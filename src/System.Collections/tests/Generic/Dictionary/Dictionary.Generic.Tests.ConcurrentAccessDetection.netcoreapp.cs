@@ -30,9 +30,8 @@ namespace Generic.Dictionary
                 Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => add(dictionary)).TargetSite.Name);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => get(dictionary)).TargetSite.Name);
-                // Removes are not resilient yet
-                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => remove(dictionary)).TargetSite.Name);
-                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
+                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => remove(dictionary)).TargetSite.Name);
+                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
             }, TaskCreationOptions.LongRunning);
 
             // If Dictionary regresses, we do not want to hang here indefinitely
