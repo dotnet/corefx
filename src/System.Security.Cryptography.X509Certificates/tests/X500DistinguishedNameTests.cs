@@ -172,8 +172,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         public static void EdgeCaseEmptyFormat()
         {
             X500DistinguishedName dn = new X500DistinguishedName("");
-            Assert.AreEqual(String.Empty, dn.Format(true));
-            Assert.AreEqual(String.Empty, dn.Format(false));
+            Assert.Equal(String.Empty, dn.Format(true));
+            Assert.Equal(String.Empty, dn.Format(false));
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             const string rname = "C=US, O=\"RSA Data Security, Inc.\", OU=Secure Server Certification Authority";
             X500DistinguishedName dn = new X500DistinguishedName(rname, X500DistinguishedNameFlags.None);
-            Assert.AreEqual(rname, dn.Decode(X500DistinguishedNameFlags.UseCommas | X500DistinguishedNameFlags.UseNewLines));
+            Assert.Equal(rname, dn.Decode(X500DistinguishedNameFlags.UseCommas | X500DistinguishedNameFlags.UseNewLines));
         }
 
         public static readonly object[][] WhitespaceBeforeCases =
