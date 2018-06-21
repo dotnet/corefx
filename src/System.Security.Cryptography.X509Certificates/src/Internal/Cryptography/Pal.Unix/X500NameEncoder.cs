@@ -51,6 +51,7 @@ namespace Internal.Cryptography.Pal
             {
                 dnSeparator = "; ";
             }
+            // Explicit UseCommas has preference over explicit UseNewLines.
             else if ((flags & (X500DistinguishedNameFlags.UseNewLines | X500DistinguishedNameFlags.UseCommas)) == X500DistinguishedNameFlags.UseNewLines)
             {
                 dnSeparator = Environment.NewLine;
