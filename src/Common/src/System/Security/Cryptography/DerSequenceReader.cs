@@ -396,7 +396,8 @@ namespace System.Security.Cryptography
             // https://github.com/dotnet/corefx/issues/27466
             try
             {
-                var utf8 = new System.Text.UTF8Encoding(false, true);
+                var utf8 = (System.Text.Encoding)System.Text.Encoding.UTF8.Clone();
+                utf8.DecoderFallback = System.Text.DecoderFallback.ExceptionFallback;
                 t61String = utf8.GetString(_data, _position, contentLength);
             }
             catch (System.Text.DecoderFallbackException)
