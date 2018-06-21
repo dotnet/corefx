@@ -309,6 +309,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(0, e.EnhancedKeyUsages.Count);
             e.EnhancedKeyUsages.Add(oid1);
             Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            Assert.NotSame(e.EnhancedKeyUsages, e.EnhancedKeyUsages);
         }
 
         [Fact]
