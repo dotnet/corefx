@@ -443,7 +443,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             // Characters are interpreted as UTF-8
             new object[]
             {
-                "CN=\u00A2",
+                "C=\u00A2",
                 "300D310B300906035504061402C2A2"
             }
         };
