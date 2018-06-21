@@ -16,8 +16,8 @@ namespace System.Net.Http.Functional.Tests
         public static bool IsSelectedSitesTestEnabled() 
         {
             string envVar = Environment.GetEnvironmentVariable("CORFX_NET_HTTP_SELECTED_SITES");
-            return envVar != null &&
-                (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1"));
+            return envVar == null || 
+                (envVar.Equals("false", StringComparison.OrdinalIgnoreCase) || envVar.Equals("0"));
         }
 
         [ConditionalTheory(nameof(IsSelectedSitesTestEnabled))]
