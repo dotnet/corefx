@@ -387,11 +387,22 @@ namespace System.Security.Cryptography
         {
             EatTag(DerTag.T61String);
             int contentLength = EatLength();
+            string t61String;
 
             // Technically the T.61 encoding (code page 20261) should be used here, but many
-            // implementations don't follow that and use UTF-8 instead. This matches the
-            // behavior of CryptoAPI on NetFX (https://github.com/dotnet/corefx/issues/27466).
-            string t61String = System.Text.Encoding.UTF8.GetString(_data, _position, contentLength);
+            // implementations don't follow that and use different character sets. CryptoAPI
+            // on NetFX seems to interpret it as UTF-8 with fallback to ISO 8859-1. OpenSSL
+            // seems to interpret it as ISO 8859-1 with no support for UTF-8.
+            // https://github.com/dotnet/corefx/issues/27466
+            try
+            {
+                var utf8 = new System.Text.UTF8Encoding(false, true);
+                t61String = utf8.GetString(_data, _position, contentLength);
+            }
+            catch (System.Text.DecoderFallbackException)
+            {
+                t61String = System.Text.Encoding.GetEncoding("iso-8859-1").GetString(_data, _position, contentLength);
+            }
             _position += contentLength;
 
             return TrimTrailingNulls(t61String);

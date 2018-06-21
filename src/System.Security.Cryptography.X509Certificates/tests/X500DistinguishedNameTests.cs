@@ -137,6 +137,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(expected, dn.Name);
         }
 
+        [Theory]
+        [MemberData(nameof(T61CasesUtf8))]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        public static void T61StringsUtf8(string expected, string hexEncoded)
+        {
+            byte[] encoded = hexEncoded.HexToByteArray();
+            X500DistinguishedName dn = new X500DistinguishedName(encoded);
+
+            Assert.Equal(expected, dn.Name);
+        }
+
         [Fact]
         public static void PrintComplexReversed()
         {
@@ -439,7 +450,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "0F76686D407573652E746573742E646B312630240603550405131D4356523A31" +
                 "333437313936372D5549443A313231323132313231323132"
             },
+        };
 
+        public static readonly object[][] T61CasesUtf8 =
+        {
             // Characters are interpreted as UTF-8
             new object[]
             {
