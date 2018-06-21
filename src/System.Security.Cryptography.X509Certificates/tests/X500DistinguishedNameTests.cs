@@ -126,6 +126,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             Assert.Equal(notQuoted, dn.Decode(X500DistinguishedNameFlags.DoNotUseQuotes));
         }
+        
+        [Theory]
+        [MemberData(nameof(T61Cases))]
+        public static void T61Strings(string expected, string hexEncoded)
+        {
+            byte[] encoded = hexEncoded.HexToByteArray();
+            X500DistinguishedName dn = new X500DistinguishedName(encoded);
+
+            Assert.Equal(expected, dn.Decode(X500DistinguishedNameFlags.DoNotUseQuotes));
+        }
 
         [Fact]
         public static void PrintComplexReversed()
@@ -156,6 +166,22 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "STREET=1 Microsoft Way, O=Microsoft Corporation, OU=MSCOM, CN=www.microsoft.com";
 
             Assert.EndsWith(expected, dn.Decode(X500DistinguishedNameFlags.None), StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public static void EdgeCaseEmptyFormat()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName("");
+            Assert.AreEqual(String.Empty, dn.Format(true));
+            Assert.AreEqual(String.Empty, dn.Format(false));
+        }
+
+        [Fact]
+        public static void EdgeCaseUseCommaAndNewLines()
+        {
+            const string rname = "C=US, O=\"RSA Data Security, Inc.\", OU=Secure Server Certification Authority";
+            X500DistinguishedName dn = new X500DistinguishedName(rname, X500DistinguishedNameFlags.None);
+            Assert.AreEqual(rname, dn.Decode(X500DistinguishedNameFlags.UseCommas | X500DistinguishedNameFlags.UseNewLines));
         }
 
         public static readonly object[][] WhitespaceBeforeCases =
@@ -383,6 +409,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "CN=Common Name\"", // Not-Quoted
                 "30233121301F06035504031E180043006F006D006D006F006E0020004E006100" +
                 "6D00650022"
+            },
+        };
+
+        public static readonly object[][] T61Cases =
+        {
+            // https://github.com/dotnet/corefx/issues/27466
+            new object[]
+            {
+                "CN=GrapeCity inc., OU=Tools Development, O=GrapeCity inc., L=Sendai Izumi-ku, S=Miyagi, C=JP",
+                "308186310b3009060355040613024a50310f300d060355040813064d6979616769311830160603550407130f53656e64616920497a756d692d6b7531173015060355040a140e47726170654369747920696e632e311a3018060355040b1411546f6f6c7320446576656c6f706d656e74311730150603550403140e47726170654369747920696e632e"
+            },
+
+            // Mono test case taken from old bug report
+            new object[]
+            {
+                "SERIALNUMBER=CVR:13471967-UID:121212121212, E=vhm@use.test.dk, CN=Hedeby's Møbelhandel - Salgsafdelingen, O=Hedeby's Møbelhandel // CVR:13471967, C=DK",
+                "3081B5310B300906035504061302444B312D302B060355040A14244865646562792773204DF862656C68616E64656C202F2F204356523A3133343731393637312F302D060355040314264865646562792773204DF862656C68616E64656C202D2053616C6773616664656C696E67656E311E301C06092A864886F70D010901160F76686D407573652E746573742E646B312630240603550405131D4356523A31333437313936372D5549443A313231323132313231323132"
             },
         };
 

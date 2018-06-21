@@ -383,6 +383,20 @@ namespace System.Security.Cryptography
             return TrimTrailingNulls(ia5String);
         }
 
+        internal string ReadT61String()
+        {
+            EatTag(DerTag.T61String);
+            int contentLength = EatLength();
+
+            // Technically the T.61 encoding (code page 20261) should be used here, but many
+            // implementations don't follow that and use ISO 8859-1 instead. This matches the
+            // behavior of CryptoAPI on NetFX (https://github.com/dotnet/corefx/issues/27466).
+            string t61String = System.Text.Encoding.GetEncoding("ISO-8859-1").GetString(_data, _position, contentLength);
+            _position += contentLength;
+
+            return TrimTrailingNulls(t61String);
+        }
+
         internal DateTime ReadX509Date()
         {
             byte tag = PeekTag();
