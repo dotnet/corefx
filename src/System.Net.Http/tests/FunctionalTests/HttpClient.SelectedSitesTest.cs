@@ -13,14 +13,7 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClient_SelectedSites_Test : HttpClientTestBase
     {
-        public static bool IsSelectedSitesTestEnabled() 
-        {
-            string envVar = Environment.GetEnvironmentVariable("CORFX_NET_HTTP_SELECTED_SITES");
-            return envVar == null || 
-                (envVar.Equals("false", StringComparison.OrdinalIgnoreCase) || envVar.Equals("0"));
-        }
-
-        [ConditionalTheory(nameof(IsSelectedSitesTestEnabled))]
+        [Theory]
         [Trait("SelectedSites", "true")]
         [MemberData(nameof(GetSelectedSites))]
         public async Task RetrieveSite_Succeeds(string site)
@@ -48,7 +41,7 @@ namespace System.Net.Http.Functional.Tests
             throw new Exception("Not expected to reach here");
         }
 
-        [ConditionalTheory(nameof(IsSelectedSitesTestEnabled))]
+        [Theory]
         [Trait("SiteInvestigation", "true")]
         [InlineData("http://microsoft.com")]
         public async Task RetrieveSite_Debug_Helper(string site)
