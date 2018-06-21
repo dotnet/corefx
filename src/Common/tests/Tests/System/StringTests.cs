@@ -4648,8 +4648,8 @@ namespace System.Tests
             bool b = s1.StartsWith(s2);	
             Assert.True(b);	
 	
-            var span = s1.AsSpan();	
-            var slice = s2.AsSpan();	
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();	
             b = span.StartsWith<char>(slice);	
             Assert.True(b);	
         }	
@@ -4659,9 +4659,9 @@ namespace System.Tests
         {	
             string s1 = "456";	
             bool b = s1.StartsWith(s1);	
-            Assert.True(b);	
-	
-            var span = s1.AsSpan();	
+            Assert.True(b);
+
+            ReadOnlySpan<char> span = s1.AsSpan();	
             b = span.StartsWith<char>(span);	
             Assert.True(b);	
         }	
@@ -4674,10 +4674,10 @@ namespace System.Tests
             string s1 = new string(a, 0, 2);	
             string s2 = new string(a, 0, 3);	
             bool b = s1.StartsWith(s2);	
-            Assert.False(b);	
-	
-            var span = s1.AsSpan();	
-            var slice = s2.AsSpan();	
+            Assert.False(b);
+
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();	
             b = span.StartsWith<char>(slice);	
             Assert.False(b);	
         }	
@@ -4707,10 +4707,10 @@ namespace System.Tests
             string s1 = "456";	
             string s2 = "456";	
             bool c = s1.StartsWith(s2);	
-            Assert.True(c);	
-	
-            var span = s1.AsSpan();	
-            var slice = s2.AsSpan();	
+            Assert.True(c);
+
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();	
             c = span.StartsWith<char>(slice);	
             Assert.True(c);	
         }	
@@ -4759,10 +4759,10 @@ namespace System.Tests
                 string s1 = new string(first, 1, length);	
                 string s2 = new string(second, 1, length);	
                 bool b = s1.StartsWith(s2);	
-                Assert.True(b);	
-	
-                var span1 = s1.AsSpan();	
-                var span2 = s2.AsSpan();	
+                Assert.True(b);
+
+                ReadOnlySpan<char> span1 = s1.AsSpan();
+                ReadOnlySpan<char> span2 = s2.AsSpan();	
                 b = span1.StartsWith<char>(span2);	
                 Assert.True(b);	
             }	
@@ -4790,10 +4790,10 @@ namespace System.Tests
             Assert.True(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
             Assert.True(s1.StartsWith(s2, StringComparison.InvariantCulture));	
             Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
-            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
-	
-            var span = s1.AsSpan();	
-            var slice = s2.AsSpan();	
+            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));
+
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();	
             Assert.True(span.StartsWith(slice, StringComparison.Ordinal));	
 	
             Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));	
@@ -4822,9 +4822,9 @@ namespace System.Tests
             Assert.True(s1.StartsWith(s1, StringComparison.CurrentCultureIgnoreCase));	
             Assert.True(s1.StartsWith(s1, StringComparison.InvariantCulture));	
             Assert.True(s1.StartsWith(s1, StringComparison.InvariantCultureIgnoreCase));	
-            Assert.True(s1.StartsWith(s1, StringComparison.OrdinalIgnoreCase));	
-	
-            var span = s1.AsSpan();	
+            Assert.True(s1.StartsWith(s1, StringComparison.OrdinalIgnoreCase));
+
+            ReadOnlySpan<char> span = s1.AsSpan();	
             Assert.True(span.StartsWith(span, StringComparison.Ordinal));	
 	
             Assert.True(span.StartsWith(span, StringComparison.CurrentCulture));	
@@ -4847,10 +4847,10 @@ namespace System.Tests
             Assert.False(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
             Assert.False(s1.StartsWith(s2, StringComparison.InvariantCulture));	
             Assert.False(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
-            Assert.False(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
-	
-            var span = s1.AsSpan();	
-            var slice = s2.AsSpan();	
+            Assert.False(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));
+
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();	
             Assert.False(span.StartsWith(slice, StringComparison.Ordinal));	
 	
             Assert.False(span.StartsWith(slice, StringComparison.CurrentCulture));	
@@ -4873,10 +4873,10 @@ namespace System.Tests
             Assert.True(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
             Assert.True(s1.StartsWith(s2, StringComparison.InvariantCulture));	
             Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
-            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
-	
-            var span = s1.AsSpan();	
-            var slice = s2.AsSpan();	
+            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));
+
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();	
             Assert.True(span.StartsWith(slice, StringComparison.Ordinal));	
 	
             Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));	
