@@ -134,7 +134,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             byte[] encoded = hexEncoded.HexToByteArray();
             X500DistinguishedName dn = new X500DistinguishedName(encoded);
 
-            Assert.Equal(expected, dn.Decode(X500DistinguishedNameFlags.DoNotUseQuotes));
+            Assert.Equal(expected, dn.Name);
         }
 
         [Fact]

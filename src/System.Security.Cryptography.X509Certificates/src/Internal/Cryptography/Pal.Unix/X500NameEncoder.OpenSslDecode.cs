@@ -111,7 +111,7 @@ namespace Internal.Cryptography.Pal
                     }
                 }
 
-                if (addTrailingDelimiter)
+                if (addTrailingDelimiter && decodedName.Length > 0)
                 {
                     decodedName.Append(dnSeparator);
                 }
