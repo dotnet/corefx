@@ -148,6 +148,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(expected, dn.Name);
         }
 
+        [Theory]
+        [MemberData(nameof(T61CasesLatin1))]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
+        public static void T61StringsLatin1(string expected, string hexEncoded)
+        {
+            byte[] encoded = hexEncoded.HexToByteArray();
+            X500DistinguishedName dn = new X500DistinguishedName(encoded);
+
+            Assert.Equal(expected, dn.Name);
+        }
+
         [Fact]
         public static void PrintComplexReversed()
         {
@@ -458,6 +469,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             new object[]
             {
                 "C=\u00A2",
+                "300D310B300906035504061402C2A2"
+            }
+        };
+
+        public static readonly object[][] T61CasesLatin1 =
+        {
+            // Characters are interpreted as ISO 8859-1
+            new object[]
+            {
+                "C=\u00C2\u00A2",
                 "300D310B300906035504061402C2A2"
             }
         };
