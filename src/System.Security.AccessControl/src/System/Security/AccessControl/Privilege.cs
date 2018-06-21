@@ -476,8 +476,8 @@ namespace System.Security.AccessControl
                     newState.Privileges.Luid = this.luid;
                     newState.Privileges.Attributes = enable ? Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED : Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_DISABLED;
 
-                    Interop.Advapi32.TOKEN_PRIVILEGE previousState;
-                    uint previousSize;
+                    Interop.Advapi32.TOKEN_PRIVILEGE previousState = new Interop.Advapi32.TOKEN_PRIVILEGE();
+                    uint previousSize = 0;
 
                     //
                     // Place the new privilege on the thread token and remember the previous state.
