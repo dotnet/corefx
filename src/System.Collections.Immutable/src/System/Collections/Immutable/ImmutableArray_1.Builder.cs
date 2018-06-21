@@ -254,6 +254,8 @@ namespace System.Collections.Immutable
                 int count = _count;
                 T[] elements = _elements;
 
+                // PERF: The uint-casts allow the JIT to eliminate bound-checks.
+                // https://github.com/dotnet/coreclr/pull/9773
                 if ((uint)count < (uint)elements.Length)
                 {
                     elements[count] = item;
@@ -265,7 +267,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            // Improve code quality as uncommon path
+            // Specify NoInlining so that we are guaranteed an opportunity to service this method
             [MethodImpl(MethodImplOptions.NoInlining)]
             private void AddWithResize(T item)
             {
