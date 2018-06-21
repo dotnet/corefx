@@ -6808,19 +6808,26 @@ namespace System.Tests
         public static unsafe void Ctor_SByte()
         {
             string s = "This is a string constructor test";
-            byte [] encodedBytes = Encoding.Default.GetBytes(s);
-            fixed (byte *pBytes = encodedBytes)
+            byte[] encodedBytes = Encoding.Default.GetBytes(s);
+            fixed (byte* pBytes = encodedBytes)
             {
-                Assert.Equal(s, new String((sbyte*) pBytes));
-                Assert.Equal(s, new String((sbyte*) pBytes, 0, encodedBytes.Length));
-                Assert.Equal(s, new String((sbyte*) pBytes, 0, encodedBytes.Length, Encoding.Default));
+                Assert.Equal(s, new String((sbyte*)pBytes));
+                Assert.Equal(s, new String((sbyte*)pBytes, 0, encodedBytes.Length));
+                Assert.Equal(s, new String((sbyte*)pBytes, 0, encodedBytes.Length, Encoding.Default));
             }
 
             s = "This is some string \u0393\u0627\u3400\u0440\u1100";
             encodedBytes = Encoding.UTF8.GetBytes(s);
-            fixed (byte *pBytes = encodedBytes)
+            fixed (byte* pBytes = encodedBytes)
             {
-                Assert.Equal(s, new String((sbyte*) pBytes, 0, encodedBytes.Length, Encoding.UTF8));
+                Assert.Equal(s, new String((sbyte*)pBytes, 0, encodedBytes.Length, Encoding.UTF8));
+            }
+
+            fixed (byte* pBytes = new byte[1] { 0 })
+            {
+                Assert.Equal(string.Empty, new String((sbyte*)pBytes));
+                Assert.Equal(string.Empty, new String((sbyte*)pBytes, 0, 0));
+                Assert.Equal(string.Empty, new String((sbyte*)pBytes, 0, 0, Encoding.UTF8));
             }
         }
 
