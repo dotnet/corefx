@@ -109,7 +109,18 @@ namespace Internal.Cryptography.Pal
                     if (ordinalIgnoreCase.Equals("Disallowed", storeName))
                         return AppleTrustStore.OpenStore(StoreName.Disallowed, storeLocation, openFlags);
 
-                    break;
+                    if (!IsValidStoreName(storeName))
+                        break;
+
+                    var storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", storeName + ".keychain");
+                    if (File.Exists(storePath))
+                        return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
+
+                    if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
+                        throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
+
+                    return AppleKeychainStore.CreateKeychain(storePath, openFlags);
+
                 case StoreLocation.LocalMachine:
                     if (ordinalIgnoreCase.Equals("My", storeName))
                         return AppleKeychainStore.OpenSystemSharedKeychain(openFlags);
@@ -120,23 +131,15 @@ namespace Internal.Cryptography.Pal
                     break;
             }
 
-            if (!IsValidStoreName(storeName))
-            {
-                string message = SR.Format(
-                    SR.Cryptography_X509_StoreCannotCreate,
-                    storeName,
-                    storeLocation);
-                throw new CryptographicException(message);
-            }
-
-            var storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", storeName + ".keychain");
-            if (File.Exists(storePath))
-                return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
-
             if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
                 throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
 
-            return AppleKeychainStore.CreateKeychain(storePath, openFlags);
+            string message = SR.Format(
+                SR.Cryptography_X509_StoreCannotCreate,
+                storeName,
+                storeLocation);
+
+            throw new CryptographicException(message, new PlatformNotSupportedException(message));
         }
 
         private static bool IsValidStoreName(string storeName)
