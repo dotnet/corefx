@@ -98,7 +98,6 @@ namespace Internal.Cryptography.Pal
         public static IStorePal FromSystemStore(string storeName, StoreLocation storeLocation, OpenFlags openFlags)
         {
             StringComparer ordinalIgnoreCase = StringComparer.OrdinalIgnoreCase;
-            string message;
 
             switch (storeLocation)
             {
@@ -109,22 +108,7 @@ namespace Internal.Cryptography.Pal
                         return AppleTrustStore.OpenStore(StoreName.Root, storeLocation, openFlags);
                     if (ordinalIgnoreCase.Equals("Disallowed", storeName))
                         return AppleTrustStore.OpenStore(StoreName.Disallowed, storeLocation, openFlags);
-
-                    if (IsValidStoreName(storeName))
-                    {
-                        string storePath;
-                        
-                        storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Keychains", storeName + ".keychain");
-                        if (File.Exists(storePath))
-                            return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
-
-                        if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
-                            throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
-
-                        return AppleKeychainStore.CreateKeychain(storePath, openFlags);
-                    }
-
-                    break;
+                    return FromCustomKeychainStore(storeName, openFlags);
 
                 case StoreLocation.LocalMachine:
                     if (ordinalIgnoreCase.Equals("My", storeName))
@@ -147,9 +131,33 @@ namespace Internal.Cryptography.Pal
             throw new CryptographicException(message, new PlatformNotSupportedException(message));
         }
 
+        private static IStorePal FromCustomKeychainStore(string storeName, OpenFlags openFlags)
+        {
+            string storePath;
+
+            if (!IsValidStoreName(storeName))
+                throw new CryptographicException(SR.Format(SR.Security_InvalidValue, nameof(storeName)));
+                        
+            storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Keychains", storeName + ".keychain");
+            if (File.Exists(storePath))
+                return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
+
+            if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
+                throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
+
+            return AppleKeychainStore.CreateKeychain(storePath, openFlags);
+        }
+
         private static bool IsValidStoreName(string storeName)
         {
-            return !string.IsNullOrWhiteSpace(storeName) && Path.GetFileName(storeName) == storeName;
+            try
+            {
+                return !string.IsNullOrWhiteSpace(storeName) && Path.GetFileName(storeName) == storeName;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
         }
 
         private static void ReadCollection(SafeCFArrayHandle matches, HashSet<X509Certificate2> collection)
