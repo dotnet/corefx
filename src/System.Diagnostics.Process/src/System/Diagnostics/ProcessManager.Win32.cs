@@ -238,10 +238,17 @@ namespace System.Diagnostics
         }
     }
 
-    internal static partial class NtProcessInfoHelper
+    internal static class NtProcessInfoHelper
     {
         // Cache a single buffer for use in GetProcessInfos().
         private static long[] CachedBuffer;
+
+        // Use a smaller buffer size on debug to ensure we hit the retry path.
+#if DEBUG
+        private const int DefaultCachedBufferSize = 1024;
+#else
+        private const int DefaultCachedBufferSize = 128 * 1024;
+#endif
 
         internal static ProcessInfo[] GetProcessInfos(Predicate<int> processIdFilter = null)
         {
@@ -305,6 +312,227 @@ namespace System.Diagnostics
             }
 
             return processInfos;
+        }
+
+        private static int GetNewBufferSize(int existingBufferSize, int requiredSize)
+        {
+            if (requiredSize == 0)
+            {
+                //
+                // On some old OS like win2000, requiredSize will not be set if the buffer
+                // passed to NtQuerySystemInformation is not enough.
+                //
+                int newSize = existingBufferSize * 2;
+                if (newSize < existingBufferSize)
+                {
+                    // In reality, we should never overflow.
+                    // Adding the code here just in case it happens.    
+                    throw new OutOfMemoryException();
+                }
+                return newSize;
+            }
+            else
+            {
+                // allocating a few more kilo bytes just in case there are some new process
+                // kicked in since new call to NtQuerySystemInformation
+                int newSize = requiredSize + 1024 * 10;
+                if (newSize < requiredSize)
+                {
+                    throw new OutOfMemoryException();
+                }
+                return newSize;
+            }
+        }
+
+        private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr, Predicate<int> processIdFilter)
+        {
+            // Use a dictionary to avoid duplicate entries if any
+            // 60 is a reasonable number for processes on a normal machine.
+            Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>(60);
+
+            long totalOffset = 0;
+
+            while (true)
+            {
+                IntPtr currentPtr = (IntPtr)((long)dataPtr + totalOffset);
+                ref SystemProcessInformation pi = ref *(SystemProcessInformation*)(currentPtr);
+
+                // Process ID shouldn't overflow. OS API GetCurrentProcessID returns DWORD.
+                var processInfoProcessId = pi.UniqueProcessId.ToInt32();
+                if (processIdFilter == null || processIdFilter(processInfoProcessId))
+                {
+                    // get information for a process
+                    ProcessInfo processInfo = new ProcessInfo();
+                    processInfo.ProcessId = processInfoProcessId;
+                    processInfo.SessionId = (int)pi.SessionId;
+                    processInfo.PoolPagedBytes = (long)pi.QuotaPagedPoolUsage;
+                    processInfo.PoolNonPagedBytes = (long)pi.QuotaNonPagedPoolUsage;
+                    processInfo.VirtualBytes = (long)pi.VirtualSize;
+                    processInfo.VirtualBytesPeak = (long)pi.PeakVirtualSize;
+                    processInfo.WorkingSetPeak = (long)pi.PeakWorkingSetSize;
+                    processInfo.WorkingSet = (long)pi.WorkingSetSize;
+                    processInfo.PageFileBytesPeak = (long)pi.PeakPagefileUsage;
+                    processInfo.PageFileBytes = (long)pi.PagefileUsage;
+                    processInfo.PrivateBytes = (long)pi.PrivatePageCount;
+                    processInfo.BasePriority = pi.BasePriority;
+                    processInfo.HandleCount = (int)pi.HandleCount;
+
+                    if (pi.ImageName.Buffer == IntPtr.Zero)
+                    {
+                        if (processInfo.ProcessId == NtProcessManager.SystemProcessID)
+                        {
+                            processInfo.ProcessName = "System";
+                        }
+                        else if (processInfo.ProcessId == NtProcessManager.IdleProcessID)
+                        {
+                            processInfo.ProcessName = "Idle";
+                        }
+                        else
+                        {
+                            // for normal process without name, using the process ID. 
+                            processInfo.ProcessName = processInfo.ProcessId.ToString(CultureInfo.InvariantCulture);
+                        }
+                    }
+                    else
+                    {
+                        string processName = GetProcessShortName(Marshal.PtrToStringUni(pi.ImageName.Buffer, pi.ImageName.Length / sizeof(char)));
+                        processInfo.ProcessName = processName;
+                    }
+
+                    // get the threads for current process
+                    processInfos[processInfo.ProcessId] = processInfo;
+
+                    currentPtr = (IntPtr)((long)currentPtr + sizeof(SystemProcessInformation));
+                    int i = 0;
+                    while (i < pi.NumberOfThreads)
+                    {
+                        ref SystemThreadInformation ti = ref *(SystemThreadInformation*)(currentPtr);
+                        ThreadInfo threadInfo = new ThreadInfo();
+
+                        threadInfo._processId = (int)ti.ClientId.UniqueProcess;
+                        threadInfo._threadId = (ulong)ti.ClientId.UniqueThread;
+                        threadInfo._basePriority = ti.BasePriority;
+                        threadInfo._currentPriority = ti.Priority;
+                        threadInfo._startAddress = ti.StartAddress;
+                        threadInfo._threadState = (ThreadState)ti.ThreadState;
+                        threadInfo._threadWaitReason = NtProcessManager.GetThreadWaitReason((int)ti.WaitReason);
+
+                        processInfo._threadInfoList.Add(threadInfo);
+                        currentPtr = (IntPtr)((long)currentPtr + sizeof(SystemThreadInformation));
+                        i++;
+                    }
+                }
+
+                if (pi.NextEntryOffset == 0)
+                {
+                    break;
+                }
+                totalOffset += pi.NextEntryOffset;
+            }
+
+            ProcessInfo[] temp = new ProcessInfo[processInfos.Values.Count];
+            processInfos.Values.CopyTo(temp, 0);
+            return temp;
+        }
+
+        // This function generates the short form of process name. 
+        //
+        // This is from GetProcessShortName in NT code base. 
+        // Check base\screg\winreg\perfdlls\process\perfsprc.c for details.
+        internal static string GetProcessShortName(String name)
+        {
+            if (String.IsNullOrEmpty(name))
+            {
+#if FEATURE_TRACESWITCH
+            Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - unexpected blank ProcessName");
+#endif
+                return String.Empty;
+            }
+
+            int slash = -1;
+            int period = -1;
+
+            for (int i = 0; i < name.Length; i++)
+            {
+                if (name[i] == '\\')
+                    slash = i;
+                else if (name[i] == '.')
+                    period = i;
+            }
+
+            if (period == -1)
+                period = name.Length - 1; // set to end of string
+            else
+            {
+                // if a period was found, then see if the extension is
+                // .EXE, if so drop it, if not, then use end of string
+                // (i.e. include extension in name)
+                ReadOnlySpan<char> extension = name.AsSpan(period);
+
+                if (extension.Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                    period--;                 // point to character before period
+                else
+                    period = name.Length - 1; // set to end of string
+            }
+
+            if (slash == -1)
+                slash = 0;     // set to start of string
+            else
+                slash++;       // point to character next to slash
+
+            // copy characters between period (or end of string) and
+            // slash (or start of string) to make image name
+            return name.Substring(slash, period - slash + 1);
+        }
+
+        // native struct defined in ntexapi.h
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct SystemProcessInformation
+        {
+            internal uint NextEntryOffset;
+            internal uint NumberOfThreads;
+            private fixed byte Reserved1[48];
+            internal Interop.UNICODE_STRING ImageName;
+            internal int BasePriority;
+            internal IntPtr UniqueProcessId;
+            private UIntPtr Reserved2;
+            internal uint HandleCount;
+            internal uint SessionId;
+            private UIntPtr Reserved3;
+            internal UIntPtr PeakVirtualSize;  // SIZE_T
+            internal UIntPtr VirtualSize;
+            private uint Reserved4;
+            internal UIntPtr PeakWorkingSetSize;  // SIZE_T
+            internal UIntPtr WorkingSetSize;  // SIZE_T
+            private UIntPtr Reserved5;
+            internal UIntPtr QuotaPagedPoolUsage;  // SIZE_T
+            private UIntPtr Reserved6;
+            internal UIntPtr QuotaNonPagedPoolUsage;  // SIZE_T
+            internal UIntPtr PagefileUsage;  // SIZE_T
+            internal UIntPtr PeakPagefileUsage;  // SIZE_T
+            internal UIntPtr PrivatePageCount;  // SIZE_T
+            private fixed long Reserved7[6];
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct SystemThreadInformation
+        {
+            private fixed long Reserved1[3];
+            private uint Reserved2;
+            internal IntPtr StartAddress;
+            internal CLIENT_ID ClientId;
+            internal int Priority;
+            internal int BasePriority;
+            private uint Reserved3;
+            internal uint ThreadState;
+            internal uint WaitReason;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct CLIENT_ID
+        {
+            internal IntPtr UniqueProcess;
+            internal IntPtr UniqueThread;
         }
     }
 }
