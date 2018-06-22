@@ -228,16 +228,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Throws<ArgumentNullException>(() => ilist.Remove(null));
             }
 
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<NullReferenceException>(
-                    () => new X509CertificateCollection.X509CertificateEnumerator(null));
-            }
-            else
-            {
-                Assert.Throws<ArgumentNullException>(
-                    () => new X509CertificateCollection.X509CertificateEnumerator(null));
-            }
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(
+                () => new X509CertificateCollection.X509CertificateEnumerator(null));
         }
 
         [Fact]
