@@ -137,28 +137,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(expected, dn.Name);
         }
 
-        [Theory]
-        [MemberData(nameof(T61CasesUtf8))]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
-        public static void T61StringsUtf8(string expected, string hexEncoded)
-        {
-            byte[] encoded = hexEncoded.HexToByteArray();
-            X500DistinguishedName dn = new X500DistinguishedName(encoded);
-
-            Assert.Equal(expected, dn.Name);
-        }
-
-        [Theory]
-        [MemberData(nameof(T61CasesLatin1))]
-        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
-        public static void T61StringsLatin1(string expected, string hexEncoded)
-        {
-            byte[] encoded = hexEncoded.HexToByteArray();
-            X500DistinguishedName dn = new X500DistinguishedName(encoded);
-
-            Assert.Equal(expected, dn.Name);
-        }
-
         [Fact]
         public static void PrintComplexReversed()
         {
@@ -461,26 +439,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "0F76686D407573652E746573742E646B312630240603550405131D4356523A31" +
                 "333437313936372D5549443A313231323132313231323132"
             },
-        };
 
-        public static readonly object[][] T61CasesUtf8 =
-        {
-            // Characters are interpreted as UTF-8
+            // Valid UTF-8 string is interpreted as UTF-8
             new object[]
             {
-                "C=\u00A2",
+                "C=\u00a2",
                 "300D310B300906035504061402C2A2"
-            }
-        };
+            },
 
-        public static readonly object[][] T61CasesLatin1 =
-        {
-            // Characters are interpreted as ISO 8859-1
+            // Invalid UTF-8 string with valid UTF-8 sequence is interpreted as ISO 8859-1
             new object[]
             {
-                "C=\u00C2\u00A2",
-                "300D310B300906035504061402C2A2"
-            }
+                "L=\u00c2\u00a2\u00f8",
+                "300E310C300A06035504071403C2A2F8"
+            },
         };
 
         private const string MicrosoftDotComSubject =
