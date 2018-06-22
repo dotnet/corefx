@@ -240,7 +240,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (nativeArgsIP == IntPtr.Zero)
                 return null;
 
-            object obj = InterfaceMarshalerSupport.ConvertToManagedWithoutUnboxing(nativeArgsIP);
+            object obj = Marshal.GetUniqueObjectForIUnknown(nativeArgsIP);
             IPropertyChangedEventArgs nativeArgs = (IPropertyChangedEventArgs)obj;
 
             return new PropertyChangedEventArgs(nativeArgs.PropertyName);
