@@ -176,15 +176,18 @@ internal static partial class Interop
 
         internal static SafeKeychainHandle OpenAndUnlockKeychain(string keychainPath)
         {
+            const int errSecAuthFailed = -25293;
+
             SafeKeychainHandle keychain;
             int osStatus = AppleCryptoNative_SecKeychainOpen(keychainPath, out keychain);
+
             if (osStatus == 0)
             {
                 // Try to unlock with empty password to match our behaviour in CreateKeychain.
-                // If it doesn't work (errSecAuthFailed) then fail silently and fallback to the
+                // If the password doesn't match then ignore it silently and fallback to the
                 // default behavior of user interaction.
                 osStatus = AppleCryptoNative_SecKeychainUnlock(keychain, 0, Array.Empty<byte>());
-                if (osStatus == 0 || osStatus == -25293)
+                if (osStatus == 0 || osStatus == errSecAuthFailed)
                 {
                     return keychain;
                 }

@@ -98,6 +98,7 @@ namespace Internal.Cryptography.Pal
         public static IStorePal FromSystemStore(string storeName, StoreLocation storeLocation, OpenFlags openFlags)
         {
             StringComparer ordinalIgnoreCase = StringComparer.OrdinalIgnoreCase;
+            string message;
 
             switch (storeLocation)
             {
@@ -109,17 +110,21 @@ namespace Internal.Cryptography.Pal
                     if (ordinalIgnoreCase.Equals("Disallowed", storeName))
                         return AppleTrustStore.OpenStore(StoreName.Disallowed, storeLocation, openFlags);
 
-                    if (!IsValidStoreName(storeName))
-                        break;
+                    if (IsValidStoreName(storeName))
+                    {
+                        string storePath;
+                        
+                        storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Keychains", storeName + ".keychain");
+                        if (File.Exists(storePath))
+                            return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
 
-                    var storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", storeName + ".keychain");
-                    if (File.Exists(storePath))
-                        return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
+                        if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
+                            throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
 
-                    if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
-                        throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
+                        return AppleKeychainStore.CreateKeychain(storePath, openFlags);
+                    }
 
-                    return AppleKeychainStore.CreateKeychain(storePath, openFlags);
+                    break;
 
                 case StoreLocation.LocalMachine:
                     if (ordinalIgnoreCase.Equals("My", storeName))
@@ -144,7 +149,7 @@ namespace Internal.Cryptography.Pal
 
         private static bool IsValidStoreName(string storeName)
         {
-            return !String.IsNullOrWhiteSpace(storeName) && Path.GetFileName(storeName) == storeName;
+            return !string.IsNullOrWhiteSpace(storeName) && Path.GetFileName(storeName) == storeName;
         }
 
         private static void ReadCollection(SafeCFArrayHandle matches, HashSet<X509Certificate2> collection)
