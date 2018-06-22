@@ -97,15 +97,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         IntPtr CreateInstance(string name, IntPtr outer, ref IntPtr inner);
     }
 
-    internal static class UnsafeNativeMethods
-    {
-        [DllImport("combase.dll", PreserveSig = true)]
-        internal static extern int RoGetActivationFactory(
-            [MarshalAs(UnmanagedType.HString)] string activatableClassId,
-            [In] ref Guid iid,
-            [Out, MarshalAs(UnmanagedType.IInspectable)] out Object factory);
-    }
-
     internal static class NotifyCollectionChangedEventArgsMarshaler
     {
         const string WinRTNotifyCollectionChangedEventArgsName = "Windows.UI.Xaml.Interop.NotifyCollectionChangedEventArgs";
@@ -148,7 +139,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             {
                 Object factory = null;
                 Guid guid = typeof(INotifyCollectionChangedEventArgsFactory).GUID;
-                int hr = UnsafeNativeMethods.RoGetActivationFactory(WinRTNotifyCollectionChangedEventArgsName, ref guid, out factory);
+                int hr = Interop.mincore.RoGetActivationFactory(WinRTNotifyCollectionChangedEventArgsName, ref guid, out factory);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 
@@ -221,7 +212,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             {
                 Object factory = null;
                 Guid guid = typeof(IPropertyChangedEventArgsFactory).GUID;
-                int hr = UnsafeNativeMethods.RoGetActivationFactory(WinRTPropertyChangedEventArgsName, ref guid, out factory);
+                int hr = Interop.mincore.RoGetActivationFactory(WinRTPropertyChangedEventArgsName, ref guid, out factory);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 
