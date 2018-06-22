@@ -256,7 +256,6 @@ namespace System.Diagnostics
             int status;
 
             ProcessInfo[] processInfos;
-            GCHandle bufferHandle = new GCHandle();
 
             // Start with the default buffer size.
             int bufferSize = DefaultCachedBufferSize;
@@ -279,17 +278,20 @@ namespace System.Diagnostics
                         bufferSize = buffer.Length * sizeof(long);
                     }
 
-                    bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-
-                    status = Interop.NtDll.NtQuerySystemInformation(
-                        Interop.NtDll.NtQuerySystemProcessInformation,
-                        bufferHandle.AddrOfPinnedObject(),
-                        bufferSize,
-                        out requiredSize);
+                    unsafe
+                    {
+                        fixed (long* bufferPtr = buffer)
+                        {
+                            status = Interop.NtDll.NtQuerySystemInformation(
+                                Interop.NtDll.NtQuerySystemProcessInformation,
+                                bufferPtr,
+                                bufferSize,
+                                out requiredSize);
+                        }
+                    }
 
                     if (unchecked((uint)status) == Interop.NtDll.STATUS_INFO_LENGTH_MISMATCH)
                     {
-                        if (bufferHandle.IsAllocated) bufferHandle.Free();
                         buffer = null;
                         bufferSize = GetNewBufferSize(bufferSize, requiredSize);
                     }
@@ -301,14 +303,12 @@ namespace System.Diagnostics
                 }
 
                 // Parse the data block to get process information
-                processInfos = GetProcessInfos(bufferHandle.AddrOfPinnedObject(), processIdFilter);
+                processInfos = GetProcessInfos(MemoryMarshal.AsBytes<long>(buffer), processIdFilter);
             }
             finally
             {
                 // Cache the final buffer for use on the next call.
                 Interlocked.Exchange(ref CachedBuffer, buffer);
-
-                if (bufferHandle.IsAllocated) bufferHandle.Free();
             }
 
             return processInfos;
@@ -344,21 +344,24 @@ namespace System.Diagnostics
             }
         }
 
-        private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr, Predicate<int> processIdFilter)
+        // TODO: Replace with https://github.com/dotnet/corefx/issues/30613
+        private static ref readonly T AsStruct<T>(ReadOnlySpan<byte> span) where T : struct
+            => ref MemoryMarshal.Cast<byte, T>(span)[0];
+
+        private static unsafe ProcessInfo[] GetProcessInfos(ReadOnlySpan<byte> data, Predicate<int> processIdFilter)
         {
             // Use a dictionary to avoid duplicate entries if any
             // 60 is a reasonable number for processes on a normal machine.
             Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>(60);
 
-            long totalOffset = 0;
+            int processInformationOffset = 0;
 
             while (true)
             {
-                IntPtr currentPtr = (IntPtr)((long)dataPtr + totalOffset);
-                ref SystemProcessInformation pi = ref *(SystemProcessInformation*)(currentPtr);
+                ref readonly SystemProcessInformation pi = ref AsStruct<SystemProcessInformation>(data.Slice(processInformationOffset));
 
                 // Process ID shouldn't overflow. OS API GetCurrentProcessID returns DWORD.
-                var processInfoProcessId = pi.UniqueProcessId.ToInt32();
+                int processInfoProcessId = pi.UniqueProcessId.ToInt32();
                 if (processIdFilter == null || processIdFilter(processInfoProcessId))
                 {
                     // get information for a process
@@ -402,11 +405,11 @@ namespace System.Diagnostics
                     // get the threads for current process
                     processInfos[processInfo.ProcessId] = processInfo;
 
-                    currentPtr = (IntPtr)((long)currentPtr + sizeof(SystemProcessInformation));
-                    int i = 0;
-                    while (i < pi.NumberOfThreads)
+                    int threadInformationOffset = processInformationOffset + sizeof(SystemProcessInformation);
+                    for (int i = 0; i < pi.NumberOfThreads; i++)
                     {
-                        ref SystemThreadInformation ti = ref *(SystemThreadInformation*)(currentPtr);
+                        ref readonly SystemThreadInformation ti = ref AsStruct<SystemThreadInformation>(data.Slice(threadInformationOffset));
+
                         ThreadInfo threadInfo = new ThreadInfo();
 
                         threadInfo._processId = (int)ti.ClientId.UniqueProcess;
@@ -418,8 +421,8 @@ namespace System.Diagnostics
                         threadInfo._threadWaitReason = NtProcessManager.GetThreadWaitReason((int)ti.WaitReason);
 
                         processInfo._threadInfoList.Add(threadInfo);
-                        currentPtr = (IntPtr)((long)currentPtr + sizeof(SystemThreadInformation));
-                        i++;
+
+                        threadInformationOffset += sizeof(SystemThreadInformation);
                     }
                 }
 
@@ -427,7 +430,7 @@ namespace System.Diagnostics
                 {
                     break;
                 }
-                totalOffset += pi.NextEntryOffset;
+                processInformationOffset += (int)pi.NextEntryOffset;
             }
 
             ProcessInfo[] temp = new ProcessInfo[processInfos.Values.Count];
@@ -444,7 +447,7 @@ namespace System.Diagnostics
             if (String.IsNullOrEmpty(name))
             {
 #if FEATURE_TRACESWITCH
-            Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - unexpected blank ProcessName");
+               Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - unexpected blank ProcessName");
 #endif
                 return String.Empty;
             }

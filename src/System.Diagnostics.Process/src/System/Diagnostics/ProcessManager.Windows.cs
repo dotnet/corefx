@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
+using static Interop.Advapi32;
+
 namespace System.Diagnostics
 {
     internal static partial class ProcessManager
@@ -32,7 +34,7 @@ namespace System.Diagnostics
             // Otherwise enumerate all processes and compare ids
             if (!IsRemoteMachine(machineName))
             {
-                using (SafeProcessHandle processHandle = Interop.Kernel32.OpenProcess(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION, false, processId))
+                using (SafeProcessHandle processHandle = Interop.Kernel32.OpenProcess(ProcessOptions.PROCESS_QUERY_INFORMATION, false, processId))
                 {
                     if (!processHandle.IsInvalid)
                     {
@@ -349,7 +351,7 @@ namespace System.Diagnostics
             // On the next call to GetProcessInfos, we'd have to load them all up again, which is SLOW!
         }
 
-        static ProcessInfo[] GetProcessInfos(PerformanceCounterLib library)
+        private static ProcessInfo[] GetProcessInfos(PerformanceCounterLib library)
         {
             ProcessInfo[] processInfos;
 
@@ -376,7 +378,11 @@ namespace System.Diagnostics
             return processInfos;
         }
 
-        static ProcessInfo[] GetProcessInfos(PerformanceCounterLib library, int processIndex, int threadIndex, byte[] data)
+        // TODO: Replace with https://github.com/dotnet/corefx/issues/30613
+        private static ref readonly T AsStruct<T>(ReadOnlySpan<byte> span) where T:struct
+            => ref MemoryMarshal.Cast<byte, T>(span)[0];
+
+        private static ProcessInfo[] GetProcessInfos(PerformanceCounterLib library, int processIndex, int threadIndex, ReadOnlySpan<byte> data)
         {
 #if FEATURE_TRACESWITCH
             Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos()");
@@ -384,109 +390,99 @@ namespace System.Diagnostics
             Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>();
             List<ThreadInfo> threadInfos = new List<ThreadInfo>();
 
-            GCHandle dataHandle = new GCHandle();
-            try
+            ref readonly PERF_DATA_BLOCK dataBlock = ref AsStruct<PERF_DATA_BLOCK>(data);
+
+            int typePos = dataBlock.HeaderLength;
+            for (int i = 0; i < dataBlock.NumObjectTypes; i++)
             {
-                dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-                IntPtr dataBlockPtr = dataHandle.AddrOfPinnedObject();
-                Interop.Advapi32.PERF_DATA_BLOCK dataBlock = new Interop.Advapi32.PERF_DATA_BLOCK();
-                Marshal.PtrToStructure(dataBlockPtr, dataBlock);
-                IntPtr typePtr = (IntPtr)((long)dataBlockPtr + dataBlock.HeaderLength);
-                Interop.Advapi32.PERF_INSTANCE_DEFINITION instance = new Interop.Advapi32.PERF_INSTANCE_DEFINITION();
-                Interop.Advapi32.PERF_COUNTER_BLOCK counterBlock = new Interop.Advapi32.PERF_COUNTER_BLOCK();
-                for (int i = 0; i < dataBlock.NumObjectTypes; i++)
+                ref readonly PERF_OBJECT_TYPE type = ref AsStruct<PERF_OBJECT_TYPE>(data.Slice(typePos));
+
+                PERF_COUNTER_DEFINITION[] counters = new PERF_COUNTER_DEFINITION[type.NumCounters];
+
+                int counterPos = typePos + type.HeaderLength;
+                for (int j = 0; j < type.NumCounters; j++)
                 {
-                    Interop.Advapi32.PERF_OBJECT_TYPE type = new Interop.Advapi32.PERF_OBJECT_TYPE();
-                    Marshal.PtrToStructure(typePtr, type);
-                    IntPtr instancePtr = (IntPtr)((long)typePtr + type.DefinitionLength);
-                    IntPtr counterPtr = (IntPtr)((long)typePtr + type.HeaderLength);
-                    List<Interop.Advapi32.PERF_COUNTER_DEFINITION> counterList = new List<Interop.Advapi32.PERF_COUNTER_DEFINITION>();
+                    ref readonly PERF_COUNTER_DEFINITION counter = ref AsStruct<PERF_COUNTER_DEFINITION>(data.Slice(counterPos));
 
-                    for (int j = 0; j < type.NumCounters; j++)
+                    string counterName = library.GetCounterName(counter.CounterNameTitleIndex);
+
+                    counters[j] = counter;
+                    if (type.ObjectNameTitleIndex == processIndex)
+                        counters[j].CounterNameTitlePtr = (int)GetValueId(counterName);
+                    else if (type.ObjectNameTitleIndex == threadIndex)
+                        counters[j].CounterNameTitlePtr = (int)GetValueId(counterName);
+
+                    counterPos += counter.ByteLength;
+                }
+
+                int instancePos = typePos + type.DefinitionLength;
+                for (int j = 0; j < type.NumInstances; j++)
+                {
+                    ref readonly PERF_INSTANCE_DEFINITION instance = ref AsStruct<PERF_INSTANCE_DEFINITION>(data.Slice(instancePos));
+
+                    ReadOnlySpan<char> instanceName = PERF_INSTANCE_DEFINITION.GetName(in instance, data.Slice(instancePos));
+
+                    if (instanceName.Equals("_Total", StringComparison.Ordinal))
                     {
-                        Interop.Advapi32.PERF_COUNTER_DEFINITION counter = new Interop.Advapi32.PERF_COUNTER_DEFINITION();
-                        Marshal.PtrToStructure(counterPtr, counter);
-                        string counterName = library.GetCounterName(counter.CounterNameTitleIndex);
-
-                        if (type.ObjectNameTitleIndex == processIndex)
-                            counter.CounterNameTitlePtr = (int)GetValueId(counterName);
-                        else if (type.ObjectNameTitleIndex == threadIndex)
-                            counter.CounterNameTitlePtr = (int)GetValueId(counterName);
-                        counterList.Add(counter);
-                        counterPtr = (IntPtr)((long)counterPtr + counter.ByteLength);
+                        // continue
                     }
-
-                    Interop.Advapi32.PERF_COUNTER_DEFINITION[] counters = counterList.ToArray();
-
-                    for (int j = 0; j < type.NumInstances; j++)
+                    else if (type.ObjectNameTitleIndex == processIndex)
                     {
-                        Marshal.PtrToStructure(instancePtr, instance);
-                        IntPtr namePtr = (IntPtr)((long)instancePtr + instance.NameOffset);
-                        string instanceName = Marshal.PtrToStringUni(namePtr);
-                        if (instanceName.Equals("_Total")) continue;
-                        IntPtr counterBlockPtr = (IntPtr)((long)instancePtr + instance.ByteLength);
-                        Marshal.PtrToStructure(counterBlockPtr, counterBlock);
-                        if (type.ObjectNameTitleIndex == processIndex)
+                        ProcessInfo processInfo = GetProcessInfo(in type, data.Slice(instancePos + instance.ByteLength), counters);
+                        if (processInfo.ProcessId == 0 && !instanceName.Equals("Idle", StringComparison.OrdinalIgnoreCase))
                         {
-                            ProcessInfo processInfo = GetProcessInfo(type, (IntPtr)((long)instancePtr + instance.ByteLength), counters);
-                            if (processInfo.ProcessId == 0 && string.Compare(instanceName, "Idle", StringComparison.OrdinalIgnoreCase) != 0)
-                            {
-                                // Sometimes we'll get a process structure that is not completely filled in.
-                                // We can catch some of these by looking for non-"idle" processes that have id 0
-                                // and ignoring those.
+                            // Sometimes we'll get a process structure that is not completely filled in.
+                            // We can catch some of these by looking for non-"idle" processes that have id 0
+                            // and ignoring those.
 #if FEATURE_TRACESWITCH
-                                Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a non-idle process with id 0; ignoring.");
+                            Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a non-idle process with id 0; ignoring.");
+#endif
+                        }
+                        else
+                        {
+                            if (processInfos.ContainsKey(processInfo.ProcessId))
+                            {
+                                // We've found two entries in the perfcounters that claim to be the
+                                // same process.  We throw an exception.  Is this really going to be
+                                // helpful to the user?  Should we just ignore?
+#if FEATURE_TRACESWITCH
+                                Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a duplicate process id");
 #endif
                             }
                             else
                             {
-                                if (processInfos.ContainsKey(processInfo.ProcessId))
+                                // the performance counters keep a 15 character prefix of the exe name, and then delete the ".exe",
+                                // if it's in the first 15.  The problem is that sometimes that will leave us with part of ".exe"
+                                // at the end.  If instanceName ends in ".", ".e", or ".ex" we remove it.
+                                if (instanceName.Length == 15)
                                 {
-                                    // We've found two entries in the perfcounters that claim to be the
-                                    // same process.  We throw an exception.  Is this really going to be
-                                    // helpful to the user?  Should we just ignore?
-#if FEATURE_TRACESWITCH
-                                    Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a duplicate process id");
-#endif
+                                    if (instanceName.EndsWith(".", StringComparison.Ordinal)) instanceName = instanceName.Slice(0, 14);
+                                    else if (instanceName.EndsWith(".e", StringComparison.Ordinal)) instanceName = instanceName.Slice(0, 13);
+                                    else if (instanceName.EndsWith(".ex", StringComparison.Ordinal)) instanceName = instanceName.Slice(0, 12);
                                 }
-                                else
-                                {
-                                    // the performance counters keep a 15 character prefix of the exe name, and then delete the ".exe",
-                                    // if it's in the first 15.  The problem is that sometimes that will leave us with part of ".exe"
-                                    // at the end.  If instanceName ends in ".", ".e", or ".ex" we remove it.
-                                    string processName = instanceName;
-                                    if (processName.Length == 15)
-                                    {
-                                        if (instanceName.EndsWith(".", StringComparison.Ordinal)) processName = instanceName.Substring(0, 14);
-                                        else if (instanceName.EndsWith(".e", StringComparison.Ordinal)) processName = instanceName.Substring(0, 13);
-                                        else if (instanceName.EndsWith(".ex", StringComparison.Ordinal)) processName = instanceName.Substring(0, 12);
-                                    }
-                                    processInfo.ProcessName = processName;
-                                    processInfos.Add(processInfo.ProcessId, processInfo);
-                                }
+                                processInfo.ProcessName = instanceName.ToString();
+                                processInfos.Add(processInfo.ProcessId, processInfo);
                             }
                         }
-                        else if (type.ObjectNameTitleIndex == threadIndex)
-                        {
-                            ThreadInfo threadInfo = GetThreadInfo(type, (IntPtr)((long)instancePtr + instance.ByteLength), counters);
-                            if (threadInfo._threadId != 0) threadInfos.Add(threadInfo);
-                        }
-                        instancePtr = (IntPtr)((long)instancePtr + instance.ByteLength + counterBlock.ByteLength);
+                    }
+                    else if (type.ObjectNameTitleIndex == threadIndex)
+                    {
+                        ThreadInfo threadInfo = GetThreadInfo(in type, data.Slice(instancePos + instance.ByteLength), counters);
+                        if (threadInfo._threadId != 0) threadInfos.Add(threadInfo);
                     }
 
-                    typePtr = (IntPtr)((long)typePtr + type.TotalByteLength);
+                    instancePos += instance.ByteLength;
+
+                    instancePos += AsStruct<PERF_COUNTER_BLOCK>(data.Slice(instancePos)).ByteLength;
                 }
-            }
-            finally
-            {
-                if (dataHandle.IsAllocated) dataHandle.Free();
+
+                typePos += type.TotalByteLength;
             }
 
             for (int i = 0; i < threadInfos.Count; i++)
             {
-                ThreadInfo threadInfo = (ThreadInfo)threadInfos[i];
-                ProcessInfo processInfo;
-                if (processInfos.TryGetValue(threadInfo._processId, out processInfo))
+                ThreadInfo threadInfo = threadInfos[i];
+                if (processInfos.TryGetValue(threadInfo._processId, out ProcessInfo processInfo))
                 {
                     processInfo._threadInfoList.Add(threadInfo);
                 }
@@ -497,13 +493,13 @@ namespace System.Diagnostics
             return temp;
         }
 
-        static ThreadInfo GetThreadInfo(Interop.Advapi32.PERF_OBJECT_TYPE type, IntPtr instancePtr, Interop.Advapi32.PERF_COUNTER_DEFINITION[] counters)
+        private static ThreadInfo GetThreadInfo(in PERF_OBJECT_TYPE type, ReadOnlySpan<byte> instanceData, PERF_COUNTER_DEFINITION[] counters)
         {
             ThreadInfo threadInfo = new ThreadInfo();
             for (int i = 0; i < counters.Length; i++)
             {
-                Interop.Advapi32.PERF_COUNTER_DEFINITION counter = counters[i];
-                long value = ReadCounterValue(counter.CounterType, (IntPtr)((long)instancePtr + counter.CounterOffset));
+                PERF_COUNTER_DEFINITION counter = counters[i];
+                long value = ReadCounterValue(counter.CounterType, instanceData.Slice(counter.CounterOffset));
                 switch ((ValueId)counter.CounterNameTitlePtr)
                 {
                     case ValueId.ProcessId:
@@ -561,13 +557,13 @@ namespace System.Diagnostics
             }
         }
 
-        static ProcessInfo GetProcessInfo(Interop.Advapi32.PERF_OBJECT_TYPE type, IntPtr instancePtr, Interop.Advapi32.PERF_COUNTER_DEFINITION[] counters)
+        private static ProcessInfo GetProcessInfo(in PERF_OBJECT_TYPE type, ReadOnlySpan<byte> instanceData, PERF_COUNTER_DEFINITION[] counters)
         {
             ProcessInfo processInfo = new ProcessInfo();
             for (int i = 0; i < counters.Length; i++)
             {
-                Interop.Advapi32.PERF_COUNTER_DEFINITION counter = counters[i];
-                long value = ReadCounterValue(counter.CounterType, (IntPtr)((long)instancePtr + counter.CounterOffset));
+                PERF_COUNTER_DEFINITION counter = counters[i];
+                long value = ReadCounterValue(counter.CounterType, instanceData.Slice(counter.CounterOffset));
                 switch ((ValueId)counter.CounterNameTitlePtr)
                 {
                     case ValueId.ProcessId:
@@ -605,13 +601,13 @@ namespace System.Diagnostics
                         break;
                     case ValueId.HandleCount:
                         processInfo.HandleCount = (int)value;
-                        break;                        
+                        break;
                 }
             }
             return processInfo;
         }
 
-        static ValueId GetValueId(string counterName)
+        private static ValueId GetValueId(string counterName)
         {
             if (counterName != null)
             {
@@ -623,18 +619,18 @@ namespace System.Diagnostics
             return ValueId.Unknown;
         }
 
-        static long ReadCounterValue(int counterType, IntPtr dataPtr)
+        private static long ReadCounterValue(int counterType, ReadOnlySpan<byte> data)
         {
-            if ((counterType & Interop.Advapi32.PerfCounterOptions.NtPerfCounterSizeLarge) != 0)
-                return Marshal.ReadInt64(dataPtr);
+            if ((counterType & PerfCounterOptions.NtPerfCounterSizeLarge) != 0)
+                return MemoryMarshal.Read<long>(data);
             else
-                return (long)Marshal.ReadInt32(dataPtr);
+                return (long)MemoryMarshal.Read<int>(data);
         }
 
         enum ValueId
         {
             Unknown = -1,
-            HandleCount,            
+            HandleCount,
             PoolPagedBytes,
             PoolNonpagedBytes,
             ElapsedTime,
