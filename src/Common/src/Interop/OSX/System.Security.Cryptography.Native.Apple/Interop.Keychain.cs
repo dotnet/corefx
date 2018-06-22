@@ -29,6 +29,13 @@ internal static partial class Interop
             out SafeTemporaryKeychainHandle keychain);
 
         [DllImport(Libraries.AppleCryptoNative)]
+        private static extern int AppleCryptoNative_SecKeychainCreate(
+            string path,
+            int utf8PassphraseLength,
+            byte[] utf8Passphrase,
+            out SafeKeychainHandle keychain);
+
+        [DllImport(Libraries.AppleCryptoNative)]
         private static extern int AppleCryptoNative_SecKeychainDelete(IntPtr keychain);
 
         [DllImport(Libraries.AppleCryptoNative)]
@@ -38,6 +45,12 @@ internal static partial class Interop
         private static extern int AppleCryptoNative_SecKeychainOpen(
             string keychainPath,
             out SafeKeychainHandle keychain);
+
+        [DllImport(Libraries.AppleCryptoNative)]
+        private static extern int AppleCryptoNative_SecKeychainUnlock(
+            SafeKeychainHandle keychain,
+            int utf8PassphraseLength,
+            byte[] utf8Passphrase);
 
         [DllImport(Libraries.AppleCryptoNative)]
         private static extern int AppleCryptoNative_SetKeychainNeverLock(SafeKeychainHandle keychain);
@@ -159,6 +172,44 @@ internal static partial class Interop
 
             Debug.Fail($"Unexpected result from AppleCryptoNative_SecKeychainEnumerateCerts: {result}");
             throw new CryptographicException();
+        }
+
+        internal static SafeKeychainHandle OpenAndUnlockKeychain(string keychainPath)
+        {
+            SafeKeychainHandle keychain;
+            int osStatus = AppleCryptoNative_SecKeychainOpen(keychainPath, out keychain);
+            if (osStatus == 0)
+            {
+                // Try to unlock with empty password to match our behaviour in CreateKeychain.
+                // If it doesn't work (errSecAuthFailed) then fail silently and fallback to the
+                // default behavior of user interaction.
+                osStatus = AppleCryptoNative_SecKeychainUnlock(keychain, 0, Array.Empty<byte>());
+                if (osStatus == 0 || osStatus == -25293)
+                {
+                    return keychain;
+                }
+            }
+
+            keychain.Dispose();
+            throw CreateExceptionForOSStatus(osStatus);
+        }
+
+        internal static SafeKeychainHandle CreateKeychain(string keychainPath)
+        {
+            SafeKeychainHandle keychain;
+            int osStatus = AppleCryptoNative_SecKeychainCreate(
+                keychainPath,
+                0,
+                Array.Empty<byte>(),
+                out keychain);
+
+            if (osStatus == 0)
+            {
+                return keychain;
+            }
+
+            keychain.Dispose();
+            throw CreateExceptionForOSStatus(osStatus);
         }
 
         internal static SafeTemporaryKeychainHandle CreateTemporaryKeychain()

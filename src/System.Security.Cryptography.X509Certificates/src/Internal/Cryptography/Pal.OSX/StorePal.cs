@@ -120,15 +120,28 @@ namespace Internal.Cryptography.Pal
                     break;
             }
 
+            if (!IsValidStoreName(storeName))
+            {
+                string message = SR.Format(
+                    SR.Cryptography_X509_StoreCannotCreate,
+                    storeName,
+                    storeLocation);
+                throw new CryptographicException(message);
+            }
+
+            var storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", storeName + ".keychain");
+            if (File.Exists(storePath))
+                return AppleKeychainStore.OpenAndUnlockKeychain(storePath, openFlags);
+
             if ((openFlags & OpenFlags.OpenExistingOnly) == OpenFlags.OpenExistingOnly)
                 throw new CryptographicException(SR.Cryptography_X509_StoreNotFound);
 
-            string message = SR.Format(
-                SR.Cryptography_X509_StoreCannotCreate,
-                storeName,
-                storeLocation);
+            return AppleKeychainStore.CreateKeychain(storePath, openFlags);
+        }
 
-            throw new CryptographicException(message, new PlatformNotSupportedException(message));
+        private static bool IsValidStoreName(string storeName)
+        {
+            return !String.IsNullOrWhiteSpace(storeName) && Path.GetFileName(storeName) == storeName;
         }
 
         private static void ReadCollection(SafeCFArrayHandle matches, HashSet<X509Certificate2> collection)
