@@ -30,6 +30,9 @@ namespace System.Security.Cryptography
 
         internal static DateTimeFormatInfo s_validityDateTimeFormatInfo;
 
+        private static Encoding s_utf8EncodingWithExceptionFallback;
+        private static Encoding s_latin1Encoding;
+
         private readonly byte[] _data;
         private readonly int _end;
         private int _position;
@@ -394,15 +397,21 @@ namespace System.Security.Cryptography
             // on NetFX seems to interpret it as UTF-8 with fallback to ISO 8859-1. OpenSSL
             // seems to interpret it as ISO 8859-1 with no support for UTF-8.
             // https://github.com/dotnet/corefx/issues/27466
+
+            Encoding utf8EncodingWithExceptionFallback = LazyInitializer.EnsureInitialized(
+                ref s_utf8EncodingWithExceptionFallback,
+                () => new UTF8Encoding(false, true));
+            Encoding latin1Encoding = LazyInitializer.EnsureInitialized(
+                ref s_latin1Encoding,
+                () => Encoding.GetEncoding("iso-8859-1"));
+            
             try
             {
-                var utf8 = (System.Text.Encoding)System.Text.Encoding.UTF8.Clone();
-                utf8.DecoderFallback = System.Text.DecoderFallback.ExceptionFallback;
-                t61String = utf8.GetString(_data, _position, contentLength);
+                t61String = utf8EncodingWithExceptionFallback.GetString(_data, _position, contentLength);
             }
-            catch (System.Text.DecoderFallbackException)
+            catch (DecoderFallbackException)
             {
-                t61String = System.Text.Encoding.GetEncoding("iso-8859-1").GetString(_data, _position, contentLength);
+                t61String = latin1Encoding.GetString(_data, _position, contentLength);
             }
             _position += contentLength;
 
