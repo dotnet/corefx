@@ -30,8 +30,8 @@ namespace System.Security.Cryptography
 
         internal static DateTimeFormatInfo s_validityDateTimeFormatInfo;
 
-        private static Encoding s_utf8EncodingWithExceptionFallback;
-        private static Encoding s_latin1Encoding;
+        private static System.Text.Encoding s_utf8EncodingWithExceptionFallback;
+        private static System.Text.Encoding s_latin1Encoding;
 
         private readonly byte[] _data;
         private readonly int _end;
@@ -398,12 +398,12 @@ namespace System.Security.Cryptography
             // seems to interpret it as ISO 8859-1 with no support for UTF-8.
             // https://github.com/dotnet/corefx/issues/27466
 
-            Encoding utf8EncodingWithExceptionFallback = LazyInitializer.EnsureInitialized(
+            System.Text.Encoding utf8EncodingWithExceptionFallback = LazyInitializer.EnsureInitialized(
                 ref s_utf8EncodingWithExceptionFallback,
                 () => new UTF8Encoding(false, true));
-            Encoding latin1Encoding = LazyInitializer.EnsureInitialized(
+            System.Text.Encoding latin1Encoding = LazyInitializer.EnsureInitialized(
                 ref s_latin1Encoding,
-                () => Encoding.GetEncoding("iso-8859-1"));
+                () => System.Text.Encoding.GetEncoding("iso-8859-1"));
             
             try
             {
