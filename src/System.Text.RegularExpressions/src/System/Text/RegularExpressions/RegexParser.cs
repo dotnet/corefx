@@ -349,6 +349,9 @@ namespace System.Text.RegularExpressions
                         break;
 
                     case '\\':
+                        if (CharsRight() == 0)
+                            throw MakeException(RegexParseError.IllegalEndEscape, SR.IllegalEndEscape);
+
                         AddUnitNode(ScanBackslash(scanOnly: false));
                         break;
 
@@ -696,11 +699,6 @@ namespace System.Text.RegularExpressions
          */
         private RegexNode ScanGroupOpen()
         {
-            char ch = '\0';
-            int NodeType;
-            char close = '>';
-
-
             // just return a RegexNode if we have:
             // 1. "(" followed by nothing
             // 2. "(x" where x != ?
@@ -723,6 +721,9 @@ namespace System.Text.RegularExpressions
                 if (CharsRight() == 0)
                     break;
 
+                int NodeType;
+                char close = '>';
+                char ch;
                 switch (ch = RightCharMoveRight())
                 {
                     case ':':
@@ -1007,8 +1008,7 @@ namespace System.Text.RegularExpressions
          */
         private RegexNode ScanBackslash(bool scanOnly)
         {
-            if (CharsRight() == 0)
-                throw MakeException(RegexParseError.IllegalEndEscape, SR.IllegalEndEscape);
+            Debug.Assert(CharsRight() > 0, "The current reading position must not be at the end of the pattern");
 
             char ch;
             switch (ch = RightChar())
@@ -2022,7 +2022,7 @@ namespace System.Text.RegularExpressions
 
         private bool IsTrueQuantifier()
         {
-            Debug.Assert(CharsRight() > 0, "IsTrueQuantifier requires characters to be read");
+            Debug.Assert(CharsRight() > 0, "The current reading position must not be at the end of the pattern");
 
             int startpos = Textpos();
             char ch = CharAt(startpos);
