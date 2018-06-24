@@ -43,15 +43,7 @@ namespace System.Text.RegularExpressions
             if (caseInsensitive)
             {
                 pattern = string.Create(pattern.Length, (pattern, culture), (span, state) =>
-                {
-                    // We do the ToLower character by character for consistency.  With surrogate chars, doing
-                    // a ToLower on the entire string could actually change the surrogate pair.  This is more correct
-                    // linguistically, but since Regex doesn't support surrogates, it's more important to be
-                    // consistent.
-                    TextInfo textInfo = state.culture.TextInfo;
-                    for (int i = 0; i < state.pattern.Length; i++)
-                        span[i] = textInfo.ToLower(state.pattern[i]);
-                });
+                    state.pattern.AsSpan().ToLower(span, state.culture));
             }
 
             Pattern = pattern;

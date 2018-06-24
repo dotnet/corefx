@@ -2080,17 +2080,7 @@ namespace System.Text.RegularExpressions
                 if (UseOptionI() && !isReplacement)
                 {
                     str = string.Create(cch, (_pattern, _culture, pos, cch), (span, state) =>
-                    {
-                        ReadOnlySpan<char> input = state._pattern.AsSpan(pos, cch);
-
-                        // We do the ToLower character by character for consistency.  With surrogate chars, doing
-                        // a ToLower on the entire string could actually change the surrogate pair.  This is more correct
-                        // linguistically, but since Regex doesn't support surrogates, it's more important to be
-                        // consistent.
-                        TextInfo textInfo = state._culture.TextInfo;
-                        for (int i = 0; i < input.Length; i++)
-                            span[i] = textInfo.ToLower(input[i]);
-                    });
+                        state._pattern.AsSpan(pos, cch).ToLower(span, state._culture));
                 }
                 else
                 {
