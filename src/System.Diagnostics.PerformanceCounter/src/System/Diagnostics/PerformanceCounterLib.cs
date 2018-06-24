@@ -121,14 +121,14 @@ namespace System.Diagnostics
                             ref readonly PERF_DATA_BLOCK dataBlock = ref AsStruct<PERF_DATA_BLOCK>(data);
                             int pos = dataBlock.HeaderLength;
 
-                            int categoryNumber = dataBlock.NumObjectTypes;
+                            int numPerfObjects = dataBlock.NumObjectTypes;
 
                             // on some machines MSMQ claims to have 4 categories, even though it only has 2.
                             // This causes us to walk past the end of our data, potentially crashing or reading
                             // data we shouldn't.  We use dataBlock.TotalByteLength to make sure we don't go past the end
                             // of the perf data.
-                            Hashtable tempCategoryTable = new Hashtable(categoryNumber, StringComparer.OrdinalIgnoreCase);
-                            for (int index = 0; index < categoryNumber && pos < dataBlock.TotalByteLength; index++)
+                            Hashtable tempCategoryTable = new Hashtable(numPerfObjects, StringComparer.OrdinalIgnoreCase);
+                            for (int index = 0; index < numPerfObjects && pos < dataBlock.TotalByteLength; index++)
                             {
                                 ref readonly PERF_OBJECT_TYPE perfObject = ref AsStruct<PERF_OBJECT_TYPE>(data.Slice(pos));
 
@@ -1426,7 +1426,7 @@ namespace System.Diagnostics
                     break;
                 }
 
-                pos = pos + perfObjectType.TotalByteLength;
+                pos += perfObjectType.TotalByteLength;
             }
 
             if (!foundCategory)
@@ -1445,7 +1445,7 @@ namespace System.Diagnostics
                 _isMultiInstance = true;
 
             // Move pointer forward to end of PERF_OBJECT_TYPE
-            pos = pos + perfObject.HeaderLength;
+            pos += perfObject.HeaderLength;
 
             CounterDefinitionSample[] samples = new CounterDefinitionSample[counterNumber];
             _counterTable = new Hashtable(counterNumber);
@@ -1544,7 +1544,7 @@ namespace System.Diagnostics
                     break;
                 }
 
-                pos = pos + type.TotalByteLength;
+                pos += type.TotalByteLength;
             }
 
             if (!foundCategory)
