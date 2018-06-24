@@ -48,7 +48,7 @@ namespace System.Text.RegularExpressions
         private RegexOptions _option;
         private ValueListBuilder<RegexOptions> _optionsStack;
 
-        private bool _ignoreNextParen;
+        private bool _ignoreNextParen; // flag to skip capturing a parentheses group
 
         private RegexParser(string pattern, RegexOptions option, CultureInfo culture, Hashtable caps, int capsize, Hashtable capnames, Span<RegexOptions> optionSpan)
         {
@@ -269,10 +269,10 @@ namespace System.Text.RegularExpressions
                 // move past all of the normal characters.  We'll stop when we hit some kind of control character,
                 // or if IgnorePatternWhiteSpace is on, we'll stop when we see some whitespace.
                 if (UseOptionX())
-                    while (CharsRight() > 0 && (!IsStopperX(ch = RightChar()) || ch == '{' && !IsTrueQuantifier()))
+                    while (CharsRight() > 0 && (!IsStopperX(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
                         MoveRight();
                 else
-                    while (CharsRight() > 0 && (!IsSpecial(ch = RightChar()) || ch == '{' && !IsTrueQuantifier()))
+                    while (CharsRight() > 0 && (!IsSpecial(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
                         MoveRight();
 
                 int endpos = Textpos();
@@ -991,6 +991,7 @@ namespace System.Text.RegularExpressions
                         RightChar(1) != '?' || RightChar() != '(')
                         return;
 
+                    // skip comment (?# ...)
                     while (CharsRight() > 0 && RightChar() != ')')
                         MoveRight();
                     if (CharsRight() == 0)
@@ -1497,13 +1498,9 @@ namespace System.Text.RegularExpressions
          */
         private void ScanOptions()
         {
-            char ch;
-            bool off;
-            RegexOptions option;
-
-            for (off = false; CharsRight() > 0; MoveRight())
+            for (bool off = false; CharsRight() > 0; MoveRight())
             {
-                ch = RightChar();
+                char ch = RightChar();
 
                 if (ch == '-')
                 {
@@ -1515,7 +1512,7 @@ namespace System.Text.RegularExpressions
                 }
                 else
                 {
-                    option = OptionFromCode(ch);
+                    RegexOptions option = OptionFromCode(ch);
                     if (option == 0 || IsOnlyTopOption(option))
                         return;
 
@@ -1703,6 +1700,7 @@ namespace System.Text.RegularExpressions
                     case '(':
                         if (CharsRight() >= 2 && RightChar(1) == '#' && RightChar() == '?')
                         {
+                            // we have a comment (?#
                             MoveLeft();
                             ScanBlank();
                         }
@@ -1760,6 +1758,9 @@ namespace System.Text.RegularExpressions
                             }
                             else
                             {
+                                // Simple (unnamed) capture group.
+                                // Add unnamend parentheses if ExplicitCapture is not set
+                                // and the next parentheses is not ignored.
                                 if (!UseOptionN() && !_ignoreNextParen)
                                     NoteCaptureSlot(_autocap++, pos);
                             }
@@ -1881,7 +1882,7 @@ namespace System.Text.RegularExpressions
 
                 for (int i = 0; i < _capcount; i++)
                 {
-                    int j = (_capnumlist == null) ? i : (int)_capnumlist[i];
+                    int j = (_capnumlist == null) ? i : _capnumlist[i];
 
                     if (next == j)
                     {
