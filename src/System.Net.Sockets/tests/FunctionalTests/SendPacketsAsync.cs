@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 using Xunit;
@@ -11,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
-    public class SendPacketsAsync
+    public partial class SendPacketsAsync
     {
         private readonly ITestOutputHelper _log;
 
@@ -273,7 +274,7 @@ namespace System.Net.Sockets.Tests
         {
             AssertExtensions.Throws<ArgumentException>("path", null, () =>
             {
-                SendPackets(type, new SendPacketsElement(String.Empty), 0);
+                SendPackets(type, new SendPacketsElement(string.Empty), 0);
             });
         }
 
@@ -342,6 +343,7 @@ namespace System.Net.Sockets.Tests
         public void SendPacketsElement_FileZeroCount_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName, 0, 0), s_testFileSize);  // Whole File
+            SendPackets(type, new SendPacketsElement(TestFileName, 0L, 0), s_testFileSize);  // Whole File
         }
 
         [Theory]
@@ -350,6 +352,7 @@ namespace System.Net.Sockets.Tests
         public void SendPacketsElement_FilePart_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName, 10, 20), 20);
+            SendPackets(type, new SendPacketsElement(TestFileName, 10L, 20), 20);
         }
 
         [Theory]
@@ -357,13 +360,16 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileMultiPart_Success(SocketImplementationType type)
         {
-            SendPacketsElement[] elements = new SendPacketsElement[]
+            var elements = new[]
             {
                 new SendPacketsElement(TestFileName, 10, 20),
                 new SendPacketsElement(TestFileName, 30, 10),
                 new SendPacketsElement(TestFileName, 0, 10),
+                new SendPacketsElement(TestFileName, 10L, 20),
+                new SendPacketsElement(TestFileName, 30L, 10),
+                new SendPacketsElement(TestFileName, 0L, 10),
             };
-            SendPackets(type, elements, SocketError.Success, 40);
+            SendPackets(type, elements, SocketError.Success, 80);
         }
 
         [Theory]
@@ -373,6 +379,7 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 11000, 1), SocketError.InvalidArgument, 0);
+            SendPackets(type, new SendPacketsElement(TestFileName, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
         }
 
         [Theory]
@@ -382,11 +389,170 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 5, 10000), SocketError.InvalidArgument, 0);
+            SendPackets(type, new SendPacketsElement(TestFileName, 5L, 10000), SocketError.InvalidArgument, 0);
         }
 
         #endregion Files
 
+        #region FileStreams
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStream_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
+                SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamZeroCount_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
+                SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamSizeCount_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
+                SendPackets(type, new SendPacketsElement(stream, 0, s_testFileSize), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream, 0, s_testFileSize), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamPart_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
+                SendPackets(type, new SendPacketsElement(stream, 0, 20), 20);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream, 10, 20), 20);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream, s_testFileSize - 20, 20), 20);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamMultiPart_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                var elements = new[]
+                {
+                    new SendPacketsElement(stream, 0, 20),
+                    new SendPacketsElement(stream, s_testFileSize - 10, 10),
+                    new SendPacketsElement(stream, 0, 10),
+                    new SendPacketsElement(stream, 10, 20),
+                    new SendPacketsElement(stream, 30, 10),
+                };
+                stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
+                SendPackets(type, elements, SocketError.Success, 70);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+
+                SendPackets(type, elements, SocketError.Success, 70);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamAsyncMultiPart_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous))
+            {
+                var elements = new[]
+                {
+                    new SendPacketsElement(stream, 0, 20),
+                    new SendPacketsElement(stream, s_testFileSize - 10, 10),
+                    new SendPacketsElement(stream, 0, 10),
+                    new SendPacketsElement(stream, 10, 20),
+                    new SendPacketsElement(stream, 30, 10),
+                };
+                stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
+                SendPackets(type, elements, SocketError.Success, 70);
+                Assert.Equal(s_testFileSize - 10, stream.Position);
+
+                SendPackets(type, elements, SocketError.Success, 70);
+                Assert.Equal(s_testFileSize - 10, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamLargeOffset_Throws(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
+                // Length is validated on Send
+                SendPackets(type, new SendPacketsElement(stream, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamLargeCount_Throws(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
+                // Length is validated on Send
+                SendPackets(type, new SendPacketsElement(stream, 5, 10000),
+                    SocketError.InvalidArgument, 0);
+            }
+        }
+
+        #endregion FileStreams
+
         #region Helpers
+
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, TransmitFileOptions flags, int bytesExpected)
         {
             Assert.True(Capability.IPv6Support());
@@ -431,12 +597,12 @@ namespace System.Net.Sockets.Tests
 
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, int bytesExpected)
         {
-            SendPackets(type, new SendPacketsElement[] { element }, SocketError.Success, bytesExpected);
+            SendPackets(type, new[] {element}, SocketError.Success, bytesExpected);
         }
 
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, SocketError expectedResut, int bytesExpected)
         {
-            SendPackets(type, new SendPacketsElement[] { element }, expectedResut, bytesExpected);
+            SendPackets(type, new[] {element}, expectedResut, bytesExpected);
         }
 
         private void SendPackets(SocketImplementationType type, SendPacketsElement[] elements, SocketError expectedResut, int bytesExpected)

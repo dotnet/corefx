@@ -629,16 +629,20 @@ namespace System.Net.Sockets
             // native TRANSMIT_PACKET_ELEMENT array that will be passed to TransmitPackets.
 
             // Scan the elements to count files and buffers.
-            int sendPacketsElementsFileCount = 0, sendPacketsElementsBufferCount = 0;
+            int sendPacketsElementsFileCount = 0, sendPacketsElementsFileStreamCount = 0, sendPacketsElementsBufferCount = 0;
             foreach (SendPacketsElement spe in sendPacketsElementsCopy)
             {
                 if (spe != null)
                 {
-                    if (spe._filePath != null)
+                    if (spe.FilePath != null)
                     {
                         sendPacketsElementsFileCount++;
                     }
-                    else if (spe._buffer != null && spe._count > 0)
+                    else if (spe.FileStream != null)
+                    {
+                        sendPacketsElementsFileStreamCount++;
+                    }
+                    else if (spe.Buffer != null && spe.Count > 0)
                     {
                         sendPacketsElementsBufferCount++;
                     }
@@ -648,51 +652,44 @@ namespace System.Net.Sockets
             // Attempt to open the files if any were given.
             if (sendPacketsElementsFileCount > 0)
             {
-                // Create arrays for streams.
-                _sendPacketsFileStreams = new FileStream[sendPacketsElementsFileCount];
-
                 // Loop through the elements attempting to open each files and get its handle.
                 int index = 0;
-                foreach (SendPacketsElement spe in sendPacketsElementsCopy)
+                // Create arrays for streams.
+                _sendPacketsFileStreams = new FileStream[sendPacketsElementsFileCount];
+                try
                 {
-                    if (spe != null && spe._filePath != null)
+                    foreach (SendPacketsElement spe in sendPacketsElementsCopy)
                     {
-                        Exception fileStreamException = null;
-                        try
+                        if (spe?.FilePath != null)
                         {
                             // Create a FileStream to open the file.
                             _sendPacketsFileStreams[index] =
-                                new FileStream(spe._filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        }
-                        catch (Exception ex)
-                        {
-                            // Save the exception to throw after closing any previous successful file opens.
-                            fileStreamException = ex;
-                        }
-                        if (fileStreamException != null)
-                        {
-                            // Got an exception opening a file - close any open streams, then throw.
-                            for (int i = 0; i < sendPacketsElementsFileCount; i++)
-                            {
-                                _sendPacketsFileStreams[i]?.Dispose();
-                            }
-                            _sendPacketsFileStreams = null;
-                            throw fileStreamException;
-                        }
+                                new FileStream(spe.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-                        // Get the file handle from the stream.
-                        index++;
+                            // Get the file handle from the stream.
+                            index++;
+                        }
                     }
+                }
+                catch
+                {
+                    // Got an exception opening a file - close any open streams, then throw.
+                    for (int i = index - 1; i >= 0; i--)
+                        _sendPacketsFileStreams[i].Dispose();
+                    _sendPacketsFileStreams = null;
+                    throw;
                 }
             }
 
-            if (sendPacketsElementsFileCount + sendPacketsElementsBufferCount == 0)
+            if (sendPacketsElementsFileCount + sendPacketsElementsFileStreamCount + sendPacketsElementsBufferCount == 0)
             {
                 FinishOperationSyncSuccess(0, SocketFlags.None);
                 return SocketError.Success;
             }
 
-            Interop.Winsock.TransmitPacketsElement[] sendPacketsDescriptor = SetupPinHandlesSendPackets(sendPacketsElementsCopy, sendPacketsElementsFileCount, sendPacketsElementsBufferCount);
+            Interop.Winsock.TransmitPacketsElement[] sendPacketsDescriptor =
+                SetupPinHandlesSendPackets(sendPacketsElementsCopy, sendPacketsElementsFileCount,
+                    sendPacketsElementsFileStreamCount, sendPacketsElementsBufferCount);
             Debug.Assert(sendPacketsDescriptor != null);
             Debug.Assert(sendPacketsDescriptor.Length > 0);
             Debug.Assert(_multipleBufferGCHandles != null);
@@ -955,7 +952,7 @@ namespace System.Net.Sockets
 
         // Sets up an Overlapped object for SendPacketsAsync.
         private unsafe Interop.Winsock.TransmitPacketsElement[] SetupPinHandlesSendPackets(
-            SendPacketsElement[] sendPacketsElementsCopy, int sendPacketsElementsFileCount, int sendPacketsElementsBufferCount)
+            SendPacketsElement[] sendPacketsElementsCopy, int sendPacketsElementsFileCount, int sendPacketsElementsFileStreamCount, int sendPacketsElementsBufferCount)
         {
             if (_pinState != PinState.None)
             {
@@ -963,7 +960,7 @@ namespace System.Net.Sockets
             }
 
             // Alloc native descriptor.
-            var sendPacketsDescriptor = new Interop.Winsock.TransmitPacketsElement[sendPacketsElementsFileCount + sendPacketsElementsBufferCount];
+            var sendPacketsDescriptor = new Interop.Winsock.TransmitPacketsElement[sendPacketsElementsFileCount + sendPacketsElementsFileStreamCount + sendPacketsElementsBufferCount];
 
             // Number of things to pin is number of buffers + 1 (native descriptor).
             // Ensure we have properly sized object array.
@@ -988,10 +985,10 @@ namespace System.Net.Sockets
             int index = 1;
             foreach (SendPacketsElement spe in sendPacketsElementsCopy)
             {
-                if (spe != null && spe._buffer != null && spe._count > 0)
+                if (spe?.Buffer != null && spe.Count > 0)
                 {
                     Debug.Assert(!_multipleBufferGCHandles[index].IsAllocated);
-                    _multipleBufferGCHandles[index] = GCHandle.Alloc(spe._buffer, GCHandleType.Pinned);
+                    _multipleBufferGCHandles[index] = GCHandle.Alloc(spe.Buffer, GCHandleType.Pinned);
 
                     index++;
                 }
@@ -1004,22 +1001,45 @@ namespace System.Net.Sockets
             {
                 if (spe != null)
                 {
-                    if (spe._buffer != null && spe._count > 0)
+                    if (spe.Buffer != null && spe.Count > 0)
                     {
                         // This element is a buffer.
-                        sendPacketsDescriptor[descriptorIndex].buffer = Marshal.UnsafeAddrOfPinnedArrayElement(spe._buffer, spe._offset);
-                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe._count;
-                        sendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
+                        sendPacketsDescriptor[descriptorIndex].buffer = Marshal.UnsafeAddrOfPinnedArrayElement(spe.Buffer, spe.Offset);
+                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
+                        sendPacketsDescriptor[descriptorIndex].flags =
+                            Interop.Winsock.TransmitPacketsElementFlags.Memory | (spe.EndOfPacket
+                                ? Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket
+                                : 0);
                         descriptorIndex++;
                     }
-                    else if (spe._filePath != null)
+                    else if (spe.FilePath != null)
                     {
                         // This element is a file.
                         sendPacketsDescriptor[descriptorIndex].fileHandle = _sendPacketsFileStreams[fileIndex].SafeFileHandle.DangerousGetHandle();
-                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe._offset;
-                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe._count;
-                        sendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
+                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
+                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
+                        sendPacketsDescriptor[descriptorIndex].flags =
+                            Interop.Winsock.TransmitPacketsElementFlags.File | (spe.EndOfPacket
+                                ? Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket
+                                : 0);
                         fileIndex++;
+                        descriptorIndex++;
+                    }
+                    else if (spe.FileStream != null)
+                    {
+                        // This element is a file stream.
+                        sendPacketsDescriptor[descriptorIndex].fileHandle = spe.FileStream.SafeFileHandle.DangerousGetHandle();
+                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
+
+                        // Workaround from synchronous reading stream from current position if packet offset equals 0
+                        if (spe.LongOffset == 0 && !spe.FileStream.IsAsync)
+                            spe.FileStream.Seek(0, SeekOrigin.Begin);
+
+                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
+                        sendPacketsDescriptor[descriptorIndex].flags =
+                            Interop.Winsock.TransmitPacketsElementFlags.File | (spe.EndOfPacket
+                                ? Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket
+                                : 0);
                         descriptorIndex++;
                     }
                 }
