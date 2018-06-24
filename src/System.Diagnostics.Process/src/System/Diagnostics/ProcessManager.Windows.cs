@@ -384,9 +384,6 @@ namespace System.Diagnostics
 
         private static ProcessInfo[] GetProcessInfos(PerformanceCounterLib library, int processIndex, int threadIndex, ReadOnlySpan<byte> data)
         {
-#if FEATURE_TRACESWITCH
-            Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos()");
-#endif
             Dictionary<int, ProcessInfo> processInfos = new Dictionary<int, ProcessInfo>();
             List<ThreadInfo> threadInfos = new List<ThreadInfo>();
 
@@ -434,9 +431,6 @@ namespace System.Diagnostics
                             // Sometimes we'll get a process structure that is not completely filled in.
                             // We can catch some of these by looking for non-"idle" processes that have id 0
                             // and ignoring those.
-#if FEATURE_TRACESWITCH
-                            Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a non-idle process with id 0; ignoring.");
-#endif
                         }
                         else
                         {
@@ -445,9 +439,6 @@ namespace System.Diagnostics
                                 // We've found two entries in the perfcounters that claim to be the
                                 // same process.  We throw an exception.  Is this really going to be
                                 // helpful to the user?  Should we just ignore?
-#if FEATURE_TRACESWITCH
-                                Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a duplicate process id");
-#endif
                             }
                             else
                             {

@@ -227,9 +227,6 @@ namespace System.Diagnostics
             }
             finally
             {
-#if FEATURE_TRACESWITCH
-                Debug.WriteLineIf(Process._processTracing.TraceVerbose, "Process - CloseHandle(process)");
-#endif
                 if (!processHandle.IsInvalid)
                 {
                     processHandle.Dispose();
@@ -446,9 +443,6 @@ namespace System.Diagnostics
         {
             if (String.IsNullOrEmpty(name))
             {
-#if FEATURE_TRACESWITCH
-               Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - unexpected blank ProcessName");
-#endif
                 return String.Empty;
             }
 
