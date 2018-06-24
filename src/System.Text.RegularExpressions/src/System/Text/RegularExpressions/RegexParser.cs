@@ -1097,13 +1097,10 @@ namespace System.Text.RegularExpressions
             if (CharsRight() == 0)
                 throw MakeException(RegexParseError.IllegalEndEscape, SR.IllegalEndEscape);
 
-            char ch;
-            bool angled = false;
+            int backpos = Textpos();
             char close = '\0';
-            int backpos;
-
-            backpos = Textpos();
-            ch = RightChar();
+            bool angled = false;
+            char ch = RightChar();
 
             // allow \k<foo> instead of \<foo>, which is now deprecated
 
@@ -1366,13 +1363,10 @@ namespace System.Text.RegularExpressions
          */
         private char ScanOctal()
         {
+            // Consume octal chars only up to 3 digits and value 0377
+            int c = 3;
             int d;
             int i;
-            int c;
-
-            // Consume octal chars only up to 3 digits and value 0377
-
-            c = 3;
 
             if (c > CharsRight())
                 c = CharsRight();
@@ -1420,10 +1414,8 @@ namespace System.Text.RegularExpressions
          */
         private char ScanHex(int c)
         {
-            int i;
+            int i = 0;
             int d;
-
-            i = 0;
 
             if (CharsRight() >= c)
             {
@@ -1464,12 +1456,10 @@ namespace System.Text.RegularExpressions
          */
         private char ScanControl()
         {
-            char ch;
-
-            if (CharsRight() <= 0)
+            if (CharsRight() == 0)
                 throw MakeException(RegexParseError.MissingControl, SR.MissingControl);
 
-            ch = RightCharMoveRight();
+            char ch = RightCharMoveRight();
 
             // \ca interpreted as \cA
 
@@ -1487,10 +1477,9 @@ namespace System.Text.RegularExpressions
          */
         private bool IsOnlyTopOption(RegexOptions option)
         {
-            return (option == RegexOptions.RightToLeft
-                || option == RegexOptions.CultureInvariant
-                || option == RegexOptions.ECMAScript
-            );
+            return option == RegexOptions.RightToLeft ||
+                option == RegexOptions.CultureInvariant ||
+                option == RegexOptions.ECMAScript;
         }
 
         /*
@@ -1577,6 +1566,7 @@ namespace System.Text.RegularExpressions
             {
                 throw MakeException(RegexParseError.IncompleteSlashP, SR.IncompleteSlashP);
             }
+
             char ch = RightCharMoveRight();
             if (ch != '{')
             {
@@ -1809,16 +1799,6 @@ namespace System.Text.RegularExpressions
                 _capnames.Add(name, pos);
                 _capnamelist.Add(name);
             }
-        }
-
-        /*
-         * For when all the used captures are known: note them all at once
-         */
-        private void NoteCaptures(Hashtable caps, int capsize, Hashtable capnames)
-        {
-            _caps = caps;
-            _capsize = capsize;
-            _capnames = capnames;
         }
 
         /*
@@ -2069,11 +2049,10 @@ namespace System.Text.RegularExpressions
          */
         private void AddConcatenate(int pos, int cch, bool isReplacement)
         {
-            RegexNode node;
-
             if (cch == 0)
                 return;
 
+            RegexNode node;
             if (cch > 1)
             {
                 string str;
