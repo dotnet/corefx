@@ -60,6 +60,8 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { @"(hello)\s+(world)", "START hello    world END", "$2 $1 $1 $2 $3$4", RegexOptions.None, 24, 0, "START world hello hello world $3$4 END" };
             yield return new object[] { @"(hello)\s+(world)", "START hello    world END", "$2 $1 $1 $2 $123$234", RegexOptions.None, 24, 0, "START world hello hello world $123$234 END" };
 
+            yield return new object[] { "aAa( CcC )bbb", "AaA CcC BBb", "$`blub$'", RegexOptions.IgnoreCase, 0, 10, "AaAblubBBb" };
+            yield return new object[] { @"aaa", "My dog cat has fleas.", "$01$02$03$04$05$06$07$08$09$10$11", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, 21, 0, "My dog cat has fleas." };
             yield return new object[] { @"(d)(o)(g)(\s)(c)(a)(t)(\s)(h)(a)(s)", "My dog cat has fleas.", "$01$02$03$04$05$06$07$08$09$10$11", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, 21, 0, "My dog cat has fleas." };
             yield return new object[] { @"(d)(o)(g)(\s)(c)(a)(t)(\s)(h)(a)(s)", "My dog cat has fleas.", "$05$06$07$04$01$02$03$08$09$10$11", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, 21, 0, "My cat dog has fleas." };
 

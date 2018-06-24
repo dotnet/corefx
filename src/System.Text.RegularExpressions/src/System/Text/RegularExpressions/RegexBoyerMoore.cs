@@ -13,8 +13,6 @@
 
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Text;
 
 namespace System.Text.RegularExpressions
 {
@@ -39,12 +37,7 @@ namespace System.Text.RegularExpressions
             // Sorry, you just can't use Boyer-Moore to find an empty pattern.
             // We're doing this for your own protection. (Really, for speed.)
             Debug.Assert(pattern.Length != 0, "RegexBoyerMoore called with an empty string. This is bad for perf");
-
-            if (caseInsensitive)
-            {
-                pattern = string.Create(pattern.Length, (pattern, culture), (span, state) =>
-                    state.pattern.AsSpan().ToLower(span, state.culture));
-            }
+            Debug.Assert(!caseInsensitive || pattern.ToLower(culture) == pattern, "RegexBoyerMoore called with a pattern which is not lowercased with caseInsensitive true.");
 
             Pattern = pattern;
             RightToLeft = rightToLeft;
@@ -221,17 +214,7 @@ namespace System.Text.RegularExpressions
                     return false;
                 }
 
-                TextInfo textinfo = _culture.TextInfo;
-                for (int i = 0; i < Pattern.Length; i++)
-                {
-                    Debug.Assert(textinfo.ToLower(Pattern[i]) == Pattern[i], "pattern should be converted to lower case in constructor!");
-                    if (textinfo.ToLower(text[index + i]) != Pattern[i])
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
+                return (0 == string.Compare(Pattern, 0, text, index, Pattern.Length, CaseInsensitive, _culture));
             }
             else
             {

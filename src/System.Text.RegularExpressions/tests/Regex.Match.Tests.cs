@@ -109,13 +109,13 @@ namespace System.Text.RegularExpressions.Tests
             }
 
             // Turning off case insensitive option in mid-pattern : Actual - "aaa(?-i:match this)bbb", "i"
-            yield return new object[] { "aaa(?-i:match this)bbb", "AaAmatch thisBBb", RegexOptions.IgnoreCase, 0, 16, true, "AaAmatch thisBBb" };
+            yield return new object[] { "aAa(?-i:match this)bbb", "AaAmatch thisBBb", RegexOptions.IgnoreCase, 0, 16, true, "AaAmatch thisBBb" };
 
             // Turning on/off all the options at once : Actual - "aaa(?imnsx-imnsx:match this)bbb", "i"
             yield return new object[] { "aaa(?imnsx-imnsx:match this)bbb", "AaAmatcH thisBBb", RegexOptions.IgnoreCase, 0, 16, false, string.Empty };
 
             // Actual - "aaa(?#ignore this completely)bbb"
-            yield return new object[] { "aaa(?#ignore this completely)bbb", "aaabbb", RegexOptions.None, 0, 6, true, "aaabbb" };
+            yield return new object[] { "aAa(?#ignore this completely)bbb", "aAabbb", RegexOptions.None, 0, 6, true, "aAabbb" };
 
             // Trying empty string: Actual "[a-z0-9]+", ""
             yield return new object[] { "[a-z0-9]+", "", RegexOptions.None, 0, 0, false, string.Empty };
