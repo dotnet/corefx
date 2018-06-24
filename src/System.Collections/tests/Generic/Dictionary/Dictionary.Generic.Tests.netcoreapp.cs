@@ -86,6 +86,67 @@ namespace System.Collections.Tests
 
         #endregion
 
+        #region RemoveAll(Predicate<KeyBaluePair<TKey,TValue>>)
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Dictionary_Generic_RemoveAll_AllElements(int count)
+        {
+            Dictionary<TKey, TValue> dict = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(count));
+            int removedCount = dict.RemoveAll((value) => { return true; });
+            Assert.Equal(count, removedCount);
+            Assert.Equal(0, dict.Count);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Dictionary_Generic_RemoveAll_NoElements(int count)
+        {
+            Dictionary<TKey, TValue> dict = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(count));
+            int removedCount = dict.RemoveAll((value) => { return false; });
+            Assert.Equal(0, removedCount);
+            Assert.Equal(count, dict.Count);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void RemoveAll_DefaultElements(int count)
+        {
+            Dictionary<TKey, TValue> dict = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(count));
+            Dictionary<TKey, TValue> beforeDict = new Dictionary<TKey, TValue>(dict);
+            Predicate<KeyValuePair<TKey,TValue>> EqualsDefaultElement = (value) => { return default(TKey) == null ? value.Key == null : default(TKey).Equals(value.Key); };
+            int expectedCount = beforeDict.Count((value) => EqualsDefaultElement(value));
+            int removedCount = dict.RemoveAll(EqualsDefaultElement);
+            Assert.Equal(expectedCount, removedCount);
+        }
+
+        [Fact]
+        public void Dictionary_Generic_RemoveAll_UpdateWhileRemoving()
+        {
+            Assert.Throws<InvalidOperationException>(
+                () =>
+                {
+                    Dictionary<TKey, TValue> dict = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(20));
+
+                    dict.RemoveAll(
+                        kvp =>
+                        {
+                            dict[CreateTKey(0)] = CreateTValue(0);
+                            return true;
+                        }
+                    );
+                }
+            );
+        }
+
+        [Fact]
+        public void RemoveAll_NullMatchPredicate()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("match", () => new Dictionary<TKey,TValue>().RemoveAll(null));
+        }
+
+        #endregion
+
         #region EnsureCapacity
 
         [Theory]
