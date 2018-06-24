@@ -112,7 +112,7 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { "aaa(?-i:match this)bbb", "AaAmatch thisBBb", RegexOptions.IgnoreCase, 0, 16, true, "AaAmatch thisBBb" };
 
             // Turning on/off all the options at once : Actual - "aaa(?imnsx-imnsx:match this)bbb", "i"
-            yield return new object[] { "aaa(?-i:match this)bbb", "AaAmatcH thisBBb", RegexOptions.IgnoreCase, 0, 16, false, string.Empty };
+            yield return new object[] { "aaa(?imnsx-imnsx:match this)bbb", "AaAmatcH thisBBb", RegexOptions.IgnoreCase, 0, 16, false, string.Empty };
 
             // Actual - "aaa(?#ignore this completely)bbb"
             yield return new object[] { "aaa(?#ignore this completely)bbb", "aaabbb", RegexOptions.None, 0, 6, true, "aaabbb" };
