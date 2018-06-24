@@ -30,9 +30,9 @@ namespace System.Text.RegularExpressions
         private RegexNode _concatenation;
         private RegexNode _unit;
 
-        private string _pattern;
+        private readonly string _pattern;
         private int _currentPos;
-        private CultureInfo _culture;
+        private readonly CultureInfo _culture;
 
         private int _autocap;
         private int _capcount;
