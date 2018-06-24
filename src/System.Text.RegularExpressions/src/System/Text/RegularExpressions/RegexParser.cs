@@ -2022,9 +2022,7 @@ namespace System.Text.RegularExpressions
 
         private bool IsTrueQuantifier()
         {
-            int nChars = CharsRight();
-            if (nChars == 0)
-                return false;
+            Debug.Assert(CharsRight() > 0, "IsTrueQuantifier requires characters to be read");
 
             int startpos = Textpos();
             char ch = CharAt(startpos);
@@ -2032,6 +2030,7 @@ namespace System.Text.RegularExpressions
                 return ch <= '{' && s_category[ch] >= Q;
 
             int pos = startpos;
+            int nChars = CharsRight();
             while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
 
             if (nChars == 0 || pos - startpos == 1)
