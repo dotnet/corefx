@@ -49,7 +49,7 @@ namespace System.Net.NetworkInformation.Tests
                 throw new InvalidOperationException("Unable to discover any addresses for the local host.");
             }
 
-            return addressFamily == AddressFamily.InterNetwork ? IPAddress.Parse("127.0.0.1") : IPAddress.Parse("::1");
+            return addressFamily == AddressFamily.InterNetwork ? IPAddress.Loopback : IPAddress.IPv6Loopback;
         }
     }
 }

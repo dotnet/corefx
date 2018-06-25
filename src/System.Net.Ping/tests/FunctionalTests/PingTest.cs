@@ -102,7 +102,6 @@ namespace System.Net.NetworkInformation.Tests
         public void SendPingWithIPAddress(AddressFamily addressFamily)
         {
             IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
-
             if (localIpAddress == null)
             {
                 // No local address for given address family.
@@ -142,8 +141,8 @@ namespace System.Net.NetworkInformation.Tests
         [InlineData(AddressFamily.InterNetworkV6)]
         public void SendPingWithIPAddress_AddressAsString(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
-             if (localIpAddress == null)
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
+            if (localIpAddress == null)
             {
                 // No local address for given address family.
                 return;
@@ -323,7 +322,6 @@ namespace System.Net.NetworkInformation.Tests
         public void SendPingWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix(AddressFamily addressFamily)
         {
             IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
-
             if (localIpAddress == null)
             {
                 // No local address for given address family.
