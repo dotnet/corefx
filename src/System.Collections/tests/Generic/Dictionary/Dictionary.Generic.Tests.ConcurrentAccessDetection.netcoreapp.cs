@@ -13,7 +13,7 @@ namespace Generic.Dictionary
 {
     public class DictionaryConcurrentAccessDetectionTests
     {
-        private async Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam)
+        private async Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam, Action<Dictionary<TKey, TValue>> removeAll)
         {
             Task task = Task.Factory.StartNew(() =>
             {
@@ -24,7 +24,16 @@ namespace Generic.Dictionary
                 FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
                 Array entriesInstance = (Array)entriesType.GetValue(dictionary);
                 Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
+                FieldInfo hashCode = entriesInstance.GetValue(0).GetType().GetTypeInfo().GetField("hashCode");
+                FieldInfo key = entriesInstance.GetValue(0).GetType().GetTypeInfo().GetField("key");
+                FieldInfo next = entriesInstance.GetValue(0).GetType().GetTypeInfo().GetField("next");
+                var entry = entryArray.GetValue(0);
+                hashCode.SetValue(entry, 2);
+                key.SetValue(entry, key.GetValue(entriesInstance.GetValue(0)));
+                next.SetValue(entry, 0);
+                entryArray.SetValue(entry, 0);
                 entriesType.SetValue(dictionary, entryArray);
+
 
                 Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
                 Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
@@ -32,18 +41,6 @@ namespace Generic.Dictionary
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => get(dictionary)).TargetSite.Name);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => remove(dictionary)).TargetSite.Name);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
-            }, TaskCreationOptions.LongRunning);
-
-            // If Dictionary regresses, we do not want to hang here indefinitely
-            Assert.True((await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(60))) == task) && task.IsCompletedSuccessfully);
-        }
-
-        private async Task DictionaryRemoveAllConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> removeAll)
-        {
-            Task task = Task.Factory.StartNew(() =>
-            {
-                Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
-                Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeAll(dictionary)).TargetSite.Name);
             }, TaskCreationOptions.LongRunning);
 
@@ -70,7 +67,9 @@ namespace Generic.Dictionary
                 d => d.Add(1, 1),
                 d => { var v = d[1]; },
                 d => d.Remove(1),
-                d => d.Remove(1, out int value));
+                d => d.Remove(1, out int value),
+                d => d.RemoveAll(kvp => true)
+            );
         }
 
         [Theory]
@@ -94,53 +93,9 @@ namespace Generic.Dictionary
                 d => d.Add(keyValueSample, keyValueSample),
                 d => { var v = d[keyValueSample]; },
                 d => d.Remove(keyValueSample),
-                d => d.Remove(keyValueSample, out DummyRefType value));
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData(typeof(CustomEqualityComparerInt32ValueType))]
-        public async Task DictionaryRemoveAllConcurrentAccessDetection_ValueTypeKey(Type comparerType)
-        {
-            IEqualityComparer<int> customComparer = null;
-
-            Dictionary<int, int> dic = comparerType == null ?
-                new Dictionary<int, int>() :
-                new Dictionary<int, int>((customComparer = (IEqualityComparer<int>)Activator.CreateInstance(comparerType)));
-
-            dic.Add(1, 1);
-            using (var disruptor = new DictionaryDisruptor<int, int>(dic))
-            {
-                await DictionaryRemoveAllConcurrentAccessDetection(dic,
-                    typeof(int).IsValueType,
-                    customComparer,
-                    d => d.RemoveAll(disruptor.MatchAndDisrupt)
-                );
-            }
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData(typeof(CustomEqualityComparerDummyRefType))]
-        public async Task DictionaryRemovaAllConcurrentAccessDetection_ReferenceTypeKey(Type comparerType)
-        {
-            IEqualityComparer<DummyRefType> customComparer = null;
-
-            Dictionary<DummyRefType, DummyRefType> dic = comparerType == null ?
-                new Dictionary<DummyRefType, DummyRefType>() :
-                new Dictionary<DummyRefType, DummyRefType>((customComparer = (IEqualityComparer<DummyRefType>)Activator.CreateInstance(comparerType)));
-
-            var keyValueSample = new DummyRefType() { Value = 1 };
-
-            dic.Add(keyValueSample, keyValueSample);
-            using (var disruptor = new DictionaryDisruptor<DummyRefType, DummyRefType>(dic))
-            {
-                await DictionaryRemoveAllConcurrentAccessDetection(dic,
-                    typeof(DummyRefType).IsValueType,
-                    customComparer,
-                    d => d.RemoveAll(disruptor.MatchAndDisrupt)
-                );
-            }
+                d => d.Remove(keyValueSample, out DummyRefType value),
+                d => d.RemoveAll(kvp => true)
+            );
         }
     }
 
@@ -183,40 +138,6 @@ namespace Generic.Dictionary
         public override int GetHashCode(int obj)
         {
             return EqualityComparer<int>.Default.GetHashCode(obj);
-        }
-    }
-
-    class DictionaryDisruptor<TKey, TValue> : IDisposable
-    {
-        private Dictionary<TKey, TValue> _dict;
-        private bool _hasRun;
-
-        public DictionaryDisruptor(Dictionary<TKey, TValue> dict)
-        {
-            _dict = dict;
-        }
-
-        public bool MatchAndDisrupt(KeyValuePair<TKey, TValue> pair)
-        {
-            if (!_hasRun)
-            {
-                FieldInfo entriesType = _dict.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                Array entriesInstance = (Array)entriesType.GetValue(_dict);
-                var entryType = entriesType.GetValue(_dict).GetType().GetElementType();
-                // the caller has a stack reference to the array so it can't be replaced, it must be edited
-                for (int index = 0; index < entriesInstance.Length; index += 1)
-                {
-                    entriesInstance.SetValue(Activator.CreateInstance(entryType), index);
-                }
-
-                _hasRun = true;
-            }
-            return true;
-        }
-
-        public void Dispose()
-        {
-            _dict = null;
         }
     }
 }
