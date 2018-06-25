@@ -28,16 +28,6 @@
     <BinPlaceConfiguration  Condition="'$(TargetsNetFx)' == 'true'" Include="$(Configuration)">
       <RefPath>$(RefPath)</RefPath>
     </BinPlaceConfiguration>
-
-    <!-- For the netfx targetgroup, binplace NetStandardSupportLibs to runtime / test-runtime-->
-    <BinPlaceConfiguration  Condition="'$(TargetGroup)' == 'netfx'" Include="$(Configuration)">
-      <ItemName>NetStandardSupportLib</ItemName>
-      <RuntimePath>$(TestHostRootPath)</RuntimePath>
-    </BinPlaceConfiguration>
-    <BinPlaceConfiguration  Condition="'$(TargetGroup)' == 'netfx'" Include="$(Configuration)">
-      <ItemName>NetStandardSupportLib</ItemName>
-      <RuntimePath>$(RuntimePath)</RuntimePath>
-    </BinPlaceConfiguration>
   </ItemGroup>
 
   <PropertyGroup>
@@ -62,22 +52,13 @@
           Condition="'$(AddNetStandardSupportPackage)' == 'true'">
     <ItemGroup>
       <_netStandardReference Condition="'$(TargetGroup)' != 'net461' AND '$(TargetGroup)' != 'net462'"
-                             Include="$(NETStandardSupportRoot)\net47\ref\*.dll" 
-                             Exclude="@(_netStandardReference->'$(NETStandardSupportRoot)\net47\ref\%(FileName).dll')" />
+                             Include="$(NETStandardSupportRoot)\net47\lib\*.dll"
+                             Exclude="@(_netStandardReference->'$(NETStandardSupportRoot)\net47\lib\%(FileName).dll')" />
       <_netStandardReference Condition="'$(TargetGroup)' != 'net461'"
-                             Include="$(NETStandardSupportRoot)\net462\ref\*.dll" 
-                             Exclude="@(_netStandardReference->'$(NETStandardSupportRoot)\net462\ref\%(FileName).dll')" />
-      <_netStandardReference Include="$(NETStandardSupportRoot)\net461\ref\*.dll" 
-                             Exclude="@(_netStandardReference->'$(NETStandardSupportRoot)\net461\ref\%(FileName).dll')" />
-
-      <NetStandardSupportLib Condition="'$(TargetGroup)' != 'net461' AND '$(TargetGroup)' != 'net462'"
-                             Include="$(NETStandardSupportRoot)\net47\lib\*.dll" 
-                             Exclude="@(NetStandardSupportLib->'$(NETStandardSupportRoot)\net47\lib\%(FileName).dll')" />
-      <NetStandardSupportLib Condition="'$(TargetGroup)' != 'net461'"
-                             Include="$(NETStandardSupportRoot)\net462\lib\*.dll" 
-                             Exclude="@(NetStandardSupportLib->'$(NETStandardSupportRoot)\net462\lib\%(FileName).dll')" />
-      <NetStandardSupportLib Include="$(NETStandardSupportRoot)\net461\lib\*.dll" 
-                             Exclude="@(NetStandardSupportLib->'$(NETStandardSupportRoot)\net461\lib\%(FileName).dll')" />
+                             Include="$(NETStandardSupportRoot)\net462\lib\*.dll"
+                             Exclude="@(_netStandardReference->'$(NETStandardSupportRoot)\net462\lib\%(FileName).dll')" />
+      <_netStandardReference Include="$(NETStandardSupportRoot)\net461\lib\*.dll"
+                             Exclude="@(_netStandardReference->'$(NETStandardSupportRoot)\net461\lib\%(FileName).dll')" />
 
       <_netStandardReference>
         <Private>False</Private>
