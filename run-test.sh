@@ -113,7 +113,7 @@ case $CPUName in
         ;;
 
     armv7l)
-        __Arch=arm
+        __Arch=armel
         ;;
 
     aarch64)
