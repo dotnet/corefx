@@ -76,7 +76,11 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { "[^0-9]+(?>[0-9]+)3", "abc123", RegexOptions.None, 0, 6, false, string.Empty };
 
             // Using beginning/end of string chars \A, \Z: Actual - "\\Aaaa\\w+zzz\\Z"
-            yield return new object[] { @"\Aaaa\w+zzz\Z", "aaaasdfajsdlfjzzz", RegexOptions.None, 0, 17, true, "aaaasdfajsdlfjzzz" };
+            yield return new object[] { @"\Aaaa\w+zzz\Z", "aaaasdfajsdlfjzzz", RegexOptions.IgnoreCase, 0, 17, true, "aaaasdfajsdlfjzzz" };
+            yield return new object[] { @"\Aaaaaa\w+zzz\Z", "aaaa", RegexOptions.IgnoreCase, 0, 4, false, string.Empty };
+            yield return new object[] { @"\Aaaaaa\w+zzz\Z", "aaaa", RegexOptions.RightToLeft, 0, 4, false, string.Empty };
+            yield return new object[] { @"\Aaaaaa\w+zzzzz\Z", "aaaa", RegexOptions.RightToLeft, 0, 4, false, string.Empty };
+            yield return new object[] { @"\Aaaaaa\w+zzz\Z", "aaaa", RegexOptions.RightToLeft | RegexOptions.IgnoreCase, 0, 4, false, string.Empty };
 
             // Using beginning/end of string chars \A, \Z: Actual - "\\Aaaa\\w+zzz\\Z"
             yield return new object[] { @"\Aaaa\w+zzz\Z", "aaaasdfajsdlfjzzza", RegexOptions.None, 0, 18, false, string.Empty };
@@ -632,6 +636,24 @@ namespace System.Text.RegularExpressions.Tests
                 new CaptureData[]
                 {
                     new CaptureData("aaa", 0, 3)
+                }
+            };
+
+            // RightToLeft with anchor
+            yield return new object[]
+            {
+                "^aaa", "aaabbb", RegexOptions.RightToLeft, 3, 3,
+                new CaptureData[]
+                {
+                    new CaptureData("aaa", 0, 3)
+                }
+            };
+            yield return new object[]
+            {
+                "bbb$", "aaabbb", RegexOptions.RightToLeft, 0, 3,
+                new CaptureData[]
+                {
+                    new CaptureData("bbb", 0, 3)
                 }
             };
         }
