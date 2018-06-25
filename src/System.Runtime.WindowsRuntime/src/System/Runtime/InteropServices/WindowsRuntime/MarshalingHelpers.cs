@@ -113,8 +113,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 
             IntPtr newItemsIP = IntPtr.Zero;
             IntPtr oldItemsIP = IntPtr.Zero;
-
-            RuntimeHelpers.PrepareConstrainedRegions();
             try
             {
                 if (managedArgs.NewItems != null)

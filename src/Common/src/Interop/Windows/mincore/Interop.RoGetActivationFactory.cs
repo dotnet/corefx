@@ -10,7 +10,7 @@ internal partial class Interop
 {
     internal partial class mincore
     {
-        [DllImport(Libraries.CORE_WINRT, PreserveSig = true)]
+        [DllImport(Libraries.CoreWinRT, PreserveSig = true)]
         internal static extern int RoGetActivationFactory(
             [MarshalAs(UnmanagedType.HString)] string activatableClassId,
             [In] ref Guid iid,
