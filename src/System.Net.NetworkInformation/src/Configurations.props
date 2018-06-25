@@ -3,6 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       uap-Windows_NT;
+      netcoreapp-FreeBSD;
       netcoreapp-Linux;
       netcoreapp-OSX;
       netcoreapp-Windows_NT;
