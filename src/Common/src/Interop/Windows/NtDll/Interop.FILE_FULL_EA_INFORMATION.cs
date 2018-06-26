@@ -36,10 +36,6 @@ internal partial class Interop
             /// </summary>
             internal ushort EaValueLength;
             
-            /// <summary>
-            /// An array of characters naming the EA for this entry.
-            /// </summary>
-            internal byte EaName;
         }
     }
 }

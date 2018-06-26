@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.IO;
-using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 
@@ -39,30 +38,17 @@ namespace System.Data.SqlTypes
         }
 
         public string Name { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public byte[] TransactionContext { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public override bool CanRead { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public override bool CanSeek { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public override bool CanWrite { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public override long Length { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public override long Position { get { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } set { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); } }
-
         public override void Flush() { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); }
-
         public override int Read(byte[] buffer, int offset, int count) { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); }
-
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); }
-
         public override void SetLength(long value) { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); }
-
         public override void Write(byte[] buffer, int offset, int count) { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); }
-
-
     }
 }
 

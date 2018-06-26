@@ -12,7 +12,6 @@ internal partial class Interop
     {
         // https://msdn.microsoft.com/en-us/library/bb432380.aspx
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff566424.aspx
-#pragma warning disable BCL0015 // Invalid Pinvoke call
         [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode, ExactSpelling = true)]
         private unsafe static extern int NtCreateFile(
             out IntPtr FileHandle,
@@ -24,9 +23,8 @@ internal partial class Interop
             System.IO.FileShare ShareAccess,
             CreateDisposition CreateDisposition,
             CreateOptions CreateOptions,
-            SafeHandle EaBuffer,
+            void* EaBuffer,
             uint EaLength);
-#pragma warning restore BCL0015 // Invalid Pinvoke call
 
         internal unsafe static (int status, IntPtr handle) CreateFile(
             ReadOnlySpan<char> path,
@@ -39,10 +37,11 @@ internal partial class Interop
             ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE
             )
         {
-                return ( CreateFile(eaBuffer: new Microsoft.Win32.SafeHandles.SafeFileHandle(IntPtr.Zero, true), eaLength: 0, path, rootDirectory,createDisposition, desiredAccess, shareAccess, fileAttributes, createOptions, objectAttributes) );
+                return ( CreateFile(eaBuffer: null, eaLength: 0, path, rootDirectory,createDisposition, desiredAccess, shareAccess, fileAttributes, createOptions, objectAttributes) );
         }
+
         internal unsafe static (int status, IntPtr handle) CreateFile(
-            SafeHandle eaBuffer,
+            void* eaBuffer,
             uint eaLength,
             ReadOnlySpan<char> path,
             IntPtr rootDirectory,
@@ -599,7 +598,5 @@ internal partial class Interop
             /// </summary>
             FILE_GENERIC_EXECUTE = 0x20000000 // GENERIC_EXECUTE
         }
-
-       
     }
 }

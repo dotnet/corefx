@@ -229,17 +229,21 @@
     <Compile Include="Interop\SNINativeMethodWrapper.Common.cs" />
     <Compile Include="System\Data\SqlClient\SqlCredential.cs" />
   </ItemGroup>
-  <!-- SqlFileStream -->
-  <!-- Non-Windows -->
-  <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+  <!-- <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
   </ItemGroup>
-  <!-- Windows UAP -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(IsUAPAssembly)' == 'true'">
     <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
   </ItemGroup>
-  <!-- Windows Non-UAP dependencies -->
-  <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp') AND '$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' == 'true'">
+    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
+  </ItemGroup> -->
+  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp' OR '$(TargetsWindows)' != 'true'">
+    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
+  </ItemGroup>
+  <!-- Windows : Win32 only -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' AND '$(TargetsWindows)' == 'true'">
+  <!-- SqlFileStream Windows Non-UAP dependencies -->
     <Compile Include="System\Data\SqlClient\SqlFileStream.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
@@ -265,8 +269,8 @@
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs">
+      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Method.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.Method.cs</Link>
@@ -287,8 +291,8 @@
       <Link>Common\Interop\Windows\Interop.RtlNtStatusToDosError.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Manage the SNI toggle for Windows netstandard and UWP -->
   <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp') AND '$(TargetsWindows)' == 'true'">
+    <!-- Manage the SNI toggle for Windows netstandard and UWP -->
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsUAPAssembly)' == 'true'">

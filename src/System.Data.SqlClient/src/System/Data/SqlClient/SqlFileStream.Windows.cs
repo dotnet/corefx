@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
+using System.Buffers;
 
 namespace System.Data.SqlTypes
 {
@@ -33,7 +34,8 @@ namespace System.Data.SqlTypes
 
         private const ushort IoControlCodeFunctionCode = 2392;
         private const int ERROR_MR_MID_NOT_FOUND = 317;
-        
+        private const int SizeOf_FILE_FULL_EA_INFORMATION_HEADER = sizeof(uint) + sizeof(byte) + sizeof(byte) + sizeof(ushort); // FileFullEaInformation Header is 8 bytes
+
         #region Definitions from devioctl.h
         private const ushort FILE_DEVICE_FILE_SYSTEM = 0x0009;
         #endregion
@@ -42,6 +44,12 @@ namespace System.Data.SqlTypes
         private string _m_path;
         private byte[] _m_txn;
         private bool _m_disposed;
+        private static byte[] s_eaNameString = new byte[]
+        {
+            (byte)'F', (byte)'i', (byte)'l', (byte)'e', (byte)'s', (byte)'t', (byte)'r', (byte)'e', (byte)'a', (byte)'m', (byte)'_',
+            (byte)'T', (byte)'r', (byte)'a', (byte)'n', (byte)'s', (byte)'a', (byte)'c', (byte)'t', (byte)'i', (byte)'o', (byte)'n', (byte)'_',
+            (byte)'T', (byte)'a', (byte)'g'
+        };
 
         public SqlFileStream
             (
@@ -452,7 +460,7 @@ namespace System.Data.SqlTypes
         // SxS: SQL File Stream is a database resource, not a local machine one
         [ResourceExposure(ResourceScope.None)]
         [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
-        private void OpenSqlFileStream
+        private unsafe void OpenSqlFileStream
             (
                 string sPath,
                 byte[] transactionContext,
@@ -482,8 +490,6 @@ namespace System.Data.SqlTypes
             // * ensure that the path starts with '\\'
             // * ensure that the path does not start with '\\.\'
             sPath = GetFullPathInternal(sPath);
-
-            FileFullEaInformation eaBuffer = null;
 
             Microsoft.Win32.SafeHandles.SafeFileHandle hFile = null;
             Interop.NtDll.DesiredAccess nDesiredAccess = Interop.NtDll.DesiredAccess.FILE_READ_ATTRIBUTES | Interop.NtDll.DesiredAccess.SYNCHRONIZE;
@@ -539,8 +545,6 @@ namespace System.Data.SqlTypes
 
             try
             {
-                eaBuffer = new FileFullEaInformation(transactionContext);
-
                 // NOTE: the Name property is intended to reveal the publicly available moniker for the
                 // FILESTREAM attributed column data. We will not surface the internal processing that
                 // takes place to create the mappedPath.
@@ -550,19 +554,44 @@ namespace System.Data.SqlTypes
 
                 try
                 {
+                    if (transactionContext.Length >= ushort.MaxValue)
+                        throw ADP.ArgumentOutOfRange("transactionContext");
 
-                    (int status, IntPtr handle) = Interop.NtDll.CreateFile( 
-                                                                            path: mappedPath.AsSpan(),
-                                                                            rootDirectory: IntPtr.Zero,
-                                                                            createDisposition: dwCreateDisposition,
-                                                                            desiredAccess: nDesiredAccess,
-                                                                            shareAccess: nShareAccess,
-                                                                            fileAttributes: 0,
-                                                                            createOptions: dwCreateOptions,
-                                                                            eaBuffer: eaBuffer,
-                                                                            eaLength: (uint)eaBuffer.Length);
-                    retval = status;
-                    hFile = new SafeFileHandle(handle, true);
+                    int headerSize = sizeof(Interop.NtDll.FILE_FULL_EA_INFORMATION);
+                    int fullSize = headerSize + transactionContext.Length + s_eaNameString.Length + 4; // 4-byte padding
+                    
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent(fullSize);
+
+                    fixed (byte* b = buffer)
+                    {
+                        Interop.NtDll.FILE_FULL_EA_INFORMATION* ea = (Interop.NtDll.FILE_FULL_EA_INFORMATION*)b;
+                        ea->NextEntryOffset = 0;
+                        ea->Flags = 0;
+                        ea->EaNameLength = (byte)s_eaNameString.Length;
+                        ea->EaValueLength = (ushort)transactionContext.Length;
+
+                        // We could continue to do pointer math here, chose to use Span for convenience to 
+                        // make sure we get the other members in the right place.
+                        Span<byte> data = new Span<byte>(buffer).Slice(headerSize);
+                        s_eaNameString.AsSpan().CopyTo(data);
+                        data = data.Slice(s_eaNameString.Length + 1);
+                        transactionContext.AsSpan().CopyTo(data);
+
+                        (int status, IntPtr handle) = Interop.NtDll.CreateFile(
+                                                                                path: mappedPath.AsSpan(),
+                                                                                rootDirectory: IntPtr.Zero,
+                                                                                createDisposition: dwCreateDisposition,
+                                                                                desiredAccess: nDesiredAccess,
+                                                                                shareAccess: nShareAccess,
+                                                                                fileAttributes: 0,
+                                                                                createOptions: dwCreateOptions,
+                                                                                eaBuffer: b,
+                                                                                eaLength: (uint)fullSize);
+                        retval = status;
+                        hFile = new SafeFileHandle(handle, true);
+                    }
+
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
                 finally
                 {
@@ -570,71 +599,71 @@ namespace System.Data.SqlTypes
                 }
 
                 switch (retval)
-                {
-                    case 0:
-                        break;
-
-                    case Interop.Errors.ERROR_SHARING_VIOLATION:
-                        throw ADP.InvalidOperation(SR.GetString(SR.SqlFileStream_FileAlreadyInTransaction));
-
-                    case Interop.Errors.ERROR_INVALID_PARAMETER:
-                        throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidParameter));
-
-                    case Interop.Errors.ERROR_FILE_NOT_FOUND:
-                        {
-                            System.IO.DirectoryNotFoundException e = new System.IO.DirectoryNotFoundException();
-                            ADP.TraceExceptionAsReturnValue(e);
-                            throw e;
-                        }
-                    default:
-                        {
-                            uint error = Interop.NtDll.RtlNtStatusToDosError(retval);
-                            if (error == ERROR_MR_MID_NOT_FOUND)
-                            {
-                                // status code could not be mapped to a Win32 error code 
-                                error = (uint)retval;
-                            }
-
-                            System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(unchecked((int)error));
-                            ADP.TraceExceptionAsReturnValue(e);
-                            throw e;
-                        }
-                }
-
-                if (hFile.IsInvalid)
-                {
-                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(Interop.Errors.ERROR_INVALID_HANDLE);
-                    ADP.TraceExceptionAsReturnValue(e);
-                    throw e;
-                }
-
-                if (Interop.Kernel32.GetFileType(hFile) != Interop.Kernel32.FileTypes.FILE_TYPE_DISK)
-                {
-                    hFile.Dispose();
-                    throw ADP.Argument(SR.GetString(SR.SqlFileStream_PathNotValidDiskResource));
-                }
-
-                // if the user is opening the SQL FileStream in read/write mode, we assume that they want to scan
-                // through current data and then append new data to the end, so we need to tell SQL Server to preserve
-                // the existing file contents.
-                if (access == System.IO.FileAccess.ReadWrite)
-                {
-                    uint ioControlCode = Interop.Kernel32.CTL_CODE(FILE_DEVICE_FILE_SYSTEM,
-                        IoControlCodeFunctionCode, (byte)Interop.Kernel32.Method.METHOD_BUFFERED,
-                        (byte)Interop.Kernel32.IoControlCodeAccess.FILE_ANY_ACCESS);
-
-                    if (!Interop.Kernel32.DeviceIoControl(hFile, ioControlCode, IntPtr.Zero, 0, IntPtr.Zero, 0, out uint cbBytesReturned, IntPtr.Zero))
                     {
-                        System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                        case 0:
+                            break;
+
+                        case Interop.Errors.ERROR_SHARING_VIOLATION:
+                            throw ADP.InvalidOperation(SR.GetString(SR.SqlFileStream_FileAlreadyInTransaction));
+
+                        case Interop.Errors.ERROR_INVALID_PARAMETER:
+                            throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidParameter));
+
+                        case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                            {
+                                System.IO.DirectoryNotFoundException e = new System.IO.DirectoryNotFoundException();
+                                ADP.TraceExceptionAsReturnValue(e);
+                                throw e;
+                            }
+                        default:
+                            {
+                                uint error = Interop.NtDll.RtlNtStatusToDosError(retval);
+                                if (error == ERROR_MR_MID_NOT_FOUND)
+                                {
+                                    // status code could not be mapped to a Win32 error code 
+                                    error = (uint)retval;
+                                }
+
+                                System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(unchecked((int)error));
+                                ADP.TraceExceptionAsReturnValue(e);
+                                throw e;
+                            }
+                    }
+
+                    if (hFile.IsInvalid)
+                    {
+                        System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(Interop.Errors.ERROR_INVALID_HANDLE);
                         ADP.TraceExceptionAsReturnValue(e);
                         throw e;
                     }
-                }
 
-                // now that we've successfully opened a handle on the path and verified that it is a file,
-                // use the SafeFileHandle to initialize our internal System.IO.FileStream instance
-                System.Diagnostics.Debug.Assert(_m_fs == null);
-                _m_fs = new System.IO.FileStream(hFile, access, DefaultBufferSize, ((options & System.IO.FileOptions.Asynchronous) != 0));
+                    if (Interop.Kernel32.GetFileType(hFile) != Interop.Kernel32.FileTypes.FILE_TYPE_DISK)
+                    {
+                        hFile.Dispose();
+                        throw ADP.Argument(SR.GetString(SR.SqlFileStream_PathNotValidDiskResource));
+                    }
+
+                    // if the user is opening the SQL FileStream in read/write mode, we assume that they want to scan
+                    // through current data and then append new data to the end, so we need to tell SQL Server to preserve
+                    // the existing file contents.
+                    if (access == System.IO.FileAccess.ReadWrite)
+                    {
+                        uint ioControlCode = Interop.Kernel32.CTL_CODE(FILE_DEVICE_FILE_SYSTEM,
+                            IoControlCodeFunctionCode, (byte)Interop.Kernel32.Method.METHOD_BUFFERED,
+                            (byte)Interop.Kernel32.IoControlCodeAccess.FILE_ANY_ACCESS);
+
+                        if (!Interop.Kernel32.DeviceIoControl(hFile, ioControlCode, IntPtr.Zero, 0, IntPtr.Zero, 0, out uint cbBytesReturned, IntPtr.Zero))
+                        {
+                            System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                            ADP.TraceExceptionAsReturnValue(e);
+                            throw e;
+                        }
+                    }
+
+                    // now that we've successfully opened a handle on the path and verified that it is a file,
+                    // use the SafeFileHandle to initialize our internal System.IO.FileStream instance
+                    System.Diagnostics.Debug.Assert(_m_fs == null);
+                    _m_fs = new System.IO.FileStream(hFile, access, DefaultBufferSize, ((options & System.IO.FileOptions.Asynchronous) != 0));
             }
             catch
             {
@@ -642,14 +671,6 @@ namespace System.Data.SqlTypes
                     hFile.Dispose();
 
                 throw;
-            }
-            finally
-            {
-                if (eaBuffer != null)
-                {
-                    eaBuffer.Dispose();
-                    eaBuffer = null;
-                }
             }
         }
 
@@ -673,128 +694,6 @@ namespace System.Data.SqlTypes
 
         #endregion
 
-    }
-
-    //-------------------------------------------------------------------------
-    // FileFullEaInformation
-    //
-    // Description: this class encapsulates the marshalling of data from a
-    // managed representation of the FILE_FULL_EA_INFORMATION struct into 
-    // native code. As part of this task, it manages memory that is allocated 
-    // in the native heap into which the managed representation is blitted. 
-    // The class also implements a SafeHandle pattern to ensure that memory
-    // is not leaked in "exceptional" circumstances such as Thread.Abort().
-    //
-    //-------------------------------------------------------------------------
-
-    internal class FileFullEaInformation : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        private string _eA_NAME_STRING = "Filestream_Transaction_Tag";
-        private int _m_cbBuffer;
-
-        public FileFullEaInformation(byte[] transactionContext)
-            : base(true)
-        {
-            _m_cbBuffer = 0;
-            InitializeEaBuffer(transactionContext);
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            _m_cbBuffer = 0;
-
-            if (base.handle == IntPtr.Zero)
-                return true;
-
-            Marshal.FreeHGlobal(base.handle);
-            base.handle = IntPtr.Zero;
-
-            return true;
-        }
-
-        public int Length
-        {
-            get
-            {
-                return _m_cbBuffer;
-            }
-        }
-
-        private void InitializeEaBuffer(byte[] transactionContext)
-        {
-            if (transactionContext.Length >= ushort.MaxValue)
-                throw ADP.ArgumentOutOfRange("transactionContext");
-
-            Interop.NtDll.FILE_FULL_EA_INFORMATION eaBuffer;
-            eaBuffer.NextEntryOffset = 0;
-            eaBuffer.Flags = 0;
-            eaBuffer.EaName = 0;
-
-            // string will be written as ANSI chars, so Length == ByteLength in this case
-            eaBuffer.EaNameLength = (byte)_eA_NAME_STRING.Length;
-            eaBuffer.EaValueLength = (ushort)transactionContext.Length;
-
-            // allocate sufficient memory to contain the FILE_FULL_EA_INFORMATION struct and
-            // the contiguous name/value pair in eaName (note: since the struct already
-            // contains one byte for eaName, we don't need to allocate a byte for the 
-            // null character separator).
-            _m_cbBuffer = Marshal.SizeOf(eaBuffer) + eaBuffer.EaNameLength + eaBuffer.EaValueLength;
-
-            IntPtr pbBuffer = IntPtr.Zero;
-            RuntimeHelpers.PrepareConstrainedRegions();
-            try
-            {
-            }
-            finally
-            {
-                pbBuffer = Marshal.AllocHGlobal(_m_cbBuffer);
-                if (pbBuffer != IntPtr.Zero)
-                    SetHandle(pbBuffer);
-            }
-
-            bool mustRelease = false;
-            RuntimeHelpers.PrepareConstrainedRegions();
-            try
-            {
-                DangerousAddRef(ref mustRelease);
-                IntPtr ptr = DangerousGetHandle();
-
-                // write struct into buffer
-                Marshal.StructureToPtr(eaBuffer, ptr, false);
-
-                // write property name into buffer
-                System.Text.ASCIIEncoding ascii = new System.Text.ASCIIEncoding();
-                byte[] asciiName = ascii.GetBytes(_eA_NAME_STRING);
-
-                // calculate offset at which to write the name/value pair
-                System.Diagnostics.Debug.Assert(Marshal.OffsetOf(typeof(Interop.NtDll.FILE_FULL_EA_INFORMATION), "EaName").ToInt64() <= int.MaxValue);
-                int cbOffset = Marshal.OffsetOf(typeof(Interop.NtDll.FILE_FULL_EA_INFORMATION), "EaName").ToInt32();
-                for (int i = 0; cbOffset < _m_cbBuffer && i < eaBuffer.EaNameLength; i++, cbOffset++)
-                {
-                    Marshal.WriteByte(ptr, cbOffset, asciiName[i]);
-                }
-
-                System.Diagnostics.Debug.Assert(cbOffset < _m_cbBuffer);
-
-                // write null character separator
-                Marshal.WriteByte(ptr, cbOffset, 0);
-                cbOffset++;
-
-                System.Diagnostics.Debug.Assert(cbOffset < _m_cbBuffer || transactionContext.Length == 0 && cbOffset == _m_cbBuffer);
-
-                // write transaction context ID
-                for (int i = 0; cbOffset < _m_cbBuffer && i < eaBuffer.EaValueLength; i++, cbOffset++)
-                {
-                    Marshal.WriteByte(ptr, cbOffset, transactionContext[i]);
-                }
-            }
-            finally
-            {
-                if (mustRelease)
-                    DangerousRelease();
-            }
-        }
-      
     }
 }
 

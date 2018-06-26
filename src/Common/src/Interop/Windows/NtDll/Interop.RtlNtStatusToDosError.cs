@@ -10,10 +10,8 @@ internal partial class Interop
     internal partial class NtDll
     {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/ms680600(v=vs.85).aspx
-		#pragma warning disable BCL0015 // Invalid Pinvoke call
         [DllImport(Libraries.NtDll, ExactSpelling = true)]
         public unsafe static extern uint RtlNtStatusToDosError(
             int Status);
-		#pragma warning restore BCL0015 // Invalid Pinvoke call
     }
 }
