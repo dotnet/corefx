@@ -159,6 +159,11 @@ namespace System.IO
             }
         }
 
+        public override void Write(StringBuilder value)
+        {            
+            _sb.Append(value);
+        }
+
         public override void WriteLine(ReadOnlySpan<char> buffer)
         {
             if (GetType() != typeof(StringWriter))
@@ -178,8 +183,13 @@ namespace System.IO
             WriteLine();
         }
 
-        #region Task based Async APIs
+        public override void WriteLine(StringBuilder value)
+        {
+            _sb.Append(value);
+        }
 
+        #region Task based Async APIs
+        
         public override Task WriteAsync(char value)
         {
             Write(value);
@@ -209,6 +219,17 @@ namespace System.IO
             return Task.CompletedTask;
         }
 
+        public override Task WriteAsync(StringBuilder value, CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            _sb.Append(value);
+            return Task.CompletedTask;
+        }
+        
         public override Task WriteLineAsync(char value)
         {
             WriteLine(value);
@@ -218,6 +239,17 @@ namespace System.IO
         public override Task WriteLineAsync(string value)
         {
             WriteLine(value);
+            return Task.CompletedTask;
+        }
+
+        public override Task WriteLineAsync(StringBuilder value, CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            _sb.Append(value);
             return Task.CompletedTask;
         }
 
