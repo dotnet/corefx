@@ -34,7 +34,6 @@ namespace Generic.Dictionary
                 entryArray.SetValue(entry, 0);
                 entriesType.SetValue(dictionary, entryArray);
 
-
                 Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
                 Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => add(dictionary)).TargetSite.Name);
