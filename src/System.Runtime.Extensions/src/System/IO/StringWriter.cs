@@ -129,7 +129,7 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added affter the Write(char[], ...) overload, and so in case
+                // This overload was added after the Write(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.Write(buffer);
                 return;
@@ -160,7 +160,20 @@ namespace System.IO
         }
 
         public override void Write(StringBuilder value)
-        {            
+        {
+            if (GetType() != typeof(StringWriter))
+            {
+                // This overload was added after the Write(StringBuilder, ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
+                base.Write(value);
+                return;
+            }
+
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+
             _sb.Append(value);
         }
 
@@ -168,7 +181,7 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added affter the WriteLine(char[], ...) overload, and so in case
+                // This overload was added after the WriteLine(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.WriteLine(buffer);
                 return;
@@ -185,7 +198,21 @@ namespace System.IO
 
         public override void WriteLine(StringBuilder value)
         {
+            if (GetType() != typeof(StringWriter))
+            {
+                // This overload was added after the WriteLine(StringBuilder, ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
+                base.WriteLine(value);
+                return;
+            }
+
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+
             _sb.Append(value);
+            WriteLine();
         }
 
         #region Task based Async APIs
@@ -220,12 +247,24 @@ namespace System.IO
         }
 
         public override Task WriteAsync(StringBuilder value, CancellationToken cancellationToken = default)
-        {
+        {            
+            if (GetType() != typeof(StringWriter))
+            {
+                // This overload was added after the WriteAsync(StringBuilder, ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
+                return base.WriteAsync(value, cancellationToken);
+            }
+
             if (cancellationToken.IsCancellationRequested)
             {
                 return Task.FromCanceled(cancellationToken);
             }
 
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+            
             _sb.Append(value);
             return Task.CompletedTask;
         }
@@ -244,12 +283,25 @@ namespace System.IO
 
         public override Task WriteLineAsync(StringBuilder value, CancellationToken cancellationToken = default)
         {
+            if (GetType() != typeof(StringWriter))
+            {
+                // This overload was added after the WriteLineAsync(StringBuilder, ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
+                return base.WriteLineAsync(value, cancellationToken);                
+            }
+
             if (cancellationToken.IsCancellationRequested)
             {
                 return Task.FromCanceled(cancellationToken);
             }
 
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+
             _sb.Append(value);
+            WriteLine();
             return Task.CompletedTask;
         }
 
