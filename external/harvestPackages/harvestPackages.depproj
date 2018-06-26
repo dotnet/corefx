@@ -29,6 +29,13 @@
         PackageIndexes="$(PackageIndexFile)">
         <Output  TaskParameter="LastStablePackages" ItemName="_NewPackageReferences" />
     </GetLastStablePackage>
+    
+    <ItemGroup>
+      <_NewPackageReferences Condition="'%(Identity)' == 'System.Reflection.TypeExtensions'">
+        <!-- harvest from 4.4.0 until we ship a new stable package -->
+        <Version Condition="'%(Version)' == '4.5.0'">4.4.0</Version>
+      </_NewPackageReferences>
+    </ItemGroup>
 
     <ItemGroup>
       <_Lines Include="&lt;Project xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;" />
