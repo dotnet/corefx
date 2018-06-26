@@ -1247,7 +1247,8 @@
         "4.1.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
@@ -2231,7 +2232,8 @@
       "StableVersions": [
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "AssemblyVersionInPackageVersion": {
@@ -2473,7 +2475,8 @@
     },
     "System.Memory": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0"
@@ -2992,7 +2995,8 @@
     },
     "System.Net.WebSockets.WebSocketProtocol": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -3219,7 +3223,8 @@
         "4.0.1",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
@@ -3599,7 +3604,8 @@
     },
     "System.Runtime.CompilerServices.Unsafe": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "AssemblyVersionInPackageVersion": {
         "4.0.4.0": "4.5.0"
@@ -4991,7 +4997,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
