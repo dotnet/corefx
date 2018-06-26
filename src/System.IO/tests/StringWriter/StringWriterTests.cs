@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Xunit;
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace System.IO.Tests
 {
@@ -376,6 +376,6 @@ namespace System.IO.Tests
                     Assert.Equal(newLine + newLine, await sr.ReadToEndAsync());
                 }
             }
-        }        
+        }
     }
 }
