@@ -6,6 +6,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs">
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
@@ -122,7 +127,6 @@
     <Compile Include="SQL\UdtTest\UdtTestHelpers.cs" />
     <Compile Include="SQL\WeakRefTest\WeakRefTest.cs" />
     <Compile Include="SQL\WeakRefTestYukonSpecific\WeakRefTestYukonSpecific.cs" />
-    <Compile Include="SQL\SqlFileStreamTest\SqlFileStreamTest.cs" />
     <Compile Include="XUnitAssemblyAttributes.cs" />
     <Content Include="DDBasics\DDDataTypesTest\data.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -146,6 +150,9 @@
     <None Include="SQL\ParameterTest\SqlParameterTest_DebugMode.bsl" />
     <None Include="SQL\ParameterTest\SqlParameterTest_ReleaseMode.bsl" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="SQL\SqlFileStreamTest\SqlFileStreamTest.cs" />
+</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="SQL\UdtTest\UDTs\Address\Address.csproj">
       <Name>Address</Name>

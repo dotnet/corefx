@@ -229,22 +229,12 @@
     <Compile Include="Interop\SNINativeMethodWrapper.Common.cs" />
     <Compile Include="System\Data\SqlClient\SqlCredential.cs" />
   </ItemGroup>
-  <!-- <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+  <!-- SqlFileStream Unix Netcoreapp only -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' AND '$(TargetsUnix)' == 'true'">
     <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(IsUAPAssembly)' == 'true'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' == 'true'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
-  </ItemGroup> -->
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp' OR '$(TargetsWindows)' != 'true'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
-  </ItemGroup>
-  <!-- Windows : Win32 only -->
+  <!-- SqlFileStream Windows Netcoreapp only -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' AND '$(TargetsWindows)' == 'true'">
-  <!-- SqlFileStream Windows Non-UAP dependencies -->
-    <Compile Include="System\Data\SqlClient\SqlFileStream.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
     </Compile>
@@ -290,6 +280,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.RtlNtStatusToDosError.cs">
       <Link>Common\Interop\Windows\Interop.RtlNtStatusToDosError.cs</Link>
     </Compile>
+    <Compile Include="System\Data\SqlClient\SqlFileStream.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp') AND '$(TargetsWindows)' == 'true'">
     <!-- Manage the SNI toggle for Windows netstandard and UWP -->
