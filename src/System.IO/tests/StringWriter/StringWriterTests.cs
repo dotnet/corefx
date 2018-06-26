@@ -376,62 +376,6 @@ namespace System.IO.Tests
                     Assert.Equal(newLine + newLine, await sr.ReadToEndAsync());
                 }
             }
-        }
-
-        [Fact]
-        public void TestWriteStringBuilder()
-        {
-            StringBuilder sb = getSb();
-            StringWriter sw = new StringWriter();
-            sw.Write(sb);
-            Assert.Equal(sb.ToString(), sw.ToString());
-        }
-
-        [Fact]
-        public async Task TestWriteAsyncStringBuilder()
-        {
-            StringBuilder sb = getSb();
-            StringWriter sw = new StringWriter();
-            await sw.WriteAsync(sb);
-            Assert.Equal(sb.ToString(), sw.ToString());
-        }
-
-        [Fact]
-        public async Task TestWriteAsyncStringBuilderCancelled()
-        {
-            StringBuilder sb = getSb();
-            StringWriter sw = new StringWriter();
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.Cancel();
-            await Assert.ThrowsAsync<TaskCanceledException>(async() => await sw.WriteAsync(sb, cts.Token));
-        }
-
-        [Fact]
-        public void TestWriteLineStringBuilder()
-        {
-            StringBuilder sb = getSb();
-            StringWriter sw = new StringWriter();
-            sw.WriteLine(sb);
-            Assert.Equal(sb.ToString() + Environment.NewLine, sw.ToString());            
-        }
-
-        [Fact]
-        public async Task TestWriteLineAsyncStringBuilder()
-        {
-            StringBuilder sb = getSb();
-            StringWriter sw = new StringWriter();
-            await sw.WriteLineAsync(sb);
-            Assert.Equal(sb.ToString() + Environment.NewLine, sw.ToString());
-        }
-
-        [Fact]
-        public async Task TestWriteLineAsyncStringBuilderCancelled()
-        {
-            StringBuilder sb = getSb();
-            StringWriter sw = new StringWriter();
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.Cancel();
-            await Assert.ThrowsAsync<TaskCanceledException>(async () => await sw.WriteLineAsync(sb, cts.Token));
-        }
+        }        
     }
 }
