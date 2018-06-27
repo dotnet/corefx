@@ -185,13 +185,19 @@ namespace System.Drawing
         /// <summary>
         /// Returns the name of this <see cref='FontFamily'/> in the specified language.
         /// </summary>
-        public string GetName(int language)
+        public unsafe string GetName(int language)
         {
             // LF_FACESIZE is 32
-            var name = new StringBuilder(32);
+            Span<char> name = stackalloc char[32];
+            fixed (char* ptr = name)
+            {
+                int status = SafeNativeMethods.Gdip.GdipGetFamilyName(new HandleRef(this, NativeFamily), ptr, language);
+                SafeNativeMethods.Gdip.CheckStatus(status);
+            }
 
-            int status = SafeNativeMethods.Gdip.GdipGetFamilyName(new HandleRef(this, NativeFamily), name, language);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            var index = name.IndexOf('\0');
+            if (index != -1)
+                return name.Slice(0, index).ToString();
 
             return name.ToString();
         }

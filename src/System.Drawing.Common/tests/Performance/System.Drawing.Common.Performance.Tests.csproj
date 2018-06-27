@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="CustomAssemblyAttributes.cs" />
     <Compile Include="Perf_Graphics_DrawBeziers.cs" />
+    <Compile Include="Perf_FontFamily_Name.cs" />
     <Compile Include="Perf_Graphics_Transforms.cs" />
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
