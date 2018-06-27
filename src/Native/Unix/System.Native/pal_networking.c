@@ -2222,6 +2222,7 @@ static int32_t TryChangeSocketEventRegistrationInner(
                0,
                GetKeventUdata(data));
 #if defined(__FreeBSD__)
+        // Issue: #30698
         // FreeBSD seems to have some issue when setting read/write events together.
         // As a workaround use separate kevent() calls.
         if (writeChanged)
