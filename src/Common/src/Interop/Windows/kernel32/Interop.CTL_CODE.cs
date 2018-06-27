@@ -35,6 +35,10 @@ internal partial class Interop
             /// </summary>
             byte access )
         {
+            /// <summary>
+            /// <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/develop/how-to-select-and-configure-the-device-fundamental-tests">MaxFunctionCode</a> method.
+            /// MaxFunctionCode specifies the maximum value of the FunctionCode field in the FSCTLs (or IOCTLs for IOCTL tests). The maximum possible value is 4095.
+            /// </summary>
             if (function > 4095)
                 throw ADP.ArgumentOutOfRange("function");
 
