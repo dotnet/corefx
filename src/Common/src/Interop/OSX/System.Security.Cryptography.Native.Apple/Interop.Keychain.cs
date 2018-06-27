@@ -174,13 +174,36 @@ internal static partial class Interop
             throw new CryptographicException();
         }
 
-        internal static SafeKeychainHandle OpenAndUnlockKeychain(string keychainPath)
+        internal static SafeKeychainHandle CreateOrOpenKeychain(string keychainPath, bool crateAllowed)
         {
             const int errSecAuthFailed = -25293;
+            const int errSecDuplicateKeychain = -25296;
 
             SafeKeychainHandle keychain;
-            int osStatus = AppleCryptoNative_SecKeychainOpen(keychainPath, out keychain);
+            int osStatus;
+            
+            if (crateAllowed)
+            {
+                // Attempt to create first
+                osStatus = AppleCryptoNative_SecKeychainCreate(
+                    keychainPath,
+                    0,
+                    Array.Empty<byte>(),
+                    out keychain);
 
+                if (osStatus == 0)
+                {
+                    return keychain;
+                }
+
+                if (osStatus != errSecDuplicateKeychain)
+                {
+                    keychain.Dispose();
+                    throw CreateExceptionForOSStatus(osStatus);
+                }
+            }
+
+            osStatus = AppleCryptoNative_SecKeychainOpen(keychainPath, out keychain);
             if (osStatus == 0)
             {
                 // Try to unlock with empty password to match our behaviour in CreateKeychain.
@@ -191,24 +214,6 @@ internal static partial class Interop
                 {
                     return keychain;
                 }
-            }
-
-            keychain.Dispose();
-            throw CreateExceptionForOSStatus(osStatus);
-        }
-
-        internal static SafeKeychainHandle CreateKeychain(string keychainPath)
-        {
-            SafeKeychainHandle keychain;
-            int osStatus = AppleCryptoNative_SecKeychainCreate(
-                keychainPath,
-                0,
-                Array.Empty<byte>(),
-                out keychain);
-
-            if (osStatus == 0)
-            {
-                return keychain;
             }
 
             keychain.Dispose();
