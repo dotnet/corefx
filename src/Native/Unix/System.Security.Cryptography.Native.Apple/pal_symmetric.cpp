@@ -92,13 +92,17 @@ extern "C" int32_t AppleCryptoNative_CryptorUpdate(CCCryptorRef cryptor,
     if (pbData == nullptr || cbData < 0 || pbOutput == nullptr || cbOutput < cbData || pcbWritten == nullptr)
         return -1;
 
+    size_t sizeWritten = 0;
     CCStatus status = CCCryptorUpdate(cryptor,
                                       pbData,
                                       static_cast<size_t>(cbData),
                                       pbOutput,
                                       static_cast<size_t>(cbOutput),
-                                      reinterpret_cast<size_t*>(pcbWritten));
+                                      &sizeWritten);
 
+    // Safe because sizeWritten is bounded by cbOutput
+    assert(sizeWritten <= INT_MAX);
+    *pcbWritten = static_cast<int32_t>(sizeWritten);
     *pccStatus = status;
     return status == kCCSuccess;
 }
@@ -114,9 +118,13 @@ extern "C" int32_t AppleCryptoNative_CryptorFinal(
     if (pbOutput == nullptr || cbOutput < 0 || pcbWritten == nullptr)
         return -1;
 
+    size_t sizeWritten;
     CCStatus status =
-        CCCryptorFinal(cryptor, pbOutput, static_cast<size_t>(cbOutput), reinterpret_cast<size_t*>(pcbWritten));
+        CCCryptorFinal(cryptor, pbOutput, static_cast<size_t>(cbOutput), &sizeWritten);
 
+    // Safe because sizeWritten is bounded by cbOutput
+    assert(sizeWritten <= INT_MAX);
+    *pcbWritten = static_cast<int32_t>(sizeWritten);
     *pccStatus = status;
     return status == kCCSuccess;
 }
