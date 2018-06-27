@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace System.Drawing.Imaging.Tests
@@ -57,6 +58,18 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        public static IEnumerable<object[]> ImageFromFileToStringTestData
+        {
+            get
+            {
+                yield return new object[] { Path.Combine("bitmaps", "nature24bits.gif"), "Gif" };
+                yield return new object[] { Path.Combine("bitmaps", "nature24bits.jpg"), "Jpeg" };
+                yield return new object[] { Path.Combine("bitmaps", "VisualPng.ico"), "Icon"};
+                yield return new object[] { Path.Combine("bitmaps", "almogaver32bits.tif"), "Tiff" };
+                yield return new object[] { Path.Combine("bitmaps", "almogaver-os2.bmp"), "Bmp" };
+            }
+        }
+
         public static IEnumerable<object[]> ImageFormatEqualsTestData
         {
             get
@@ -80,6 +93,14 @@ namespace System.Drawing.Imaging.Tests
         public void ToString_ReturnsExpected(string expected, ImageFormat imageFormat)
         {
             Assert.Equal(expected, imageFormat.ToString());
+        }
+
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [MemberData(nameof(ImageFromFileToStringTestData))]
+        public void Image_RawFormat_ToString(string path, string expected)
+        {
+            var img = Image.FromFile(path);
+            Assert.Same(img.RawFormat.ToString(), expected);
         }
 
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
