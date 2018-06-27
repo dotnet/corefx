@@ -736,7 +736,8 @@ static int CheckX509HostnameMatch(ASN1_STRING* candidate, const char* hostname, 
         {
             char c = candidateStr[i];
 
-            if ((c < 'a' || c > 'z') && (c < '0' || c > '9') && (c != '.') && (c != '-') && (c != '*' || i != 0))
+            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && (c != '.') && (c != '-') &&
+                (c != '*' || i != 0))
             {
                 return 0;
             }
@@ -749,7 +750,7 @@ static int CheckX509HostnameMatch(ASN1_STRING* candidate, const char* hostname, 
                 return 0;
             }
 
-            return !memcmp(candidateStr, hostname, static_cast<size_t>(cchHostname));
+            return !strncasecmp(candidateStr, hostname, static_cast<size_t>(cchHostname));
         }
 
         for (i = 0; i < cchHostname; ++i)
@@ -782,7 +783,7 @@ static int CheckX509HostnameMatch(ASN1_STRING* candidate, const char* hostname, 
                 return 0;
             }
 
-            return !memcmp(candidateStr + 1, hostname + hostnameFirstDot, static_cast<size_t>(matchLength));
+            return !strncasecmp(candidateStr + 1, hostname + hostnameFirstDot, static_cast<size_t>(matchLength));
         }
     }
 
@@ -793,7 +794,7 @@ static int CheckX509HostnameMatch(ASN1_STRING* candidate, const char* hostname, 
         return 0;
     }
 
-    return !memcmp(candidate->data, hostname, static_cast<size_t>(cchHostname));
+    return !strncasecmp(reinterpret_cast<char*>(candidate->data), hostname, static_cast<size_t>(cchHostname));
 }
 
 /*
