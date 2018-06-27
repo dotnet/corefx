@@ -48,7 +48,7 @@ namespace System.Data.SqlTypes
         {
             (byte)'F', (byte)'i', (byte)'l', (byte)'e', (byte)'s', (byte)'t', (byte)'r', (byte)'e', (byte)'a', (byte)'m', (byte)'_',
             (byte)'T', (byte)'r', (byte)'a', (byte)'n', (byte)'s', (byte)'a', (byte)'c', (byte)'t', (byte)'i', (byte)'o', (byte)'n', (byte)'_',
-            (byte)'T', (byte)'a', (byte)'g'
+            (byte)'T', (byte)'a', (byte)'g', (byte) '\0'
         };
 
         public SqlFileStream
@@ -558,8 +558,8 @@ namespace System.Data.SqlTypes
                         throw ADP.ArgumentOutOfRange("transactionContext");
 
                     int headerSize = sizeof(Interop.NtDll.FILE_FULL_EA_INFORMATION);
-                    int fullSize = headerSize + transactionContext.Length + s_eaNameString.Length + 4; // 4-byte padding
-                    
+                    int fullSize = headerSize + transactionContext.Length + s_eaNameString.Length;
+
                     byte[] buffer = ArrayPool<byte>.Shared.Rent(fullSize);
 
                     fixed (byte* b = buffer)
@@ -567,14 +567,14 @@ namespace System.Data.SqlTypes
                         Interop.NtDll.FILE_FULL_EA_INFORMATION* ea = (Interop.NtDll.FILE_FULL_EA_INFORMATION*)b;
                         ea->NextEntryOffset = 0;
                         ea->Flags = 0;
-                        ea->EaNameLength = (byte)s_eaNameString.Length;
+                        ea->EaNameLength = (byte)(s_eaNameString.Length - 1); // Length does not include terminating null character.
                         ea->EaValueLength = (ushort)transactionContext.Length;
 
                         // We could continue to do pointer math here, chose to use Span for convenience to 
                         // make sure we get the other members in the right place.
                         Span<byte> data = new Span<byte>(buffer).Slice(headerSize);
                         s_eaNameString.AsSpan().CopyTo(data);
-                        data = data.Slice(s_eaNameString.Length + 1);
+                        data = data.Slice(s_eaNameString.Length);
                         transactionContext.AsSpan().CopyTo(data);
 
                         (int status, IntPtr handle) = Interop.NtDll.CreateFile(
