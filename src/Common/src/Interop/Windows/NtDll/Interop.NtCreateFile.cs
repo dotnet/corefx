@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Data.Common;
 
 internal partial class Interop
 {

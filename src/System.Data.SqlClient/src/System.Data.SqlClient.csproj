@@ -283,7 +283,7 @@
     <Compile Include="System\Data\SqlClient\SqlFileStream.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp') AND '$(TargetsWindows)' == 'true'">
-    <!-- Manage the SNI toggle for Windows netstandard and UWP -->
+  <!-- Manage the SNI toggle for Windows netstandard and UWP -->
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsUAPAssembly)' == 'true'">

@@ -1316,6 +1316,7 @@
   </data>
   <data name="SQL_ParsingErrorAuthLibraryType" xml:space="preserve"> 
     <value>Internal connection fatal error. Error state: {0}, Authentication Library Type: {1}.</value>
+  </data>
   <data name="SqlFileStream_InvalidPath" xml:space="preserve">
     <value>The path name is not valid.</value>
   </data>

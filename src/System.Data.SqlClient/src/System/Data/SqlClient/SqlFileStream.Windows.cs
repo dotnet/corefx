@@ -34,8 +34,6 @@ namespace System.Data.SqlTypes
 
         private const ushort IoControlCodeFunctionCode = 2392;
         private const int ERROR_MR_MID_NOT_FOUND = 317;
-        private const int SizeOf_FILE_FULL_EA_INFORMATION_HEADER = sizeof(uint) + sizeof(byte) + sizeof(byte) + sizeof(ushort); // FileFullEaInformation Header is 8 bytes
-
         #region Definitions from devioctl.h
         private const ushort FILE_DEVICE_FILE_SYSTEM = 0x0009;
         #endregion
