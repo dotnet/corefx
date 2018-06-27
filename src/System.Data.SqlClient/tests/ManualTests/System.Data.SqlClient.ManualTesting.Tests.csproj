@@ -152,6 +152,7 @@
     <None Include="SQL\ParameterTest\SqlParameterTest_ReleaseMode.bsl" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="SQL\ConnectionPoolTest\PoolBlockPeriodTest.netcoreapp.cs" />
     <Compile Include="SQL\SqlFileStreamTest\SqlFileStreamTest.cs" />
   </ItemGroup>
   <ItemGroup>
