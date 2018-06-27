@@ -12,6 +12,7 @@ using System.Security;
 using System.Windows.Input;
 
 using Internal.Runtime.CompilerServices;
+using Internal.Runtime.InteropServices.WindowsRuntime;
 
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
@@ -310,7 +311,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             INotifyCollectionChanged _this = Unsafe.As<INotifyCollectionChanged>(this);
             EventRegistrationTokenTable<NotifyCollectionChangedEventHandler> table = s_weakTable.GetOrCreateValue(_this);
 
-            NotifyCollectionChangedEventHandler handler = table.ExtractHandler(token);
+            NotifyCollectionChangedEventHandler handler = WindowsRuntimeMarshalSupport.GetEventHandlerFromEventRegistrationToken(table, token);
             if (handler != null)
             {
                 _this.CollectionChanged -= handler;
@@ -392,7 +393,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             INotifyPropertyChanged _this = Unsafe.As<INotifyPropertyChanged>(this);
             EventRegistrationTokenTable<PropertyChangedEventHandler> table = s_weakTable.GetOrCreateValue(_this);
 
-            PropertyChangedEventHandler handler = table.ExtractHandler(token);
+            PropertyChangedEventHandler handler = WindowsRuntimeMarshalSupport.GetEventHandlerFromEventRegistrationToken(table, token);
             if (handler != null)
             {
                 _this.PropertyChanged -= handler;
@@ -500,7 +501,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             ICommand _this = Unsafe.As<ICommand>(this);
             EventRegistrationTokenTable<EventHandler> table = s_weakTable.GetOrCreateValue(_this);
 
-            EventHandler handler = table.ExtractHandler(token);
+            EventHandler handler = WindowsRuntimeMarshalSupport.GetEventHandlerFromEventRegistrationToken(table, token);
             if (handler != null)
             {
                 _this.CanExecuteChanged -= handler;
