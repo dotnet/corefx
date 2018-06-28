@@ -138,7 +138,12 @@ namespace Internal.Cryptography.Pal
             if (!IsValidStoreName(storeName))
                 throw new CryptographicException(SR.Format(SR.Security_InvalidValue, nameof(storeName)));
                         
-            storePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Keychains", storeName.ToLowerInvariant() + ".keychain");
+            storePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Library",
+                "Keychains",
+                storeName.ToLowerInvariant() + ".keychain");
+
             return AppleKeychainStore.CreateOrOpenKeychain(storePath, openFlags);
         }
 

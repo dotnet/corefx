@@ -347,7 +347,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        class TemporaryX509Store : IDisposable
+        private class TemporaryX509Store : IDisposable
         {
             private X509Store _store;
  

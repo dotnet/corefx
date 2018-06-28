@@ -174,7 +174,7 @@ internal static partial class Interop
             throw new CryptographicException();
         }
 
-        internal static SafeKeychainHandle CreateOrOpenKeychain(string keychainPath, bool crateAllowed)
+        internal static SafeKeychainHandle CreateOrOpenKeychain(string keychainPath, bool createAllowed)
         {
             const int errSecAuthFailed = -25293;
             const int errSecDuplicateKeychain = -25296;
@@ -182,7 +182,7 @@ internal static partial class Interop
             SafeKeychainHandle keychain;
             int osStatus;
             
-            if (crateAllowed)
+            if (createAllowed)
             {
                 // Attempt to create first
                 osStatus = AppleCryptoNative_SecKeychainCreate(
