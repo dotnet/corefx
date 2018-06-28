@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
-
 using Internal.Cryptography;
-
 using DATA_BLOB = Interop.Crypt32.DATA_BLOB;
 using CryptProtectDataFlags = Interop.Crypt32.CryptProtectDataFlags;
 
@@ -20,6 +18,8 @@ namespace System.Security.Cryptography
             if (userData == null)
                 throw new ArgumentNullException(nameof(userData));
 
+            Check(scope);
+
             return ProtectOrUnprotect(userData, optionalEntropy, scope, protect: true);
         }
 
@@ -27,6 +27,8 @@ namespace System.Security.Cryptography
         {
             if (encryptedData == null)
                 throw new ArgumentNullException(nameof(encryptedData));
+
+            Check(scope);
 
             return ProtectOrUnprotect(encryptedData, optionalEntropy, scope, protect: false);
         }
@@ -104,6 +106,14 @@ namespace System.Security.Cryptography
             // CAPI returns a file not found error if the user profile is not yet loaded
             return errorCode == Interop.Errors.E_FILENOTFOUND ||
                    errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND;
+        }
+
+        private static void Check(DataProtectionScope scope)
+        {
+            if (scope < DataProtectionScope.CurrentUser || scope > DataProtectionScope.LocalMachine)
+            {
+                throw new ArgumentException(string.Format(Globalization.CultureInfo.CurrentCulture, SR.Arg_EnumIllegalVal, nameof(scope)));
+            }
         }
     }
 }

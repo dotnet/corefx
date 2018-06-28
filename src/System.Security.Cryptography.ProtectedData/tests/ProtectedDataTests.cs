@@ -84,6 +84,29 @@ namespace System.Security.Cryptography.ProtectedDataTests
             WrongEntropy(entropy1, entropy2);
         }
 
+        [Fact]
+        public static void ProtectInvalidDataProtectionScope()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                byte[] data = { 1, 2, 3 };
+                byte[] entropy = { 4, 5, 6 };
+                ProtectedData.Protect(data, entropy, (DataProtectionScope)int.MinValue);
+            });
+        }
+
+        [Fact]
+        public static void UnprotectInvalidDataProtectionScope()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                byte[] data = { 1, 2, 3 };
+                byte[] entropy = { 4, 5, 6 };
+                byte[] encodedData = ProtectedData.Protect(data, entropy, DataProtectionScope.CurrentUser);
+                ProtectedData.Unprotect(data, entropy, (DataProtectionScope)int.MinValue);
+            });
+        }
+
         private static void WrongEntropy(byte[] entropy1, byte[] entropy2)
         {
             foreach (DataProtectionScope scope in new DataProtectionScope[] { DataProtectionScope.CurrentUser, DataProtectionScope.LocalMachine })
