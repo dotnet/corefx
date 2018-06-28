@@ -66,7 +66,6 @@ namespace System.Drawing.Imaging.Tests
                 yield return new object[] { Path.Combine("bitmaps", "nature24bits.jpg"), "Jpeg" };
                 yield return new object[] { Path.Combine("bitmaps", "VisualPng.ico"), "Icon"};
                 yield return new object[] { Path.Combine("bitmaps", "almogaver32bits.tif"), "Tiff" };
-                yield return new object[] { Path.Combine("bitmaps", "almogaver-os2.bmp"), "Bmp" };
             }
         }
 
@@ -95,6 +94,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(expected, imageFormat.ToString());
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug fix in .NET Core that is not in NETFX yet, dotnet/corefx 16463")]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(ImageFromFileToStringTestData))]
         public void Image_RawFormat_ToString(string path, string expected)
