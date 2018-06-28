@@ -28,15 +28,15 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void NullValueArguments_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => { Marshal.WriteByte(null, 0, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.WriteInt16(null, 0, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.WriteInt32(null, 0, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.WriteInt64(null, 0, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.WriteIntPtr(null, 0, IntPtr.Zero); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.ReadByte(null, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.ReadInt16(null, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.ReadInt32(null, 0); });
-            Assert.Throws<ArgumentNullException>(() => { Marshal.ReadIntPtr(null, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.WriteByte(null, 0, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.WriteInt16(null, 0, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.WriteInt32(null, 0, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.WriteInt64(null, 0, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.WriteIntPtr(null, 0, IntPtr.Zero); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.ReadByte(null, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.ReadInt16(null, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.ReadInt32(null, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.ReadIntPtr(null, 0); });
         }
 
         [Fact]
@@ -56,11 +56,11 @@ namespace System.Runtime.InteropServices.Tests
             int offsetOfD = Marshal.OffsetOf<BlittableStruct>("_d").ToInt32();
             int offsetOfP = Marshal.OffsetOf<BlittableStruct>("_p").ToInt32();
 
-            Assert.Equal(Marshal.ReadInt32(boxedBlittableStruct, 0), 200);
-            Assert.Equal(Marshal.ReadInt32(boxedBlittableStruct, offsetOfB), 300);
-            Assert.Equal(Marshal.ReadByte(boxedBlittableStruct, offsetOfC), 10);
-            Assert.Equal(Marshal.ReadInt16(boxedBlittableStruct, offsetOfD), 123);
-            Assert.Equal(Marshal.ReadIntPtr(boxedBlittableStruct, offsetOfP), new IntPtr(100));
+            Assert.Equal(200, Marshal.ReadInt32(boxedBlittableStruct, 0));
+            Assert.Equal(300, Marshal.ReadInt32(boxedBlittableStruct, offsetOfB));
+            Assert.Equal(10, Marshal.ReadByte(boxedBlittableStruct, offsetOfC));
+            Assert.Equal(123, Marshal.ReadInt16(boxedBlittableStruct, offsetOfD));
+            Assert.Equal(new IntPtr(100), Marshal.ReadIntPtr(boxedBlittableStruct, offsetOfP));
 
             Marshal.WriteInt32(boxedBlittableStruct, 0, 300);
             Marshal.WriteInt32(boxedBlittableStruct, offsetOfB, 400);
@@ -69,11 +69,11 @@ namespace System.Runtime.InteropServices.Tests
 
             Marshal.WriteIntPtr(boxedBlittableStruct, offsetOfP, new IntPtr(500));
 
-            Assert.Equal(((BlittableStruct)boxedBlittableStruct)._a, 300);
-            Assert.Equal(((BlittableStruct)boxedBlittableStruct)._b, 400);
-            Assert.Equal(((BlittableStruct)boxedBlittableStruct)._c, 20);
-            Assert.Equal(((BlittableStruct)boxedBlittableStruct)._d, 144);
-            Assert.Equal(((BlittableStruct)boxedBlittableStruct)._p, new IntPtr(500));
+            Assert.Equal(300, ((BlittableStruct)boxedBlittableStruct)._a);
+            Assert.Equal(400, ((BlittableStruct)boxedBlittableStruct)._b);
+            Assert.Equal(20, ((BlittableStruct)boxedBlittableStruct)._c);
+            Assert.Equal(144, ((BlittableStruct)boxedBlittableStruct)._d);
+            Assert.Equal(new IntPtr(500), ((BlittableStruct)boxedBlittableStruct)._p);
         }
 
         [Fact]
@@ -89,17 +89,17 @@ namespace System.Runtime.InteropServices.Tests
             int offsetOfStr = Marshal.OffsetOf<StructWithReferenceTypes>("_str").ToInt32();
             int offsetOfByValArr = Marshal.OffsetOf<StructWithReferenceTypes>("_byValArr").ToInt32();
 
-            Assert.Equal(Marshal.ReadInt32(boxedStruct, 0), 100);
-            Assert.NotEqual(Marshal.ReadIntPtr(boxedStruct, offsetOfStr), IntPtr.Zero);
-            Assert.Equal(Marshal.ReadInt32(boxedStruct, offsetOfByValArr + sizeof(int) * 2), 3);
+            Assert.Equal(100, Marshal.ReadInt32(boxedStruct, 0));
+            Assert.NotEqual(IntPtr.Zero, Marshal.ReadIntPtr(boxedStruct, offsetOfStr));
+            Assert.Equal(3, Marshal.ReadInt32(boxedStruct, offsetOfByValArr + sizeof(int) * 2));
 
             Marshal.WriteInt32(boxedStruct, 0, 200);
             Marshal.WriteInt32(boxedStruct, offsetOfByValArr + sizeof(int) * 9, 100);
 
-            Assert.Equal(((StructWithReferenceTypes)boxedStruct)._ptr, new IntPtr(200));
-            Assert.Equal(((StructWithReferenceTypes)boxedStruct)._byValArr[9], 100);
-            Assert.Equal(((StructWithReferenceTypes)boxedStruct)._byValArr[8], 9);
-            Assert.Equal(((StructWithReferenceTypes)boxedStruct)._str, "ABC");
+            Assert.Equal(new IntPtr(200), ((StructWithReferenceTypes)boxedStruct)._ptr);
+            Assert.Equal(100, ((StructWithReferenceTypes)boxedStruct)._byValArr[9]);
+            Assert.Equal(9, ((StructWithReferenceTypes)boxedStruct)._byValArr[8]);
+            Assert.Equal("ABC", ((StructWithReferenceTypes)boxedStruct)._str);
         }
     }
 #pragma warning restore 618

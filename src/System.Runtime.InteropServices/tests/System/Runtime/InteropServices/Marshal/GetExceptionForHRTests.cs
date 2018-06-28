@@ -8,14 +8,9 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class GetExceptionForHRTests
     {
-        public static readonly object[][] TestData =
-        {
-            new object[] { unchecked((int)0x80020006) },
-            new object[] { unchecked((int)0x80020101) }
-        };
-
         [Theory]
-        [MemberData(nameof(TestData))]
+        [InlineData(unchecked((int)0x80020006))]
+        [InlineData(unchecked((int)0x80020101))]
         public void GetExceptionForHR_EqualsErrorCode(int err)
         {
             Exception ex = Marshal.GetExceptionForHR(err);

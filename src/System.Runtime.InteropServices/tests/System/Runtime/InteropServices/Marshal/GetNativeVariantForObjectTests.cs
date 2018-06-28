@@ -24,8 +24,8 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public static void NullParameter()
         {
-            Assert.Throws<ArgumentNullException>("pDstNativeVariant", () => Marshal.GetNativeVariantForObject(new object(), IntPtr.Zero));
-            Assert.Throws<ArgumentNullException>("pDstNativeVariant", () => Marshal.GetNativeVariantForObject<int>(1, IntPtr.Zero));
+            AssertExtensions.Throws<ArgumentNullException>("pDstNativeVariant", () => Marshal.GetNativeVariantForObject(new object(), IntPtr.Zero));
+            AssertExtensions.Throws<ArgumentNullException>("pDstNativeVariant", () => Marshal.GetNativeVariantForObject<int>(1, IntPtr.Zero));
         }
 
         [Fact]
@@ -33,9 +33,16 @@ namespace System.Runtime.InteropServices.Tests
         {
             Variant v = new Variant();
             IntPtr pNative = Marshal.AllocHGlobal(Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject(null, pNative);
-            object o = Marshal.GetObjectForNativeVariant(pNative);
-            Assert.Equal(null, o);
+            try
+            {
+                Marshal.GetNativeVariantForObject(null, pNative);
+                object o = Marshal.GetObjectForNativeVariant(pNative);
+                Assert.Equal(null, o);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
         }
 
         [Fact]
@@ -43,9 +50,16 @@ namespace System.Runtime.InteropServices.Tests
         {
             Variant v = new Variant();
             IntPtr pNative = Marshal.AllocHGlobal(Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject<ushort>(99, pNative);
-            ushort actual = Marshal.GetObjectForNativeVariant<ushort>(pNative);
-            Assert.Equal(99, actual);
+            try
+            {
+                Marshal.GetNativeVariantForObject<ushort>(99, pNative);
+                ushort actual = Marshal.GetObjectForNativeVariant<ushort>(pNative);
+                Assert.Equal(99, actual);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
         }
 
         [Fact]
@@ -56,10 +70,17 @@ namespace System.Runtime.InteropServices.Tests
             // To get back the original char, use GetObjectForNativeVariant<ushort> and cast to char.
             Variant v = new Variant();
             IntPtr pNative = Marshal.AllocHGlobal(Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject<char>('a', pNative);
-            ushort actual = Marshal.GetObjectForNativeVariant<ushort>(pNative);
-            char actualChar = (char)actual;
-            Assert.Equal('a', actual);
+            try
+            {
+                Marshal.GetNativeVariantForObject<char>('a', pNative);
+                ushort actual = Marshal.GetObjectForNativeVariant<ushort>(pNative);
+                char actualChar = (char)actual;
+                Assert.Equal('a', actual);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
         }
 
         [Fact]
@@ -70,12 +91,15 @@ namespace System.Runtime.InteropServices.Tests
             // is the same on ProjectN and Desktop CLR.
             Variant v = new Variant();
             IntPtr pNative = Marshal.AllocHGlobal(Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject<char>('a', pNative);
-            Assert.Throws<InvalidCastException>(() =>
+            try
             {
-                char actual = Marshal.GetObjectForNativeVariant<char>(pNative);
-                Assert.Equal('a', actual);
-            });
+                Marshal.GetNativeVariantForObject<char>('a', pNative);
+                Assert.Throws<InvalidCastException>(() => Marshal.GetObjectForNativeVariant<char>(pNative));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
         }
 
         [Fact]
@@ -83,9 +107,16 @@ namespace System.Runtime.InteropServices.Tests
         {
             Variant v = new Variant();
             IntPtr pNative = Marshal.AllocHGlobal(Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject<string>("99", pNative);
-            string actual = Marshal.GetObjectForNativeVariant<string>(pNative);
-            Assert.Equal("99", actual);
+            try
+            {
+                Marshal.GetNativeVariantForObject<string>("99", pNative);
+                string actual = Marshal.GetObjectForNativeVariant<string>(pNative);
+                Assert.Equal("99", actual);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
         }
 
         [Fact]
@@ -93,10 +124,17 @@ namespace System.Runtime.InteropServices.Tests
         {
             Variant v = new Variant();
             IntPtr pNative = Marshal.AllocHGlobal(Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject<double>(3.14, pNative);
-            double actual = Marshal.GetObjectForNativeVariant<double>(pNative);
-            Assert.Equal(3.14, actual);
-        }
+            try
+            {
+                Marshal.GetNativeVariantForObject<double>(3.14, pNative);
+                double actual = Marshal.GetObjectForNativeVariant<double>(pNative);
+                Assert.Equal(3.14, actual);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+}
 #pragma warning restore 618
     }
 }

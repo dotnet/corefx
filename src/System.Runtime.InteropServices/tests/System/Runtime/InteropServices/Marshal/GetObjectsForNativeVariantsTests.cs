@@ -59,26 +59,28 @@ namespace System.Runtime.InteropServices.Tests
 #pragma warning disable 618
         public static void NullParameter()
         {
-            Assert.Throws<ArgumentNullException>("aSrcNativeVariant", () => Marshal.GetObjectsForNativeVariants(IntPtr.Zero, 10));
+            AssertExtensions.Throws<ArgumentNullException>("aSrcNativeVariant", () => Marshal.GetObjectsForNativeVariants(IntPtr.Zero, 10));
             Assert.Throws<ArgumentOutOfRangeException>("cVars", () => Marshal.GetObjectsForNativeVariants<int>(new IntPtr(100), -1));
         }
 
         public static void UshortType()
         {
-
             Variant v = new Variant();
 
             IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
-            Marshal.GetNativeVariantForObject<ushort>(99, pNative);
-            Marshal.GetNativeVariantForObject<ushort>(100, pNative + Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<ushort>(99, pNative);
+                Marshal.GetNativeVariantForObject<ushort>(100, pNative + Marshal.SizeOf(v));
 
-
-            ushort[] actual = Marshal.GetObjectsForNativeVariants<ushort>(pNative, 2);
-            Assert.Equal(99, actual[0]);
-            Assert.Equal(100, actual[1]);
-
-            Marshal.FreeHGlobal(pNative);
-
+                ushort[] actual = Marshal.GetObjectsForNativeVariants<ushort>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
         }
 #pragma warning restore 618
     }

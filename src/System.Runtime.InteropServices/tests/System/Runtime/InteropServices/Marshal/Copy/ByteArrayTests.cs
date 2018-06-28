@@ -18,10 +18,10 @@ namespace System.Runtime.InteropServices.Tests
         public void NullValueArguments_ThrowsArgumentNullException(byte[] TestArray)
         {
             byte[] array = null;
-            Assert.Throws<ArgumentNullException>("destination", () => Marshal.Copy(TestArray, 0, IntPtr.Zero, 0));
-            Assert.Throws<ArgumentNullException>("source", () => Marshal.Copy(array, 0, new IntPtr(1), 0));
-            Assert.Throws<ArgumentNullException>("destination", () => Marshal.Copy(new IntPtr(1), array, 0, 0));
-            Assert.Throws<ArgumentNullException>("source", () => Marshal.Copy(IntPtr.Zero, TestArray, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("destination", () => Marshal.Copy(TestArray, 0, IntPtr.Zero, 0));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => Marshal.Copy(array, 0, new IntPtr(1), 0));
+            AssertExtensions.Throws<ArgumentNullException>("destination", () => Marshal.Copy(new IntPtr(1), array, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => Marshal.Copy(IntPtr.Zero, TestArray, 0, 0));
         }
 
         [Theory]
@@ -30,12 +30,16 @@ namespace System.Runtime.InteropServices.Tests
         {
             int sizeOfArray = sizeof(byte) * TestArray.Length;
             IntPtr ptr = Marshal.AllocCoTaskMem(sizeOfArray);
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.Copy(TestArray, 0, ptr, TestArray.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.Copy(TestArray, TestArray.Length + 1, ptr, 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.Copy(TestArray, 2, ptr, TestArray.Length));
-
-            Marshal.FreeCoTaskMem(ptr);
+            try
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.Copy(TestArray, 0, ptr, TestArray.Length + 1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.Copy(TestArray, TestArray.Length + 1, ptr, 1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.Copy(TestArray, 2, ptr, TestArray.Length));
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(ptr);
+            }
         }
 
         [Theory]
@@ -44,19 +48,23 @@ namespace System.Runtime.InteropServices.Tests
         {
             int sizeOfArray = sizeof(byte) * TestArray.Length;
             IntPtr ptr = Marshal.AllocCoTaskMem(sizeOfArray);
+            try
+            {
+                Marshal.Copy(TestArray, 0, ptr, TestArray.Length);
 
-            Marshal.Copy(TestArray, 0, ptr, TestArray.Length);
+                byte[] array1 = new byte[TestArray.Length];
+                Marshal.Copy(ptr, array1, 0, TestArray.Length);
+                Assert.True(CommonHelper.IsArrayEqual(TestArray, array1), "Failed copy round trip test, original array and round trip copied arrays do not match.");
 
-            byte[] array1 = new byte[TestArray.Length];
-            Marshal.Copy(ptr, array1, 0, TestArray.Length);
-            Assert.True(CommonHelper.IsArrayEqual(TestArray, array1), "Failed copy round trip test, original array and round trip copied arrays do not match.");
-
-            Marshal.Copy(TestArray, 2, ptr, TestArray.Length - 4);
-            byte[] array2 = new byte[TestArray.Length];
-            Marshal.Copy(ptr, array2, 2, TestArray.Length - 4);
-            Assert.True(CommonHelper.IsSubArrayEqual(TestArray, array2, 2, TestArray.Length - 4), "Failed copy round trip test, original array and round trip partially copied arrays do not match.");
-
-            Marshal.FreeCoTaskMem(ptr);
+                Marshal.Copy(TestArray, 2, ptr, TestArray.Length - 4);
+                byte[] array2 = new byte[TestArray.Length];
+                Marshal.Copy(ptr, array2, 2, TestArray.Length - 4);
+                Assert.True(CommonHelper.IsSubArrayEqual(TestArray, array2, 2, TestArray.Length - 4), "Failed copy round trip test, original array and round trip partially copied arrays do not match.");
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(ptr);
+            }
         }
     }
 }

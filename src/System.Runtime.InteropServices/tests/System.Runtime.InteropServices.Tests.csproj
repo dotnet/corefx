@@ -62,12 +62,14 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\Int64ArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\IntPtrArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\SingleArrayTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\DestroyStructureTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\PtrToStructureTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\PtrToStringTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\SizeOfTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionForHRTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetNativeVariantForObjectTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetObjectForNativeVariantTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetObjectsForNativeVariantsTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\Miscellaneous\AutoLayoutStructureTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\Miscellaneous\MarshalClassTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\OffsetOfTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\ByteTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\Int16Tests.cs" />

@@ -17,48 +17,19 @@ namespace System.Runtime.InteropServices.Tests
         [MemberData(nameof(ArrayData))]
         public void NullValue_ThrowsException(int[] TestValues)
         {
-            int value;
+            Exception e;
 
-            try
-            {
-                value = Marshal.ReadInt32(IntPtr.Zero);
-            }
-            catch (Exception e)
-            {
-                //ProjectN throws NullReferenceException
-                Assert.True(e.GetType().FullName == "System.AccessViolationException" || e.GetType().FullName == "System.NullReferenceException", e.GetType().FullName + " is not expected.");
-            }
+            e = Record.Exception(() => Marshal.ReadInt32(IntPtr.Zero));
+            Assert.True(e is AccessViolationException || e is NullReferenceException);
 
-            try
-            {
-                value = Marshal.ReadInt32(IntPtr.Zero, 2);
-            }
-            catch (Exception e)
-            {
-                //ProjectN throws NullReferenceException
-                Assert.True(e.GetType().FullName == "System.AccessViolationException" || e.GetType().FullName == "System.NullReferenceException", e.GetType().FullName + " is not expected.");
-            }
+            e = Record.Exception(() => Marshal.ReadInt32(IntPtr.Zero, 2));
+            Assert.True(e is AccessViolationException || e is NullReferenceException);
 
-            try
-            {
-                Marshal.WriteInt32(IntPtr.Zero, TestValues[0]);
+            e = Record.Exception(() => Marshal.WriteInt32(IntPtr.Zero, TestValues[0]));
+            Assert.True(e is AccessViolationException || e is NullReferenceException);
 
-            }
-            catch (Exception e)
-            {
-                //ProjectN throws NullReferenceException
-                Assert.True(e.GetType().FullName == "System.AccessViolationException" || e.GetType().FullName == "System.NullReferenceException", e.GetType().FullName + " is not expected.");
-            }
-
-            try
-            {
-                Marshal.WriteInt32(IntPtr.Zero, 2, TestValues[0]);
-            }
-            catch (Exception e)
-            {
-                //ProjectN throws NullReferenceException
-                Assert.True(e.GetType().FullName == "System.AccessViolationException" || e.GetType().FullName == "System.NullReferenceException", e.GetType().FullName + " is not expected.");
-            }
+            e = Record.Exception(() => Marshal.WriteInt32(IntPtr.Zero, 2, TestValues[0]));
+            Assert.True(e is AccessViolationException || e is NullReferenceException);
         }
 
         [Theory]
@@ -68,22 +39,28 @@ namespace System.Runtime.InteropServices.Tests
             int sizeOfArray = Marshal.SizeOf(TestValues[0]) * TestValues.Length;
 
             IntPtr ptr = Marshal.AllocCoTaskMem(sizeOfArray);
-            Marshal.WriteInt32(ptr, TestValues[0]);
-
-            for (int i = 1; i < TestValues.Length; i++)
+            try
             {
-                Marshal.WriteInt32(ptr, i * Marshal.SizeOf(TestValues[0]), TestValues[i]);
+                Marshal.WriteInt32(ptr, TestValues[0]);
+
+                for (int i = 1; i < TestValues.Length; i++)
+                {
+                    Marshal.WriteInt32(ptr, i * Marshal.SizeOf(TestValues[0]), TestValues[i]);
+                }
+
+                int value = Marshal.ReadInt32(ptr);
+                Assert.Equal(TestValues[0], value);
+
+                for (int i = 1; i < TestValues.Length; i++)
+                {
+                    value = Marshal.ReadInt32(ptr, i * Marshal.SizeOf(TestValues[0]));
+                    Assert.Equal(TestValues[i], value);
+                }
             }
-
-            int value = Marshal.ReadInt32(ptr);
-            Assert.True(value.Equals(TestValues[0]), "Failed round trip ReadWrite test.");
-
-            for (int i = 1; i < TestValues.Length; i++)
+            finally
             {
-                value = Marshal.ReadInt32(ptr, i * Marshal.SizeOf(TestValues[0]));
-                Assert.True(value.Equals(TestValues[i]), "Failed round trip ReadWrite test.");
+                Marshal.FreeCoTaskMem(ptr);
             }
-            Marshal.FreeCoTaskMem(ptr);
         }
     }
 }

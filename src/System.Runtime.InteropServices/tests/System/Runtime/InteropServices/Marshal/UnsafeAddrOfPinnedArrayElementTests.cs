@@ -12,7 +12,7 @@ namespace System.Runtime.InteropServices.Tests
         public void NullParameter()
         {
             int[] array = null;
-            Assert.Throws<ArgumentNullException>("arr", () => Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 0));
+            AssertExtensions.Throws<ArgumentNullException>("arr", () => Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 0));
         }
 
         [Fact]
@@ -20,18 +20,21 @@ namespace System.Runtime.InteropServices.Tests
         {
             int[] array = new int[] { 1, 2, 3 };
             GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+            try
+            {
+                IntPtr v0 = Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 0);
+                Assert.Equal(1, Marshal.ReadInt32(v0));
 
+                IntPtr v1 = Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 1);
+                Assert.Equal(2, Marshal.ReadInt32(v1));
 
-            IntPtr v0 = Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 0);
-            Assert.Equal(1, Marshal.ReadInt32(v0));
-
-            IntPtr v1 = Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 1);
-            Assert.Equal(2, Marshal.ReadInt32(v1));
-
-            IntPtr v2 = Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 2);
-            Assert.Equal(3, Marshal.ReadInt32(v2));
-
-            handle.Free();
+                IntPtr v2 = Marshal.UnsafeAddrOfPinnedArrayElement<int>(array, 2);
+                Assert.Equal(3, Marshal.ReadInt32(v2));
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
 
@@ -51,24 +54,27 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+            try
+            {
+                IntPtr v0 = Marshal.UnsafeAddrOfPinnedArrayElement<Point>(array, 0);
+                Point p0 = Marshal.PtrToStructure<Point>(v0);
+                Assert.Equal(100, p0.x);
+                Assert.Equal(100, p0.y);
 
-            IntPtr v0 = Marshal.UnsafeAddrOfPinnedArrayElement<Point>(array, 0);
-            Point p0 = Marshal.PtrToStructure<Point>(v0);
-            Assert.Equal(100, p0.x);
-            Assert.Equal(100, p0.y);
+                IntPtr v1 = Marshal.UnsafeAddrOfPinnedArrayElement<Point>(array, 1);
+                Point p1 = Marshal.PtrToStructure<Point>(v1);
+                Assert.Equal(-1, p1.x);
+                Assert.Equal(-1, p1.y);
 
-            IntPtr v1 = Marshal.UnsafeAddrOfPinnedArrayElement<Point>(array, 1);
-            Point p1 = Marshal.PtrToStructure<Point>(v1);
-            Assert.Equal(-1, p1.x);
-            Assert.Equal(-1, p1.y);
-
-
-            IntPtr v2 = Marshal.UnsafeAddrOfPinnedArrayElement<Point>(array, 2);
-            Point p2 = Marshal.PtrToStructure<Point>(v2);
-            Assert.Equal(0, p2.x);
-            Assert.Equal(0, p2.y);
-
-            handle.Free();
+                IntPtr v2 = Marshal.UnsafeAddrOfPinnedArrayElement<Point>(array, 2);
+                Point p2 = Marshal.PtrToStructure<Point>(v2);
+                Assert.Equal(0, p2.x);
+                Assert.Equal(0, p2.y);
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
     }
 }

@@ -77,7 +77,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment()
         {
-            var t = typeof(FieldAlignementTest);
+            var t = typeof(FieldAlignmentTest);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (RuntimeInformation.ProcessArchitecture != Architecture.X86))
             {
                 Assert.Equal(80, Marshal.SizeOf(t));
@@ -123,7 +123,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment_Decimal()
         {
-            var t = typeof(FieldAlignementTest_Decimal);
+            var t = typeof(FieldAlignmentTest_Decimal);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (RuntimeInformation.ProcessArchitecture != Architecture.X86))
             {
@@ -150,7 +150,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment_Guid()
         {
-            var t = typeof(FieldAlignementTest_Guid);
+            var t = typeof(FieldAlignmentTest_Guid);
             Assert.Equal(24, Marshal.SizeOf(t));
 
             Assert.Equal(new IntPtr(0), Marshal.OffsetOf(t, "b"));
@@ -161,7 +161,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment_Variant()
         {
-            var t = typeof(FieldAlignementTest_Variant);
+            var t = typeof(FieldAlignmentTest_Variant);
 
             Assert.Equal(new IntPtr(0), Marshal.OffsetOf(t, "b"));
             Assert.Equal(new IntPtr(8), Marshal.OffsetOf(t, "v"));
@@ -181,8 +181,25 @@ namespace System.Runtime.InteropServices.Tests
                 Assert.True(false, string.Format("Unexpected value '{0}' for IntPtr.Size", IntPtr.Size));
             }
         }
+
+        [Fact]
+        public void NonGenericOffEqualsGenericOffset()
+        {
+            IntPtr nonGenericOffsetCall = Marshal.OffsetOf(typeof(SomeStruct), "var");
+            IntPtr genericOffsetCall = Marshal.OffsetOf<SomeStruct>("var");
+            Assert.Equal(nonGenericOffsetCall, genericOffsetCall);
+
+            Assert.Throws<ArgumentException>(() => Marshal.OffsetOf(typeof(StructWithFxdLPSTRSAFld), "Arr"));
+        }
     }
 #pragma warning disable 169, 649, 618
+    [StructLayout(LayoutKind.Sequential)]
+    public struct StructWithFxdLPSTRSAFld
+    {
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPStr, SizeConst = 0)]
+        public String[] Arr;
+    }
+
     public struct SomeStruct
     {
         public bool p;
@@ -271,7 +288,7 @@ namespace System.Runtime.InteropServices.Tests
                              // 7 bytes of padding
     }
 
-    internal struct FieldAlignementTest
+    internal struct FieldAlignmentTest
     {
         public byte m_byte1; // 1 byte
                              // 1 byte of padding
@@ -302,7 +319,7 @@ namespace System.Runtime.InteropServices.Tests
         public char m_char4; // 1 byte
                              // 7 bytes of padding
     }
-    struct FieldAlignementTest_Decimal
+    struct FieldAlignmentTest_Decimal
     {
         public byte b; // 1 byte
                        // 7 bytes of padding
@@ -312,13 +329,13 @@ namespace System.Runtime.InteropServices.Tests
         // This is because unlike fields of other types well known to mcg (like long, char etc.)
         // which need to be aligned according to their byte size, decimal is really a struct
         // with 8 byte alignment requirement.
-        public FieldAlignementTest p; // 80 bytes (72 bytes on x86/Unix)
+        public FieldAlignmentTest p; // 80 bytes (72 bytes on x86/Unix)
 
         public short s; // 2 bytes
                         // 6 bytes of padding
     }
 
-    struct FieldAlignementTest_Guid
+    struct FieldAlignmentTest_Guid
     {
         public byte b; // 1 byte
                        // 3 bytes of padding
@@ -330,7 +347,7 @@ namespace System.Runtime.InteropServices.Tests
                         // 2 bytes of padding
     }
 
-    struct FieldAlignementTest_Variant
+    struct FieldAlignmentTest_Variant
     {
         public byte b; // 1 byte
                        // 7 bytes of padding
