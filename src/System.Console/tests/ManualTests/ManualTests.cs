@@ -9,7 +9,7 @@ namespace System
 {
     public class ConsoleManualTests
     {
-        public static bool ManualTestsEnabled => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"));
+        public static bool ManualTestsEnabled => true;
 
         [ConditionalTheory(nameof(ManualTestsEnabled))]
         [InlineData(false)]
