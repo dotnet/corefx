@@ -100,7 +100,7 @@ namespace System.Drawing.Imaging.Tests
         public void Image_RawFormat_ToString(string path, string expected)
         {
             var img = Image.FromFile(path);
-            Assert.Same(img.RawFormat.ToString(), expected);
+            Assert.Same(expected, img.RawFormat.ToString());
         }
 
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
