@@ -25,7 +25,7 @@ namespace System.Drawing
         private static int s_idCount = 0;
         private int _id;
 #endif
-        
+
         [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts")]
         private void SetNativeFamily(IntPtr family)
         {
@@ -187,19 +187,10 @@ namespace System.Drawing
         /// </summary>
         public unsafe string GetName(int language)
         {
-            // LF_FACESIZE is 32
-            Span<char> name = stackalloc char[32];
-            fixed (char* ptr = name)
-            {
-                int status = SafeNativeMethods.Gdip.GdipGetFamilyName(new HandleRef(this, NativeFamily), ptr, language);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-
-            var index = name.IndexOf('\0');
-            if (index != -1)
-                return name.Slice(0, index).ToString();
-
-            return name.ToString();
+            char* name = stackalloc char[32]; // LF_FACESIZE is 32
+            int status = SafeNativeMethods.Gdip.GdipGetFamilyName(new HandleRef(this, NativeFamily), name, language);
+            SafeNativeMethods.Gdip.CheckStatus(status);
+            return Marshal.PtrToStringUni((IntPtr)name);
         }
 
         /// <summary>
