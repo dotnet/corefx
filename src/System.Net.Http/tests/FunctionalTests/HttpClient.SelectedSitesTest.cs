@@ -13,22 +13,12 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClient_SelectedSites_Test : HttpClientTestBase
     {
-        public static bool IsSelectedSitesTestEnabled() 
-        {
-            string envVar = Environment.GetEnvironmentVariable("CORFX_NET_HTTP_SELECTED_SITES");
-            return envVar != null &&
-                (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1"));
-        }
-
-        [ConditionalTheory(nameof(IsSelectedSitesTestEnabled))]
+        [Theory]
+        [OuterLoop("Uses external servers and can take around 30 seconds")]
         [Trait("SelectedSites", "true")]
         [MemberData(nameof(GetSelectedSites))]
         public async Task RetrieveSite_Succeeds(string site)
         {
-            // Not doing this in bulk for platform handlers.
-            if (!UseSocketsHttpHandler)
-                return;
-
             int remainingAttempts = 2;
             while (remainingAttempts-- > 0)
             {
@@ -48,7 +38,8 @@ namespace System.Net.Http.Functional.Tests
             throw new Exception("Not expected to reach here");
         }
 
-        [ConditionalTheory(nameof(IsSelectedSitesTestEnabled))]
+        [Theory]
+        [OuterLoop("Uses external servers and can take around 30 seconds")]
         [Trait("SiteInvestigation", "true")]
         [InlineData("http://microsoft.com")]
         public async Task RetrieveSite_Debug_Helper(string site)
@@ -94,14 +85,6 @@ namespace System.Net.Http.Functional.Tests
                     case HttpStatusCode.OK:
                         if (response.Content.Headers.ContentLength > 0)
                             Assert.Equal(response.Content.Headers.ContentLength.Value, (await response.Content.ReadAsByteArrayAsync()).Length);
-                        break;
-                    case HttpStatusCode.BadGateway:
-                    case HttpStatusCode.Forbidden:
-                    case HttpStatusCode.Moved:
-                    case HttpStatusCode.NotFound:
-                    case HttpStatusCode.ServiceUnavailable:
-                    case HttpStatusCode.Unauthorized:
-                    case HttpStatusCode.InternalServerError:
                         break;
                     default:
                         throw new Exception($"{site} returned: {response.StatusCode}");

@@ -48,3 +48,5 @@ http://opera.com
 http://google.es
 http://walmart.com
 http://dailymail.co.uk
+http://office.com
+http://outlook.com
