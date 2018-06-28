@@ -91,7 +91,7 @@ namespace System.IO.Tests
             StringWriter sw = new StringWriter();
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.Cancel();
-            Assert.Equal(TaskStatus.Canceled, sw.WriteAsync(sb, cts.Token).Status);
+            Assert.Equal(TaskStatus.Canceled, sw.WriteLineAsync(sb, cts.Token).Status);
         }
     }
 }
