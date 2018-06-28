@@ -13,7 +13,7 @@ internal partial class Interop
         /// <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/buffer-descriptions-for-i-o-control-codes">TransferType</a>.
         /// Indicates how the system will pass data between the caller of DeviceIoControl (or IoBuildDeviceIoControlRequest) and the driver that handles the IRP.
         /// </summary>
-        public enum Method
+        public enum IoControlTransferType
         {
             /// <summary>
             /// Specifies the buffered I/O method, which is typically used for transferring small amounts of data per request. 
@@ -38,6 +38,6 @@ internal partial class Interop
             /// of the input and output buffers that were specified to DeviceIoControl or IoBuildDeviceIoControlRequest, without validating or mapping them.
             /// </summary>
             METHOD_NEITHER
-        };
+        }
     }
 }

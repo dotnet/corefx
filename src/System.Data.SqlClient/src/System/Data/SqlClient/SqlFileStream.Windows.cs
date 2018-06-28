@@ -139,7 +139,6 @@ namespace System.Data.SqlTypes
                 AssertPathFormat(_m_path);
                 return _m_path;
             }
-            [ResourceExposure(ResourceScope.None)] // SxS: the file name is not exposed
             [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
             private set
             {
@@ -420,7 +419,6 @@ namespace System.Data.SqlTypes
             Debug.Assert(path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase));
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
         [ResourceConsumption(ResourceScope.Machine)]
         static private string GetFullPathInternal(string path)
         {
@@ -456,7 +454,6 @@ namespace System.Data.SqlTypes
         }
 
         // SxS: SQL File Stream is a database resource, not a local machine one
-        [ResourceExposure(ResourceScope.None)]
         [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         private unsafe void OpenSqlFileStream
             (
@@ -647,7 +644,7 @@ namespace System.Data.SqlTypes
                     if (access == System.IO.FileAccess.ReadWrite)
                     {
                         uint ioControlCode = Interop.Kernel32.CTL_CODE(FILE_DEVICE_FILE_SYSTEM,
-                            IoControlCodeFunctionCode, (byte)Interop.Kernel32.Method.METHOD_BUFFERED,
+                            IoControlCodeFunctionCode, (byte)Interop.Kernel32.IoControlTransferType.METHOD_BUFFERED,
                             (byte)Interop.Kernel32.IoControlCodeAccess.FILE_ANY_ACCESS);
 
                         if (!Interop.Kernel32.DeviceIoControl(hFile, ioControlCode, IntPtr.Zero, 0, IntPtr.Zero, 0, out uint cbBytesReturned, IntPtr.Zero))
@@ -671,27 +668,17 @@ namespace System.Data.SqlTypes
                 throw;
             }
         }
-
-        #region private helper methods
-
         // This method exists to ensure that the requested path name is unique so that SMB/DNS is prevented
         // from collapsing a file open request to a file handle opened previously. In the SQL FILESTREAM case,
         // this would likely be a file open in another transaction, so this mechanism ensures isolation.
         static private string InitializeNtPath(string path)
         {
-            // ensure we have validated and normalized the path before
+            // Ensure we have validated and normalized the path before
             AssertPathFormat(path);
-
-            string formatPath = string.Empty;
-            string uniqueId = string.Empty;
-
-            formatPath = System.IO.PathInternal.IsDeviceUNC(path.AsSpan()) ? @"\??" : @"\??\UNC\{0}\{1}";
-            uniqueId = Guid.NewGuid().ToString("N");
-            return string.Format(CultureInfo.InvariantCulture, formatPath, path.Trim('\\'), uniqueId);
+            string uniqueId = Guid.NewGuid().ToString("N");
+            return System.IO.PathInternal.IsDeviceUNC(path) ? string.Format(CultureInfo.InvariantCulture, @"{0}\{1}", path.Replace(@"\\.", @"\??"), uniqueId)
+                                                            : string.Format(CultureInfo.InvariantCulture, @"\??\UNC\{0}\{1}", path.Trim('\\'), uniqueId);
         }
-
-        #endregion
-
     }
 }
 

@@ -271,8 +271,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileOperations.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FileOperations.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Method.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.Method.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.IoControlTransferType.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.IoControlTransferType.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.FILE_FULL_EA_INFORMATION.cs">
       <Link>Common\Interop\Windows\NtDll\Interop.FILE_FULL_EA_INFORMATION.cs</Link>

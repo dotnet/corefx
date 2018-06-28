@@ -33,23 +33,9 @@ internal partial class Interop
             System.IO.FileShare shareAccess = System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete,
             System.IO.FileAttributes fileAttributes = 0,
             CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
-            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE
-            )
-        {
-                return ( CreateFile(eaBuffer: null, eaLength: 0, path, rootDirectory,createDisposition, desiredAccess, shareAccess, fileAttributes, createOptions, objectAttributes) );
-        }
-
-        internal unsafe static (int status, IntPtr handle) CreateFile(
-            void* eaBuffer,
-            uint eaLength,
-            ReadOnlySpan<char> path,
-            IntPtr rootDirectory,
-            CreateDisposition createDisposition,
-            DesiredAccess desiredAccess = DesiredAccess.FILE_GENERIC_READ | DesiredAccess.SYNCHRONIZE,
-            System.IO.FileShare shareAccess = System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete,
-            System.IO.FileAttributes fileAttributes = 0,
-            CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
-            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE
+            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE,
+            void* eaBuffer = null,
+            uint eaLength = 0
            )
         {
             fixed (char* c = &MemoryMarshal.GetReference(path))
@@ -67,9 +53,9 @@ internal partial class Interop
                     rootDirectory);
 
                 int status = NtCreateFile(
-                    out IntPtr handle,
-                    desiredAccess,
-                    ref attributes,
+                    FileHandle: out IntPtr handle,
+                    DesiredAccess: desiredAccess,
+                    ObjectAttributes: ref attributes,
                     out IO_STATUS_BLOCK statusBlock,
                     AllocationSize: null,
                     FileAttributes: fileAttributes,
