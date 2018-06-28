@@ -173,10 +173,18 @@ const EVP_CIPHER* CryptoNative_EvpDes3Cbc()
 
 const EVP_CIPHER* CryptoNative_EvpRC2Ecb()
 {
+#ifdef OPENSSL_NO_RC2
+    return NULL;
+#else
     return EVP_rc2_ecb();
+#endif
 }
 
 const EVP_CIPHER* CryptoNative_EvpRC2Cbc()
 {
+#ifdef OPENSSL_NO_RC2
+    return NULL;
+#else
     return EVP_rc2_cbc();
+#endif
 }

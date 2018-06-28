@@ -66,11 +66,19 @@ int32_t CryptoNative_DsaSign(
         return 0;
     }
 
+#ifdef OPENSSL_IS_BORINGSSL
+    if (dsa->priv_key == NULL)
+#else
     // DSA_OpenSSL() returns a shared pointer, no need to free/cache.
     if (dsa->meth == DSA_OpenSSL() && dsa->priv_key == NULL)
+#endif
     {
         *outSignatureLength = 0;
+#ifndef OPENSSL_IS_BORINGSSL
         ERR_PUT_error(ERR_LIB_DSA, DSA_F_DSA_DO_SIGN, DSA_R_MISSING_PARAMETERS, __FILE__, __LINE__);
+#else
+        OPENSSL_PUT_ERROR(DSA, DSA_R_MISSING_PARAMETERS);
+#endif
         return 0;
     }
 

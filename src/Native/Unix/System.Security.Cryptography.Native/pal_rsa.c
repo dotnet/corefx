@@ -53,6 +53,7 @@ static int HasNoPrivateKey(RSA* rsa)
     if (rsa == NULL)
         return 1;
 
+#ifndef OPENSSL_IS_BORINGSSL
     // Shared pointer, don't free.
     const RSA_METHOD* meth = RSA_get_method(rsa);
 
@@ -60,6 +61,7 @@ static int HasNoPrivateKey(RSA* rsa)
     // That doesn't mean it's actually present, but we can't tell.
     if (meth->flags & RSA_FLAG_EXT_PKEY)
         return 0;
+#endif
 
     // In the event that there's a middle-ground where we report failure when success is expected,
     // one could do something like check if the RSA_METHOD intercepts all private key operations:
@@ -93,7 +95,11 @@ CryptoNative_RsaPrivateDecrypt(int32_t flen, const uint8_t* from, uint8_t* to, R
 {
     if (HasNoPrivateKey(rsa))
     {
-        ERR_PUT_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#ifdef OPENSSL_IS_BORINGSSL
+        OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
+#else
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#endif
         return -1;
     }
 
@@ -105,7 +111,11 @@ int32_t CryptoNative_RsaSignPrimitive(int32_t flen, const uint8_t* from, uint8_t
 {
     if (HasNoPrivateKey(rsa))
     {
-        ERR_PUT_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#ifdef OPENSSL_IS_BORINGSSL
+        OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
+#else
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#endif
         return -1;
     }
 
@@ -140,7 +150,11 @@ CryptoNative_RsaSign(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigr
 
     if (HasNoPrivateKey(rsa))
     {
-        ERR_PUT_error(ERR_LIB_RSA, RSA_F_RSA_SIGN, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#ifdef OPENSSL_IS_BORINGSSL
+        OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
+#else
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_SIGN, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#endif
         return 0;
     }
 
@@ -151,7 +165,11 @@ CryptoNative_RsaSign(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigr
     // we have to check that the digest size matches what we expect.
     if (digest != NULL && mlen != EVP_MD_size(digest))
     {
-        ERR_PUT_error(ERR_LIB_RSA, RSA_F_RSA_SIGN, RSA_R_INVALID_MESSAGE_LENGTH, __FILE__, __LINE__);
+#ifdef OPENSSL_IS_BORINGSSL
+        OPENSSL_PUT_ERROR(RSA, RSA_R_INVALID_MESSAGE_LENGTH);
+#else
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_SIGN, RSA_R_INVALID_MESSAGE_LENGTH, __FILE__, __LINE__);
+#endif
         return 0;
     }
 

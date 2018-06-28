@@ -36,6 +36,54 @@
 
 #include "pal_crypto_config.h"
 
+#ifdef OPENSSL_IS_BORINGSSL
+#include "pal_utilities.h"
+#define sk_ASN1_OBJECT_num(stack) SizeTToInt32(sk_ASN1_OBJECT_num(stack))
+#define sk_ASN1_OBJECT_value(stack, i) sk_ASN1_OBJECT_value(stack, Int32ToSizeT(i))
+#define sk_GENERAL_NAME_num(stack) SizeTToInt32(sk_GENERAL_NAME_num(stack))
+#define sk_GENERAL_NAME_value(stack, i) sk_GENERAL_NAME_value(stack, Int32ToSizeT(i))
+#define sk_X509_num(stack) SizeTToInt32(sk_X509_num(stack))
+#define sk_X509_value(stack, i) sk_X509_value(stack, Int32ToSizeT(i))
+#define sk_X509_push(stack, p) SizeTToInt32(sk_X509_push(stack, p))
+#define sk_X509_NAME_num(stack) SizeTToInt32(sk_X509_NAME_num(stack))
+#define sk_X509_NAME_value(stack, i) sk_X509_NAME_value(stack, Int32ToSizeT(i))
+#define BN_bin2bn(in, len, ret) BN_bin2bn(in, Int32ToSizeT(len), ret)
+#define BN_bn2bin(in, out) SizeTToInt32(BN_bn2bin(in, out));
+#define BN_num_bytes(bn) Uint32ToInt32(BN_num_bytes(bn))
+#define RAND_bytes(buf, len) \
+        RAND_bytes(buf, Int32ToSizeT(len))
+#define DSA_generate_parameters_ex(dsa, bits, seed_in, seed_len, out_counter, out_h, cb) \
+        DSA_generate_parameters_ex(dsa, Int32ToUint32(bits), seed_in, seed_len, out_counter, out_h, cb)
+#define DSA_sign(type, digest, digest_len, out_sig, out_siglen, dsa) \
+        DSA_sign(type, digest, Int32ToSizeT(digest_len), out_sig, out_siglen, dsa)
+#define DSA_verify(type, digest, digest_len, sig, siglen, dsa) \
+        DSA_verify(type, digest, Int32ToSizeT(digest_len), sig, Int32ToSizeT(siglen), dsa)
+#define ECDSA_sign(type, digest, digest_len, out_sig, out_siglen, dsa) \
+        ECDSA_sign(type, digest, Int32ToSizeT(digest_len), out_sig, out_siglen, dsa)
+#define ECDSA_verify(type, digest, digest_len, sig, siglen, dsa) \
+        ECDSA_verify(type, digest, Int32ToSizeT(digest_len), sig, Int32ToSizeT(siglen), dsa)
+#define ECDSA_size(key) SizeTToInt32(ECDSA_size(key))
+#define EVP_MD_size(md) SizeTToInt32(EVP_MD_size(md))
+#define d2i_PKCS7(out_p7, ber_bytes, ber_len) \
+        d2i_PKCS7(out_p7, ber_bytes, Int32ToSizeT(ber_len))
+#define d2i_PKCS12(out_p12, ber_bytes, ber_len) \
+        d2i_PKCS12(out_p12, ber_bytes, Int32ToSizeT(ber_len))
+#define EVP_CIPHER_CTX_set_key_length(c, key_len) \
+        EVP_CIPHER_CTX_set_key_length(c, (unsigned)(key_len))
+#define HMAC_Init_ex(ctx, key, key_len, md, impl) \
+        HMAC_Init_ex(ctx, key, Int32ToSizeT(key_len), md, impl)
+#define RSA_size(key) SizeTToInt32(RSA_size(key))
+#define RSA_private_encrypt(flen, from, to, rsa, padding) \
+        RSA_private_encrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define RSA_public_decrypt(flen, from, to, rsa, padding) \
+        RSA_public_decrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define RSA_public_encrypt(flen, from, to, rsa, padding) \
+        RSA_public_encrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define RSA_private_decrypt(flen, from, to, rsa, padding) \
+        RSA_private_decrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define EC_GROUP_get_degree(group) (int)EC_GROUP_get_degree(group)
+#endif
+
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL
 
 #if !HAVE_OPENSSL_EC2M

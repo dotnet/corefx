@@ -303,7 +303,11 @@ X509* CryptoNative_X509UpRef(X509* x509)
 {
     if (x509 != NULL)
     {
+#ifdef OPENSSL_IS_BORINGSSL
+        X509_up_ref(x509);
+#else
         CRYPTO_add(&x509->references, 1, CRYPTO_LOCK_X509);
+#endif
     }
 
     return x509;
