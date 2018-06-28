@@ -19,9 +19,7 @@ using Windows.UI.Core;
 
 namespace System.Threading
 {
-
-namespace System.Threading
-{
+#if FEATURE_APPX
     [WindowsRuntimeImport]
     [Guid("DFA2DC9C-1A2D-4917-98F2-939AF1D6E0C8")]
     public delegate void DispatcherQueueHandler();
