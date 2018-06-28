@@ -102,7 +102,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         const string WinRTNotifyCollectionChangedEventArgsName = "Windows.UI.Xaml.Interop.NotifyCollectionChangedEventArgs";
 
         // IBindableVector Guid
-        static Guid IBindableVectorID = new Guid("393de7de-6fd0-4c0d-bb71-47244a113e93");
+        static Guid IID_IBindableVector = new Guid("393de7de-6fd0-4c0d-bb71-47244a113e93");
 
         static INotifyCollectionChangedEventArgsFactory s_EventArgsFactory;
 
@@ -121,7 +121,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 if (managedArgs.NewItems != null)
                 {
                     IntPtr unkPtr = Marshal.GetIUnknownForObject(managedArgs.NewItems);
-                    int hr = Marshal.QueryInterface(unkPtr, ref IBindableVectorID, out newItemsIP);
+                    int hr = Marshal.QueryInterface(unkPtr, ref IID_IBindableVector, out newItemsIP);
                     Marshal.Release(unkPtr);
                     if (hr < 0)
                         throw Marshal.GetExceptionForHR(hr);
@@ -130,7 +130,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 if (managedArgs.OldItems != null)
                 {
                     IntPtr unkPtr = Marshal.GetIUnknownForObject(managedArgs.OldItems);
-                    int hr = Marshal.QueryInterface(unkPtr, ref IBindableVectorID, out oldItemsIP);
+                    int hr = Marshal.QueryInterface(unkPtr, ref IID_IBindableVector, out oldItemsIP);
                     Marshal.Release(unkPtr);
                     if (hr < 0)
                         throw Marshal.GetExceptionForHR(hr);
