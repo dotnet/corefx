@@ -57,13 +57,13 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public async Task TestWriteAsyncStringBuilderCancelled()
+        public void TestWriteAsyncStringBuilderCancelled()
         {
             StringBuilder sb = getSb();
             StringWriter sw = new StringWriter();
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.Cancel();
-            await Assert.ThrowsAsync<TaskCanceledException>(async () => await sw.WriteAsync(sb, cts.Token));
+            Assert.Equal(TaskStatus.Canceled, sw.WriteAsync(sb, cts.Token).Status);
         }
 
         [Fact]
@@ -85,13 +85,13 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public async Task TestWriteLineAsyncStringBuilderCancelled()
+        public void TestWriteLineAsyncStringBuilderCancelled()
         {
             StringBuilder sb = getSb();
             StringWriter sw = new StringWriter();
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.Cancel();
-            await Assert.ThrowsAsync<TaskCanceledException>(async () => await sw.WriteLineAsync(sb, cts.Token));
+            Assert.Equal(TaskStatus.Canceled, sw.WriteAsync(sb, cts.Token).Status);
         }
     }
 }

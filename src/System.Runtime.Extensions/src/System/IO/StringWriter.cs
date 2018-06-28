@@ -163,7 +163,7 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added after the Write(StringBuilder, ...) overload, and so in case
+                // This overload was added after the Write(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.Write(value);
                 return;
@@ -181,7 +181,7 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added after the WriteLine(char[], ...) overload, and so in case
+                // This overload was added after the Write(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.WriteLine(buffer);
                 return;
@@ -200,7 +200,7 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added after the WriteLine(StringBuilder, ...) overload, and so in case
+                // This overload was added after the Write(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.WriteLine(value);
                 return;
@@ -250,7 +250,7 @@ namespace System.IO
         {            
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added after the WriteAsync(StringBuilder, ...) overload, and so in case
+                // This overload was added after the Write(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 return base.WriteAsync(value, cancellationToken);
             }
@@ -285,7 +285,7 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
-                // This overload was added after the WriteLineAsync(StringBuilder, ...) overload, and so in case
+                // This overload was added after the Write(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
                 return base.WriteLineAsync(value, cancellationToken);                
             }
