@@ -69,7 +69,7 @@ namespace System.Threading.Tasks
                     }
 
                     if (disposeOfCtr)
-                        ctr.Dispose();
+                        CancellationTokenRegistrationSupport.Unregister(ctr);
                 }
             }
             catch (Exception ex)
@@ -148,7 +148,7 @@ namespace System.Threading.Tasks
                     ctr = _ctr; // under lock to avoid torn reads
                     _ctr = default(CancellationTokenRegistration);
                 }
-                ctr.Dispose(); // It's ok if we end up unregistering a not-initialized registration; it'll just be a nop.
+                CancellationTokenRegistrationSupport.Unregister(ctr); // It's ok if we end up unregistering a not-initialized registration; it'll just be a nop.
 
                 try
                 {
