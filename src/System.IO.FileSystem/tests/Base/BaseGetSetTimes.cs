@@ -136,6 +136,7 @@ namespace System.IO.Tests
             });
         }
 
+        [ActiveIssue(30742)]
         [Fact]
         // OSX does not currently support millisec granularity: use this test as a canary to flag
         // if this ever changes so we can enable the actual test
