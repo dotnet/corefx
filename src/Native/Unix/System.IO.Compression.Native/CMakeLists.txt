@@ -6,6 +6,8 @@ set(NATIVECOMPRESSION_SOURCES
     ../../AnyOS/zlib/pal_zlib.c
 )
 
+add_definitions(-DBROTLI_SHARED_COMPILATION)
+
 #Include Brotli include files
 include_directories("../../AnyOS/brotli/include")
 
