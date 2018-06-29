@@ -2059,7 +2059,7 @@ namespace System.Text.RegularExpressions
                 if (UseOptionI() && !isReplacement)
                 {
                     str = string.Create(cch, (_pattern, _culture, pos, cch), (span, state) =>
-                        state._pattern.AsSpan(pos, cch).ToLower(span, state._culture));
+                        state._pattern.AsSpan(state.pos, state.cch).ToLower(span, state._culture));
                 }
                 else
                 {
