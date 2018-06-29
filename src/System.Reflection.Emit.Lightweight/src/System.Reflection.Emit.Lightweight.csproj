@@ -5,6 +5,7 @@
     <AssemblyName>System.Reflection.Emit.Lightweight</AssemblyName>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netstandard'">true</IsPartialFacadeAssembly>
     <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot' And '$(IsPartialFacadeAssembly)' != 'true'">true</GenFacadesIgnoreMissingTypes>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_RefEmitLightweight</GeneratePlatformNotSupportedAssemblyMessage>
     <ProjectGuid>{FEF9FF32-8DE5-4C52-BC4E-8725A1FAA1E9}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -21,7 +22,7 @@
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
-    <!-- TODO: Add NS2.0 implementation here -->
+    <Reference Include="System.Reflection.Emit.ILGeneration" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

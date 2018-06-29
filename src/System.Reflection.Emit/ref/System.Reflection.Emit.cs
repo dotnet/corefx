@@ -109,12 +109,6 @@ namespace System.Reflection.Emit
         public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
         protected override bool IsPointerImpl() { throw null; }
         protected override bool IsPrimitiveImpl() { throw null; }
-#if !TargetsNetstandard
-        public override bool IsByRefLike { get { throw null; } }
-        public override bool IsTypeDefinition { get { throw null; } }
-        public override bool IsSZArray { get { throw null; } }
-        public override bool IsVariableBoundArray { get { throw null; } }
-#endif //!TargetsNetstandard
         protected override bool IsValueTypeImpl() { throw null; }
         public override System.Type MakeArrayType() { throw null; }
         public override System.Type MakeArrayType(int rank) { throw null; }
@@ -212,12 +206,6 @@ namespace System.Reflection.Emit
         protected override bool IsPointerImpl() { throw null; }
         protected override bool IsPrimitiveImpl() { throw null; }
         public override bool IsSubclassOf(System.Type c) { throw null; }
-#if !TargetsNetstandard
-        public override bool IsByRefLike { get { throw null; } }
-        public override bool IsTypeDefinition { get { throw null; } }
-        public override bool IsSZArray { get { throw null; } }
-        public override bool IsVariableBoundArray { get { throw null; } }
-#endif //!TargetsNetstandard
         protected override bool IsValueTypeImpl() { throw null; }
         public override System.Type MakeArrayType() { throw null; }
         public override System.Type MakeArrayType(int rank) { throw null; }
@@ -241,9 +229,6 @@ namespace System.Reflection.Emit
         public bool InitLocals { get { throw null; } set { } }
         public override bool IsGenericMethod { get { throw null; } }
         public override bool IsGenericMethodDefinition { get { throw null; } }
-#if !TargetsNetstandard
-        public override bool IsConstructedGenericMethod { get { throw null; } }
-#endif //!TargetsNetstandard
         public override System.RuntimeMethodHandle MethodHandle { get { throw null; } }
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
@@ -343,9 +328,6 @@ namespace System.Reflection.Emit
         public override System.Reflection.GenericParameterAttributes GenericParameterAttributes { get { throw null; } }
         public override int GenericParameterPosition { get { throw null; } }
         public override System.Guid GUID { get { throw null; } }
-#if !TargetsNetstandard
-        public override bool IsByRefLike { get { throw null; } }
-#endif //!TargetsNetstandard
         public override bool IsConstructedGenericType { get { throw null; } }
         public override bool IsGenericParameter { get { throw null; } }
         public override bool IsGenericType { get { throw null; } }
@@ -430,11 +412,6 @@ namespace System.Reflection.Emit
         protected override bool IsPointerImpl() { throw null; }
         protected override bool IsPrimitiveImpl() { throw null; }
         public override bool IsSubclassOf(System.Type c) { throw null; }
-#if !TargetsNetstandard
-        public override bool IsTypeDefinition { get { throw null; } }
-        public override bool IsSZArray { get { throw null; } }
-        public override bool IsVariableBoundArray { get { throw null; } }
-#endif //!TargetsNetstandard
         public override System.Type MakeArrayType() { throw null; }
         public override System.Type MakeArrayType(int rank) { throw null; }
         public override System.Type MakeByRefType() { throw null; }

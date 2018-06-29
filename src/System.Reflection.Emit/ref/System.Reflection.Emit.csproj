@@ -3,7 +3,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{4FBD1556-7B96-414E-9EA4-85281956D60E}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants);TargetsNetstandard</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
@@ -13,6 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Reflection.Emit.cs" />
+    <Compile Include="System.Reflection.Emit.nonNetstandard.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
     <Compile Include="System.Reflection.Emit.netstandard.cs" Condition="'$(TargetGroup)' == 'netstandard'" />
   </ItemGroup>
   <ItemGroup>

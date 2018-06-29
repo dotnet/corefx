@@ -6,6 +6,7 @@
       netcoreapp-Unix;
       uap-Windows_NT;
       uapaot-Windows_NT;
+      netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
