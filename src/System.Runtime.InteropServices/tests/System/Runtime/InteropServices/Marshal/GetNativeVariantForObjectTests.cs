@@ -37,7 +37,7 @@ namespace System.Runtime.InteropServices.Tests
             {
                 Marshal.GetNativeVariantForObject(null, pNative);
                 object o = Marshal.GetObjectForNativeVariant(pNative);
-                Assert.Equal(null, o);
+                Assert.Null(o);
             }
             finally
             {
@@ -75,7 +75,7 @@ namespace System.Runtime.InteropServices.Tests
                 Marshal.GetNativeVariantForObject<char>('a', pNative);
                 ushort actual = Marshal.GetObjectForNativeVariant<ushort>(pNative);
                 char actualChar = (char)actual;
-                Assert.Equal('a', actual);
+                Assert.Equal('a', actualChar);
             }
             finally
             {

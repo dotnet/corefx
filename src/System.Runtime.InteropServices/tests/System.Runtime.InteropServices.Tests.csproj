@@ -53,7 +53,6 @@
     <Compile Include="System\Runtime\InteropServices\MarshalAsAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\CommonHelper.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\ByteArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\CharArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\DoubleArrayTests.cs" />

@@ -42,7 +42,6 @@ namespace System.Runtime.InteropServices.Tests
         {
             var someTs_Auto = new SomeTestStruct_Auto();
             ArgumentException ex = AssertExtensions.Throws<ArgumentException>("structure", () => Marshal.StructureToPtr(someTs_Auto, new IntPtr(123), true));
-            Assert.Contains("The specified structure must be blittable or have layout information.", ex.Message);
         }
 
         [Fact]

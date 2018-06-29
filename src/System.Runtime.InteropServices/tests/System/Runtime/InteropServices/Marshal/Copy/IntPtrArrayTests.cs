@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
 using Xunit;
 
 namespace System.Runtime.InteropServices.Tests
@@ -10,16 +11,8 @@ namespace System.Runtime.InteropServices.Tests
     {
         public static readonly object[][] ArrayData =
         {
-            new object[] { GenerateIntPtrArray() }
+            new object[] { Enumerable.Range(0, 10).Select(i => new IntPtr(i)).ToArray() }
         };
-
-        public static IntPtr[] GenerateIntPtrArray()
-        {
-            IntPtr[] testArray = new IntPtr[10];
-            for (int i = 0; i < testArray.Length; i++)
-                testArray[i] = new IntPtr(i);
-            return testArray;
-        }
 
         [Theory]
         [MemberData(nameof(ArrayData))]
@@ -62,12 +55,12 @@ namespace System.Runtime.InteropServices.Tests
 
                 IntPtr[] array1 = new IntPtr[TestArray.Length];
                 Marshal.Copy(ptr, array1, 0, TestArray.Length);
-                Assert.True(CommonHelper.IsArrayEqual(TestArray, array1), "Failed copy round trip test, original array and round trip copied arrays do not match.");
+                Assert.Equal<IntPtr>(TestArray, array1);
 
                 Marshal.Copy(TestArray, 2, ptr, TestArray.Length - 4);
                 IntPtr[] array2 = new IntPtr[TestArray.Length];
                 Marshal.Copy(ptr, array2, 2, TestArray.Length - 4);
-                Assert.True(CommonHelper.IsSubArrayEqual(TestArray, array2, 2, TestArray.Length - 4), "Failed copy round trip test, original array and round trip partially copied arrays do not match.");
+                Assert.Equal<IntPtr>(TestArray.AsSpan(2, TestArray.Length - 4).ToArray(), array2.AsSpan(2, TestArray.Length - 4).ToArray());
             }
             finally
             {

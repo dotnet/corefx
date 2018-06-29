@@ -36,10 +36,11 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void PtrToStringUTF8()
         {
-            Marshal.PtrToStringUTF8(IntPtr.Zero, 123);
-            Assert.Throws<System.ArgumentOutOfRangeException>(() => Marshal.PtrToStringUTF8(new IntPtr(123), -77));
+            Assert.Null(Marshal.PtrToStringUTF8(IntPtr.Zero, 123));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.PtrToStringUTF8(new IntPtr(123), -77));
         }
     }
 }

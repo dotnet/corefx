@@ -149,6 +149,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void TestUTF8String()
         {
             foreach (String srcString in TestStrings)
@@ -171,7 +172,7 @@ namespace System.Runtime.InteropServices.Tests
                 }
                 finally
                 {
-                    Marshal.FreeHGlobal(ptrString);
+                    Marshal.FreeCoTaskMem(ptrString);
                 }
             }
         }
@@ -179,9 +180,15 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestNullString()
         {
-            Assert.Null(Marshal.PtrToStringUTF8(IntPtr.Zero));
             Assert.Null(Marshal.PtrToStringUni(IntPtr.Zero));
             Assert.Null(Marshal.PtrToStringAnsi(IntPtr.Zero));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void TestNullStringUTF8()
+        {
+            Assert.Null(Marshal.PtrToStringUTF8(IntPtr.Zero));
         }
     }
 }

@@ -22,10 +22,9 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        public void DestroyStructure()
+        public void DestroyStructure_Negative()
         {
             IntPtr ip;
-            SomeTestStruct someTestStruct = new SomeTestStruct();
 
             ip = IntPtr.Zero;
             AssertExtensions.Throws<ArgumentNullException>("ptr", () => Marshal.DestroyStructure<SomeTestStruct>(ip));
@@ -35,13 +34,22 @@ namespace System.Runtime.InteropServices.Tests
 
             SomeTestStruct_Auto someTs_Auto = new SomeTestStruct_Auto();
             Assert.Throws<ArgumentException>(() => Marshal.DestroyStructure(ip, someTs_Auto.GetType()));
-            
-            ip = Marshal.AllocHGlobal(Marshal.SizeOf(someTestStruct));
+        }
+
+        [Fact]
+        public void DestroyStructure_Positive()
+        {
+            SomeTestStruct someTestStruct = new SomeTestStruct();
+            IntPtr ip = Marshal.AllocHGlobal(Marshal.SizeOf(someTestStruct));
             try
             {
                 someTestStruct.s = null;
+                //Generic
                 Marshal.StructureToPtr(someTestStruct, ip, false);
                 Marshal.DestroyStructure<SomeTestStruct>(ip);
+                //None-Generic
+                Marshal.StructureToPtr(someTestStruct, ip, false);
+                Marshal.DestroyStructure(ip, typeof(SomeTestStruct));
             }
             finally
             {

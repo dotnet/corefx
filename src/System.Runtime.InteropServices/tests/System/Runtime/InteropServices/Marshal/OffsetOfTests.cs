@@ -52,7 +52,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestExplicitLayout()
         {
-            var t = typeof(ExplicitLayoutTest);
+            Type t = typeof(ExplicitLayoutTest);
             Assert.Equal(56, Marshal.SizeOf(t));
             Assert.Equal(new IntPtr(0), Marshal.OffsetOf(t, "m_short1"));
             Assert.Equal(new IntPtr(2), Marshal.OffsetOf(t, "m_short2"));
@@ -77,7 +77,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment()
         {
-            var t = typeof(FieldAlignmentTest);
+            Type t = typeof(FieldAlignmentTest);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (RuntimeInformation.ProcessArchitecture != Architecture.X86))
             {
                 Assert.Equal(80, Marshal.SizeOf(t));
@@ -123,7 +123,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment_Decimal()
         {
-            var t = typeof(FieldAlignmentTest_Decimal);
+            Type t = typeof(FieldAlignmentTest_Decimal);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (RuntimeInformation.ProcessArchitecture != Architecture.X86))
             {
@@ -150,7 +150,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment_Guid()
         {
-            var t = typeof(FieldAlignmentTest_Guid);
+            Type t = typeof(FieldAlignmentTest_Guid);
             Assert.Equal(24, Marshal.SizeOf(t));
 
             Assert.Equal(new IntPtr(0), Marshal.OffsetOf(t, "b"));
@@ -161,7 +161,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void TestFieldAlignment_Variant()
         {
-            var t = typeof(FieldAlignmentTest_Variant);
+            Type t = typeof(FieldAlignmentTest_Variant);
 
             Assert.Equal(new IntPtr(0), Marshal.OffsetOf(t, "b"));
             Assert.Equal(new IntPtr(8), Marshal.OffsetOf(t, "v"));

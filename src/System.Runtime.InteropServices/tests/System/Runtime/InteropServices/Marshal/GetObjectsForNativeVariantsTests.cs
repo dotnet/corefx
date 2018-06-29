@@ -57,13 +57,100 @@ namespace System.Runtime.InteropServices.Tests
             [FieldOffset(0)] public decimal m_decimal;
         }
 #pragma warning disable 618
+
+        [Fact]
         public static void NullParameter()
         {
             AssertExtensions.Throws<ArgumentNullException>("aSrcNativeVariant", () => Marshal.GetObjectsForNativeVariants(IntPtr.Zero, 10));
             Assert.Throws<ArgumentOutOfRangeException>("cVars", () => Marshal.GetObjectsForNativeVariants<int>(new IntPtr(100), -1));
         }
 
-        public static void UshortType()
+        [Fact]
+        public void SByteType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<sbyte>(99, pNative);
+                Marshal.GetNativeVariantForObject<sbyte>(100, pNative + Marshal.SizeOf(v));
+
+                sbyte[] actual = Marshal.GetObjectsForNativeVariants<sbyte>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void ByteType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<byte>(99, pNative);
+                Marshal.GetNativeVariantForObject<byte>(100, pNative + Marshal.SizeOf(v));
+
+                byte[] actual = Marshal.GetObjectsForNativeVariants<byte>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void DoubleType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<double>(99, pNative);
+                Marshal.GetNativeVariantForObject<double>(100, pNative + Marshal.SizeOf(v));
+
+                double[] actual = Marshal.GetObjectsForNativeVariants<double>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void ShortType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<short>(99, pNative);
+                Marshal.GetNativeVariantForObject<short>(100, pNative + Marshal.SizeOf(v));
+
+                short[] actual = Marshal.GetObjectsForNativeVariants<short>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void UshortType()
         {
             Variant v = new Variant();
 
@@ -82,6 +169,112 @@ namespace System.Runtime.InteropServices.Tests
                 Marshal.FreeHGlobal(pNative);
             }
         }
+
+        [Fact]
+        public void IntType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<int>(99, pNative);
+                Marshal.GetNativeVariantForObject<int>(100, pNative + Marshal.SizeOf(v));
+
+                int[] actual = Marshal.GetObjectsForNativeVariants<int>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void UIntType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<uint>(99, pNative);
+                Marshal.GetNativeVariantForObject<uint>(100, pNative + Marshal.SizeOf(v));
+
+                uint[] actual = Marshal.GetObjectsForNativeVariants<uint>(pNative, 2);
+                Assert.Equal<uint>(99, actual[0]);
+                Assert.Equal<uint>(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void LongType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<long>(99, pNative);
+                Marshal.GetNativeVariantForObject<long>(100, pNative + Marshal.SizeOf(v));
+
+                long[] actual = Marshal.GetObjectsForNativeVariants<long>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void ULongType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<ulong>(99, pNative);
+                Marshal.GetNativeVariantForObject<ulong>(100, pNative + Marshal.SizeOf(v));
+
+                ulong[] actual = Marshal.GetObjectsForNativeVariants<ulong>(pNative, 2);
+                Assert.Equal<ulong>(99, actual[0]);
+                Assert.Equal<ulong>(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
+        [Fact]
+        public void FloatType()
+        {
+            Variant v = new Variant();
+
+            IntPtr pNative = Marshal.AllocHGlobal(2 * Marshal.SizeOf(v));
+            try
+            {
+                Marshal.GetNativeVariantForObject<float>(99, pNative);
+                Marshal.GetNativeVariantForObject<float>(100, pNative + Marshal.SizeOf(v));
+
+                float[] actual = Marshal.GetObjectsForNativeVariants<float>(pNative, 2);
+                Assert.Equal(99, actual[0]);
+                Assert.Equal(100, actual[1]);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pNative);
+            }
+        }
+
 #pragma warning restore 618
     }
 }

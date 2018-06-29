@@ -75,6 +75,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void DecimalType()
         {
             Variant v = new Variant();
@@ -92,6 +93,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void PrimitiveType()
         {
             Variant v = new Variant();
@@ -109,6 +111,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void StringType()
         {
             Variant v = new Variant();
@@ -126,6 +129,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void DoubleType()
         {
             Variant v = new Variant();
@@ -143,6 +147,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void IUnknownType()
         {
             Variant v = new Variant();

@@ -54,12 +54,12 @@ namespace System.Runtime.InteropServices.Tests
 
                 double[] array1 = new double[TestArray.Length];
                 Marshal.Copy(ptr, array1, 0, TestArray.Length);
-                Assert.True(CommonHelper.IsArrayEqual(TestArray, array1), "Failed copy round trip test, original array and round trip copied arrays do not match.");
+                Assert.Equal<double>(TestArray, array1);
 
                 Marshal.Copy(TestArray, 2, ptr, TestArray.Length - 4);
                 double[] array2 = new double[TestArray.Length];
                 Marshal.Copy(ptr, array2, 2, TestArray.Length - 4);
-                Assert.True(CommonHelper.IsSubArrayEqual(TestArray, array2, 2, TestArray.Length - 4), "Failed copy round trip test, original array and round trip partially copied arrays do not match.");
+                Assert.Equal<double>(TestArray.AsSpan(2, TestArray.Length - 4).ToArray(), array2.AsSpan(2, TestArray.Length - 4).ToArray());
             }
             finally
             {
