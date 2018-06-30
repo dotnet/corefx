@@ -1032,8 +1032,11 @@ namespace System.Threading.Threads.Tests
         {
             DummyClass.RemoteInvoke(() =>
             {
-                AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
-                Assert.Equal(Environment.UserDomainName + @"\" + Environment.UserName, Thread.CurrentPrincipal.Identity.Name);
+                if (!string.IsNullOrEmpty(Environment.UserDomainName))
+                {
+                    AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+                    Assert.Equal(Environment.UserDomainName + @"\" + Environment.UserName, Thread.CurrentPrincipal.Identity.Name);
+                }
             }).Dispose();
         }
 
