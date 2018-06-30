@@ -96,6 +96,7 @@ namespace System.Collections.Generic
         public virtual void OnDeserialization(object sender) { }
         public bool Remove(TKey key) { throw null; }
         public bool Remove(TKey key, out TValue value) { throw null; }
+        public int RemoveAll(System.Predicate<System.Collections.Generic.KeyValuePair<TKey, TValue>> match) { throw null; }
         public void TrimExcess(int capacity) { }
         public void TrimExcess() { }
         public bool TryAdd(TKey key, TValue value) { throw null; }
