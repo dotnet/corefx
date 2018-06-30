@@ -35,8 +35,7 @@ internal partial class Interop
             CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
             ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE,
             void* eaBuffer = null,
-            uint eaLength = 0
-           )
+            uint eaLength = 0)
         {
             fixed (char* c = &MemoryMarshal.GetReference(path))
             {
@@ -53,17 +52,17 @@ internal partial class Interop
                     rootDirectory);
 
                 int status = NtCreateFile(
-                    FileHandle: out IntPtr handle,
-                    DesiredAccess: desiredAccess,
-                    ObjectAttributes: ref attributes,
+                    out IntPtr handle,
+                    desiredAccess,
+                    ref attributes,
                     out IO_STATUS_BLOCK statusBlock,
                     AllocationSize: null,
-                    FileAttributes: fileAttributes,
-                    ShareAccess: shareAccess,
-                    CreateDisposition: createDisposition,
-                    CreateOptions: createOptions,
-                    EaBuffer: eaBuffer,
-                    EaLength: eaLength);
+                    fileAttributes,
+                    shareAccess,
+                    createDisposition,
+                    createOptions,
+                    eaBuffer,
+                    eaLength);
 
                 return (status, handle);
             }

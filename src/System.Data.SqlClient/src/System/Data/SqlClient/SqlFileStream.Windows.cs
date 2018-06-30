@@ -49,26 +49,12 @@ namespace System.Data.SqlTypes
             (byte)'T', (byte)'a', (byte)'g', (byte) '\0'
         };
 
-        public SqlFileStream
-            (
-                string path,
-                byte[] transactionContext,
-                System.IO.FileAccess access
-            )
-            : this(path, transactionContext, access, System.IO.FileOptions.None, 0)
-        {
-        }
+        public SqlFileStream(string path, byte[] transactionContext, FileAccess access) :
+            this(path, transactionContext, access, FileOptions.None, 0)
+        { }
 
-        public SqlFileStream
-            (
-                string path,
-                byte[] transactionContext,
-                System.IO.FileAccess access,
-                System.IO.FileOptions options,
-                long allocationSize
-            )
+        public SqlFileStream(string path, byte[] transactionContext, FileAccess access, FileOptions options, long allocationSize)
         {
-
             //-----------------------------------------------------------------
             // precondition validation
 

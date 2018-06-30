@@ -159,7 +159,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 // Drop Table
                 ExecuteNonQueryCommand($"DROP TABLE {tempTable}", connection);
             }
-
         }
         #region Private helper methods
         private static string SetupTable(SqlConnection conn)
@@ -180,6 +179,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             return tempTable;
         }
+
         private static void ExecuteNonQueryCommand(string cmdText, SqlConnection conn)
         {
             using (SqlCommand cmd = conn.CreateCommand())
@@ -208,10 +208,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             newArray[0] = newByte;
             return newArray;
         }
-
         #endregion
-
     }
-
-
 }

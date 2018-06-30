@@ -3,36 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Data.Common;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Globalization;
 using System.IO;
-using System.Diagnostics;
-using System.Runtime.Versioning;
 
 namespace System.Data.SqlTypes
 {
     public sealed partial class SqlFileStream : System.IO.Stream
     {
-        public SqlFileStream
-            (
-                string path,
-                byte[] transactionContext,
-                System.IO.FileAccess access
-            )
+        public SqlFileStream(string path, byte[] transactionContext, FileAccess access)
         {
             throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported);
         }
 
-        public SqlFileStream
-            (
-                string path,
-                byte[] transactionContext,
-                System.IO.FileAccess access,
-                System.IO.FileOptions options,
-                Int64 allocationSize
-            )
+        public SqlFileStream(string path, byte[] transactionContext, FileAccess access, FileOptions options, Int64 allocationSize)
         {
             throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported);
         }
