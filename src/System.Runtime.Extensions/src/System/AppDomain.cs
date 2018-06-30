@@ -289,15 +289,11 @@ namespace System
 
         public IPrincipal GetThreadPrincipal()
         {
-            IPrincipal principal = _defaultPrincipal
+            IPrincipal principal = _defaultPrincipal;
             if (principal == null)
             {
                 switch (_principalPolicy)
                 {
-                    case PrincipalPolicy.NoPrincipal:
-                        principal = null;
-                        break;
-
                     case PrincipalPolicy.UnauthenticatedPrincipal:
                         if (s_genericPrincipalCtor == null || s_genericIdentityCtor == null)
                         {
