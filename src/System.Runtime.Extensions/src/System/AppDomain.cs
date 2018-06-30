@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Loader;
 using System.IO;
+using System.Runtime.Remoting;
 using System.Security.Principal;
 
 namespace System
@@ -279,6 +280,66 @@ namespace System
                 }
                 _defaultPrincipal = principal;
             }
+        }
+
+        public ObjectHandle CreateInstance(string assemblyName, string typeName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
+        {
+            throw new NotImplementedException();
         }
     }
 }
