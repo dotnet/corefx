@@ -1027,7 +1027,8 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        public static void WindowsPrincipalPolicyTest()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void WindowsPrincipalPolicyTest_Windows()
         {
             DummyClass.RemoteInvoke(() =>
             {
@@ -1037,21 +1038,42 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void WindowsPrincipalPolicyTest_Unix()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal));
+            }).Dispose();
+        }
+
+        [Fact]
         public static void UnauthenticatedPrincipalTest()
         {
             DummyClass.RemoteInvoke(() =>
             {
                 AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.UnauthenticatedPrincipal);
-                Assert.Equal("", Thread.CurrentPrincipal.Identity.Name);
+                Assert.Equal(string.Empty, Thread.CurrentPrincipal.Identity.Name);
             }).Dispose();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void DefaultPrincipalPolicyTest()
         {
             DummyClass.RemoteInvoke(() =>
             {
                 Assert.Equal(null, Thread.CurrentPrincipal);
+            }).Dispose();
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void DefaultPrincipalPolicyTest_Desktop()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Equal(Environment.UserDomainName + @"\" + Environment.UserName, Thread.CurrentPrincipal.Identity.Name);
             }).Dispose();
         }
     }

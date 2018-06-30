@@ -18,6 +18,10 @@ namespace System
         private readonly object _forLock = new object();
         private IPrincipal _defaultPrincipal;
         private PrincipalPolicy _principalPolicy = PrincipalPolicy.NoPrincipal;
+        private ConstructorInfo _genericPrincipalCtor;
+        private ConstructorInfo _genericIdentityCtor;
+        private ConstructorInfo _windowsPrincipalCtor;
+        private MethodInfo _currentIdentity;
 
         private AppDomain() { }
 
@@ -297,25 +301,33 @@ namespace System
                     case PrincipalPolicy.NoPrincipal:
                         principal = null;
                         break;
+
                     case PrincipalPolicy.UnauthenticatedPrincipal:
-                        Assembly assembly = Assembly.Load(new AssemblyName("System.Security.Claims"));
-                        Type genericPrincipal = assembly?.GetType("System.Security.Principal.GenericPrincipal");
-                        Type genericIdentity = assembly?.GetType("System.Security.Principal.GenericIdentity");
+                        if (_genericPrincipalCtor == null || _genericIdentityCtor == null)
+                        {
+                            Assembly assembly = Assembly.Load(new AssemblyName("System.Security.Claims"));
+                            Type genericPrincipal = assembly.GetType("System.Security.Principal.GenericPrincipal", throwOnError: true);
+                            Type genericIdentity = assembly.GetType("System.Security.Principal.GenericIdentity", throwOnError: true);
 
-                        ConstructorInfo genericPrincipalCtor = genericPrincipal?.GetConstructor( new[] { genericIdentity, typeof(string[])});
-                        ConstructorInfo genericIdentityCtor = genericIdentity?.GetConstructor( new[] { typeof(string), typeof(string) });
+                            _genericPrincipalCtor = genericPrincipal.GetConstructor(new[] { genericIdentity, typeof(string[]) });
+                            _genericIdentityCtor = genericIdentity.GetConstructor(new[] { typeof(string), typeof(string) });
+                        }
 
-                        principal = (IPrincipal)genericPrincipalCtor.Invoke(new object[] { genericIdentityCtor.Invoke( new object[] { "", "" }), new string[] { "" } });
+                        principal = (IPrincipal)_genericPrincipalCtor.Invoke(new object[] { _genericIdentityCtor.Invoke( new object[] { string.Empty, string.Empty }), new string[] { string.Empty } });
                         break;
+
                     case PrincipalPolicy.WindowsPrincipal:
-                        assembly = Assembly.Load(new AssemblyName("System.Security.Principal.Windows"));
-                        Type windowsPrincipal = assembly?.GetType("System.Security.Principal.WindowsPrincipal");
-                        Type windowsIdentity = assembly?.GetType("System.Security.Principal.WindowsIdentity");
+                        if (_windowsPrincipalCtor == null || _currentIdentity == null)
+                        {
+                            Assembly assembly = Assembly.Load(new AssemblyName("System.Security.Principal.Windows"));
+                            Type windowsPrincipal = assembly.GetType("System.Security.Principal.WindowsPrincipal", throwOnError: true);
+                            Type windowsIdentity = assembly.GetType("System.Security.Principal.WindowsIdentity", throwOnError: true);
 
-                        ConstructorInfo windowsPrincipalCtor = windowsPrincipal?.GetConstructor( new[] { windowsIdentity });
-                        MethodInfo currentIdentity = windowsIdentity?.GetMethod("GetCurrent", new Type[] { } );
+                            _windowsPrincipalCtor = windowsPrincipal?.GetConstructor(new[] { windowsIdentity });
+                            _currentIdentity = windowsIdentity?.GetMethod("GetCurrent", Array.Empty<Type>());
+                        }
 
-                        principal = (IPrincipal)windowsPrincipalCtor?.Invoke( new object[] { currentIdentity.Invoke(null, new object[] { } ) });
+                        principal = (IPrincipal)_windowsPrincipalCtor?.Invoke( new object[] { _currentIdentity.Invoke(null, null) });
                         break;
                 }
             }
