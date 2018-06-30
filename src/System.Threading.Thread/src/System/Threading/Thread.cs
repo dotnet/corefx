@@ -155,6 +155,10 @@ namespace System.Threading
         {
             get
             {
+                if (CurrentThread._principal == null)
+                {
+                    CurrentThread._principal = AppDomain.CurrentDomain.GetThreadPrincipal();
+                }
                 return CurrentThread._principal;
             }
             set

@@ -18,7 +18,7 @@ namespace System.Threading.Threads.Tests
         public static string HostRunnerTest = HostRunner;
     }
 
-    public static partial class ThreadTests 
+    public static partial class ThreadTests
     {
         private const int UnexpectedTimeoutMilliseconds = ThreadTestHelpers.UnexpectedTimeoutMilliseconds;
         private const int ExpectedTimeoutMilliseconds = ThreadTestHelpers.ExpectedTimeoutMilliseconds;
@@ -1024,6 +1024,35 @@ namespace System.Threading.Threads.Tests
             Thread.SpinWait(0);
             Thread.SpinWait(1);
             Thread.Yield();
+        }
+
+        [Fact]
+        public static void WindowsPrincipalPolicyTest()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+                Assert.Equal(Environment.UserDomainName + @"\" + Environment.UserName, Thread.CurrentPrincipal.Identity.Name);
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void UnauthenticatedPrincipalTest()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.UnauthenticatedPrincipal);
+                Assert.Equal("", Thread.CurrentPrincipal.Identity.Name);
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void DefaultPrincipalPolicyTest()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Equal(null, Thread.CurrentPrincipal);
+            }).Dispose();
         }
     }
 }

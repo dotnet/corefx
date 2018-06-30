@@ -4,8 +4,6 @@
 
 #pragma warning disable CS0067 // events are declared but not used
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Loader;
@@ -19,6 +17,7 @@ namespace System
         private static readonly AppDomain s_domain = new AppDomain();
         private readonly object _forLock = new object();
         private IPrincipal _defaultPrincipal;
+        private PrincipalPolicy _principalPolicy = PrincipalPolicy.NoPrincipal;
 
         private AppDomain() { }
 
@@ -261,7 +260,10 @@ namespace System
             remove { AssemblyLoadContext.ResourceResolve -= value; }
         }
 
-        public void SetPrincipalPolicy(PrincipalPolicy policy) { }
+        public void SetPrincipalPolicy(PrincipalPolicy policy)
+        {
+            _principalPolicy = policy;
+        }
 
         public void SetThreadPrincipal(IPrincipal principal)
         {
@@ -279,6 +281,46 @@ namespace System
                 }
                 _defaultPrincipal = principal;
             }
+        }
+
+        public IPrincipal GetThreadPrincipal()
+        {
+            IPrincipal principal = null;
+            if (_defaultPrincipal != null)
+            {
+                principal = _defaultPrincipal;
+            }
+            else
+            {
+                switch (_principalPolicy)
+                {
+                    case PrincipalPolicy.NoPrincipal:
+                        principal = null;
+                        break;
+                    case PrincipalPolicy.UnauthenticatedPrincipal:
+                        Assembly assembly = Assembly.Load(new AssemblyName("System.Security.Claims"));
+                        Type genericPrincipal = assembly?.GetType("System.Security.Principal.GenericPrincipal");
+                        Type genericIdentity = assembly?.GetType("System.Security.Principal.GenericIdentity");
+
+                        ConstructorInfo genericPrincipalCtor = genericPrincipal?.GetConstructor( new[] { genericIdentity, typeof(string[])});
+                        ConstructorInfo genericIdentityCtor = genericIdentity?.GetConstructor( new[] { typeof(string), typeof(string) });
+
+                        principal = (IPrincipal)genericPrincipalCtor.Invoke(new object[] { genericIdentityCtor.Invoke( new object[] { "", "" }), new string[] { "" } });
+                        break;
+                    case PrincipalPolicy.WindowsPrincipal:
+                        assembly = Assembly.Load(new AssemblyName("System.Security.Principal.Windows"));
+                        Type windowsPrincipal = assembly?.GetType("System.Security.Principal.WindowsPrincipal");
+                        Type windowsIdentity = assembly?.GetType("System.Security.Principal.WindowsIdentity");
+
+                        ConstructorInfo windowsPrincipalCtor = windowsPrincipal?.GetConstructor( new[] { windowsIdentity });
+                        MethodInfo currentIdentity = windowsIdentity?.GetMethod("GetCurrent", new Type[] { } );
+
+                        principal = (IPrincipal)windowsPrincipalCtor?.Invoke( new object[] { currentIdentity.Invoke(null, new object[] { } ) });
+                        break;
+                }
+            }
+
+            return principal;
         }
     }
 }
