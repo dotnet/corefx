@@ -6989,9 +6989,7 @@ namespace System.Runtime.Remoting
     public class ObjectHandle : MarshalByRefObject
     {        
         private ObjectHandle() { }
-
         public ObjectHandle(Object o) { }
-
         public Object Unwrap() { throw null; }
     }
 }
