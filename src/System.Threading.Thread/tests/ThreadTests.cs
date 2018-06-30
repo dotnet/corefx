@@ -1038,16 +1038,6 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public static void WindowsPrincipalPolicyTest_Unix()
-        {
-            DummyClass.RemoteInvoke(() =>
-            {
-                Assert.Throws<PlatformNotSupportedException>(() => AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal));
-            }).Dispose();
-        }
-
-        [Fact]
         public static void UnauthenticatedPrincipalTest()
         {
             DummyClass.RemoteInvoke(() =>
@@ -1073,7 +1063,7 @@ namespace System.Threading.Threads.Tests
         {
             DummyClass.RemoteInvoke(() =>
             {
-                Assert.Equal(Environment.UserDomainName + @"\" + Environment.UserName, Thread.CurrentPrincipal.Identity.Name);
+                Assert.Equal(string.Empty, Thread.CurrentPrincipal.Identity.Name);
             }).Dispose();
         }
     }
