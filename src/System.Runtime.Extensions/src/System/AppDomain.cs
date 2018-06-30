@@ -289,12 +289,8 @@ namespace System
 
         public IPrincipal GetThreadPrincipal()
         {
-            IPrincipal principal = null;
-            if (_defaultPrincipal != null)
-            {
-                principal = _defaultPrincipal;
-            }
-            else
+            IPrincipal principal = _defaultPrincipal
+            if (principal == null)
             {
                 switch (_principalPolicy)
                 {
@@ -327,7 +323,7 @@ namespace System
                             s_currentIdentity = windowsIdentity.GetMethod("GetCurrent", Array.Empty<Type>());
                         }
 
-                        principal = (IPrincipal)s_windowsPrincipalCtor.Invoke( new object[] { s_currentIdentity.Invoke(null, null) });
+                        principal = (IPrincipal)s_windowsPrincipalCtor.Invoke(new object[] { s_currentIdentity.Invoke(null, null) });
                         break;
                 }
             }
