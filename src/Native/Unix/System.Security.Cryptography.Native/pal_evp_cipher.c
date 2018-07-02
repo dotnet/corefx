@@ -18,7 +18,11 @@ CryptoNative_EvpCipherCreate(const EVP_CIPHER* type, uint8_t* key, unsigned char
 EVP_CIPHER_CTX*
 CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyLength, int32_t effectiveKeyLength, unsigned char* iv, int32_t enc)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX* ctx = (EVP_CIPHER_CTX*)malloc(sizeof(EVP_CIPHER_CTX));
+#else
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+#endif
     if (ctx == NULL)
     {
         // Allocation failed

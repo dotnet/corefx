@@ -54,7 +54,7 @@ static long TrySetECDHNamedCurve(SSL_CTX* ctx)
 {
 	long result = 0;
 #ifdef SSL_CTX_set_ecdh_auto
-#ifdef OPENSSL_IS_BORINGSSL
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	#pragma unused(ctx)
 #endif
 	result = SSL_CTX_set_ecdh_auto(ctx, 1);
@@ -456,7 +456,11 @@ int32_t CryptoNative_SslDoHandshake(SSL* ssl)
 
 int32_t CryptoNative_IsSslStateOK(SSL* ssl)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return SSL_state(ssl) == SSL_ST_OK;
+#else
+    return SSL_get_state(ssl) == TLS_ST_OK;
+#endif
 }
 
 X509* CryptoNative_SslGetPeerCertificate(SSL* ssl)

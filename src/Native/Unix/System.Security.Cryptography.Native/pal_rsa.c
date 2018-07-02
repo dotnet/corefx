@@ -53,7 +53,7 @@ static int HasNoPrivateKey(RSA* rsa)
     if (rsa == NULL)
         return 1;
 
-#ifndef OPENSSL_IS_BORINGSSL
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     // Shared pointer, don't free.
     const RSA_METHOD* meth = RSA_get_method(rsa);
 
@@ -61,7 +61,6 @@ static int HasNoPrivateKey(RSA* rsa)
     // That doesn't mean it's actually present, but we can't tell.
     if (meth->flags & RSA_FLAG_EXT_PKEY)
         return 0;
-#endif
 
     // In the event that there's a middle-ground where we report failure when success is expected,
     // one could do something like check if the RSA_METHOD intercepts all private key operations:
@@ -79,6 +78,25 @@ static int HasNoPrivateKey(RSA* rsa)
 
     if (rsa->p == NULL || rsa->q == NULL || rsa->dmp1 == NULL || rsa->dmq1 == NULL || rsa->iqmp == NULL)
         return 1;
+#else
+    if (RSA_flags(rsa) & RSA_FLAG_EXT_PKEY)
+        return 0;
+
+    BIGNUM* d;
+    RSA_get0_key(rsa, NULL, NULL, &d);
+    if (d != NULL)
+        return 0;
+
+    BIGNUM* p;
+    BIGNUM* q;
+    BIGNUM* dmp1;
+    BIGNUM* dmq1;
+    BIGNUM* iqmp;
+    RSA_get0_factors(rsa, &p, &q);
+    RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
+    if (p == NULL || q == NULL || dmp1 == NULL || dmq1 == NULL || iqmp == NULL)
+        return 1;    
+#endif
 
     return 0;
 }
@@ -97,8 +115,10 @@ CryptoNative_RsaPrivateDecrypt(int32_t flen, const uint8_t* from, uint8_t* to, R
     {
 #ifdef OPENSSL_IS_BORINGSSL
         OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
-#else
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
         ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#else
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_OSSL_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
 #endif
         return -1;
     }
@@ -113,8 +133,10 @@ int32_t CryptoNative_RsaSignPrimitive(int32_t flen, const uint8_t* from, uint8_t
     {
 #ifdef OPENSSL_IS_BORINGSSL
         OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
-#else
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
         ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+#else
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_OSSL_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
 #endif
         return -1;
     }
@@ -221,6 +243,7 @@ int32_t CryptoNative_GetRsaParameters(const RSA* rsa,
         return 0;
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     *n = rsa->n;
     *e = rsa->e;
     *d = rsa->d;
@@ -229,10 +252,16 @@ int32_t CryptoNative_GetRsaParameters(const RSA* rsa,
     *q = rsa->q;
     *dmq1 = rsa->dmq1;
     *iqmp = rsa->iqmp;
+#else
+    RSA_get0_key(rsa, n, e, d);
+    RSA_get0_factors(rsa, p, q);
+    RSA_get0_crt_params(rsa, dmp1, dmq1, iqmp);
+#endif
 
     return 1;
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 static int32_t SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
 {
     assert(rsaFieldAddress != NULL);
@@ -254,6 +283,7 @@ static int32_t SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_
 
     return 0;
 }
+#endif
 
 int32_t CryptoNative_SetRsaParameters(RSA* rsa,
                                               uint8_t* n,
@@ -279,7 +309,8 @@ int32_t CryptoNative_SetRsaParameters(RSA* rsa,
         return 0;
     }
 
-    return 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    return
         SetRsaParameter(&rsa->n, n, nLength) &&
         SetRsaParameter(&rsa->e, e, eLength) &&
         SetRsaParameter(&rsa->d, d, dLength) &&
@@ -288,4 +319,33 @@ int32_t CryptoNative_SetRsaParameters(RSA* rsa,
         SetRsaParameter(&rsa->q, q, qLength) &&
         SetRsaParameter(&rsa->dmq1, dmq1, dmq1Length) &&
         SetRsaParameter(&rsa->iqmp, iqmp, iqmpLength);
+#else
+    BIGNUM* bn_n = n && nLength ? BN_bin2bn(n, nLength, NULL) : NULL;
+    BIGNUM* bn_e = e && eLength ? BN_bin2bn(e, eLength, NULL) : NULL;
+    BIGNUM* bn_d = d && dLength ? BN_bin2bn(d, dLength, NULL) : NULL;
+    if (!RSA_set0_key(rsa, bn_n, bn_e, bn_d))
+    {
+        return 0;
+    }
+
+    if (p || q)
+    {
+        BIGNUM* bn_p = p && pLength ? BN_bin2bn(p, pLength, NULL) : NULL;
+        BIGNUM* bn_q = q && qLength ? BN_bin2bn(q, qLength, NULL) : NULL;
+        if (!RSA_set0_factors(rsa, bn_p, bn_q))
+        {
+            return 0;
+        }
+    }
+
+    if (dmp1 || dmq1 || iqmp)
+    {
+        BIGNUM* bn_dmp1 = dmp1 && dmp1Length ? BN_bin2bn(dmp1, dmp1Length, NULL) : NULL;
+        BIGNUM* bn_dmq1 = dmq1 && dmq1Length ? BN_bin2bn(dmq1, dmq1Length, NULL) : NULL;
+        BIGNUM* bn_iqmp = iqmp && iqmpLength ? BN_bin2bn(iqmp, iqmpLength, NULL) : NULL;
+        return RSA_set0_crt_params(rsa, bn_dmp1, bn_dmq1, bn_iqmp);
+    }
+
+    return 1;
+#endif
 }

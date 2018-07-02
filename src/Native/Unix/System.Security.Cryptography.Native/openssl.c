@@ -96,12 +96,17 @@ Return values:
 NULL if the validity cannot be determined, a pointer to the ASN1_TIME structure for the NotBefore value
 otherwise.
 */
-ASN1_TIME* CryptoNative_GetX509NotBefore(X509* x509)
+const ASN1_TIME* CryptoNative_GetX509NotBefore(X509* x509)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (x509 && x509->cert_info && x509->cert_info->validity)
     {
         return x509->cert_info->validity->notBefore;
     }
+#else
+    if (x509)
+        return X509_get0_notBefore(x509);
+#endif
 
     return NULL;
 }
@@ -117,12 +122,17 @@ Return values:
 NULL if the validity cannot be determined, a pointer to the ASN1_TIME structure for the NotAfter value
 otherwise.
 */
-ASN1_TIME* CryptoNative_GetX509NotAfter(X509* x509)
+const ASN1_TIME* CryptoNative_GetX509NotAfter(X509* x509)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (x509 && x509->cert_info && x509->cert_info->validity)
     {
         return x509->cert_info->validity->notAfter;
     }
+#else
+    if (x509)
+        return X509_get0_notAfter(x509);
+#endif
 
     return NULL;
 }
@@ -142,7 +152,11 @@ ASN1_TIME* CryptoNative_GetX509CrlNextUpdate(X509_CRL* crl)
 {
     if (crl)
     {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(OPENSSL_IS_BORINGSSL)
         return X509_CRL_get_nextUpdate(crl);
+#else
+        return X509_CRL_get0_nextUpdate(crl);
+#endif
     }
 
     return NULL;
@@ -164,11 +178,16 @@ The encoded value of the version, otherwise:
 */
 int32_t CryptoNative_GetX509Version(X509* x509)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (x509 && x509->cert_info)
     {
         long ver = ASN1_INTEGER_get(x509->cert_info->version);
         return (int32_t)ver;
     }
+#else
+    if (x509)
+        return (int32_t)X509_get_version(x509);
+#endif
 
     return -1;
 }
@@ -186,10 +205,23 @@ describing the object type.
 */
 ASN1_OBJECT* CryptoNative_GetX509PublicKeyAlgorithm(X509* x509)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (x509 && x509->cert_info && x509->cert_info->key && x509->cert_info->key->algor)
     {
         return x509->cert_info->key->algor->algorithm;
     }
+#else
+    if (x509)
+    {
+        X509_PUBKEY* pubkey = X509_get_X509_PUBKEY(x509);        
+        if (pubkey)
+        {
+            ASN1_OBJECT* pkalg;
+            if (X509_PUBKEY_get0_param(&pkalg, NULL, NULL, NULL, pubkey))
+                return pkalg;
+        }
+    }
+#endif
 
     return NULL;
 }
@@ -207,10 +239,19 @@ describing the object type.
 */
 ASN1_OBJECT* CryptoNative_GetX509SignatureAlgorithm(X509* x509)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (x509 && x509->sig_alg && x509->sig_alg->algorithm)
     {
         return x509->sig_alg->algorithm;
     }
+#else
+    if (x509)
+    {
+        X509_ALGOR* sig_alg = X509_get0_tbs_sigalg(x509);
+        if (sig_alg)
+            return sig_alg->algorithm;
+    }    
+#endif
 
     return NULL;
 }
@@ -229,12 +270,27 @@ Any negative value: The input buffer size was reported as insufficient. A buffer
 */
 int32_t CryptoNative_GetX509PublicKeyParameterBytes(X509* x509, uint8_t* pBuf, int32_t cBuf)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (!x509 || !x509->cert_info || !x509->cert_info->key || !x509->cert_info->key->algor)
     {
         return 0;
     }
 
     ASN1_TYPE* parameter = x509->cert_info->key->algor->parameter;
+#else
+    if (!x509)
+        return 0;
+
+    X509_PUBKEY* pubkey = X509_get_X509_PUBKEY(x509);        
+    if (!pubkey)
+        return 0;
+
+    X509_ALGOR* algor;
+    if (!X509_PUBKEY_get0_param(NULL, NULL, NULL, &algor, pubkey))
+        return 0;
+
+    ASN1_TYPE* parameter = algor->parameter;
+#endif
 
     if (!parameter)
     {
@@ -274,10 +330,15 @@ the public key.
 */
 ASN1_BIT_STRING* CryptoNative_GetX509PublicKeyBytes(X509* x509)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (x509 && x509->cert_info && x509->cert_info->key)
     {
         return x509->cert_info->key->public_key;
     }
+#else
+    if (x509)
+        return X509_get0_pubkey_bitstr(x509);
+#endif
 
     return NULL;
 }
@@ -352,6 +413,7 @@ Any negative value: The input buffer size was reported as insufficient. A buffer
 */
 int32_t CryptoNative_GetX509NameRawBytes(X509_NAME* x509Name, uint8_t* pBuf, int32_t cBuf)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (!x509Name || !x509Name->bytes || cBuf < 0)
     {
         return 0;
@@ -387,6 +449,46 @@ int32_t CryptoNative_GetX509NameRawBytes(X509_NAME* x509Name, uint8_t* pBuf, int
 
     memcpy_s(pBuf, Int32ToSizeT(cBuf), x509Name->bytes->data, Int32ToSizeT(length));
     return 1;
+#else
+    const unsigned char *der;
+    size_t derlen;
+
+    if (!x509Name || cBuf < 0 || !X509_NAME_get0_der(x509Name, &der, &derlen))
+    {
+        return 0;
+    }
+
+    /*
+     * length is size_t on some platforms and int on others, so the comparisons
+     * are not tautological everywhere. We can let the compiler optimize away
+     * any part of the check that is. We split the size checks into two checks
+     * so we can get around the warnings on Linux where the Length is unsigned
+     * whereas Length is signed on OS X. The first check makes sure the variable
+     * value is less than INT_MAX in it's native format; once we know it is not
+     * too large, we can safely cast to an int to make sure it is not negative
+     */
+    if (derlen > INT_MAX)
+    {
+        assert(0 && "Huge length X509_NAME");
+        return 0;
+    }
+
+    int length = (int)derlen;
+
+    if (length < 0)
+    {
+        assert(0 && "Negative length X509_NAME");
+        return 0;
+    }
+
+    if (!pBuf || cBuf < length)
+    {
+        return -length;
+    }
+
+    memcpy_s(pBuf, Int32ToSizeT(cBuf), der, Int32ToSizeT(length));
+    return 1;
+#endif
 }
 
 /*
@@ -436,7 +538,7 @@ BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32_t forIssue
 {
     static const char szOidUpn[] = "1.3.6.1.4.1.311.20.2.3";
 
-    if (!x509 || !x509->cert_info || nameType < NAME_TYPE_SIMPLE || nameType > NAME_TYPE_URL)
+    if (!x509 || /*!x509->cert_info ||*/ nameType < NAME_TYPE_SIMPLE || nameType > NAME_TYPE_URL)
     {
         return NULL;
     }
@@ -453,7 +555,11 @@ BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32_t forIssue
     // UrlName: SAN.Entries.FirstOrDefault(type == GEN_URI);
     if (nameType == NAME_TYPE_SIMPLE)
     {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         X509_NAME* name = forIssuer ? x509->cert_info->issuer : x509->cert_info->subject;
+#else
+        X509_NAME* name = forIssuer ? X509_get_issuer_name(x509) : X509_get_subject_name(x509);
+#endif
 
         if (name)
         {
@@ -628,7 +734,11 @@ BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32_t forIssue
 
     if (nameType == NAME_TYPE_EMAIL || nameType == NAME_TYPE_DNS)
     {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         X509_NAME* name = forIssuer ? x509->cert_info->issuer : x509->cert_info->subject;
+#else
+        X509_NAME* name = forIssuer ? X509_get_issuer_name(x509) : X509_get_subject_name(x509);
+#endif
         int expectedNid = NID_undef;
 
         switch (nameType)
@@ -1249,6 +1359,7 @@ static pthread_mutex_t g_initLock = PTHREAD_MUTEX_INITIALIZER;
 // Set of locks initialized for OpenSSL
 static pthread_mutex_t* g_locks = NULL;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 /*
 Function:
 LockingCallback
@@ -1297,6 +1408,7 @@ static unsigned long GetCurrentThreadId()
     return tid;
 }
 #endif // __APPLE__
+#endif // OPENSSL_VERSION_NUMBER < 0x10100000L
 
 /*
 Function:
@@ -1357,12 +1469,14 @@ int32_t CryptoNative_EnsureOpenSslInitialized()
         }
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     // Initialize the callback
     CRYPTO_set_locking_callback(LockingCallback);
 
 #ifdef __APPLE__
     // OSX uses an earlier version of OpenSSL which requires setting the CRYPTO_set_id_callback
     CRYPTO_set_id_callback(GetCurrentThreadId);
+#endif
 #endif
 
     // Initialize the random number generator seed

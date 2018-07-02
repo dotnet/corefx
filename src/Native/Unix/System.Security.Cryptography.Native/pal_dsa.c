@@ -45,12 +45,24 @@ int32_t CryptoNative_DsaSizeSignature(DSA* dsa)
 
 int32_t CryptoNative_DsaSizeP(DSA* dsa)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return BN_num_bytes(dsa->p);
+#else
+    BIGNUM* p;
+    DSA_get0_pqg(dsa, &p, NULL, NULL);
+    return BN_num_bytes(p);
+#endif
 }
 
 int32_t CryptoNative_DsaSizeQ(DSA* dsa)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return BN_num_bytes(dsa->q);
+#else
+    BIGNUM* q;
+    DSA_get0_pqg(dsa, NULL, &q, NULL);
+    return BN_num_bytes(q);
+#endif
 }
 
 int32_t CryptoNative_DsaSign(
@@ -66,11 +78,13 @@ int32_t CryptoNative_DsaSign(
         return 0;
     }
 
-#ifdef OPENSSL_IS_BORINGSSL
-    if (dsa->priv_key == NULL)
-#else
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     // DSA_OpenSSL() returns a shared pointer, no need to free/cache.
     if (dsa->meth == DSA_OpenSSL() && dsa->priv_key == NULL)
+#else
+    BIGNUM *x;
+    DSA_get0_key(dsa, NULL, &x);
+    if (x == NULL)
 #endif
     {
         *outSignatureLength = 0;
@@ -138,18 +152,30 @@ int32_t CryptoNative_GetDsaParameters(
         return 0;
     }
     
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     *p = dsa->p; *pLength = BN_num_bytes(*p);
     *q = dsa->q; *qLength = BN_num_bytes(*q);
     *g = dsa->g; *gLength = BN_num_bytes(*g);
-    *y = dsa->pub_key; *yLength = BN_num_bytes(*y);
+    *y = dsa->pub_key; *yLength = BN_num_bytes(*y);    
 
     // dsa->priv_key is optional
     *x = dsa->priv_key;
     *xLength = (*x == NULL) ? 0 : BN_num_bytes(*x);
+#else
+    DSA_get0_pqg(dsa, p, q, g);
+    DSA_get0_key(dsa, y, x);
+    *pLength = BN_num_bytes(*p);
+    *qLength = BN_num_bytes(*q);
+    *gLength = BN_num_bytes(*g);
+    *yLength = BN_num_bytes(*y);    
+    // dsa->priv_key is optional
+    *xLength = (*x == NULL) ? 0 : BN_num_bytes(*x);
+#endif
 
     return 1;
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
 {
     assert(dsaFieldAddress != NULL);
@@ -171,6 +197,7 @@ static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_
 
     return 0;
 }
+#endif
 
 int32_t CryptoNative_DsaKeyCreateByExplicitParameters(
     DSA** outDsa,
@@ -199,10 +226,23 @@ int32_t CryptoNative_DsaKeyCreateByExplicitParameters(
 
     DSA* dsa = *outDsa;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return
         SetDsaParameter(&dsa->p, p, pLength) &&
         SetDsaParameter(&dsa->q, q, qLength) &&
         SetDsaParameter(&dsa->g, g, gLength) &&
         SetDsaParameter(&dsa->pub_key, y, yLength) &&
         SetDsaParameter(&dsa->priv_key, x, xLength);
+#else
+    BIGNUM* bn_p = p && pLength ? BN_bin2bn(p, pLength, NULL) : NULL;
+    BIGNUM* bn_q = q && qLength ? BN_bin2bn(q, qLength, NULL) : NULL;
+    BIGNUM* bn_g = g && gLength ? BN_bin2bn(g, gLength, NULL) : NULL;
+    if (!DSA_set0_pqg(dsa, bn_p, bn_q, bn_g))
+    {
+        return 0;
+    }
+    BIGNUM* bn_y = y && yLength ? BN_bin2bn(y, yLength, NULL) : NULL;
+    BIGNUM* bn_x = x && xLength ? BN_bin2bn(x, xLength, NULL) : NULL;
+    return DSA_set0_key(dsa, bn_y, bn_x);
+#endif
 }
