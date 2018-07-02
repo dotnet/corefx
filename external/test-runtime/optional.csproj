@@ -5,8 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.IBCMerge" Version="$(MicrosoftDotNetIBCMergePackageVersion)" />
-    <PackageReference Include="TestILC.amd64ret" Version="$(TestILCamd64retPackageVersion)" />
-    <PackageReference Include="TestILC.armret" Version="$(TestILCarmretPackageVersion)" />
-    <PackageReference Include="TestILC.x86ret" Version="$(TestILCx86retPackageVersion)" />
+    <PackageReference Include="TestILC.amd64ret" Version="$(TestILCAmd64retPackageVersion)" />
+    <PackageReference Include="TestILC.armret" Version="$(TestILCArmretPackageVersion)" />
+    <PackageReference Include="TestILC.x86ret" Version="$(TestILCX86retPackageVersion)" />
   </ItemGroup>
 </Project>
