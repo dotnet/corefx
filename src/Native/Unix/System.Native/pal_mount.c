@@ -143,9 +143,9 @@ SystemNative_GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer
             *formatType = -1;
         }
 #elif defined(HAVE_STATFS)
-        assert(formatType != nullptr);
-        *formatType = SignedCast(stats.f_type);
-        SafeStringCopy(formatNameBuffer, bufferLength, "");
+        assert(formatType != NULL);
+        *formatType = (int64_t)(stats.f_type);
+        SafeStringCopy(formatNameBuffer, Int32ToSizeT(bufferLength), "");
 #else
 		*formatType = 0;
 #endif

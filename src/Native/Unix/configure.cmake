@@ -145,12 +145,14 @@ check_function_exists(
     ioctl
     HAVE_IOCTL)
 
-check_function_exists(
+check_symbol_exists(
     sched_getaffinity
+    "sched.h"
     HAVE_SCHED_GETAFFINITY)
 
-check_function_exists(
+check_symbol_exists(
     sched_setaffinity
+    "sched.h"
     HAVE_SCHED_SETAFFINITY)
 
 check_symbol_exists(
