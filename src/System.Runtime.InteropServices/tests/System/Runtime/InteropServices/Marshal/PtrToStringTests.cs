@@ -36,7 +36,6 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void PtrToStringUTF8()
         {
             Assert.Null(Marshal.PtrToStringUTF8(IntPtr.Zero, 123));

@@ -22,6 +22,7 @@ namespace System.Runtime.InteropServices.Tests
 
 #pragma warning disable 618
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void NullParameter()
         {
             AssertExtensions.Throws<ArgumentNullException>("pDstNativeVariant", () => Marshal.GetNativeVariantForObject(new object(), IntPtr.Zero));
@@ -29,6 +30,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void EmptyObject()
         {
             Variant v = new Variant();
@@ -46,6 +48,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void PrimitiveType()
         {
             Variant v = new Variant();
@@ -63,6 +66,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void CharType()
         {
             // GetNativeVariantForObject supports char, but internally recognizes it the same as ushort
@@ -84,6 +88,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void CharTypeNegative()
         {
             // While GetNativeVariantForObject supports taking chars, GetObjectForNativeVariant will
@@ -103,6 +108,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void StringType()
         {
             Variant v = new Variant();
@@ -120,6 +126,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void DoubleType()
         {
             Variant v = new Variant();

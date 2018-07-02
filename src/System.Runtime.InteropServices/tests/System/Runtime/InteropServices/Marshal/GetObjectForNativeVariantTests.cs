@@ -59,6 +59,7 @@ namespace System.Runtime.InteropServices.Tests
 
 #pragma warning disable 618
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void NullParameter()
         {
             AssertExtensions.Throws<ArgumentNullException>("pSrcNativeVariant", () => Marshal.GetObjectForNativeVariant(IntPtr.Zero));

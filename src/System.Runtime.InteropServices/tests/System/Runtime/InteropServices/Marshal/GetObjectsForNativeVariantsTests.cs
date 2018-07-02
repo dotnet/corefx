@@ -59,6 +59,7 @@ namespace System.Runtime.InteropServices.Tests
 #pragma warning disable 618
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void NullParameter()
         {
             AssertExtensions.Throws<ArgumentNullException>("aSrcNativeVariant", () => Marshal.GetObjectsForNativeVariants(IntPtr.Zero, 10));
@@ -66,6 +67,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void SByteType()
         {
             Variant v = new Variant();
@@ -87,6 +89,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ByteType()
         {
             Variant v = new Variant();
@@ -108,6 +111,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DoubleType()
         {
             Variant v = new Variant();
@@ -129,6 +133,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ShortType()
         {
             Variant v = new Variant();
@@ -150,6 +155,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UshortType()
         {
             Variant v = new Variant();
@@ -171,6 +177,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void IntType()
         {
             Variant v = new Variant();
@@ -192,6 +199,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UIntType()
         {
             Variant v = new Variant();
@@ -213,6 +221,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void LongType()
         {
             Variant v = new Variant();
@@ -234,6 +243,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ULongType()
         {
             Variant v = new Variant();
@@ -255,6 +265,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FloatType()
         {
             Variant v = new Variant();

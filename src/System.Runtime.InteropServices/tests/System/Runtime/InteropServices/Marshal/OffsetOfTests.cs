@@ -75,7 +75,8 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        public void TestFieldAlignment()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void TestFieldAlignment_Windows()
         {
             Type t = typeof(FieldAlignmentTest);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (RuntimeInformation.ProcessArchitecture != Architecture.X86))
