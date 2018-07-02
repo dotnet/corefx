@@ -5,8 +5,5 @@
 #include "pal_types.h"
 #include "pal_compiler.h"
 
-BEGIN_EXTERN_C
+DLLEXPORT intptr_t SystemIoPortsNative_SerialPortOpen(const char * name);
 
-intptr_t SystemIoPortsNative_SerialPortOpen(const char * name);
-
-END_EXTERN_C

@@ -1,4 +1,4 @@
-project(System.IO.Ports.Native)
+project(System.IO.Ports.Native C)
 
 add_library(System.IO.Ports.Native
     SHARED

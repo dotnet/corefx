@@ -7,7 +7,6 @@
 #include <errno.h>
 #include <pal_serial.h>
 
-
 /* Open device file in non-blocking mode and without controlling terminal */
 intptr_t SystemIoPortsNative_SerialPortOpen(const char * name)
 {
@@ -15,4 +14,3 @@ intptr_t SystemIoPortsNative_SerialPortOpen(const char * name)
     while ((result = open(name, O_RDWR | O_NOCTTY | O_CLOEXEC | O_NONBLOCK)) < 0 && errno == EINTR);
     return result;
 }
-
