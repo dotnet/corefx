@@ -1410,5 +1410,13 @@ Version number as MNNFFRBB (major minor fix final beta/patch)
 */
 uint32_t CryptoNative_OpenSslVersionNumber()
 {
-    return (uint32_t)SSLeay();
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+    if (API_EXISTS(OpenSSL_version_num))
+        return (uint32_t)OpenSSL_version_num();
+    if (API_EXISTS(SSLeay))
+        return (uint32_t)SSLeay();
+    return 0;
+#else
+    return OPENSSL_VERSION_NUMBER;
+#endif
 }
