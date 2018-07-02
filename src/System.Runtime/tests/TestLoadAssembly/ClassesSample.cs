@@ -16,7 +16,7 @@ class PrivateClassSample
     public PrivateClassSample(int param) { }
 }
 
-class PublicClassNoDefaultConstructorSample
+public class PublicClassNoDefaultConstructorSample
 {    
     public PublicClassNoDefaultConstructorSample(int param) { }
 }

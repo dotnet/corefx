@@ -439,7 +439,6 @@ namespace System.Tests
             yield return new object[] { "testloadassembly.dll", "publicclassnodefaultconstructorsample", "PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) };
         }
 
-
         [Theory]
         [MemberData(nameof(TestingCreateInstanceObjectHandle))]        
         static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType)
