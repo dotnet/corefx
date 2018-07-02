@@ -23,8 +23,6 @@ namespace System
     /// ReadOnlySpan represents a contiguous region of arbitrary memory. Unlike arrays, it can point to either managed
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
-    [DebuggerTypeProxy(typeof(SpanDebugView<>))]
-    [DebuggerDisplay("{ToString(),raw}")]
     [NonVersionable]
     public readonly ref partial struct ReadOnlySpan<T>
     {
@@ -167,6 +165,7 @@ namespace System
         /// Thrown when the destination Span is shorter than the source Span.
         /// </exception>
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(Span<T> destination)
         {
             // Using "if (!TryCopyTo(...))" results in two branches: one for the length

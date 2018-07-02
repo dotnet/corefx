@@ -15,17 +15,13 @@
 **
 ===========================================================*/
 
-using System;
 using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Runtime;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Security;
-using System.Diagnostics;
-using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
@@ -33,7 +29,7 @@ namespace System.IO
     {
         public static readonly Stream Null = new NullStream();
 
-        //We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
+        // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
         // improvement in Copy performance.
         private const int DefaultCopyBufferSize = 81920;
@@ -116,7 +112,7 @@ namespace System.IO
             return CopyToAsync(destination, bufferSize);
         }
 
-        public Task CopyToAsync(Stream destination, Int32 bufferSize)
+        public Task CopyToAsync(Stream destination, int bufferSize)
         {
             return CopyToAsync(destination, bufferSize, CancellationToken.None);
         }
@@ -128,14 +124,14 @@ namespace System.IO
             return CopyToAsync(destination, bufferSize, cancellationToken);
         }
 
-        public virtual Task CopyToAsync(Stream destination, Int32 bufferSize, CancellationToken cancellationToken)
+        public virtual Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
 
             return CopyToAsyncInternal(destination, bufferSize, cancellationToken);
         }
 
-        private async Task CopyToAsyncInternal(Stream destination, Int32 bufferSize, CancellationToken cancellationToken)
+        private async Task CopyToAsyncInternal(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
             try
@@ -219,24 +215,17 @@ namespace System.IO
         // classes, and without worrying about version brittleness, from a
         // base class switching to the Dispose pattern.  We're moving
         // Stream to the Dispose(bool) pattern - that's where all subclasses 
-        // should put their cleanup starting in V2.
+        // should put their cleanup now.
         public virtual void Close()
         {
-            // Ideally we would assert CanRead == CanWrite == CanSeek = false, 
-            // but we'd have to fix PipeStream & NetworkStream very carefully.
-
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         public void Dispose()
         {
-            // Ideally we would assert CanRead == CanWrite == CanSeek = false, 
-            // but we'd have to fix PipeStream & NetworkStream very carefully.
-
             Close();
         }
-
 
         protected virtual void Dispose(bool disposing)
         {
@@ -264,13 +253,13 @@ namespace System.IO
             return new ManualResetEvent(false);
         }
 
-        public virtual IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+        public virtual IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return BeginReadInternal(buffer, offset, count, callback, state, serializeAsynchronously: false, apm: true);
         }
 
         internal IAsyncResult BeginReadInternal(
-            byte[] buffer, int offset, int count, AsyncCallback callback, Object state,
+            byte[] buffer, int offset, int count, AsyncCallback callback, object state,
             bool serializeAsynchronously, bool apm)
         {
             if (!CanRead) throw Error.GetReadNotSupported();
@@ -360,12 +349,12 @@ namespace System.IO
             }
         }
 
-        public Task<int> ReadAsync(Byte[] buffer, int offset, int count)
+        public Task<int> ReadAsync(byte[] buffer, int offset, int count)
         {
             return ReadAsync(buffer, offset, count, CancellationToken.None);
         }
 
-        public virtual Task<int> ReadAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public virtual Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             // If cancellation was requested, bail early with an already completed task.
             // Otherwise, return a task that represents the Begin/End methods.
@@ -401,17 +390,17 @@ namespace System.IO
             }
         }
 
-        private Task<Int32> BeginEndReadAsync(Byte[] buffer, Int32 offset, Int32 count)
+        private Task<int> BeginEndReadAsync(byte[] buffer, int offset, int count)
         {
             if (!HasOverriddenBeginEndRead())
             {
                 // If the Stream does not override Begin/EndRead, then we can take an optimized path
                 // that skips an extra layer of tasks / IAsyncResults.
-                return (Task<Int32>)BeginReadInternal(buffer, offset, count, null, null, serializeAsynchronously: true, apm: false);
+                return (Task<int>)BeginReadInternal(buffer, offset, count, null, null, serializeAsynchronously: true, apm: false);
             }
 
             // Otherwise, we need to wrap calls to Begin/EndWrite to ensure we use the derived type's functionality.
-            return TaskFactory<Int32>.FromAsyncTrim(
+            return TaskFactory<int>.FromAsyncTrim(
                         this, new ReadWriteParameters { Buffer = buffer, Offset = offset, Count = count },
                         (stream, args, callback, state) => stream.BeginRead(args.Buffer, args.Offset, args.Count, callback, state), // cached by compiler
                         (stream, asyncResult) => stream.EndRead(asyncResult)); // cached by compiler
@@ -426,13 +415,13 @@ namespace System.IO
 
 
 
-        public virtual IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+        public virtual IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return BeginWriteInternal(buffer, offset, count, callback, state, serializeAsynchronously: false, apm: true);
         }
 
         internal IAsyncResult BeginWriteInternal(
-            byte[] buffer, int offset, int count, AsyncCallback callback, Object state,
+            byte[] buffer, int offset, int count, AsyncCallback callback, object state,
             bool serializeAsynchronously, bool apm)
         {
             if (!CanWrite) throw Error.GetWriteNotSupported();
@@ -666,12 +655,12 @@ namespace System.IO
             bool ITaskCompletionAction.InvokeMayRunArbitraryCode { get { return true; } }
         }
 
-        public Task WriteAsync(Byte[] buffer, int offset, int count)
+        public Task WriteAsync(byte[] buffer, int offset, int count)
         {
             return WriteAsync(buffer, offset, count, CancellationToken.None);
         }
 
-        public virtual Task WriteAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public virtual Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             // If cancellation was requested, bail early with an already completed task.
             // Otherwise, return a task that represents the Begin/End methods.
@@ -706,7 +695,7 @@ namespace System.IO
             }
         }
 
-        private Task BeginEndWriteAsync(Byte[] buffer, Int32 offset, Int32 count)
+        private Task BeginEndWriteAsync(byte[] buffer, int offset, int count)
         {
             if (!HasOverriddenBeginEndWrite())
             {
@@ -803,7 +792,7 @@ namespace System.IO
         {
         }
 
-        internal IAsyncResult BlockingBeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+        internal IAsyncResult BlockingBeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             // To avoid a race with a stream's position pointer & generating conditions
             // with internal buffer indexes in our own streams that 
@@ -835,7 +824,7 @@ namespace System.IO
             return SynchronousAsyncResult.EndRead(asyncResult);
         }
 
-        internal IAsyncResult BlockingBeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+        internal IAsyncResult BlockingBeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             // To avoid a race condition with a stream's position pointer & generating conditions 
             // with internal buffer indexes in our own streams that 
@@ -869,6 +858,8 @@ namespace System.IO
 
         private sealed class NullStream : Stream
         {
+            private static readonly Task<int> s_zeroTask = Task.FromResult(0);
+
             internal NullStream() { }
 
             public override bool CanRead => true;
@@ -919,7 +910,7 @@ namespace System.IO
                     Task.CompletedTask;
             }
 
-            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
                 if (!CanRead) throw Error.GetReadNotSupported();
 
@@ -934,7 +925,7 @@ namespace System.IO
                 return BlockingEndRead(asyncResult);
             }
 
-            public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+            public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
                 if (!CanWrite) throw Error.GetWriteNotSupported();
 
@@ -959,9 +950,9 @@ namespace System.IO
                 return 0;
             }
 
-            public override Task<int> ReadAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                return AsyncTaskMethodBuilder<int>.s_defaultResultTask;
+                return s_zeroTask;
             }
 
             public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
@@ -982,7 +973,7 @@ namespace System.IO
             {
             }
 
-            public override Task WriteAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 return cancellationToken.IsCancellationRequested ?
                     Task.FromCanceled(cancellationToken) :
@@ -1014,28 +1005,28 @@ namespace System.IO
         /// <summary>Used as the IAsyncResult object when using asynchronous IO methods on the base Stream class.</summary>
         private sealed class SynchronousAsyncResult : IAsyncResult
         {
-            private readonly Object _stateObject;
+            private readonly object _stateObject;
             private readonly bool _isWrite;
             private ManualResetEvent _waitHandle;
             private ExceptionDispatchInfo _exceptionInfo;
 
             private bool _endXxxCalled;
-            private Int32 _bytesRead;
+            private int _bytesRead;
 
-            internal SynchronousAsyncResult(Int32 bytesRead, Object asyncStateObject)
+            internal SynchronousAsyncResult(int bytesRead, object asyncStateObject)
             {
                 _bytesRead = bytesRead;
                 _stateObject = asyncStateObject;
                 //_isWrite = false;
             }
 
-            internal SynchronousAsyncResult(Object asyncStateObject)
+            internal SynchronousAsyncResult(object asyncStateObject)
             {
                 _stateObject = asyncStateObject;
                 _isWrite = true;
             }
 
-            internal SynchronousAsyncResult(Exception ex, Object asyncStateObject, bool isWrite)
+            internal SynchronousAsyncResult(Exception ex, object asyncStateObject, bool isWrite)
             {
                 _exceptionInfo = ExceptionDispatchInfo.Capture(ex);
                 _stateObject = asyncStateObject;
@@ -1056,7 +1047,7 @@ namespace System.IO
                 }
             }
 
-            public Object AsyncState
+            public object AsyncState
             {
                 get { return _stateObject; }
             }
@@ -1072,7 +1063,7 @@ namespace System.IO
                     _exceptionInfo.Throw();
             }
 
-            internal static Int32 EndRead(IAsyncResult asyncResult)
+            internal static int EndRead(IAsyncResult asyncResult)
             {
                 SynchronousAsyncResult ar = asyncResult as SynchronousAsyncResult;
                 if (ar == null || ar._isWrite)
@@ -1235,7 +1226,7 @@ namespace System.IO
                     return _stream.ReadByte();
             }
 
-            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
 #if CORERT
                 throw new NotImplementedException(); // TODO: https://github.com/dotnet/corert/issues/3251
@@ -1296,7 +1287,7 @@ namespace System.IO
                     _stream.WriteByte(b);
             }
 
-            public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
+            public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
 #if CORERT
                 throw new NotImplementedException(); // TODO: https://github.com/dotnet/corert/issues/3251
