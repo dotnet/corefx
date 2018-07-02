@@ -253,6 +253,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Contracts\src\System.Diagnostics.Contracts.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />

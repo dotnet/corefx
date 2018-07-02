@@ -82,9 +82,9 @@ namespace System
         public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName) { throw null; }
         public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
         public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
-        public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName) { throw null; }
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
-        public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
     }
 
     public delegate System.Reflection.Assembly ResolveEventHandler(Object sender, ResolveEventArgs args);

@@ -284,62 +284,155 @@ namespace System
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName)
         {
-            throw new NotImplementedException();
+            // jit does not check for that, so we should do it ...
+            if (this == null)
+                throw new NullReferenceException();
+ 
+            if (assemblyName == null)
+                throw new ArgumentNullException("assemblyName");
+            Contract.EndContractBlock();
+
+            return Activator.CreateInstance(assemblyName, typeName);
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            // jit does not check for that, so we should do it ...
+            if (this == null)
+                throw new NullReferenceException();
+ 
+            if (assemblyName == null)
+                throw new ArgumentNullException("assemblyName");
+            Contract.EndContractBlock();
+
+            return Activator.CreateInstance(assemblyName,
+                                            typeName,
+                                            ignoreCase,
+                                            bindingAttr,
+                                            binder,
+                                            args,
+                                            culture,
+                                            activationAttributes);
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            // jit does not check for that, so we should do it ...
+            if (this == null)
+                throw new NullReferenceException();
+ 
+            if (assemblyName == null)
+                throw new ArgumentNullException("assemblyName");
+            Contract.EndContractBlock();
+
+            return Activator.CreateInstance(assemblyName, typeName, activationAttributes);
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName)
         {
-            throw new NotImplementedException();
+            ObjectHandle oh = CreateInstance(assemblyName, typeName);
+            if (oh == null)
+                return null;
+ 
+            return oh.Unwrap();
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            ObjectHandle oh = CreateInstance(assemblyName, 
+                                             typeName, 
+                                             ignoreCase, 
+                                             bindingAttr,
+                                             binder, 
+                                             args, 
+                                             culture, 
+                                             activationAttributes);
+ 
+            if (oh == null)
+                return null; 
+            
+            return oh.Unwrap();
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            ObjectHandle oh = CreateInstance(assemblyName, typeName, activationAttributes);
+            if (oh == null)
+                return null; 
+ 
+            return oh.Unwrap();
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
         {
-            throw new NotImplementedException();
+            // jit does not check for that, so we should do it ...
+            if (this == null)
+                throw new NullReferenceException();
+            Contract.EndContractBlock();
+
+            return Activator.CreateInstanceFrom(assemblyFile, typeName);
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            // jit does not check for that, so we should do it ...
+            if (this == null)
+                throw new NullReferenceException();
+            Contract.EndContractBlock();
+
+            return Activator.CreateInstanceFrom(assemblyFile,
+                                                typeName,
+                                                ignoreCase,
+                                                bindingAttr,
+                                                binder,
+                                                args,
+                                                culture,
+                                                activationAttributes);
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            // jit does not check for that, so we should do it ...
+            if (this == null)
+                throw new NullReferenceException();
+            Contract.EndContractBlock();
+
+            return Activator.CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
         }
 
-        public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName)
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName)
         {
-            throw new NotImplementedException();
+            ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName);
+            if (oh == null)
+                return null;  
+ 
+            return oh.Unwrap(); 
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            ObjectHandle oh = CreateInstanceFrom(assemblyFile, 
+                                                 typeName, 
+                                                 ignoreCase, 
+                                                 bindingAttr,
+                                                 binder, 
+                                                 args, 
+                                                 culture, 
+                                                 activationAttributes);
+ 
+            if (oh == null)
+                return null; 
+ 
+            return oh.Unwrap();
         }
 
-        public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes)
         {
-            throw new NotImplementedException();
+            ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
+            if (oh == null)
+                return null; 
+ 
+            return oh.Unwrap();
         }
     }
 }
