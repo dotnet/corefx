@@ -45,13 +45,32 @@ int32_t CryptoNative_EncodePkcs12(PKCS12* p12, uint8_t* buf)
 
 int32_t CryptoNative_Pkcs12Parse(PKCS12* p12, const char* pass, EVP_PKEY** pkey, X509** cert, X509Stack** ca)
 {
-    int32_t ret = PKCS12_parse(p12, pass, pkey, cert, ca);
+    int32_t ret = PKCS12_parse(p12, pass, pkey, cert, ca);    
 
     if (ret)
     {
         // PKCS12_parse's main loop can put a lot of spurious errors into the
         // error queue.  If we're returning success, clear the error queue.
         ERR_clear_error();
+
+#ifdef OPENSSL_IS_BORINGSSL
+        if (ca != NULL)
+        {
+            X509Stack *new_ca = sk_X509_new_null();
+            X509 *x = NULL;
+            if (new_ca == NULL)
+            {
+                OPENSSL_PUT_ERROR(PKCS8, ERR_R_MALLOC_FAILURE);
+                *pkey = NULL;
+                *cert = NULL;
+                return 0;
+            }
+            while ((x = sk_X509_pop(*ca)))
+                sk_X509_push(new_ca, x);
+            sk_X509_free(*ca);
+            *ca = new_ca;
+        }
+#endif
     }
     else
     {
