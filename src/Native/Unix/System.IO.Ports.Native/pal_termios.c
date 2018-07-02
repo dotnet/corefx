@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_types.h"
+#include "pal_utilities.h"
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -29,7 +30,8 @@ enum
 };
 
 /* Interop/Unix/Interop.Termios.cs */
-enum {
+enum
+{
     SignalDtr = 1,
     SignalDsr = 2,
     SignalRts = 3,
@@ -37,14 +39,16 @@ enum {
     SignalDcd = 5,
 };
 
-enum {
+enum
+{
     AllQueues = 0,
     ReceiveQueue = 1,
     SendQueue = 2,
 };
 
-static int TermiosGetStatus(int32_t fd)
+static int32_t SystemIoPortsNative_TermiosGetStatus(intptr_t handle)
 {
+    int fd = ToFileDescriptor(handle);
     int status = 0;
     if (ioctl(fd, TIOCMGET, &status) < 0)
     {
@@ -54,11 +58,10 @@ static int TermiosGetStatus(int32_t fd)
     return status;
 }
 
-int32_t Termios_GetSignal(int32_t fd, int32_t signal)
+int32_t SystemIoPortsNative_TermiosGetSignal(intptr_t handle, int32_t signal)
 {
-    int status;
-
-    if (ioctl(fd, TIOCMGET, &status) < 0)
+    int32_t status = SystemIoPortsNative_TermiosGetStatus(handle);
+    if (status == -1)
     {
         return -1;
     }
@@ -80,9 +83,9 @@ int32_t Termios_GetSignal(int32_t fd, int32_t signal)
    }
 }
 
-int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set)
+int32_t SystemIoPortsNative_TermiosSetSignal(intptr_t handle, int32_t signal, int32_t set)
 {
-    int status;
+    int fd = ToFileDescriptor(handle);
     int bit;
 
     switch (signal)
@@ -98,7 +101,7 @@ int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set)
         return -1;
     }
 
-    status = TermiosGetStatus(fd);
+    int status = SystemIoPortsNative_TermiosGetStatus(fd);
     if (status >= 0)
     {
         if (set)
@@ -115,8 +118,7 @@ int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set)
     return -1;
 }
 
-static speed_t
-TermiosSpeed2Rate(int speed)
+static speed_t SystemIoPortsNative_TermiosSpeed2Rate(int speed)
 {
     switch (speed)
     {
@@ -209,8 +211,7 @@ TermiosSpeed2Rate(int speed)
     return B0;
 }
 
-static int
-TermiosRate2Speed(speed_t brate)
+static int SystemIoPortsNative_TermiosRate2Speed(speed_t brate)
 {
     switch (brate)
     {
@@ -303,23 +304,23 @@ TermiosRate2Speed(speed_t brate)
     return brate;
 }
 
-int32_t
-Termios_GetSpeed(int32_t fd)
+int32_t SystemIoPortsNative_TermiosGetSpeed(intptr_t handle)
 {
+    int fd = ToFileDescriptor(handle);
     struct termios term;
     if (tcgetattr(fd, &term) < 0)
     {
         return  -1;
     }
 
-    return TermiosRate2Speed(cfgetispeed(&term));
+    return SystemIoPortsNative_TermiosRate2Speed(cfgetispeed(&term));
 }
 
-int32_t
-Termios_SetSpeed(int32_t fd, int32_t speed)
+int32_t SystemIoPortsNative_TermiosSetSpeed(intptr_t handle, int32_t speed)
 {
+    int fd = ToFileDescriptor(handle);
     struct termios term;
-    speed_t brate = TermiosSpeed2Rate(speed);
+    speed_t brate = SystemIoPortsNative_TermiosSpeed2Rate(speed);
 
     if (brate == B0)
     {
@@ -342,9 +343,9 @@ Termios_SetSpeed(int32_t fd, int32_t speed)
     return speed;
 }
 
-int32_t
-Termios_AvailableBytes(int32_t fd, int32_t readBuffer)
+int32_t SystemIoPortsNative_TermiosAvailableBytes(intptr_t handle, int32_t readBuffer)
 {
+    int fd = ToFileDescriptor(handle);
     int32_t bytes;
     if (ioctl (fd, readBuffer ? FIONREAD : TIOCOUTQ, &bytes) == -1)
     {
@@ -354,9 +355,9 @@ Termios_AvailableBytes(int32_t fd, int32_t readBuffer)
     return bytes;
 }
 
-int32_t
-Termios_Discard(int32_t fd, int32_t queue)
+int32_t SystemIoPortsNative_TermiosDiscard(intptr_t handle, int32_t queue)
 {
+    int fd = ToFileDescriptor(handle);
     switch (queue)
     {
     case ReceiveQueue:
@@ -368,21 +369,21 @@ Termios_Discard(int32_t fd, int32_t queue)
     }
 }
 
-int32_t
-Termios_Drain(int32_t fd)
+int32_t SystemIoPortsNative_TermiosDrain(intptr_t handle)
 {
+    int fd = ToFileDescriptor(handle);
     return tcdrain(fd);
 }
 
-int32_t
-Termios_SendBreak(int32_t fd, int32_t duration)
+int32_t SystemIoPortsNative_TermiosSendBreak(intptr_t handle, int32_t duration)
 {
+    int fd = ToFileDescriptor(handle);
     return tcsendbreak(fd, duration);
 }
 
-int32_t
-Termios_Reset(int32_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int32_t parity, int32_t handshake)
+int32_t SystemIoPortsNative_TermiosReset(intptr_t handle, int32_t speed, int32_t dataBits, int32_t stopBits, int32_t parity, int32_t handshake)
 {
+    int fd = ToFileDescriptor(handle);
     struct termios term;
     int ret = 0;
 
@@ -461,7 +462,7 @@ Termios_Reset(int32_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int
 
     if (speed)
     {
-        speed_t brate = TermiosSpeed2Rate(speed);
+        speed_t brate = SystemIoPortsNative_TermiosSpeed2Rate(speed);
         if (brate == B0)
         {
             errno = EINVAL;
@@ -478,5 +479,3 @@ Termios_Reset(int32_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int
 
     return 0;
 }
-
-

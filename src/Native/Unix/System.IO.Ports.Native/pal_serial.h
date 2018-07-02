@@ -7,6 +7,6 @@
 
 BEGIN_EXTERN_C
 
-int SerialPortOpen(const char * name);
+intptr_t SystemIoPortsNative_SerialPortOpen(const char * name);
 
 END_EXTERN_C

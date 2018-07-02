@@ -9,9 +9,9 @@
 
 
 /* Open device file in non-blocking mode and without controlling terminal */
-int SerialPortOpen(const char * name)
+intptr_t SystemIoPortsNative_SerialPortOpen(const char * name)
 {
-    int result;
+    intptr_t result;
     while ((result = open(name, O_RDWR | O_NOCTTY | O_CLOEXEC | O_NONBLOCK)) < 0 && errno == EINTR);
     return result;
 }

@@ -26,31 +26,31 @@ internal static partial class Interop
             SendQueue = 2,
         }
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_Reset", SetLastError = true)]
-        internal static extern int TermiosReset(SafeFileHandle fd, int speed, int data, StopBits stop, Parity parity, Handshake flow);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosReset", SetLastError = true)]
+        internal static extern int TermiosReset(SafeFileHandle handle, int speed, int data, StopBits stop, Parity parity, Handshake flow);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_GetSignal", SetLastError = true)]
-        internal static extern int TermiosGetSignal(SafeFileHandle fd, Signals signal);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosGetSignal", SetLastError = true)]
+        internal static extern int TermiosGetSignal(SafeFileHandle handle, Signals signal);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_SetSignal", SetLastError = true)]
-        internal static extern int TermiosGetSignal(SafeFileHandle fd, Signals signal, int set);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosSetSignal", SetLastError = true)]
+        internal static extern int TermiosGetSignal(SafeFileHandle handle, Signals signal, int set);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_SetSpeed", SetLastError = true)]
-        internal static extern int TermiosSetSpeed(SafeFileHandle fd, int speed);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosSetSpeed", SetLastError = true)]
+        internal static extern int TermiosSetSpeed(SafeFileHandle handle, int speed);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_GetSpeed", SetLastError = true)]
-        internal static extern int TermiosGetSpeed(SafeFileHandle fd);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosGetSpeed", SetLastError = true)]
+        internal static extern int TermiosGetSpeed(SafeFileHandle handle);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_AvailableBytes", SetLastError = true)]
-        internal static extern int TermiosGetAvailableBytes(SafeFileHandle fd, int input);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosAvailableBytes", SetLastError = true)]
+        internal static extern int TermiosGetAvailableBytes(SafeFileHandle handle, int input);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_Discard", SetLastError = true)]
-        internal static extern int TermiosDiscard(SafeFileHandle fd, Queue input);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosDiscard", SetLastError = true)]
+        internal static extern int TermiosDiscard(SafeFileHandle handle, Queue input);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_Drain", SetLastError = true)]
-        internal static extern int TermiosDrain(SafeFileHandle fd);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosDrain", SetLastError = true)]
+        internal static extern int TermiosDrain(SafeFileHandle handle);
 
-        [DllImport(Libraries.IOPortsNative, EntryPoint = "Termios_SendBreak", SetLastError = true)]
-        internal static extern int TermiosSendBreak(SafeFileHandle fd, int duration);
+        [DllImport(Libraries.IOPortsNative, EntryPoint = "SystemIoPortsNative_TermiosSendBreak", SetLastError = true)]
+        internal static extern int TermiosSendBreak(SafeFileHandle handle, int duration);
     }
 }

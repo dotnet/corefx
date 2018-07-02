@@ -7,17 +7,17 @@
 
 BEGIN_EXTERN_C
 
-int32_t Termios_GetSignal(int32_t fd, int32_t signal);
-int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set);
+int32_t SystemIoPortsNative_TermiosGetSignal(intptr_t fd, int32_t signal);
+int32_t SystemIoPortsNative_TermiosSetSignal(intptr_t fd, int32_t signal, int32_t set);
 
-int32_t Termios_GetSpeed(int32_t fd);
-int32_t Termios_SetSpeed(int32_t fd, int32_t speed);
+int32_t SystemIoPortsNative_TermiosGetSpeed(intptr_t fd);
+int32_t SystemIoPortsNative_TermiosSetSpeed(intptr_t fd, int32_t speed);
 
-int32_t Termios_AvailableBytes(int32_t fd, int32_t readBuffer);
+int32_t SystemIoPortsNative_TermiosAvailableBytes(intptr_t fd, int32_t readBuffer);
 
-int32_t Termios_Reset(int32_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int32_t parity, int32_t handshake);
-int32_t Termios_Discard(int32_t fd, int32_t queue);
-int32_t Termios_Drain(int32_t fd);
-int32_t Termios_SendBreak(int32_t fd, int32_t duration);
+int32_t SystemIoPortsNative_TermiosReset(intptr_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int32_t parity, int32_t handshake);
+int32_t SystemIoPortsNative_TermiosDiscard(intptr_t fd, int32_t queue);
+int32_t SystemIoPortsNative_TermiosDrain(intptr_t fd);
+int32_t SystemIoPortsNative_TermiosSendBreak(intptr_t fd, int32_t duration);
 
 END_EXTERN_C
