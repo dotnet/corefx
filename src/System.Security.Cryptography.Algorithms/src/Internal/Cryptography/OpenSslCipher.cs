@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
 
@@ -65,19 +66,15 @@ namespace Internal.Cryptography
             return output;
         }
 
-        private unsafe byte[] ProcessFinalBlock(byte[] input, int inputOffset, int count)
+        private byte[] ProcessFinalBlock(byte[] input, int inputOffset, int count)
         {
             byte[] output = new byte[count];
             int outputBytes = CipherUpdate(input, inputOffset, count, output, 0);
 
-            fixed (byte* outputStart = output)
-            {
-                byte* outputCurrent = outputStart + outputBytes;
-
-                int bytesWritten;
-                CheckBoolReturn(Interop.Crypto.EvpCipherFinalEx(_ctx, outputCurrent, out bytesWritten));
-                outputBytes += bytesWritten;
-            }
+            Span<byte> outputSpan = new Span<byte>(output).Slice(outputBytes);
+            int bytesWritten;
+            CheckBoolReturn(Interop.Crypto.EvpCipherFinalEx(_ctx, ref MemoryMarshal.GetReference(outputSpan), out bytesWritten));
+            outputBytes += bytesWritten;
 
             if (outputBytes == output.Length)
             {
@@ -94,24 +91,20 @@ namespace Internal.Cryptography
             return userData;
         }
 
-        private unsafe int CipherUpdate(byte[] input, int inputOffset, int count, byte[] output, int outputOffset)
+        private int CipherUpdate(byte[] input, int inputOffset, int count, byte[] output, int outputOffset)
         {
             bool status;
             int bytesWritten;
 
-            fixed (byte* inputStart = input)
-            fixed (byte* outputStart = output)
-            {
-                byte* inputCurrent = inputStart + inputOffset;
-                byte* outputCurrent = outputStart + outputOffset;
+            ReadOnlySpan<byte> inputSpan = new ReadOnlySpan<byte>(input).Slice(inputOffset);
+            Span<byte> outputSpan = new Span<byte>(output).Slice(outputOffset);
 
-                status = Interop.Crypto.EvpCipherUpdate(
-                    _ctx,
-                    outputCurrent,
-                    out bytesWritten,
-                    inputCurrent,
-                    count);
-            }
+            status = Interop.Crypto.EvpCipherUpdate(
+                _ctx,
+                ref MemoryMarshal.GetReference(outputSpan),
+                out bytesWritten,
+                ref MemoryMarshal.GetReference(inputSpan),
+                count);
 
             CheckBoolReturn(status);
             return bytesWritten;
@@ -121,10 +114,10 @@ namespace Internal.Cryptography
         {
             _ctx = Interop.Crypto.EvpCipherCreate(
                 algorithm,
-                key,
+                ref MemoryMarshal.GetReference(new ReadOnlySpan<byte>(key)),
                 key.Length * 8,
                 effectiveKeyLength,
-                IV,
+                ref MemoryMarshal.GetReference(new ReadOnlySpan<byte>(IV)),
                 _encrypting ? 1 : 0);
 
             Interop.Crypto.CheckValidOpenSslHandle(_ctx);

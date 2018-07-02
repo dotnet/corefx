@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{508A7D81-6462-459C-9F8F-B58FCCCFC8E7}</ProjectGuid>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
@@ -94,6 +94,8 @@
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\TripleDES\TripleDESReusabilityTests.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\TripleDES\TripleDESReusabilityTests.cs</Link>
     </Compile>
+    <Compile Include="AesCcmTests.cs" />
+    <Compile Include="AesGcmTests.cs" />
     <Compile Include="AesProvider.cs" />
     <Compile Include="AesTests.cs" />
     <Compile Include="DefaultECDsaProvider.cs" />
