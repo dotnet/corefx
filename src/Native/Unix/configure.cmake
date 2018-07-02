@@ -617,12 +617,6 @@ check_function_exists(
     uname
     HAVE_UNAME)
 
-check_symbol_exists(
-    getsockopt
-    sys/socket.h
-    HAVE_GETSOCKOPT
-)
-
 # getdomainname on OSX takes an 'int' instead of a 'size_t'
 # check if compiling with 'size_t' would cause a warning
 set (PREVIOUS_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
