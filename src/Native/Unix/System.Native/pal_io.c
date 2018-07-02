@@ -1372,7 +1372,6 @@ int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid)
     }
     return -1;
 #elif HAVE_GETPEEREID
-#error hit bsd
     uid_t egid;
     return getpeereid(fd, euid, &egid);
 #else
