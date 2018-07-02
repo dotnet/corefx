@@ -4,12 +4,11 @@
 
 #pragma warning disable CS0067 // events are declared but not used
 
-using System;
-using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.IO;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Loader;
-using System.IO;
 using System.Runtime.Remoting;
 using System.Security.Principal;
 
