@@ -17,7 +17,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Buffers;
-using System.Text;
+using Internal.Runtime.CompilerServices;
 
 namespace System.Globalization
 {
@@ -107,7 +107,7 @@ namespace System.Globalization
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
-            if (assembly != typeof(Object).Module.Assembly)
+            if (assembly != typeof(object).Module.Assembly)
             {
                 throw new ArgumentException(SR.Argument_OnlyMscorlib);
             }
@@ -134,7 +134,7 @@ namespace System.Globalization
                 throw new ArgumentNullException(name == null ? nameof(name) : nameof(assembly));
             }
 
-            if (assembly != typeof(Object).Module.Assembly)
+            if (assembly != typeof(object).Module.Assembly)
             {
                 throw new ArgumentException(SR.Argument_OnlyMscorlib);
             }
@@ -304,7 +304,7 @@ namespace System.Globalization
         {
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
-                return String.Compare(string1, string2, StringComparison.OrdinalIgnoreCase);
+                return string.Compare(string1, string2, StringComparison.OrdinalIgnoreCase);
             }
 
             // Verify the options before we do any real comparison.
@@ -315,7 +315,7 @@ namespace System.Globalization
                     throw new ArgumentException(SR.Argument_CompareOptionOrdinal, nameof(options));
                 }
 
-                return String.CompareOrdinal(string1, string2);
+                return string.CompareOrdinal(string1, string2);
             }
 
             if ((options & ValidCompareMaskOffFlags) != 0)
@@ -343,7 +343,7 @@ namespace System.Globalization
                 if ((options & CompareOptions.IgnoreCase) != 0)
                     return CompareOrdinalIgnoreCase(string1, string2);
 
-                return String.CompareOrdinal(string1, string2);
+                return string.CompareOrdinal(string1, string2);
             }
 
             return CompareString(string1.AsSpan(), string2.AsSpan(), options);
@@ -449,7 +449,7 @@ namespace System.Globalization
         {
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
-                int result = String.Compare(string1, offset1, string2, offset2, length1 < length2 ? length1 : length2, StringComparison.OrdinalIgnoreCase);
+                int result = string.Compare(string1, offset1, string2, offset2, length1 < length2 ? length1 : length2, StringComparison.OrdinalIgnoreCase);
                 if ((length1 != length2) && result == 0)
                     return (length1 > length2 ? 1 : -1);
                 return (result);
@@ -529,57 +529,103 @@ namespace System.Globalization
         {
             Debug.Assert(indexA + lengthA <= strA.Length);
             Debug.Assert(indexB + lengthB <= strB.Length);
-            return CompareOrdinalIgnoreCase(strA.AsSpan(indexA, lengthA), strB.AsSpan(indexB, lengthB));
+            return CompareOrdinalIgnoreCase(
+                ref Unsafe.Add(ref strA.GetRawStringData(), indexA),
+                lengthA,
+                ref Unsafe.Add(ref strB.GetRawStringData(), indexB),
+                lengthB);
         }
 
-        internal static unsafe int CompareOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+        internal static int CompareOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
         {
-            int length = Math.Min(strA.Length, strB.Length);
+            return CompareOrdinalIgnoreCase(ref MemoryMarshal.GetReference(strA), strA.Length, ref MemoryMarshal.GetReference(strB), strB.Length);
+        }
+
+        internal static int CompareOrdinalIgnoreCase(string strA, string strB)
+        {
+            return CompareOrdinalIgnoreCase(ref strA.GetRawStringData(), strA.Length, ref strB.GetRawStringData(), strB.Length);
+        }
+
+        internal static int CompareOrdinalIgnoreCase(ref char strA, int lengthA, ref char strB, int lengthB)
+        {
+            int length = Math.Min(lengthA, lengthB);
             int range = length;
 
-            fixed (char* ap = &MemoryMarshal.GetReference(strA))
-            fixed (char* bp = &MemoryMarshal.GetReference(strB))
+            ref char charA = ref strA;
+            ref char charB = ref strB;
+
+            // in InvariantMode we support all range and not only the ascii characters.
+            char maxChar = (GlobalizationMode.Invariant ? (char)0xFFFF : (char)0x7F);
+
+            while (length != 0 && charA <= maxChar && charB <= maxChar)
             {
-                char* a = ap;
-                char* b = bp;
-
-                // in InvariantMode we support all range and not only the ascii characters.
-                char maxChar = (char) (GlobalizationMode.Invariant ? 0xFFFF : 0x7F);
-
-                while (length != 0 && (*a <= maxChar) && (*b <= maxChar))
+                // Ordinal equals or lowercase equals if the result ends up in the a-z range 
+                if (charA == charB ||
+                    ((charA | 0x20) == (charB | 0x20) &&
+                        (uint)((charA | 0x20) - 'a') <= (uint)('z' - 'a')))
                 {
-                    int charA = *a;
-                    int charB = *b;
+                    length--;
+                    charA = ref Unsafe.Add(ref charA, 1);
+                    charB = ref Unsafe.Add(ref charB, 1);
+                }
+                else
+                {
+                    int currentA = charA;
+                    int currentB = charB;
 
-                    if (charA == charB)
-                    {
-                        a++; b++;
-                        length--;
-                        continue;
-                    }
-
-                    // uppercase both chars - notice that we need just one compare per char
-                    if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
-                    if ((uint)(charB - 'a') <= 'z' - 'a') charB -= 0x20;
+                    // Uppercase both chars if needed
+                    if ((uint)(charA - 'a') <= 'z' - 'a')
+                        currentA -= 0x20;
+                    if ((uint)(charB - 'a') <= 'z' - 'a')
+                        currentB -= 0x20;
 
                     // Return the (case-insensitive) difference between them.
-                    if (charA != charB)
-                        return charA - charB;
-
-                    // Next char
-                    a++; b++;
-                    length--;
+                    return currentA - currentB;
                 }
-
-                if (length == 0)
-                    return strA.Length - strB.Length;
-
-                Debug.Assert(!GlobalizationMode.Invariant);
-
-                range -= length;
-
-                return CompareStringOrdinalIgnoreCase(a, strA.Length - range, b, strB.Length - range);
             }
+
+            if (length == 0)
+                return lengthA - lengthB;
+
+            Debug.Assert(!GlobalizationMode.Invariant);
+
+            range -= length;
+
+            return CompareStringOrdinalIgnoreCase(ref charA, lengthA - range, ref charB, lengthB - range);
+        }
+
+
+        internal static bool EqualsOrdinalIgnoreCase(ref char strA, ref char strB, int length)
+        {
+            ref char charA = ref strA;
+            ref char charB = ref strB;
+
+            // in InvariantMode we support all range and not only the ascii characters.
+            char maxChar = (GlobalizationMode.Invariant ? (char)0xFFFF : (char)0x7F);
+
+            while (length != 0 && charA <= maxChar && charB <= maxChar)
+            {
+                // Ordinal equals or lowercase equals if the result ends up in the a-z range 
+                if (charA == charB ||
+                    ((charA | 0x20) == (charB | 0x20) &&
+                        (uint)((charA | 0x20) - 'a') <= (uint)('z' - 'a')))
+                {
+                    length--;
+                    charA = ref Unsafe.Add(ref charA, 1);
+                    charB = ref Unsafe.Add(ref charB, 1);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (length == 0)
+                return true;
+
+            Debug.Assert(!GlobalizationMode.Invariant);
+
+            return CompareStringOrdinalIgnoreCase(ref charA, length, ref charB, length) == 0;
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -587,7 +633,7 @@ namespace System.Globalization
         //  IsPrefix
         //
         //  Determines whether prefix is a prefix of string.  If prefix equals
-        //  String.Empty, true is returned.
+        //  string.Empty, true is returned.
         //
         ////////////////////////////////////////////////////////////////////////
         public virtual bool IsPrefix(string source, string prefix, CompareOptions options)
@@ -652,7 +698,7 @@ namespace System.Globalization
         //  IsSuffix
         //
         //  Determines whether suffix is a suffix of string.  If suffix equals
-        //  String.Empty, true is returned.
+        //  string.Empty, true is returned.
         //
         ////////////////////////////////////////////////////////////////////////
         public virtual bool IsSuffix(string source, string suffix, CompareOptions options)
@@ -719,7 +765,7 @@ namespace System.Globalization
         //
         //  Returns the first index where value is found in string.  The
         //  search starts from startIndex and ends at endIndex.  Returns -1 if
-        //  the specified value is not found.  If value equals String.Empty,
+        //  the specified value is not found.  If value equals string.Empty,
         //  startIndex is returned.  Throws IndexOutOfRange if startIndex or
         //  endIndex is less than zero or greater than the length of string.
         //  Throws ArgumentException if value is null.
@@ -967,7 +1013,7 @@ namespace System.Globalization
         //
         //  Returns the last index where value is found in string.  The
         //  search starts from startIndex and ends at endIndex.  Returns -1 if
-        //  the specified value is not found.  If value equals String.Empty,
+        //  the specified value is not found.  If value equals string.Empty,
         //  endIndex is returned.  Throws IndexOutOfRange if startIndex or
         //  endIndex is less than zero or greater than the length of string.
         //  Throws ArgumentException if value is null.
@@ -975,7 +1021,7 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
 
 
-        public virtual int LastIndexOf(String source, char value)
+        public virtual int LastIndexOf(string source, char value)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
@@ -1190,7 +1236,7 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
 
 
-        public override bool Equals(Object value)
+        public override bool Equals(object value)
         {
             CompareInfo that = value as CompareInfo;
 

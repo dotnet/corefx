@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
+using Thread = Internal.Runtime.Augments.RuntimeThread;
+
 namespace System.Threading.Tasks
 {
     /// <summary>
@@ -60,7 +62,7 @@ namespace System.Threading.Tasks
         /// <summary>Default MaxItemsPerTask to use for processing if none is specified.</summary>
         private const int DEFAULT_MAXITEMSPERTASK = UNLIMITED_PROCESSING;
         /// <summary>Default MaxConcurrencyLevel is the processor count if not otherwise specified.</summary>
-        private static Int32 DefaultMaxConcurrencyLevel { get { return Environment.ProcessorCount; } }
+        private static int DefaultMaxConcurrencyLevel { get { return Environment.ProcessorCount; } }
 
         /// <summary>Gets the sync obj used to protect all state on this instance.</summary>
         private object ValueLock { get { return m_threadProcessingMode; } }
@@ -114,8 +116,8 @@ namespace System.Threading.Tasks
 
             // Treat UNLIMITED_PROCESSING/-1 for both MCL and MIPT as the biggest possible value so that we don't
             // have to special case UNLIMITED_PROCESSING later on in processing.
-            if (m_maxConcurrencyLevel == UNLIMITED_PROCESSING) m_maxConcurrencyLevel = Int32.MaxValue;
-            if (m_maxItemsPerTask == UNLIMITED_PROCESSING) m_maxItemsPerTask = Int32.MaxValue;
+            if (m_maxConcurrencyLevel == UNLIMITED_PROCESSING) m_maxConcurrencyLevel = int.MaxValue;
+            if (m_maxItemsPerTask == UNLIMITED_PROCESSING) m_maxItemsPerTask = int.MaxValue;
 
             // Create the concurrent/exclusive schedulers for this pair
             m_exclusiveTaskScheduler = new ConcurrentExclusiveTaskScheduler(this, 1, ProcessingMode.ProcessingExclusiveTask);
@@ -293,7 +295,7 @@ namespace System.Threading.Tasks
                     try
                     {
                         processingTask = new Task(thisPair => ((ConcurrentExclusiveSchedulerPair)thisPair).ProcessExclusiveTasks(), this,
-                            default(CancellationToken), GetCreationOptionsForTask(fairly));
+                            default, GetCreationOptionsForTask(fairly));
                         processingTask.Start(m_underlyingTaskScheduler);
                         // When we call Start, if the underlying scheduler throws in QueueTask, TPL will fault the task and rethrow
                         // the exception.  To deal with that, we need a reference to the task object, so that we can observe its exception.
@@ -320,7 +322,7 @@ namespace System.Threading.Tasks
                             try
                             {
                                 processingTask = new Task(thisPair => ((ConcurrentExclusiveSchedulerPair)thisPair).ProcessConcurrentTasks(), this,
-                                    default(CancellationToken), GetCreationOptionsForTask(fairly));
+                                    default, GetCreationOptionsForTask(fairly));
                                 processingTask.Start(m_underlyingTaskScheduler); // See above logic for why we use new + Start rather than StartNew
                             }
                             catch

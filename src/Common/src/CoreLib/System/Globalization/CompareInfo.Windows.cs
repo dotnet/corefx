@@ -166,14 +166,16 @@ namespace System.Globalization
             }
         }
 
-        private static unsafe int CompareStringOrdinalIgnoreCase(char* string1, int count1, char* string2, int count2)
+        private static unsafe int CompareStringOrdinalIgnoreCase(ref char string1, int count1, ref char string2, int count2)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
-            Debug.Assert(string1 != null);
-            Debug.Assert(string2 != null);
 
-            // Use the OS to compare and then convert the result to expected value by subtracting 2 
-            return Interop.Kernel32.CompareStringOrdinal(string1, count1, string2, count2, true) - 2;
+            fixed (char* char1 = &string1)
+            fixed (char* char2 = &string2)
+            {
+                // Use the OS to compare and then convert the result to expected value by subtracting 2 
+                return Interop.Kernel32.CompareStringOrdinal(char1, count1, char2, count2, true) - 2;
+            }
         }
 
         // TODO https://github.com/dotnet/coreclr/issues/13827:
@@ -314,7 +316,7 @@ namespace System.Globalization
             }
         }
 
-        internal unsafe int IndexOfCore(String source, String target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
+        internal unsafe int IndexOfCore(string source, string target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
         {
             Debug.Assert(!_invariantMode);
 
@@ -531,7 +533,7 @@ namespace System.Globalization
             return retValue;
         }
 
-        private unsafe SortKey CreateSortKey(String source, CompareOptions options)
+        private unsafe SortKey CreateSortKey(string source, CompareOptions options)
         {
             Debug.Assert(!_invariantMode);
 

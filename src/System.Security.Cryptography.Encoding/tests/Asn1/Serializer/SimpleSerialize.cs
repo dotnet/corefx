@@ -13,6 +13,32 @@ namespace System.Security.Cryptography.Tests.Asn1
     public static class SimpleSerialize
     {
         [Fact]
+        public static void SerializeNullAlgorithmIdentifier()
+        {
+            AlgorithmIdentifier identifier = new AlgorithmIdentifier
+            {
+                Algorithm = new Oid(null, "SHA-2-256"),
+                Parameters = new byte[] { 5, 0 },
+            };
+
+            Assert.Throws<CryptographicException>(
+                () => AsnSerializer.Serialize(identifier, AsnEncodingRules.DER));
+        }
+
+        [Fact]
+        public static void SerializeNullOidString()
+        {
+            AnyWithExpectedTag anyVal = new AnyWithExpectedTag
+            {
+                Id = null,
+                Data = "3000".HexToByteArray(),
+            };
+
+            Assert.Throws<CryptographicException>(
+                () => AsnSerializer.Serialize(anyVal, AsnEncodingRules.DER));
+        }
+
+        [Fact]
         public static void SerializeAlgorithmIdentifier()
         {
             AlgorithmIdentifier identifier = new AlgorithmIdentifier
@@ -425,6 +451,21 @@ namespace System.Security.Cryptography.Tests.Asn1
             using (AsnWriter writer = AsnSerializer.Serialize(data, AsnEncodingRules.DER))
             {
                 Assert.Equal(expectedHex, writer.Encode().ByteArrayToHex());
+            }
+        }
+
+        [Fact]
+        public static void WriteNegativeIntegers()
+        {
+            BigIntegers bigIntegers = new BigIntegers
+            {
+                First = -273,
+                Second = new byte[] { 0xFE, 0xED, 0xF0, 0x0D },
+            };
+
+            using (AsnWriter writer = AsnSerializer.Serialize(bigIntegers, AsnEncodingRules.DER))
+            {
+                Assert.Equal("300A0202FEEF0204FEEDF00D", writer.EncodeAsSpan().ByteArrayToHex());
             }
         }
     }

@@ -10,7 +10,7 @@ namespace System.Globalization
     {
         private int GetHijriDateAdjustment()
         {
-            if (_hijriAdvance == Int32.MinValue)
+            if (_hijriAdvance == int.MinValue)
             {
                 // Never been set before.  Use the system value from registry.
                 _hijriAdvance = GetAdvanceHijriDate();
@@ -18,8 +18,8 @@ namespace System.Globalization
             return (_hijriAdvance);
         }
 
-        private const String InternationalRegKey = "Control Panel\\International";
-        private const String HijriAdvanceRegKeyEntry = "AddHijriDate";
+        private const string InternationalRegKey = "Control Panel\\International";
+        private const string HijriAdvanceRegKeyEntry = "AddHijriDate";
 
         /*=================================GetAdvanceHijriDate==========================
         **Action: Gets the AddHijriDate value from the registry.
@@ -55,13 +55,13 @@ namespace System.Globalization
             {
                 try
                 {
-                    Object value = key.InternalGetValue(HijriAdvanceRegKeyEntry, null, false, false);
+                    object value = key.InternalGetValue(HijriAdvanceRegKeyEntry, null, false, false);
                     if (value == null)
                     {
                         return (0);
                     }
-                    String str = value.ToString();
-                    if (String.Compare(str, 0, HijriAdvanceRegKeyEntry, 0, HijriAdvanceRegKeyEntry.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                    string str = value.ToString();
+                    if (string.Compare(str, 0, HijriAdvanceRegKeyEntry, 0, HijriAdvanceRegKeyEntry.Length, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         if (str.Length == HijriAdvanceRegKeyEntry.Length)
                             hijriAdvance = -1;
@@ -69,7 +69,7 @@ namespace System.Globalization
                         {
                             try
                             {
-                                int advance = Int32.Parse(str.AsSpan(HijriAdvanceRegKeyEntry.Length), provider:CultureInfo.InvariantCulture);
+                                int advance = int.Parse(str.AsSpan(HijriAdvanceRegKeyEntry.Length), provider:CultureInfo.InvariantCulture);
                                 if ((advance >= MinAdvancedHijri) && (advance <= MaxAdvancedHijri))
                                 {
                                     hijriAdvance = advance;

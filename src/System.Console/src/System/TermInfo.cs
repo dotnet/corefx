@@ -101,8 +101,8 @@ namespace System
             private readonly int _nameSectionNumBytes;
             /// <summary>The number of bytes in the Booleans section of the database.</summary>
             private readonly int _boolSectionNumBytes;
-            /// <summary>The number of shorts in the numbers section of the database.</summary>
-            private readonly int _numberSectionNumShorts;
+            /// <summary>The number of integers in the numbers section of the database.</summary>
+            private readonly int _numberSectionNumInts;
             /// <summary>The number of offsets in the strings section of the database.</summary>
             private readonly int _stringSectionNumOffsets;
             /// <summary>The number of bytes in the strings table of the database.</summary>
@@ -129,17 +129,17 @@ namespace System
                 _readAs32Bit =
                     magic == MagicLegacyNumber ? false :
                     magic == Magic32BitNumber ? true :
-                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, String.Concat("O" + Convert.ToString(magic, 8)))); // magic number was not recognized. Printing the magic number in octal.
+                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, string.Concat("O" + Convert.ToString(magic, 8)))); // magic number was not recognized. Printing the magic number in octal.
                 _sizeOfInt = (_readAs32Bit) ? 4 : 2;
 
                 _nameSectionNumBytes = ReadInt16(data, 2);
                 _boolSectionNumBytes = ReadInt16(data, 4);
-                _numberSectionNumShorts = ReadInt16(data, 6);
+                _numberSectionNumInts = ReadInt16(data, 6);
                 _stringSectionNumOffsets = ReadInt16(data, 8);
                 _stringTableNumBytes = ReadInt16(data, 10);
                 if (_nameSectionNumBytes < 0 ||
                     _boolSectionNumBytes < 0 ||
-                    _numberSectionNumShorts < 0 ||
+                    _numberSectionNumInts < 0 ||
                     _stringSectionNumOffsets < 0 ||
                     _stringTableNumBytes < 0)
                 {
@@ -285,7 +285,7 @@ namespace System
             /// The offset into data where the string offsets section begins.  We index into this section
             /// to find the location within the strings table where a string value exists.
             /// </summary>
-            private int StringOffsetsOffset { get { return NumbersOffset + (_numberSectionNumShorts * _sizeOfInt); } }
+            private int StringOffsetsOffset { get { return NumbersOffset + (_numberSectionNumInts * _sizeOfInt); } }
 
             /// <summary>The offset into data where the string table exists.</summary>
             private int StringsTableOffset { get { return StringOffsetsOffset + (_stringSectionNumOffsets * 2); } }
@@ -337,14 +337,14 @@ namespace System
                 int index = (int)numberIndex;
                 Debug.Assert(index >= 0);
 
-                if (index >= _numberSectionNumShorts)
+                if (index >= _numberSectionNumInts)
                 {
                     // Some terminfo files may not contain enough entries to actually
                     // have the requested one.
                     return -1;
                 }
 
-                return ReadInt16(_data, NumbersOffset + (index * 2));
+                return ReadInt(_data, NumbersOffset + (index * _sizeOfInt), _readAs32Bit);
             }
 
             /// <summary>Parses the extended string information from the terminfo data.</summary>
@@ -854,7 +854,7 @@ namespace System
             /// <summary>Converts an Int32 to a Boolean, with 0 meaning false and all non-zero values meaning true.</summary>
             /// <param name="i">The integer value to convert.</param>
             /// <returns>true if the integer was non-zero; otherwise, false.</returns>
-            private static bool AsBool(Int32 i) { return i != 0; }
+            private static bool AsBool(int i) { return i != 0; }
 
             /// <summary>Converts a Boolean to an Int32, with true meaning 1 and false meaning 0.</summary>
             /// <param name="b">The Boolean value to convert.</param>
@@ -867,7 +867,7 @@ namespace System
             /// <returns>The formatted string.</returns>
             private static unsafe string FormatPrintF(string format, object arg)
             {
-                Debug.Assert(arg is string || arg is Int32);
+                Debug.Assert(arg is string || arg is int);
 
                 // Determine how much space is needed to store the formatted string.
                 string stringArg = arg as string;
@@ -934,16 +934,16 @@ namespace System
 
                 /// <summary>Initializes the parameter with an integer value.</summary>
                 /// <param name="value">The value to be stored in the parameter.</param>
-                public FormatParam(Int32 value) : this(value, null) { }
+                public FormatParam(int value) : this(value, null) { }
 
                 /// <summary>Initializes the parameter with a string value.</summary>
                 /// <param name="value">The value to be stored in the parameter.</param>
-                public FormatParam(String value) : this(0, value ?? string.Empty) { }
+                public FormatParam(string value) : this(0, value ?? string.Empty) { }
 
                 /// <summary>Initializes the parameter.</summary>
                 /// <param name="intValue">The integer value.</param>
                 /// <param name="stringValue">The string value.</param>
-                private FormatParam(Int32 intValue, String stringValue)
+                private FormatParam(int intValue, string stringValue)
                 {
                     _int32 = intValue;
                     _string = stringValue;

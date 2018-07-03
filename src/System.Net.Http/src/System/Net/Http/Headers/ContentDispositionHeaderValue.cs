@@ -97,7 +97,7 @@ namespace System.Net.Http.Headers
                 if (sizeParameter != null)
                 {
                     string sizeString = sizeParameter.Value;
-                    if (UInt64.TryParse(sizeString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
+                    if (ulong.TryParse(sizeString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
                     {
                         return (long)value;
                     }
@@ -324,7 +324,7 @@ namespace System.Net.Http.Headers
                 {
                     dateString = dateString.Substring(1, dateString.Length - 2);
                 }
-                if (HttpRuleParser.TryStringToDate(dateString, out date))
+                if (HttpDateParser.TryStringToDate(dateString, out date))
                 {
                     return date;
                 }
@@ -347,7 +347,7 @@ namespace System.Net.Http.Headers
             else
             {
                 // Must always be quoted.
-                string dateString = "\"" + HttpRuleParser.DateToString(date.Value) + "\"";
+                string dateString = "\"" + HttpDateParser.DateToString(date.Value) + "\"";
                 if (dateParameter != null)
                 {
                     dateParameter.Value = dateString;

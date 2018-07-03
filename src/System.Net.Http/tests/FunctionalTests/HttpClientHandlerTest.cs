@@ -13,6 +13,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -250,7 +251,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop]
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
         {
@@ -279,7 +281,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                IDictionary<String, object> dict = handler.Properties;
+                IDictionary<string, object> dict = handler.Properties;
                 Assert.Same(dict, handler.Properties);
                 Assert.Equal(0, dict.Count);
             }
@@ -290,9 +292,9 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                IDictionary<String, object> dict = handler.Properties;
+                IDictionary<string, object> dict = handler.Properties;
 
-                var item = new Object();
+                var item = new object();
                 dict.Add("item", item);
 
                 object value;
@@ -301,7 +303,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external servers")]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task SendAsync_SimpleGet_Success(Uri remoteServer)
         {
@@ -318,7 +320,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -340,15 +342,13 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_GetWithInvalidHostHeader_ThrowsException()
         {
             if (PlatformDetection.IsNetCore && !UseSocketsHttpHandler)
             {
-                // [ActiveIssue(24862)]
-                // WinHttpHandler and CurlHandler do not use the Host header to influence the SSL auth.
-                // .NET Framework and SocketsHttpHandler do.
+                // Only .NET Framework and SocketsHttpHandler use the Host header to influence the SSL auth.
                 return;
             }
 
@@ -362,7 +362,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // TODO: make unconditional after #26813 and #26476 are fixed
         public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
         {
@@ -379,7 +378,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(GetAsync_IPBasedUri_Success_MemberData))]
         public async Task GetAsync_IPBasedUri_Success(IPAddress address)
@@ -408,7 +406,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_MultipleRequestsReusingSameClient_Success()
         {
@@ -424,7 +422,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_ResponseContentAfterClientAndHandlerDispose_Success()
         {
@@ -439,7 +437,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_Cancel_CancellationTokenPropagates()
         {
@@ -448,8 +446,17 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClient client = CreateHttpClient())
             {
                 var request = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer);
-                TaskCanceledException ex = await Assert.ThrowsAsync<TaskCanceledException>(() =>
-                    client.SendAsync(request, cts.Token));
+                Task t = client.SendAsync(request, cts.Token);
+                OperationCanceledException ex;
+                if (PlatformDetection.IsUap)
+                {
+                    ex = await Assert.ThrowsAsync<OperationCanceledException>(() => t);
+                }
+                else
+                {
+                    ex = await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+                }
+
                 Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
                 if (!PlatformDetection.IsFullFramework)
                 {
@@ -459,7 +466,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external servers")]
         [Theory, MemberData(nameof(CompressedServers))]
         public async Task GetAsync_SetAutomaticDecompression_ContentDecompressed(Uri server)
         {
@@ -481,6 +488,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData("[::1234]")]
         [InlineData("[::1234]:8080")]
@@ -507,6 +515,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData("1.2.3.4")]
         [InlineData("1.2.3.4:8080")]
@@ -542,8 +551,9 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { "[::1234]" };
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
-        [OuterLoop] // Test uses azure endpoint.
+        [OuterLoop("Uses external server")]
         [MemberData(nameof(DestinationHost_MemberData))]
         public async Task ProxiedRequest_DefaultPort_PortStrippedOffInUri(string host)
         {
@@ -569,8 +579,9 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Fact]
-        [OuterLoop] // Test uses azure endpoint.
+        [OuterLoop("Uses external server")]
         public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
         {
             // Https proxy request will use CONNECT tunnel, even the default 443 port is specified, it will not be stripped off.
@@ -602,6 +613,7 @@ namespace System.Net.Http.Functional.Tests
             from useSsl in new[] { true, false }
             select new object[] { address, useSsl };
 
+        [ActiveIssue(30056, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
         public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
@@ -632,7 +644,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(CompressedServers))]
         public async Task GetAsync_SetAutomaticDecompression_HeadersRemoved(Uri server)
         {
@@ -648,7 +660,77 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+#if netcoreapp
+        [InlineData(DecompressionMethods.Brotli, "br", "")]
+        [InlineData(DecompressionMethods.Brotli, "br", "br")]
+        [InlineData(DecompressionMethods.Brotli, "br", "gzip")]
+        [InlineData(DecompressionMethods.Brotli, "br", "gzip, deflate")]
+#endif
+        [InlineData(DecompressionMethods.GZip, "gzip", "")]
+        [InlineData(DecompressionMethods.Deflate, "deflate", "")]
+        [InlineData(DecompressionMethods.GZip | DecompressionMethods.Deflate, "gzip, deflate", "")]
+        [InlineData(DecompressionMethods.GZip, "gzip", "gzip")]
+        [InlineData(DecompressionMethods.Deflate, "deflate", "deflate")]
+        [InlineData(DecompressionMethods.GZip, "gzip", "deflate")]
+        [InlineData(DecompressionMethods.GZip, "gzip", "br")]
+        [InlineData(DecompressionMethods.Deflate, "deflate", "gzip")]
+        [InlineData(DecompressionMethods.Deflate, "deflate", "br")]
+        [InlineData(DecompressionMethods.GZip | DecompressionMethods.Deflate, "gzip, deflate", "gzip, deflate")]
+        public async Task GetAsync_SetAutomaticDecompression_AcceptEncodingHeaderSentWithNoDuplicates(
+            DecompressionMethods methods,
+            string encodings,
+            string manualAcceptEncodingHeaderValues)
+        {
+            if (IsCurlHandler)
+            {
+                // Skip these tests on CurlHandler, dotnet/corefx #29905.
+                return;
+            }
+
+            if (!UseSocketsHttpHandler &&
+                (encodings.Contains("br") || manualAcceptEncodingHeaderValues.Contains("br")))
+            {
+                // Brotli encoding only supported on SocketsHttpHandler.
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+                handler.AutomaticDecompression = methods;
+
+                using (var client = new HttpClient(handler))
+                {
+                    if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
+                    {
+                        client.DefaultRequestHeaders.Add("Accept-Encoding", manualAcceptEncodingHeaderValues);
+                    }
+
+                    Task<HttpResponseMessage> clientTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
+                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { clientTask, serverTask }); 
+
+                    List<string> requestLines = await serverTask;
+                    string requestLinesString = string.Join("\r\n", requestLines);
+                    _output.WriteLine(requestLinesString);
+
+                    Assert.InRange(Regex.Matches(requestLinesString, "Accept-Encoding").Count, 1, 1);
+                    Assert.InRange(Regex.Matches(requestLinesString, encodings).Count, 1, 1);
+                    if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
+                    {
+                        Assert.InRange(Regex.Matches(requestLinesString, manualAcceptEncodingHeaderValues).Count, 1, 1);
+                    }
+
+                    using (HttpResponseMessage response = await clientTask)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }                    
+                }
+            });
+        }
+
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_ServerNeedsBasicAuthAndSetDefaultCredentials_StatusCodeUnauthorized()
         {
@@ -664,7 +746,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_ServerNeedsAuthAndSetCredential_StatusCodeOK()
         {
@@ -680,7 +762,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void GetAsync_ServerNeedsAuthAndNoCredential_StatusCodeUnauthorized()
         {
@@ -702,7 +784,6 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("WWW-Authenticate: CustomAuth\r\n")]
         [InlineData("")] // RFC7235 requires servers to send this header with 401 but some servers don't.
@@ -726,7 +807,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectFalse_RedirectFromHttpToHttp_StatusCodeRedirect(int statusCode)
         {
@@ -795,6 +876,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(30063, TargetFrameworkMonikers.Uap)] // fails due to TE header
         [Theory]
         [InlineData(300)]
         [InlineData(301)]
@@ -873,7 +955,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttp_StatusCodeOK(int statusCode)
         {
@@ -895,7 +977,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttps_StatusCodeOK()
         {
@@ -918,7 +1000,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework allows HTTPS to HTTP redirection")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpsToHttp_StatusCodeRedirect()
         {
@@ -968,7 +1050,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Needs to be rewritten to use RemoteInvoke")]
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectToUriWithParams_RequestMsgUriSet()
         {
@@ -992,7 +1075,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(3, 2)]
         [InlineData(3, 3)]
@@ -1048,7 +1131,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithRelativeLocation()
         {
@@ -1072,7 +1155,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(200)]
         [InlineData(201)]
@@ -1106,7 +1188,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't send fragments")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't send fragments")]
         [Theory]
         [InlineData("#origFragment", "", "#origFragment", false)]
         [InlineData("#origFragment", "", "#origFragment", true)]
@@ -1121,12 +1204,6 @@ namespace System.Net.Http.Functional.Tests
             {
                 // Starting with libcurl 7.20, "fragment part of URLs are no longer sent to the server".
                 // So CurlHandler doesn't send fragments.
-                return;
-            }
-
-            if (IsNetfxHandler)
-            {
-                // Similarly, netfx doesn't send fragments at all.
                 return;
             }
 
@@ -1184,7 +1261,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        [OuterLoop] // Test uses azure endpoint.
+        [OuterLoop("Uses external server")]
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -1203,8 +1280,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Needs to be rewritten to use RemoteInvoke")]
         [Fact]
-        [OuterLoop] // Test uses azure endpoint.
+        [OuterLoop("Uses external server")]
         public async Task HttpClientHandler_CredentialIsNotCredentialCacheAfterRedirect_StatusCodeOK()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -1230,7 +1308,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
         {
@@ -1265,7 +1343,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(HeaderWithEmptyValueAndUris))]
@@ -1290,7 +1368,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(HeaderValueAndUris))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndValueSent(string name, string value, Uri uri)
         {
@@ -1308,6 +1386,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP ignores invalid headers")]
         [Theory]
         [InlineData(":")]
         [InlineData("\x1234: \x5678")]
@@ -1476,7 +1555,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Contains("X-Http-Method-Override: DELETE", headersSet);
                     Assert.Contains("X-ATT-DeviceId: GT-P7320/P7320XXLPG", headersSet);
                     Assert.Contains("X-Wap-Profile: http://wap.samsungmobile.com/uaprof/SGH-I777.xml", headersSet);
-                    if (!IsNetfxHandler)
+                    if (!IsNetfxHandler && !PlatformDetection.IsUap)
                     {
                         Assert.Contains("Proxy-Connection: keep-alive", headersSet);
                     }
@@ -1493,6 +1572,7 @@ namespace System.Net.Http.Functional.Tests
             from dribble in new[] { false, true }
             select new object[] { newline, fold, dribble };
 
+        [ActiveIssue(30060, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(GetAsync_ManyDifferentResponseHeaders_ParsedCorrectly_MemberData))]
         public async Task GetAsync_ManyDifferentResponseHeaders_ParsedCorrectly(string newline, string fold, bool dribble)
@@ -1630,7 +1710,6 @@ namespace System.Net.Http.Functional.Tests
                 dribble ? new LoopbackServer.Options { StreamWrapper = s => new DribbleStream(s) } : null);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1681,7 +1760,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_NonTraditionalChunkSizes_Accepted()
         {
@@ -1722,7 +1800,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Test hangs due to bugs in WinRT HTTP stack")]
         [Theory]
         [InlineData("")] // missing size
         [InlineData("    ")] // missing size
@@ -1783,7 +1861,6 @@ namespace System.Net.Http.Functional.Tests
                 "\r\n"));
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_InfiniteChunkSize_ThrowsHttpRequestException()
         {
@@ -1817,15 +1894,10 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "No exception thrown")]
         [Fact]
         public async Task SendAsync_TransferEncodingSetButNoRequestContent_Throws()
         {
-            if (IsNetfxHandler)
-            {
-                // no exception thrown
-                return;
-            }
-
             var req = new HttpRequestMessage(HttpMethod.Post, "http://bing.com");
             req.Headers.TransferEncodingChunked = true;
             using (HttpClient c = CreateHttpClient())
@@ -1835,7 +1907,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_ResponseHeadersRead_ReadFromEachIterativelyDoesntDeadlock()
         {
@@ -1860,7 +1932,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_HttpRequestMsgResponseHeadersRead_StatusCodeOK()
         {
@@ -1881,7 +1953,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx's ConnectStream.ReadAsync tries to read beyond data already buffered, causing hangs #18864")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Slow response")]
         [Fact]
         public async Task SendAsync_ReadFromSlowStreamingServer_PartialDataReturned()
         {
@@ -2145,7 +2217,6 @@ namespace System.Net.Http.Functional.Tests
             server => server.AcceptConnectionSendResponseAndCloseAsync());
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
@@ -2163,7 +2234,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     await LoopbackServer.CreateServerAsync(async (server3, url3) =>
                     {
-                        var unblockServers = new TaskCompletionSource<bool>(TaskContinuationOptions.RunContinuationsAsynchronously);
+                        var unblockServers = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                         // First server connects but doesn't send any response yet
                         Task serverTask1 = server1.AcceptConnectionAsync(async connection1 =>
@@ -2213,7 +2284,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(99)]
         [InlineData(1000)]
@@ -2241,7 +2311,8 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework currently does not allow unicode in DNS names")]
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_UnicodeHostName_SuccessStatusCodeInResponse()
         {
@@ -2260,7 +2331,7 @@ namespace System.Net.Http.Functional.Tests
 
         #region Post Methods Tests
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(VerifyUploadServers))]
         public async Task PostAsync_CallMethodTwice_StringContent(Uri remoteServer)
         {
@@ -2285,7 +2356,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(VerifyUploadServers))]
         public async Task PostAsync_CallMethod_UnicodeStringContent(Uri remoteServer)
         {
@@ -2302,7 +2373,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(VerifyUploadServersStreamsAndExpectedData))]
         public async Task PostAsync_CallMethod_StreamContent(Uri remoteServer, HttpContent content, byte[] expectedData)
         {
@@ -2443,7 +2514,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostAsync_CallMethod_NullContent(Uri remoteServer)
         {
@@ -2464,7 +2535,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostAsync_CallMethod_EmptyContent(Uri remoteServer)
         {
@@ -2486,7 +2557,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(false, "1.0")]
         [InlineData(true, "1.0")]
@@ -2524,7 +2595,36 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't send content for get requests")]
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public async Task GetAsync_ExpectContinueTrue_NoContent_StillSendsHeader()
+        {
+            const string ExpectedContent = "Hello, expecting and continuing world.";
+            var clientCompleted = new TaskCompletionSource<bool>();
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = CreateHttpClient())
+                {
+                    client.DefaultRequestHeaders.ExpectContinue = true;
+                    Assert.Equal(ExpectedContent, await client.GetStringAsync(uri));
+                    clientCompleted.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAsync();
+                    Assert.Contains("Expect: 100-continue", headers);
+
+                    await connection.Writer.WriteAsync("HTTP/1.1 100 Continue\r\n\r\n");
+                    await connection.SendResponseAsync(content: ExpectedContent);
+                    await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
+                });
+            });
+        }
+
+        [ActiveIssue(30061, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -2561,7 +2661,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -2586,14 +2686,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
-        [OuterLoop] // takes several seconds
+        [OuterLoop("Takes several seconds")]
         [Fact]
         public async Task PostAsync_RedirectWith307_LargePayload()
         {
             await PostAsync_Redirect_LargePayload_Helper(307, true);
         }
 
-        [OuterLoop] // takes several seconds
+        [OuterLoop("Takes several seconds")]
         [Fact]
         public async Task PostAsync_RedirectWith302_LargePayload()
         {
@@ -2624,7 +2724,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(EchoServers))] // NOTE: will not work for in-box System.Net.Http.dll due to disposal of request content
         public async Task PostAsync_ReuseRequestContent_Success(Uri remoteServer)
         {
@@ -2643,7 +2743,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(HttpStatusCode.MethodNotAllowed, "Custom description")]
         [InlineData(HttpStatusCode.MethodNotAllowed, "")]
@@ -2666,7 +2766,7 @@ namespace System.Net.Http.Functional.Tests
 
         #region Various HTTP Method Tests
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(HttpMethods))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithNoContent_MethodCorrectlySent(
             string method,
@@ -2694,7 +2794,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(HttpMethodsThatAllowContent))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithContent_Success(
             string method,
@@ -2730,8 +2830,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)] // Test hangs. But this test seems invalid. An HttpRequestMessage can only be sent once.
-        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(30057, TargetFrameworkMonikers.Uap)]
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData("12345678910", 0)]
         [InlineData("12345678910", 5)]
@@ -2765,7 +2865,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(HttpMethodsThatDontAllowContent))]
         public async Task SendAsync_SendRequestUsingNoBodyMethodToEchoServerWithContent_NoBodySent(
             string method,
@@ -2818,7 +2918,7 @@ namespace System.Net.Http.Functional.Tests
 
         #region Version tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not allow HTTP/1.0 requests.")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_RequestVersion10_ServerReceivesVersion10Request()
         {
@@ -2826,7 +2926,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 0), receivedRequestVersion);
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_RequestVersion11_ServerReceivesVersion11Request()
         {
@@ -2835,7 +2935,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Throws exception sending request using Version(0,0)")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_RequestVersionNotSpecified_ServerReceivesVersion11Request()
         {
@@ -2853,7 +2953,7 @@ namespace System.Net.Http.Functional.Tests
 
         [ActiveIssue(23037, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [MemberData(nameof(Http2Servers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
@@ -2929,7 +3029,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20(Uri server)
         {
@@ -2996,246 +3096,7 @@ namespace System.Net.Http.Functional.Tests
         }
         #endregion
 
-        #region Proxy tests
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [MemberData(nameof(CredentialsForProxyRfcCompliant))]
-        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_RfcCompliant(ICredentials creds, bool wrapCredsInCache)
-        {
-            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [MemberData(nameof(CredentialsForProxyNonRfcCompliant))]
-        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_NonRfcCompliant(ICredentials creds, bool wrapCredsInCache)
-        {
-            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
-        }
-
-        private async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(ICredentials creds, bool wrapCredsInCache)
-        {
-            int port;
-            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
-                out port,
-                requireAuth: creds != null && creds != CredentialCache.DefaultCredentials,
-                expectCreds: true);
-            Uri proxyUrl = new Uri($"http://localhost:{port}");
-
-            const string BasicAuth = "Basic";
-            if (wrapCredsInCache)
-            {
-                Assert.IsAssignableFrom<NetworkCredential>(creds);
-                var cache = new CredentialCache();
-                cache.Add(proxyUrl, BasicAuth, (NetworkCredential)creds);
-                creds = cache;
-            }
-
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
-            {
-                handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, creds);
-
-                Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
-                Task<string> responseStringTask = responseTask.ContinueWith(t => t.Result.Content.ReadAsStringAsync(), TaskScheduler.Default).Unwrap();
-                await TestHelper.WhenAllCompletedOrAnyFailed(proxyTask, responseTask, responseStringTask);
-
-                using (responseTask.Result)
-                {
-                    TestHelper.VerifyResponseBody(responseStringTask.Result, responseTask.Result.Content.Headers.ContentMD5, false, null);
-                    Assert.Equal(Encoding.ASCII.GetString(proxyTask.Result.ResponseContent), responseStringTask.Result);
-
-                    NetworkCredential nc = creds?.GetCredential(proxyUrl, BasicAuth);
-                    string expectedAuth =
-                        nc == null || nc == CredentialCache.DefaultCredentials ? null :
-                        string.IsNullOrEmpty(nc.Domain) ? $"{nc.UserName}:{nc.Password}" :
-                        $"{nc.Domain}\\{nc.UserName}:{nc.Password}";
-                    Assert.Equal(expectedAuth, proxyTask.Result.AuthenticationHeaderValue);
-                }
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [MemberData(nameof(BypassedProxies))]
-        public async Task Proxy_BypassTrue_GetRequestDoesntGoesThroughCustomProxy(IWebProxy proxy)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Proxy = proxy;
-            using (var client = new HttpClient(handler))
-            using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
-            {
-                TestHelper.VerifyResponseBody(
-                    await response.Content.ReadAsStringAsync(),
-                    response.Content.Headers.ContentMD5,
-                    false,
-                    null);
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public async Task Proxy_HaveNoCredsAndUseAuthenticatedCustomProxy_ProxyAuthenticationRequiredStatusCode()
-        {
-            int port;
-            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
-                out port,
-                requireAuth: true,
-                expectCreds: false);
-            Uri proxyUrl = new Uri($"http://localhost:{port}");
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, null);
-            using (var client = new HttpClient(handler))
-            {
-                Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
-                await (new Task[] { proxyTask, responseTask }).WhenAllOrAnyFailed();
-                using (responseTask.Result)
-                {
-                    Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);
-                }
-            }
-        }
-
-        [Fact]
-        public async Task Proxy_SslProxyUnsupported_Throws()
-        {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
-            {
-                handler.Proxy = new WebProxy("https://" + Guid.NewGuid().ToString("N"));
-
-                Type expectedType = IsNetfxHandler || UseSocketsHttpHandler ?
-                    typeof(NotSupportedException) :
-                    typeof(HttpRequestException);
-
-                await Assert.ThrowsAsync(expectedType, () => client.GetAsync("http://" + Guid.NewGuid().ToString("N")));
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [Fact]
-        public async Task Proxy_UseSecureProxyTunnel_Success()
-        {
-            if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
-            {
-                // Issue #27746: WinHttpHandler and netfx hang on this test. 
-                // The same happens consistently on macOS 10.13 Release and with some
-                // frequency on some Linux flavors, disabling the test for curl handler due to that.
-                return;
-            }
-
-            LoopbackServer.Options options = new LoopbackServer.Options { UseSsl = true };
-
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            var ep = (IPEndPoint)listener.Server.LocalEndPoint;
-            Uri proxyUrl = new Uri($"http://{ep.Address}:{ep.Port}/");
-            //TODO : refactor once LoopbackGetRequestHttpProxy is merged with LoppbackServer
-            Task proxy = LoopbackGetRequestHttpProxy.StartAsync(listener, false, false);
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                Task serverTask = server.AcceptConnectionAsync(async connection =>
-                {
-                    await connection.ReadRequestHeaderAndSendResponseAsync(content: "OK\r\n");
-                });
-
-                using (HttpClientHandler handler = CreateHttpClientHandler()){
-                    // Point handler at out loopback proxy
-                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, null);
-                    handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
-
-                    using (HttpClient client = new HttpClient(handler))
-                    {
-                        HttpResponseMessage response = await client.GetAsync(url);
-                        Assert.True(response.StatusCode ==  HttpStatusCode.OK);
-                    }
-               }
-               await serverTask;
-            }, options);
-            await proxy;
-        }
-
-        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public async Task ProxyAuth_Digest_Succeeds()
-        {
-            if (IsCurlHandler)
-            {
-                // Issue #27870 curl HttpHandler can only do basic auth to proxy
-                return;
-            }
-
-            const string expectedUsername = "testusername";
-            const string expectedPassword = "testpassword";
-            const string authHeader = "Proxy-Authenticate: Digest realm=\"NetCore\", nonce=\"PwOnWgAAAAAAjnbW438AAJSQi1kAAAAA\", qop=\"auth\", stale=false\r\n";
-            LoopbackServer.Options options = new LoopbackServer.Options { IsProxy = true, Username = expectedUsername, Password = expectedPassword };
-            var proxyCreds = new NetworkCredential(expectedUsername, expectedPassword);
-
-            await LoopbackServer.CreateServerAsync(async (proxyServer, proxyUrl) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
-                {
-                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, proxyCreds);
-
-                    // URL does not matter. We will get response from "proxy" code below.
-                    Task<HttpResponseMessage> clientTask = client.GetAsync($"http://notarealserver.com/");
-
-                    //  Send Digest challenge.
-                    Task<List<string>> serverTask = proxyServer.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.ProxyAuthenticationRequired, authHeader);
-                    if (clientTask == await Task.WhenAny(clientTask, serverTask).TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds))
-                    {
-                        // Client task shouldn't have completed successfully; propagate failure.
-                        Assert.NotEqual(TaskStatus.RanToCompletion, clientTask.Status);
-                        await clientTask;
-                    }
-
-                    // Verify user & password.
-                    serverTask = proxyServer.AcceptConnectionPerformAuthenticationAndCloseAsync("");
-                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { clientTask, serverTask }, TestHelper.PassingTestTimeoutMilliseconds);
-
-                    Assert.Equal(HttpStatusCode.OK, clientTask.Result.StatusCode);
-                }
-            }, options);
-
-        }
-
-        private static IEnumerable<object[]> BypassedProxies()
-        {
-            yield return new object[] { null };
-            yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
-        }
-
-        private static IEnumerable<object[]> CredentialsForProxyRfcCompliant()
-        {
-            foreach (bool wrapCredsInCache in new[] { true, false })
-            {
-                yield return new object[] { new NetworkCredential("username", "password"), wrapCredsInCache };
-                yield return new object[] { new NetworkCredential("username", "password", "domain"), wrapCredsInCache };
-            }
-        }
-
-        private static IEnumerable<object[]> CredentialsForProxyNonRfcCompliant()
-        {
-            yield return new object[] { null, false };
-            foreach (bool wrapCredsInCache in new[] { true, false })
-            {
-                yield return new object[] { new NetworkCredential("user:name", "password"), wrapCredsInCache };
-                yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
-            }
-        }
-
-        #endregion
-
         #region Uri wire transmission encoding tests
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendRequest_UriPathHasReservedChars_ServerReceivedExpectedPath()
         {

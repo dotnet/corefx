@@ -28,6 +28,7 @@
     <Compile Include="EnvelopedCms\CertificateTests.cs" />
     <Compile Include="EnvelopedCms\ContentEncryptionAlgorithmTests.cs" />
     <Compile Include="EnvelopedCms\DecryptTests.cs" />
+    <Compile Include="EnvelopedCms\DecryptTestsUsingCertWithPrivateKey.cs" />
     <Compile Include="EnvelopedCms\EdgeCasesTests.cs" />
     <Compile Include="EnvelopedCms\GeneralTests.cs" />
     <Compile Include="EnvelopedCms\KeyAgreeRecipientInfoTests.cs" />
@@ -37,6 +38,7 @@
     <Compile Include="Oids.cs" />
     <Compile Include="Pkcs9AttributeTests.cs" />
     <Compile Include="RecipientInfoCollectionTests.cs" />
+    <Compile Include="SignedCms\CmsSignerTests.cs" />
     <Compile Include="SignedCms\CounterSigningDerOrder.cs" />
     <Compile Include="SignedCms\SignedCmsTests.cs" />
     <Compile Include="SignedCms\SignedCmsWholeDocumentTests.cs" />
@@ -44,11 +46,15 @@
     <Compile Include="SignedCms\SignerInfoTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="EnvelopedCms\DecryptTestsUsingExplicitPrivateKey.cs" />
+    <Compile Include="EnvelopedCms\SubjectIdentifierTests.cs" />
     <Compile Include="Rfc3161\TimestampRequestTests.cs" />
     <Compile Include="Rfc3161\TimestampTokenInfoTests.cs" />
     <Compile Include="Rfc3161\TimestampTokenTestData.cs" />
     <Compile Include="Rfc3161\TimestampTokenTests.cs" />
     <Compile Include="SignedCms\SignedCmsTests.netcoreapp.cs" />
+    <Compile Include="SignedCms\SignerInfoTests.netcoreapp.cs" />
+    <Compile Include="Pkcs8PrivateKeyInfoTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)'=='netcoreapp'">
     <Compile Include="EnvelopedCms\DecryptTests.KeyPersistence.cs" />

@@ -30,10 +30,10 @@ namespace System.Diagnostics.Tracing.Internal
             if (fmt != null)
                 return string.Format(fmt, args);
 
-            string sargs = String.Empty;
+            string sargs = string.Empty;
             foreach(var arg in args)
             {
-                if (sargs != String.Empty)
+                if (sargs != string.Empty)
                     sargs += ", ";
                 sargs += arg.ToString();
             }
@@ -301,7 +301,7 @@ namespace Microsoft.Reflection
             else if (type == typeof(float)) return TypeCode.Single;
             else if (type == typeof(double)) return TypeCode.Double;
             else if (type == typeof(DateTime)) return TypeCode.DateTime;
-            else if (type == (typeof(Decimal))) return TypeCode.Decimal;
+            else if (type == (typeof(decimal))) return TypeCode.Decimal;
             else return TypeCode.Object;
         }
 

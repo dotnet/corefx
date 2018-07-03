@@ -38,8 +38,6 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Imaging
 {
-
-    [MonoTODO("Metafiles, both WMF and EMF formats, are only partially supported.")]
 #if !NETCORE
     [Serializable]
     [Editor ("System.Drawing.Design.MetafileEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
@@ -59,7 +57,7 @@ namespace System.Drawing.Imaging
         public Metafile(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             int status;
             // With libgdiplus we use a custom API for this, because there's no easy way
@@ -261,7 +259,7 @@ namespace System.Drawing.Imaging
             EmfType type, string description)
         {
             if (stream == null)
-                throw new NullReferenceException("stream");
+                throw new NullReferenceException(nameof(stream));
 
             int status = SafeNativeMethods.Gdip.NotImplemented;
             // With libgdiplus we use a custom API for this, because there's no easy way
@@ -277,7 +275,7 @@ namespace System.Drawing.Imaging
             EmfType type, string description)
         {
             if (stream == null)
-                throw new NullReferenceException("stream");
+                throw new NullReferenceException(nameof(stream));
 
             int status = SafeNativeMethods.Gdip.NotImplemented;
             // With libgdiplus we use a custom API for this, because there's no easy way
@@ -318,7 +316,6 @@ namespace System.Drawing.Imaging
             return nativeImage;
         }
 
-        [MonoLimitation("Metafiles aren't only partially supported by libgdiplus.")]
         public MetafileHeader GetMetafileHeader()
         {
             IntPtr header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MetafileHeader)));
@@ -334,7 +331,6 @@ namespace System.Drawing.Imaging
             }
         }
 
-        [MonoLimitation("Metafiles aren't only partially supported by libgdiplus.")]
         public static MetafileHeader GetMetafileHeader(IntPtr henhmetafile)
         {
             IntPtr header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MetafileHeader)));
@@ -350,11 +346,10 @@ namespace System.Drawing.Imaging
             }
         }
 
-        [MonoLimitation("Metafiles aren't only partially supported by libgdiplus.")]
         public static MetafileHeader GetMetafileHeader(Stream stream)
         {
             if (stream == null)
-                throw new NullReferenceException("stream");
+                throw new NullReferenceException(nameof(stream));
 
             IntPtr header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MetafileHeader)));
             try
@@ -375,11 +370,10 @@ namespace System.Drawing.Imaging
             }
         }
 
-        [MonoLimitation("Metafiles aren't only partially supported by libgdiplus.")]
         public static MetafileHeader GetMetafileHeader(string fileName)
         {
             if (fileName == null)
-                throw new ArgumentNullException("fileName");
+                throw new ArgumentNullException(nameof(fileName));
 
             IntPtr header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MetafileHeader)));
             try
@@ -394,7 +388,6 @@ namespace System.Drawing.Imaging
             }
         }
 
-        [MonoLimitation("Metafiles aren't only partially supported by libgdiplus.")]
         public static MetafileHeader GetMetafileHeader(IntPtr hmetafile, WmfPlaceableFileHeader wmfHeader)
         {
             IntPtr header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MetafileHeader)));
@@ -410,7 +403,6 @@ namespace System.Drawing.Imaging
             }
         }
 
-        [MonoLimitation("Metafiles aren't only partially supported by libgdiplus.")]
         public void PlayRecord(EmfPlusRecordType recordType, int flags, int dataSize, byte[] data)
         {
             int status = SafeNativeMethods.Gdip.GdipPlayMetafileRecord(nativeImage, recordType, flags, dataSize, data);

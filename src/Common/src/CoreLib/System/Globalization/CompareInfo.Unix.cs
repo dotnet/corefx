@@ -178,13 +178,15 @@ namespace System.Globalization
             return -1;
         }
 
-        private static unsafe int CompareStringOrdinalIgnoreCase(char* string1, int count1, char* string2, int count2)
+        private static unsafe int CompareStringOrdinalIgnoreCase(ref char string1, int count1, ref char string2, int count2)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
-            Debug.Assert(string1 != null);
-            Debug.Assert(string2 != null);
 
-            return Interop.Globalization.CompareStringOrdinalIgnoreCase(string1, count1, string2, count2);
+            fixed (char* char1 = &string1)
+            fixed (char* char2 = &string2)
+            {
+                return Interop.Globalization.CompareStringOrdinalIgnoreCase(char1, count1, char2, count2);
+            }
         }
 
         // TODO https://github.com/dotnet/coreclr/issues/13827:
@@ -720,7 +722,7 @@ namespace System.Globalization
             }
         }
 
-        private unsafe SortKey CreateSortKey(String source, CompareOptions options)
+        private unsafe SortKey CreateSortKey(string source, CompareOptions options)
         {
             Debug.Assert(!_invariantMode);
 
@@ -762,12 +764,12 @@ namespace System.Globalization
 
             while (index < length)
             {
-                if (Char.IsHighSurrogate(text[index]))
+                if (char.IsHighSurrogate(text[index]))
                 {
-                    if (index == length - 1 || !Char.IsLowSurrogate(text[index+1]))
+                    if (index == length - 1 || !char.IsLowSurrogate(text[index+1]))
                         return false; // unpaired surrogate
 
-                    uc = CharUnicodeInfo.GetUnicodeCategory(Char.ConvertToUtf32(text[index], text[index+1]));
+                    uc = CharUnicodeInfo.GetUnicodeCategory(char.ConvertToUtf32(text[index], text[index+1]));
                     if (uc == UnicodeCategory.PrivateUse || uc == UnicodeCategory.OtherNotAssigned)
                         return false;
 
@@ -775,7 +777,7 @@ namespace System.Globalization
                     continue;
                 }
 
-                if (Char.IsLowSurrogate(text[index]))
+                if (char.IsLowSurrogate(text[index]))
                 {
                     return false; // unpaired surrogate
                 }
