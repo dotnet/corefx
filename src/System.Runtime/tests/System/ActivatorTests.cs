@@ -397,7 +397,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]        
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]
         static void TestingCreateInstanceFromObjectHandle(string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
@@ -419,7 +419,7 @@ namespace System.Tests
             }
             else
             {
-                Activator.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null);
+                oh = Activator.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null);
                 Assert.NotNull(oh);
                 Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
             }
@@ -440,7 +440,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandle))]        
+        [MemberData(nameof(TestingCreateInstanceObjectHandle))]
         static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
@@ -462,7 +462,7 @@ namespace System.Tests
             }
             else
             {
-                Activator.CreateInstance(assemblyName: assemblyName, typeName: type, null);
+                oh = Activator.CreateInstance(assemblyName: assemblyName, typeName: type, null);
                 Assert.NotNull(oh);
                 Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
             }
@@ -472,7 +472,7 @@ namespace System.Tests
         {
             //string assemblyName, string typeName, returnedFullNameType, expectedException
             yield return new object[] { "TestLoadAssembly", "PublicClassSample",  "PublicClassSample", null };
-            yield return new object[] { "testloadassembly", "publicclasssample",  "PublicClassSample", typeof(TypeLoadException) };            
+            yield return new object[] { "testloadassembly", "publicclasssample",  "PublicClassSample", typeof(TypeLoadException) };
 
             yield return new object[] { "TestLoadAssembly", "PrivateClassSample",  "PrivateClassSample", null };
             yield return new object[] { "testloadassembly", "privateclasssample",  "PrivateClassSample", typeof(TypeLoadException) };
@@ -482,7 +482,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]        
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]
         static void TestingCreateInstanceFromObjectHandleFullSignature(string assemblyFile, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {            
             ObjectHandle oh = Activator.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
@@ -506,9 +506,9 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]        
+        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]
         static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
-        {            
+        {
             ObjectHandle oh = Activator.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder , args: args, culture: culture, activationAttributes: activationAttributes);
             Assert.NotNull(oh);
             Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
@@ -526,6 +526,28 @@ namespace System.Tests
             yield return new object[] { "testloadassembly", "privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "PrivateClassSample" };
             yield return new object[] { "TestLoadAssembly", "PrivateClassSample", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "PrivateClassSample" };
             yield return new object[] { "testloadassembly", "privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "PrivateClassSample" };
+
+            yield return new object[] { null, typeof(PublicType).FullName, false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, typeof(PublicType).FullName };
+            yield return new object[] { null, typeof(PrivateType).FullName, false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, typeof(PrivateType).FullName };
+        }
+        
+        [Fact]        
+        static void CreateInstanceAssemblyResolve()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            ObjectHandle oh = Activator.CreateInstance("TestLoadAssemblyWrongType", "PublicClassSample");
+            AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
+            Assert.NotNull(oh.Unwrap());
+        }
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            return Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "TestLoadAssembly.dll"));
+        }
+
+        public class PublicType
+        {
+            public PublicType() { }
         }
     }
 }

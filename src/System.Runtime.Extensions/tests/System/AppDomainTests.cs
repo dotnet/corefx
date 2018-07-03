@@ -740,31 +740,42 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]        
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]
         static void TestingCreateInstanceFromObjectHandle(string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
+            object obj = null;
 
             if (exceptionType != null)
             {
                 Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type));
             }
             else
             {
                 oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type);
                 Assert.NotNull(oh);
                 Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type);
+                Assert.NotNull(obj);
+                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
             }
 
             if (exceptionType != null)
             {
                 Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, null));
             }
             else
             {
-                AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null);
+                oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null);
                 Assert.NotNull(oh);
                 Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, null);
+                Assert.NotNull(obj);
+                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
             }
             Assert.True(File.Exists(assemblyFile));
         }
@@ -783,31 +794,42 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandle))]        
+        [MemberData(nameof(TestingCreateInstanceObjectHandle))]
         static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
+            object obj = null;
 
             if (exceptionType != null)
             {
                 Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type));
             }
             else
             {
                 oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type);
                 Assert.NotNull(oh);
                 Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type);
+                Assert.NotNull(obj);
+                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
             }
 
             if (exceptionType != null)
             {
                 Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, null));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, null));
             }
             else
             {
-                AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, null);
+                oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, null);
                 Assert.NotNull(oh);
                 Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, null);
+                Assert.NotNull(obj);
+                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
             }
         }
 
@@ -825,12 +847,17 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]        
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]
         static void TestingCreateInstanceFromObjectHandleFullSignature(string assemblyFile, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {
             ObjectHandle oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
             Assert.NotNull(oh);
             Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+
+            object obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
+            Assert.NotNull(obj);
+            Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+
             Assert.True(File.Exists(assemblyFile));
         }
 
@@ -849,12 +876,16 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]        
+        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]
         static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {
             ObjectHandle oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
             Assert.NotNull(oh);
             Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+
+            object obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
+            Assert.NotNull(obj);
+            Assert.Equal(returnedFullNameType, obj.GetType().FullName);
         }
 
         public static IEnumerable<object[]> TestingCreateInstanceObjectHandleFullSignature()
