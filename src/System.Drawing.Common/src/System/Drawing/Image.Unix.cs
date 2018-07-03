@@ -82,7 +82,7 @@ namespace System.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            Image img = CreateFromHandle(InitFromStream(stream));
+            Image img = CreateFromHandle(InitializeFromStream(stream));
             return img;
         }
 
@@ -172,7 +172,7 @@ namespace System.Drawing
             return result;
         }
 
-        internal static IntPtr InitFromStream(Stream stream)
+        private static IntPtr InitializeFromStream(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
