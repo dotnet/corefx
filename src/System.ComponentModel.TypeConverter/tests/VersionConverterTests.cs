@@ -24,11 +24,12 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void ConvertFrom_WithContext()
         {
-            ConvertFrom_WithContext(new object[3, 3]
+            ConvertFrom_WithContext(new object[4, 3]
                 {
                     {"1.2", new Version(1, 2), null},
                     {"1.2.3", new Version(1, 2, 3), null},
-                    {"1.2.3.4", new Version(1, 2, 3, 4), null}
+                    {"1.2.3.4", new Version(1, 2, 3, 4), null},
+                    {" 1.2.3.4 ", new Version(1, 2, 3, 4), null}
                 },
                 VersionConverterTests.s_converter);
         }
