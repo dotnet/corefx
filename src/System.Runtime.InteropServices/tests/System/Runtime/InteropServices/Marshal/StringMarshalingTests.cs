@@ -148,6 +148,7 @@ namespace System.Runtime.InteropServices.Tests
 
         }
 
+#if netcoreapp
         [Fact]
         public void TestUTF8String()
         {
@@ -177,9 +178,15 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        public void TestNullString()
+        public void TestNullString_UTF8()
         {
             Assert.Null(Marshal.PtrToStringUTF8(IntPtr.Zero));
+        }
+#endif
+
+        [Fact]
+        public void TestNullString()
+        {
             Assert.Null(Marshal.PtrToStringUni(IntPtr.Zero));
             Assert.Null(Marshal.PtrToStringAnsi(IntPtr.Zero));
         }

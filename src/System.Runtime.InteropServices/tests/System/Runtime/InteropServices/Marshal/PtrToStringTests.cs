@@ -35,6 +35,7 @@ namespace System.Runtime.InteropServices.Tests
             AssertExtensions.Throws<ArgumentNullException>("ptr", () => Marshal.PtrToStringBSTR(IntPtr.Zero));
         }
 
+#if netcoreapp
         [Fact]
         public void PtrToStringUTF8()
         {
@@ -42,4 +43,5 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.PtrToStringUTF8(new IntPtr(123), -77));
         }
     }
+#endif
 }
