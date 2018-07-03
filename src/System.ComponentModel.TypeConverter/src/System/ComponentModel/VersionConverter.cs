@@ -49,7 +49,7 @@ namespace System.ComponentModel
                 return new Version(version.Major, version.Minor, version.Build, version.Revision); // return new instance
             }
 
-            throw GetConvertFromException(value);
+            return base.ConvertFrom(context, culture, value);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace System.ComponentModel
                     return new Version(version.Major, version.Minor, version.Build, version.Revision);
             }
 
-            throw GetConvertToException(value, destinationType);
+            return base.ConvertTo(context, culture, value, destinationType);
         }
         
         public override bool IsValid(ITypeDescriptorContext context, object value)
