@@ -538,10 +538,16 @@ BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32_t forIssue
 {
     static const char szOidUpn[] = "1.3.6.1.4.1.311.20.2.3";
 
-    if (!x509 || /*!x509->cert_info ||*/ nameType < NAME_TYPE_SIMPLE || nameType > NAME_TYPE_URL)
+    if (!x509 || nameType < NAME_TYPE_SIMPLE || nameType > NAME_TYPE_URL)
     {
         return NULL;
     }
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    if (!x509->cert_info)
+    {
+        return NULL;
+    }
+#endif
 
     // Algorithm behaviors (pseudocode).  When forIssuer is true, replace "Subject" with "Issuer" and
     // SAN (Subject Alternative Names) with IAN (Issuer Alternative Names).
