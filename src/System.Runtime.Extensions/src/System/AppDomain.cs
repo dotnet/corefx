@@ -10,7 +10,6 @@ using System.Runtime.Loader;
 using System.IO;
 using System.Security.Principal;
 using System.Threading;
-using System.Globalization;
 
 namespace System
 {
@@ -20,8 +19,7 @@ namespace System
         private readonly object _forLock = new object();
         private IPrincipal _defaultPrincipal;
         private PrincipalPolicy _principalPolicy = PrincipalPolicy.NoPrincipal;
-        private static ConstructorInfo s_windowsPrincipalCtor;
-        private static MethodInfo s_currentIdentity;
+        private Func<IPrincipal> s_getWindowsPrincipal;
         private Func<IPrincipal> s_getUnauthenticatedPrincipal;
 
         private AppDomain() { }
@@ -299,25 +297,22 @@ namespace System
                         if (s_getUnauthenticatedPrincipal == null)
                         {
                             Type type = Type.GetType("System.Security.Principal.GenericPrincipal, System.Security.Claims", throwOnError: true);
-                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Static);
+                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Instance);
                             Volatile.Write(ref s_getUnauthenticatedPrincipal, (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = s_getUnauthenticatedPrincipal.Invoke();
+                        principal = s_getUnauthenticatedPrincipal();
                         break;
 
                     case PrincipalPolicy.WindowsPrincipal:
-                        if (s_windowsPrincipalCtor == null || s_currentIdentity == null)
+                        if (s_getWindowsPrincipal == null)
                         {
-                            Assembly assembly = Assembly.Load(new AssemblyName("System.Security.Principal.Windows"));
-                            Type windowsPrincipal = assembly.GetType("System.Security.Principal.WindowsPrincipal", throwOnError: true);
-                            Type windowsIdentity = assembly.GetType("System.Security.Principal.WindowsIdentity", throwOnError: true);
-
-                            Volatile.Write(ref s_windowsPrincipalCtor, windowsPrincipal.GetConstructor(new[] { windowsIdentity }));
-                            Volatile.Write(ref s_currentIdentity, windowsIdentity.GetMethod("GetCurrent", Array.Empty<Type>()));
+                            Type type = Type.GetType("System.Security.Principal.WindowsPrincipal, System.Security.Principal.Windows", throwOnError: true);
+                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Instance);
+                            Volatile.Write(ref s_getWindowsPrincipal, (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = (IPrincipal)s_windowsPrincipalCtor.Invoke(BindingFlags.DoNotWrapExceptions, null, new object[] { s_currentIdentity.Invoke(null, BindingFlags.DoNotWrapExceptions, null, null, CultureInfo.CurrentCulture) }, CultureInfo.CurrentCulture);
+                        principal = s_getWindowsPrincipal();
                         break;
                 }
             }

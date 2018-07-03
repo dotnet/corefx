@@ -187,5 +187,7 @@ namespace System.Security.Principal
             token.Dispose();
             return isMember;
         }
+
+        private IPrincipal GetDefaultInstance() => new WindowsPrincipal(WindowsIdentity.GetCurrent());
     }
 }
