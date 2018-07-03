@@ -45,7 +45,7 @@ int32_t CryptoNative_EncodePkcs12(PKCS12* p12, uint8_t* buf)
 
 int32_t CryptoNative_Pkcs12Parse(PKCS12* p12, const char* pass, EVP_PKEY** pkey, X509** cert, X509Stack** ca)
 {
-    int32_t ret = PKCS12_parse(p12, pass, pkey, cert, ca);    
+    int32_t ret = PKCS12_parse(p12, pass, pkey, cert, ca);
 
     if (ret)
     {
