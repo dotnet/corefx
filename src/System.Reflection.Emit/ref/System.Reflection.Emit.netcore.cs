@@ -28,6 +28,7 @@ namespace System.Reflection.Emit
     }
     public sealed partial class TypeBuilder : System.Type
     {
+        public System.Type CreateType() { throw null; }
         public override bool IsByRefLike { get { throw null; } }
         public override bool IsTypeDefinition { get { throw null; } }
         public override bool IsSZArray { get { throw null; } }
