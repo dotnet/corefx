@@ -41,7 +41,7 @@ namespace System.ComponentModel
             if (value is string versionString)
             {
                 // Let the Version constructor throw any informative exceptions
-                return new Version(versionString);
+                return Version.Parse(versionString);
             }
 
             if (value is Version version)
