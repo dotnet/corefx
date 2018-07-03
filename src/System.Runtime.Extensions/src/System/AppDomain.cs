@@ -297,8 +297,7 @@ namespace System
                         if (s_getUnauthenticatedPrincipal == null)
                         {
                             Type type = Type.GetType("System.Security.Principal.GenericPrincipal, System.Security.Claims", throwOnError: true);
-                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Instance);
-                            Volatile.Write(ref s_getUnauthenticatedPrincipal, (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
+                            Volatile.Write(ref s_getUnauthenticatedPrincipal, (Func<IPrincipal>)Delegate.CreateDelegate(typeof(Func<IPrincipal>), type, "GetDefaultInstance"));
                         }
 
                         principal = s_getUnauthenticatedPrincipal();
@@ -308,8 +307,7 @@ namespace System
                         if (s_getWindowsPrincipal == null)
                         {
                             Type type = Type.GetType("System.Security.Principal.WindowsPrincipal, System.Security.Principal.Windows", throwOnError: true);
-                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Instance);
-                            Volatile.Write(ref s_getWindowsPrincipal, (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
+                            Volatile.Write(ref s_getWindowsPrincipal, (Func<IPrincipal>)Delegate.CreateDelegate(typeof(Func<IPrincipal>), type, "GetDefaultInstance"));
                         }
 
                         principal = s_getWindowsPrincipal();

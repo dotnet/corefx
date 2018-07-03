@@ -85,7 +85,7 @@ namespace System.Security.Principal
             return base.IsInRole(role);
         }
 
-        private IPrincipal GetDefaultInstance() => new GenericPrincipal(new GenericIdentity(string.Empty), new string[] { string.Empty });
-
+        // This is called by AppDomain.GetThreadPrincipal() via reflection.
+        private static IPrincipal GetDefaultInstance() => new GenericPrincipal(new GenericIdentity(string.Empty), new string[] { string.Empty });
     }
 }

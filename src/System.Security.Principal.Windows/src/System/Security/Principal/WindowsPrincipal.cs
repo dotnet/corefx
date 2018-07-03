@@ -188,6 +188,7 @@ namespace System.Security.Principal
             return isMember;
         }
 
-        private IPrincipal GetDefaultInstance() => new WindowsPrincipal(WindowsIdentity.GetCurrent());
+        // This is called by AppDomain.GetThreadPrincipal() via reflection.
+        private static IPrincipal GetDefaultInstance() => new WindowsPrincipal(WindowsIdentity.GetCurrent());
     }
 }
