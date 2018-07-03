@@ -134,15 +134,7 @@ namespace System.Drawing
         {
             _iconData = (byte[])info.GetValue("IconData", typeof(byte[])); // Do not rename (binary serialization)
             _iconSize = (Size)info.GetValue("IconSize", typeof(Size)); // Do not rename (binary serialization)
-
-            if (_iconSize.IsEmpty)
-            {
-                Initialize(0, 0);
-            }
-            else
-            {
-                Initialize(_iconSize.Width, _iconSize.Height);
-            }
+            Initialize(_iconSize.Width, _iconSize.Height);
         }
 
         void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
