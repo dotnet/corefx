@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_x509.h"
+#include <dlfcn.h>
 
 static const int32_t kErrOutItemsNull = -3;
 static const int32_t kErrOutItemsEmpty = -2;
@@ -52,7 +53,27 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
     if (cert == NULL || pPublicKeyOut == NULL || pOSStatusOut == NULL)
         return kErrorBadInput;
 
-    *pOSStatusOut = SecCertificateCopyPublicKey(cert, pPublicKeyOut);
+    // SecCertificateCopyPublicKey was deprecated in 10.14, so use SecCertificateCopyKey on the systems that have it (10.14+),
+    // and SecCertificateCopyPublicKey on the systems that don’t.
+    static SecKeyRef (*secCertificateCopyKey)(SecCertificateRef);
+    static OSStatus (*secCertificateCopyPublicKey)(SecCertificateRef, SecKeyRef*);
+    static int checked;
+    
+    if (!checked)
+    {
+        secCertificateCopyKey = (SecKeyRef (*)(SecCertificateRef))dlsym(RTLD_DEFAULT, "SecCertificateCopyKey");
+        secCertificateCopyPublicKey = (OSStatus (*)(SecCertificateRef, SecKeyRef*))dlsym(RTLD_DEFAULT, "SecCertificateCopyPublicKey");
+        checked = 1;
+    }
+    if (secCertificateCopyKey != NULL)
+    {
+        *pPublicKeyOut = (*secCertificateCopyKey)(cert);
+    }
+    else
+    {
+        assert(secCertificateCopyPublicKey != NULL);
+        *pOSStatusOut = (*secCertificateCopyPublicKey)(cert, pPublicKeyOut);
+    }
     return (*pOSStatusOut == noErr);
 }
 
