@@ -330,6 +330,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(RSA_up_ref, true) \
     PER_FUNCTION_BLOCK(RSA_verify, true) \
     PER_FUNCTION_BLOCK(SSL_CIPHER_description, true) \
+    PER_FUNCTION_BLOCK(SSL_CIPHER_get_bits, true) \
     PER_FUNCTION_BLOCK(SSL_ctrl, true) \
     PER_FUNCTION_BLOCK(SSL_set_quiet_shutdown, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_check_private_key, true) \
@@ -466,7 +467,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(RSA_set0_factors, true) \
     PER_FUNCTION_BLOCK(RSA_set0_key, true) \
     PER_FUNCTION_BLOCK(OpenSSL_version_num, true) \
-    PER_FUNCTION_BLOCK(SSL_CIPHER_get_bits, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_options, true) \
     PER_FUNCTION_BLOCK(SSL_get_state, true) \
     PER_FUNCTION_BLOCK(SSL_session_reused, true) \
@@ -688,6 +688,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_up_ref RSA_up_ref_ptr
 #define RSA_verify RSA_verify_ptr
 #define SSL_CIPHER_description SSL_CIPHER_description_ptr
+#define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
 #define SSL_ctrl SSL_ctrl_ptr
 #define SSL_set_quiet_shutdown SSL_set_quiet_shutdown_ptr
 #define SSL_CTX_check_private_key SSL_CTX_check_private_key_ptr
@@ -823,7 +824,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_set0_factors RSA_set0_factors_ptr
 #define RSA_set0_key RSA_set0_key_ptr
 #define OpenSSL_version_num OpenSSL_version_num_ptr
-#define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
 #define SSL_CTX_set_options SSL_CTX_set_options_ptr
 #define SSL_get_state SSL_get_state_ptr
 #define SSL_session_reused SSL_session_reused_ptr
