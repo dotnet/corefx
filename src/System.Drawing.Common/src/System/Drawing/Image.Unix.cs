@@ -172,7 +172,7 @@ namespace System.Drawing
             return result;
         }
 
-        private static IntPtr InitializeFromStream(Stream stream)
+        private protected static IntPtr InitializeFromStream(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));

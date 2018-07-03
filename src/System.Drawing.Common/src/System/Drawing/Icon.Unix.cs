@@ -297,14 +297,14 @@ namespace System.Drawing
 
         private Icon(SerializationInfo info, StreamingContext context)
         {
-            var dataStream = new MemoryStream((byte[])info.GetValue("IconData", typeof(byte[]))); // Do not rename (binary serialization)
+            byte[] iconData = (byte[])info.GetValue("IconData", typeof(byte[])); // Do not rename (binary serialization)
+            var dataStream = new MemoryStream(iconData);
             if (dataStream != null)
             {
                 Size iconSize = (Size)info.GetValue("IconSize", typeof(Size)); // Do not rename (binary serialization)
                 int width = iconSize.Width;
                 int height = iconSize.Height;
 
-                dataStream.Seek(0, SeekOrigin.Begin);
                 InitFromStreamWithSize(dataStream, width, height);
             }
         }
