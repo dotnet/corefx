@@ -12,6 +12,7 @@
       <SignBuildArgs Include="/p:ConfigurationGroup=$(ConfigurationGroup)" />
       <SignBuildArgs Include="/p:RuntimeOS=$(RuntimeOS)" />
       <SignBuildArgs Include="/p:OfficialBuildId=$(OfficialBuildId)" />
+      <SignBuildArgs Include="/p:SignType=$(SignType)" />
     </ItemGroup>
     
     <!-- MicroBuild signing only supports being called from the full framework MSBuild -->
