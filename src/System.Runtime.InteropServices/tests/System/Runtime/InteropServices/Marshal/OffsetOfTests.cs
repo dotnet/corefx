@@ -160,6 +160,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void TestFieldAlignment_Variant()
         {
             Type t = typeof(FieldAlignmentTest_Variant);
