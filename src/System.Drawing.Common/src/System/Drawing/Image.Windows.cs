@@ -265,7 +265,7 @@ namespace System.Drawing
             }
         }
 
-        internal void Save(MemoryStream stream)
+        private void Save(MemoryStream stream)
         {
             // Jpeg loses data, so we don't want to use it to serialize...
             ImageFormat dest = RawFormat;

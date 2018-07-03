@@ -334,6 +334,19 @@ namespace System.Drawing
             Gdip.CheckStatus(st);
         }
 
+        private void Save(MemoryStream stream)
+        {
+            // Jpeg loses data, so we don't want to use it to serialize...
+            ImageFormat dest = RawFormat;
+            if (dest == ImageFormat.Jpeg)
+                dest = ImageFormat.Png;
+
+            // If we don't find an Encoder (for things like Icon), we just switch back to PNG...
+            ImageCodecInfo codec = findEncoderForFormat(dest) ?? findEncoderForFormat(ImageFormat.Png);
+
+            Save(stream, codec, null);
+        }
+
         public void Save(Stream stream, ImageFormat format)
         {
             ImageCodecInfo encoder = FindEncoderForFormat(format);
