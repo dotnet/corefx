@@ -88,7 +88,7 @@ int32_t CryptoNative_DsaSign(
 #endif
     {
         *outSignatureLength = 0;
-        ERR_PUT_error(ERR_LIB_DSA, DSA_F_DSA_DO_SIGN, DSA_R_MISSING_PARAMETERS, __FILE__, __LINE__);
+        ERR_put_error(ERR_LIB_DSA, DSA_F_DSA_DO_SIGN, DSA_R_MISSING_PARAMETERS, __FILE__, __LINE__);
         return 0;
     }
 

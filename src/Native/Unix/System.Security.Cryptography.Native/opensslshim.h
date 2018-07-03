@@ -116,7 +116,6 @@ extern __typeof(OPENSSL_sk_push)* OPENSSL_sk_push_ptr;
 #define RSA_F_RSA_NULL_PRIVATE_ENCRYPT 0
 #define RSA_F_RSA_SIGN 0
 #define DSA_F_DSA_DO_SIGN 0
-#define ERR_PUT_error ERR_put_error
 #endif
 
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL
