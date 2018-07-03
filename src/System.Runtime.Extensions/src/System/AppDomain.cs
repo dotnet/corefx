@@ -330,10 +330,8 @@ namespace System
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName)
         {
             ObjectHandle oh = CreateInstance(assemblyName, typeName);
-            if (oh == null)
-                return null;
- 
-            return oh.Unwrap();
+
+            return (oh != null) ? oh.Unwrap() : null;
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
@@ -347,19 +345,14 @@ namespace System
                                              culture, 
                                              activationAttributes);
  
-            if (oh == null)
-                return null; 
-            
-            return oh.Unwrap();
+            return (oh != null) ? oh.Unwrap() : null;
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
         {
             ObjectHandle oh = CreateInstance(assemblyName, typeName, activationAttributes);
-            if (oh == null)
-                return null; 
- 
-            return oh.Unwrap();
+            
+            return (oh != null) ? oh.Unwrap() : null;
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
@@ -402,10 +395,8 @@ namespace System
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName)
         {
             ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName);
-            if (oh == null)
-                return null;  
- 
-            return oh.Unwrap(); 
+
+            return (oh != null) ? oh.Unwrap() : null; 
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
@@ -419,19 +410,14 @@ namespace System
                                                  culture, 
                                                  activationAttributes);
  
-            if (oh == null)
-                return null; 
- 
-            return oh.Unwrap();
+            return (oh != null) ? oh.Unwrap() : null;
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes)
         {
             ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
-            if (oh == null)
-                return null; 
- 
-            return oh.Unwrap();
+            
+             return (oh != null) ? oh.Unwrap() : null;
         }
     }
 }
