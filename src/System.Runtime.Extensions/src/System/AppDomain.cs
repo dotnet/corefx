@@ -9,6 +9,8 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.Loader;
 using System.IO;
 using System.Security.Principal;
+using System.Threading;
+using System.Globalization;
 
 namespace System
 {
@@ -18,10 +20,9 @@ namespace System
         private readonly object _forLock = new object();
         private IPrincipal _defaultPrincipal;
         private PrincipalPolicy _principalPolicy = PrincipalPolicy.NoPrincipal;
-        private static ConstructorInfo s_genericPrincipalCtor;
-        private static ConstructorInfo s_genericIdentityCtor;
         private static ConstructorInfo s_windowsPrincipalCtor;
         private static MethodInfo s_currentIdentity;
+        private Func<IPrincipal> s_getUnauthenticatedPrincipal;
 
         private AppDomain() { }
 
@@ -61,12 +62,12 @@ namespace System
 
         public event EventHandler<FirstChanceExceptionEventArgs> FirstChanceException
         {
-            add 
-            { 
+            add
+            {
 #if uapaot
                 AppContext.SetAppDomain(this);
 #endif
-                AppContext.FirstChanceException += value; 
+                AppContext.FirstChanceException += value;
             }
             remove { AppContext.FirstChanceException -= value; }
         }
@@ -136,7 +137,7 @@ namespace System
                 {
                     throw;
                 }
-                
+
                 // We are catching the TIE here and throws the inner exception only,
                 // this is needed to have a consistent exception story with desktop clr
                 ExceptionDispatchInfo.Throw(targetInvocationException.InnerException);
@@ -295,17 +296,14 @@ namespace System
                 switch (_principalPolicy)
                 {
                     case PrincipalPolicy.UnauthenticatedPrincipal:
-                        if (s_genericPrincipalCtor == null || s_genericIdentityCtor == null)
+                        if (s_getUnauthenticatedPrincipal == null)
                         {
-                            Assembly assembly = Assembly.Load(new AssemblyName("System.Security.Claims"));
-                            Type genericPrincipal = assembly.GetType("System.Security.Principal.GenericPrincipal", throwOnError: true);
-                            Type genericIdentity = assembly.GetType("System.Security.Principal.GenericIdentity", throwOnError: true);
-
-                            s_genericPrincipalCtor = genericPrincipal.GetConstructor(new[] { genericIdentity, typeof(string[]) });
-                            s_genericIdentityCtor = genericIdentity.GetConstructor(new[] { typeof(string), typeof(string) });
+                            Type type = Type.GetType("System.Security.Principal.GenericPrincipal, System.Security.Claims", throwOnError: true);
+                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Static);
+                            Volatile.Write(ref s_getUnauthenticatedPrincipal, (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = (IPrincipal)s_genericPrincipalCtor.Invoke(new object[] { s_genericIdentityCtor.Invoke( new object[] { string.Empty, string.Empty }), new string[] { string.Empty } });
+                        principal = s_getUnauthenticatedPrincipal.Invoke();
                         break;
 
                     case PrincipalPolicy.WindowsPrincipal:
@@ -315,11 +313,11 @@ namespace System
                             Type windowsPrincipal = assembly.GetType("System.Security.Principal.WindowsPrincipal", throwOnError: true);
                             Type windowsIdentity = assembly.GetType("System.Security.Principal.WindowsIdentity", throwOnError: true);
 
-                            s_windowsPrincipalCtor = windowsPrincipal.GetConstructor(new[] { windowsIdentity });
-                            s_currentIdentity = windowsIdentity.GetMethod("GetCurrent", Array.Empty<Type>());
+                            Volatile.Write(ref s_windowsPrincipalCtor, windowsPrincipal.GetConstructor(new[] { windowsIdentity }));
+                            Volatile.Write(ref s_currentIdentity, windowsIdentity.GetMethod("GetCurrent", Array.Empty<Type>()));
                         }
 
-                        principal = (IPrincipal)s_windowsPrincipalCtor.Invoke(new object[] { s_currentIdentity.Invoke(null, null) });
+                        principal = (IPrincipal)s_windowsPrincipalCtor.Invoke(BindingFlags.DoNotWrapExceptions, null, new object[] { s_currentIdentity.Invoke(null, BindingFlags.DoNotWrapExceptions, null, null, CultureInfo.CurrentCulture) }, CultureInfo.CurrentCulture);
                         break;
                 }
             }

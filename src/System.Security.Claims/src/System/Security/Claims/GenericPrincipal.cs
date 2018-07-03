@@ -11,6 +11,7 @@ namespace System.Security.Principal
     {
         private readonly IIdentity m_identity;
         private readonly string[] m_roles;
+        private static GenericPrincipal s_genericPrincipal;
 
         public GenericPrincipal(IIdentity identity, string[] roles)
         {
@@ -83,6 +84,16 @@ namespace System.Security.Principal
 
             // it may be the case a ClaimsIdentity was passed in as the IIdentity which may have contained claims, they need to be checked.
             return base.IsInRole(role);
+        }
+
+        private static IPrincipal GetDefaultInstance()
+        {
+            if (s_genericPrincipal == null)
+            {
+                s_genericPrincipal = new GenericPrincipal(new GenericIdentity(string.Empty), new string[] { string.Empty });
+
+            }
+            return s_genericPrincipal;
         }
     }
 }
