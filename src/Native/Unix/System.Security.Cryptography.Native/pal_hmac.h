@@ -12,6 +12,7 @@
 //   * Managed code remains resilient to changes in size of HMAC_CTX across platforms
 
 // Forward declarations - shim API must not depend on knowing layout of these types.
+// OpenSSL 1.1+ already uses opaque structures.
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 typedef struct hmac_ctx_st HMAC_CTX;
 typedef struct env_md_st EVP_MD;

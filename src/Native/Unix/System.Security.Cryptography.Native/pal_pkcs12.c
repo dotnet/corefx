@@ -54,6 +54,7 @@ int32_t CryptoNative_Pkcs12Parse(PKCS12* p12, const char* pass, EVP_PKEY** pkey,
         ERR_clear_error();
 
 #ifdef OPENSSL_IS_BORINGSSL
+        // BoringSSL returns the CA certificates in reverse order.
         if (ca != NULL)
         {
             X509Stack *new_ca = sk_X509_new_null();

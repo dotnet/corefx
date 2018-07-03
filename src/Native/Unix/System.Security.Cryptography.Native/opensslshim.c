@@ -6,12 +6,14 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "opensslshim.h"
 
 // Define pointers to all the used ICU functions
 #define PER_FUNCTION_BLOCK(fn, isRequired) __typeof(fn) fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
+FOR_ALL_OPENSSL_FUNCTIONS_STACK
 #undef PER_FUNCTION_BLOCK
 
 // x.x.x, considering the max number of decimal digits for each component

@@ -113,13 +113,7 @@ CryptoNative_RsaPrivateDecrypt(int32_t flen, const uint8_t* from, uint8_t* to, R
 {
     if (HasNoPrivateKey(rsa))
     {
-#ifdef OPENSSL_IS_BORINGSSL
-        OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
-        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
-#else
-        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_OSSL_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
-#endif
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_NULL_PRIVATE_DECRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
         return -1;
     }
 
@@ -131,13 +125,7 @@ int32_t CryptoNative_RsaSignPrimitive(int32_t flen, const uint8_t* from, uint8_t
 {
     if (HasNoPrivateKey(rsa))
     {
-#ifdef OPENSSL_IS_BORINGSSL
-        OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
-        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
-#else
-        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_OSSL_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
-#endif
+        ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_NULL_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
         return -1;
     }
 
@@ -172,11 +160,7 @@ CryptoNative_RsaSign(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigr
 
     if (HasNoPrivateKey(rsa))
     {
-#ifdef OPENSSL_IS_BORINGSSL
-        OPENSSL_PUT_ERROR(RSA, RSA_R_VALUE_MISSING);
-#else
         ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_SIGN, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
-#endif
         return 0;
     }
 
@@ -187,11 +171,7 @@ CryptoNative_RsaSign(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigr
     // we have to check that the digest size matches what we expect.
     if (digest != NULL && mlen != EVP_MD_size(digest))
     {
-#ifdef OPENSSL_IS_BORINGSSL
-        OPENSSL_PUT_ERROR(RSA, RSA_R_INVALID_MESSAGE_LENGTH);
-#else
         ERR_put_error(ERR_LIB_RSA, RSA_F_RSA_SIGN, RSA_R_INVALID_MESSAGE_LENGTH, __FILE__, __LINE__);
-#endif
         return 0;
     }
 
@@ -261,7 +241,6 @@ int32_t CryptoNative_GetRsaParameters(const RSA* rsa,
     return 1;
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 static int32_t SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
 {
     assert(rsaFieldAddress != NULL);
@@ -283,7 +262,6 @@ static int32_t SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_
 
     return 0;
 }
-#endif
 
 int32_t CryptoNative_SetRsaParameters(RSA* rsa,
                                               uint8_t* n,
@@ -320,30 +298,51 @@ int32_t CryptoNative_SetRsaParameters(RSA* rsa,
         SetRsaParameter(&rsa->dmq1, dmq1, dmq1Length) &&
         SetRsaParameter(&rsa->iqmp, iqmp, iqmpLength);
 #else
-    BIGNUM* bn_n = n && nLength ? BN_bin2bn(n, nLength, NULL) : NULL;
-    BIGNUM* bn_e = e && eLength ? BN_bin2bn(e, eLength, NULL) : NULL;
-    BIGNUM* bn_d = d && dLength ? BN_bin2bn(d, dLength, NULL) : NULL;
-    if (!RSA_set0_key(rsa, bn_n, bn_e, bn_d))
+    BIGNUM* bn_n = NULL;
+    BIGNUM* bn_e = NULL;
+    BIGNUM* bn_d = NULL;
+
+    if (!SetRsaParameter(&bn_n, n, nLength) ||
+        !SetRsaParameter(&bn_e, e, eLength) ||
+        !SetRsaParameter(&bn_d, d, dLength) ||
+        !RSA_set0_key(rsa, bn_n, bn_e, bn_d))
     {
+        BN_free(bn_n);
+        BN_free(bn_e);
+        BN_free(bn_d);
         return 0;
     }
 
     if (p || q)
     {
-        BIGNUM* bn_p = p && pLength ? BN_bin2bn(p, pLength, NULL) : NULL;
-        BIGNUM* bn_q = q && qLength ? BN_bin2bn(q, qLength, NULL) : NULL;
-        if (!RSA_set0_factors(rsa, bn_p, bn_q))
+        BIGNUM* bn_p = NULL;
+        BIGNUM* bn_q = NULL;
+
+        if (!SetRsaParameter(&bn_p, p, pLength) ||
+            !SetRsaParameter(&bn_q, q, qLength) ||
+            !RSA_set0_factors(rsa, bn_p, bn_q))
         {
+            BN_free(bn_p);
+            BN_free(bn_q);
             return 0;
         }
     }
 
     if (dmp1 || dmq1 || iqmp)
     {
-        BIGNUM* bn_dmp1 = dmp1 && dmp1Length ? BN_bin2bn(dmp1, dmp1Length, NULL) : NULL;
-        BIGNUM* bn_dmq1 = dmq1 && dmq1Length ? BN_bin2bn(dmq1, dmq1Length, NULL) : NULL;
-        BIGNUM* bn_iqmp = iqmp && iqmpLength ? BN_bin2bn(iqmp, iqmpLength, NULL) : NULL;
-        return RSA_set0_crt_params(rsa, bn_dmp1, bn_dmq1, bn_iqmp);
+        BIGNUM* bn_dmp1 = NULL;
+        BIGNUM* bn_dmq1 = NULL;
+        BIGNUM* bn_iqmp = NULL;
+        if (!SetRsaParameter(&bn_dmp1, dmp1, dmp1Length) ||
+            !SetRsaParameter(&bn_dmq1, dmq1, dmq1Length) ||
+            !SetRsaParameter(&bn_iqmp, iqmp, iqmpLength) ||
+            !RSA_set0_crt_params(rsa, bn_dmp1, bn_dmq1, bn_iqmp))
+        {
+            BN_free(bn_dmp1);
+            BN_free(bn_dmq1);
+            BN_free(bn_iqmp);
+            return 0;
+        }
     }
 
     return 1;

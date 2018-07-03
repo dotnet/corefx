@@ -29,7 +29,9 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
         return NULL;
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX_init(ctx);
+#endif
 
     // Perform partial initialization so we can set the key lengths
     int ret = EVP_CipherInit_ex(ctx, type, NULL, NULL, NULL, 0);
@@ -76,8 +78,12 @@ void CryptoNative_EvpCipherDestroy(EVP_CIPHER_CTX* ctx)
 {
     if (ctx != NULL)
     {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         EVP_CIPHER_CTX_cleanup(ctx);
         free(ctx);
+#else
+        EVP_CIPHER_CTX_free(ctx);
+#endif
     }
 }
 

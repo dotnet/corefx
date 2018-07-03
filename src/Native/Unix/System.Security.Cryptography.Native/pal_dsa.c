@@ -88,11 +88,7 @@ int32_t CryptoNative_DsaSign(
 #endif
     {
         *outSignatureLength = 0;
-#ifndef OPENSSL_IS_BORINGSSL
         ERR_PUT_error(ERR_LIB_DSA, DSA_F_DSA_DO_SIGN, DSA_R_MISSING_PARAMETERS, __FILE__, __LINE__);
-#else
-        OPENSSL_PUT_ERROR(DSA, DSA_R_MISSING_PARAMETERS);
-#endif
         return 0;
     }
 
@@ -153,30 +149,27 @@ int32_t CryptoNative_GetDsaParameters(
     }
     
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-    *p = dsa->p; *pLength = BN_num_bytes(*p);
-    *q = dsa->q; *qLength = BN_num_bytes(*q);
-    *g = dsa->g; *gLength = BN_num_bytes(*g);
-    *y = dsa->pub_key; *yLength = BN_num_bytes(*y);    
-
-    // dsa->priv_key is optional
+    *p = dsa->p;
+    *q = dsa->q;
+    *g = dsa->g;
+    *y = dsa->pub_key;
     *x = dsa->priv_key;
-    *xLength = (*x == NULL) ? 0 : BN_num_bytes(*x);
 #else
     DSA_get0_pqg(dsa, p, q, g);
     DSA_get0_key(dsa, y, x);
+#endif
+
     *pLength = BN_num_bytes(*p);
     *qLength = BN_num_bytes(*q);
     *gLength = BN_num_bytes(*g);
-    *yLength = BN_num_bytes(*y);    
-    // dsa->priv_key is optional
+    *yLength = BN_num_bytes(*y);
+    // Private key is optional
     *xLength = (*x == NULL) ? 0 : BN_num_bytes(*x);
-#endif
 
     return 1;
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
+static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_t bufferLength, int optional)
 {
     assert(dsaFieldAddress != NULL);
     if (dsaFieldAddress)
@@ -184,7 +177,7 @@ static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_
         if (!buffer || !bufferLength)
         {
             *dsaFieldAddress = NULL;
-            return 1;
+            return optional;
         }
         else
         {
@@ -197,7 +190,6 @@ static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_
 
     return 0;
 }
-#endif
 
 int32_t CryptoNative_DsaKeyCreateByExplicitParameters(
     DSA** outDsa,
@@ -226,23 +218,43 @@ int32_t CryptoNative_DsaKeyCreateByExplicitParameters(
 
     DSA* dsa = *outDsa;
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    return
-        SetDsaParameter(&dsa->p, p, pLength) &&
-        SetDsaParameter(&dsa->q, q, qLength) &&
-        SetDsaParameter(&dsa->g, g, gLength) &&
-        SetDsaParameter(&dsa->pub_key, y, yLength) &&
-        SetDsaParameter(&dsa->priv_key, x, xLength);
-#else
-    BIGNUM* bn_p = p && pLength ? BN_bin2bn(p, pLength, NULL) : NULL;
-    BIGNUM* bn_q = q && qLength ? BN_bin2bn(q, qLength, NULL) : NULL;
-    BIGNUM* bn_g = g && gLength ? BN_bin2bn(g, gLength, NULL) : NULL;
-    if (!DSA_set0_pqg(dsa, bn_p, bn_q, bn_g))
+    BIGNUM* bn_p = NULL;
+    BIGNUM* bn_q = NULL;
+    BIGNUM* bn_g = NULL;
+    if (!SetDsaParameter(&bn_p, p, pLength, 0) ||
+        !SetDsaParameter(&bn_q, q, qLength, 0) ||
+        !SetDsaParameter(&bn_g, g, gLength, 0))
     {
+        BN_free(bn_p);
+        BN_free(bn_q);
+        BN_free(bn_g);
         return 0;
     }
-    BIGNUM* bn_y = y && yLength ? BN_bin2bn(y, yLength, NULL) : NULL;
-    BIGNUM* bn_x = x && xLength ? BN_bin2bn(x, xLength, NULL) : NULL;
-    return DSA_set0_key(dsa, bn_y, bn_x);
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    dsa->p = bn_p;
+    dsa->q = bn_q;
+    dsa->g = bn_g;
+#else
+    DSA_set0_pqg(dsa, bn_p, bn_q, bn_g);
 #endif
+
+    BIGNUM* bn_x = NULL;
+    BIGNUM* bn_y = NULL;
+    if (!SetDsaParameter(&bn_y, y, yLength, 0) ||
+        !SetDsaParameter(&bn_x, x, xLength, 1))
+    {
+        BN_free(bn_x);
+        BN_free(bn_y);
+        return 0;
+    }
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    dsa->pub_key = bn_y;
+    dsa->priv_key = bn_x;
+#else
+    DSA_set0_key(dsa, bn_y, bn_x);
+#endif
+
+    return 1;
 }
