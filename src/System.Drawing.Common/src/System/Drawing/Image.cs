@@ -16,6 +16,7 @@ namespace System.Drawing
     /// An abstract base class that provides functionality for 'Bitmap', 'Icon', 'Cursor', and 'Metafile' descended classes.
     /// </summary>
     [ImmutableObject(true)]
+    [Serializable]
     public abstract partial class Image : MarshalByRefObject, IDisposable, ICloneable, ISerializable
     {
         // The signature of this delegate is incorrect. The signature of the corresponding 
@@ -48,7 +49,52 @@ namespace System.Drawing
             set => _userData = value;
         }
 
-        internal Image() { }
+        private protected Image() { }
+
+#pragma warning disable CA2229 // Implement Serialization constructor
+        private protected Image(SerializationInfo info, StreamingContext context)
+#pragma warning restore CA2229
+        {
+            byte[] dat = (byte[])info.GetValue("Data", typeof(byte[])); // Do not rename (binary serialization)
+
+            try
+            {
+                InitializeFromStream(new MemoryStream(dat));
+            }
+            catch (ExternalException e)
+            {
+                Debug.Fail("failure: " + e.ToString());
+            }
+            catch (ArgumentException e)
+            {
+                Debug.Fail("failure: " + e.ToString());
+            }
+            catch (OutOfMemoryException e)
+            {
+                Debug.Fail("failure: " + e.ToString());
+            }
+            catch (InvalidOperationException e)
+            {
+                Debug.Fail("failure: " + e.ToString());
+            }
+            catch (NotImplementedException e)
+            {
+                Debug.Fail("failure: " + e.ToString());
+            }
+            catch (FileNotFoundException e)
+            {
+                Debug.Fail("failure: " + e.ToString());
+            }
+        }
+
+        void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Save(stream);
+                si.AddValue("Data", stream.ToArray(), typeof(byte[])); // Do not rename (binary serialization)
+            }
+        }
 
         /// <summary>
         /// Creates an <see cref='Image'/> from the specified file.
