@@ -42,6 +42,6 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Null(Marshal.PtrToStringUTF8(IntPtr.Zero, 123));
             Assert.Throws<ArgumentOutOfRangeException>(() => Marshal.PtrToStringUTF8(new IntPtr(123), -77));
         }
-    }
 #endif
+    }
 }
