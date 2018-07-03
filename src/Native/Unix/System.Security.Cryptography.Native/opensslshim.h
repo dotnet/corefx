@@ -152,7 +152,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
 // List of all functions from the libssl that are used in the System.Security.Cryptography.Native.
 // Forgetting to add a function here results in build failure with message reporting the function
 // that needs to be added.
-#define FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERISONS \
+#define FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERSIONS \
     PER_FUNCTION_BLOCK(ASN1_BIT_STRING_free, true) \
     PER_FUNCTION_BLOCK(ASN1_INTEGER_get, true) \
     PER_FUNCTION_BLOCK(ASN1_OBJECT_free, true) \
@@ -416,8 +416,8 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GF2m, false) \
-    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false) \
-    
+    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false)
+ 
 #define FOR_ALL_OPENSSL_FUNCTIONS_1_0 \
     PER_FUNCTION_BLOCK(CRYPTO_add_lock, true) \
     PER_FUNCTION_BLOCK(CRYPTO_num_locks, true) \
@@ -444,7 +444,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(SSLv23_method, true) \
     PER_FUNCTION_BLOCK(TLSv1_1_method, true) \
     PER_FUNCTION_BLOCK(TLSv1_2_method, true) \
-    PER_FUNCTION_BLOCK(TLSv1_method, true) \
+    PER_FUNCTION_BLOCK(TLSv1_method, true)
 
 #define FOR_ALL_OPENSSL_FUNCTIONS_1_1 \
     PER_FUNCTION_BLOCK(DSA_get0_key, true) \
@@ -484,16 +484,16 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(X509_NAME_get0_der, true) \
     PER_FUNCTION_BLOCK(X509_PUBKEY_get0_param, true) \
     PER_FUNCTION_BLOCK(X509_STORE_CTX_get0_cert, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_get0_untrusted, true) \
+    PER_FUNCTION_BLOCK(X509_STORE_CTX_get0_untrusted, true)
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define FOR_ALL_OPENSSL_FUNCTIONS \
-    FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERISONS \
+    FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERSIONS \
     FOR_ALL_OPENSSL_FUNCTIONS_1_0
 #define FOR_ALL_OPENSSL_FUNCTIONS_STACK
 #else
 #define FOR_ALL_OPENSSL_FUNCTIONS \
-    FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERISONS \
+    FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERSIONS \
     FOR_ALL_OPENSSL_FUNCTIONS_1_1
 #define FOR_ALL_OPENSSL_FUNCTIONS_STACK \
     PER_FUNCTION_BLOCK(OPENSSL_sk_free, true) \

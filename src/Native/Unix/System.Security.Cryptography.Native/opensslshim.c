@@ -84,6 +84,7 @@ static void InitializeOpenSSLShim()
     if ((fn##_ptr) == NULL && isRequired) { fprintf(stderr, "Cannot get required symbol " #fn " from libssl\n"); abort(); }
 
     FOR_ALL_OPENSSL_FUNCTIONS
+    FOR_ALL_OPENSSL_FUNCTIONS_STACK
 #undef PER_FUNCTION_BLOCK    
 }
 
