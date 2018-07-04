@@ -78,8 +78,7 @@ namespace System
 
     public sealed partial class AppDomainSetup
     {
-        internal AppDomainSetup() { }
-        public string ApplicationBase { get { throw null; } set { } }
+        public string ApplicationBase { get { throw null; } }
         public string TargetFrameworkName { get { throw null; } }
     }
 
