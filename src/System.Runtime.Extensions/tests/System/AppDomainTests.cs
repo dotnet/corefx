@@ -720,6 +720,13 @@ namespace System.Tests
             }).Dispose();
         }
 
+        [Fact]
+        public void GetSetupInformation()
+        {
+            Assert.Equal(AppContext.BaseDirectory, AppDomain.CurrentDomain.SetupInformation.ApplicationBase);
+            Assert.Equal(AppContext.TargetFrameworkName, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName);
+        }
+
         private void CopyTestAssemblies()
         {
             string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll");
