@@ -61,29 +61,23 @@ namespace System.Drawing
             {
                 InitializeFromStream(new MemoryStream(dat));
             }
-            catch (ExternalException e)
+            catch (ExternalException)
             {
-                Debug.Fail("failure: " + e.ToString());
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
-                Debug.Fail("failure: " + e.ToString());
             }
-            catch (OutOfMemoryException e)
+            catch (OutOfMemoryException)
             {
-                Debug.Fail("failure: " + e.ToString());
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
-                Debug.Fail("failure: " + e.ToString());
             }
-            catch (NotImplementedException e)
+            catch (NotImplementedException)
             {
-                Debug.Fail("failure: " + e.ToString());
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
-                Debug.Fail("failure: " + e.ToString());
             }
         }
 
