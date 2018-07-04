@@ -535,7 +535,7 @@ namespace System.Tests
         static void CreateInstanceAssemblyResolve()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-            ObjectHandle oh = Activator.CreateInstance("TestLoadAssemblyWrongType", "PublicClassSample");
+            ObjectHandle oh = Activator.CreateInstance(",,,,", "PublicClassSample");
             AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
             Assert.NotNull(oh.Unwrap());
         }
