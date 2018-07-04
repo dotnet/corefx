@@ -306,14 +306,14 @@ namespace Internal.Cryptography.Pal.Windows
                     // DES key length is fixed at 64 (or 56 without the parity bits).
                     keyLength = KeyLengths.Des_64Bit;
 
-                    GetParameters(cryptAlgorithmIdentifer, ref parameters);
+                    GetParameters(cryptAlgorithmIdentifer, 16, ref parameters);
                     break;
 
                 case AlgId.CALG_3DES:
                     // 3DES key length is fixed at 192 (or 168 without the parity bits).
                     keyLength = KeyLengths.TripleDes_192Bit;
 
-                    GetParameters(cryptAlgorithmIdentifer, ref parameters);
+                    GetParameters(cryptAlgorithmIdentifer, 16, ref parameters);
                     break;
 
                 default:
@@ -532,23 +532,21 @@ namespace Internal.Cryptography.Pal.Windows
             collection.Add(new CryptographicAttributeObject(oid, attributeCollection));
         }
 
-        private static void GetParameters(CRYPT_ALGORITHM_IDENTIFIER cryptAlgorithmIdentifer, ref byte[] parameters)
+        private static void GetParameters(CRYPT_ALGORITHM_IDENTIFIER cryptAlgorithmIdentifer, int cbSize, ref byte[] parameters)
         {
-            if (cryptAlgorithmIdentifer.Parameters.cbData > 0)
+            if (cryptAlgorithmIdentifer.Parameters.cbData > 0 && cbSize > 0)
             {
-                CRYPT_RC2_CBC_PARAMETERS rc2Parameters;
-                unsafe
+                using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(
+                    CryptDecodeObjectStructType.X509_OCTET_STRING,
+                    cryptAlgorithmIdentifer.Parameters.pbData,
+                    (int)cryptAlgorithmIdentifer.Parameters.cbData))
                 {
-                    int cbSize = 24;
-                    int cbSizeInit = cbSize;
-                    if (!CryptDecodeObject(CryptDecodeObjectStructType.X509_OCTET_STRING, cryptAlgorithmIdentifer.Parameters.pbData, (int)(cryptAlgorithmIdentifer.Parameters.cbData), &rc2Parameters, ref cbSize))
-                        throw Marshal.GetLastWin32Error().ToCryptographicException();
-                }
-
-                // Retrieve IV if available.
-                if (rc2Parameters.fIV > 0)
-                {
-                    parameters = rc2Parameters.ToByteArray();
+                    unsafe
+                    {
+                        DATA_BLOB* pDataBlob = (DATA_BLOB*)(sh.DangerousGetHandle());
+                        parameters = new byte[cbSize];
+                        Marshal.Copy((*pDataBlob).pbData, parameters, 0, cbSize);
+                    }
                 }
             }
         }
