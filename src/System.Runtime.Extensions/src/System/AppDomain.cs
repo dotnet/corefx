@@ -307,7 +307,7 @@ namespace System
                         if (s_getWindowsPrincipal == null)
                         {
                             Type type = Type.GetType("System.Security.Principal.WindowsPrincipal, System.Security.Principal.Windows", throwOnError: true);
-                            Volatile.Write(ref s_getWindowsPrincipal, (Func<IPrincipal>)Delegate.CreateDelegate(typeof(Func<IPrincipal>), type, "GetDefaultInstance"));
+                            Volatile.Write(ref s_getWindowsPrincipal, (Func<IPrincipal>)Delegate.CreateDelegate(typeof(Func<IPrincipal>), type, "GetDefaultInstance", ignoreCase: false, throwOnBindFailure: false) ?? throw new PlatformNotSupportedException(SR.PlatformNotSupported_Principal));
                         }
 
                         principal = s_getWindowsPrincipal();
