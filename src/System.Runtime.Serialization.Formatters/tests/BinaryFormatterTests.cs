@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -562,7 +563,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             // These types are unstable during serialization and produce different blobs.
             if (obj is WeakReference<Point> ||
-                obj is Collections.Specialized.HybridDictionary)
+                obj is Collections.Specialized.HybridDictionary ||
+                obj is Color ||
+                obj is Icon)
             {
                 return;
             }

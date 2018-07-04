@@ -26,6 +26,7 @@ using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.IO.IsolatedStorage;
@@ -1360,6 +1361,44 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // Various other special cases
             yield return new object[] { new TypeWithoutNamespace(), new TypeSerializableValue[] { new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAHBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249NC4wLjMuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAAUVHlwZVdpdGhvdXROYW1lc3BhY2UAAAAAAgAAAAs=", TargetFrameworkMoniker.netcoreapp20), new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAHBTeXN0ZW0uUnVudGltZS5TZXJpYWxpemF0aW9uLkZvcm1hdHRlcnMuVGVzdHMsIFZlcnNpb249NC4wLjMuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj05ZDc3Y2M3YWQzOWI2OGViBQEAAAAUVHlwZVdpdGhvdXROYW1lc3BhY2UAAAAAAgAAAAs=", TargetFrameworkMoniker.netfx461) } };
 
+            // System.Drawing.Common
+
+            const string InlineJpegImage = "/9j/4AAQSkZJRgABAQEAwADAAAD/4QAiRXhpZgAATU0AKgAAAAgAAQESAAMAAAABAAEAAAAAAAD/2wBDABALDA4MChAODQ4SERATGCkbGBYWGDIkJh4pOzQ+PTo0OThBSV5QQUVZRjg5Um9TWWFkaWppP09ze3Jmel5naWX/2wBDARESEhgVGDAbGzBlQzlDZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWX/wAARCAACAAIDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCpARJb/9k=";
+            byte[] rawInlineImageBytes = Convert.FromBase64String(InlineJpegImage);
+            // Stream is disposed by the save operation on Bitmap.
+            MemoryStream ms = new MemoryStream(rawInlineImageBytes);
+
+            // Bitmap
+            Bitmap bitmapImage = new Bitmap(ms);
+            yield return new object[] { bitmapImage, new TypeSerializableValue[] { new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFhTeXN0ZW0uRHJhd2luZy5Db21tb24sIFZlcnNpb249NC4wLjEuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jYzdiMTNmZmNkMmRkZDUxBQEAAAAVU3lzdGVtLkRyYXdpbmcuQml0bWFwAQAAAAREYXRhBwICAAAACQMAAAAPAwAAAEMBAAAC/9j/4AAQSkZJRgABAQEAwADAAAD/4QAiRXhpZgAATU0AKgAAAAgAAQESAAMAAAABAAEAAAAAAAD/2wBDABALDA4MChAODQ4SERATGCkbGBYWGDIkJh4pOzQ+PTo0OThBSV5QQUVZRjg5Um9TWWFkaWppP09ze3Jmel5naWX/2wBDARESEhgVGDAbGzBlQzlDZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWX/wAARCAACAAIDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCpARJb/9kL", TargetFrameworkMoniker.netcoreapp30), new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTeXN0ZW0uRHJhd2luZy5CaXRtYXABAAAABERhdGEHAgIAAAAJAwAAAA8DAAAAQwEAAAL/2P/gABBKRklGAAEBAQDAAMAAAP/hACJFeGlmAABNTQAqAAAACAABARIAAwAAAAEAAQAAAAAAAP/bAEMAEAsMDgwKEA4NDhIREBMYKRsYFhYYMiQmHik7ND49OjQ5OEFJXlBBRVlGODlSb1NZYWRpamk/T3N7cmZ6XmdpZf/bAEMBERISGBUYMBsbMGVDOUNlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZf/AABEIAAIAAgMBIgACEQEDEQH/xAAVAAEBAAAAAAAAAAAAAAAAAAAABv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAVAQEBAAAAAAAAAAAAAAAAAAAEBv/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AKkBElv/2Qs=", TargetFrameworkMoniker.netfx461) } };
+
+            // Metafile
+            Metafile mf = null;
+            using (Bitmap bm = new Bitmap(16, 16))
+            {
+                using (Graphics gr = Graphics.FromImage(bm))
+                {
+                    RectangleF bounds = new RectangleF(0, 0, 10, 10);
+                    mf = new Metafile("test.emf", gr.GetHdc(), bounds, MetafileFrameUnit.Pixel);
+                    gr.ReleaseHdc();
+                }
+            }
+
+            using (Graphics gr = Graphics.FromImage(mf))
+            {
+                gr.SmoothingMode = SmoothingMode.AntiAlias;
+                using (Pen pen = new Pen(Brushes.Black, 5))
+                {
+                    gr.DrawEllipse(pen, 2, 2, 5, 5);
+                }
+            }
+
+            yield return new object[] { mf, new TypeSerializableValue[] { new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFhTeXN0ZW0uRHJhd2luZy5Db21tb24sIFZlcnNpb249NC4wLjEuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jYzdiMTNmZmNkMmRkZDUxBQEAAAAfU3lzdGVtLkRyYXdpbmcuSW1hZ2luZy5NZXRhZmlsZQEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADYAAAAAolQTkcNChoKAAAADUlIRFIAAAAKAAAACggGAAAAjTLPvQAAAAFzUkdCAK7OHOkAAAAEZ0FNQQAAsY8L/GEFAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAbUlEQVQoU2NAAhpA3A/E+6F4OhBbADEKCADi90D8HwtuAGIwAJn0HYixKYJhkEEMy5EEcOHzQAwmsEkiY5CNDPeRBPBhhvVoAtjwdSBmiEASwIXhPsfnIZDTOIAYDjKAGNm9z4G4HYgFGBgYGADUPE3Cb+jHTAAAAABJRU5ErkJgggs=", TargetFrameworkMoniker.netcoreapp30), new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB9TeXN0ZW0uRHJhd2luZy5JbWFnaW5nLk1ldGFmaWxlAQAAAAREYXRhBwICAAAACQMAAAAPAwAAANgAAAACiVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABtSURBVChTY0ACGkDcD8T7oXg6EFsAMQoIAOL3QPwfC24AYjAAmfQdiLEpgmGQQQzLkQRw4fNADCawSSJjkI0M95EE8GGG9WgC2PB1IGaIQBLAheE+x+chkNM4gBgOMoAY2b3PgbgdiAUYGBgYANQ8TcJv6MdMAAAAAElFTkSuQmCCCw==", TargetFrameworkMoniker.netfx461) } };
+
+            // Icon
+            Icon icon = Icon.FromHandle(bitmapImage.GetHicon());
+            yield return new object[] { icon, new TypeSerializableValue[] { new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFhTeXN0ZW0uRHJhd2luZy5Db21tb24sIFZlcnNpb249NC4wLjEuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jYzdiMTNmZmNkMmRkZDUxDAMAAABRU3lzdGVtLkRyYXdpbmcsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iMDNmNWY3ZjExZDUwYTNhBQEAAAATU3lzdGVtLkRyYXdpbmcuSWNvbgIAAAAISWNvbkRhdGEISWNvblNpemUHBAITU3lzdGVtLkRyYXdpbmcuU2l6ZQMAAAACAAAACQQAAAAF+////xNTeXN0ZW0uRHJhd2luZy5TaXplAgAAAAV3aWR0aAZoZWlnaHQAAAgIAwAAAAAAAAAAAAAADwQAAACmAAAAAgAAAQABAAICEJAAAAAAkAAAABYAAAAoAAAAAgAAAAQAAAABAAQAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAgAAAAICAAIAAAACAAIAAgIAAAICAgADAwMAAAAD/AAD/AAAA//8A/wAAAP8A/wD//wAA////ALsAAAC7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL", TargetFrameworkMoniker.netcoreapp30), new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABNTeXN0ZW0uRHJhd2luZy5JY29uAgAAAAhJY29uRGF0YQhJY29uU2l6ZQcEAhNTeXN0ZW0uRHJhd2luZy5TaXplAgAAAAIAAAAJAwAAAAX8////E1N5c3RlbS5EcmF3aW5nLlNpemUCAAAABXdpZHRoBmhlaWdodAAACAgCAAAAAAAAAAAAAAAPAwAAAKYAAAACAAABAAEAAgIQAAAAAACQAAAAFgAAACgAAAACAAAABAAAAAEABAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AuwAAALsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAs=", TargetFrameworkMoniker.netfx472) } };
+
             // System.DirectoryServices, System.Security.Principal and System.Security.AccessControl are only available on Windows.
             // They are currently not supported on UAP
             if (PlatformDetection.IsWindows && !PlatformDetection.IsUap)
@@ -1432,7 +1471,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // Extension of core serializable types
-            // Disabling on full framework until we compile against net471
+            // Disabling on full framework until we compile against >=net471
             if (!PlatformDetection.IsFullFramework/* ? PlatformDetection.IsNetfx471OrNewer : true*/)
             {
                 // ValueType isn't serializable before net471.
