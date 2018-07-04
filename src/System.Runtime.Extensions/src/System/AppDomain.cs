@@ -282,27 +282,17 @@ namespace System
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName)
-        {
-            // jit does not check for that, so we should do it ...
-            if (this == null)
-                throw new NullReferenceException();
- 
+        { 
             if (assemblyName == null)
-                throw new ArgumentNullException("assemblyName");
-            Contract.EndContractBlock();
+                throw new ArgumentNullException(nameof(assemblyName));
 
             return Activator.CreateInstance(assemblyName, typeName);
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
-        {
-            // jit does not check for that, so we should do it ...
-            if (this == null)
-                throw new NullReferenceException();
- 
+        { 
             if (assemblyName == null)
-                throw new ArgumentNullException("assemblyName");
-            Contract.EndContractBlock();
+                throw new ArgumentNullException(nameof(assemblyName));
 
             return Activator.CreateInstance(assemblyName,
                                             typeName,
@@ -315,14 +305,9 @@ namespace System
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes)
-        {
-            // jit does not check for that, so we should do it ...
-            if (this == null)
-                throw new NullReferenceException();
- 
+        { 
             if (assemblyName == null)
-                throw new ArgumentNullException("assemblyName");
-            Contract.EndContractBlock();
+                throw new ArgumentNullException(nameof(assemblyName));
 
             return Activator.CreateInstance(assemblyName, typeName, activationAttributes);
         }
@@ -356,22 +341,12 @@ namespace System
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
-        {
-            // jit does not check for that, so we should do it ...
-            if (this == null)
-                throw new NullReferenceException();
-            Contract.EndContractBlock();
-
+        {            
             return Activator.CreateInstanceFrom(assemblyFile, typeName);
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
-        {
-            // jit does not check for that, so we should do it ...
-            if (this == null)
-                throw new NullReferenceException();
-            Contract.EndContractBlock();
-
+        {            
             return Activator.CreateInstanceFrom(assemblyFile,
                                                 typeName,
                                                 ignoreCase,
@@ -383,12 +358,7 @@ namespace System
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes)
-        {
-            // jit does not check for that, so we should do it ...
-            if (this == null)
-                throw new NullReferenceException();
-            Contract.EndContractBlock();
-
+        {            
             return Activator.CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
         }
 
