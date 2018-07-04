@@ -26,6 +26,7 @@ namespace System.Runtime.InteropServices.Tests
     public class ObjectTests
     {
         [Fact]
+        [ActiveIssue(30830, TargetFrameworkMonikers.NetFramework)]
         public void NullValueArguments_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("ptr", () => { Marshal.WriteByte(null, 0, 0); });
