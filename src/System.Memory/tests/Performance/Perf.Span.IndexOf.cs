@@ -163,5 +163,25 @@ namespace System.Memory.Tests
             }
             Assert.Equal(size / 2, index);
         }
+
+        [InlineData("foo", "", StringComparison.Ordinal)]
+        [InlineData("foobardzsdzs", "rddzs", StringComparison.Ordinal)]
+        [InlineData("Hello", "L", StringComparison.OrdinalIgnoreCase)]
+        [InlineData("Exhibit \u00C0", "a\u0300", StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData("Exhibit \u00C0", "a\u0300", StringComparison.OrdinalIgnoreCase)]
+        [InlineData("TestFooBA\u0300R", "FooB\u00C0R", StringComparison.InvariantCultureIgnoreCase)]
+        [InlineData("More Test's", "Tests", StringComparison.InvariantCulture)]
+        [InlineData("very long input string that is hardly recognizable by a clever PC and therefore not usable", "PC", StringComparison.Ordinal)]
+        public void SpanIndexOfSpanComparison(string input, string value, StringComparison comparisonType)
+        {
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+            ReadOnlySpan<char> valueSpan = value.AsSpan();
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+                using (iteration.StartMeasurement())
+                {
+                    inputSpan.IndexOf(valueSpan, comparisonType);
+                }
+        }
     }
 }
