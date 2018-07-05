@@ -33,13 +33,13 @@ static int32_t GetMountInfo(MountPointFound onFound)
 #else
     struct statvfs* mounts = NULL;
 #endif
-    #if defined(__FreeBSD__)
+#if defined(__FreeBSD__)
     // second argument of getmntinfo is mode, which, in FreeBSD, can either be MNT_WAIT (1) or MNT_NOWAIT (2)
     // check getmntinfo(3) and getfsstat(2) for more info
     int count = getmntinfo(&mounts, MNT_WAIT);
-    #elif
+#elif
     int count = getmntinfo(&mounts, 0);
-    #endif
+#endif
     for (int32_t i = 0; i < count; i++)
     {
         onFound(mounts[i].f_mntonname);
