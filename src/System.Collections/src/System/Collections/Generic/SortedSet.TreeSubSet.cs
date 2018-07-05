@@ -17,6 +17,7 @@ namespace System.Collections.Generic
         {
             private SortedSet<T> _underlying;
             private T _min, _max;
+            private int versionCount;
             // these exist for unbounded collections
             // for instance, you could allow this subset to be defined for i > 10. The set will throw if
             // anything <= 10 is added, but there is no upper bound. These features Head(), Tail(), were punted
@@ -42,7 +43,7 @@ namespace System.Collections.Generic
                 root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive); // root is first element within range
                 count = 0;
                 version = -1;
-                VersionCheckImpl();
+                versionCount = -1;
             }
 
             internal override bool AddIfNotPresent(T item)
@@ -87,7 +88,7 @@ namespace System.Collections.Generic
 
             public override void Clear()
             {
-                if (count == 0)
+                if (Count == 0)
                 {
                     return;
                 }
@@ -310,9 +311,25 @@ namespace System.Collections.Generic
                 {
                     root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
                     version = _underlying.version;
+                }
+            }
+
+            internal override void VersionCheckCount()
+            {
+                VersionCheckImpl();
+
+                if (versionCount != _underlying.version)
+                {
                     count = 0;
                     InOrderTreeWalk(n => { count++; return true; });
+                    versionCount = _underlying.version;
                 }
+            }
+
+            internal override int TotalCount()
+            {
+                Debug.Assert(_underlying != null);
+                return _underlying.Count;
             }
 
             // This passes functionality down to the underlying tree, clipping edges if necessary
