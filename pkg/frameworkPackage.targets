@@ -71,12 +71,12 @@
 
     <ItemGroup>
       <!-- Include refs -->
-      <File Include="@(RefFile)">
+      <File Include="@(RefFile)" Condition="'%(RefFile.IsSourceCodeFile)' != 'true'">
         <TargetPath Condition="'%(RefFile.TargetPath)' == ''">$(RefFileTargetPath)%(RefFile.SubFolder)</TargetPath>
       </File>
 
       <!-- Include lib -->
-      <File Include="@(LibFile)">
+      <File Include="@(LibFile)"  Condition="'%(LibFile.IsSourceCodeFile)' != 'true'">
         <TargetPath Condition="'%(LibFile.TargetPath)' == '' ">$(LibFileTargetPath)%(LibFile.SubFolder)</TargetPath>
       </File>
 
