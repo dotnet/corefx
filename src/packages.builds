@@ -25,12 +25,6 @@
     <Project Include="..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
