@@ -43,8 +43,6 @@ namespace System
         public static bool IsRedHatFamily7 => false;
         public static bool IsNotRedHatFamily6 => true;
 
-        public static bool IsWindows10Version1507OrGreater => 
-            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 10240;
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => 

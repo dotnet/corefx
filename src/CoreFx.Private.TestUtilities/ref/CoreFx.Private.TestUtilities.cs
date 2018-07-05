@@ -95,7 +95,6 @@ namespace System
         public static bool IsUbuntu1710OrHigher { get { throw null; } }
         public static bool IsUbuntu1804 { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
-        public static bool IsWindows10Version1507OrGreater { get { throw null; } } // >= First release RTM
         public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
         public static bool IsWindows10Version1709OrGreater { get { throw null; } } // >= Windows 10 Fall Creators Update
