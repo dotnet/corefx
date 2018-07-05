@@ -12,7 +12,7 @@ namespace System.Tests
         public void GetSetupInformation()
         {
             // The behaviour is different from full framework due to the https://github.com/dotnet/corefx/issues/23063.
-            // We can moddify this test later to check if the TargetFrameworkName starts with .NETCore or .NETFramework.
+            // We can modify this test later to check if the TargetFrameworkName starts with .NETCore or .NETFramework.
             Assert.Equal(AppContext.BaseDirectory, AppDomain.CurrentDomain.SetupInformation.ApplicationBase);
             Assert.Equal(AppContext.TargetFrameworkName, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName);
         }        
