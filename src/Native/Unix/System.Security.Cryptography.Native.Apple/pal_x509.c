@@ -61,7 +61,7 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
         *pOSStatusOut = noErr;
 
     if (cert == NULL || pPublicKeyOut == NULL || pOSStatusOut == NULL)
-        return kErrorBadInput;
+        return kErrorUnknownState;
 
     pthread_once (&once, InitCertificateCopy);
     // SecCertificateCopyPublicKey was deprecated in 10.14, so use SecCertificateCopyKey on the systems that have it (10.14+),
@@ -70,10 +70,13 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
     {
         *pPublicKeyOut = (*secCertificateCopyKey)(cert);
     }
+    else if (secCertificateCopyPublicKey != NULL)
+    {
+        *pOSStatusOut = (*secCertificateCopyPublicKey)(cert, pPublicKeyOut);
+    }
     else
     {
-        assert(secCertificateCopyPublicKey != NULL);
-        *pOSStatusOut = (*secCertificateCopyPublicKey)(cert, pPublicKeyOut);
+        return kErrorBadInput;
     }
     return (*pOSStatusOut == noErr);
 }
