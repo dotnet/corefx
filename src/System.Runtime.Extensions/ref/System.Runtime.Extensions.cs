@@ -58,6 +58,7 @@ namespace System
         public void SetDynamicBase(string path) { }
         public void SetPrincipalPolicy(System.Security.Principal.PrincipalPolicy policy) { }
         public void SetThreadPrincipal(System.Security.Principal.IPrincipal principal) { }
+        public AppDomainSetup SetupInformation { get { throw null; } }
         public override string ToString() { throw null; }
         public static void Unload(System.AppDomain domain) { }
         public bool ShadowCopyFiles { get { throw null; } }
@@ -85,6 +86,13 @@ namespace System
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName) { throw null; }
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
+    }
+
+    public sealed partial class AppDomainSetup
+    {
+        private AppDomainSetup() { }
+        public string ApplicationBase { get { throw null; } }
+        public string TargetFrameworkName { get { throw null; } }
     }
 
     public delegate System.Reflection.Assembly ResolveEventHandler(Object sender, ResolveEventArgs args);
