@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -11,7 +12,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class ActivatorTests
+    public class ActivatorTests : RemoteExecutorTestBase
     {
         [Fact]
         public static void CreateInstance()
@@ -397,7 +398,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]        
         static void TestingCreateInstanceFromObjectHandle(string physicalFileName, string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
@@ -482,7 +483,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]        
         static void TestingCreateInstanceFromObjectHandleFullSignature(string physicalFileName, string assemblyFile, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {            
             ObjectHandle oh = Activator.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
@@ -506,7 +507,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]
+        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]        
         static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {
             ObjectHandle oh = Activator.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder , args: args, culture: culture, activationAttributes: activationAttributes);
@@ -529,25 +530,24 @@ namespace System.Tests
 
             yield return new object[] { null, typeof(PublicType).FullName, false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, typeof(PublicType).FullName };
             yield return new object[] { null, typeof(PrivateType).FullName, false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, typeof(PrivateType).FullName };
+
+            yield return new object[] { "Windows, Version=255.255.255.255, Culture=neutral, PublicKeyToken=null, ContentType=WindowsRuntime", "Windows.Foundation.Collections.StringMap", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "Windows.Foundation.Collections.StringMap" };
         }
         
-        [Fact]
-        static void CreateInstanceAssemblyResolve()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-            ObjectHandle oh = Activator.CreateInstance(",,,,", "PublicClassSample");
-            AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
-            Assert.NotNull(oh.Unwrap());
-        }
-
-        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            return Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "TestLoadAssembly.dll"));
-        }
-
         public class PublicType
         {
             public PublicType() { }
+        }
+
+        [Fact]
+        static void CreateInstanceAssemblyResolve()
+        {
+            RemoteInvoke(() =>
+            {
+              AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "TestLoadAssembly.dll"));
+               ObjectHandle oh = Activator.CreateInstance(",,,,", "PublicClassSample");
+               Assert.NotNull(oh.Unwrap());
+            }).Dispose();
         }
     }
 }

@@ -323,7 +323,7 @@ namespace System
         {
             ObjectHandle oh = CreateInstance(assemblyName, typeName);
 
-            return (oh != null) ? oh.Unwrap() : null;
+            return oh?.Unwrap();
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
@@ -337,14 +337,14 @@ namespace System
                                              culture, 
                                              activationAttributes);
  
-            return (oh != null) ? oh.Unwrap() : null;
+            return oh?.Unwrap();
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
         {
             ObjectHandle oh = CreateInstance(assemblyName, typeName, activationAttributes);
             
-            return (oh != null) ? oh.Unwrap() : null;
+            return oh?.Unwrap();
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
@@ -373,7 +373,7 @@ namespace System
         {
             ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName);
 
-            return (oh != null) ? oh.Unwrap() : null; 
+            return oh?.Unwrap(); 
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
@@ -387,14 +387,14 @@ namespace System
                                                  culture, 
                                                  activationAttributes);
  
-            return (oh != null) ? oh.Unwrap() : null;
+            return oh?.Unwrap();
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes)
         {
             ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
             
-             return (oh != null) ? oh.Unwrap() : null;
+            return oh?.Unwrap();
         }
 
         public IPrincipal GetThreadPrincipal()
