@@ -6,9 +6,11 @@
 #include <dlfcn.h>
 #include <pthread.h>
 
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static const int32_t kErrOutItemsNull = -3;
 static const int32_t kErrOutItemsEmpty = -2;
+static pthread_once_t once = PTHREAD_ONCE_INIT;
+static SecKeyRef (*secCertificateCopyKey)(SecCertificateRef);
+static OSStatus (*secCertificateCopyPublicKey)(SecCertificateRef, SecKeyRef*);
 
 typedef const struct OpaqueSecCertificateRef * ConstSecCertificateRef;
 typedef const struct OpaqueSecIdentityRef * ConstSecIdentityRef;
@@ -44,6 +46,12 @@ AppleCryptoNative_X509DemuxAndRetainHandle(CFTypeRef handle, SecCertificateRef* 
     return 1;
 }
 
+static void InitCertificateCopy()
+{
+    secCertificateCopyKey = (SecKeyRef (*)(SecCertificateRef))dlsym(RTLD_DEFAULT, "SecCertificateCopyKey");
+    secCertificateCopyPublicKey = (OSStatus (*)(SecCertificateRef, SecKeyRef*))dlsym(RTLD_DEFAULT, "SecCertificateCopyPublicKey");
+}
+
 int32_t
 AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKeyOut, int32_t* pOSStatusOut)
 {
@@ -55,22 +63,9 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
     if (cert == NULL || pPublicKeyOut == NULL || pOSStatusOut == NULL)
         return kErrorBadInput;
 
+    pthread_once (&once, InitCertificateCopy);
     // SecCertificateCopyPublicKey was deprecated in 10.14, so use SecCertificateCopyKey on the systems that have it (10.14+),
     // and SecCertificateCopyPublicKey on the systems that don’t.
-    static SecKeyRef (*secCertificateCopyKey)(SecCertificateRef);
-    static OSStatus (*secCertificateCopyPublicKey)(SecCertificateRef, SecKeyRef*);
-    static int checked;
-    
-    pthread_mutex_lock(&lock);
-    {
-        if (!checked)
-        {
-            checked = 1;
-            secCertificateCopyKey = (SecKeyRef (*)(SecCertificateRef))dlsym(RTLD_DEFAULT, "SecCertificateCopyKey");
-            secCertificateCopyPublicKey = (OSStatus (*)(SecCertificateRef, SecKeyRef*))dlsym(RTLD_DEFAULT, "SecCertificateCopyPublicKey");
-        }
-    }
-    pthread_mutex_unlock(&lock);
     if (secCertificateCopyKey != NULL)
     {
         *pPublicKeyOut = (*secCertificateCopyKey)(cert);
