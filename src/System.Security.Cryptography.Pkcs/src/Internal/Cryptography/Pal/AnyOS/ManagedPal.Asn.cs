@@ -81,6 +81,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
         public override byte[] EncodeUtcTime(DateTime utcTime)
         {
+            const int minLegalYear = 1950;
             // Write using DER to support the most readers.
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
@@ -90,11 +91,11 @@ namespace Internal.Cryptography.Pal.AnyOS
                 // Unknown => Local (adjust) => UTC (adjust "back", add Z marker; matches Windows)
                 if (utcTime.Kind == DateTimeKind.Unspecified)
                 {
-                    writer.WriteUtcTime(utcTime.ToLocalTime());
+                    writer.WriteUtcTime(utcTime.ToLocalTime(), minLegalYear);
                 }
                 else
                 {
-                    writer.WriteUtcTime(utcTime);
+                    writer.WriteUtcTime(utcTime, minLegalYear);
                 }
 
                 return writer.Encode();
