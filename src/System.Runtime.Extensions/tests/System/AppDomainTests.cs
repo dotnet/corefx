@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class AppDomainTests : RemoteExecutorTestBase
+    public partial class AppDomainTests : RemoteExecutorTestBase
     {
         [Fact]
         public void CurrentDomain_Not_Null()
@@ -718,13 +718,6 @@ namespace System.Tests
                 AppDomain.CurrentDomain.SetThreadPrincipal(principal);
                 return SuccessExitCode;
             }).Dispose();
-        }
-
-        [Fact]
-        public void GetSetupInformation()
-        {
-            Assert.Equal(AppContext.BaseDirectory, AppDomain.CurrentDomain.SetupInformation.ApplicationBase);
-            Assert.Equal(AppContext.TargetFrameworkName, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName);
         }
 
         private void CopyTestAssemblies()
