@@ -4,7 +4,9 @@
 
 #include "pal_x509.h"
 #include <dlfcn.h>
+#include <pthread.h>
 
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static const int32_t kErrOutItemsNull = -3;
 static const int32_t kErrOutItemsEmpty = -2;
 
@@ -59,12 +61,16 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
     static OSStatus (*secCertificateCopyPublicKey)(SecCertificateRef, SecKeyRef*);
     static int checked;
     
-    if (!checked)
+    pthread_mutex_lock(&lock);
     {
-        secCertificateCopyKey = (SecKeyRef (*)(SecCertificateRef))dlsym(RTLD_DEFAULT, "SecCertificateCopyKey");
-        secCertificateCopyPublicKey = (OSStatus (*)(SecCertificateRef, SecKeyRef*))dlsym(RTLD_DEFAULT, "SecCertificateCopyPublicKey");
-        checked = 1;
+        if (!checked)
+        {
+            checked = 1;
+            secCertificateCopyKey = (SecKeyRef (*)(SecCertificateRef))dlsym(RTLD_DEFAULT, "SecCertificateCopyKey");
+            secCertificateCopyPublicKey = (OSStatus (*)(SecCertificateRef, SecKeyRef*))dlsym(RTLD_DEFAULT, "SecCertificateCopyPublicKey");
+        }
     }
+    pthread_mutex_unlock(&lock);
     if (secCertificateCopyKey != NULL)
     {
         *pPublicKeyOut = (*secCertificateCopyKey)(cert);
