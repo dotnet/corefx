@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Runtime.Remoting;
 using Xunit;
 
-namespace System
+namespace System.Tests
 {
     public partial class AppDomainTests
     {
