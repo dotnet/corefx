@@ -398,7 +398,7 @@ namespace System
         public static void SetIn(TextReader newIn)
         {
             CheckNonNull(newIn, nameof(newIn));
-            newIn = SyncTextReader.GetSynchronizedTextReader(newIn);
+            newIn = TextReader.Synchronized(newIn);
             lock (InternalSyncObject)
             {
                 Volatile.Write(ref s_in, newIn);
