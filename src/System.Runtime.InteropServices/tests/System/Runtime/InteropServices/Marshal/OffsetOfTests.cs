@@ -205,7 +205,7 @@ namespace System.Runtime.InteropServices.Tests
     public struct SomeStruct
     {
         public bool p;
-        private int var;
+        public int var;
     }
 
     [StructLayout(LayoutKind.Explicit)]
