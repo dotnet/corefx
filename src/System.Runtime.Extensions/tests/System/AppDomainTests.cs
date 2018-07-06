@@ -39,6 +39,15 @@ namespace System.Tests
         } 
 
         [Fact]
+        public void TargetFrameworkTest()
+        {
+            RemoteInvoke(() => {
+                Assert.Contains(".NETCoreApp", AppContext.TargetFrameworkName);
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
         public void UnhandledException_Add_Remove()
         {
             RemoteInvoke(() => {
