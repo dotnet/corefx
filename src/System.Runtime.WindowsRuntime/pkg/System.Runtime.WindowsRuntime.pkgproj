@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <SkipValidatePackage>true</SkipValidatePackage>
+    <HarvestStablePackage>false</HarvestStablePackage>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ref\System.Runtime.WindowsRuntime.csproj">
+      <SupportedFramework>netcoreapp2.1</SupportedFramework>
+    </ProjectReference>
+    <ProjectReference Include="..\src\System.Runtime.WindowsRuntime.csproj" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project> 
