@@ -144,6 +144,9 @@ namespace Internal.Cryptography.Pal
                 case DerSequenceReader.DerTag.UTF8String:
                     value = reader.ReadUtf8String();
                     break;
+                case DerSequenceReader.DerTag.T61String:
+                    value = reader.ReadT61String();
+                    break;
 
                 // Ignore anything we don't know how to read.
             }
