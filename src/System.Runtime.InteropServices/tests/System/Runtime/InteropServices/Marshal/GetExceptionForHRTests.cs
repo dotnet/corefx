@@ -11,6 +11,7 @@ namespace System.Runtime.InteropServices.Tests
         [Theory]
         [InlineData(unchecked((int)0x80020006))]
         [InlineData(unchecked((int)0x80020101))]
+        [ActiveIssue(30866)]
         public void GetExceptionForHR_EqualsErrorCode(int err)
         {
             Exception ex = Marshal.GetExceptionForHR(err);
