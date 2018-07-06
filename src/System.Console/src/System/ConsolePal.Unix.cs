@@ -82,7 +82,7 @@ namespace System
             }
             else
             {
-                return StdInReader;
+                return TextReader.Synchronized(StdInReader);
             }
         }
 
