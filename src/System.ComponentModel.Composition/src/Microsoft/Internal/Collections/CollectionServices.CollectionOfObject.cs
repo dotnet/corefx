@@ -99,12 +99,7 @@ namespace Microsoft.Internal.Collections
 
         private class CollectionOfObject<T> : ICollection<object>
         {
-            private readonly ICollection<T> _collectionOfT;
-
-            public CollectionOfObject(object collectionOfT)
-            {
-                _collectionOfT = (ICollection<T>)collectionOfT;
-            }
+            private readonly ICollection<T> _collectionOfT = default;
 
             public void Add(object item)
             {

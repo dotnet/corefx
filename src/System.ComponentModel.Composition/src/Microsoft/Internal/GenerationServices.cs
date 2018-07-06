@@ -37,21 +37,6 @@ namespace Microsoft.Internal
 
         private static readonly MethodInfo ExceptionGetData = typeof(Exception).GetProperty("Data").GetGetMethod();
         private static readonly MethodInfo DictionaryAdd = typeof(IDictionary).GetMethod("Add");
-        private static readonly ConstructorInfo ObjectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
-
-        public static ILGenerator CreateGeneratorForPublicConstructor(this TypeBuilder typeBuilder, Type[] ctrArgumentTypes)
-        {
-            ConstructorBuilder ctorBuilder = typeBuilder.DefineConstructor(
-                MethodAttributes.Public,
-                CallingConventions.Standard,
-                ctrArgumentTypes);
-
-            ILGenerator ctorIL = ctorBuilder.GetILGenerator();
-            ctorIL.Emit(OpCodes.Ldarg_0);
-            ctorIL.Emit(OpCodes.Call, ObjectCtor);
-
-            return ctorIL;
-        }
 
         /// Generates the code that loads the supplied value on the stack
         /// This is not as simple as it seems, as different instructions need to be generated depending
