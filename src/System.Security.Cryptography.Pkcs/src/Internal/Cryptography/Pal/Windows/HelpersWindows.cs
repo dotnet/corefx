@@ -225,95 +225,74 @@ namespace Internal.Cryptography.Pal.Windows
             AlgId algId = oidValue.ToAlgId();
 
             int keyLength;
-            byte[] parameters = Array.Empty<byte>();
             switch (algId)
             {
                 case AlgId.CALG_RC2:
-                {
-                    if (cryptAlgorithmIdentifer.Parameters.cbData == 0)
                     {
-                        keyLength = 0;
-                    }
-                    else
-                    {
-                        CRYPT_RC2_CBC_PARAMETERS rc2Parameters;
-                        unsafe
+                        if (cryptAlgorithmIdentifer.Parameters.cbData == 0)
                         {
-                            int cbSize = sizeof(CRYPT_RC2_CBC_PARAMETERS);
-                            if (!Interop.Crypt32.CryptDecodeObject(
-                                    CryptDecodeObjectStructType.PKCS_RC2_CBC_PARAMETERS,
-                                    cryptAlgorithmIdentifer.Parameters.pbData,
-                                    (int)(cryptAlgorithmIdentifer.Parameters.cbData),
-                                    &rc2Parameters,
-                                    ref cbSize))
-                            {
-                                throw Marshal.GetLastWin32Error().ToCryptographicException();
-                            }
+                            keyLength = 0;
                         }
-
-                        switch (rc2Parameters.dwVersion)
+                        else
                         {
-                            case CryptRc2Version.CRYPT_RC2_40BIT_VERSION:
-                                keyLength = KeyLengths.Rc2_40Bit;
-                                break;
-                            case CryptRc2Version.CRYPT_RC2_56BIT_VERSION:
-                                keyLength = KeyLengths.Rc2_56Bit;
-                                break;
-                            case CryptRc2Version.CRYPT_RC2_64BIT_VERSION:
-                                keyLength = KeyLengths.Rc2_64Bit;
-                                break;
-                            case CryptRc2Version.CRYPT_RC2_128BIT_VERSION:
-                                keyLength = KeyLengths.Rc2_128Bit;
-                                break;
-                            default:
-                                keyLength = 0;
-                                break;
-                        }
-                        // Retrieve IV if available.
-                        if (rc2Parameters.fIV > 0)
-                        {
-                            parameters = rc2Parameters.ToByteArray();
-                        }
-                    }
-                    break;
-                }
-
-                case AlgId.CALG_RC4:
-                {
-                    int saltLength = 0;
-                    if (cryptAlgorithmIdentifer.Parameters.cbData != 0)
-                    {
-                        using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(
-                            CryptDecodeObjectStructType.X509_OCTET_STRING, 
-                            cryptAlgorithmIdentifer.Parameters.pbData, 
-                            (int)cryptAlgorithmIdentifer.Parameters.cbData))
-                        {
+                            CRYPT_RC2_CBC_PARAMETERS rc2Parameters;
                             unsafe
                             {
-                                DATA_BLOB* pDataBlob = (DATA_BLOB*)(sh.DangerousGetHandle());
-                                saltLength = (int)(pDataBlob->cbData);
-                                parameters = (*pDataBlob).ToByteArray();
+                                int cbSize = sizeof(CRYPT_RC2_CBC_PARAMETERS);
+                                if (!Interop.Crypt32.CryptDecodeObject(CryptDecodeObjectStructType.PKCS_RC2_CBC_PARAMETERS, cryptAlgorithmIdentifer.Parameters.pbData, (int)(cryptAlgorithmIdentifer.Parameters.cbData), &rc2Parameters, ref cbSize))
+                                    throw Marshal.GetLastWin32Error().ToCryptographicException();
+                            }
+
+                            switch (rc2Parameters.dwVersion)
+                            {
+                                case CryptRc2Version.CRYPT_RC2_40BIT_VERSION:
+                                    keyLength = KeyLengths.Rc2_40Bit;
+                                    break;
+                                case CryptRc2Version.CRYPT_RC2_56BIT_VERSION:
+                                    keyLength = KeyLengths.Rc2_56Bit;
+                                    break;
+                                case CryptRc2Version.CRYPT_RC2_64BIT_VERSION:
+                                    keyLength = KeyLengths.Rc2_64Bit;
+                                    break;
+                                case CryptRc2Version.CRYPT_RC2_128BIT_VERSION:
+                                    keyLength = KeyLengths.Rc2_128Bit;
+                                    break;
+                                default:
+                                    keyLength = 0;
+                                    break;
                             }
                         }
+                        break;
                     }
 
-                    // For RC4, keyLength = 128 - (salt length * 8).
-                    keyLength = KeyLengths.Rc4Max_128Bit - saltLength * 8;
-                    break;
-                }
+                case AlgId.CALG_RC4:
+                    {
+                        int saltLength = 0;
+                        if (cryptAlgorithmIdentifer.Parameters.cbData != 0)
+                        {
+                            using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(CryptDecodeObjectStructType.X509_OCTET_STRING, cryptAlgorithmIdentifer.Parameters.pbData, (int)cryptAlgorithmIdentifer.Parameters.cbData))
+                            {
+                                unsafe
+                                {
+                                    DATA_BLOB* pDataBlob = (DATA_BLOB*)(sh.DangerousGetHandle());
+                                    saltLength = (int)(pDataBlob->cbData);
+                                }
+                            }
+                        }
+
+                        // For RC4, keyLength = 128 - (salt length * 8).
+                        keyLength = KeyLengths.Rc4Max_128Bit - saltLength * 8;
+                        break;
+                    }
 
                 case AlgId.CALG_DES:
                     // DES key length is fixed at 64 (or 56 without the parity bits).
                     keyLength = KeyLengths.Des_64Bit;
-
-                    GetParameters(cryptAlgorithmIdentifer, 16, ref parameters);
                     break;
 
                 case AlgId.CALG_3DES:
                     // 3DES key length is fixed at 192 (or 168 without the parity bits).
                     keyLength = KeyLengths.TripleDes_192Bit;
-
-                    GetParameters(cryptAlgorithmIdentifer, 16, ref parameters);
                     break;
 
                 default:
@@ -323,45 +302,8 @@ namespace Internal.Cryptography.Pal.Windows
                     break;
             }
 
-            var algorithmIdentifier = new AlgorithmIdentifier(Oid.FromOidValue(oidValue, OidGroup.All), keyLength)
-            {
-                Parameters = parameters
-            };
-
+            AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(Oid.FromOidValue(oidValue, OidGroup.All), keyLength);
             return algorithmIdentifier;
-        }
-
-        public static AlgorithmIdentifier ToAlgorithmIdentifier(this CERT_PUBLIC_KEY_INFO keyInfo)
-        {
-            int keyLength = CertGetPublicKeyLength(MsgEncodingType.X509_ASN_ENCODING | MsgEncodingType.PKCS_7_ASN_ENCODING, ref keyInfo);
-            byte[] parameters = new byte[keyInfo.Algorithm.Parameters.cbData];
-            if (parameters.Length > 0)
-            {
-                Marshal.Copy(keyInfo.Algorithm.Parameters.pbData, parameters, 0, parameters.Length);
-            }
-
-            var algorithmIdentifier = new AlgorithmIdentifier(
-                Oid.FromOidValue(Marshal.PtrToStringAnsi(keyInfo.Algorithm.pszObjId), OidGroup.PublicKeyAlgorithm), 
-                keyLength)
-            {
-                Parameters = parameters
-            };
-
-            return algorithmIdentifier;
-        }
-
-        public static byte[] ToByteArray(this CRYPT_RC2_CBC_PARAMETERS parameters) {
-            return new byte[]
-            {
-                parameters.rgbIV0,
-                parameters.rgbIV1,
-                parameters.rgbIV2,
-                parameters.rgbIV3,
-                parameters.rgbIV4,
-                parameters.rgbIV5,
-                parameters.rgbIV6,
-                parameters.rgbIV7
-            };
         }
 
         public static CryptographicAttributeObjectCollection GetUnprotectedAttributes(this SafeCryptMsgHandle hCryptMsg)
@@ -530,25 +472,6 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             collection.Add(new CryptographicAttributeObject(oid, attributeCollection));
-        }
-
-        private static void GetParameters(CRYPT_ALGORITHM_IDENTIFIER cryptAlgorithmIdentifer, int cbSize, ref byte[] parameters)
-        {
-            if (cryptAlgorithmIdentifer.Parameters.cbData > 0 && cbSize > 0)
-            {
-                using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(
-                    CryptDecodeObjectStructType.X509_OCTET_STRING,
-                    cryptAlgorithmIdentifer.Parameters.pbData,
-                    (int)cryptAlgorithmIdentifer.Parameters.cbData))
-                {
-                    unsafe
-                    {
-                        DATA_BLOB* pDataBlob = (DATA_BLOB*)(sh.DangerousGetHandle());
-                        parameters = new byte[cbSize];
-                        Marshal.Copy((*pDataBlob).pbData, parameters, 0, cbSize);
-                    }
-                }
-            }
         }
     }
 }

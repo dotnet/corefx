@@ -12,8 +12,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class ContentEncryptionAlgorithmTests
     {
-        static partial void CheckParameters(AlgorithmIdentifier identifier, int? length);
-
         public static bool SupportsRc4 => PlatformDetection.IsWindows;
         public static bool DoesNotSupportRc4 => !SupportsRc4;
 
@@ -68,7 +66,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Rc2, algorithm.Oid.Value);
             Assert.Equal(128, algorithm.KeyLength);
-            CheckParameters(algorithm, 8);
         }
 
         [Fact]
@@ -193,7 +190,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Des, algorithm.Oid.Value);
             Assert.Equal(64, algorithm.KeyLength);
-            CheckParameters(algorithm, 16);
         }
 
         [Fact]
@@ -220,8 +216,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 + "77495ce527339dc78b063477104d513eda6f8a7b2f5c642fddf81d86a4c139f836590a1f81efafb953f7c6d666021fe5c031"
                 + "10064f21ce4b17f4737a9370298a8b540b1d597fbc39d21a537b45d9dc65c8d2cbafcc6c7208b5f0453f7ef206f4b1d99cc0"
                 + "7186f7f5b31a0a9ec885296ae27183f51b83a64bb8bf46ece16305302b06092a864886f70d010701301406082a864886f70d"
-                + "03070408d8ac6958c16ea6f58008beb49fa4214d1e3f").HexToByteArray();
-            VerifyAlgorithm3Des(encodedMessage);
+                + "03070408d8ac6958c16ea6f58008beb49fa4214d1e3f").HexToByteArray(); VerifyAlgorithm3Des(encodedMessage);
         }
 
         private static void VerifyAlgorithm3Des(byte[] encodedMessage)
@@ -232,7 +227,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.TripleDesCbc, algorithm.Oid.Value);
             Assert.Equal(192, algorithm.KeyLength);
-            CheckParameters(algorithm, 16);
         }
 
         [ConditionalFact(nameof(SupportsRc4))]
@@ -271,7 +265,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Rc4, algorithm.Oid.Value);
             Assert.Equal(128, algorithm.KeyLength);
-            CheckParameters(algorithm, 0);
         }
 
         [Fact]
@@ -350,7 +343,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Aes128, algorithm.Oid.Value);
             Assert.Equal(0, algorithm.KeyLength);
-            CheckParameters(algorithm, 0);
         }
 
         [Fact]
@@ -389,7 +381,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Aes192, algorithm.Oid.Value);
             Assert.Equal(0, algorithm.KeyLength);
-            CheckParameters(algorithm, 0);
         }
 
         [Fact]
@@ -429,7 +420,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Aes256, algorithm.Oid.Value);
             Assert.Equal(0, algorithm.KeyLength);
-            CheckParameters(algorithm, 0);
         }
     }
 }

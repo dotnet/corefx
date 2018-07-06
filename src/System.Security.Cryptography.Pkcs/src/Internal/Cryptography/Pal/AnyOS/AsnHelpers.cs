@@ -54,7 +54,6 @@ namespace Internal.Cryptography.Pal.AnyOS
         internal static AlgorithmIdentifier ToPresentationObject(this AlgorithmIdentifierAsn asn)
         {
             int keyLength;
-            byte[] parameters = Array.Empty<byte>();
 
             switch (asn.Algorithm.Value)
             {
@@ -80,7 +79,6 @@ namespace Internal.Cryptography.Pal.AnyOS
                             case 64:
                             case 128:
                                 keyLength = keySize;
-                                parameters = rc2Params.Iv.ToArray();
                                 break;
                             default:
                                 keyLength = 0;
@@ -108,7 +106,6 @@ namespace Internal.Cryptography.Pal.AnyOS
                             if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
                             {
                                 saltLen = contents.Length;
-                                parameters = contents.ToArray();
                             }
                             else
                             {
@@ -126,11 +123,9 @@ namespace Internal.Cryptography.Pal.AnyOS
                     }
                 case Oids.DesCbc:
                     keyLength = KeyLengths.Des_64Bit;
-                    GetParameters(asn, ref parameters);
                     break;
                 case Oids.TripleDesCbc:
                     keyLength = KeyLengths.TripleDes_192Bit;
-                    GetParameters(asn, ref parameters);
                     break;
                 default:
                     // .NET Framework doesn't set a keylength for AES, or any other algorithm than the ones
@@ -139,18 +134,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     break;
             }
 
-            AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(new Oid(asn.Algorithm), keyLength);
-            algorithmIdentifier.Parameters = parameters;
-
-            return algorithmIdentifier;
-        }
-
-        private static void GetParameters(AlgorithmIdentifierAsn algorithmIdentifierAsn, ref  byte[] parameters)
-        {
-            Rc2CbcParameters rc2Params = AsnSerializer.Deserialize<Rc2CbcParameters>(
-                algorithmIdentifierAsn.Parameters.Value,
-                AsnEncodingRules.BER);
-            parameters = rc2Params.Iv.ToArray();
+            return new AlgorithmIdentifier(new Oid(asn.Algorithm), keyLength);
         }
     }
 }
