@@ -107,7 +107,7 @@ EnumerateKeychain(SecKeychainRef keychain, CFStringRef matchType, CFArrayRef* pC
     CFTypeRef result = NULL;
     const void *constKeychain = keychain;
     CFArrayRef searchList = CFArrayCreate(
-        NULL, (const void**)(&constKeychain), 1, &kCFTypeArrayCallBacks);
+        NULL, &constKeychain, 1, &kCFTypeArrayCallBacks);
 
     if (searchList == NULL)
     {
@@ -179,7 +179,7 @@ static OSStatus DeleteInKeychain(CFTypeRef needle, SecKeychainRef haystack)
 
     const void *constKeychain = haystack;
     CFArrayRef searchList = CFArrayCreate(
-        NULL, (const void**)(&constKeychain), 1, &kCFTypeArrayCallBacks);
+        NULL, &constKeychain, 1, &kCFTypeArrayCallBacks);
 
     if (searchList == NULL)
     {
