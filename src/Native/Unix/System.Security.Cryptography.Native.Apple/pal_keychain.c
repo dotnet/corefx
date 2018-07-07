@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_keychain.h"
+#include "pal_utilities.h"
 
 int32_t AppleCryptoNative_SecKeychainItemCopyKeychain(SecKeychainItemRef item, SecKeychainRef* pKeychainOut)
 {
@@ -104,8 +105,9 @@ EnumerateKeychain(SecKeychainRef keychain, CFStringRef matchType, CFArrayRef* pC
 
     int32_t ret = 0;
     CFTypeRef result = NULL;
+    const void *constKeychain = keychain;
     CFArrayRef searchList = CFArrayCreate(
-        NULL, (void**)(&keychain), 1, &kCFTypeArrayCallBacks);
+        NULL, (const void**)(&constKeychain), 1, &kCFTypeArrayCallBacks);
 
     if (searchList == NULL)
     {
@@ -175,8 +177,9 @@ static OSStatus DeleteInKeychain(CFTypeRef needle, SecKeychainRef haystack)
     if (query == NULL)
         return errSecAllocate;
 
+    const void *constKeychain = haystack;
     CFArrayRef searchList = CFArrayCreate(
-        NULL, (void**)(&haystack), 1, &kCFTypeArrayCallBacks);
+        NULL, (const void**)(&constKeychain), 1, &kCFTypeArrayCallBacks);
 
     if (searchList == NULL)
     {
@@ -223,9 +226,6 @@ static OSStatus DeleteInKeychain(CFTypeRef needle, SecKeychainRef haystack)
     return status;
 }
 
-typedef const struct OpaqueSecCertificateRef * ConstSecCertificateRef;
-typedef const struct OpaqueSecIdentityRef * ConstSecIdentityRef;
-
 int32_t
 AppleCryptoNative_X509StoreAddCertificate(CFTypeRef certOrIdentity, SecKeychainRef keychain, int32_t* pOSStatus)
 {
@@ -243,12 +243,12 @@ AppleCryptoNative_X509StoreAddCertificate(CFTypeRef certOrIdentity, SecKeychainR
 
     if (inputType == SecCertificateGetTypeID())
     {
-        cert = (ConstSecCertificateRef)certOrIdentity;
+        cert = (SecCertificateRef)CONST_CAST(void *, certOrIdentity);
         CFRetain(cert);
     }
     else if (inputType == SecIdentityGetTypeID())
     {
-        SecIdentityRef identity = (ConstSecIdentityRef)certOrIdentity;
+        SecIdentityRef identity = (SecIdentityRef)CONST_CAST(void *, certOrIdentity);
         status = SecIdentityCopyCertificate(identity, &cert);
 
         if (status == noErr)
@@ -335,12 +335,12 @@ AppleCryptoNative_X509StoreRemoveCertificate(CFTypeRef certOrIdentity, SecKeycha
 
     if (inputType == SecCertificateGetTypeID())
     {
-        cert = (ConstSecCertificateRef)certOrIdentity;
+        cert = (SecCertificateRef)CONST_CAST(void *, certOrIdentity);
         CFRetain(cert);
     }
     else if (inputType == SecIdentityGetTypeID())
     {
-        identity = (ConstSecIdentityRef)certOrIdentity;
+        identity = (SecIdentityRef)CONST_CAST(void *, certOrIdentity);
         status = SecIdentityCopyCertificate(identity, &cert);
 
         if (status != noErr)
