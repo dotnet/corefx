@@ -12,6 +12,48 @@ namespace Microsoft.Internal
 {
     internal static class ReflectionServices
     {
+        public static Assembly Assembly(this MemberInfo member)
+        {
+            Type type = member as Type;
+            if (type != null)
+            {
+                return type.Assembly;
+            }
+
+            return member.DeclaringType.Assembly;
+        }
+
+        public static bool IsVisible(this ConstructorInfo constructor)
+        {
+            return constructor.DeclaringType.IsVisible && constructor.IsPublic;
+        }
+
+        public static bool IsVisible(this FieldInfo field)
+        {
+            return field.DeclaringType.IsVisible && field.IsPublic;
+        }
+
+        public static bool IsVisible(this MethodInfo method)
+        {
+            if (!method.DeclaringType.IsVisible)
+                return false;
+
+            if (!method.IsPublic)
+                return false;
+
+            if (method.IsGenericMethod)
+            {
+                // Check type arguments, for example if we're passed 'Activator.CreateInstance<SomeMefInternalType>()'
+                foreach (Type typeArgument in method.GetGenericArguments())
+                {
+                    if (!typeArgument.IsVisible)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
         public static string GetDisplayName(Type declaringType, string name)
         {
             if(declaringType == null)

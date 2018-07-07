@@ -281,5 +281,22 @@ namespace Microsoft.Internal.Collections
             return true;
         }
 
+        public static bool IsCollectionEqual<T>(this IList<T> thisList, IList<T> thatList)
+        {
+            if (thisList.Count != thatList.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < thisList.Count; i++)
+            {
+                if (!thisList[i].Equals(thatList[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

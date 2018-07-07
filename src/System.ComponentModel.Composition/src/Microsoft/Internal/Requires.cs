@@ -24,6 +24,15 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
+        public static void NullOrNotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
+            where TKey : class
+            where TValue : class
+        {
+            NotNullElements(values, parameterName);
+            Contract.EndContractBlock();
+        }
+
+        [DebuggerStepThrough]
         public static void NullOrNotNullElements<T>(IEnumerable<T> values, string parameterName)
             where T : class
         {
