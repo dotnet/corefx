@@ -8,15 +8,7 @@
 static ECCurveType GroupToCurveType(EC_GROUP* group)
 {
 #ifdef OPENSSL_IS_BORINGSSL
-    switch (EC_GROUP_get_curve_name(group)) {
-        case NID_secp384r1:
-        case NID_secp224r1:
-        case NID_secp521r1:
-            return PrimeMontgomery;
-        case NID_X9_62_prime256v1:
-        default:
-            return PrimeShortWeierstrass;
-    }
+    return PrimeShortWeierstrass;
 #else
     EC_METHOD* method;
 
