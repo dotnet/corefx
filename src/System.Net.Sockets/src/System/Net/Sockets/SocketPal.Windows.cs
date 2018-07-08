@@ -218,7 +218,10 @@ namespace System.Net.Sockets
             }
         }
 
-        public static unsafe SocketError SendTo(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, byte[] peerAddress, int peerAddressSize, out int bytesTransferred)
+        public static unsafe SocketError SendTo(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, byte[] peerAddress, int peerAddressSize, out int bytesTransferred) =>
+            SendTo(handle, new ReadOnlySpan<byte>(buffer, offset, size), socketFlags, peerAddress, peerAddressSize, out bytesTransferred);
+
+        public static unsafe SocketError SendTo(SafeCloseSocket handle, ReadOnlySpan<byte> buffer, SocketFlags socketFlags, byte[] peerAddress, int peerAddressSize, out int bytesTransferred)
         {
             int bytesSent;
             if (buffer.Length == 0)
@@ -233,12 +236,12 @@ namespace System.Net.Sockets
             }
             else
             {
-                fixed (byte* pinnedBuffer = &buffer[0])
+                fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
                 {
                     bytesSent = Interop.Winsock.sendto(
                         handle.DangerousGetHandle(),
-                        pinnedBuffer + offset,
-                        size,
+                        bufferPtr,
+                        buffer.Length,
                         socketFlags,
                         peerAddress,
                         peerAddressSize);
