@@ -40,12 +40,9 @@
 
 #define sizeof_member(type,member) sizeof(((type*)NULL)->member)
 
-#if defined(__GNUC__)
-#define CONST_CAST2(TOTYPE,FROMTYPE,X) ((__extension__(union {FROMTYPE _q; TOTYPE _nq;})(X))._nq)
-#else
-#define CONST_CAST2(TOTYPE,FROMTYPE,X) ((TOTYPE)(FROMTYPE)(X))
-#endif
-#define CONST_CAST(TYPE,X) CONST_CAST2 (TYPE, const TYPE, (X))
+// See https://stackoverflow.com/questions/51231405
+#define CONST_CAST2(TOTYPE, FROMTYPE, X) ((union { FROMTYPE _q; TOTYPE _nq; }){ ._q = (X) }._nq)
+#define CONST_CAST(TYPE, X) CONST_CAST2(TYPE, const TYPE, (X))
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
