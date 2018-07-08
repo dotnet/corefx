@@ -9,7 +9,7 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>11f431e6bd908d5fdd94c187d2741d9c40a4287d</CoreFxCurrentRef>
+    <CoreFxCurrentRef>8fc22d261883eb7a1f8765bfe716d806303d0318</CoreFxCurrentRef>
     <CoreClrCurrentRef>11f431e6bd908d5fdd94c187d2741d9c40a4287d</CoreClrCurrentRef>
     <CoreSetupCurrentRef>11f431e6bd908d5fdd94c187d2741d9c40a4287d</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
@@ -17,7 +17,7 @@
     <ProjectNTfsTestILCCurrentRef>ccd922b62227c43ed2dac6bcb737321dd2b07be0</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>c520a2569b40fc53cf51e4f6970c3e7411adc173</StandardCurrentRef>
-    <BuildToolsCurrentRef>d1e2bedf58a4a66aadda4f5751ecdaf3ad4f62fe</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>8fc22d261883eb7a1f8765bfe716d806303d0318</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -31,7 +31,7 @@
 
   <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>servicing</CoreFxExpectedPrerelease>
+    <CoreFxExpectedPrerelease>servicing-26703-08</CoreFxExpectedPrerelease>
     <MicrosoftNETCorePlatformsPackageVersion>2.1.0</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.1-servicing-26606-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <ProjectNTfsExpectedPrerelease>beta-26413-00</ProjectNTfsExpectedPrerelease>
@@ -47,7 +47,7 @@
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0019</XunitPerfAnalysisPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
-    <XunitNetcoreExtensionsVersion>2.1.0-rc1-02913-01</XunitNetcoreExtensionsVersion>
+    <XunitNetcoreExtensionsVersion>2.1.0-rc1-03006-01</XunitNetcoreExtensionsVersion>
 
     <!-- Roslyn optimization data package version -->
     <OptimizationDataVersion>2.0.0-rc-61101-17</OptimizationDataVersion>
@@ -56,7 +56,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.1.0-rc1-02913-01</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.1.0-rc1-03006-01</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
