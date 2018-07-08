@@ -15,6 +15,13 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- Harvest netstandard ref assemblies that are still referenced but aren't built anymore -->
+  <ItemGroup Condition="'$(NETStandardVersion)' != ''">
+    <PackageReference Condition="'$(NETStandardVersion)' &gt;= 1.1" Include="System.Memory">
+      <Version>4.5.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(IsNETStandard1x)' == 'true'">
     <PackageReference Include="System.Diagnostics.Contracts">
       <Version>4.3.0</Version>
