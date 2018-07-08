@@ -23,6 +23,8 @@ namespace System.Net.Sockets
         public int Send(ReadOnlySpan<byte> buffer) { throw null; }
         public int Send(ReadOnlySpan<byte> buffer, System.Net.Sockets.SocketFlags socketFlags) { throw null; }
         public int Send(ReadOnlySpan<byte> buffer, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { throw null; }
+        public int SendTo(ReadOnlySpan<byte> buffer, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEP) { throw null; }
+        public int SendTo(ReadOnlySpan<byte> buffer, System.Net.EndPoint remoteEP) { throw null; }
     }
 
     public static partial class SocketTaskExtensions
