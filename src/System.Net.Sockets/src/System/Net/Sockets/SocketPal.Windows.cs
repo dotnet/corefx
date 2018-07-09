@@ -236,7 +236,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
+                fixed (byte* bufferPtr = buffer)
                 {
                     bytesSent = Interop.Winsock.sendto(
                         handle.DangerousGetHandle(),
