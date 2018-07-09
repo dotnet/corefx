@@ -42,8 +42,7 @@ namespace System.Tests
         public void TargetFrameworkTest()
         {
             RemoteInvoke(() => {
-                Assert.Contains(".NETCoreApp", AppContext.TargetFrameworkName);
-                return SuccessExitCode;
+                Assert.Contains("DUMMY-TFA", AppContext.TargetFrameworkName);
             }).Dispose();
         }
 
