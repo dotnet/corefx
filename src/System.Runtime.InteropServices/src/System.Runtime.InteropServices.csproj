@@ -6,6 +6,7 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'uapaot'">true</GenFacadesIgnoreMissingTypes>
     <NoWarn Condition="'$(TargetGroup)' == 'uapaot'">0436;3001</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
@@ -32,6 +33,7 @@
     <Compile Include="System\Runtime\InteropServices\ExporterEventKind.cs" />
     <Compile Include="System\Runtime\InteropServices\RegistrationClassContext.cs" />
     <Compile Include="System\Runtime\InteropServices\RegistrationConnectionType.cs" />
+    <Compile Include="System\Runtime\InteropServices\StandardOleMarshalObject.cs" />
     <Compile Include="System\Security\SecureStringMarshal.cs" />
   </ItemGroup>
   <ItemGroup>
