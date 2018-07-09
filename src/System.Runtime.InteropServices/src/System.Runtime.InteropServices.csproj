@@ -13,7 +13,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs">
       <Link>Common\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)Microsoft\Win32\IMarshal.cs">
+    <Compile Include="$(CommonPath)\Microsoft\Win32\IMarshal.cs">
       <Link>Common\Microsoft\Win32\IMarshal.cs</Link>
     </Compile>
     <Compile Include="System\Runtime\CompilerServices\Attributes.cs" />

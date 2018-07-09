@@ -23,12 +23,12 @@ namespace System.Runtime.InteropServices
         {
             IntPtr pStandardMarshal = IntPtr.Zero;
 
-            IntPtr pUnk = Marshal.GetIUnknownForObject(this);
-            if (pUnk != IntPtr.Zero)
+            IntPtr pUnknown = Marshal.GetIUnknownForObject(this);
+            if (pUnknown != IntPtr.Zero)
             {
                 try
                 {
-                    if (NativeMethods.S_OK == CoGetStandardMarshal(ref riid, pUnk, dwDestContext, IntPtr.Zero, mshlflags, out pStandardMarshal))
+                    if (NativeMethods.S_OK == Interop.Ole32.CoGetStandardMarshal(ref riid, pUnknown, dwDestContext, IntPtr.Zero, mshlflags, out pStandardMarshal))
                     {
                         Debug.Assert(pStandardMarshal != null, "Failed to get marshaler for interface '" + riid.ToString() + "', CoGetStandardMarshal returned S_OK");
                         return pStandardMarshal;
@@ -36,7 +36,7 @@ namespace System.Runtime.InteropServices
                 }
                 finally
                 {
-                    Marshal.Release(pUnk);
+                    Marshal.Release(pUnknown);
                 }
             }
             throw new InvalidOperationException(string.Format(SR.StandardOleMarshalObjectGetMarshalerFailed, riid.ToString()));

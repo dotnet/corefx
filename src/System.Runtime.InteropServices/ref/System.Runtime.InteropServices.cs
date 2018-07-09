@@ -17,11 +17,17 @@ namespace Microsoft.Win32
 {
     internal partial interface IMarshal
     {
+        [System.Runtime.InteropServices.PreserveSig]
         int GetUnmarshalClass(ref System.Guid riid, System.IntPtr pv, int dwDestContext, System.IntPtr pvDestContext, int mshlflags, out System.Guid pCid);
+        [System.Runtime.InteropServices.PreserveSig]
         int GetMarshalSizeMax(ref System.Guid riid, System.IntPtr pv, int dwDestContext, System.IntPtr pvDestContext, int mshlflags, out int pSize);
+        [System.Runtime.InteropServices.PreserveSig]
         int MarshalInterface(System.IntPtr pStm, ref System.Guid riid, System.IntPtr pv, int dwDestContext, System.IntPtr pvDestContext, int mshlflags);
+        [System.Runtime.InteropServices.PreserveSig]
         int UnmarshalInterface(System.IntPtr pStm, ref System.Guid riid, out System.IntPtr ppv);
+        [System.Runtime.InteropServices.PreserveSig]
         int ReleaseMarshalData(System.IntPtr pStm);
+        [System.Runtime.InteropServices.PreserveSig]
         int DisconnectObject(int dwReserved);
     }
 }
