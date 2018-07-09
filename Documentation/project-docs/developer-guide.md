@@ -99,11 +99,7 @@ For more information about extra parameters take a look at the scripts `build-na
 
 ### Build Managed
 Since the managed build uses the .NET Core CLI (which the build will download), managed components can only be built on a subset of distros.
-There are some additional prerequisites from the CLI which need to be installed. Both libicu and
-libunwind are used by CoreCLR to execute managed code, so they must be
-installed. Since CoreFX does not actually link against these packages, runtime
-versions are sufficient.  We also require curl to be present, which we use to
-download the .NET Core CLI.
+There are some additional prerequisites from the CLI which need to be installed. Both libicu and libunwind are used by CoreCLR to execute managed code, so they must be installed. Since CoreFX does not actually link against these packages, runtime versions are sufficient. We also require curl to be present, which we use to download the .NET Core CLI.
 
 **Examples**
 
@@ -171,6 +167,8 @@ build System.Collections -framework:netfx -release
 ```
 
 ### Building individual projects
+
+You can either ues `dotnet msbuild` or `msbuild`, depending on which is in your path. As `dotnet msbuild` works on all supported environments (i.e. Unix) we will use it throughout this guide.
 
 **Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch.
 
