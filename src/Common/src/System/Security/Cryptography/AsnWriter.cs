@@ -1188,8 +1188,11 @@ namespace System.Security.Cryptography.Asn1
             if (minLegalYear <= value.Year && value.Year < minLegalYear + 100)
             {
                 WriteUtcTime(value);
-            } else
+            }
+            else
+            {
                 throw new ArgumentOutOfRangeException(nameof(value));
+            }
         }
 
         // T-REC-X.680-201508 sec 47

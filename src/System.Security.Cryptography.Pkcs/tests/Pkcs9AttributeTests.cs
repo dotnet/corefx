@@ -31,37 +31,14 @@ namespace System.Security.Cryptography.Pkcs.Tests
         public static void TestDateBefore1950()
         {
             DateTime dt = new DateTime(1949, 12, 31, 11, 59, 59);
-            try
-            {
-                var st = new Pkcs9SigningTime(dt);
-            } catch (Exception ex)
-            {
-                if (ex is ArgumentOutOfRangeException || ex is CryptographicException)
-                {
-                    // test passes
-                }
-                else
-                    throw;
-            }
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
         [Fact]
         public static void TestDateAfter1949()
         {
             DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00);
-            try
-            {
-                var st = new Pkcs9SigningTime(dt);
-            }
-            catch (Exception ex)
-            {
-                if (ex is ArgumentOutOfRangeException || ex is CryptographicException)
-                {
-                    // test passes
-                }
-                else
-                    throw;
-            }
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
         [Fact]
