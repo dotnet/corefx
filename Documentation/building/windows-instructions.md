@@ -101,7 +101,7 @@ Once you've built the source code for netfx from the root (`build.cmd -framework
 For advanced debugging using WinDBG see [Debugging CoreFX on Windows](https://github.com/dotnet/corefx/blob/master/Documentation/debugging/windows-instructions.md)
 
 ### Notes
-* At any given time, the corefx repo might be configured to use a more recent compiler than
+* At any given time, the corefx repo might be configured to use a [more recent compiler](../../../DotnetCLIVersion.txt) than
 the one used by the installed .NET Core SDK. This means the corefx codebase might
 be using language features that are not understood by the IDE, which might result in errors that
 show up as red squiggles while writing code. Such errors should, however, not affect the actual compilation.

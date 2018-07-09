@@ -133,6 +133,9 @@ Temporary versions are at https://github.com/dotnet/corefx/blob/dev/eng/src/Tool
 ## Project configurations for VS
 For each unique configuration needed for a given library project a configuration entry separated by a ';' should be added to the project so it can be selected and built in VS and also clearly identify the various configurations.<BR/>
 
+`$(TargetGroup)-$(OSGroup)-$(ConfigurationGroup)|$(Platform`
+- Note that the majority of managed projects, currently all in corefx, $(Platform) is overridden to be AnyCPU.
+
 `<Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>`
 
 ####*Examples*
