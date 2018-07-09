@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{D7AEA698-275D-441F-B7A7-8491D1F0EFF0}</ProjectGuid>
     <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
-    <Configurations>netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Drawing.Common.cs" />

@@ -12,7 +12,7 @@
         https://github.com/dotnet/corefx/issues/15966
       -->
     <EnablePinvokeUWPAnalyzer>false</EnablePinvokeUWPAnalyzer>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.RegistryOptions.cs">

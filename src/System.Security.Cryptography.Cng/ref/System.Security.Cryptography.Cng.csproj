@@ -12,7 +12,7 @@
          producing the netcoreapp2.0 src library again instead of harvesting it.
      -->
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard'">4.3.0.0</AssemblyVersion>
-    <Configurations>net462-Debug;net462-Release;net47-Debug;net47-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>net461-Debug;net461-Release;net462-Debug;net462-Release;net47-Debug;net47-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Security.Cryptography.Cng.cs" />
