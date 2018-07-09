@@ -4,6 +4,11 @@
 
 #include "pal_asn1_print.h"
 
+/*
+ * This file is completely unused. It's kept around for compatiblity between
+ * servicing updates.
+ */
+
 static_assert(PAL_B_ASN1_NUMERICSTRING == B_ASN1_NUMERICSTRING, "");
 static_assert(PAL_B_ASN1_PRINTABLESTRING == B_ASN1_PRINTABLESTRING, "");
 static_assert(PAL_B_ASN1_T61STRING == B_ASN1_T61STRING, "");
