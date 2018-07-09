@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -339,6 +340,23 @@ namespace System.Collections.Tests
             HashSet<T> set = new HashSet<T>();
             ISet<T> iset = (set as ISet<T>);
             Assert.NotNull(iset);
+        }
+
+        [Fact]
+        public void GetObjectData_ComparerEqualsType_Success()
+        {
+            var hashSet = new HashSet<string>();
+            SerializationInfo testData = new SerializationInfo(typeof(HashSet<string>), new FormatterConverter());
+            hashSet.GetObjectData(testData, new StreamingContext(StreamingContextStates.Other));
+
+            foreach (SerializationEntry entry in testData)
+            {
+                if (entry.Name == "Comparer")
+                {
+                    Assert.IsAssignableFrom(entry.ObjectType, entry.Value);
+                    break;
+                }
+            }
         }
     }
 }
