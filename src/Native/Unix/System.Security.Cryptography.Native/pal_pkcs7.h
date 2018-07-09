@@ -30,12 +30,12 @@ Returns the new PKCS7 instance.
 DLLEXPORT PKCS7* CryptoNative_D2IPkcs7Bio(BIO* bp);
 
 /*
-Create a new PKCS7 instance and prepare it to be a signed PKCS7
-with a data payload and certificates.
+Create a new PKCS7 instance and prepare it to be a signed PKCS7 object
+with certificates only.
 
 Returns the new PKCS7 instance.
 */
-DLLEXPORT PKCS7* CryptoNative_Pkcs7Sign(X509Stack* certs);
+DLLEXPORT PKCS7* CryptoNative_Pkcs7CreateCertificateCollection(X509Stack* certs);
 
 /*
 Cleans up and deletes a PKCS7 instance.

@@ -24,7 +24,7 @@ PKCS7* CryptoNative_D2IPkcs7Bio(BIO* bp)
     return d2i_PKCS7_bio(bp, NULL);
 }
 
-PKCS7* CryptoNative_Pkcs7Sign(X509Stack* certs)
+PKCS7* CryptoNative_Pkcs7CreateCertificateCollection(X509Stack* certs)
 {
     return PKCS7_sign(NULL, NULL, certs, NULL, PKCS7_PARTIAL);
 }

@@ -180,7 +180,7 @@ namespace Internal.Cryptography.Pal
                     GC.KeepAlive(cert); // ensure cert's safe handle isn't finalized while raw handle is in use
                 }
 
-                using (SafePkcs7Handle pkcs7 = Interop.Crypto.Pkcs7Sign(certs))
+                using (SafePkcs7Handle pkcs7 = Interop.Crypto.Pkcs7CreateCertificateCollection(certs))
                 {
                     Interop.Crypto.CheckValidOpenSslHandle(pkcs7);
                     return Interop.Crypto.OpenSslEncode(
