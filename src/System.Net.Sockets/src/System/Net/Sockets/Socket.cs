@@ -1376,6 +1376,54 @@ namespace System.Net.Sockets
             return SendTo(buffer, 0, buffer != null ? buffer.Length : 0, SocketFlags.None, remoteEP);
         }
 
+        public int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            if (remoteEP == null)
+            {
+                throw new ArgumentNullException(nameof(remoteEP));
+            }
+
+            ValidateBlockingMode();
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SRC:{LocalEndPoint} size:{buffer.Length} remoteEP:{remoteEP}");
+
+            EndPoint endPointSnapshot = remoteEP;
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+
+            int bytesTransferred;
+            SocketError errorCode = SocketPal.SendTo(_handle, buffer, socketFlags, socketAddress.Buffer, socketAddress.Size, out bytesTransferred);
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+
+            if (_rightEndPoint == null)
+            {
+                // Save a copy of the EndPoint so we can use it for Create().
+                _rightEndPoint = endPointSnapshot;
+            }
+
+            if (NetEventSource.IsEnabled)
+            {
+                NetEventSource.DumpBuffer(this, buffer.ToArray(), 0, buffer.Length);
+                NetEventSource.Exit(this, bytesTransferred);
+            }
+            return bytesTransferred;
+        }
+
+        public int SendTo(ReadOnlySpan<byte> buffer, EndPoint remoteEP)
+        {
+            return SendTo(buffer, SocketFlags.None, remoteEP);
+        }
+
         // Receives data from a connected socket.
         public int Receive(byte[] buffer, int size, SocketFlags socketFlags)
         {
