@@ -97,7 +97,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // Check if the passed in value in a serialization entry is assignable by the passed in type.
-            if (!PlatformDetection.IsFullFramework && obj is ISerializable customSerializableObj)
+            if (obj is ISerializable customSerializableObj && HasObjectTypeIntegrity(customSerializableObj))
             {
                 CheckObjectTypeIntegrity(customSerializableObj);
             }
@@ -536,6 +536,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.True(objType.IsGenericType, $"Type `{objType.FullName}` must be generic.");
             Assert.Equal("System.Collections.Generic.ObjectEqualityComparer`1", objType.GetGenericTypeDefinition().FullName);
             Assert.Equal(obj.GetType().GetGenericArguments()[0], objType.GetGenericArguments()[0]);
+        }
+
+        private static bool HasObjectTypeIntegrity(ISerializable serializable)
+        {
+            return !PlatformDetection.IsFullFramework ||
+                !(serializable is NotFiniteNumberException ||
+                serializable.GetType().GetGenericTypeDefinition() == typeof(HashSet<>));
         }
 
         private static void CheckObjectTypeIntegrity(ISerializable serializable)
