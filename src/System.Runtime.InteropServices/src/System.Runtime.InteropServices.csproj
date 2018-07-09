@@ -10,7 +10,12 @@
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Microsoft\Win32\IMarshal.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs">
+      <Link>Common\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)Microsoft\Win32\IMarshal.cs">
+      <Link>Common\Microsoft\Win32\IMarshal.cs</Link>
+    </Compile>
     <Compile Include="System\Runtime\CompilerServices\Attributes.cs" />
     <Compile Include="System\Runtime\InteropServices\Attributes.cs" />
     <Compile Include="System\Runtime\InteropServices\ComAwareEventInfo.cs" />
