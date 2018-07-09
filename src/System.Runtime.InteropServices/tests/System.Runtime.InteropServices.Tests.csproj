@@ -43,6 +43,7 @@
     <Compile Include="System\Runtime\InteropServices\LCIDConversionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalAsAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\MarshalTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="System\Runtime\InteropServices\MarshalTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\ByteArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\CharArrayTests.cs" />
