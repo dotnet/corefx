@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Ports;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -20,6 +21,11 @@ namespace Legacy.Support
 
         public static string[] GetPorts()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return SerialPort.GetPortNames();
+            }
+
             if (PlatformDetection.IsUap)
             {
                 return new [] { "COM3", "COM4", "COM5", "COM6", "COM7" }; // we are waiting for a Win32 new QueryDosDevice API since the current doesn't work for Uap https://github.com/dotnet/corefx/issues/21156

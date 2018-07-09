@@ -3,6 +3,7 @@
   <PropertyGroup>
     <PackageConfigurations>
       netstandard-Windows_NT;
+      netstandard-Linux;
       netstandard;
       netfx;
     </PackageConfigurations>
