@@ -204,6 +204,12 @@ dotnet msbuild System.Net.NetworkInformation.csproj /p:TargetGroup=uap
 dotnet msbuild System.Net.NetworkInformation.csproj /p:ConfigurationGroup=Release
 ```
 
+To build for all supported configurations you can use the `BuildAll` and `RebuildAll` tasks:
+
+```
+dotnet msbuild System.Net.NetworkInformation.csproj /t:RebuildAll
+```
+
 ### Building all for other OSes
 
 By default, building from the root will only build the libraries for the OS you are running on. One can
