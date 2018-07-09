@@ -157,14 +157,6 @@ namespace System.Net.Sockets
             set
             {
                 Debug.Assert(value == -1 || value > 0, $"Unexpected value: {value}");
-
-                // We always implement timeouts using nonblocking I/O and AsyncContext,
-                // to avoid issues when switching from blocking I/O to nonblocking.
-                if (value != -1)
-                {
-                    SetHandleNonBlocking();
-                }
-
                 _receiveTimeout = value;
             }
         }
@@ -178,14 +170,6 @@ namespace System.Net.Sockets
             set
             {
                 Debug.Assert(value == -1 || value > 0, $"Unexpected value: {value}");
-
-                // We always implement timeouts using nonblocking I/O and AsyncContext,
-                // to avoid issues when switching from blocking I/O to nonblocking.
-                if (value != -1)
-                {
-                    SetHandleNonBlocking();
-                }
-
                 _sendTimeout = value;
             }
         }
@@ -319,8 +303,9 @@ namespace System.Net.Sockets
 
                     errorCode = SocketError.Success;
 
-                    // The socket was created successfully; enable IPV6_V6ONLY by default for AF_INET6 sockets.
-                    if (addressFamily == AddressFamily.InterNetworkV6)
+                    // The socket was created successfully; enable IPV6_V6ONLY by default for normal AF_INET6 sockets.
+                    // This fails on raw sockets so we just let them be in default state.
+                    if (addressFamily == AddressFamily.InterNetworkV6 && socketType != SocketType.Raw)
                     {
                         int on = 1;
                         error = Interop.Sys.SetSockOpt(fd, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
@@ -349,7 +334,7 @@ namespace System.Net.Sockets
                 IntPtr acceptedFd;
                 if (!socketHandle.IsNonBlocking)
                 {
-                    errorCode = socketHandle.AsyncContext.Accept(socketAddress, ref socketAddressLen, -1, out acceptedFd);
+                    errorCode = socketHandle.AsyncContext.Accept(socketAddress, ref socketAddressLen, out acceptedFd);
                 }
                 else
                 {

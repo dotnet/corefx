@@ -214,8 +214,7 @@ namespace System.Reflection
                 {
                     if (_ignoresAccessChecksToAttributeConstructor == null)
                     {
-                        TypeInfo attributeTypeInfo = GenerateTypeInfoOfIgnoresAccessChecksToAttribute();
-                        _ignoresAccessChecksToAttributeConstructor = attributeTypeInfo.DeclaredConstructors.Single();
+                        _ignoresAccessChecksToAttributeConstructor = IgnoreAccessChecksToAttributeBuilder.AddToModule(_mb);
                     }
 
                     return _ignoresAccessChecksToAttributeConstructor;
@@ -226,94 +225,6 @@ namespace System.Reflection
                 int nextId = Interlocked.Increment(ref _typeId);
                 TypeBuilder tb = _mb.DefineType(name + "_" + nextId, TypeAttributes.Public, proxyBaseType);
                 return new ProxyBuilder(this, tb, proxyBaseType);
-            }
-
-            // Generate the declaration for the IgnoresAccessChecksToAttribute type.
-            // This attribute will be both defined and used in the dynamic assembly.
-            // Each usage identifies the name of the assembly containing non-public
-            // types the dynamic assembly needs to access.  Normally those types
-            // would be inaccessible, but this attribute allows them to be visible.
-            // It works like a reverse InternalsVisibleToAttribute.
-            // This method returns the TypeInfo of the generated attribute.
-            private TypeInfo GenerateTypeInfoOfIgnoresAccessChecksToAttribute()
-            {
-                TypeBuilder attributeTypeBuilder = 
-                    _mb.DefineType("System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute", 
-                                   TypeAttributes.Public | TypeAttributes.Class, 
-                                   typeof(Attribute));
-
-                // Create backing field as:
-                // private string assemblyName;
-                FieldBuilder assemblyNameField = 
-                    attributeTypeBuilder.DefineField("assemblyName", typeof(String), FieldAttributes.Private);
-
-                // Create ctor as:
-                // public IgnoresAccessChecksToAttribute(string)
-                ConstructorBuilder constructorBuilder = attributeTypeBuilder.DefineConstructor(MethodAttributes.Public, 
-                                                             CallingConventions.HasThis, 
-                                                             new Type[] { assemblyNameField.FieldType });
-
-                ILGenerator il = constructorBuilder.GetILGenerator();
-
-                // Create ctor body as:
-                // this.assemblyName = {ctor parameter 0}
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldarg, 1);
-                il.Emit(OpCodes.Stfld, assemblyNameField);
-
-                // return
-                il.Emit(OpCodes.Ret);
-
-                // Define property as:
-                // public string AssemblyName {get { return this.assemblyName; } }
-                PropertyBuilder getterPropertyBuilder = attributeTypeBuilder.DefineProperty(
-                                                       "AssemblyName",
-                                                       PropertyAttributes.None,
-                                                       CallingConventions.HasThis,
-                                                       returnType: typeof(String),
-                                                       parameterTypes: null);
-
-                MethodBuilder getterMethodBuilder = attributeTypeBuilder.DefineMethod(
-                                                       "get_AssemblyName",
-                                                       MethodAttributes.Public,
-                                                       CallingConventions.HasThis,
-                                                       returnType: typeof(String),
-                                                       parameterTypes: null);
-
-                // Generate body:
-                // return this.assemblyName;
-                il = getterMethodBuilder.GetILGenerator();
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldfld, assemblyNameField);
-                il.Emit(OpCodes.Ret);
-
-                // Generate the AttributeUsage attribute for this attribute type:
-                // [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-                TypeInfo attributeUsageTypeInfo = typeof(AttributeUsageAttribute).GetTypeInfo();
-
-                // Find the ctor that takes only AttributeTargets
-                ConstructorInfo attributeUsageConstructorInfo =
-                    attributeUsageTypeInfo.DeclaredConstructors
-                        .Single(c => c.GetParameters().Count() == 1 &&
-                                     c.GetParameters()[0].ParameterType == typeof(AttributeTargets));
-
-                // Find the property to set AllowMultiple
-                PropertyInfo allowMultipleProperty =
-                    attributeUsageTypeInfo.DeclaredProperties
-                        .Single(f => String.Equals(f.Name, "AllowMultiple"));
-
-                // Create a builder to construct the instance via the ctor and property
-                CustomAttributeBuilder customAttributeBuilder = 
-                    new CustomAttributeBuilder(attributeUsageConstructorInfo,
-                                                new object[] { AttributeTargets.Assembly },
-                                                new PropertyInfo[] { allowMultipleProperty },
-                                                new object[] { true });
-
-                // Attach this attribute instance to the newly defined attribute type
-                attributeTypeBuilder.SetCustomAttribute(customAttributeBuilder);
-
-                // Make the TypeInfo real so the constructor can be used.
-                return attributeTypeBuilder.CreateTypeInfo();
             }
 
             // Generates an instance of the IgnoresAccessChecksToAttribute to
@@ -557,7 +468,7 @@ namespace System.Reflection
                 // packed[PackedArgs.MethodTokenPosition] = iface method token;
                 packedArr.BeginSet(PackedArgs.MethodTokenPosition);
                 il.Emit(OpCodes.Ldc_I4, methodToken);
-                packedArr.EndSet(typeof(Int32));
+                packedArr.EndSet(typeof(int));
 
                 // packed[PackedArgs.ArgsPosition] = args;
                 packedArr.BeginSet(PackedArgs.ArgsPosition);
@@ -629,49 +540,49 @@ namespace System.Reflection
                 if (type == null)
                     return 0;   // TypeCode.Empty;
 
-                if (type == typeof(Boolean))
+                if (type == typeof(bool))
                     return 3;   // TypeCode.Boolean;
 
-                if (type == typeof(Char))
+                if (type == typeof(char))
                     return 4;   // TypeCode.Char;
 
-                if (type == typeof(SByte))
+                if (type == typeof(sbyte))
                     return 5;   // TypeCode.SByte;
 
-                if (type == typeof(Byte))
+                if (type == typeof(byte))
                     return 6;   // TypeCode.Byte;
 
-                if (type == typeof(Int16))
+                if (type == typeof(short))
                     return 7;   // TypeCode.Int16;
 
-                if (type == typeof(UInt16))
+                if (type == typeof(ushort))
                     return 8;   // TypeCode.UInt16;
 
-                if (type == typeof(Int32))
+                if (type == typeof(int))
                     return 9;   // TypeCode.Int32;
 
-                if (type == typeof(UInt32))
+                if (type == typeof(uint))
                     return 10;  // TypeCode.UInt32;
 
-                if (type == typeof(Int64))
+                if (type == typeof(long))
                     return 11;  // TypeCode.Int64;
 
-                if (type == typeof(UInt64))
+                if (type == typeof(ulong))
                     return 12;  // TypeCode.UInt64;
 
-                if (type == typeof(Single))
+                if (type == typeof(float))
                     return 13;  // TypeCode.Single;
 
-                if (type == typeof(Double))
+                if (type == typeof(double))
                     return 14;  // TypeCode.Double;
 
-                if (type == typeof(Decimal))
+                if (type == typeof(decimal))
                     return 15;  // TypeCode.Decimal;
 
                 if (type == typeof(DateTime))
                     return 16;  // TypeCode.DateTime;
 
-                if (type == typeof(String))
+                if (type == typeof(string))
                     return 18;  // TypeCode.String;
 
                 if (type.GetTypeInfo().IsEnum)

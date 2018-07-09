@@ -79,7 +79,7 @@
   <data name="CardinalityMismatch_NoExports" xml:space="preserve">
     <value>No exports were found that match the constraint: {0}</value>
   </data>
-  <data name="CardinalityMismatch_TooManyExports" xml:space="preserve">
+  <data name="CardinalityMismatch_TooManyExports_Constraint" xml:space="preserve">
     <value>More than one export was found that matches the constraint: {0}</value>
   </data>
   <data name="ImportEngine_ComposeTookTooManyIterations" xml:space="preserve">
@@ -387,5 +387,20 @@
   </data>
   <data name="PlatformNotSupported_ComponentModel_Composition" xml:space="preserve">
     <value>System.ComponentModel.Composition APIs are not supported on this platform.</value>
+  </data>
+  <data name="Expecting_AtleastOne_Type" xml:space="preserve">
+    <value>Expecting genericTypeArguments to contain at least one Type</value>
+  </data>
+  <data name="Expecting_Empty_Queue" xml:space="preserve">
+    <value>Expecting genericTypeArguments queue to be empty.</value>
+  </data>
+  <data name="Expecting_Generic_Type" xml:space="preserve">
+    <value>Expecting type to be a generic type</value>
+  </data>
+  <data name="Diagnostic_InternalExceptionMessage" xml:space="preserve">
+    <value>Internal error occurred. Additional information: '{0}'.</value>
+  </data>
+  <data name="Diagnostic_TraceUnnecessaryWork" xml:space="preserve">
+    <value>To avoid unnecessary work when a trace level has not been enabled, check CanWriteXXX before calling this method.</value>
   </data>
 </root>

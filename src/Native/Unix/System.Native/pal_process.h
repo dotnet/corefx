@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "pal_compiler.h"
 #include "pal_types.h"
 #include <stdio.h>
 #include <string.h>
@@ -18,8 +19,8 @@
  * As would have been the case with fork/execve, a return value of 0 is success and -1
  * is failure; if failure, error information is provided in errno.
  */
-extern "C" int32_t
-SystemNative_ForkAndExecProcess(const char* filename,   // filename argument to execve
+DLLEXPORT int32_t SystemNative_ForkAndExecProcess(
+                   const char* filename,   // filename argument to execve
                    char* const argv[],     // argv argument to execve
                    char* const envp[],     // envp argument to execve
                    const char* cwd,        // path passed to chdir in child process
@@ -37,12 +38,12 @@ SystemNative_ForkAndExecProcess(const char* filename,   // filename argument to 
 /**
  * Shim for the popen function.
  */
-extern "C" FILE* SystemNative_POpen(const char* command, const char* type);
+DLLEXPORT FILE* SystemNative_POpen(const char* command, const char* type);
 
 /**
  * Shim for the pclose function.
  */
-extern "C" int32_t SystemNative_PClose(FILE* stream);
+DLLEXPORT int32_t SystemNative_PClose(FILE* stream);
 
 /************
  * The values below in the header are fixed and correct for managed callers to use forever.
@@ -54,7 +55,7 @@ extern "C" int32_t SystemNative_PClose(FILE* stream);
  * These values differ from OS to OS, so make a constant contract.
  * These values apply for the current process only
  */
-enum RLimitResources : int32_t
+typedef enum
 {
     PAL_RLIMIT_CPU = 0,     // CPU limit in seconds
     PAL_RLIMIT_FSIZE = 1,   // Largest file that can be created, in bytes
@@ -66,12 +67,12 @@ enum RLimitResources : int32_t
     PAL_RLIMIT_MEMLOCK = 7, // Locked-in-memory address space
     PAL_RLIMIT_NPROC = 8,   // Number of processes
     PAL_RLIMIT_NOFILE = 9,  // Number of open files
-};
+} RLimitResources;
 
-enum Signals : int32_t
+typedef enum
 {
     PAL_SIGKILL = 9, /* kill the specified process */
-};
+} Signals;
 
 /**
  * Constants for passing to the first parameter of syslog.
@@ -81,7 +82,7 @@ enum Signals : int32_t
  *
  * These values keep their original definition and are taken from syslog.h
  */
-enum SysLogPriority : int32_t
+typedef enum
 {
     // Priorities
     PAL_LOG_EMERG = 0,   /* system is unusable */
@@ -114,7 +115,7 @@ enum SysLogPriority : int32_t
     PAL_LOG_LOCAL5 = (21 << 3), /* reserved for local use */
     PAL_LOG_LOCAL6 = (22 << 3), /* reserved for local use */
     PAL_LOG_LOCAL7 = (23 << 3), /* reserved for local use */
-};
+} SysLogPriority;
 
 /**
  * Constants to pass into pathconf.
@@ -123,7 +124,7 @@ enum SysLogPriority : int32_t
  *        values; they must be converted to the correct platform
  *        values before passing to pathconf.
  */
-enum PathConfName : int32_t
+typedef enum
 {
     PAL_PC_LINK_MAX = 1,
     PAL_PC_MAX_CANON = 2,
@@ -134,85 +135,95 @@ enum PathConfName : int32_t
     PAL_PC_CHOWN_RESTRICTED = 7,
     PAL_PC_NO_TRUNC = 8,
     PAL_PC_VDISABLE = 9,
-};
+} PathConfName;
 
 /**
  * Constants for passing to GetPriority and SetPriority.
  */
-enum PriorityWhich : int32_t
+typedef enum
 {
     PAL_PRIO_PROCESS = 0,
     PAL_PRIO_PGRP = 1,
     PAL_PRIO_USER = 2,
-};
+} PriorityWhich;
 
 /**
  * The current and maximum resource values for the current process.
  * These values are depict the resource according to the above enum.
  */
-struct RLimit
+typedef struct
 {
     uint64_t CurrentLimit;
     uint64_t MaximumLimit;
-};
+} RLimit;
 
 /**
  * The native struct is dependent on the size of a numeric type
  * so make it the largest possible value here and then we will
  * copy to native as necessary
  */
-struct CpuSetBits
+typedef struct
 {
     uint64_t Bits[16]; // __CPU_SETSIZE / (8 * sizeof(int64_t))
-};
+} CpuSetBits;
 
 /**
  * Get the current limit for the specified resource of the current process.
  * Returns 0 on success; returns -1 on failure and errno is set to the error reason.
  */
-extern "C" int32_t SystemNative_GetRLimit(RLimitResources resourceType, RLimit* limits);
+DLLEXPORT int32_t SystemNative_GetRLimit(RLimitResources resourceType, RLimit* limits);
 
 /**
  * Set the soft and hard limits for the specified resource.
  * Only a super-user can increase hard limits for the current process.
  * Returns 0 on success; returns -1 on failure and errno is set to the error reason.
  */
-extern "C" int32_t SystemNative_SetRLimit(RLimitResources resourceType, const RLimit* limits);
+DLLEXPORT int32_t SystemNative_SetRLimit(RLimitResources resourceType, const RLimit* limits);
 
 /**
  * Kill the specified process (or process group) identified by the supplied pid; the
  * process or process group will be killed by the specified signal.
  * Returns 0 on success; on failure, -1 is returned and errno is set
  */
-extern "C" int32_t SystemNative_Kill(int32_t pid, int32_t signal);
+DLLEXPORT int32_t SystemNative_Kill(int32_t pid, int32_t signal);
 
 /**
  * Returns the Process ID of the current executing process.
  * This call should never fail
  */
-extern "C" int32_t SystemNative_GetPid();
+DLLEXPORT int32_t SystemNative_GetPid(void);
 
 /**
  * Returns the sessions ID of the specified process; if 0 is passed in, returns the
  * session ID of the current process.
  * Returns a session ID on success; otherwise, returns -1 and sets errno.
  */
-extern "C" int32_t SystemNative_GetSid(int32_t pid);
+DLLEXPORT int32_t SystemNative_GetSid(int32_t pid);
 
 /**
  * Write a message to the system logger, which in turn writes the message to the system console, log files, etc.
  * See man 3 syslog for more info
  */
-extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message, const char* arg1);
+DLLEXPORT void SystemNative_SysLog(SysLogPriority priority, const char* message, const char* arg1);
 
 /**
- * Waits for terminated child processes.
+ * Returns the pid of a terminated child without reaping it.
  *
  * 1) returns the process id of a terminated child process
- * 2) if no children are waiting, 0 is returned
+ * 2) if no children are terminated, 0 is returned
  * 3) on error, -1 is returned
  */
-extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCode, int32_t keepWaitable);
+DLLEXPORT int32_t SystemNative_WaitIdAnyExitedNoHangNoWait(void);
+
+/**
+ * Reaps a terminated child.
+ *
+ * 1) when a child is reaped, its process id is returned
+ * 2) if pid is not a child or there are no unwaited-for children, -1 is returned (errno=ECHILD)
+ * 3) if the child has not yet terminated, 0 is returned
+ * 4) on error, -1 is returned.
+ */
+DLLEXPORT int32_t SystemNative_WaitPidExitedNoHang(int32_t pid, int32_t* exitCode);
 
 /**
  * Gets the configurable limit or variable for system path or file descriptor options.
@@ -220,7 +231,7 @@ extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCod
  * Returns the requested variable value on success; if the variable does not have a limit, -1 is returned and errno
  * is not set; otherwise, -1 is returned and errno is set.
  */
-extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name);
+DLLEXPORT int64_t SystemNative_PathConf(const char* path, PathConfName name);
 
 /**
  * Gets the priority (nice value) of a certain execution group.
@@ -229,19 +240,19 @@ extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name);
  * valid nice value, meaning we can't use that value to determine valid output or not. Errno is set on failure so
  * we need to reset errno before a call and check the value if we get -1.
  */
-extern "C" int32_t SystemNative_GetPriority(PriorityWhich which, int32_t who);
+DLLEXPORT int32_t SystemNative_GetPriority(PriorityWhich which, int32_t who);
 
 /**
  * Sets the priority (nice value) of a certain execution group.
  *
  * Returns 0 on success; otherwise, -1 and errno is set.
  */
-extern "C" int32_t SystemNative_SetPriority(PriorityWhich which, int32_t who, int32_t nice);
+DLLEXPORT int32_t SystemNative_SetPriority(PriorityWhich which, int32_t who, int32_t nice);
 
 /**
  * Gets the current working directory of the currently executing process.
  */
-extern "C" char* SystemNative_GetCwd(char* buffer, int32_t bufferSize);
+DLLEXPORT char* SystemNative_GetCwd(char* buffer, int32_t bufferSize);
 
 #if HAVE_SCHED_SETAFFINITY
 /**
@@ -249,7 +260,7 @@ extern "C" char* SystemNative_GetCwd(char* buffer, int32_t bufferSize);
  *
  * Returns 0 on success; otherwise, -1 is returned and errno is set
  */
-extern "C" int32_t SystemNative_SchedSetAffinity(int32_t pid, intptr_t* mask);
+DLLEXPORT int32_t SystemNative_SchedSetAffinity(int32_t pid, intptr_t* mask);
 #endif
 
 #if HAVE_SCHED_GETAFFINITY
@@ -258,7 +269,5 @@ extern "C" int32_t SystemNative_SchedSetAffinity(int32_t pid, intptr_t* mask);
  *
  * Returns 0 on success; otherwise, -1 is returned and errno is set.
  */
-extern "C" int32_t SystemNative_SchedGetAffinity(int32_t pid, intptr_t* mask);
+DLLEXPORT int32_t SystemNative_SchedGetAffinity(int32_t pid, intptr_t* mask);
 #endif
-
-extern "C" char** SystemNative_GetEnviron();

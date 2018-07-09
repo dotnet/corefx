@@ -8,8 +8,8 @@
       <Platform>arm64</Platform>
     </OfficialBuildRID>
     <OfficialBuildRID Include="linux-x64" />
+    <OfficialBuildRID Include="linux-musl-x64" />
     <OfficialBuildRID Include="rhel.6-x64" />
-    <OfficialBuildRID Include="alpine.3.6-x64" />
     <OfficialBuildRID Include="osx-x64" />
     <OfficialBuildRID Include="win-arm">
       <Platform>arm</Platform>
@@ -26,6 +26,9 @@
          built during official builds, however we wish to include them
          in our runtime.json to enable others to provide them.  -->
     <OfficialBuildRID Include="tizen.4.0.0-armel">
+      <Platform>armel</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="tizen.5.0.0-armel">
       <Platform>armel</Platform>
     </OfficialBuildRID>
   </ItemGroup>

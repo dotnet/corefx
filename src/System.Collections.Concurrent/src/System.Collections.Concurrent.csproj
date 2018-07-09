@@ -1,41 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{EA610394-CBA3-4E5C-B3DB-AAEA7F640E89}</ProjectGuid>
     <AssemblyName>System.Collections.Concurrent</AssemblyName>
     <RootNamespace>System.Collections.Concurrent</RootNamespace>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Collections\Concurrent\BlockingCollection.cs" />
     <Compile Include="System\Collections\Concurrent\CDSCollectionETWBCLProvider.cs" />
     <Compile Include="System\Collections\Concurrent\ConcurrentBag.cs" />
     <Compile Include="System\Collections\Concurrent\ConcurrentDictionary.cs" />
-    <Compile Include="System\Collections\Concurrent\ConcurrentQueue.cs" />
     <Compile Include="System\Collections\Concurrent\ConcurrentStack.cs" />
-    <Compile Include="System\Collections\Concurrent\IProducerConsumerCollection.cs" />
     <Compile Include="System\Collections\Concurrent\OrderablePartitioner.cs" />
     <Compile Include="System\Collections\Concurrent\Partitioner.cs" />
     <Compile Include="System\Collections\Concurrent\PartitionerStatic.cs" />
     <Compile Include="System\Collections\Concurrent\PlatformHelper.cs" />
-    <Compile Include="$(CommonPath)\System\Collections\Concurrent\ConcurrentQueue_Segment.cs">
-      <Link>Common\System\Collections\Concurrent\ConcurrentQueue_Segment.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\IProducerConsumerCollectionDebugView.cs">
+      <Link>Common\CoreLib\System\Collections\Concurrent\IProducerConsumerCollectionDebugView.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Diagnostics.Tracing" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading" />
-    <Reference Include="System.Threading.Tasks" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Tools\src\System.Diagnostics.Tools.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Tracing\src\System.Diagnostics.Tracing.csproj" />
+    <ProjectReference Include="..\..\System.Numerics.Vectors\src\System.Numerics.Vectors.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" />
+    <ProjectReference Include="..\..\System.Threading\src\System.Threading.csproj" />
+    <ProjectReference Include="..\..\System.Threading.Tasks\src\System.Threading.Tasks.csproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

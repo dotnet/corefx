@@ -57,7 +57,7 @@ namespace System.Collections.Concurrent
 
         #region Properties
         /// <summary>Gets the bounded capacity of this <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</summary>
-        /// <value>The bounded capacity of this collection, or int.MaxValue if no bound was supplied.</value>
+        /// <value>The bounded capacity of this collection, or -1 if no bound was supplied.</value>
         /// <exception cref="T:System.ObjectDisposedException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public int BoundedCapacity
@@ -1757,10 +1757,10 @@ nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
         private static void ValidateTimeout(TimeSpan timeout)
         {
             long totalMilliseconds = (long)timeout.TotalMilliseconds;
-            if ((totalMilliseconds < 0 || totalMilliseconds > Int32.MaxValue) && (totalMilliseconds != Timeout.Infinite))
+            if ((totalMilliseconds < 0 || totalMilliseconds > int.MaxValue) && (totalMilliseconds != Timeout.Infinite))
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), timeout,
-                    String.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, Int32.MaxValue));
+                    string.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
             }
         }
 
@@ -1774,7 +1774,7 @@ nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
             if ((millisecondsTimeout < 0) && (millisecondsTimeout != Timeout.Infinite))
             {
                 throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout), millisecondsTimeout,
-                    String.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, Int32.MaxValue));
+                    string.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
             }
         }
 

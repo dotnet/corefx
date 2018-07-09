@@ -3,37 +3,78 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Xunit.Performance;
+using Xunit;
 
 namespace System.Tests
 {
     public class Perf_Int32
     {
-        [Benchmark]
-        public void ToString_()
+        private const int InnerCount = 500_000;
+
+        private static string s_resultString;
+        private static int s_resultInt32;
+
+        public static object[][] Int32Values => new[]
         {
-            int i32 = 32;
-            foreach (var iteration in Benchmark.Iterations)
+            new object[] { 0 },
+            new object[] { -1 },
+            new object[] { 1 },
+            new object[] { -1283 },
+            new object[] { 1283 },
+            new object[] { -12837467 },
+            new object[] { 12837467 },
+            new object[] { -2147483648 },
+            new object[] { 2147483647 },
+        };
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [MemberData(nameof(Int32Values))]
+        public void ToString(int value)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
+                {
+                    for (int i = 0; i < InnerCount; i++)
                     {
-                        i32.ToString(); i32.ToString(); i32.ToString();
-                        i32.ToString(); i32.ToString(); i32.ToString();
-                        i32.ToString(); i32.ToString(); i32.ToString();
+                        s_resultString = value.ToString();
                     }
+                }
+            }
         }
 
-        [Benchmark]
-        public void Parse_str()
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [MemberData(nameof(Int32Values))]
+        public void TryFormat(int value)
         {
-            string builtString = "1111111";
-            foreach (var iteration in Benchmark.Iterations)
+            Span<char> destination = new char[value.ToString().Length];
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
+                {
+                    for (int i = 0; i < InnerCount; i++)
                     {
-                        int.Parse(builtString); int.Parse(builtString); int.Parse(builtString);
-                        int.Parse(builtString); int.Parse(builtString); int.Parse(builtString);
-                        int.Parse(builtString); int.Parse(builtString); int.Parse(builtString);
+                        value.TryFormat(destination, out s_resultInt32);
                     }
+                }
+            }
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [MemberData(nameof(Int32Values))]
+        public void Parse(int value)
+        {
+            ReadOnlySpan<char> valueSpan = value.ToString();
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < InnerCount; i++)
+                    {
+                        s_resultInt32 = int.Parse(valueSpan);
+                    }
+                }
+            }
         }
     }
 }

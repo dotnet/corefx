@@ -11,7 +11,7 @@ namespace System
     public static partial class PlatformDetection
     {
         private static string FrameworkName => AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
-        private static Version TargetVersion => String.IsNullOrEmpty(FrameworkName) ? new Version(4, 5, 0, 0) : new FrameworkName(FrameworkName).Version;
+        private static Version TargetVersion => string.IsNullOrEmpty(FrameworkName) ? new Version(4, 5, 0, 0) : new FrameworkName(FrameworkName).Version;
 
         // The current full framework xunit runner is targeting 4.5.2 so we expect TargetsNetFx452OrLower to be true.
         // When we update xunit runner in the future which may target recent framework version, TargetsNetFx452OrLower can start return
@@ -23,6 +23,8 @@ namespace System
         public static bool IsNetfx470OrNewer => GetFrameworkVersion() >= new Version(4, 7, 0);
 
         public static bool IsNetfx471OrNewer => GetFrameworkVersion() >= new Version(4, 7, 1);
+
+        public static bool IsNetfx472OrNewer => GetFrameworkVersion() >= new Version(4, 7, 2);
 
         public static string LibcRelease => "";
         public static string LibcVersion => "";
@@ -37,6 +39,8 @@ namespace System
                 if (ndpKey != null)
                 {
                     int value = (int)(ndpKey.GetValue("Release") ?? 0);
+                    if (value >= 461808)
+                        return new Version(4, 7, 2);
                     if (value >= 461308)
                         return new Version(4, 7, 1);
                     if (value >= 460798)

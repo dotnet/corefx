@@ -91,14 +91,15 @@ namespace System.Globalization
             return FindStringOrdinal(FIND_FROMSTART, source, startIndex, count, value, value.Length, ignoreCase);
         }
 
-        internal static int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+        internal static int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase, bool fromBeginning)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(source.Length != 0);
             Debug.Assert(value.Length != 0);
 
-            return FindStringOrdinal(FIND_FROMSTART, source, value, ignoreCase);
+            uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
+            return FindStringOrdinal(positionFlag, source, value, ignoreCase);
         }
 
         internal static int LastIndexOfOrdinalCore(string source, string value, int startIndex, int count, bool ignoreCase)
@@ -166,14 +167,16 @@ namespace System.Globalization
             }
         }
 
-        private static unsafe int CompareStringOrdinalIgnoreCase(char* string1, int count1, char* string2, int count2)
+        private static unsafe int CompareStringOrdinalIgnoreCase(ref char string1, int count1, ref char string2, int count2)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
-            Debug.Assert(string1 != null);
-            Debug.Assert(string2 != null);
 
-            // Use the OS to compare and then convert the result to expected value by subtracting 2 
-            return Interop.Kernel32.CompareStringOrdinal(string1, count1, string2, count2, true) - 2;
+            fixed (char* char1 = &string1)
+            fixed (char* char2 = &string2)
+            {
+                // Use the OS to compare and then convert the result to expected value by subtracting 2 
+                return Interop.Kernel32.CompareStringOrdinal(char1, count1, char2, count2, true) - 2;
+            }
         }
 
         // TODO https://github.com/dotnet/coreclr/issues/13827:
@@ -314,7 +317,7 @@ namespace System.Globalization
             }
         }
 
-        internal unsafe int IndexOfCore(String source, String target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
+        internal unsafe int IndexOfCore(string source, string target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
         {
             Debug.Assert(!_invariantMode);
 
@@ -357,7 +360,7 @@ namespace System.Globalization
             return -1;
         }
 
-        internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr)
+        internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
         {
             Debug.Assert(!_invariantMode);
 
@@ -365,8 +368,8 @@ namespace System.Globalization
             Debug.Assert(target.Length != 0);
             Debug.Assert((options == CompareOptions.None || options == CompareOptions.IgnoreCase));
 
-            int retValue = FindString(FIND_FROMSTART | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
-            return retValue;
+            uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
+            return FindString(positionFlag | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
         }
 
         private unsafe int LastIndexOfCore(string source, string target, int startIndex, int count, CompareOptions options)
@@ -531,7 +534,7 @@ namespace System.Globalization
             return retValue;
         }
 
-        private unsafe SortKey CreateSortKey(String source, CompareOptions options)
+        private unsafe SortKey CreateSortKey(string source, CompareOptions options)
         {
             Debug.Assert(!_invariantMode);
 

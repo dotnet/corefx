@@ -919,16 +919,12 @@ namespace System
             switch (comparisonType)
             {
                 case StringComparison.CurrentCulture:
-                    return ReplaceCore(oldValue, newValue, CultureInfo.CurrentCulture, CompareOptions.None);
-
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return ReplaceCore(oldValue, newValue, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase);
+                    return ReplaceCore(oldValue, newValue, CultureInfo.CurrentCulture, GetCaseCompareOfComparisonCulture(comparisonType));
 
                 case StringComparison.InvariantCulture:
-                    return ReplaceCore(oldValue, newValue, CultureInfo.InvariantCulture, CompareOptions.None);
-
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return ReplaceCore(oldValue, newValue, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
+                    return ReplaceCore(oldValue, newValue, CultureInfo.InvariantCulture, GetCaseCompareOfComparisonCulture(comparisonType));
 
                 case StringComparison.Ordinal:
                     return Replace(oldValue, newValue);
@@ -1250,7 +1246,7 @@ namespace System
             return SplitInternal(separator ?? string.Empty, null, int.MaxValue, options);
         }
 
-        public string[] Split(string separator, Int32 count, StringSplitOptions options = StringSplitOptions.None)
+        public string[] Split(string separator, int count, StringSplitOptions options = StringSplitOptions.None)
         {
             return SplitInternal(separator ?? string.Empty, null, count, options);
         }
@@ -1260,7 +1256,7 @@ namespace System
             return SplitInternal(null, separator, int.MaxValue, options);
         }
 
-        public string[] Split(string[] separator, Int32 count, StringSplitOptions options)
+        public string[] Split(string[] separator, int count, StringSplitOptions options)
         {
             return SplitInternal(null, separator, count, options);
         }
@@ -1686,7 +1682,7 @@ namespace System
         }
 
         // Trims the whitespace from both ends of the string.  Whitespace is defined by
-        // Char.IsWhiteSpace.
+        // char.IsWhiteSpace.
         //
         public string Trim() => TrimWhiteSpaceHelper(TrimType.Both);
 

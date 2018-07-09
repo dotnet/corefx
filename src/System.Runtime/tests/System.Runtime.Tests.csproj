@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{B1BF7CE0-CAB5-4FA2-A39C-450B05D5DB1C}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -8,16 +6,9 @@
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='uapaot'">$(DefineConstants);uapaot</DefineConstants>
     <!-- Please don't delete. We need App.config for netfx -->
-    <NETFxTestRunnerAppConfig Condition="'$(TargetGroup)' == 'netstandard'">$(MSBuildProjectDirectory)\App.config</NETFxTestRunnerAppConfig>
+    <NETFxTestRunnerAppConfig Condition="'$(TargetGroup)' == 'netfx'">$(MSBuildProjectDirectory)\App.config</NETFxTestRunnerAppConfig>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release;uapaot-Debug;uapaot-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\EnumTypes.cs">
       <Link>Common\System\EnumTypes.cs</Link>
@@ -49,6 +40,13 @@
     <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
       <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
+      <Link>System\StringTests.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Tests\System\SpanTestHelpers.cs">
+      <Link>System\SpanTestHelpers.cs</Link>
+    </Compile>
+    <Compile Include="CompareToTests.cs" />
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttributeTests.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
@@ -78,6 +76,7 @@
     <Compile Include="System\ExecutionEngineExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
+    <Compile Include="System\FormattableStringTests.cs" />
     <Compile Include="System\GCTests.cs" />
     <Compile Include="System\GuidTests.cs" />
     <Compile Include="System\HandleTests.cs" />
@@ -101,8 +100,8 @@
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StackOverflowExceptionTests.cs" />
+    <Compile Include="System\StringComparerTests.cs" />
     <Compile Include="System\StringGetHashCodeTests.cs" />
-    <Compile Include="System\StringTests.cs" />
     <Compile Include="System\String.SplitTests.cs" />
     <Compile Include="System\SystemExceptionTests.cs" />
     <Compile Include="System\TimeSpanTests.cs" />
@@ -170,6 +169,7 @@
     <Compile Include="System\Runtime\NgenServicingAttributesTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\AttributesTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.cs" />
+    <Compile Include="System\Runtime\CompilerServices\FormattableStringFactoryTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBoxTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.cs" />
     <Compile Include="System\Runtime\ExceptionServices\HandleProcessCorruptedStateExceptions.cs" />
@@ -180,7 +180,7 @@
       <Link>Common\System\RandomDataGenerator.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uapaot'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Compile Include="System\HashCodeTests.netcoreapp.cs" />
     <Compile Include="Helpers.netcoreapp.cs" />
     <Compile Include="System\ActivatorTests.netcoreapp.cs" />
@@ -192,6 +192,7 @@
     <Compile Include="System\DateTimeOffsetTests.netcoreapp.cs" />
     <Compile Include="System\DecimalTests.netcoreapp.cs" />
     <Compile Include="System\EnumTests.netcoreapp.cs" />
+    <Compile Include="System\FormattableStringTests.netcoreapp.cs" />
     <Compile Include="System\GCTests.netcoreapp.cs" />
     <Compile Include="System\GuidTests.netcoreapp.cs" />
     <Compile Include="System\Int16Tests.netcoreapp.cs" />
@@ -201,6 +202,7 @@
     <Compile Include="System\Collections\Generic\KeyValuePairTests.netcoreapp.cs" />
     <Compile Include="System\LazyTests.netcoreapp.cs" />
     <Compile Include="System\SByteTests.netcoreapp.cs" />
+    <Compile Include="System\StringComparerTests.netcoreapp.cs" />
     <Compile Include="System\StringTests.netcoreapp.cs" />
     <Compile Include="System\TimeSpanTests.netcoreapp.cs" />
     <Compile Include="System\TypeTests.netcoreapp.cs" />
@@ -213,11 +215,13 @@
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\AssemblyTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\BindingFlagsDoNotWrap.netcoreapp.cs" />
+    <Compile Include="System\Reflection\InvokeRefReturn.netcoreapp.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\MemberInfoTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\SignatureTypes.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeInfoTests.netcoreapp.cs" />
+    <Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttributeTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeFeatureTests.netcoreapp.cs" />
@@ -241,7 +245,7 @@
       <LogicalName>System.Reflection.Tests.EmbeddedTextFile.txt</LogicalName>
     </EmbeddedResource>
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
-      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+      <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
@@ -274,5 +278,4 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

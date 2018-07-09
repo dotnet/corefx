@@ -1,9 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <ProjectGuid>{4A85232C-E914-4E06-8542-26DAF4B22D60}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>System.Security.Cryptography.Xml.Tests</RootNamespace>
@@ -21,6 +20,7 @@
     <Compile Include="EncryptedXmlTests.cs" />
     <Compile Include="EncryptionPropertyCollectionTest.cs" />
     <Compile Include="EncryptionPropertyTest.cs" />
+    <Compile Include="SignedXml_Helpers.cs" />
     <Compile Include="KeyInfoNameTest.cs" />
     <Compile Include="KeyInfoNodeTest.cs" />
     <Compile Include="KeyInfoRetrievalMethodTest.cs" />
@@ -43,7 +43,6 @@
     <Compile Include="TestHelpers.cs" />
     <Compile Include="TransformChainTest.cs" />
     <Compile Include="TransformTest.cs" />
-    <Compile Include="XmlDecryptionTransformTest.cs" />
     <Compile Include="XmlDsigBase64TransformTest.cs" />
     <Compile Include="XmlDsigC14NTransformTest.cs" />
     <Compile Include="XmlDsigC14NWithCommentsTransformTest.cs" />
@@ -55,16 +54,19 @@
     <Compile Include="XmlLicenseEncryptedRef.cs" />
     <Compile Include="XmlLicenseTransformTest.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="KeyInfo_ArbitraryElements.cs" />
+    <Compile Include="Reference_ArbitraryElements.cs" />
+    <Compile Include="Signature_ArbitraryElements.cs" />
+    <Compile Include="SignedInfo_ArbitraryElements.cs" />
+    <Compile Include="SignedXml_Limits.cs" />
+    <Compile Include="SignedXml_SignatureMethodAlgorithm.cs" />
+    <Compile Include="XmlDecryptionTransformTest.cs" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="EncryptedXmlSample3.xml" />
     <EmbeddedResource Include="EncryptedXmlSample2.xml" />
     <EmbeddedResource Include="EncryptedXmlSample1.xml" />
     <EmbeddedResource Include="XmlLicenseSample.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

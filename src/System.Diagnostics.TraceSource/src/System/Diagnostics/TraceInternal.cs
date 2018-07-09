@@ -56,7 +56,7 @@ namespace System.Diagnostics
             {
                 if (s_appName == null)
                 {
-                    s_appName = Assembly.GetEntryAssembly().GetName().Name;
+                    s_appName = Assembly.GetEntryAssembly()?.GetName().Name ?? string.Empty;
                 }
                 return s_appName;
             }
@@ -165,7 +165,7 @@ namespace System.Diagnostics
             lock (critSec)
             {
                 InitializeSettings();
-                if (t_indentLevel < Int32.MaxValue)
+                if (t_indentLevel < int.MaxValue)
                 {
                     t_indentLevel++;
                 }

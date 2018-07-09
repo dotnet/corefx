@@ -49,6 +49,8 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
         public static bool IsWindows10Version1709OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16299;
+        public static bool IsWindows10Version1803OrGreater =>
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 17134;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP =>  
@@ -93,7 +95,7 @@ namespace System
                     return false;
                 }
 
-                byte[] buffer = new byte[0];
+                byte[] buffer = Array.Empty<byte>();
                 uint bufferSize = 0;
                 try
                 {

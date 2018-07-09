@@ -1,22 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
-    <PackageVersion>2.0.0</PackageVersion>
+      <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built -->
+    <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion>
+    <PackageVersion>2.1.0</PackageVersion>
     <ServiceModelVersion>4.4.1</ServiceModelVersion>
   </PropertyGroup>
-
   <ItemDefinitionGroup>
     <PrereleaseLibraryPackage>
-      <Version>4.5.0</Version>
+      <Version>$(_PreReleasePackageVersion)</Version>
     </PrereleaseLibraryPackage>
   </ItemDefinitionGroup>
-
   <ItemGroup>
     <PackageIndex Include="$(MSBuildThisFileDirectory)externalIndex.json" />
   </ItemGroup>
-
   <ItemGroup>
     <PrereleaseLibraryPackage Include="Microsoft.Win32.Registry" />
     <PrereleaseLibraryPackage Include="Microsoft.Win32.Registry.AccessControl" />
@@ -50,7 +48,6 @@
     <PrereleaseLibraryPackage Include="System.ServiceProcess.ServiceController" />
     <PrereleaseLibraryPackage Include="System.Text.Encoding.CodePages" />
     <PrereleaseLibraryPackage Include="System.Threading.AccessControl" />
-
     <!-- Service model packages -->
     <LibraryPackage Include="System.ServiceModel.Primitives">
       <Version>$(ServiceModelVersion)</Version>
@@ -68,16 +65,24 @@
       <Version>$(ServiceModelVersion)</Version>
     </LibraryPackage>
   </ItemGroup>
-
   <ItemGroup>
-    <Dependency Include="@(LibraryPackage)" />
-    <Dependency Include="@(PrereleaseLibraryPackage)" />
-
+    <!-- The shims included in the shims package are only needed for netcoreapp2.0 since in newer frameworks they are included inbox.
+    In order to condition the shims package to an specific framework other dependencies need to specify their target framework. So
+    we need to include the dependencies with the supported frameworks and then we include the compatibility shims package only for 2.0 -->
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
+      <TargetFramework>netcoreapp2.0</TargetFramework>
+    </Dependency>
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+    </Dependency>
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
+      <TargetFramework>netstandard2.0</TargetFramework>
+    </Dependency>
     <!-- Include dependency to shims package -->
     <Dependency Include="Microsoft.Windows.Compatibility.Shims">
       <Version>$(CompatibilityShimsPackageVersion)</Version>
+      <TargetFramework>netcoreapp2.0</TargetFramework>
     </Dependency>
   </ItemGroup>
-
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

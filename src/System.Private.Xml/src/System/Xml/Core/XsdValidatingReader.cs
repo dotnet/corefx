@@ -156,7 +156,7 @@ namespace System.Xml
             _currentAttrIndex = -1;
             _attributePSVINodes = new AttributePSVIInfo[InitialAttributeCount];
             _valueGetter = new XmlValueGetter(GetStringValue);
-            s_typeOfString = typeof(System.String);
+            s_typeOfString = typeof(string);
             _xmlSchemaInfo = new XmlSchemaInfo();
 
             //Add common strings to be compared to NameTable
@@ -894,7 +894,7 @@ namespace System.Xml
             }
         }
 
-        public override Decimal ReadElementContentAsDecimal()
+        public override decimal ReadElementContentAsDecimal()
         {
             if (this.NodeType != XmlNodeType.Element)
             {
@@ -1939,9 +1939,6 @@ namespace System.Xml
             }
         }
 
-        // SxS: This function calls ValidateElement on XmlSchemaValidator which is annotated with ResourceExposure attribute.
-        // Since the resource names (namespace location) are not provided directly by the user (they are read from the source
-        // document) and the function does not expose any resources it is fine to suppress the SxS warning. 
         private void ProcessElementEvent()
         {
             if (_processInlineSchema && IsXSDRoot(_coreReader.LocalName, _coreReader.NamespaceURI) && _coreReader.Depth > 0)

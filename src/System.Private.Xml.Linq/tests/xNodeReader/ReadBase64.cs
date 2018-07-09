@@ -11,7 +11,7 @@ using XmlCoreTest.Common;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
 
         public partial class XNodeReaderTests : XLinqTestCase
@@ -278,7 +278,7 @@ namespace CoreXml.Test.XLinq
                     {
                         DataReader.ReadContentAsBase64(base64, i, 2);
                         strActbase64 = (System.BitConverter.ToChar(base64, i)).ToString();
-                        TestLog.Compare(String.Compare(strActbase64, 0, strTextBase64, i / 2, 1), 0, "Compare All Valid Base64");
+                        TestLog.Compare(string.Compare(strActbase64, 0, strTextBase64, i / 2, 1), 0, "Compare All Valid Base64");
                     }
                 }
 
@@ -757,7 +757,7 @@ namespace CoreXml.Test.XLinq
                     {
                         DataReader.ReadElementContentAsBase64(base64, i, 2);
                         strActbase64 = (System.BitConverter.ToChar(base64, i)).ToString();
-                        TestLog.Compare(String.Compare(strActbase64, 0, strTextBase64, i / 2, 1), 0, "Compare All Valid Base64");
+                        TestLog.Compare(string.Compare(strActbase64, 0, strTextBase64, i / 2, 1), 0, "Compare All Valid Base64");
                     }
                 }
 

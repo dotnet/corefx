@@ -10,7 +10,7 @@ namespace System.Collections
     // synchronization methods.
     public interface ICollection : IEnumerable
     {
-        // Interfaces are not serialable
+        // Interfaces are not serializable
         // CopyTo copies a collection into an Array, starting at a particular
         // index into the array.
         // 
@@ -49,12 +49,12 @@ namespace System.Collections
         // or your language's equivalent to the C# lock keyword as mentioned 
         // above.
         // 
-        // For collections with no publically available underlying store, the 
+        // For collections with no publicly available underlying store, the 
         // expected implementation is to simply return the this pointer.  Note 
         // that the this pointer may not be sufficient for collections that 
         // wrap other collections;  those should return the underlying 
         // collection's SyncRoot property.
-        Object SyncRoot
+        object SyncRoot
         { get; }
 
         // Is this collection synchronized (i.e., thread-safe)?  If you want a 

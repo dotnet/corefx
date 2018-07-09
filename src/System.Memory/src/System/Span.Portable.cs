@@ -15,8 +15,6 @@ namespace System
     /// Span represents a contiguous region of arbitrary memory. Unlike arrays, it can point to either managed
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
-    [DebuggerTypeProxy(typeof(SpanDebugView<>))]
-    [DebuggerDisplay("{ToString(),raw}")]
     public readonly ref partial struct Span<T>
     {
         /// <summary>
@@ -155,6 +153,24 @@ namespace System
                 else
                     return ref Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
             }
+        }
+
+        /// <summary>
+        /// Returns a reference to the 0th element of the Span. If the Span is empty, returns null reference.
+        /// It can be used for pinning and is required to support the use of span within a fixed statement.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public unsafe ref T GetPinnableReference()
+        {
+            if (_length != 0)
+            {
+                if (_pinnable == null)
+                {
+                    return ref Unsafe.AsRef<T>(_byteOffset.ToPointer());
+                }
+                return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
+            }
+            return ref Unsafe.AsRef<T>(null);
         }
 
         /// <summary>

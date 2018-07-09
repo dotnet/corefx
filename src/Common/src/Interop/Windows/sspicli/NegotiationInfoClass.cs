@@ -26,21 +26,25 @@ namespace System.Net
             if (negotiationState == Interop.SspiCli.SECPKG_NEGOTIATION_COMPLETE
                 || negotiationState == Interop.SspiCli.SECPKG_NEGOTIATION_OPTIMISTIC)
             {
-                IntPtr unmanagedString = Marshal.ReadIntPtr(packageInfo, SecurityPackageInfo.NameOffest);
                 string name = null;
-                if (unmanagedString != IntPtr.Zero)
+
+                unsafe
                 {
-                    name = Marshal.PtrToStringUni(unmanagedString);
+                    IntPtr unmanagedString = ((SecurityPackageInfo *)packageInfo)->Name;
+                    if (unmanagedString != IntPtr.Zero)
+                    {
+                        name = Marshal.PtrToStringUni(unmanagedString);
+                    }
                 }
 
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"packageInfo:{packageInfo} negotiationState:{negotiationState:x} name:{name}");
 
                 // An optimization for future string comparisons.
-                if (string.Compare(name, Kerberos, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(name, Kerberos, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthenticationPackage = Kerberos;
                 }
-                else if (string.Compare(name, NTLM, StringComparison.OrdinalIgnoreCase) == 0)
+                else if (string.Equals(name, NTLM, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthenticationPackage = NTLM;
                 }

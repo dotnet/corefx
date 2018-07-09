@@ -1,15 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{7669C397-C21C-4C08-83F1-BE6691911E88}</ProjectGuid>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
     <!-- XUnit AppDomains BaseDirectory path doesn't contain a trailing slash, which impacts our tests. -->
     <XUnitNoAppdomain>true</XUnitNoAppdomain>
+    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
       <Link>Common\System\IO\TempDirectory.cs</Link>
@@ -75,7 +72,9 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="System\Configuration\ApplicationSettingsBaseTests.cs" />
+    <Compile Include="System\Configuration\AppSettingsReaderTests.cs" />
     <Compile Include="System\Configuration\AppSettingsTests.cs" />
+    <Compile Include="System\Configuration\CallBackValidatorAttributeTests.cs" />
     <Compile Include="System\Configuration\ConfigPathUtilityTests.cs" />
     <Compile Include="System\Configuration\ConfigurationElementCollectionTests.cs" />
     <Compile Include="System\Configuration\ConfigurationElementTests.cs" />
@@ -90,10 +89,18 @@
     <Compile Include="System\Configuration\LocalFileSettingsProviderTests.cs" />
     <Compile Include="System\Configuration\NameValueConfigurationCollectionTests.cs" />
     <Compile Include="System\Configuration\SectionGroupsTests.cs" />
+    <Compile Include="System\Configuration\SettingElementCollectionTests.cs" />
     <Compile Include="System\Configuration\SettingElementTests.cs" />
+    <Compile Include="System\Configuration\SettingsDescriptionAttributeTests.cs" />
+    <Compile Include="System\Configuration\SettingsGroupDescriptionAttributeTests.cs" />
+    <Compile Include="System\Configuration\SettingsManageabilityAtrributeTests.cs" />
+    <Compile Include="System\Configuration\SettingsPropertyIsReadOnlyExceptionTests.cs" />
+    <Compile Include="System\Configuration\SettingsPropertyNotFoundExceptionTests.cs" />
+    <Compile Include="System\Configuration\SettingsPropertyWrongTypeExceptionTests.cs" />
     <Compile Include="System\Configuration\SmokeTest.cs" />
     <Compile Include="System\Configuration\StringUtilTests.cs" />
     <Compile Include="System\Configuration\TempConfig.cs" />
+    <Compile Include="System\Configuration\TempConfigurationHost.cs" />
     <Compile Include="System\Configuration\TestData.cs" />
     <Compile Include="System\Configuration\StringValidatorTests.cs" />
     <Compile Include="System\Configuration\SubclassTypeValidatorAttributeTests.cs" />
@@ -105,5 +112,10 @@
     <Compile Include="System\Configuration\ValidatiorUtilsTests.cs" />
     <Compile Include="System\Drawing\Configuration\SystemDrawingSectionTests.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

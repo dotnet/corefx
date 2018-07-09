@@ -72,6 +72,11 @@ namespace System.Net.Http
             get => _curlHandler != null ? _curlHandler.CookieContainer : _socketsHttpHandler.CookieContainer;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 if (_curlHandler != null)
                 {
                     _curlHandler.CookieContainer = value;
@@ -286,12 +291,28 @@ namespace System.Net.Http
 
         public bool UseDefaultCredentials
         {
-            get => _curlHandler != null ? _curlHandler.UseDefaultCredentials : false;
+            // Either read variable from curlHandler or compare .Credentials as socketsHttpHandler does not have separate prop.
+            get => _curlHandler != null ? _curlHandler.UseDefaultCredentials : _socketsHttpHandler.Credentials == CredentialCache.DefaultCredentials;
             set
             {
                 if (_curlHandler != null)
                 {
                     _curlHandler.UseDefaultCredentials = value;
+                }
+                else
+                {
+                    if (value)
+                    {
+                        _socketsHttpHandler.Credentials = CredentialCache.DefaultCredentials;
+                    }
+                    else
+                    {
+                        if (_socketsHttpHandler.Credentials == CredentialCache.DefaultCredentials)
+                        {
+                            // Only clear out the Credentials property if it was a DefaultCredentials.
+                            _socketsHttpHandler.Credentials = null;
+                        }
+                    }
                 }
             }
         }

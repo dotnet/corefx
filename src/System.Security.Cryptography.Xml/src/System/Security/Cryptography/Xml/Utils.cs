@@ -81,6 +81,29 @@ namespace System.Security.Cryptography.Xml
             return element.HasAttribute(localName) || element.HasAttribute(localName, namespaceURI);
         }
 
+        internal static bool VerifyAttributes(XmlElement element, string expectedAttrName)
+        {
+            return VerifyAttributes(element, expectedAttrName == null ? null : new string[] { expectedAttrName });
+        }
+
+        internal static bool VerifyAttributes(XmlElement element, string[] expectedAttrNames)
+        {
+            foreach (XmlAttribute attr in element.Attributes)
+            {
+                // There are a few Xml Special Attributes that are always allowed on any node. Make sure we allow those here.
+                bool attrIsAllowed = attr.Name == "xmlns" || attr.Name.StartsWith("xmlns:") || attr.Name == "xml:space" || attr.Name == "xml:lang" || attr.Name == "xml:base";
+                int expectedInd = 0;
+                while (!attrIsAllowed && expectedAttrNames != null && expectedInd < expectedAttrNames.Length)
+                {
+                    attrIsAllowed = attr.Name == expectedAttrNames[expectedInd];
+                    expectedInd++;
+                }
+                if (!attrIsAllowed)
+                    return false;
+            }
+            return true;
+        }
+
         internal static bool IsNamespaceNode(XmlNode n)
         {
             return n.NodeType == XmlNodeType.Attribute && (n.Prefix.Equals("xmlns") || (n.Prefix.Length == 0 && n.LocalName.Equals("xmlns")));
@@ -139,11 +162,11 @@ namespace System.Security.Cryptography.Xml
         {
             int i, iCount = 0;
             for (i = 0; i < inputCount; i++)
-                if (Char.IsWhiteSpace(inputBuffer[inputOffset + i])) iCount++;
+                if (char.IsWhiteSpace(inputBuffer[inputOffset + i])) iCount++;
             char[] rgbOut = new char[inputCount - iCount];
             iCount = 0;
             for (i = 0; i < inputCount; i++)
-                if (!Char.IsWhiteSpace(inputBuffer[inputOffset + i]))
+                if (!char.IsWhiteSpace(inputBuffer[inputOffset + i]))
                 {
                     rgbOut[iCount++] = inputBuffer[inputOffset + i];
                 }
@@ -728,7 +751,7 @@ namespace System.Security.Cryptography.Xml
                     digit = (uint)(sArray[i] & 0x0f);
                     hexOrder[j++] = s_hexValues[digit];
                 }
-                result = new String(hexOrder);
+                result = new string(hexOrder);
             }
             return result;
         }
@@ -765,7 +788,7 @@ namespace System.Security.Cryptography.Xml
             if (elements.Count != 1)
                 return false;
             X509Certificate2 certificate = elements[0].Certificate;
-            if (String.Compare(certificate.SubjectName.Name, certificate.IssuerName.Name, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(certificate.SubjectName.Name, certificate.IssuerName.Name, StringComparison.OrdinalIgnoreCase))
                 return true;
             return false;
         }
@@ -774,5 +797,8 @@ namespace System.Security.Cryptography.Xml
         {
             return (AsymmetricAlgorithm)certificate.GetRSAPublicKey();
         }
+
+        internal const int MaxTransformsPerReference = 10;
+        internal const int MaxReferencesPerSignedInfo = 100;
     }
 }

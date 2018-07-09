@@ -105,7 +105,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 var tmpList = new List<TypeSerializableValue>(blobs);
                 tmpList.RemoveAt(1);
 
-                int index = tmpList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx461 || b.Platform == TargetFrameworkMoniker.netfx471);
+                int index = tmpList.FindIndex(b => b.Platform.IsNetfxPlatform());
                 if (index >= 0)
                     tmpList.RemoveAt(index);
 
@@ -113,7 +113,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // We store our framework blobs in index 1
-            int platformBlobIndex = TypeSerializableValue.GetPlatformIndex(blobs);
+            int platformBlobIndex = blobs.GetPlatformIndex();
             for (int i = 0; i < blobs.Length; i++)
             {
                 // Check if the current blob is from the current running platform.
@@ -129,6 +129,22 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Simple), isSamePlatform);
                     EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Full), isSamePlatform);
                 }
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void RegexExceptionSerializable()
+        {
+            try
+            {
+                new Regex("*"); // parsing "*" - Quantifier {x,y} following nothing.
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.Equal(ex.GetType().Name, "RegexParseException");
+                ArgumentException clone = BinaryFormatterHelpers.Clone(ex);
+                Assert.IsType<ArgumentException>(clone);
             }
         }
 
@@ -533,7 +549,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // Check if runtime generated blob is the same as the stored one
-            int frameworkBlobNumber = TypeSerializableValue.GetPlatformIndex(blobs);
+            int frameworkBlobNumber = blobs.GetPlatformIndex();
             if (frameworkBlobNumber < blobs.Length)
             {
                 string runtimeBlob = BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full);

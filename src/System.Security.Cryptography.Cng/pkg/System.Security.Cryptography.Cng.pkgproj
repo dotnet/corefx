@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Security.Cryptography.Cng.csproj">
-      <!-- Removing AllXamarianFrameworks from validation because of https://github.com/dotnet/corefx/issues/25924 -->
-      <SupportedFramework>net461;netcoreapp2.1;$(UAPvNextTFM)</SupportedFramework>
+      <SupportedFramework>net461</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Security.Cryptography.Cng.csproj" />
     <File Include="$(PlaceHolderFile)">
@@ -22,5 +21,5 @@
          therefore it cannot reference NETStandard.Library -->
     <SuppressMetaPackage Include="NETStandard.Library" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

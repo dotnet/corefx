@@ -43,7 +43,7 @@ namespace System.Net.Http.Functional.Tests
         /// This test must be in the same test collection as any others testing HttpClient/WinHttpHandler
         /// DiagnosticSources, since the global logging mechanism makes them conflict inherently.
         /// </remarks>
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceLogging()
         {
@@ -111,7 +111,7 @@ namespace System.Net.Http.Functional.Tests
         /// This test must be in the same test collection as any others testing HttpClient/WinHttpHandler
         /// DiagnosticSources, since the global logging mechanism makes them conflict inherently.
         /// </remarks>
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNoLogging()
         {
@@ -150,7 +150,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
-                            await Task.WhenAll(response, requestLines);
+                            await new Task[] { response, requestLines }.WhenAllOrAnyFailed();
 
                             AssertNoHeadersAreInjected(requestLines.Result);
                             response.Result.Dispose();
@@ -167,7 +167,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23771, TestPlatforms.AnyUnix)]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -214,7 +214,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString(), useSsl.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionLogging()
         {
@@ -260,7 +260,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23209)]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledLogging()
         {
@@ -305,7 +305,6 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLogging()
         {
@@ -361,7 +360,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
-                            await Task.WhenAll(response, requestLines);
+                            await new Task[] { response, requestLines }.WhenAllOrAnyFailed();
 
                             AssertHeadersAreInjected(requestLines.Result, parentActivity);
                             response.Result.Dispose();
@@ -381,7 +380,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceUrlFilteredActivityLogging()
         {
@@ -422,7 +421,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionActivityLogging()
         {
@@ -468,10 +467,19 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSynchronousExceptionActivityLogging()
         {
+            if (IsCurlHandler)
+            {
+                // The only way to throw a synchronous exception for CurlHandler through
+                // DiagnosticHandler is when the Request uri scheme is Https, and the
+                // backend doesn't support SSL.
+                return;
+            }
+
             RemoteInvoke(useSocketsHttpHandlerString =>
             {
                 bool exceptionLogged = false;
@@ -502,21 +510,38 @@ namespace System.Net.Http.Functional.Tests
                     using (HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString))
                     using (HttpClient client = new HttpClient(handler))
                     {
+                        // Set a https proxy.
+                        handler.Proxy = new WebProxy($"https://{Guid.NewGuid()}.com", false);
+                        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"http://{Guid.NewGuid()}.com");
+
                         if (bool.Parse(useSocketsHttpHandlerString))
                         {
-                            // Forces a synchronous exception for SocketsHttpHandler
-                            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"http://{Guid.NewGuid()}.com");
-                            request.Version = new Version(0, 0);
+                            // Forces a synchronous exception for SocketsHttpHandler.
+                            // SocketsHttpHandler only allow http scheme for proxies.
 
-                            Assert.ThrowsAsync<NotSupportedException>(() => client.SendAsync(request)).Wait();
+                            // We cannot use Assert.Throws<Exception>(() => { SendAsync(...); }) to verify the
+                            // synchronous exception here, because DiagnosticsHandler SendAsync() method has async
+                            // modifier, and returns Task. If the call is not awaited, the current test method will continue
+                            // run before the call is completed, thus Assert.Throws() will not capture the exception.
+                            // We need to wait for the Task to complete synchronously, to validate the exception.
+                            Task sendTask = client.SendAsync(request);
+                            Assert.True(sendTask.IsFaulted);
+                            Assert.IsType<NotSupportedException>(sendTask.Exception.InnerException);
                         }
                         else
                         {
-                            // Forces a synchronous exception for WinHttpHandler
-                            handler.UseCookies = true;
-                            handler.CookieContainer = null;
+                            // Forces a synchronous exception for WinHttpHandler.
+                            // WinHttpHandler will not allow (proxy != null && !UseCustomProxy).
+                            handler.UseProxy = false;
 
-                            Assert.ThrowsAsync<InvalidOperationException>(() => client.GetAsync($"http://{Guid.NewGuid()}.com")).Wait();
+                            // We cannot use Assert.Throws<Exception>(() => { SendAsync(...); }) to verify the
+                            // synchronous exception here, because DiagnosticsHandler SendAsync() method has async
+                            // modifier, and returns Task. If the call is not awaited, the current test method will continue
+                            // run before the call is completed, thus Assert.Throws() will not capture the exception.
+                            // We need to wait for the Task to complete synchronously, to validate the exception.
+                            Task sendTask = client.SendAsync(request);
+                            Assert.True(sendTask.IsFaulted);
+                            Assert.IsType<InvalidOperationException>(sendTask.Exception.InnerException);
                         }
                     }
                     // Poll with a timeout since logging response is not synchronized with returning a response.
@@ -530,7 +555,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNewAndDeprecatedEventsLogging()
         {
@@ -569,7 +594,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionOnlyActivityLogging()
         {
@@ -607,7 +632,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticStopOnlyActivityLogging()
         {
@@ -645,7 +670,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23209)]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledActivityLogging()
         {
@@ -689,6 +714,45 @@ namespace System.Net.Http.Functional.Tests
 
                 return SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
+        }
+
+        [Fact]
+        public void SendAsync_NullRequest_ThrowsArgumentNullException()
+        {
+            RemoteInvoke(async () =>
+            {
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(null);
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable();
+
+                    using (MyHandler handler = new MyHandler())
+                    {
+                        // Getting the Task first from the .SendAsync() call also tests
+                        // that the exception comes from the async Task path.
+                        Task t = handler.SendAsync(null);
+                        if (PlatformDetection.IsUap)
+                        {
+                            await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                        }
+                        else
+                        {
+                            await Assert.ThrowsAsync<ArgumentNullException>(() => t);
+                        }
+                    }
+                }
+
+                diagnosticListenerObserver.Disable();
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        private class MyHandler : HttpClientHandler
+        {
+            internal Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+            {
+                return SendAsync(request, CancellationToken.None);
+            }
         }
 
         private static T GetPropertyValueFromAnonymousTypeInstance<T>(object obj, string propertyName)

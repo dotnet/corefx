@@ -58,7 +58,7 @@ namespace System.Drawing
         {
             if (format == null)
             {
-                throw new ArgumentNullException("format");
+                throw new ArgumentNullException(nameof(format));
             }
 
             int status = SafeNativeMethods.Gdip.GdipCloneStringFormat(new HandleRef(format, format.nativeFormat), out nativeFormat);
@@ -210,7 +210,7 @@ namespace System.Drawing
             {
                 if (value < 0 || value > StringAlignment.Far)
                 {
-                    throw new InvalidEnumArgumentException("value", unchecked((int)value), typeof(StringAlignment));
+                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(StringAlignment));
                 }
 
                 int status = SafeNativeMethods.Gdip.GdipSetStringFormatLineAlign(new HandleRef(this, nativeFormat), value);
@@ -256,7 +256,7 @@ namespace System.Drawing
         {
             if (firstTabOffset < 0)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, "firstTabOffset", firstTabOffset));
+                throw new ArgumentException(SR.Format(SR.InvalidArgumentValue, nameof(firstTabOffset), firstTabOffset));
             }
 
             foreach (float tabStop in tabStops) // Emulate Windows GDI+ behavior.

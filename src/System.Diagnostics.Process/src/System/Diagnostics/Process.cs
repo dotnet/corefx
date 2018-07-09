@@ -80,14 +80,6 @@ namespace System.Diagnostics
         internal AsyncStreamReader _error;
         internal bool _pendingOutputRead;
         internal bool _pendingErrorRead;
-#if FEATURE_TRACESWITCH
-        internal static TraceSwitch _processTracing =
-#if DEBUG
-            new TraceSwitch("processTracing", "Controls debug output from Process component");
-#else
-            null;
-#endif
-#endif
 
         /// <devdoc>
         ///    <para>
@@ -302,7 +294,7 @@ namespace System.Diagnostics
             {
                 if (_modules == null)
                 {
-                    EnsureState(State.HaveId | State.IsLocal);
+                    EnsureState(State.HaveNonExitedId | State.IsLocal);
                     _modules = ProcessManager.GetModules(_processId);
                 }
                 return _modules;
@@ -782,10 +774,20 @@ namespace System.Diagnostics
         ///     This is called from the threadpool when a process exits.
         /// </devdoc>
         /// <internalonly/>
-        private void CompletionCallback(object context, bool wasSignaled)
+        private void CompletionCallback(object waitHandleContext, bool wasSignaled)
         {
-            StopWatchingForExit();
-            RaiseOnExited();
+            Debug.Assert(waitHandleContext != null, "Process.CompletionCallback called with no waitHandleContext");
+            lock (this)
+            {
+                // Check the exited event that we get from the threadpool
+                // matches the event we are waiting for.
+                if (waitHandleContext != _waitHandle)
+                {
+                    return;
+                }
+                StopWatchingForExit();
+                RaiseOnExited();
+            }
         }
 
         /// <internalonly/>
@@ -835,10 +837,14 @@ namespace System.Diagnostics
             {
                 if (_haveProcessHandle)
                 {
-                    StopWatchingForExit();
-#if FEATURE_TRACESWITCH
-                    Debug.WriteLineIf(_processTracing.TraceVerbose, "Process - CloseHandle(process) in Close()");
-#endif
+                    // We need to lock to ensure we don't run concurrently with CompletionCallback.
+                    // Without this lock we could reset _raisedOnExited which causes CompletionCallback to
+                    // raise the Exited event a second time for the same process.
+                    lock (this)
+                    {
+                        // This sets _waitHandle to null which causes CompletionCallback to not emit events.
+                        StopWatchingForExit();
+                    }
                     _processHandle.Dispose();
                     _processHandle = null;
                     _haveProcessHandle = false;
@@ -890,6 +896,10 @@ namespace System.Diagnostics
             }
         }
 
+        // Checks if the process hasn't exited on Unix systems.
+        // This is used to detect recycled child PIDs.
+        partial void ThrowIfExited(bool refresh);
+
         /// <devdoc>
         ///     Helper method for checking preconditions when accessing properties.
         /// </devdoc>
@@ -914,6 +924,10 @@ namespace System.Diagnostics
                         throw new InvalidOperationException(SR.ProcessIdRequired);
                     }
                 }
+                if ((state & State.HaveNonExitedId) == State.HaveNonExitedId)
+                {
+                    ThrowIfExited(refresh: false);
+                }
             }
 
             if ((state & State.IsLocal) != (State)0 && _isRemoteMachine)
@@ -925,7 +939,10 @@ namespace System.Diagnostics
             {
                 if (_processInfo == null)
                 {
-                    if ((state & State.HaveId) == (State)0) EnsureState(State.HaveId);
+                    if ((state & State.HaveNonExitedId) != State.HaveNonExitedId)
+                    {
+                        EnsureState(State.HaveNonExitedId);
+                    }
                     _processInfo = ProcessManager.GetProcessInfo(_processId, _machineName);
                     if (_processInfo == null)
                     {
@@ -1039,18 +1056,6 @@ namespace System.Diagnostics
                 ProcessInfo processInfo = processInfos[i];
                 processes[i] = new Process(machineName, isRemoteMachine, processInfo.ProcessId, processInfo);
             }
-#if FEATURE_TRACESWITCH
-            Debug.WriteLineIf(_processTracing.TraceVerbose, "Process.GetProcesses(" + machineName + ")");
-#if DEBUG
-            if (_processTracing.TraceVerbose) {
-                Debug.Indent();
-                for (int i = 0; i < processInfos.Length; i++) {
-                    Debug.WriteLine(processes[i].Id + ": " + processes[i].ProcessName);
-                }
-                Debug.Unindent();
-            }
-#endif
-#endif
             return processes;
         }
 
@@ -1300,7 +1305,7 @@ namespace System.Diagnostics
                 string processName = ProcessName;
                 if (processName.Length != 0)
                 {
-                    return String.Format(CultureInfo.CurrentCulture, "{0} ({1})", base.ToString(), processName);
+                    return string.Format(CultureInfo.CurrentCulture, "{0} ({1})", base.ToString(), processName);
                 }
             }
             return base.ToString();
@@ -1448,7 +1453,7 @@ namespace System.Diagnostics
             _pendingErrorRead = false;
         }
 
-        internal void OutputReadNotifyUser(String data)
+        internal void OutputReadNotifyUser(string data)
         {
             // To avoid race between remove handler and raising the event
             DataReceivedEventHandler outputDataReceived = OutputDataReceived;
@@ -1459,7 +1464,7 @@ namespace System.Diagnostics
             }
         }
 
-        internal void ErrorReadNotifyUser(String data)
+        internal void ErrorReadNotifyUser(string data)
         {
             // To avoid race between remove handler and raising the event
             DataReceivedEventHandler errorDataReceived = ErrorDataReceived;
@@ -1497,6 +1502,7 @@ namespace System.Diagnostics
         {
             HaveId = 0x1,
             IsLocal = 0x2,
+            HaveNonExitedId = HaveId | 0x4,
             HaveProcessInfo = 0x8,
             Exited = 0x10,
             Associated = 0x20,

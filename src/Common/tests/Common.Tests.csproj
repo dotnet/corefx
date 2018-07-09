@@ -1,15 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C72FD34C-539A-4447-9796-62A229571199}</ProjectGuid>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
@@ -44,11 +39,14 @@
     <Compile Include="$(CommonPath)\System\IO\RowConfigReader.cs">
       <Link>Common\System\IO\RowConfigReader.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
-      <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
+      <Link>Common\System\Text\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
@@ -69,15 +67,17 @@
       <Link>Common\System\PasteArguments.cs</Link>
     </Compile>
     <Compile Include="Tests\Interop\procfsTests.cs" />
-    <Compile Include="Tests\System\AssertExtensionTests.cs" />
     <Compile Include="Tests\System\CharArrayHelpersTests.cs" />
     <Compile Include="Tests\System\IO\PathInternal.Tests.cs" />
     <Compile Include="Tests\System\IO\StringParserTests.cs" />
     <Compile Include="Tests\System\MarvinTests.cs" />
+    <Compile Include="Tests\System\Net\HttpDateParserTests.cs" />
     <Compile Include="Tests\System\PasteArgumentsTests.cs" />
     <Compile Include="Tests\System\Security\IdentityHelperTests.cs" />
     <Compile Include="Tests\System\Text\ValueStringBuilderTests.cs" />
+    <Compile Include="Tests\System\SpanTestHelpers.cs" />
     <Compile Include="Tests\System\StringExtensions.Tests.cs" />
+    <Compile Include="Tests\System\StringTests.cs" />
     <Compile Include="Tests\System\Collections\Generic\ArrayBuilderTests.cs" />
     <Compile Include="Tests\System\Collections\Generic\LargeArrayBuilderTests.cs" />
     <Compile Include="Tests\System\IO\RowConfigReaderTests.cs" />
@@ -93,8 +93,8 @@
     </Compile>
     <Compile Include="Tests\System\Net\VirtualNetworkTest.cs" />
     <Compile Include="Tests\System\Net\VirtualNetworkStreamTest.cs" />
-    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
-      <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>ProductionCode\Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.cs</Link>
@@ -108,10 +108,7 @@
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="Tests\System\IO\PathInternal.Windows.Tests.cs" />
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFullPathNameW.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetFullPathNameW.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
@@ -130,7 +127,7 @@
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Unix.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.PathConf.cs">
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
@@ -146,5 +143,10 @@
     <Folder Include="System\Net\Sockets\" />
     <Folder Include="System\Net\VirtualNetwork\" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

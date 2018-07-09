@@ -380,14 +380,15 @@ namespace System.Net.Sockets
 
                 receivedFlags = messageHeader.Flags;
                 sockAddrLen = messageHeader.SocketAddressLen;
-                ipPacketInformation = GetIPPacketInformation(&messageHeader, isIPv4, isIPv6);
             }
 
             if (errno != Interop.Error.SUCCESS)
             {
+                ipPacketInformation = default(IPPacketInformation);
                 return -1;
             }
 
+            ipPacketInformation = GetIPPacketInformation(&messageHeader, isIPv4, isIPv6);
             socketAddressLen = sockAddrLen;
             return checked((int)received);
         }
@@ -442,15 +443,16 @@ namespace System.Net.Sockets
 
                     receivedFlags = messageHeader.Flags;
                     int sockAddrLen = messageHeader.SocketAddressLen;
-                    ipPacketInformation = GetIPPacketInformation(&messageHeader, isIPv4, isIPv6);
 
                     if (errno == Interop.Error.SUCCESS)
                     {
+                        ipPacketInformation = GetIPPacketInformation(&messageHeader, isIPv4, isIPv6);
                         socketAddressLen = sockAddrLen;
                         return checked((int)received);
                     }
                     else
                     {
+                        ipPacketInformation = default(IPPacketInformation);
                         return -1;
                     }
                 }
@@ -864,7 +866,7 @@ namespace System.Net.Sockets
         {
             if (!handle.IsNonBlocking)
             {
-                return handle.AsyncContext.Connect(socketAddress, socketAddressLen, -1);
+                return handle.AsyncContext.Connect(socketAddress, socketAddressLen);
             }
 
             SocketError errorCode;
@@ -1097,17 +1099,15 @@ namespace System.Net.Sockets
             {
                 if (optionName == SocketOptionName.ReceiveTimeout)
                 {
-                    // Note, setting a non-infinite timeout will force the handle into nonblocking mode
                     handle.ReceiveTimeout = optionValue == 0 ? -1 : optionValue;
-                    handle.TrackOption(optionLevel, optionName);
-                    return SocketError.Success;
+                    err = Interop.Sys.SetReceiveTimeout(handle, optionValue);
+                    return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
                 }
                 else if (optionName == SocketOptionName.SendTimeout)
                 {
-                    // Note, setting a non-infinite timeout will force the handle into nonblocking mode
                     handle.SendTimeout = optionValue == 0 ? -1 : optionValue;
-                    handle.TrackOption(optionLevel, optionName);
-                    return SocketError.Success;
+                    err = Interop.Sys.SetSendTimeout(handle, optionValue);
+                    return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
                 }
             }
             else if (optionLevel == SocketOptionLevel.IP)

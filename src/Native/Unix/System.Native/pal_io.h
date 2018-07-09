@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 #include "pal_errno.h"
 #include <time.h>
@@ -18,7 +15,7 @@ BEGIN_EXTERN_C
 /**
  * File status returned by Stat or FStat.
  */
-struct FileStatus
+typedef struct
 {
     int32_t Flags;     // flags for testing if some members are present (see FileStatusFlags)
     int32_t Mode;      // file mode (see S_I* constants above for bit values)
@@ -35,7 +32,7 @@ struct FileStatus
     int64_t BirthTimeNsec; // nanosecond part
     int64_t Dev;       // ID of the device containing the file
     int64_t Ino;       // inode number of the file
-};
+} FileStatus;
 
 /* Provide consistent access to nanosecond fields, if they exist. */
 /* Seconds are always available through st_atime, st_mtime, st_ctime. */
@@ -156,7 +153,7 @@ enum
 /**
  * Constants from dirent.h for the inode type returned from readdir variants
  */
-enum NodeType
+typedef enum
 {
     PAL_DT_UNKNOWN = 0, // Unknown file type
     PAL_DT_FIFO = 1,    // Named Pipe
@@ -167,50 +164,42 @@ enum NodeType
     PAL_DT_LNK = 10,    // Symlink
     PAL_DT_SOCK = 12,   // Socket
     PAL_DT_WHT = 14     // BSD Whiteout
-};
+} NodeType;
 
 /**
  * Constants from sys/file.h for lock types
  */
-enum LockOperations
+typedef enum
 {
     PAL_LOCK_SH = 1, /* shared lock */
     PAL_LOCK_EX = 2, /* exclusive lock */
     PAL_LOCK_NB = 4, /* don't block when locking*/
     PAL_LOCK_UN = 8, /* unlock */
-};
+} LockOperations;
 
 /**
  * Constants for changing the access permissions of a path
  */
-enum AccessMode
+typedef enum
 {
     PAL_F_OK = 0, /* Check for existence */
     PAL_X_OK = 1, /* Check for execute */
     PAL_W_OK = 2, /* Check for write */
     PAL_R_OK = 4, /* Check for read */
-};
-
-/**
- * Flags to pass to fnmatch for what type of pattern matching to do
- */
-enum FnMatchFlags
-{
-    PAL_FNM_NONE = 0,
-};
+} AccessMode;
 
 /**
  * Constants passed to lseek telling the OS where to seek from
  */
-enum SeekWhence
+typedef enum
 {
     PAL_SEEK_SET = 0, /* seek from the beginning of the stream */
     PAL_SEEK_CUR = 1, /* seek from the current position */
     PAL_SEEK_END = 2, /* seek from the end of the stream, wrapping if necessary */
-};
+} SeekWhence;
 
 /**
- * Constants for protection argument to MMap or MProtect.
+ * Constants for protection argument to MMap.
  */
 enum
 {
@@ -247,25 +236,25 @@ enum
 /**
  * Advice argument to MAdvise.
  */
-enum MemoryAdvice
+typedef enum
 {
     PAL_MADV_DONTFORK = 1, // don't map pages in to forked process
-};
+} MemmoryAdvice;
 
 /**
  * Name argument to SysConf.
  */
-enum SysConfName
+typedef enum
 {
     PAL_SC_CLK_TCK = 1,  // Number of clock ticks per second
     PAL_SC_PAGESIZE = 2, // Size of a page in bytes
-};
+} SysConfName;
 
 /**
  * Constants passed to and from poll describing what to poll for and what
  * kind of data was received from poll.
  */
-enum PollEvents
+typedef enum
 {
     PAL_POLLIN = 0x0001,   /* non-urgent readable data available */
     PAL_POLLPRI = 0x0002,  /* urgent readable data available */
@@ -273,13 +262,13 @@ enum PollEvents
     PAL_POLLERR = 0x0008,  /* an error occurred */
     PAL_POLLHUP = 0x0010,  /* the file descriptor hung up */
     PAL_POLLNVAL = 0x0020, /* the requested events were invalid */
-};
+} PollEvents;
 
 /**
  * Constants passed to posix_advise to give hints to the kernel about the type of I/O
  * operations that will occur.
  */
-enum FileAdvice
+typedef enum
 {
     PAL_POSIX_FADV_NORMAL = 0,     /* no special advice, the default value */
     PAL_POSIX_FADV_RANDOM = 1,     /* random I/O access */
@@ -287,32 +276,32 @@ enum FileAdvice
     PAL_POSIX_FADV_WILLNEED = 3,   /* will need specified pages */
     PAL_POSIX_FADV_DONTNEED = 4,   /* don't need the specified pages */
     PAL_POSIX_FADV_NOREUSE = 5,    /* data will only be acessed once */
-};
+} FileAdvice;
 
 /**
  * Our intermediate dirent struct that only gives back the data we need
  */
-struct DirectoryEntry
+typedef struct
 {
     const char* Name;   // Address of the name of the inode
     int32_t NameLength; // Length (in chars) of the inode name
     int32_t InodeType; // The inode type as described in the NodeType enum
-};
+} DirectoryEntry;
 
 /**
  * Our intermediate pollfd struct to normalize the data types
  */
-struct PollEvent
+typedef struct
 {
     int32_t FileDescriptor;  // The file descriptor to poll
     int16_t Events;          // The events to poll for
     int16_t TriggeredEvents; // The events that triggered the poll
-};
+} PollEvent;
 
 /**
 * Constants passed in the mask argument of INotifyAddWatch which identify inotify events.
 */
-enum NotifyEvents
+typedef enum
 {
     PAL_IN_ACCESS = 0x00000001,
     PAL_IN_MODIFY = 0x00000002,
@@ -327,92 +316,92 @@ enum NotifyEvents
     PAL_IN_DONT_FOLLOW = 0x02000000,
     PAL_IN_EXCL_UNLINK = 0x04000000,
     PAL_IN_ISDIR = 0x40000000,
-};
+} NotifyEvents;
 
 /**
  * Get file status from a descriptor. Implemented as shim to fstat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_FStat(intptr_t fd, struct FileStatus* output);
+DLLEXPORT int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output);
 
 /**
  * Get file status from a full path. Implemented as shim to stat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_Stat(const char* path, struct FileStatus* output);
+DLLEXPORT int32_t SystemNative_Stat2(const char* path, FileStatus* output);
 
 /**
  * Get file stats from a full path. Implemented as shim to lstat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_LStat(const char* path, struct FileStatus* output);
+DLLEXPORT int32_t SystemNative_LStat2(const char* path, FileStatus* output);
 
 /**
  * Open or create a file or device. Implemented as shim to open(2).
  *
  * Returns file descriptor or -1 for failure. Sets errno on failure.
  */
-intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode);
+DLLEXPORT intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode);
 
 /**
  * Close a file descriptor. Implemented as shim to open(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_Close(intptr_t fd);
+DLLEXPORT int32_t SystemNative_Close(intptr_t fd);
 
 /**
  * Duplicates a file descriptor.
  *
  * Returns the duplication descriptor for success, -1 for failure. Sets errno on failure.
  */
-intptr_t SystemNative_Dup(intptr_t oldfd);
+DLLEXPORT intptr_t SystemNative_Dup(intptr_t oldfd);
 
 /**
  * Delete an entry from the file system. Implemented as shim to unlink(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_Unlink(const char* path);
+DLLEXPORT int32_t SystemNative_Unlink(const char* path);
 
 /**
  * Open or create a shared memory object. Implemented as shim to shm_open(3).
  *
  * Returns file descriptor or -1 on fiailure. Sets errno on failure.
  */
-intptr_t SystemNative_ShmOpen(const char* name, int32_t flags, int32_t mode);
+DLLEXPORT intptr_t SystemNative_ShmOpen(const char* name, int32_t flags, int32_t mode);
 
 /**
  * Unlink a shared memory object. Implemented as shim to shm_unlink(3).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_ShmUnlink(const char* name);
+DLLEXPORT int32_t SystemNative_ShmUnlink(const char* name);
 
 /**
  * Returns the size of the dirent struct on the current architecture
  */
-int32_t SystemNative_GetReadDirRBufferSize(void);
+DLLEXPORT int32_t SystemNative_GetReadDirRBufferSize(void);
 
 /**
  * Re-entrant readdir that will retrieve the next dirent from the directory stream pointed to by dir.
  *
  * Returns 0 when data is retrieved; returns -1 when end-of-stream is reached; returns an error code on failure
  */
-int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, struct DirectoryEntry* outputEntry);
+DLLEXPORT int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, DirectoryEntry* outputEntry);
 
 /**
  * Returns a DIR struct containing info about the current path or NULL on failure; sets errno on fail.
  */
-DIR* SystemNative_OpenDir(const char* path);
+DLLEXPORT DIR* SystemNative_OpenDir(const char* path);
 
 /**
  * Closes the directory stream opened by opendir and returns 0 on success. On fail, -1 is returned and errno is set
  */
-int32_t SystemNative_CloseDir(DIR* dir);
+DLLEXPORT int32_t SystemNative_CloseDir(DIR* dir);
 
 /**
  * Creates a pipe. Implemented as shim to pipe(2) or pipe2(2) if available.
@@ -420,7 +409,7 @@ int32_t SystemNative_CloseDir(DIR* dir);
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_Pipe(int32_t pipefd[2], // [out] pipefds[0] gets read end, pipefd[1] gets write end.
+DLLEXPORT int32_t SystemNative_Pipe(int32_t pipefd[2], // [out] pipefds[0] gets read end, pipefd[1] gets write end.
                         int32_t flags);    // 0 for defaults or PAL_O_CLOEXEC for close-on-exec
 
 // NOTE: Rather than a general fcntl shim, we opt to export separate functions
@@ -432,14 +421,14 @@ int32_t SystemNative_Pipe(int32_t pipefd[2], // [out] pipefds[0] gets read end, 
  *
  * Returns 0 for success; -1 for failure. Sets errno for failure.
  */
-int32_t SystemNative_FcntlSetCloseOnExec(intptr_t fd);
+DLLEXPORT int32_t SystemNative_FcntlSetCloseOnExec(intptr_t fd);
 
 /**
  * Determines if the current platform supports getting and setting pipe capacity.
  *
  * Returns true (non-zero) if supported, false (zero) if not.
  */
-int32_t SystemNative_FcntlCanGetSetPipeSz(void);
+DLLEXPORT int32_t SystemNative_FcntlCanGetSetPipeSz(void);
 
 /**
  * Gets the capacity of a pipe.
@@ -448,7 +437,7 @@ int32_t SystemNative_FcntlCanGetSetPipeSz(void);
  *
  * NOTE: Some platforms do not support this operation and will always fail with errno = ENOTSUP.
  */
-int32_t SystemNative_FcntlGetPipeSz(intptr_t fd);
+DLLEXPORT int32_t SystemNative_FcntlGetPipeSz(intptr_t fd);
 
 /**
  * Sets the capacity of a pipe.
@@ -457,56 +446,56 @@ int32_t SystemNative_FcntlGetPipeSz(intptr_t fd);
  *
  * NOTE: Some platforms do not support this operation and will always fail with errno = ENOTSUP.
  */
-int32_t SystemNative_FcntlSetPipeSz(intptr_t fd, int32_t size);
+DLLEXPORT int32_t SystemNative_FcntlSetPipeSz(intptr_t fd, int32_t size);
 
 /**
  * Sets whether or not a file descriptor is non-blocking.
  *
  * Returns 0 for success, -1 for failure. Sets errno for failure.
  */
-int32_t SystemNative_FcntlSetIsNonBlocking(intptr_t fd, int32_t isNonBlocking);
+DLLEXPORT int32_t SystemNative_FcntlSetIsNonBlocking(intptr_t fd, int32_t isNonBlocking);
 
 /**
  * Create a directory. Implemented as a shim to mkdir(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno for failure.
  */
-int32_t SystemNative_MkDir(const char* path, int32_t mode);
+DLLEXPORT int32_t SystemNative_MkDir(const char* path, int32_t mode);
 
 /**
  * Change permissions of a file. Implemented as a shim to chmod(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno for failure.
  */
-int32_t SystemNative_ChMod(const char* path, int32_t mode);
+DLLEXPORT int32_t SystemNative_ChMod(const char* path, int32_t mode);
 
 /**
 * Change permissions of a file. Implemented as a shim to fchmod(2).
 *
 * Returns 0 for success, -1 for failure. Sets errno for failure.
 */
-int32_t SystemNative_FChMod(intptr_t fd, int32_t mode);
+DLLEXPORT int32_t SystemNative_FChMod(intptr_t fd, int32_t mode);
 
 /**
  * Flushes all modified data and attribtues of the specified File Descriptor to the storage medium.
  *
  * Returns 0 for success; on fail, -1 is returned and errno is set.
  */
-int32_t SystemNative_FSync(intptr_t fd);
+DLLEXPORT int32_t SystemNative_FSync(intptr_t fd);
 
 /**
  * Changes the advisory lock status on a given File Descriptor
  *
  * Returns 0 on success; otherwise, -1 is returned and errno is set
  */
-int32_t SystemNative_FLock(intptr_t fd, int32_t operation);
+DLLEXPORT int32_t SystemNative_FLock(intptr_t fd, int32_t operation);
 
 /**
  * Changes the current working directory to be the specified path.
  *
  * Returns 0 on success; otherwise, returns -1 and errno is set
  */
-int32_t SystemNative_ChDir(const char* path);
+DLLEXPORT int32_t SystemNative_ChDir(const char* path);
 
 /**
  * Checks the access permissions of the current calling user on the specified path for the specified mode.
@@ -514,15 +503,7 @@ int32_t SystemNative_ChDir(const char* path);
  * Returns -1 if the path cannot be found or the if desired access is not granted and errno is set; otherwise, returns
  * 0.
  */
-int32_t SystemNative_Access(const char* path, int32_t mode);
-
-/**
- * Tests whether a pathname matches a specified pattern.
- *
- * Returns 0 if the string matches; returns FNM_NOMATCH if the call succeeded but the
- * string does not match; otherwise, returns a non-zero error code.
- */
-int32_t SystemNative_FnMatch(const char* pattern, const char* path, int32_t flags);
+DLLEXPORT int32_t SystemNative_Access(const char* path, int32_t mode);
 
 /**
  * Seek to a specified location within a seekable stream
@@ -530,14 +511,14 @@ int32_t SystemNative_FnMatch(const char* pattern, const char* path, int32_t flag
  * On success, the resulting offet, in bytes, from the beginning of the stream; otherwise,
  * returns -1 and errno is set.
  */
-int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, int32_t whence);
+DLLEXPORT int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, int32_t whence);
 
 /**
  * Creates a hard-link at link pointing to source.
  *
  * Returns 0 on success; otherwise, returns -1 and errno is set.
  */
-int32_t SystemNative_Link(const char* source, const char* linkTarget);
+DLLEXPORT int32_t SystemNative_Link(const char* source, const char* linkTarget);
 
 /**
  * Creates a file name that adheres to the specified template, creates the file on disk with
@@ -545,7 +526,7 @@ int32_t SystemNative_Link(const char* source, const char* linkTarget);
  *
  * Returns a valid File Descriptor on success; otherwise, returns -1 and errno is set.
  */
-intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength);
+DLLEXPORT intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength);
 
 /**
  * Map file or device into memory. Implemented as shim to mmap(2).
@@ -555,7 +536,7 @@ intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength);
  * Note that null failure result is a departure from underlying
  * mmap(2) using non-null sentinel.
  */
-void* SystemNative_MMap(void* address,
+DLLEXPORT void* SystemNative_MMap(void* address,
                       uint64_t length,
                       int32_t protection, // bitwise OR of PAL_PROT_*
                       int32_t flags,      // bitwise OR of PAL_MAP_*, but PRIVATE and SHARED are mutually exclusive.
@@ -567,42 +548,21 @@ void* SystemNative_MMap(void* address,
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_MUnmap(void* address, uint64_t length);
+DLLEXPORT int32_t SystemNative_MUnmap(void* address, uint64_t length);
 
 /**
  * Give advice about use of memory. Implemented as shim to madvise(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_MAdvise(void* address, uint64_t length, int32_t advice);
-
-/**
- * Lock memory from being swapped out. Implemented as shim to mlock(2).
- *
- * Returns 0 for success, -1 for failure. Sets errno on failure.
- */
-int32_t SystemNative_MLock(void* address, uint64_t length);
-
-/**
- * Unlock memory, allowing it to be swapped out. Implemented as shim to munlock(2).
- *
- * Returns 0 for success, -1 for failure. Sets errno on failure.
- */
-int32_t SystemNative_MUnlock(void* address, uint64_t length);
-
-/**
- * Set protection on a region of memory. Implemented as shim to mprotect(2).
- *
- * Returns 0 for success, -1 for failure. Sets errno on failure.
- */
-int32_t SystemNative_MProtect(void* address, uint64_t length, int32_t protection);
+DLLEXPORT int32_t SystemNative_MAdvise(void* address, uint64_t length, int32_t advice);
 
 /**
  * Sycnhronize a file with a memory map. Implemented as shim to mmap(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_MSync(void* address, uint64_t length, int32_t flags);
+DLLEXPORT int32_t SystemNative_MSync(void* address, uint64_t length, int32_t flags);
 
 /**
  * Get system configuration value. Implemented as shim to sysconf(3).
@@ -613,14 +573,14 @@ int32_t SystemNative_MSync(void* address, uint64_t length, int32_t flags);
  * note that -1 can also be a meaningful successful return value, in
  * which case errno is unchanged.
  */
-int64_t SystemNative_SysConf(int32_t name);
+DLLEXPORT int64_t SystemNative_SysConf(int32_t name);
 
 /**
  * Truncate a file to given length. Implemented as shim to ftruncate(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_FTruncate(intptr_t fd, int64_t length);
+DLLEXPORT int32_t SystemNative_FTruncate(intptr_t fd, int64_t length);
 
 /**
  * Examines one or more file descriptors for the specified state(s) and blocks until the state(s) occur or the timeout
@@ -629,7 +589,7 @@ int32_t SystemNative_FTruncate(intptr_t fd, int64_t length);
  * Returns an error or Error_SUCCESS. `triggered` is set to the number of ready descriptors if any. The number of
  * triggered descriptors may be zero in the event of a timeout.
  */
-int32_t SystemNative_Poll(struct PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered);
+DLLEXPORT int32_t SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered);
 
 /**
  * Notifies the OS kernel that the specified file will be accessed in a particular way soon; this allows the kernel to
@@ -637,14 +597,14 @@ int32_t SystemNative_Poll(struct PollEvent* pollEvents, uint32_t eventCount, int
  *
  * Returns 0 on success; otherwise, the error code is returned and errno is NOT set.
  */
-int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, int32_t advice);
+DLLEXPORT int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, int32_t advice);
 
 /**
 * Reads a line from the provided stream.
 *
 * Returns the read line, or null if no line could be read.  The caller is responsible for freeing the malloc'd line.
 */
-char* SystemNative_GetLine(FILE* stream);
+DLLEXPORT char* SystemNative_GetLine(FILE* stream);
 
 /**
  * Reads the number of bytes specified into the provided buffer from the specified, opened file descriptor.
@@ -653,7 +613,7 @@ char* SystemNative_GetLine(FILE* stream);
  *
  * Note - on fail. the position of the stream may change depending on the platform; consult man 2 read for more info
  */
-int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize);
+DLLEXPORT int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize);
 
 /**
  * Takes a path to a symbolic link and attempts to place the link target path into the buffer. If the buffer is too
@@ -661,7 +621,7 @@ int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize);
  *
  * Returns the number of bytes placed into the buffer on success; otherwise, -1 is returned and errno is set.
  */
-int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize);
+DLLEXPORT int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize);
 
 /**
  * Renames a file, moving to the correct destination if necessary. There are many edge cases to this call, check man 2
@@ -669,33 +629,33 @@ int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize
  *
  * Returns 0 on succes; otherwise, returns -1 and errno is set.
  */
-int32_t SystemNative_Rename(const char* oldPath, const char* newPath);
+DLLEXPORT int32_t SystemNative_Rename(const char* oldPath, const char* newPath);
 
 /**
  * Deletes the specified empty directory.
  *
  * Returns 0 on success; otherwise, returns -1 and errno is set.
  */
-int32_t SystemNative_RmDir(const char* path);
+DLLEXPORT int32_t SystemNative_RmDir(const char* path);
 
 /**
  * Forces a write of all modified I/O buffers to their storage mediums.
  */
-void SystemNative_Sync(void);
+DLLEXPORT void SystemNative_Sync(void);
 
 /**
  * Writes the specified buffer to the provided open file descriptor
  *
  * Returns the number of bytes written on success; otherwise, returns -1 and sets errno
  */
-int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize);
+DLLEXPORT int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize);
 
 /**
  * Copies all data from the source file descriptor to the destination file descriptor.
  *
  * Returns 0 on success; otherwise, returns -1 and sets errno.
  */
-int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd);
+DLLEXPORT int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd);
 
 /**
 * Initializes a new inotify instance and returns a file
@@ -704,7 +664,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd);
 * Returns a new file descriptor on success.
 * On error, -1 is returned, and errno is set to indicate the error.
 */
-intptr_t SystemNative_INotifyInit(void);
+DLLEXPORT intptr_t SystemNative_INotifyInit(void);
 
 /**
 * Adds a new watch, or modifies an existing watch,
@@ -713,7 +673,7 @@ intptr_t SystemNative_INotifyInit(void);
 * Returns a nonnegative watch descriptor on success.
 * On error -1 is returned and errno is set appropriately.
 */
-int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathName, uint32_t mask);
+DLLEXPORT int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathName, uint32_t mask);
 
 /**
 * Removes the watch associated with the watch descriptor wd
@@ -721,21 +681,21 @@ int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathName, uint32_t
 *
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
-int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd);
+DLLEXPORT int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd);
 
 /**
 * Expands all symbolic links and expands all paths to return an absolute path
 *
 * Returns the result absolute path on success or null on error with errno set appropriately.
 */
-char* SystemNative_RealPath(const char* path);
+DLLEXPORT char* SystemNative_RealPath(const char* path);
 
 /**
 * Attempts to retrieve the ID of the process at the end of the given socket
 *
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
-int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid);
+DLLEXPORT int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid);
 
 /**
 * Attempts to lock/unlock the region of the file "fd" specified by the offset and length. lockType
@@ -743,6 +703,4 @@ int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid);
 *
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
-int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType);
-
-END_EXTERN_C
+DLLEXPORT int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType);

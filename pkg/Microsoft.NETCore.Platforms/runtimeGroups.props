@@ -90,6 +90,12 @@
       <Versions>10.10;10.11;10.12;10.13</Versions>
     </RuntimeGroup>
 
+    <RuntimeGroup Include="freebsd">
+      <Parent>unix</Parent>
+      <Architectures>x64</Architectures>
+      <Versions>11;11.0;11.1;11.2</Versions>
+    </RuntimeGroup>
+
     <!-- rhel 6 is independent -->
     <RuntimeGroup Include="rhel">
       <Parent>linux</Parent>
@@ -111,8 +117,8 @@
 
     <RuntimeGroup Include="tizen">
       <Parent>linux</Parent>
-      <Architectures>armel</Architectures>
-      <Versions>4.0.0</Versions>
+      <Architectures>x86;armel</Architectures>
+      <Versions>4.0.0;5.0.0</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="ubuntu">

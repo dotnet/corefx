@@ -51,17 +51,27 @@ namespace System.Net.Http
         private object SyncObj => _pools;
 
         /// <summary>Initializes the pools.</summary>
-        /// <param name="maxConnectionsPerServer">The maximum number of connections allowed per pool. <see cref="int.MaxValue"/> indicates unlimited.</param>
-        
         public HttpConnectionPoolManager(HttpConnectionSettings settings)
         {
             _settings = settings;
             _maxConnectionsPerServer = settings._maxConnectionsPerServer;
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
 
+            // As an optimization, we can sometimes avoid the overheads associated with
+            // storing connections.  This is possible when we would immediately terminate
+            // connections anyway due to either the idle timeout or the lifetime being
+            // set to zero, as in that case the timeout effectively immediately expires.
+            // However, we can only do such optimizations if we're not also tracking
+            // connections per server, as we use data in the associated data structures
+            // to do that tracking.
+            bool avoidStoringConnections =
+                settings._maxConnectionsPerServer == int.MaxValue &&
+                (settings._pooledConnectionIdleTimeout == TimeSpan.Zero ||
+                 settings._pooledConnectionLifetime == TimeSpan.Zero);
+
             // Start out with the timer not running, since we have no pools.
             // When it does run, run it with a frequency based on the idle timeout.
-            if (!AvoidStoringConnections)
+            if (!avoidStoringConnections)
             {
                 if (settings._pooledConnectionIdleTimeout == Timeout.InfiniteTimeSpan)
                 {
@@ -111,9 +121,6 @@ namespace System.Net.Http
 
         public HttpConnectionSettings Settings => _settings;
         public ICredentials ProxyCredentials => _proxyCredentials;
-        public bool AvoidStoringConnections =>
-            _settings._pooledConnectionIdleTimeout == TimeSpan.Zero ||
-            _settings._pooledConnectionLifetime == TimeSpan.Zero;
 
         private static string ParseHostNameFromHeader(string hostHeader)
         {
@@ -148,15 +155,10 @@ namespace System.Net.Http
         {
             Uri uri = request.RequestUri;
 
-            // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
-            // In this case, use uri.Host instead, which will correctly enclose with [].
-            // Note we don't need punycode encoding if it's an IP address, so using uri.Host is fine.
-            bool isIPv6Address = uri.HostNameType == UriHostNameType.IPv6;
-
             if (isProxyConnect)
             {
                 Debug.Assert(uri == proxyUri);
-                return new HttpConnectionKey(HttpConnectionKind.ProxyConnect, isIPv6Address ? uri.Host : uri.IdnHost, uri.Port, null, proxyUri);
+                return new HttpConnectionKey(HttpConnectionKind.ProxyConnect, uri.IdnHost, uri.Port, null, proxyUri);
             }
 
             string sslHostName = null;
@@ -182,7 +184,7 @@ namespace System.Net.Http
                     if (HttpUtilities.IsNonSecureWebSocketScheme(uri.Scheme))
                     {
                         // Non-secure websocket connection through proxy to the destination.
-                        return new HttpConnectionKey(HttpConnectionKind.ProxyTunnel, isIPv6Address ? uri.Host : uri.IdnHost, uri.Port, null, proxyUri);
+                        return new HttpConnectionKey(HttpConnectionKind.ProxyTunnel, uri.IdnHost, uri.Port, null, proxyUri);
                     }
                     else
                     {
@@ -195,16 +197,16 @@ namespace System.Net.Http
                 else
                 {
                     // Tunnel SSL connection through proxy to the destination.
-                    return new HttpConnectionKey(HttpConnectionKind.SslProxyTunnel, isIPv6Address ? uri.Host : uri.IdnHost, uri.Port, sslHostName, proxyUri);
+                    return new HttpConnectionKey(HttpConnectionKind.SslProxyTunnel, uri.IdnHost, uri.Port, sslHostName, proxyUri);
                 }
             }
             else if (sslHostName != null)
             {
-                return new HttpConnectionKey(HttpConnectionKind.Https, isIPv6Address ? uri.Host : uri.IdnHost, uri.Port, sslHostName, null);
+                return new HttpConnectionKey(HttpConnectionKind.Https, uri.IdnHost, uri.Port, sslHostName, null);
             }
             else
             {
-                return new HttpConnectionKey(HttpConnectionKind.Http, isIPv6Address ? uri.Host : uri.IdnHost, uri.Port, null, null);
+                return new HttpConnectionKey(HttpConnectionKind.Http, uri.IdnHost, uri.Port, null, null);
             }
         }
 
@@ -215,8 +217,21 @@ namespace System.Net.Http
             HttpConnectionPool pool;
             while (!_pools.TryGetValue(key, out pool))
             {
-                pool = new HttpConnectionPool(this, key.Kind, key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
-                if (_pools.TryAdd(key, pool) && _cleaningTimer != null)
+                // TODO: #28863 Uri.IdnHost is missing '[', ']' characters around IPv6 address.
+                // So, we need to add them manually for now.
+                bool isNonNullIPv6address = key.Host != null && request.RequestUri.HostNameType == UriHostNameType.IPv6;
+
+                pool = new HttpConnectionPool(this, key.Kind, isNonNullIPv6address ? "[" + key.Host + "]" : key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
+
+                if (_cleaningTimer == null)
+                {
+                    // There's no cleaning timer, which means we're not adding connections into pools, but we still need
+                    // the pool object for this request.  We don't need or want to add the pool to the pools, though,
+                    // since we don't want it to sit there forever, which it would without the cleaning timer.
+                    break;
+                }
+
+                if (_pools.TryAdd(key, pool))
                 {
                     // We need to ensure the cleanup timer is running if it isn't
                     // already now that we added a new connection pool.
@@ -224,14 +239,15 @@ namespace System.Net.Http
                     {
                         if (!_timerIsRunning)
                         {
-                            _cleaningTimer.Change(_cleanPoolTimeout, _cleanPoolTimeout);
-                            _timerIsRunning = true;
+                            SetCleaningTimer(_cleanPoolTimeout);
                         }
                     }
                     break;
                 }
 
-                pool.Dispose();
+                // We created a pool and tried to add it to our pools, but some other thread got there before us.
+                // We don't need to Dispose the pool, as that's only needed when it contains connections
+                // that need to be closed.
             }
 
             return pool.SendAsync(request, doRequestAuth, cancellationToken);
@@ -258,10 +274,11 @@ namespace System.Net.Http
                     proxyUri = _proxy.GetProxy(request.RequestUri);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Eat any exception from the IWebProxy and just treat it as no proxy.
                 // This matches the behavior of other handlers.
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Exception from IWebProxy.GetProxy({request.RequestUri}): {ex}");
             }
 
             if (proxyUri != null && proxyUri.Scheme != UriScheme.Http)
@@ -288,9 +305,28 @@ namespace System.Net.Http
             }
         }
 
+        /// <summary>Sets <see cref="_cleaningTimer"/> and <see cref="_timerIsRunning"/> based on the specified timeout.</summary>
+        private void SetCleaningTimer(TimeSpan timeout)
+        {
+            try
+            {
+                _cleaningTimer.Change(timeout, timeout);
+                _timerIsRunning = timeout != Timeout.InfiniteTimeSpan;
+            }
+            catch (ObjectDisposedException)
+            {
+                // In a rare race condition where the timer callback was queued
+                // or executed and then the pool manager was disposed, the timer
+                // would be disposed and then calling Change on it could result
+                // in an ObjectDisposedException.  We simply eat that.
+            }
+        }
+
         /// <summary>Removes unusable connections from each pool, and removes stale pools entirely.</summary>
         private void RemoveStalePools()
         {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+
             Debug.Assert(_cleaningTimer != null);
 
             // Iterate through each pool in the set of pools.  For each, ask it to clear out
@@ -311,8 +347,7 @@ namespace System.Net.Http
             {
                 if (_pools.IsEmpty)
                 {
-                    _cleaningTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                    _timerIsRunning = false;
+                    SetCleaningTimer(Timeout.InfiniteTimeSpan);
                 }
             }
 
@@ -325,6 +360,8 @@ namespace System.Net.Http
             // than reused.  This should be a rare occurrence, so for now we don't worry about it.  In the
             // future, there are a variety of possible ways to address it, such as allowing connections to
             // be returned to pools they weren't associated with.
+
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
         internal readonly struct HttpConnectionKey : IEquatable<HttpConnectionKey>
@@ -361,9 +398,6 @@ namespace System.Net.Http
                 Port == other.Port &&
                 ProxyUri == other.ProxyUri &&
                 SslHostName == other.SslHostName;
-
-            public static bool operator ==(HttpConnectionKey key1, HttpConnectionKey key2) => key1.Equals(key2);
-            public static bool operator !=(HttpConnectionKey key1, HttpConnectionKey key2) => !key1.Equals(key2);
         }
     }
 }

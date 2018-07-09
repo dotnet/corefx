@@ -72,7 +72,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task Automatic_SSLBackendNotSupported_ThrowsPlatformNotSupportedException()
         {
@@ -89,7 +89,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task Manual_SSLBackendNotSupported_ThrowsPlatformNotSupportedException()
         {
@@ -106,7 +106,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void Manual_SendClientCertificateWithClientAuthEKUToRemoteServer_OK()
         {
@@ -139,7 +139,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void Manual_SendClientCertificateWithServerAuthEKUToRemoteServer_Forbidden()
         {
@@ -167,7 +167,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void Manual_SendClientCertificateWithNoEKUToRemoteServer_OK()
         {
@@ -200,9 +200,8 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-        [ActiveIssue(9543)] // fails sporadically with 'WinHttpException : The server returned an invalid or unrecognized response' or 'TaskCanceledException : A task was canceled'
-        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(30056, TargetFrameworkMonikers.Uap)]
+        [OuterLoop("Uses GC and waits for finalizers")]
         [Theory]
         [InlineData(6, false)]
         [InlineData(3, true)]
@@ -213,12 +212,6 @@ namespace System.Net.Http.Functional.Tests
             if (!BackendSupportsCustomCertificateHandling) // can't use [Conditional*] right now as it's evaluated at the wrong time for SocketsHttpHandler
             {
                 _output.WriteLine($"Skipping {nameof(Manual_CertificateSentMatchesCertificateReceived_Success)}()");
-                return;
-            }
-
-            if (!UseSocketsHttpHandler)
-            {
-                // Issue #9543: fails sporadically on WinHttpHandler/CurlHandler
                 return;
             }
 
@@ -240,8 +233,15 @@ namespace System.Net.Http.Functional.Tests
                     server.AcceptConnectionAsync(async connection =>
                     {
                         SslStream sslStream = Assert.IsType<SslStream>(connection.Stream);
-                        Assert.Equal(cert, sslStream.RemoteCertificate);
-                        await connection.ReadRequestHeaderAndSendResponseAsync();
+
+                        // We can't do Assert.Equal(cert, sslStream.RemoteCertificate) because
+                        // on .NET Framework sslStream.RemoteCertificate is always an X509Certificate
+                        // object which is not equal to the X509Certificate2 object we use in the tests.
+                        // So, we'll just compare a few properties to make sure it's the right certificate.
+                        Assert.Equal(cert.Subject, sslStream.RemoteCertificate.Subject);
+                        Assert.Equal(cert.Issuer, sslStream.RemoteCertificate.Issuer);
+
+                        await connection.ReadRequestHeaderAndSendResponseAsync(additionalHeaders: "Connection: close\r\n");
                     }));
             };
 
@@ -279,7 +279,7 @@ namespace System.Net.Http.Functional.Tests
             }, options);
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(30056, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(ClientCertificateOption.Manual)]
         [InlineData(ClientCertificateOption.Automatic)]
@@ -288,7 +288,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (!BackendSupportsCustomCertificateHandling) // can't use [Conditional*] right now as it's evaluated at the wrong time for SocketsHttpHandler
             {
-                _output.WriteLine($"Skipping {nameof(Manual_CertificateSentMatchesCertificateReceived_Success)}()");
+                _output.WriteLine($"Skipping {nameof(AutomaticOrManual_DoesntFailRegardlessOfWhetherClientCertsAreAvailable)}()");
                 return;
             }
 

@@ -220,7 +220,7 @@
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
   </data>
   <data name="SqlConvert_ConvertFailed" xml:space="preserve">
-    <value> Cannot convert object of type '{0}' to object of type '{1}'.</value>
+    <value>Cannot convert object of type '{0}' to object of type '{1}'.</value>
   </data>
   <data name="SQL_WrongType" xml:space="preserve">
     <value>Expecting argument of type {1}, but received type {0}.</value>
@@ -1180,10 +1180,10 @@
     <value>NTLM authentication is not possible with default credentials on this platform.</value>
   </data>
   <data name="net_nego_not_supported_empty_target_with_defaultcreds" xml:space="preserve">
-    <value>Target name should be non-empty if default credentials are passed.</value>
+    <value>Target name should be non empty if default credentials are passed.</value>
   </data>
   <data name="net_nego_server_not_supported" xml:space="preserve">
-    <value>Server implementation is not supported.</value>
+    <value>Server implementation is not supported</value>
   </data>
   <data name="net_nego_protection_level_not_supported" xml:space="preserve">
     <value>Requested protection level is not supported with the GSSAPI implementation currently installed.</value>
@@ -1252,7 +1252,7 @@
     <value>The requested collection ({0}) is not defined.</value>
   </data>
   <data name="MDF_UnsupportedVersion" xml:space="preserve">
-    <value> requested collection ({0}) is not supported by this version of the provider.</value>
+    <value>The requested collection ({0}) is not supported by this version of the provider.</value>
   </data>
   <data name="MDF_MissingRestrictionColumn" xml:space="preserve">
     <value>One or more of the required columns of the restrictions collection is missing.</value>
@@ -1295,5 +1295,41 @@
   </data>
   <data name="SQL_ChangePasswordUseOfUnallowedKey" xml:space="preserve">
     <value>The keyword '{0}' must not be specified in the connectionString argument to ChangePassword.</value>
+  </data>
+  <data name="SQL_ParsingErrorWithState" xml:space="preserve">
+    <value>Internal connection fatal error. Error state: {0}.</value>
+  </data>
+  <data name="SQL_ParsingErrorValue" xml:space="preserve">
+    <value>Internal connection fatal error. Error state: {0}, Value: {1}.</value>
+  </data>
+  <data name="ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity" xml:space="preserve">
+    <value>Cannot set the AccessToken property if the 'Integrated Security' connection string keyword has been set to 'true' or 'SSPI'.</value>
+  </data>
+  <data name="ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword" xml:space="preserve">
+    <value>Cannot set the AccessToken property if 'UserID', 'UID', 'Password', or 'PWD' has been specified in connection string.</value>
+  </data>
+  <data name="ADP_InvalidMixedUsageOfCredentialAndAccessToken" xml:space="preserve">
+    <value>Cannot set the Credential property if the AccessToken property is already set.</value>
+  </data>
+ <data name="SQL_ParsingErrorFeatureId" xml:space="preserve"> 
+    <value>Internal connection fatal error. Error state: {0}, Feature Id: {1}.</value>
+  </data>
+  <data name="SQL_ParsingErrorAuthLibraryType" xml:space="preserve"> 
+    <value>Internal connection fatal error. Error state: {0}, Authentication Library Type: {1}.</value>
+  </data>
+  <data name="SqlFileStream_InvalidPath" xml:space="preserve">
+    <value>The path name is not valid.</value>
+  </data>
+  <data name="SqlFileStream_PathNotValidDiskResource" xml:space="preserve">
+    <value>The path name is invalid or does not point to a disk file.</value>
+  </data>
+  <data name="SqlFileStream_FileAlreadyInTransaction" xml:space="preserve">
+    <value>The process cannot access the file specified because it has been opened in another transaction.</value>
+  </data>
+  <data name="SqlFileStream_InvalidParameter" xml:space="preserve">
+    <value>An invalid parameter was passed to the function.</value>
+  </data>
+  <data name="SqlFileStream_NotSupported" xml:space="preserve">
+    <value>SqlFileStream is not supported on this platform.</value>
   </data>
 </root>

@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -33,6 +37,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Second_drops_first()
         {
             RemoteInvoke(() =>
@@ -46,6 +51,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Shrink_cache()
         {
             RemoteInvoke(() =>
@@ -63,6 +69,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Promote_entries()
         {
             RemoteInvoke(() =>
@@ -81,6 +88,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Uses_culture_and_options()
         {
             RemoteInvoke(() =>
@@ -98,7 +106,8 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // different cache structure
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, 
+            "different cache structure, reflection blocked")]
         public void Ctor_Cache_Uses_dictionary_linked_list_switch_does_not_throw()
         {
             // assume the limit is less than the cache size so we cross it two times:
@@ -147,9 +156,8 @@ namespace System.Text.RegularExpressions.Tests
                     .GetValue(linkedList);
             }
 
-            string cacheFieldName = PlatformDetection.IsFullFramework ? "cacheSize" : "s_cacheCount";
             return (int)typeof(Regex)
-                .GetField(cacheFieldName, BindingFlags.NonPublic | BindingFlags.Static)
+                .GetField("s_cacheCount", BindingFlags.NonPublic | BindingFlags.Static)
                 .GetValue(null);
         }
     }

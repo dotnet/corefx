@@ -47,7 +47,7 @@ namespace System.IO
                 // but don't mangle the root.
                 string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath) ? FullPath : PathInternal.TrimEndingDirectorySeparator(FullPath));
                 return parentName != null ? 
-                    new DirectoryInfo(parentName, null) :
+                    new DirectoryInfo(parentName, isNormalized: true) :
                     null;
             }
         }
@@ -61,17 +61,22 @@ namespace System.IO
             if (Path.IsPathRooted(path))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(path));
 
-            string fullPath = Path.GetFullPath(Path.Combine(FullPath, path));
+            string newPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
-            if (fullPath.Length < FullPath.Length 
-                || (fullPath.Length > FullPath.Length && !PathInternal.IsDirectorySeparator(fullPath[FullPath.Length]))
-                || string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) != 0)
+            ReadOnlySpan<char> trimmedNewPath = PathInternal.TrimEndingDirectorySeparator(newPath.AsSpan());
+            ReadOnlySpan<char> trimmedCurrentPath = PathInternal.TrimEndingDirectorySeparator(FullPath.AsSpan());
+
+            // We want to make sure the requested directory is actually under the subdirectory.
+            if (trimmedNewPath.StartsWith(trimmedCurrentPath, PathInternal.StringComparison)
+                // Allow the exact same path, but prevent allowing "..\FooBar" through when the directory is "Foo"
+                && ((trimmedNewPath.Length == trimmedCurrentPath.Length) || PathInternal.IsDirectorySeparator(newPath[trimmedCurrentPath.Length])))
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
+                FileSystem.CreateDirectory(newPath);
+                return new DirectoryInfo(newPath);
             }
 
-            FileSystem.CreateDirectory(fullPath);
-            return new DirectoryInfo(fullPath);
+            // We weren't nested
+            throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
         }
 
         public void Create() => FileSystem.CreateDirectory(FullPath);

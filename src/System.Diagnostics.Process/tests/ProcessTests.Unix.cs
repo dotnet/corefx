@@ -155,7 +155,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Theory, InlineData("nano"), InlineData("vi")]
+        [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
         public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
@@ -178,7 +178,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Theory, InlineData("nano"), InlineData("vi")]
+        [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
         public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
@@ -186,7 +186,7 @@ namespace System.Diagnostics.Tests
             if (IsProgramInstalled(programToOpenWith))
             {
                 string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
                 ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
                 psi.ArgumentList.Add(fileToOpen);
                 using (var px = Process.Start(psi))
@@ -385,6 +385,21 @@ namespace System.Diagnostics.Tests
             Process p = CreateProcessPortable(RemotelyInvokable.Dummy);
             p.StartInfo.UserName = "DoesNotExist";
             Assert.Throws<Win32Exception>(() => p.Start());
+        }
+
+        [Fact]
+        public void TestExitCodeKilledChild()
+        {
+            using (Process p = CreateProcessLong())
+            {
+                p.Start();
+                p.Kill();
+                p.WaitForExit();
+
+                // SIGKILL may change per platform
+                const int SIGKILL = 9; // Linux, macOS, FreeBSD, ...
+                Assert.Equal(128 + SIGKILL, p.ExitCode);
+            }
         }
 
         /// <summary>
@@ -587,6 +602,45 @@ namespace System.Diagnostics.Tests
                 Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
                 Assert.False(GetWaitStateDictionary(childDictionary: true).Contains(processId));
             }
+        }
+
+        /// <summary>
+        /// Verifies a new Process instance can refer to a process with a recycled pid for which
+        /// there is still an existing Process instance. Operations on the existing instance will
+        /// throw since that process has exited.
+        /// </summary>
+        [ConditionalFact(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
+        public void TestProcessRecycledPid()
+        {
+            const int LinuxPidMaxDefault = 32768;
+            var processes = new Dictionary<int, Process>(LinuxPidMaxDefault);
+            bool foundRecycled = false;
+            for (int i = 0; i < int.MaxValue; i++)
+            {
+                var process = CreateProcessLong();
+                process.Start();
+
+                Process recycled;
+                foundRecycled = processes.TryGetValue(process.Id, out recycled);
+                if (foundRecycled)
+                {
+                    Assert.Throws<InvalidOperationException>(() => recycled.Kill());
+                }
+
+                process.Kill();
+                process.WaitForExit();
+
+                if (foundRecycled)
+                {
+                    break;
+                }
+                else
+                {
+                    processes.Add(process.Id, process);
+                }
+            }
+
+            Assert.True(foundRecycled);
         }
 
         private static IDictionary GetWaitStateDictionary(bool childDictionary)

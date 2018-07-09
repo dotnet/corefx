@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 using System;
@@ -296,23 +296,31 @@ namespace Microsoft.XmlSerializer.Generator
 
                 bool gac = assembly.GlobalAssemblyCache;
                 outputDirectory = outputDirectory == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : outputDirectory;
+
+                if (!Directory.Exists(outputDirectory))
+                {
+                    //We need double quote the path to escpate the space in the path. 
+                    //However when a path ending with backslash, if followed by double quote, it becomes an escapte sequence 
+                    //e.g. "obj\Debug\netcoreapp2.0\", it will be converted as obj\Debug\netcoreapp2.0", which is not valid and not exist
+                    //We need remove the ending quote for this situation
+                    if (!outputDirectory.EndsWith("\"") || !Directory.Exists(outputDirectory.Remove(outputDirectory.Length - 1)))
+                    {
+                        throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, outputDirectory));
+                    }
+                }
+
                 string serializerName = GetXmlSerializerAssemblyName(serializableTypes[0], null);
                 string codePath = Path.Combine(outputDirectory, serializerName + ".cs");
 
                 if (!force)
                 {
                     if (File.Exists(codePath))
-                        throw new InvalidOperationException(SR.Format(SR.ErrSerializerExists, codePath, "force"));
+                        throw new InvalidOperationException(SR.Format(SR.ErrSerializerExists, codePath, nameof(force)));
                 }
 
                 if (Directory.Exists(codePath))
                 {
                     throw new InvalidOperationException(SR.Format(SR.ErrDirectoryExists, codePath));
-                }
-
-                if (!Directory.Exists(outputDirectory))
-                {
-                    throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, codePath, outputDirectory));
                 }
 
                 bool success = false;
@@ -382,7 +390,7 @@ namespace Microsoft.XmlSerializer.Generator
             return arg.Equals(formal, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public bool ShortNameArgumentMatch(string arg, string shortName)
+        private bool ShortNameArgumentMatch(string arg, string shortName)
         {
             // Short name format, eg: -a 
             if (arg.Length < 2 || arg[0] != '-')
@@ -440,7 +448,7 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHeader()
         {
             // do not localize Copyright header
-            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
@@ -501,7 +509,7 @@ namespace Microsoft.XmlSerializer.Generator
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
             return GetTempAssemblyName(type.Assembly.GetName(), defaultNamespace);
         }

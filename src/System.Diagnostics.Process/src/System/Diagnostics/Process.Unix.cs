@@ -56,7 +56,7 @@ namespace System.Diagnostics
         /// <summary>Stops the associated process immediately.</summary>
         public void Kill()
         {
-            EnsureState(State.HaveId);
+            EnsureState(State.HaveNonExitedId);
             if (Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGKILL) != 0)
             {
                 throw new Win32Exception(); // same exception as on Windows
@@ -84,7 +84,8 @@ namespace System.Diagnostics
         {
             // Make sure that we configure the wait state holder for this process object, which we can only do once we have a process ID.
             Debug.Assert(_haveProcessId, $"{nameof(ConfigureAfterProcessIdSet)} should only be called once a process ID is set");
-            GetWaitState(); // lazily initializes the wait state
+            // Initialize WaitStateHolder for non-child processes
+            GetWaitState();
         }
 
         /// <devdoc>
@@ -104,9 +105,9 @@ namespace System.Diagnostics
                         _watchingForExit = true;
                         try
                         {
-                            _waitHandle = new ProcessWaitHandle(_processHandle);
+                            _waitHandle = new ProcessWaitHandle(GetWaitState());
                             _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
-                                new WaitOrTimerCallback(CompletionCallback), null, -1, true);
+                                new WaitOrTimerCallback(CompletionCallback), _waitHandle, -1, true);
                         }
                         catch
                         {
@@ -157,7 +158,7 @@ namespace System.Diagnostics
         private void UpdateHasExited()
         {
             int? exitCode;
-            _exited = GetWaitState().GetExited(out exitCode);
+            _exited = GetWaitState().GetExited(out exitCode, refresh: true);
             if (_exited && exitCode != null)
             {
                 _exitCode = exitCode.Value;
@@ -190,7 +191,7 @@ namespace System.Diagnostics
             // and the other values above and below are simply distributed evenly.
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 int pri = 0;
                 int errno = Interop.Sys.GetPriority(Interop.Sys.PriorityWhich.PRIO_PROCESS, _processId, out pri);
@@ -210,6 +211,8 @@ namespace System.Diagnostics
             }
             set
             {
+                EnsureState(State.HaveNonExitedId);
+
                 int pri = 0; // Normal
                 switch (value)
                 {
@@ -237,6 +240,20 @@ namespace System.Diagnostics
             return Interop.Sys.GetPid();
         }
 
+        partial void ThrowIfExited(bool refresh)
+        {
+            // Don't allocate a ProcessWaitState.Holder unless we're refreshing.
+            if (_waitStateHolder == null && !refresh)
+            {
+                return;
+            }
+
+            if (GetWaitState().GetExited(out _, refresh))
+            {
+                throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString()));
+            }
+        }
+
         /// <summary>
         /// Gets a short-term handle to the process, with the given access.  If a handle exists,
         /// then it is reused.  If the process has exited, it throws an exception.
@@ -245,14 +262,12 @@ namespace System.Diagnostics
         {
             if (_haveProcessHandle)
             {
-                if (GetWaitState().HasExited)
-                {
-                    throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
-                }
+                ThrowIfExited(refresh: true);
+
                 return _processHandle;
             }
 
-            EnsureState(State.HaveId | State.IsLocal);
+            EnsureState(State.HaveNonExitedId | State.IsLocal);
             return new SafeProcessHandle(_processId);
         }
 

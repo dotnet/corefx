@@ -1,20 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netfx'">$(DefineConstants);netfx</DefineConstants>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <!-- Don't delete these clauses even if they look useless. They tell the VS IDE that "Windows_Debug", etc., are
        valid configuration for this project and stop it from trying to "fix up" the .sln file -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
       <Link>CommonTest\System\Security\Cryptography\ByteUtils.cs</Link>
@@ -27,6 +20,7 @@
     <Compile Include="EnvelopedCms\CertificateTests.cs" />
     <Compile Include="EnvelopedCms\ContentEncryptionAlgorithmTests.cs" />
     <Compile Include="EnvelopedCms\DecryptTests.cs" />
+    <Compile Include="EnvelopedCms\DecryptTestsUsingCertWithPrivateKey.cs" />
     <Compile Include="EnvelopedCms\EdgeCasesTests.cs" />
     <Compile Include="EnvelopedCms\GeneralTests.cs" />
     <Compile Include="EnvelopedCms\KeyAgreeRecipientInfoTests.cs" />
@@ -36,6 +30,7 @@
     <Compile Include="Oids.cs" />
     <Compile Include="Pkcs9AttributeTests.cs" />
     <Compile Include="RecipientInfoCollectionTests.cs" />
+    <Compile Include="SignedCms\CmsSignerTests.cs" />
     <Compile Include="SignedCms\CounterSigningDerOrder.cs" />
     <Compile Include="SignedCms\SignedCmsTests.cs" />
     <Compile Include="SignedCms\SignedCmsWholeDocumentTests.cs" />
@@ -43,13 +38,17 @@
     <Compile Include="SignedCms\SignerInfoTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="EnvelopedCms\DecryptTestsUsingExplicitPrivateKey.cs" />
+    <Compile Include="EnvelopedCms\SubjectIdentifierTests.cs" />
     <Compile Include="Rfc3161\TimestampRequestTests.cs" />
     <Compile Include="Rfc3161\TimestampTokenInfoTests.cs" />
     <Compile Include="Rfc3161\TimestampTokenTestData.cs" />
     <Compile Include="Rfc3161\TimestampTokenTests.cs" />
+    <Compile Include="SignedCms\SignedCmsTests.netcoreapp.cs" />
+    <Compile Include="SignedCms\SignerInfoTests.netcoreapp.cs" />
+    <Compile Include="Pkcs8PrivateKeyInfoTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)'=='netcoreapp'">
     <Compile Include="EnvelopedCms\DecryptTests.KeyPersistence.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

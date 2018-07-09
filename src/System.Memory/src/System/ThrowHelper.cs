@@ -80,9 +80,9 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentOutOfRangeException_PositionOutOfRange() { return new ArgumentOutOfRangeException("position"); }
 
-        internal static void ThrowArgumentOutOfRangeException_CountOutOfRange() { throw CreateArgumentOutOfRangeException_CountOutOfRange(); }
+        internal static void ThrowArgumentOutOfRangeException_OffsetOutOfRange() { throw CreateArgumentOutOfRangeException_OffsetOutOfRange(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArgumentOutOfRangeException_CountOutOfRange() { return new ArgumentOutOfRangeException("count"); }
+        private static Exception CreateArgumentOutOfRangeException_OffsetOutOfRange() { return new ArgumentOutOfRangeException(nameof(ExceptionArgument.offset)); }
 
         internal static void ThrowObjectDisposedException_ArrayMemoryPoolBuffer() { throw CreateObjectDisposedException_ArrayMemoryPoolBuffer(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -133,6 +133,8 @@ namespace System
                 return CreateArgumentNullException(ExceptionArgument.startSegment);
             else if (endSegment == null)
                 return CreateArgumentNullException(ExceptionArgument.endSegment);
+            else if (startSegment != endSegment && startSegment.RunningIndex > endSegment.RunningIndex)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.endSegment);
             else if ((uint)startSegment.Memory.Length < (uint)startIndex)
                 return CreateArgumentOutOfRangeException(ExceptionArgument.startIndex);
             else
@@ -151,6 +153,20 @@ namespace System
             else
                 return CreateArgumentOutOfRangeException(ExceptionArgument.length);
         }
+
+        //
+        // ReadOnlySequence Slice validation Throws coalesced to enable inlining of the Slice
+        //
+        public static void ThrowStartOrEndArgumentValidationException(long start)
+            => throw CreateStartOrEndArgumentValidationException(start);
+
+        private static Exception CreateStartOrEndArgumentValidationException(long start)
+        {
+            if (start < 0)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+            return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+        }
+
     }
 
     //
@@ -171,6 +187,7 @@ namespace System
         startIndex,
         endIndex,
         array,
-        culture
+        culture,
+        manager
     }
 }

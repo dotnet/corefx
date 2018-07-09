@@ -29,7 +29,7 @@ namespace System.Collections.Specialized
         private int _initialCapacity;
         private IEqualityComparer _comparer;
         private bool _readOnly;
-        private Object _syncRoot;
+        private object _syncRoot;
         private SerializationInfo _siInfo; //A temporary variable which we need during deserialization.
 
         private const string KeyComparerName = "KeyComparer"; // Do not rename (binary serialization)
@@ -162,7 +162,7 @@ namespace System.Collections.Specialized
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange(ref _syncRoot, new Object(), null);
+                    System.Threading.Interlocked.CompareExchange(ref _syncRoot, new object(), null);
                 }
                 return _syncRoot;
             }
@@ -541,7 +541,7 @@ namespace System.Collections.Specialized
                 if (array == null)
                     throw new ArgumentNullException(nameof(array));
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum_Index);
                 foreach (object o in _objects)
                 {
                     array.SetValue(_isKeys ? ((DictionaryEntry)o).Key : ((DictionaryEntry)o).Value, index);

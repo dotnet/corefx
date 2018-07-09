@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
+using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
+using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 using Internal.Runtime.CompilerServices;
 
 #pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)'
@@ -22,8 +23,6 @@ namespace System
     /// Span represents a contiguous region of arbitrary memory. Unlike arrays, it can point to either managed
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
-    [DebuggerTypeProxy(typeof(SpanDebugView<>))]
-    [DebuggerDisplay("{ToString(),raw}")]
     [NonVersionable]
     public readonly ref partial struct Span<T>
     {
@@ -155,6 +154,13 @@ namespace System
         }
 
         /// <summary>
+        /// Returns a reference to the 0th element of the Span. If the Span is empty, returns null reference.
+        /// It can be used for pinning and is required to support the use of span within a fixed statement.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public unsafe ref T GetPinnableReference() => ref (_length != 0) ? ref _pointer.Value : ref Unsafe.AsRef<T>(null);
+
+        /// <summary>
         /// Clears the contents of this span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -232,6 +238,7 @@ namespace System
         /// <exception cref="System.ArgumentException">
         /// Thrown when the destination Span is shorter than the source Span.
         /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(Span<T> destination)
         {
             // Using "if (!TryCopyTo(...))" results in two branches: one for the length
@@ -283,7 +290,7 @@ namespace System
 
         /// <summary>
         /// For <see cref="Span{Char}"/>, returns a new instance of string that represents the characters pointed to by the span.
-        /// Otherwise, returns a <see cref="String"/> with the name of the type and the number of elements.
+        /// Otherwise, returns a <see cref="string"/> with the name of the type and the number of elements.
         /// </summary>
         public override string ToString()
         {

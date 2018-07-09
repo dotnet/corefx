@@ -1,14 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{7061832A-E8CF-4AB6-A8DC-44D2F5A43A13}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ExternallyShipping>false</ExternallyShipping>
     <RootNamespace>System.Reflection.Metadata.Tests</RootNamespace>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="..\..\Common\src\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -22,8 +19,8 @@
     <Compile Include="..\..\Common\src\Interop\Windows\kernel32\Interop.LoadLibraryEx.cs">
       <Link>Common\Interop\Windows\Interop.LoadLibraryEx.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
-      <Link>Common\Microsoft\Win32\Handles\SafeLibraryHandle.cs</Link>
+    <Compile Include="..\..\Common\src\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
+      <Link>Common\src\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
     <Compile Include="..\..\Common\tests\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
@@ -145,5 +142,4 @@
     <TargetingPackExclusions Include="System.Reflection.Metadata" />
     <ReferenceFromRuntime Include="System.Reflection.Metadata" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

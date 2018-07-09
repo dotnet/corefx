@@ -632,6 +632,130 @@
         "fedora-x64-corert"
       ]
     },
+    "freebsd": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "freebsd-corert": {
+      "#import": [
+        "freebsd",
+        "unix-corert"
+      ]
+    },
+    "freebsd-x64": {
+      "#import": [
+        "freebsd",
+        "unix-x64"
+      ]
+    },
+    "freebsd-x64-corert": {
+      "#import": [
+        "freebsd-corert",
+        "freebsd-x64",
+        "unix-x64-corert"
+      ]
+    },
+    "freebsd.11": {
+      "#import": [
+        "freebsd"
+      ]
+    },
+    "freebsd.11-corert": {
+      "#import": [
+        "freebsd.11",
+        "freebsd-corert"
+      ]
+    },
+    "freebsd.11-x64": {
+      "#import": [
+        "freebsd.11",
+        "freebsd-x64"
+      ]
+    },
+    "freebsd.11-x64-corert": {
+      "#import": [
+        "freebsd.11-corert",
+        "freebsd.11-x64",
+        "freebsd.11",
+        "freebsd-x64-corert"
+      ]
+    },
+    "freebsd.11.0": {
+      "#import": [
+        "freebsd.11"
+      ]
+    },
+    "freebsd.11.0-corert": {
+      "#import": [
+        "freebsd.11.0",
+        "freebsd.11-corert"
+      ]
+    },
+    "freebsd.11.0-x64": {
+      "#import": [
+        "freebsd.11.0",
+        "freebsd.11-x64"
+      ]
+    },
+    "freebsd.11.0-x64-corert": {
+      "#import": [
+        "freebsd.11.0-corert",
+        "freebsd.11.0-x64",
+        "freebsd.11.0",
+        "freebsd.11-x64-corert"
+      ]
+    },
+    "freebsd.11.1": {
+      "#import": [
+        "freebsd.11.0"
+      ]
+    },
+    "freebsd.11.1-corert": {
+      "#import": [
+        "freebsd.11.1",
+        "freebsd.11.0-corert"
+      ]
+    },
+    "freebsd.11.1-x64": {
+      "#import": [
+        "freebsd.11.1",
+        "freebsd.11.0-x64"
+      ]
+    },
+    "freebsd.11.1-x64-corert": {
+      "#import": [
+        "freebsd.11.1-corert",
+        "freebsd.11.1-x64",
+        "freebsd.11.1",
+        "freebsd.11.0-x64-corert"
+      ]
+    },
+    "freebsd.11.2": {
+      "#import": [
+        "freebsd.11.1"
+      ]
+    },
+    "freebsd.11.2-corert": {
+      "#import": [
+        "freebsd.11.2",
+        "freebsd.11.1-corert"
+      ]
+    },
+    "freebsd.11.2-x64": {
+      "#import": [
+        "freebsd.11.2",
+        "freebsd.11.1-x64"
+      ]
+    },
+    "freebsd.11.2-x64-corert": {
+      "#import": [
+        "freebsd.11.2-corert",
+        "freebsd.11.2-x64",
+        "freebsd.11.2",
+        "freebsd.11.1-x64-corert"
+      ]
+    },
     "gentoo": {
       "#import": [
         "linux"
@@ -1817,6 +1941,19 @@
         "linux-corert"
       ]
     },
+    "tizen-x86": {
+      "#import": [
+        "tizen",
+        "linux-x86"
+      ]
+    },
+    "tizen-x86-corert": {
+      "#import": [
+        "tizen-corert",
+        "tizen-x86",
+        "linux-x86-corert"
+      ]
+    },
     "tizen.4.0.0": {
       "#import": [
         "tizen"
@@ -1840,6 +1977,59 @@
       "#import": [
         "tizen.4.0.0",
         "tizen-corert"
+      ]
+    },
+    "tizen.4.0.0-x86": {
+      "#import": [
+        "tizen.4.0.0",
+        "tizen-x86"
+      ]
+    },
+    "tizen.4.0.0-x86-corert": {
+      "#import": [
+        "tizen.4.0.0-corert",
+        "tizen.4.0.0-x86",
+        "tizen.4.0.0",
+        "tizen-x86-corert"
+      ]
+    },
+    "tizen.5.0.0": {
+      "#import": [
+        "tizen.4.0.0"
+      ]
+    },
+    "tizen.5.0.0-armel": {
+      "#import": [
+        "tizen.5.0.0",
+        "tizen.4.0.0-armel"
+      ]
+    },
+    "tizen.5.0.0-armel-corert": {
+      "#import": [
+        "tizen.5.0.0-corert",
+        "tizen.5.0.0-armel",
+        "tizen.5.0.0",
+        "tizen.4.0.0-armel-corert"
+      ]
+    },
+    "tizen.5.0.0-corert": {
+      "#import": [
+        "tizen.5.0.0",
+        "tizen.4.0.0-corert"
+      ]
+    },
+    "tizen.5.0.0-x86": {
+      "#import": [
+        "tizen.5.0.0",
+        "tizen.4.0.0-x86"
+      ]
+    },
+    "tizen.5.0.0-x86-corert": {
+      "#import": [
+        "tizen.5.0.0-corert",
+        "tizen.5.0.0-x86",
+        "tizen.5.0.0",
+        "tizen.4.0.0-x86-corert"
       ]
     },
     "ubuntu": {
