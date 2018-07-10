@@ -28,16 +28,30 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        public static void TestDateBefore1950()
+        public static void TestDateBefore1950_Utc()
         {
-            DateTime dt = new DateTime(1949, 12, 31, 11, 59, 59);
+            DateTime dt = new DateTime(1949, 12, 31, 11, 59, 59, DateTimeKind.Utc);
             Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
         [Fact]
-        public static void TestDateAfter1949()
+        public static void TestDateBefore1950_Local()
         {
-            DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00);
+            DateTime dt = new DateTime(1949, 12, 31, 11, 59, 59, DateTimeKind.Local);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void TestDateAfter2049_Utc()
+        {
+            DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00, DateTimeKind.Utc);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void TestDateAfter2049_Local()
+        {
+            DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00, DateTimeKind.Local);
             Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
