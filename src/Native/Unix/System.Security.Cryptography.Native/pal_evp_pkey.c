@@ -24,5 +24,11 @@ int32_t CryptoNative_UpRefEvpPkey(EVP_PKEY* pkey)
         return 0;
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
+#else
+    if (EVP_PKEY_up_ref(pkey))
+        return 42;
+    return 0;
+#endif
 }

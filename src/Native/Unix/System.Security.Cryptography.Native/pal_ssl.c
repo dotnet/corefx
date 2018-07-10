@@ -20,8 +20,10 @@ int32_t CryptoNative_EnsureOpenSslInitialized(void);
 void CryptoNative_EnsureLibSslInitialized()
 {
     CryptoNative_EnsureOpenSslInitialized();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     SSL_library_init();
     SSL_load_error_strings();
+#endif
 }
 
 const SSL_METHOD* CryptoNative_SslV2_3Method()
@@ -54,6 +56,9 @@ static long TrySetECDHNamedCurve(SSL_CTX* ctx)
 {
 	long result = 0;
 #ifdef SSL_CTX_set_ecdh_auto
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	#pragma unused(ctx)
+#endif
 	result = SSL_CTX_set_ecdh_auto(ctx, 1);
 #else
 	EC_KEY *ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
@@ -75,7 +80,11 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
         return;
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     long protocolOptions = 0;
+#else
+    uint32_t protocolOptions = 0;
+#endif
 
     if ((protocols & PAL_SSL_SSL2) != PAL_SSL_SSL2)
     {
@@ -396,7 +405,7 @@ int32_t CryptoNative_GetSslConnectionInfo(SSL* ssl,
         goto err;
     }
 
-    *dataKeySize = cipher->alg_bits;
+    SSL_CIPHER_get_bits(cipher, dataKeySize);
     if (GetSslConnectionInfoFromDescription(cipher, dataCipherAlg, keyExchangeAlg, dataHashAlg, hashKeySize))
     {
         return 1;
@@ -453,7 +462,11 @@ int32_t CryptoNative_SslDoHandshake(SSL* ssl)
 
 int32_t CryptoNative_IsSslStateOK(SSL* ssl)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return SSL_state(ssl) == SSL_ST_OK;
+#else
+    return SSL_get_state(ssl) == TLS_ST_OK;
+#endif
 }
 
 X509* CryptoNative_SslGetPeerCertificate(SSL* ssl)
@@ -513,6 +526,12 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
 // below string is corresponding to "AllowNoEncryption"
 #define SSL_TXT_Separator ":"
 #define SSL_TXT_Exclusion "!"
+#ifndef SSL_TXT_aNULL
+#define SSL_TXT_aNULL "aNULL"
+#endif
+#ifndef SSL_TXT_eNULL
+#define SSL_TXT_eNULL "eNULL"
+#endif
 #define SSL_TXT_AllIncludingNull SSL_TXT_ALL SSL_TXT_Separator SSL_TXT_eNULL
 #define SSL_TXT_NotAnon SSL_TXT_Separator SSL_TXT_Exclusion SSL_TXT_aNULL
 
@@ -612,6 +631,6 @@ void CryptoNative_SslGet0AlpnSelected(SSL* ssl, const uint8_t** protocol, uint32
 
 int32_t CryptoNative_SslSetTlsExtHostName(SSL* ssl, uint8_t* name)
 {
-    return (int32_t)SSL_set_tlsext_host_name(ssl, name);
+    return (int32_t)SSL_set_tlsext_host_name(ssl, (const char *)name);
 }
 

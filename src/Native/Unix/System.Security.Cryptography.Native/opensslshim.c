@@ -6,12 +6,14 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "opensslshim.h"
 
 // Define pointers to all the used ICU functions
 #define PER_FUNCTION_BLOCK(fn, isRequired) __typeof(fn) fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
+FOR_ALL_OPENSSL_FUNCTIONS_STACK
 #undef PER_FUNCTION_BLOCK
 
 // x.x.x, considering the max number of decimal digits for each component
@@ -36,6 +38,7 @@ static bool OpenLibrary()
         libssl = dlopen(soName, RTLD_LAZY);
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (libssl == NULL)
     {
         // Debian 9 has dropped support for SSLv3 and so they have bumped their soname. Let's try it
@@ -55,6 +58,13 @@ static bool OpenLibrary()
         // Fedora derived distros use different naming for the version 1.0.0
         libssl = dlopen("libssl.so.10", RTLD_LAZY);
     }
+#else
+    if (libssl == NULL)
+    {
+        // Try the default versioned so naming as described in the OpenSSL doc
+        libssl = dlopen("libssl.so.1.1", RTLD_LAZY);
+    }
+#endif
 
     return libssl != NULL;
 }
@@ -74,6 +84,7 @@ static void InitializeOpenSSLShim()
     if ((fn##_ptr) == NULL && isRequired) { fprintf(stderr, "Cannot get required symbol " #fn " from libssl\n"); abort(); }
 
     FOR_ALL_OPENSSL_FUNCTIONS
+    FOR_ALL_OPENSSL_FUNCTIONS_STACK
 #undef PER_FUNCTION_BLOCK    
 }
 

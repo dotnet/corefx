@@ -18,14 +18,20 @@ CryptoNative_EvpCipherCreate(const EVP_CIPHER* type, uint8_t* key, unsigned char
 EVP_CIPHER_CTX*
 CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyLength, int32_t effectiveKeyLength, unsigned char* iv, int32_t enc)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX* ctx = (EVP_CIPHER_CTX*)malloc(sizeof(EVP_CIPHER_CTX));
+#else
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+#endif
     if (ctx == NULL)
     {
         // Allocation failed
         return NULL;
     }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX_init(ctx);
+#endif
 
     // Perform partial initialization so we can set the key lengths
     int ret = EVP_CipherInit_ex(ctx, type, NULL, NULL, NULL, 0);
@@ -72,8 +78,12 @@ void CryptoNative_EvpCipherDestroy(EVP_CIPHER_CTX* ctx)
 {
     if (ctx != NULL)
     {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         EVP_CIPHER_CTX_cleanup(ctx);
         free(ctx);
+#else
+        EVP_CIPHER_CTX_free(ctx);
+#endif
     }
 }
 
@@ -173,7 +183,11 @@ const EVP_CIPHER* CryptoNative_EvpDes3Cbc()
 
 const EVP_CIPHER* CryptoNative_EvpRC2Ecb()
 {
+#ifdef OPENSSL_NO_RC2
+    return NULL;
+#else
     return EVP_rc2_ecb();
+#endif
 }
 
 const EVP_CIPHER* CryptoNative_EvpRC2Cbc()

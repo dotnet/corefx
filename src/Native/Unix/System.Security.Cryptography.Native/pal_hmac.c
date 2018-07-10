@@ -14,7 +14,11 @@ HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_
     assert(keyLen >= 0);
     assert(md != NULL);
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     HMAC_CTX* ctx = (HMAC_CTX*)malloc(sizeof(HMAC_CTX));
+#else
+    HMAC_CTX* ctx = HMAC_CTX_new();
+#endif
     if (ctx == NULL)
     {
         // Allocation failed
@@ -27,7 +31,9 @@ HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_
     if (keyLen == 0)
         key = &_;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     HMAC_CTX_init(ctx);
+#endif
     int ret = HMAC_Init_ex(ctx, key, keyLen, md, NULL);
 
     if (!ret)
@@ -43,8 +49,12 @@ void CryptoNative_HmacDestroy(HMAC_CTX* ctx)
 {
     if (ctx != NULL)
     {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         HMAC_CTX_cleanup(ctx);
         free(ctx);
+#else
+        HMAC_CTX_free(ctx);
+#endif
     }
 }
 

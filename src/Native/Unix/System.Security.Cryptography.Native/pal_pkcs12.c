@@ -30,7 +30,7 @@ void CryptoNative_Pkcs12Destroy(PKCS12* p12)
 PKCS12* CryptoNative_Pkcs12Create(char* pass, EVP_PKEY* pkey, X509* cert, X509Stack* ca)
 {
     return PKCS12_create(
-        pass, NULL, pkey, cert, ca, NID_undef, NID_undef, PKCS12_DEFAULT_ITER, PKCS12_DEFAULT_ITER, 0);
+        pass, NULL, pkey, cert, ca, NID_undef, NID_undef, 0, 0, 0);
 }
 
 int32_t CryptoNative_GetPkcs12DerSize(PKCS12* p12)
@@ -52,6 +52,26 @@ int32_t CryptoNative_Pkcs12Parse(PKCS12* p12, const char* pass, EVP_PKEY** pkey,
         // PKCS12_parse's main loop can put a lot of spurious errors into the
         // error queue.  If we're returning success, clear the error queue.
         ERR_clear_error();
+
+#ifdef OPENSSL_IS_BORINGSSL
+        // BoringSSL returns the CA certificates in reverse order.
+        if (ca != NULL)
+        {
+            X509Stack *new_ca = sk_X509_new_null();
+            X509 *x = NULL;
+            if (new_ca == NULL)
+            {
+                OPENSSL_PUT_ERROR(PKCS8, ERR_R_MALLOC_FAILURE);
+                *pkey = NULL;
+                *cert = NULL;
+                return 0;
+            }
+            while ((x = sk_X509_pop(*ca)))
+                sk_X509_push(new_ca, x);
+            sk_X509_free(*ca);
+            *ca = new_ca;
+        }
+#endif
     }
     else
     {

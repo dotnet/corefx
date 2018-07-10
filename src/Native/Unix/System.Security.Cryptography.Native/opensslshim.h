@@ -9,6 +9,27 @@
 
 #pragma once
 
+// For OpenSSL 1.1+ we need to redefine the safe stack macros early to make
+// inline functions work.
+#include <openssl/opensslv.h>
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#include <openssl/stack.h>
+extern __typeof(OPENSSL_sk_free)* OPENSSL_sk_free_ptr;
+extern __typeof(OPENSSL_sk_new_null)* OPENSSL_sk_new_null_ptr;
+extern __typeof(OPENSSL_sk_num)* OPENSSL_sk_num_ptr;
+extern __typeof(OPENSSL_sk_pop_free)* OPENSSL_sk_pop_free_ptr;
+extern __typeof(OPENSSL_sk_value)* OPENSSL_sk_value_ptr;
+extern __typeof(OPENSSL_sk_push)* OPENSSL_sk_push_ptr;
+#define OPENSSL_sk_free OPENSSL_sk_free_ptr
+#define OPENSSL_sk_new_null OPENSSL_sk_new_null_ptr
+#define OPENSSL_sk_num OPENSSL_sk_num_ptr
+#define OPENSSL_sk_pop_free OPENSSL_sk_pop_free_ptr
+#define OPENSSL_sk_push OPENSSL_sk_push_ptr
+#define OPENSSL_sk_value OPENSSL_sk_value_ptr
+#endif
+#endif
+
 // All the openssl includes need to be here to ensure that the APIs we use
 // are overriden to be called through our function pointers.
 #include <openssl/asn1.h>
@@ -35,6 +56,67 @@
 #include <openssl/x509v3.h>
 
 #include "pal_crypto_config.h"
+
+#ifdef OPENSSL_IS_BORINGSSL
+#include "pal_utilities.h"
+
+// Add int/size_t casts to APIs that differ from OpenSSL
+#define sk_ASN1_OBJECT_num(stack) SizeTToInt32(sk_ASN1_OBJECT_num(stack))
+#define sk_ASN1_OBJECT_value(stack, i) sk_ASN1_OBJECT_value(stack, Int32ToSizeT(i))
+#define sk_GENERAL_NAME_num(stack) SizeTToInt32(sk_GENERAL_NAME_num(stack))
+#define sk_GENERAL_NAME_value(stack, i) sk_GENERAL_NAME_value(stack, Int32ToSizeT(i))
+#define sk_X509_num(stack) SizeTToInt32(sk_X509_num(stack))
+#define sk_X509_value(stack, i) sk_X509_value(stack, Int32ToSizeT(i))
+#define sk_X509_push(stack, p) SizeTToInt32(sk_X509_push(stack, p))
+#define sk_X509_NAME_num(stack) SizeTToInt32(sk_X509_NAME_num(stack))
+#define sk_X509_NAME_value(stack, i) sk_X509_NAME_value(stack, Int32ToSizeT(i))
+#define BN_bin2bn(in, len, ret) BN_bin2bn(in, Int32ToSizeT(len), ret)
+#define BN_bn2bin(in, out) SizeTToInt32(BN_bn2bin(in, out));
+#define BN_num_bytes(bn) Uint32ToInt32(BN_num_bytes(bn))
+#define RAND_bytes(buf, len) \
+        RAND_bytes(buf, Int32ToSizeT(len))
+#define DSA_generate_parameters_ex(dsa, bits, seed_in, seed_len, out_counter, out_h, cb) \
+        DSA_generate_parameters_ex(dsa, Int32ToUint32(bits), seed_in, seed_len, out_counter, out_h, cb)
+#define DSA_sign(type, digest, digest_len, out_sig, out_siglen, dsa) \
+        DSA_sign(type, digest, Int32ToSizeT(digest_len), out_sig, out_siglen, dsa)
+#define DSA_verify(type, digest, digest_len, sig, siglen, dsa) \
+        DSA_verify(type, digest, Int32ToSizeT(digest_len), sig, Int32ToSizeT(siglen), dsa)
+#define ECDSA_sign(type, digest, digest_len, out_sig, out_siglen, dsa) \
+        ECDSA_sign(type, digest, Int32ToSizeT(digest_len), out_sig, out_siglen, dsa)
+#define ECDSA_verify(type, digest, digest_len, sig, siglen, dsa) \
+        ECDSA_verify(type, digest, Int32ToSizeT(digest_len), sig, Int32ToSizeT(siglen), dsa)
+#define ECDSA_size(key) SizeTToInt32(ECDSA_size(key))
+#define EVP_MD_size(md) SizeTToInt32(EVP_MD_size(md))
+#define d2i_PKCS7(out_p7, ber_bytes, ber_len) \
+        d2i_PKCS7(out_p7, ber_bytes, Int32ToSizeT(ber_len))
+#define d2i_PKCS12(out_p12, ber_bytes, ber_len) \
+        d2i_PKCS12(out_p12, ber_bytes, Int32ToSizeT(ber_len))
+#define EVP_CIPHER_CTX_set_key_length(c, key_len) \
+        EVP_CIPHER_CTX_set_key_length(c, (unsigned)(key_len))
+#define HMAC_Init_ex(ctx, key, key_len, md, impl) \
+        HMAC_Init_ex(ctx, key, Int32ToSizeT(key_len), md, impl)
+#define RSA_size(key) SizeTToInt32(RSA_size(key))
+#define RSA_private_encrypt(flen, from, to, rsa, padding) \
+        RSA_private_encrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define RSA_public_decrypt(flen, from, to, rsa, padding) \
+        RSA_public_decrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define RSA_public_encrypt(flen, from, to, rsa, padding) \
+        RSA_public_encrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define RSA_private_decrypt(flen, from, to, rsa, padding) \
+        RSA_private_decrypt(Int32ToSizeT(flen), from, to, rsa, padding)
+#define EC_GROUP_get_degree(group) (int)EC_GROUP_get_degree(group)
+#define ERR_reason_error_string(e) ERR_reason_error_string((uint32_t)(e))
+#define ERR_error_string_n(e, buf, len) ERR_error_string_n((uint32_t)(e), buf, len)
+
+// Missing API from OpenSSL 1.1
+#define X509_CRL_get0_nextUpdate X509_CRL_get_nextUpdate
+
+// BoringSSL doesn't use function codes for errors
+#define RSA_F_RSA_NULL_PRIVATE_DECRYPT 0
+#define RSA_F_RSA_NULL_PRIVATE_ENCRYPT 0
+#define RSA_F_RSA_SIGN 0
+#define DSA_F_DSA_DO_SIGN 0
+#endif
 
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL
 
@@ -70,7 +152,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
 // List of all functions from the libssl that are used in the System.Security.Cryptography.Native.
 // Forgetting to add a function here results in build failure with message reporting the function
 // that needs to be added.
-#define FOR_ALL_OPENSSL_FUNCTIONS \
+#define FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERSIONS \
     PER_FUNCTION_BLOCK(ASN1_BIT_STRING_free, true) \
     PER_FUNCTION_BLOCK(ASN1_INTEGER_get, true) \
     PER_FUNCTION_BLOCK(ASN1_OBJECT_free, true) \
@@ -79,6 +161,8 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(ASN1_OCTET_STRING_set, true) \
     PER_FUNCTION_BLOCK(ASN1_STRING_free, true) \
     PER_FUNCTION_BLOCK(ASN1_STRING_print_ex, true) \
+    PER_FUNCTION_BLOCK(ASN1_STRING_set, true) \
+    PER_FUNCTION_BLOCK(ASN1_STRING_type_new, true) \
     PER_FUNCTION_BLOCK(BASIC_CONSTRAINTS_free, true) \
     PER_FUNCTION_BLOCK(BIO_ctrl, true) \
     PER_FUNCTION_BLOCK(BIO_ctrl_pending, true) \
@@ -95,12 +179,8 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(BN_free, true) \
     PER_FUNCTION_BLOCK(BN_new, true) \
     PER_FUNCTION_BLOCK(BN_num_bits, true) \
-    PER_FUNCTION_BLOCK(CRYPTO_add_lock, true) \
-    PER_FUNCTION_BLOCK(CRYPTO_num_locks, true) \
-    PER_FUNCTION_BLOCK(CRYPTO_set_locking_callback, true) \
     PER_FUNCTION_BLOCK(d2i_ASN1_BIT_STRING, true) \
     PER_FUNCTION_BLOCK(d2i_ASN1_OCTET_STRING, true) \
-    PER_FUNCTION_BLOCK(d2i_ASN1_type_bytes, true) \
     PER_FUNCTION_BLOCK(d2i_BASIC_CONSTRAINTS, true) \
     PER_FUNCTION_BLOCK(d2i_EXTENDED_KEY_USAGE, true) \
     PER_FUNCTION_BLOCK(d2i_PKCS12, true) \
@@ -116,7 +196,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(DSA_generate_key, true) \
     PER_FUNCTION_BLOCK(DSA_generate_parameters_ex, true) \
     PER_FUNCTION_BLOCK(DSA_new, true) \
-    PER_FUNCTION_BLOCK(DSA_OpenSSL, true) \
     PER_FUNCTION_BLOCK(DSA_sign, true) \
     PER_FUNCTION_BLOCK(DSA_size, true) \
     PER_FUNCTION_BLOCK(DSA_up_ref, true) \
@@ -161,7 +240,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(ERR_clear_error, true) \
     PER_FUNCTION_BLOCK(ERR_error_string_n, true) \
     PER_FUNCTION_BLOCK(ERR_get_error, true) \
-    PER_FUNCTION_BLOCK(ERR_load_crypto_strings, true) \
     PER_FUNCTION_BLOCK(ERR_put_error, true) \
     PER_FUNCTION_BLOCK(ERR_peek_error, true) \
     PER_FUNCTION_BLOCK(ERR_peek_last_error, true) \
@@ -172,9 +250,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(EVP_aes_192_ecb, true) \
     PER_FUNCTION_BLOCK(EVP_aes_256_cbc, true) \
     PER_FUNCTION_BLOCK(EVP_aes_256_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_cleanup, true) \
     PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_ctrl, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_init, true) \
     PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_set_key_length, true) \
     PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_set_padding, true) \
     PER_FUNCTION_BLOCK(EVP_CipherFinal_ex, true) \
@@ -189,8 +265,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(EVP_DigestUpdate, true) \
     PER_FUNCTION_BLOCK(EVP_get_digestbyname, true) \
     PER_FUNCTION_BLOCK(EVP_md5, true) \
-    PER_FUNCTION_BLOCK(EVP_MD_CTX_create, true) \
-    PER_FUNCTION_BLOCK(EVP_MD_CTX_destroy, true) \
     PER_FUNCTION_BLOCK(EVP_MD_size, true) \
     PER_FUNCTION_BLOCK(EVP_PKEY_CTX_free, true) \
     PER_FUNCTION_BLOCK(EVP_PKEY_CTX_new, true) \
@@ -213,8 +287,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(EVP_sha512, true) \
     PER_FUNCTION_BLOCK(EXTENDED_KEY_USAGE_free, true) \
     PER_FUNCTION_BLOCK(GENERAL_NAMES_free, true) \
-    PER_FUNCTION_BLOCK(HMAC_CTX_cleanup, true) \
-    PER_FUNCTION_BLOCK(HMAC_CTX_init, true) \
     PER_FUNCTION_BLOCK(HMAC_Final, true) \
     PER_FUNCTION_BLOCK(HMAC_Init_ex, true) \
     PER_FUNCTION_BLOCK(HMAC_Update, true) \
@@ -233,7 +305,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(OBJ_sn2nid, true) \
     PER_FUNCTION_BLOCK(OBJ_txt2nid, true) \
     PER_FUNCTION_BLOCK(OBJ_txt2obj, true) \
-    PER_FUNCTION_BLOCK(OPENSSL_add_all_algorithms_conf, true) \
     PER_FUNCTION_BLOCK(OPENSSL_cleanse, true) \
     PER_FUNCTION_BLOCK(PEM_read_bio_PKCS7, true) \
     PER_FUNCTION_BLOCK(PEM_read_bio_X509_AUX, true) \
@@ -258,13 +329,8 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(RSA_size, true) \
     PER_FUNCTION_BLOCK(RSA_up_ref, true) \
     PER_FUNCTION_BLOCK(RSA_verify, true) \
-    PER_FUNCTION_BLOCK(sk_free, true) \
-    PER_FUNCTION_BLOCK(sk_new_null, true) \
-    PER_FUNCTION_BLOCK(sk_num, true) \
-    PER_FUNCTION_BLOCK(sk_pop_free, true) \
-    PER_FUNCTION_BLOCK(sk_push, true) \
-    PER_FUNCTION_BLOCK(sk_value, true) \
     PER_FUNCTION_BLOCK(SSL_CIPHER_description, true) \
+    PER_FUNCTION_BLOCK(SSL_CIPHER_get_bits, true) \
     PER_FUNCTION_BLOCK(SSL_ctrl, true) \
     PER_FUNCTION_BLOCK(SSL_set_quiet_shutdown, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_check_private_key, true) \
@@ -292,8 +358,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(SSL_get_SSL_CTX, true) \
     PER_FUNCTION_BLOCK(SSL_get_version, true) \
     PER_FUNCTION_BLOCK(SSL_get0_alpn_selected, false) \
-    PER_FUNCTION_BLOCK(SSL_library_init, true) \
-    PER_FUNCTION_BLOCK(SSL_load_error_strings, true) \
     PER_FUNCTION_BLOCK(SSL_new, true) \
     PER_FUNCTION_BLOCK(SSL_read, true) \
     PER_FUNCTION_BLOCK(SSL_renegotiate_pending, true) \
@@ -301,13 +365,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(SSL_set_bio, true) \
     PER_FUNCTION_BLOCK(SSL_set_connect_state, true) \
     PER_FUNCTION_BLOCK(SSL_shutdown, true) \
-    PER_FUNCTION_BLOCK(SSL_state, true) \
-    PER_FUNCTION_BLOCK(SSLeay, true) \
-    PER_FUNCTION_BLOCK(SSLv23_method, true) \
     PER_FUNCTION_BLOCK(SSL_write, true) \
-    PER_FUNCTION_BLOCK(TLSv1_1_method, true) \
-    PER_FUNCTION_BLOCK(TLSv1_2_method, true) \
-    PER_FUNCTION_BLOCK(TLSv1_method, true) \
     PER_FUNCTION_BLOCK(X509_check_issued, true) \
     PER_FUNCTION_BLOCK(X509_check_purpose, true) \
     PER_FUNCTION_BLOCK(X509_CRL_free, true) \
@@ -359,8 +417,93 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GF2m, false) \
-    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false) \
-    
+    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false)
+ 
+#define FOR_ALL_OPENSSL_FUNCTIONS_1_0 \
+    PER_FUNCTION_BLOCK(CRYPTO_add_lock, true) \
+    PER_FUNCTION_BLOCK(CRYPTO_num_locks, true) \
+    PER_FUNCTION_BLOCK(CRYPTO_set_locking_callback, true) \
+    PER_FUNCTION_BLOCK(DSA_OpenSSL, true) \
+    PER_FUNCTION_BLOCK(ERR_load_crypto_strings, true) \
+    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_cleanup, true) \
+    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_init, true) \
+    PER_FUNCTION_BLOCK(EVP_MD_CTX_create, true) \
+    PER_FUNCTION_BLOCK(EVP_MD_CTX_destroy, true) \
+    PER_FUNCTION_BLOCK(HMAC_CTX_cleanup, true) \
+    PER_FUNCTION_BLOCK(HMAC_CTX_init, true) \
+    PER_FUNCTION_BLOCK(OPENSSL_add_all_algorithms_conf, true) \
+    PER_FUNCTION_BLOCK(sk_free, true) \
+    PER_FUNCTION_BLOCK(sk_new_null, true) \
+    PER_FUNCTION_BLOCK(sk_num, true) \
+    PER_FUNCTION_BLOCK(sk_pop_free, true) \
+    PER_FUNCTION_BLOCK(sk_push, true) \
+    PER_FUNCTION_BLOCK(sk_value, true) \
+    PER_FUNCTION_BLOCK(SSL_library_init, true) \
+    PER_FUNCTION_BLOCK(SSL_load_error_strings, true) \
+    PER_FUNCTION_BLOCK(SSL_state, true) \
+    PER_FUNCTION_BLOCK(SSLeay, true) \
+    PER_FUNCTION_BLOCK(SSLv23_method, true) \
+    PER_FUNCTION_BLOCK(TLSv1_1_method, true) \
+    PER_FUNCTION_BLOCK(TLSv1_2_method, true) \
+    PER_FUNCTION_BLOCK(TLSv1_method, true)
+
+#define FOR_ALL_OPENSSL_FUNCTIONS_1_1 \
+    PER_FUNCTION_BLOCK(DSA_get0_key, true) \
+    PER_FUNCTION_BLOCK(DSA_get0_pqg, true) \
+    PER_FUNCTION_BLOCK(DSA_set0_key, true) \
+    PER_FUNCTION_BLOCK(DSA_set0_pqg, true) \
+    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_free, true) \
+    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_new, true) \
+    PER_FUNCTION_BLOCK(EVP_MD_CTX_new, true) \
+    PER_FUNCTION_BLOCK(EVP_MD_CTX_free, true) \
+    PER_FUNCTION_BLOCK(EVP_PKEY_up_ref, true) \
+    PER_FUNCTION_BLOCK(HMAC_CTX_free, true) \
+    PER_FUNCTION_BLOCK(HMAC_CTX_new, true) \
+    PER_FUNCTION_BLOCK(RSA_get0_crt_params, true) \
+    PER_FUNCTION_BLOCK(RSA_get0_factors, true) \
+    PER_FUNCTION_BLOCK(RSA_get0_key, true) \
+    PER_FUNCTION_BLOCK(RSA_flags, true) \
+    PER_FUNCTION_BLOCK(RSA_set0_crt_params, true) \
+    PER_FUNCTION_BLOCK(RSA_set0_factors, true) \
+    PER_FUNCTION_BLOCK(RSA_set0_key, true) \
+    PER_FUNCTION_BLOCK(OpenSSL_version_num, true) \
+    PER_FUNCTION_BLOCK(SSL_CTX_set_options, true) \
+    PER_FUNCTION_BLOCK(SSL_get_state, true) \
+    PER_FUNCTION_BLOCK(SSL_session_reused, true) \
+    PER_FUNCTION_BLOCK(TLS_method, true) \
+    PER_FUNCTION_BLOCK(X509_up_ref, true) \
+    PER_FUNCTION_BLOCK(X509_get_issuer_name, true) \
+    PER_FUNCTION_BLOCK(X509_get_subject_name, true) \
+    PER_FUNCTION_BLOCK(X509_get_version, true) \
+    PER_FUNCTION_BLOCK(X509_get_X509_PUBKEY, true) \
+    PER_FUNCTION_BLOCK(X509_get0_notAfter, true) \
+    PER_FUNCTION_BLOCK(X509_get0_notBefore, true) \
+    PER_FUNCTION_BLOCK(X509_get0_pubkey_bitstr, true) \
+    PER_FUNCTION_BLOCK(X509_get0_tbs_sigalg, true) \
+    PER_FUNCTION_BLOCK(X509_CRL_get0_nextUpdate, true) \
+    PER_FUNCTION_BLOCK(X509_NAME_get0_der, true) \
+    PER_FUNCTION_BLOCK(X509_PUBKEY_get0_param, true) \
+    PER_FUNCTION_BLOCK(X509_STORE_CTX_get0_cert, true) \
+    PER_FUNCTION_BLOCK(X509_STORE_CTX_get0_untrusted, true)
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define FOR_ALL_OPENSSL_FUNCTIONS \
+    FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERSIONS \
+    FOR_ALL_OPENSSL_FUNCTIONS_1_0
+#define FOR_ALL_OPENSSL_FUNCTIONS_STACK
+#else
+#define FOR_ALL_OPENSSL_FUNCTIONS \
+    FOR_ALL_OPENSSL_FUNCTIONS_ALL_VERSIONS \
+    FOR_ALL_OPENSSL_FUNCTIONS_1_1
+#define FOR_ALL_OPENSSL_FUNCTIONS_STACK \
+    PER_FUNCTION_BLOCK(OPENSSL_sk_free, true) \
+    PER_FUNCTION_BLOCK(OPENSSL_sk_new_null, true) \
+    PER_FUNCTION_BLOCK(OPENSSL_sk_num, true) \
+    PER_FUNCTION_BLOCK(OPENSSL_sk_pop_free, true) \
+    PER_FUNCTION_BLOCK(OPENSSL_sk_push, true) \
+    PER_FUNCTION_BLOCK(OPENSSL_sk_value, true)
+#endif
+
 // Declare pointers to all the used OpenSSL functions
 #define PER_FUNCTION_BLOCK(fn, isRequired) extern __typeof(fn)* fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
@@ -376,6 +519,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define ASN1_OCTET_STRING_set ASN1_OCTET_STRING_set_ptr
 #define ASN1_STRING_free ASN1_STRING_free_ptr
 #define ASN1_STRING_print_ex ASN1_STRING_print_ex_ptr
+#define ASN1_STRING_set ASN1_STRING_set_ptr
+#define ASN1_STRING_type_new ASN1_STRING_type_new_ptr
 #define BASIC_CONSTRAINTS_free BASIC_CONSTRAINTS_free_ptr
 #define BIO_ctrl BIO_ctrl_ptr
 #define BIO_ctrl_pending BIO_ctrl_pending_ptr
@@ -392,12 +537,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define BN_free BN_free_ptr
 #define BN_new BN_new_ptr
 #define BN_num_bits BN_num_bits_ptr
-#define CRYPTO_add_lock CRYPTO_add_lock_ptr
-#define CRYPTO_num_locks CRYPTO_num_locks_ptr
-#define CRYPTO_set_locking_callback CRYPTO_set_locking_callback_ptr
 #define d2i_ASN1_BIT_STRING d2i_ASN1_BIT_STRING_ptr
 #define d2i_ASN1_OCTET_STRING d2i_ASN1_OCTET_STRING_ptr
-#define d2i_ASN1_type_bytes d2i_ASN1_type_bytes_ptr
 #define d2i_BASIC_CONSTRAINTS d2i_BASIC_CONSTRAINTS_ptr
 #define d2i_EXTENDED_KEY_USAGE d2i_EXTENDED_KEY_USAGE_ptr
 #define d2i_PKCS12 d2i_PKCS12_ptr
@@ -413,7 +554,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define DSA_generate_key DSA_generate_key_ptr
 #define DSA_generate_parameters_ex DSA_generate_parameters_ex_ptr
 #define DSA_new DSA_new_ptr
-#define DSA_OpenSSL DSA_OpenSSL_ptr
 #define DSA_sign DSA_sign_ptr
 #define DSA_size DSA_size_ptr
 #define DSA_up_ref DSA_up_ref_ptr
@@ -458,7 +598,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define ERR_clear_error ERR_clear_error_ptr
 #define ERR_error_string_n ERR_error_string_n_ptr
 #define ERR_get_error ERR_get_error_ptr
-#define ERR_load_crypto_strings ERR_load_crypto_strings_ptr
 #define ERR_peek_error ERR_peek_error_ptr
 #define ERR_peek_last_error ERR_peek_last_error_ptr
 #define ERR_put_error ERR_put_error_ptr
@@ -469,9 +608,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_aes_192_ecb EVP_aes_192_ecb_ptr
 #define EVP_aes_256_cbc EVP_aes_256_cbc_ptr
 #define EVP_aes_256_ecb EVP_aes_256_ecb_ptr
-#define EVP_CIPHER_CTX_cleanup EVP_CIPHER_CTX_cleanup_ptr
 #define EVP_CIPHER_CTX_ctrl EVP_CIPHER_CTX_ctrl_ptr
-#define EVP_CIPHER_CTX_init EVP_CIPHER_CTX_init_ptr
 #define EVP_CIPHER_CTX_set_key_length EVP_CIPHER_CTX_set_key_length_ptr
 #define EVP_CIPHER_CTX_set_padding EVP_CIPHER_CTX_set_padding_ptr
 #define EVP_CipherFinal_ex EVP_CipherFinal_ex_ptr
@@ -486,8 +623,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_DigestUpdate EVP_DigestUpdate_ptr
 #define EVP_get_digestbyname EVP_get_digestbyname_ptr
 #define EVP_md5 EVP_md5_ptr
-#define EVP_MD_CTX_create EVP_MD_CTX_create_ptr
-#define EVP_MD_CTX_destroy EVP_MD_CTX_destroy_ptr
 #define EVP_MD_size EVP_MD_size_ptr
 #define EVP_PKEY_CTX_free EVP_PKEY_CTX_free_ptr
 #define EVP_PKEY_CTX_new EVP_PKEY_CTX_new_ptr
@@ -510,8 +645,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_sha512 EVP_sha512_ptr
 #define EXTENDED_KEY_USAGE_free EXTENDED_KEY_USAGE_free_ptr
 #define GENERAL_NAMES_free GENERAL_NAMES_free_ptr
-#define HMAC_CTX_cleanup HMAC_CTX_cleanup_ptr
-#define HMAC_CTX_init HMAC_CTX_init_ptr
 #define HMAC_Final HMAC_Final_ptr
 #define HMAC_Init_ex HMAC_Init_ex_ptr
 #define HMAC_Update HMAC_Update_ptr
@@ -530,7 +663,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define OBJ_sn2nid OBJ_sn2nid_ptr
 #define OBJ_txt2nid OBJ_txt2nid_ptr
 #define OBJ_txt2obj OBJ_txt2obj_ptr
-#define OPENSSL_add_all_algorithms_conf OPENSSL_add_all_algorithms_conf_ptr
 #define OPENSSL_cleanse OPENSSL_cleanse_ptr
 #define PEM_read_bio_PKCS7 PEM_read_bio_PKCS7_ptr
 #define PEM_read_bio_X509_AUX PEM_read_bio_X509_AUX_ptr
@@ -555,13 +687,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_size RSA_size_ptr
 #define RSA_up_ref RSA_up_ref_ptr
 #define RSA_verify RSA_verify_ptr
-#define sk_free sk_free_ptr
-#define sk_new_null sk_new_null_ptr
-#define sk_num sk_num_ptr
-#define sk_pop_free sk_pop_free_ptr
-#define sk_push sk_push_ptr
-#define sk_value sk_value_ptr
 #define SSL_CIPHER_description SSL_CIPHER_description_ptr
+#define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
 #define SSL_ctrl SSL_ctrl_ptr
 #define SSL_set_quiet_shutdown SSL_set_quiet_shutdown_ptr
 #define SSL_CTX_check_private_key SSL_CTX_check_private_key_ptr
@@ -589,8 +716,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_get_SSL_CTX SSL_get_SSL_CTX_ptr
 #define SSL_get_version SSL_get_version_ptr
 #define SSL_get0_alpn_selected SSL_get0_alpn_selected_ptr
-#define SSL_library_init SSL_library_init_ptr
-#define SSL_load_error_strings SSL_load_error_strings_ptr
 #define SSL_new SSL_new_ptr
 #define SSL_read SSL_read_ptr
 #define SSL_renegotiate_pending SSL_renegotiate_pending_ptr
@@ -598,13 +723,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_set_bio SSL_set_bio_ptr
 #define SSL_set_connect_state SSL_set_connect_state_ptr
 #define SSL_shutdown SSL_shutdown_ptr
-#define SSL_state SSL_state_ptr
-#define SSLeay SSLeay_ptr
-#define SSLv23_method SSLv23_method_ptr
 #define SSL_write SSL_write_ptr
-#define TLSv1_1_method TLSv1_1_method_ptr
-#define TLSv1_2_method TLSv1_2_method_ptr
-#define TLSv1_method TLSv1_method_ptr
 #define X509_check_issued X509_check_issued_ptr
 #define X509_check_purpose X509_check_purpose_ptr
 #define X509_CRL_free X509_CRL_free_ptr
@@ -657,6 +776,73 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EC_GROUP_set_curve_GF2m EC_GROUP_set_curve_GF2m_ptr
 #define EC_POINT_get_affine_coordinates_GF2m EC_POINT_get_affine_coordinates_GF2m_ptr
 #define EC_POINT_set_affine_coordinates_GF2m EC_POINT_set_affine_coordinates_GF2m_ptr
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define CRYPTO_add_lock CRYPTO_add_lock_ptr
+#define CRYPTO_num_locks CRYPTO_num_locks_ptr
+#define CRYPTO_set_locking_callback CRYPTO_set_locking_callback_ptr
+#define DSA_OpenSSL DSA_OpenSSL_ptr
+#define ERR_load_crypto_strings ERR_load_crypto_strings_ptr
+#define EVP_CIPHER_CTX_cleanup EVP_CIPHER_CTX_cleanup_ptr
+#define EVP_CIPHER_CTX_init EVP_CIPHER_CTX_init_ptr
+#define EVP_MD_CTX_create EVP_MD_CTX_create_ptr
+#define EVP_MD_CTX_destroy EVP_MD_CTX_destroy_ptr
+#define HMAC_CTX_cleanup HMAC_CTX_cleanup_ptr
+#define HMAC_CTX_init HMAC_CTX_init_ptr
+#define OPENSSL_add_all_algorithms_conf OPENSSL_add_all_algorithms_conf_ptr
+#define sk_free sk_free_ptr
+#define sk_new_null sk_new_null_ptr
+#define sk_num sk_num_ptr
+#define sk_pop_free sk_pop_free_ptr
+#define sk_push sk_push_ptr
+#define sk_value sk_value_ptr
+#define SSL_library_init SSL_library_init_ptr
+#define SSL_load_error_strings SSL_load_error_strings_ptr
+#define SSL_state SSL_state_ptr
+#define SSLeay SSLeay_ptr
+#define SSLv23_method SSLv23_method_ptr
+#define TLSv1_1_method TLSv1_1_method_ptr
+#define TLSv1_2_method TLSv1_2_method_ptr
+#define TLSv1_method TLSv1_method_ptr
+#else
+#define DSA_get0_key DSA_get0_key_ptr
+#define DSA_get0_pqg DSA_get0_pqg_ptr
+#define DSA_set0_key DSA_set0_key_ptr
+#define DSA_set0_pqg DSA_set0_pqg_ptr
+#define EVP_CIPHER_CTX_free EVP_CIPHER_CTX_free_ptr
+#define EVP_CIPHER_CTX_new EVP_CIPHER_CTX_new_ptr
+#define EVP_MD_CTX_new EVP_MD_CTX_new_ptr
+#define EVP_MD_CTX_free EVP_MD_CTX_free_ptr
+#define EVP_PKEY_up_ref EVP_PKEY_up_ref_ptr
+#define HMAC_CTX_free HMAC_CTX_free_ptr
+#define HMAC_CTX_new HMAC_CTX_new_ptr
+#define RSA_get0_crt_params RSA_get0_crt_params_ptr
+#define RSA_get0_factors RSA_get0_factors_ptr
+#define RSA_get0_key RSA_get0_key_ptr
+#define RSA_flags RSA_flags_ptr
+#define RSA_set0_crt_params RSA_set0_crt_params_ptr
+#define RSA_set0_factors RSA_set0_factors_ptr
+#define RSA_set0_key RSA_set0_key_ptr
+#define OpenSSL_version_num OpenSSL_version_num_ptr
+#define SSL_CTX_set_options SSL_CTX_set_options_ptr
+#define SSL_get_state SSL_get_state_ptr
+#define SSL_session_reused SSL_session_reused_ptr
+#define TLS_method TLS_method_ptr
+#define X509_up_ref X509_up_ref_ptr
+#define X509_get_issuer_name X509_get_issuer_name_ptr
+#define X509_get_subject_name X509_get_subject_name_ptr
+#define X509_get_version X509_get_version_ptr
+#define X509_get_X509_PUBKEY X509_get_X509_PUBKEY_ptr
+#define X509_get0_notAfter X509_get0_notAfter_ptr
+#define X509_get0_notBefore X509_get0_notBefore_ptr
+#define X509_get0_pubkey_bitstr X509_get0_pubkey_bitstr_ptr
+#define X509_get0_tbs_sigalg X509_get0_tbs_sigalg_ptr
+#define X509_CRL_get0_nextUpdate X509_CRL_get0_nextUpdate_ptr
+#define X509_NAME_get0_der X509_NAME_get0_der_ptr
+#define X509_PUBKEY_get0_param X509_PUBKEY_get0_param_ptr
+#define X509_STORE_CTX_get0_cert X509_STORE_CTX_get0_cert_ptr
+#define X509_STORE_CTX_get0_untrusted X509_STORE_CTX_get0_untrusted_ptr
+#endif
 
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
