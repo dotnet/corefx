@@ -117,7 +117,7 @@ static int32_t EnumerateTrust(SecTrustSettingsDomain domain,
                 continue;
             }
 
-            SecCertificateRef cert = (SecCertificateRef)CONST_CAST(void *, obj);
+            SecCertificateRef cert = (SecCertificateRef)CONST_CAST(void*, obj);
             bool isMatch = CheckTrustMatch(cert, domain, result, pOSStatus);
 
             if (*pOSStatus != noErr)
@@ -162,16 +162,14 @@ int32_t AppleCryptoNative_StoreEnumerateUserRoot(CFArrayRef* pCertsOut, int32_t*
         *pCertsOut = NULL;
     if (pOSStatusOut != NULL)
         *pOSStatusOut = noErr;
+
     if (pCertsOut == NULL || pOSStatusOut == NULL)
         return -1;
 
     CFMutableArrayRef pCertsRef = NULL;
     int32_t ret;
-    
-    ret = EnumerateTrust(kSecTrustSettingsDomainUser,
-                         kSecTrustSettingsResultTrustRoot,
-                         &pCertsRef,
-                         pOSStatusOut);
+
+    ret = EnumerateTrust(kSecTrustSettingsDomainUser, kSecTrustSettingsResultTrustRoot, &pCertsRef, pOSStatusOut);
 
     *pCertsOut = pCertsRef;
 
@@ -184,23 +182,18 @@ int32_t AppleCryptoNative_StoreEnumerateMachineRoot(CFArrayRef* pCertsOut, int32
         *pCertsOut = NULL;
     if (pOSStatusOut != NULL)
         *pOSStatusOut = noErr;
+
     if (pCertsOut == NULL || pOSStatusOut == NULL)
         return -1;
 
     CFMutableArrayRef pCertsRef = NULL;
     int32_t ret;
 
-    ret = EnumerateTrust(kSecTrustSettingsDomainAdmin,
-                         kSecTrustSettingsResultTrustRoot,
-                         &pCertsRef,
-                         pOSStatusOut);
+    ret = EnumerateTrust(kSecTrustSettingsDomainAdmin, kSecTrustSettingsResultTrustRoot, &pCertsRef, pOSStatusOut);
 
     if (ret == 1)
     {
-        ret = EnumerateTrust(kSecTrustSettingsDomainSystem,
-                             kSecTrustSettingsResultTrustRoot,
-                             &pCertsRef,
-                             pOSStatusOut);
+        ret = EnumerateTrust(kSecTrustSettingsDomainSystem, kSecTrustSettingsResultTrustRoot, &pCertsRef, pOSStatusOut);
     }
 
     *pCertsOut = pCertsRef;
@@ -214,16 +207,14 @@ int32_t AppleCryptoNative_StoreEnumerateUserDisallowed(CFArrayRef* pCertsOut, in
         *pCertsOut = NULL;
     if (pOSStatusOut != NULL)
         *pOSStatusOut = noErr;
+
     if (pCertsOut == NULL || pOSStatusOut == NULL)
         return -1;
 
     CFMutableArrayRef pCertsRef = NULL;
     int ret;
-    
-    ret = EnumerateTrust(kSecTrustSettingsDomainUser,
-                         kSecTrustSettingsResultDeny,
-                         &pCertsRef,
-                         pOSStatusOut);
+
+    ret = EnumerateTrust(kSecTrustSettingsDomainUser, kSecTrustSettingsResultDeny, &pCertsRef, pOSStatusOut);
 
     *pCertsOut = pCertsRef;
 
@@ -236,23 +227,18 @@ int32_t AppleCryptoNative_StoreEnumerateMachineDisallowed(CFArrayRef* pCertsOut,
         *pCertsOut = NULL;
     if (pOSStatusOut != NULL)
         *pOSStatusOut = noErr;
+
     if (pCertsOut == NULL || pOSStatusOut == NULL)
         return -1;
 
     CFMutableArrayRef pCertsRef = NULL;
     int32_t ret;
-    
-    ret = EnumerateTrust(kSecTrustSettingsDomainAdmin,
-                         kSecTrustSettingsResultDeny,
-                         &pCertsRef,
-                         pOSStatusOut);
+
+    ret = EnumerateTrust(kSecTrustSettingsDomainAdmin, kSecTrustSettingsResultDeny, &pCertsRef, pOSStatusOut);
 
     if (ret == 1)
     {
-        ret = EnumerateTrust(kSecTrustSettingsDomainSystem,
-                             kSecTrustSettingsResultDeny,
-                             &pCertsRef,
-                             pOSStatusOut);
+        ret = EnumerateTrust(kSecTrustSettingsDomainSystem, kSecTrustSettingsResultDeny, &pCertsRef, pOSStatusOut);
     }
 
     *pCertsOut = pCertsRef;
