@@ -31,12 +31,7 @@ namespace System
                 return false;
             }
 
-            if (d == 0.0)
-            {
-                d = 0.0;
-            }
-
-            value = d;
+            value = (d == 0.0) ? 0.0 : d;
             return true;
         }
 
