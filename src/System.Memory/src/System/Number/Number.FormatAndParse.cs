@@ -31,7 +31,13 @@ namespace System
                 return false;
             }
 
-            value = (d == 0.0) ? 0.0 : d;
+            if (d == 0.0)
+            {
+                // normalize -0.0 to 0.0
+                d = 0.0;
+            }
+
+            value = d;
             return true;
         }
 
