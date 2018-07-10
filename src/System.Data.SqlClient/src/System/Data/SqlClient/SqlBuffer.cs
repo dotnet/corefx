@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.SqlClient
 {
-    internal sealed class SqlBuffer
+    internal sealed partial class SqlBuffer
     {
         internal enum StorageType
         {
@@ -1027,16 +1027,6 @@ namespace System.Data.SqlClient
             _isNull = false;
         }
 
-#if netcoreapp
-        internal void SetToDate(ReadOnlySpan<byte> bytes)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.Date;
-            _value._int32 = GetDateFromByteArray(bytes);
-            _isNull = false;
-        }
-#else
         internal void SetToDate(byte[] bytes)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
@@ -1045,8 +1035,6 @@ namespace System.Data.SqlClient
             _value._int32 = GetDateFromByteArray(bytes, 0);
             _isNull = false;
         }
-#endif
-
 
         internal void SetToDate(DateTime date)
         {
@@ -1057,16 +1045,6 @@ namespace System.Data.SqlClient
             _isNull = false;
         }
 
-#if netcoreapp
-        internal void SetToTime(ReadOnlySpan<byte> bytes, int length, byte scale)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.Time;
-            FillInTimeInfo(ref _value._timeInfo, bytes, length, scale);
-            _isNull = false;
-        }
-#else
         internal void SetToTime(byte[] bytes, int length, byte scale)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
@@ -1075,7 +1053,6 @@ namespace System.Data.SqlClient
             FillInTimeInfo(ref _value._timeInfo, bytes, length, scale);
             _isNull = false;
         }
-#endif
 
         internal void SetToTime(TimeSpan timeSpan, byte scale)
         {
@@ -1087,17 +1064,6 @@ namespace System.Data.SqlClient
             _isNull = false;
         }
 
-#if netcoreapp
-        internal void SetToDateTime2(ReadOnlySpan<byte> bytes, int length, byte scale)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.DateTime2;
-            FillInTimeInfo(ref _value._dateTime2Info.timeInfo, bytes, length - 3, scale); // remaining 3 bytes is for date
-            _value._dateTime2Info.date = GetDateFromByteArray(bytes.Slice(length - 3)); // 3 bytes for date
-            _isNull = false;
-        }
-#else
         internal void SetToDateTime2(byte[] bytes, int length, byte scale)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
@@ -1107,7 +1073,6 @@ namespace System.Data.SqlClient
             _value._dateTime2Info.date = GetDateFromByteArray(bytes, length - 3); // 3 bytes for date
             _isNull = false;
         }
-#endif
 
         internal void SetToDateTime2(DateTime dateTime, byte scale)
         {
@@ -1120,18 +1085,6 @@ namespace System.Data.SqlClient
             _isNull = false;
         }
 
-#if netcoreapp
-        internal void SetToDateTimeOffset(ReadOnlySpan<byte> bytes, int length, byte scale)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.DateTimeOffset;
-            FillInTimeInfo(ref _value._dateTimeOffsetInfo.dateTime2Info.timeInfo, bytes, length - 5, scale); // remaining 5 bytes are for date and offset
-            _value._dateTimeOffsetInfo.dateTime2Info.date = GetDateFromByteArray(bytes.Slice(length - 5)); // 3 bytes for date
-            _value._dateTimeOffsetInfo.offset = (short)(bytes[length - 2] + (bytes[length - 1] << 8)); // 2 bytes for offset (Int16)
-            _isNull = false;
-        }
-#else
         internal void SetToDateTimeOffset(byte[] bytes, int length, byte scale)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
@@ -1142,7 +1095,6 @@ namespace System.Data.SqlClient
             _value._dateTimeOffsetInfo.offset = (Int16)(bytes[length - 2] + (bytes[length - 1] << 8)); // 2 bytes for offset (Int16)
             _isNull = false;
         }
-#endif
 
         internal void SetToDateTimeOffset(DateTimeOffset dateTimeOffset, byte scale)
         {
@@ -1162,7 +1114,7 @@ namespace System.Data.SqlClient
 #else
         private static void FillInTimeInfo(ref TimeInfo timeInfo, byte[] timeBytes, int length, byte scale)
 #endif
-            {
+        {
             Debug.Assert(3 <= length && length <= 5, "invalid data length for timeInfo: " + length);
             Debug.Assert(0 <= scale && scale <= 7, "invalid scale: " + scale);
 
@@ -1178,13 +1130,8 @@ namespace System.Data.SqlClient
             timeInfo.ticks = tickUnits * TdsEnums.TICKS_FROM_SCALE[scale];
             timeInfo.scale = scale;
         }
-#if netcoreapp
-        private static int GetDateFromByteArray(ReadOnlySpan<byte> buf)
-        {
-            return buf[0] + (buf[1] << 8) + (buf[2] << 16);
-        }
-#endif
-        private static Int32 GetDateFromByteArray(byte[] buf, int offset)
+
+        private static int GetDateFromByteArray(byte[] buf, int offset)
         {
             return buf[offset] + (buf[offset + 1] << 8) + (buf[offset + 2] << 16);
         }

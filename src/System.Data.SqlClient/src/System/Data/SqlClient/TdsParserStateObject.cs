@@ -20,7 +20,7 @@ namespace System.Data.SqlClient
         internal long _value;
     }
 
-    internal abstract class TdsParserStateObject
+    internal abstract partial class TdsParserStateObject
     {
         private const int AttentionTimeoutSeconds = 5;
 
@@ -1220,14 +1220,6 @@ namespace System.Data.SqlClient
             return TryReadByteArray(buff, offset, len, out ignored);
         }
 
-#if netcoreapp
-        public bool TryReadByteArray(Span<byte> buff, int len)
-        {
-            int ignored;
-            return TryReadByteArray(buff,len, out ignored);
-        }
-#endif
-
         // NOTE: This method must be retriable WITHOUT replaying a snapshot
         // Every time you call this method increment the offset and decrease len by the value of totalRead
         public bool TryReadByteArray(byte[] buff, int offset, int len, out int totalRead)
@@ -1294,72 +1286,6 @@ namespace System.Data.SqlClient
             return true;
         }
 
-#if netcoreapp
-        public bool TryReadByteArray(Span<byte> buff, int len, out int totalRead)
-        {
-            totalRead = 0;
-
-#if DEBUG
-            if (_snapshot != null && _snapshot.DoPend())
-            {
-                _networkPacketTaskSource = new TaskCompletionSource<object>();
-                Interlocked.MemoryBarrier();
-
-                if (_forcePendingReadsToWaitForUser)
-                {
-                    _realNetworkPacketTaskSource = new TaskCompletionSource<object>();
-                    _realNetworkPacketTaskSource.SetResult(null);
-                }
-                else
-                {
-                    _networkPacketTaskSource.TrySetResult(null);
-                }
-                return false;
-            }
-#endif
-
-            Debug.Assert(buff.Length==0 || buff.Length >= len, "Invalid length sent to ReadByteArray()!");
-
-            // loop through and read up to array length
-            while (len > 0)
-            {
-                if ((_inBytesPacket == 0) || (_inBytesUsed == _inBytesRead))
-                {
-                    if (!TryPrepareBuffer())
-                    {
-                        return false;
-                    }
-                }
-
-                int bytesToRead = Math.Min(len, Math.Min(_inBytesPacket, _inBytesRead - _inBytesUsed));
-                Debug.Assert(bytesToRead > 0, "0 byte read in TryReadByteArray");
-                if (buff.Length>0)
-                {
-                    ReadOnlySpan<byte> inBuffSpan = new ReadOnlySpan<byte>(_inBuff, _inBytesUsed, bytesToRead);
-                    inBuffSpan.CopyTo(buff);
-                }
-
-                totalRead += bytesToRead;
-                _inBytesUsed += bytesToRead;
-                _inBytesPacket -= bytesToRead;
-                len -= bytesToRead;
-
-                AssertValidState();
-            }
-
-            if ((_messageStatus != TdsEnums.ST_EOM) && ((_inBytesPacket == 0) || (_inBytesUsed == _inBytesRead)))
-            {
-                if (!TryPrepareBuffer())
-                {
-                    return false;
-                }
-            }
-
-            AssertValidState();
-
-            return true;
-        }
-#endif
         // Takes no arguments and returns a byte from the buffer.  If the buffer is empty, it is filled
         // before the byte is returned.
         internal bool TryReadByte(out byte value)
