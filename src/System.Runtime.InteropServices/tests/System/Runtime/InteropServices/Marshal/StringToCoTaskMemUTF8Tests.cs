@@ -5,9 +5,9 @@
 using System.Collections.Generic;
 using Xunit;
 
-namespace System.Runtime.InteropServices
+namespace System.Runtime.InteropServices.Tests
 {
-    public partial class MarshalTests
+    public class StringToCoTaskMemUTF8Tests
     {
         public static IEnumerable<object[]> StringToCoTaskMemUTF8_TestData()
         {
@@ -50,8 +50,7 @@ namespace System.Runtime.InteropServices
             try
             {
                 pString = Marshal.StringToCoTaskMemUTF8(chars);
-                string utf8String = Marshal.PtrToStringUTF8(pString);
-                Assert.Equal(chars, utf8String);
+                Assert.Equal(chars, Marshal.PtrToStringUTF8(pString));
             }
             finally
             {
