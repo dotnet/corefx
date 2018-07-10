@@ -541,8 +541,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         private static bool HasObjectTypeIntegrity(ISerializable serializable)
         {
             return !PlatformDetection.IsFullFramework ||
-                !(serializable is NotFiniteNumberException ||
-                (serializable.GetType().IsGenericType && serializable.GetType().GetGenericTypeDefinition() == typeof(HashSet<>)));
+                !(serializable is NotFiniteNumberException);
         }
 
         private static void CheckObjectTypeIntegrity(ISerializable serializable)
