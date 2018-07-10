@@ -542,7 +542,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             return !PlatformDetection.IsFullFramework ||
                 !(serializable is NotFiniteNumberException ||
-                serializable.GetType().GetGenericTypeDefinition() == typeof(HashSet<>));
+                (serializable.GetType().IsGenericType && serializable.GetType().GetGenericTypeDefinition() == typeof(HashSet<>)));
         }
 
         private static void CheckObjectTypeIntegrity(ISerializable serializable)
