@@ -634,6 +634,15 @@ namespace System.Xml
                         throw new ArgumentException(SR.Xml_EmptyLocalName);
                     }
                 }
+                // check local name
+                if (prefix == null || prefix.Length == 0)
+                {
+                    if (localName.Contains("xmlns:xs"))
+                    {
+                        localName = "xmlns";
+                        prefix = "xs";
+                    }
+                }
                 CheckNCName(localName);
 
                 AdvanceState(Token.StartAttribute);

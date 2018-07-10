@@ -15,6 +15,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class DataStreamTest
     {
+        private static DataSet _dataset;
+
         [CheckConnStrSetupFact]
         public static void RunAllTestsForSingleServer_NP()
         {
@@ -32,6 +34,33 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void RunAllTestsForSingleServer_TCP()
         {
             RunAllTestsForSingleServer(DataTestUtility.TcpConnStr);
+        }
+
+        [CheckConnStrSetupFact]
+        public static void DataSetWriteXmlTest()
+        {
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
+            {
+                connection.Open();
+                using (_dataset = new DataSet())
+                using (SqlCommand cmd = new SqlCommand("select SERVERPROPERTY ( 'ServerName' ) AS ServerName", connection))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    using (SqlDataAdapter dataAdapter = new SqlDataAdapter(cmd))
+                        dataAdapter.Fill(_dataset);
+                }
+            }
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            Xml.XmlWriterSettings settings = new XmlWriterSettings();
+
+            settings.Indent = true;
+            using (System.Xml.XmlWriter xw = System.Xml.XmlWriter.Create(sb, settings))
+            {
+
+                _dataset.WriteXml(xw, System.Data.XmlWriteMode.WriteSchema);
+            }
+            Assert.Equal("ServerName", _dataset.Tables[0].Columns[0].ColumnName);
         }
 
         private static void RunAllTestsForSingleServer(string connectionString, bool usingNamePipes = false)
