@@ -177,9 +177,9 @@ static OSStatus DeleteInKeychain(CFTypeRef needle, SecKeychainRef haystack)
     if (query == NULL)
         return errSecAllocate;
 
-    const void *constKeychain = haystack;
+    const void *constHaystack = haystack;
     CFArrayRef searchList = CFArrayCreate(
-        NULL, &constKeychain, 1, &kCFTypeArrayCallBacks);
+        NULL, &constHaystack, 1, &kCFTypeArrayCallBacks);
 
     if (searchList == NULL)
     {

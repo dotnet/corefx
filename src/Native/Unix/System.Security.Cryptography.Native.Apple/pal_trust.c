@@ -164,8 +164,12 @@ static int32_t EnumerateTrust(SecTrustSettingsDomain domain,
 
 int32_t AppleCryptoNative_StoreEnumerateUserRoot(CFArrayRef* pCertsOut, int32_t* pOSStatusOut)
 {
-   if (pCertsOut == NULL)
-        return -1;        
+    if (pCertsOut == NULL)
+    {
+        if (pOSStatus != NULL)
+            *pOSStatus = noErr;
+        return -1;
+    }
 
     CFMutableArrayRef pCertsRef = NULL;
     int32_t ret;
@@ -183,7 +187,11 @@ int32_t AppleCryptoNative_StoreEnumerateUserRoot(CFArrayRef* pCertsOut, int32_t*
 int32_t AppleCryptoNative_StoreEnumerateMachineRoot(CFArrayRef* pCertsOut, int32_t* pOSStatusOut)
 {
     if (pCertsOut == NULL)
+    {
+        if (pOSStatus != NULL)
+            *pOSStatus = noErr;
         return -1;
+    }
 
     CFMutableArrayRef pCertsRef = NULL;
     int32_t ret;
@@ -209,7 +217,11 @@ int32_t AppleCryptoNative_StoreEnumerateMachineRoot(CFArrayRef* pCertsOut, int32
 int32_t AppleCryptoNative_StoreEnumerateUserDisallowed(CFArrayRef* pCertsOut, int32_t* pOSStatusOut)
 {
     if (pCertsOut == NULL)
+    {
+        if (pOSStatus != NULL)
+            *pOSStatus = noErr;
         return -1;
+    }
 
     CFMutableArrayRef pCertsRef = NULL;
     int ret;
@@ -227,7 +239,11 @@ int32_t AppleCryptoNative_StoreEnumerateUserDisallowed(CFArrayRef* pCertsOut, in
 int32_t AppleCryptoNative_StoreEnumerateMachineDisallowed(CFArrayRef* pCertsOut, int32_t* pOSStatusOut)
 {
     if (pCertsOut == NULL)
+    {
+        if (pOSStatus != NULL)
+            *pOSStatus = noErr;
         return -1;
+    }
 
     CFMutableArrayRef pCertsRef = NULL;
     int32_t ret;
