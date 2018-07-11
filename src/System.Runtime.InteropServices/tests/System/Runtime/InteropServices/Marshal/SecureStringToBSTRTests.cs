@@ -43,7 +43,6 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [ActiveIssue(30938, ~TargetFrameworkMonikers.NetFramework)]
         public void SecureStringToBSTR_DisposedString_ThrowsObjectDisposedException()
         {
             var secureString = new SecureString();
