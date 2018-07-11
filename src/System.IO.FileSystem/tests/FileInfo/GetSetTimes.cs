@@ -65,7 +65,7 @@ namespace System.IO.Tests
                 ((testFile) => testFile.LastWriteTimeUtc),
                 DateTimeKind.Utc);
             yield return TimeFunction.Create(
-                ((testFile, time) => { CopytoOperation(); }),
+                ((testFile, time) => CopytoOperation()),
                 ((testFile) => testFile.LastWriteTimeUtc),
                 DateTimeKind.Utc);         
         }
