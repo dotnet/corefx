@@ -64,7 +64,32 @@ namespace System.IO.Tests
                 ((testFile, time) => { testFile.LastWriteTimeUtc = time; }),
                 ((testFile) => testFile.LastWriteTimeUtc),
                 DateTimeKind.Utc);
+            yield return TimeFunction.Create(
+                ((testFile, time) => { CopytoOperation(); }),
+                ((testFile) => testFile.LastWriteTimeUtc),
+                DateTimeKind.Utc);         
         }
+
+        private void CopytoOperation()
+        {
+            string fileName = GetTestFileName();
+	        FileInfo input = new FileInfo(Path.Combine(TestDirectory, fileName));
+	        FileInfo output = new FileInfo(Path.Combine(TestDirectory, GetTestFileName(), fileName));
+	        input.Create().Dispose();
+            Console.WriteLine($"Input: {input.LastWriteTime.Millisecond} ms, {input.LastWriteTime.Ticks} ticks");
+	        Console.WriteLine($"Output: {output.LastWriteTime.Millisecond} ms, {output.LastWriteTime.Ticks} ticks");
+	        if(!output.Exists || input.LastWriteTime > output.LastWriteTime) 
+            {
+		        if(!output.Directory.Exists)
+                {
+			        output.Directory.Create();
+			        Console.WriteLine("Directory Created");
+		        }
+            }
+            output = input.CopyTo(output.FullName, true);
+            Console.WriteLine($"Input: {input.LastWriteTime.Millisecond} ms, {input.LastWriteTime.Ticks} ticks");
+	        Console.WriteLine($"Output: {output.LastWriteTime.Millisecond} ms, {output.LastWriteTime.Ticks} ticks");
+		}
 
         [Fact]
         public void DeleteAfterEnumerate_TimesStillSet()
