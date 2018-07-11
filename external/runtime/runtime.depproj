@@ -66,8 +66,6 @@
   <!-- Setup the testing shared framework host -->
   <Target Name="SetupTestingHost" AfterTargets="ResolveNuGetPackages" Condition="'$(BinPlaceTestSharedFramework)' == 'true'">
 
-      <Message Text="PackageTargetRuntimeSuffix: $(PackageTargetRuntimeSuffix)" Importance="high" />
-      <Message Text="TargetGroup: $(TargetGroup)" Importance="high" />
     <PropertyGroup>
       <HostFxrFileName Condition="'$(OSGroup)'=='Windows_NT'">hostfxr</HostFxrFileName>
       <HostFxrFileName Condition="'$(OSGroup)'!='Windows_NT'">libhostfxr</HostFxrFileName>
