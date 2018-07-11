@@ -25,7 +25,7 @@ namespace System
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct Single : IComparable, IConvertible, IFormattable, IComparable<float>, IEquatable<float>, ISpanFormattable
     {
-        private float m_value; // Do not rename (binary serialization)
+        private readonly float m_value; // Do not rename (binary serialization)
 
         //
         // Public constants
@@ -72,8 +72,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNegative(float f)
         {
-            var bits = unchecked((uint)BitConverter.SingleToInt32Bits(f));
-            return (bits & 0x80000000) == 0x80000000;
+            return BitConverter.SingleToInt32Bits(f) < 0;
         }
 
         /// <summary>Determines whether the specified value is negative infinity.</summary>
@@ -217,7 +216,7 @@ namespace System
 
         public override int GetHashCode()
         {
-            var bits = Unsafe.As<float, int>(ref m_value);
+            var bits = Unsafe.As<float, int>(ref Unsafe.AsRef(in m_value));
 
             // Optimized check for IsNan() || IsZero()
             if (((bits - 1) & 0x7FFFFFFF) >= 0x7F800000)

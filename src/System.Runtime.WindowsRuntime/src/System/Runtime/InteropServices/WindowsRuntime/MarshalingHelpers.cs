@@ -101,6 +101,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     {
         const string WinRTNotifyCollectionChangedEventArgsName = "Windows.UI.Xaml.Interop.NotifyCollectionChangedEventArgs";
 
+        // IBindableVector Guid
+        static Guid IID_IBindableVector = new Guid("393de7de-6fd0-4c0d-bb71-47244a113e93");
+
         static INotifyCollectionChangedEventArgsFactory s_EventArgsFactory;
 
         // Extracts properties from a managed NotifyCollectionChangedEventArgs and passes them to
@@ -116,9 +119,22 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             try
             {
                 if (managedArgs.NewItems != null)
-                    newItemsIP = Marshal.GetComInterfaceForObject(managedArgs.NewItems, typeof(IBindableVector));
+                {
+                    IntPtr unkPtr = Marshal.GetIUnknownForObject(managedArgs.NewItems);
+                    int hr = Marshal.QueryInterface(unkPtr, ref IID_IBindableVector, out newItemsIP);
+                    Marshal.Release(unkPtr);
+                    if (hr < 0)
+                        throw Marshal.GetExceptionForHR(hr);
+
+                }
                 if (managedArgs.OldItems != null)
-                    oldItemsIP = Marshal.GetComInterfaceForObject(managedArgs.OldItems, typeof(IBindableVector));
+                {
+                    IntPtr unkPtr = Marshal.GetIUnknownForObject(managedArgs.OldItems);
+                    int hr = Marshal.QueryInterface(unkPtr, ref IID_IBindableVector, out oldItemsIP);
+                    Marshal.Release(unkPtr);
+                    if (hr < 0)
+                        throw Marshal.GetExceptionForHR(hr);
+                }
 
                 return CreateNativeNCCEventArgsInstanceHelper((int)managedArgs.Action, newItemsIP, oldItemsIP, managedArgs.NewStartingIndex, managedArgs.OldStartingIndex);
             }
@@ -310,8 +326,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             INotifyCollectionChanged _this = Unsafe.As<INotifyCollectionChanged>(this);
             EventRegistrationTokenTable<NotifyCollectionChangedEventHandler> table = s_weakTable.GetOrCreateValue(_this);
 
-            NotifyCollectionChangedEventHandler handler = table.ExtractHandler(token);
-            if (handler != null)
+            if (table.RemoveEventHandler(token, out NotifyCollectionChangedEventHandler handler))
             {
                 _this.CollectionChanged -= handler;
             }
@@ -392,8 +407,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             INotifyPropertyChanged _this = Unsafe.As<INotifyPropertyChanged>(this);
             EventRegistrationTokenTable<PropertyChangedEventHandler> table = s_weakTable.GetOrCreateValue(_this);
 
-            PropertyChangedEventHandler handler = table.ExtractHandler(token);
-            if (handler != null)
+            if (table.RemoveEventHandler(token, out PropertyChangedEventHandler handler))
             {
                 _this.PropertyChanged -= handler;
             }
@@ -500,8 +514,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             ICommand _this = Unsafe.As<ICommand>(this);
             EventRegistrationTokenTable<EventHandler> table = s_weakTable.GetOrCreateValue(_this);
 
-            EventHandler handler = table.ExtractHandler(token);
-            if (handler != null)
+            if (table.RemoveEventHandler(token, out EventHandler handler))
             {
                 _this.CanExecuteChanged -= handler;
             }

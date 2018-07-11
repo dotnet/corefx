@@ -863,6 +863,9 @@
     "System.ComponentModel.Composition.Registration": {
       "InboxOn": {
         "net45": "4.0.0.0"
+      },
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
       }
     },
     "System.ComponentModel.DataAnnotations": {
@@ -979,17 +982,19 @@
     "System.Composition": {
       "StableVersions": [
         "1.0.31",
-        "1.1.0"
+        "1.1.0",
+        "1.2.0"
       ],
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {}
     },
     "System.Composition.AttributedModel": {
       "StableVersions": [
         "1.0.31",
-        "1.1.0"
+        "1.1.0",
+        "1.2.0"
       ],
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1001,9 +1006,10 @@
     "System.Composition.Convention": {
       "StableVersions": [
         "1.0.31",
-        "1.1.0"
+        "1.1.0",
+        "1.2.0"
       ],
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1015,9 +1021,10 @@
     "System.Composition.Hosting": {
       "StableVersions": [
         "1.0.31",
-        "1.1.0"
+        "1.1.0",
+        "1.2.0"
       ],
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1029,9 +1036,10 @@
     "System.Composition.Runtime": {
       "StableVersions": [
         "1.0.31",
-        "1.1.0"
+        "1.1.0",
+        "1.2.0"
       ],
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1043,9 +1051,10 @@
     "System.Composition.TypedParts": {
       "StableVersions": [
         "1.0.31",
-        "1.1.0"
+        "1.1.0",
+        "1.2.0"
       ],
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1239,7 +1248,7 @@
         "monoandroid10": "Any",
         "monotouch10": "Any",
         "uap10.0.16299": "4.3.0.0",
-        "uap10.0.16300": "4.4.1.0",
+        "uap10.0.16300": "4.5.0.0",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",
         "xamarintvos10": "Any",
@@ -1251,7 +1260,7 @@
         "4.1.1.0": "4.3.0",
         "4.2.0.0": "4.4.0",
         "4.4.0.0": "4.5.0",
-        "4.4.1.0": "4.6.0"
+        "4.5.0.0": "4.6.0"
       }
     },
     "System.Data.SqlXml": {
@@ -2444,7 +2453,6 @@
     "System.Memory": {
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0",
-        "netcoreapp3.0": "4.1.0.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
         "uap10.0.16300": "4.1.0.0",
@@ -3236,7 +3244,8 @@
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.0.1",
         "4.0.2.0": "4.3.0",
-        "4.0.3.0": "4.3.0"
+        "4.0.3.0": "4.3.0",
+        "4.1.1.0": "4.6.0"
       }
     },
     "System.Reflection.Emit.ILGeneration": {
@@ -3261,7 +3270,8 @@
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.0.1",
-        "4.0.2.0": "4.3.0"
+        "4.0.2.0": "4.3.0",
+        "4.0.3.0": "4.6.0"
       }
     },
     "System.Reflection.Emit.Lightweight": {
@@ -3286,7 +3296,8 @@
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.0.1",
-        "4.0.2.0": "4.3.0"
+        "4.0.2.0": "4.3.0",
+        "4.0.3.0": "4.6.0"
       }
     },
     "System.Reflection.Extensions": {
@@ -4981,7 +4992,6 @@
         "monotouch10": "Any",
         "netcoreapp2.0": "4.1.1.0",
         "netcoreapp2.1": "4.3.0.0",
-        "netcoreapp3.0": "4.3.0.0",
         "uap10.0.16300": "4.3.0.0",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",

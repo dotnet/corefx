@@ -19,12 +19,12 @@ namespace System
 {
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public struct Boolean : IComparable, IConvertible, IComparable<bool>, IEquatable<bool>
+    public readonly struct Boolean : IComparable, IConvertible, IComparable<bool>, IEquatable<bool>
     {
         //
         // Member Variables
         //
-        private bool m_value; // Do not rename (binary serialization)
+        private readonly bool m_value; // Do not rename (binary serialization)
 
         // The true value.
         //
@@ -97,18 +97,34 @@ namespace System
 
         public bool TryFormat(Span<char> destination, out int charsWritten)
         {
-            string s = m_value ? TrueLiteral : FalseLiteral;
-
-            if (s.AsSpan().TryCopyTo(destination))
+            if (m_value)
             {
-                charsWritten = s.Length;
-                return true;
+                if ((uint)destination.Length > 3) // uint cast, per https://github.com/dotnet/coreclr/issues/18688
+                {
+                    destination[0] = 'T';
+                    destination[1] = 'r';
+                    destination[2] = 'u';
+                    destination[3] = 'e';
+                    charsWritten = 4;
+                    return true;
+                }
             }
             else
             {
-                charsWritten = 0;
-                return false;
+                if ((uint)destination.Length > 4)
+                {
+                    destination[0] = 'F';
+                    destination[1] = 'a';
+                    destination[2] = 'l';
+                    destination[3] = 's';
+                    destination[4] = 'e';
+                    charsWritten = 5;
+                    return true;
+                }
             }
+
+            charsWritten = 0;
+            return false;
         }
 
         // Determines whether two Boolean objects are equal.
