@@ -80,7 +80,7 @@ namespace System.Collections.Tests
                     return true;
                 };
             }
-            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Add) == ModifyOperation.Remove)
+            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Remove) == ModifyOperation.Remove)
             {
                 yield return (IEnumerable<T> enumerable) =>
                 {
@@ -93,7 +93,7 @@ namespace System.Collections.Tests
                     return false;
                 };
             }
-            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Add) == ModifyOperation.Clear)
+            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Clear) == ModifyOperation.Clear)
             {
                 yield return (IEnumerable<T> enumerable) =>
                 {
