@@ -76,20 +76,15 @@ namespace System.IO.Tests
 	        FileInfo input = new FileInfo(Path.Combine(TestDirectory, fileName));
 	        FileInfo output = new FileInfo(Path.Combine(TestDirectory, GetTestFileName(), fileName));
 	        input.Create().Dispose();
-            Console.WriteLine($"Input: {input.LastWriteTime.Millisecond} ms, {input.LastWriteTime.Ticks} ticks");
-	        Console.WriteLine($"Output: {output.LastWriteTime.Millisecond} ms, {output.LastWriteTime.Ticks} ticks");
-	        if(!output.Exists || input.LastWriteTime > output.LastWriteTime) 
-            {
-		        if(!output.Directory.Exists)
-                {
-			        output.Directory.Create();
-			        Console.WriteLine("Directory Created");
-		        }
-            }
-            output = input.CopyTo(output.FullName, true);
-            Console.WriteLine($"Input: {input.LastWriteTime.Millisecond} ms, {input.LastWriteTime.Ticks} ticks");
-	        Console.WriteLine($"Output: {output.LastWriteTime.Millisecond} ms, {output.LastWriteTime.Ticks} ticks");
-		}
+            
+            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+	        Assert.Equal(0, output.LastWriteTime.Millisecond);
+            output.Directory.Create();
+			output = input.CopyTo(output.FullName, true);
+
+            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+	        Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+        }
 
         [Fact]
         public void DeleteAfterEnumerate_TimesStillSet()
