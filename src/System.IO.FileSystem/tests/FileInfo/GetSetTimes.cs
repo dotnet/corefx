@@ -67,23 +67,23 @@ namespace System.IO.Tests
             yield return TimeFunction.Create(
                 ((testFile, time) => CopytoOperation()),
                 ((testFile) => testFile.LastWriteTimeUtc),
-                DateTimeKind.Utc);         
+                DateTimeKind.Utc);
         }
 
         private void CopytoOperation()
         {
             string fileName = GetTestFileName();
-	        FileInfo input = new FileInfo(Path.Combine(TestDirectory, fileName));
-	        FileInfo output = new FileInfo(Path.Combine(TestDirectory, GetTestFileName(), fileName));
-	        input.Create().Dispose();
-            
-            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
-	        Assert.Equal(0, output.LastWriteTime.Millisecond);
-            output.Directory.Create();
-			output = input.CopyTo(output.FullName, true);
+            FileInfo input = new FileInfo(Path.Combine(TestDirectory, fileName));
+            FileInfo output = new FileInfo(Path.Combine(TestDirectory, GetTestFileName(), fileName));
+            input.Create().Dispose();
 
             Assert.NotEqual(0, input.LastWriteTime.Millisecond);
-	        Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+
+            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
         }
 
         [Fact]
