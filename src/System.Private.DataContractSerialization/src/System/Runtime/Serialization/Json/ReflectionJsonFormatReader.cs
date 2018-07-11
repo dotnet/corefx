@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -197,43 +197,43 @@ namespace System.Runtime.Serialization.Json
                     switch (typeCode)
                     {
                         case TypeCode.Boolean:
-                            pairKey = bool.Parse(keyString);
+                            pairKey = Boolean.Parse(keyString);
                             break;
                         case TypeCode.Int16:
-                            pairKey = short.Parse(keyString);
+                            pairKey = Int16.Parse(keyString);
                             break;
                         case TypeCode.Int32:
-                            pairKey = int.Parse(keyString);
+                            pairKey = Int32.Parse(keyString);
                             break;
                         case TypeCode.Int64:
-                            pairKey = long.Parse(keyString);
+                            pairKey = Int64.Parse(keyString);
                             break;
                         case TypeCode.Char:
-                            pairKey = char.Parse(keyString);
+                            pairKey = Char.Parse(keyString);
                             break;
                         case TypeCode.Byte:
-                            pairKey = byte.Parse(keyString);
+                            pairKey = Byte.Parse(keyString);
                             break;
                         case TypeCode.SByte:
-                            pairKey = sbyte.Parse(keyString);
+                            pairKey = SByte.Parse(keyString);
                             break;
                         case TypeCode.Double:
-                            pairKey = double.Parse(keyString);
+                            pairKey = Double.Parse(keyString);
                             break;
                         case TypeCode.Decimal:
-                            pairKey = decimal.Parse(keyString);
+                            pairKey = Decimal.Parse(keyString);
                             break;
                         case TypeCode.Single:
-                            pairKey = float.Parse(keyString);
+                            pairKey = Single.Parse(keyString);
                             break;
                         case TypeCode.UInt16:
-                            pairKey = ushort.Parse(keyString);
+                            pairKey = UInt16.Parse(keyString);
                             break;
                         case TypeCode.UInt32:
-                            pairKey = uint.Parse(keyString);
+                            pairKey = UInt32.Parse(keyString);
                             break;
                         case TypeCode.UInt64:
-                            pairKey = ulong.Parse(keyString);
+                            pairKey = UInt64.Parse(keyString);
                             break;
                         default:
                             pairKey = keyDataContract.ParseMethod.Invoke(null, new object[] { keyString });

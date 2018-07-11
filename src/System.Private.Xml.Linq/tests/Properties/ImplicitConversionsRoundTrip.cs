@@ -24,21 +24,21 @@ namespace CoreXml.Test.XLinq
                 switch (ret.Name)
                 {
                     case "Boolean":
-                        return (bool)data;
+                        return (Boolean)data;
                     case "Int32":
-                        return (int)data;
+                        return (Int32)data;
                     case "UInt32":
-                        return (uint)data;
+                        return (UInt32)data;
                     case "Int64":
-                        return (long)data;
+                        return (Int64)data;
                     case "UInt64":
-                        return (ulong)data;
+                        return (UInt64)data;
                     case "Single":
-                        return (float)data;
+                        return (Single)data;
                     case "Double":
-                        return (double)data;
+                        return (Double)data;
                     case "Decimal":
-                        return (decimal)data;
+                        return (Decimal)data;
                     case "DateTime":
                         return (DateTime)data;
                     case "DateTimeOffset":
@@ -52,21 +52,21 @@ namespace CoreXml.Test.XLinq
                             switch (ret.ToString())
                             {
                                 case "System.Nullable`1[System.Boolean]":
-                                    return (bool?)data;
+                                    return (Boolean?)data;
                                 case "System.Nullable`1[System.Int32]":
-                                    return (int?)data;
+                                    return (Int32?)data;
                                 case "System.Nullable`1[System.Int64]":
-                                    return (long?)data;
+                                    return (Int64?)data;
                                 case "System.Nullable`1[System.UInt32]":
-                                    return (uint?)data;
+                                    return (UInt32?)data;
                                 case "System.Nullable`1[System.UInt64]":
-                                    return (ulong?)data;
+                                    return (UInt64?)data;
                                 case "System.Nullable`1[System.Single]":
-                                    return (float?)data;
+                                    return (Single?)data;
                                 case "System.Nullable`1[System.Double]":
-                                    return (double?)data;
+                                    return (Double?)data;
                                 case "System.Nullable`1[System.Decimal]":
-                                    return (decimal?)data;
+                                    return (Decimal?)data;
                                 case "System.Nullable`1[System.DateTime]":
                                     return (DateTime?)data;
                                 case "System.Nullable`1[System.DateTimeOffset]":
@@ -88,21 +88,21 @@ namespace CoreXml.Test.XLinq
                 switch (ret.Name)
                 {
                     case "Boolean":
-                        return (bool)data;
+                        return (Boolean)data;
                     case "Int32":
-                        return (int)data;
+                        return (Int32)data;
                     case "UInt32":
-                        return (uint)data;
+                        return (UInt32)data;
                     case "Int64":
-                        return (long)data;
+                        return (Int64)data;
                     case "UInt64":
-                        return (ulong)data;
+                        return (UInt64)data;
                     case "Single":
-                        return (float)data;
+                        return (Single)data;
                     case "Double":
-                        return (double)data;
+                        return (Double)data;
                     case "Decimal":
-                        return (decimal)data;
+                        return (Decimal)data;
                     case "DateTime":
                         return (DateTime)data;
                     case "DateTimeOffset":
@@ -116,21 +116,21 @@ namespace CoreXml.Test.XLinq
                             switch (ret.ToString())
                             {
                                 case "System.Nullable`1[System.Boolean]":
-                                    return (bool?)data;
+                                    return (Boolean?)data;
                                 case "System.Nullable`1[System.Int32]":
-                                    return (int?)data;
+                                    return (Int32?)data;
                                 case "System.Nullable`1[System.Int64]":
-                                    return (long?)data;
+                                    return (Int64?)data;
                                 case "System.Nullable`1[System.UInt32]":
-                                    return (uint?)data;
+                                    return (UInt32?)data;
                                 case "System.Nullable`1[System.UInt64]":
-                                    return (ulong?)data;
+                                    return (UInt64?)data;
                                 case "System.Nullable`1[System.Single]":
-                                    return (float?)data;
+                                    return (Single?)data;
                                 case "System.Nullable`1[System.Double]":
-                                    return (double?)data;
+                                    return (Double?)data;
                                 case "System.Nullable`1[System.Decimal]":
-                                    return (decimal?)data;
+                                    return (Decimal?)data;
                                 case "System.Nullable`1[System.DateTime]":
                                     return (DateTime?)data;
                                 case "System.Nullable`1[System.DateTimeOffset]":
@@ -177,59 +177,59 @@ namespace CoreXml.Test.XLinq
                     false,
 
                     // Int32
-                    (int) 1001,
-                    (int) 0,
-                    (int) (-321),
-                    int.MaxValue,
-                    int.MinValue,
+                    (Int32) 1001,
+                    (Int32) 0,
+                    (Int32) (-321),
+                    Int32.MaxValue,
+                    Int32.MinValue,
 
                     // UInt32
-                    (uint) 1001,
-                    (uint) 0,
-                    uint.MaxValue,
-                    uint.MinValue,
+                    (UInt32) 1001,
+                    (UInt32) 0,
+                    UInt32.MaxValue,
+                    UInt32.MinValue,
 
-                    (long) 0,
-                    (long) (-641),
-                    long.MaxValue,
-                    long.MinValue,
+                    (Int64) 0,
+                    (Int64) (-641),
+                    Int64.MaxValue,
+                    Int64.MinValue,
 
-                    (ulong) 1001,
-                    (ulong) 0,
-                    ulong.MaxValue,
-                    ulong.MinValue,
+                    (UInt64) 1001,
+                    (UInt64) 0,
+                    UInt64.MaxValue,
+                    UInt64.MinValue,
 
                     // float
-                    (float) 12.1,
-                    (float) (-12.1),
-                    (float) 0.0,
-                    float.Epsilon,
-                    float.NaN,
-                    float.PositiveInfinity,
-                    float.NegativeInfinity,
-                    float.MinValue,
-                    float.MaxValue,
+                    (Single) 12.1,
+                    (Single) (-12.1),
+                    (Single) 0.0,
+                    Single.Epsilon,
+                    Single.NaN,
+                    Single.PositiveInfinity,
+                    Single.NegativeInfinity,
+                    Single.MinValue,
+                    Single.MaxValue,
 
                     // double 
-                    (double)12.1,
-                    (double)(-12.1),
-                    (double)0.0,
-                    double.Epsilon,
-                    double.NaN,
-                    double.PositiveInfinity,
-                    double.NegativeInfinity,
-                    double.MinValue,
-                    double.MaxValue,
+                    (Double)12.1,
+                    (Double)(-12.1),
+                    (Double)0.0,
+                    Double.Epsilon,
+                    Double.NaN,
+                    Double.PositiveInfinity,
+                    Double.NegativeInfinity,
+                    Double.MinValue,
+                    Double.MaxValue,
 
                     // decimal
-                    (decimal)12.1,
-                    (decimal)(-12.1),
-                    (decimal) 0.0,
-                    decimal.MinValue,
-                    decimal.MaxValue,
-                    decimal.MinusOne,
-                    decimal.One,
-                    decimal.Zero,
+                    (Decimal)12.1,
+                    (Decimal)(-12.1),
+                    (Decimal) 0.0,
+                    Decimal.MinValue,
+                    Decimal.MaxValue,
+                    Decimal.MinusOne,
+                    Decimal.One,
+                    Decimal.Zero,
 
                     //// DateTimeOffset
                     DateTimeOffset.Now,
@@ -262,13 +262,13 @@ namespace CoreXml.Test.XLinq
                     {
                         typeMapper = new Dictionary<Type, Type>();
                         typeMapper.Add(typeof(bool), typeof(bool?));
-                        typeMapper.Add(typeof(int), typeof(int?));
-                        typeMapper.Add(typeof(long), typeof(long?));
-                        typeMapper.Add(typeof(uint), typeof(uint?));
-                        typeMapper.Add(typeof(ulong), typeof(ulong?));
-                        typeMapper.Add(typeof(float), typeof(float?));
-                        typeMapper.Add(typeof(double), typeof(double?));
-                        typeMapper.Add(typeof(decimal), typeof(decimal?));
+                        typeMapper.Add(typeof(Int32), typeof(Int32?));
+                        typeMapper.Add(typeof(Int64), typeof(Int64?));
+                        typeMapper.Add(typeof(UInt32), typeof(UInt32?));
+                        typeMapper.Add(typeof(UInt64), typeof(UInt64?));
+                        typeMapper.Add(typeof(Single), typeof(Single?));
+                        typeMapper.Add(typeof(Double), typeof(Double?));
+                        typeMapper.Add(typeof(Decimal), typeof(Decimal?));
                         typeMapper.Add(typeof(DateTime), typeof(DateTime?));
                         typeMapper.Add(typeof(DateTimeOffset), typeof(DateTimeOffset?));
                         typeMapper.Add(typeof(TimeSpan), typeof(TimeSpan?));
@@ -471,28 +471,28 @@ namespace CoreXml.Test.XLinq
                             switch (_data.GetType().Name)
                             {
                                 case "Boolean":
-                                    xmlConv = XmlConvert.ToString((bool)_data);
+                                    xmlConv = XmlConvert.ToString((Boolean)_data);
                                     break;
                                 case "Int32":
-                                    xmlConv = XmlConvert.ToString((int)_data);
+                                    xmlConv = XmlConvert.ToString((Int32)_data);
                                     break;
                                 case "UInt32":
-                                    xmlConv = XmlConvert.ToString((uint)_data);
+                                    xmlConv = XmlConvert.ToString((UInt32)_data);
                                     break;
                                 case "Int64":
-                                    xmlConv = XmlConvert.ToString((long)_data);
+                                    xmlConv = XmlConvert.ToString((Int64)_data);
                                     break;
                                 case "UInt64":
-                                    xmlConv = XmlConvert.ToString((ulong)_data);
+                                    xmlConv = XmlConvert.ToString((UInt64)_data);
                                     break;
                                 case "Single":
-                                    xmlConv = XmlConvert.ToString((float)_data);
+                                    xmlConv = XmlConvert.ToString((Single)_data);
                                     break;
                                 case "Double":
-                                    xmlConv = XmlConvert.ToString((double)_data);
+                                    xmlConv = XmlConvert.ToString((Double)_data);
                                     break;
                                 case "Decimal":
-                                    xmlConv = XmlConvert.ToString((decimal)_data);
+                                    xmlConv = XmlConvert.ToString((Decimal)_data);
                                     break;
                                 case "DateTime":
                                     TestLog.Skip("DateTime Convert include +8:00");

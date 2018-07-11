@@ -312,7 +312,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     throw new ArgumentException(SR.NoNegativeTime, nameof(value));
 
                 double tmpVal = value.TotalMinutes;
-                if (tmpVal > int.MaxValue)
+                if (tmpVal > Int32.MaxValue)
                     throw new ArgumentException(SR.ReplicationIntervalExceedMax, nameof(value));
 
                 int totalMinutes = (int)tmpVal;

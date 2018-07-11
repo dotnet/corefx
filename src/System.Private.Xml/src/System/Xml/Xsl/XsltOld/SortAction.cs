@@ -63,7 +63,7 @@ namespace System.Xml.Xsl.XsltOld
             {
                 return XmlDataType.Number;
             }
-            string prefix, localname;
+            String prefix, localname;
             PrefixQName.ParseQualifiedName(value, out prefix, out localname);
             manager.ResolveXmlNamespace(prefix);
             if (prefix.Length == 0 && !_forwardCompatibility)

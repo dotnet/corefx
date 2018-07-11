@@ -14,7 +14,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='  false  '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.Throws<XmlException>(() => reader.ReadContentAs(typeof(byte), null));
+            Assert.Throws<XmlException>(() => reader.ReadContentAs(typeof(Byte), null));
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='true'/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.Throws<XmlException>(() => reader.ReadContentAs(typeof(byte), null));
+            Assert.Throws<XmlException>(() => reader.ReadContentAs(typeof(Byte), null));
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='  0  '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.Equal(byte.MinValue, reader.ReadContentAs(typeof(byte), null));
+            Assert.Equal(Byte.MinValue, reader.ReadContentAs(typeof(Byte), null));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='  255  '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.Equal(byte.MaxValue, reader.ReadContentAs(typeof(byte), null));
+            Assert.Equal(Byte.MaxValue, reader.ReadContentAs(typeof(Byte), null));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='0'/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.Equal(byte.MinValue, reader.ReadContentAs(typeof(byte), null));
+            Assert.Equal(Byte.MinValue, reader.ReadContentAs(typeof(Byte), null));
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='255'/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.Equal(byte.MaxValue, reader.ReadContentAs(typeof(byte), null));
+            Assert.Equal(Byte.MaxValue, reader.ReadContentAs(typeof(Byte), null));
         }
     }
 }

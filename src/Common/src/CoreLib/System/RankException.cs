@@ -26,13 +26,13 @@ namespace System
             HResult = HResults.COR_E_RANK;
         }
 
-        public RankException(string message)
+        public RankException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_RANK;
         }
 
-        public RankException(string message, Exception innerException)
+        public RankException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_RANK;

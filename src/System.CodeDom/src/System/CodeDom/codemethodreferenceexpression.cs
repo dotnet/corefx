@@ -31,8 +31,8 @@ namespace System.CodeDom
 
         public string MethodName
         {
-            get => _methodName ?? string.Empty;
-            set => _methodName = value;
+            get { return _methodName ?? string.Empty; }
+            set { _methodName = value; }
         }
 
         public CodeTypeReferenceCollection TypeArguments => _typeArguments ?? (_typeArguments = new CodeTypeReferenceCollection());

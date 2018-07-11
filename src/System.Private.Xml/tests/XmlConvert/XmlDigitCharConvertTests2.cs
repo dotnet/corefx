@@ -25,7 +25,7 @@ namespace System.Xml.Tests
         public int XmlEncodeName2()
         {
             int i = ((CurVariation.id) - 1) * 2;
-            string strEnVal = string.Empty;
+            string strEnVal = String.Empty;
 
             strEnVal = XmlConvert.EncodeNmToken((BitConverter.ToChar(_byte_Digit, i)).ToString());
             if (_Expbyte_Digit[i / 2] != "_x0A70_")

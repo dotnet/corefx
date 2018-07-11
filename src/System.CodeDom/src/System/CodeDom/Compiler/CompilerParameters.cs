@@ -8,6 +8,9 @@ namespace System.CodeDom.Compiler
 {
     public partial class CompilerParameters
     {
+        private readonly StringCollection _assemblyNames = new StringCollection();
+        private readonly StringCollection _embeddedResources = new StringCollection();
+        private readonly StringCollection _linkedResources = new StringCollection();
         private TempFileCollection _tempFiles;
 
         public CompilerParameters() : this(null, null)
@@ -54,15 +57,16 @@ namespace System.CodeDom.Compiler
 
         public bool GenerateInMemory { get; set; }
 
-        public StringCollection ReferencedAssemblies { get; } = new StringCollection();
+        public StringCollection ReferencedAssemblies => _assemblyNames;
+
         public string MainClass { get; set; }
 
         public string OutputAssembly { get; set; }
 
         public TempFileCollection TempFiles
         {
-            get => _tempFiles ?? (_tempFiles = new TempFileCollection());
-            set => _tempFiles = value;
+            get { return _tempFiles ?? (_tempFiles = new TempFileCollection()); }
+            set { _tempFiles = value; }
         }
 
         public bool IncludeDebugInformation { get; set; }
@@ -75,9 +79,9 @@ namespace System.CodeDom.Compiler
 
         public string Win32Resource { get; set; }
 
-        public StringCollection EmbeddedResources { get; } = new StringCollection();
+        public StringCollection EmbeddedResources => _embeddedResources;
 
-        public StringCollection LinkedResources { get; } = new StringCollection();
+        public StringCollection LinkedResources => _linkedResources;
 
         public IntPtr UserToken { get; set; }
     }

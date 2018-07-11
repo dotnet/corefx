@@ -42,7 +42,7 @@ namespace System.DirectoryServices.ActiveDirectory
             this.directoryEntryMgr = directoryEntryMgr;
 
             // initialize the transfer role owner attributes
-            _becomeRoleOwnerAttrs = new string[2];
+            _becomeRoleOwnerAttrs = new String[2];
             _becomeRoleOwnerAttrs[0] = PropertyManager.BecomeSchemaMaster;
             _becomeRoleOwnerAttrs[1] = PropertyManager.BecomeDomainMaster;
 
@@ -67,7 +67,7 @@ namespace System.DirectoryServices.ActiveDirectory
             this.directoryEntryMgr = directoryEntryMgr;
 
             // initialize the transfer role owner attributes
-            _becomeRoleOwnerAttrs = new string[2];
+            _becomeRoleOwnerAttrs = new String[2];
             _becomeRoleOwnerAttrs[0] = PropertyManager.BecomeSchemaMaster;
             _becomeRoleOwnerAttrs[1] = PropertyManager.BecomeDomainMaster;
 
@@ -686,7 +686,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public override string SiteName
+        public override String SiteName
         {
             get
             {
@@ -707,7 +707,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        internal string SiteObjectName
+        internal String SiteObjectName
         {
             get
             {
@@ -733,7 +733,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        internal string ServerObjectName
+        internal String ServerObjectName
         {
             get
             {
@@ -758,7 +758,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        internal string NtdsaObjectName
+        internal String NtdsaObjectName
         {
             get
             {

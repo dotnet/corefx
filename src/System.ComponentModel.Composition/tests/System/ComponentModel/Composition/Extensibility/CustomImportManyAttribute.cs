@@ -10,5 +10,10 @@ namespace System.ComponentModel.Composition.Extensibility
         public CustomImportManyAttribute()
         {
         }
+
+        public CustomImportManyAttribute(Type type)
+            : base(type)
+        {
+        }
     }
 }

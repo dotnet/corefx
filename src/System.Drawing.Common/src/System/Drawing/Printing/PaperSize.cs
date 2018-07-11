@@ -25,7 +25,7 @@ namespace System.Drawing.Printing
         public PaperSize()
         {
             _kind = PaperKind.Custom;
-            _name = string.Empty;
+            _name = String.Empty;
             _createdByDefaultConstructor = true;
         }
 

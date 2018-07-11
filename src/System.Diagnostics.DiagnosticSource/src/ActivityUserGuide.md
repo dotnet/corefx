@@ -61,7 +61,7 @@ When that activity is started, it gets an [Id](id) and [Parent](parent).
            activity.SetParentId(context.Request.headers["Request-id"])
            foreach (var pair in context.Request.Headers["Correlation-Context"])
            {
-               var baggageItem = NameValueHeaderValue.Parse(pair);
+               var baggageItem = NameValueHEaderValue.Parse(pair);
                activity.AddBaggage(baggageItem.Key, baggageItem.Value);
            }     
            httpListener.StartActivity(activity, new  {context});

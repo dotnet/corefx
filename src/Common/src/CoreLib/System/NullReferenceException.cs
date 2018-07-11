@@ -25,13 +25,13 @@ namespace System
             HResult = HResults.COR_E_NULLREFERENCE;
         }
 
-        public NullReferenceException(string message)
+        public NullReferenceException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_NULLREFERENCE;
         }
 
-        public NullReferenceException(string message, Exception innerException)
+        public NullReferenceException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_NULLREFERENCE;

@@ -23,8 +23,8 @@ namespace System.CodeDom
 
         public string Name
         {
-            get => _name ?? string.Empty;
-            set => _name = value;
+            get { return _name ?? string.Empty; }
+            set { _name = value; }
         }
 
         public CodeExpression Value { get; set; }

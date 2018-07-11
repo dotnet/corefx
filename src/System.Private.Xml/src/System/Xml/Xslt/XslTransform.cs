@@ -238,7 +238,7 @@ namespace System.Xml.Xsl
             Transform(input.CreateNavigator(), args, output, _DocumentResolver);
         }
 
-        public void Transform(string inputfile, string outputfile, XmlResolver resolver)
+        public void Transform(String inputfile, String outputfile, XmlResolver resolver)
         {
             FileStream fs = null;
             try
@@ -257,7 +257,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        public void Transform(string inputfile, string outputfile)
+        public void Transform(String inputfile, String outputfile)
         {
             Transform(inputfile, outputfile, _DocumentResolver);
         }

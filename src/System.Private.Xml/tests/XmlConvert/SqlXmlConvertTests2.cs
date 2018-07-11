@@ -25,8 +25,8 @@ namespace System.Xml.Tests
         public int XmlEncodeName2()
         {
             int i = (CurVariation.id) - 1;
-            string strDeVal = string.Empty;
-            string strEnVal = string.Empty;
+            string strDeVal = String.Empty;
+            string strEnVal = String.Empty;
 
             CError.WriteLine(strEncode[i]);
             strEnVal = XmlConvert.EncodeName(strEncode[i]);

@@ -12,9 +12,9 @@ namespace System
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public readonly struct Int32 : IComparable, IConvertible, IFormattable, IComparable<int>, IEquatable<int>, ISpanFormattable
+    public struct Int32 : IComparable, IConvertible, IFormattable, IComparable<Int32>, IEquatable<Int32>, ISpanFormattable
     {
-        private readonly int m_value; // Do not rename (binary serialization)
+        private int m_value; // Do not rename (binary serialization)
 
         public const int MaxValue = 0x7fffffff;
         public const int MinValue = unchecked((int)0x80000000);
@@ -28,13 +28,13 @@ namespace System
         // null is considered to be less than any instance, hence returns positive number
         // If object is not of type Int32, this method throws an ArgumentException.
         // 
-        public int CompareTo(object value)
+        public int CompareTo(Object value)
         {
             if (value == null)
             {
                 return 1;
             }
-            if (value is int)
+            if (value is Int32)
             {
                 // NOTE: Cannot use return (_value - value) as this causes a wrap
                 // around in cases where _value - value > MaxValue.
@@ -55,17 +55,17 @@ namespace System
             return 0;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Object obj)
         {
-            if (!(obj is int))
+            if (!(obj is Int32))
             {
                 return false;
             }
-            return m_value == ((int)obj).m_value;
+            return m_value == ((Int32)obj).m_value;
         }
 
         [NonVersionable]
-        public bool Equals(int obj)
+        public bool Equals(Int32 obj)
         {
             return m_value == obj;
         }
@@ -76,22 +76,22 @@ namespace System
             return m_value;
         }
 
-        public override string ToString()
+        public override String ToString()
         {
             return Number.FormatInt32(m_value, null, null);
         }
 
-        public string ToString(string format)
+        public String ToString(String format)
         {
             return Number.FormatInt32(m_value, format, null);
         }
 
-        public string ToString(IFormatProvider provider)
+        public String ToString(IFormatProvider provider)
         {
             return Number.FormatInt32(m_value, null, provider);
         }
 
-        public string ToString(string format, IFormatProvider provider)
+        public String ToString(String format, IFormatProvider provider)
         {
             return Number.FormatInt32(m_value, format, provider);
         }
@@ -101,13 +101,13 @@ namespace System
             return Number.TryFormatInt32(m_value, format, provider, destination, out charsWritten);
         }
 
-        public static int Parse(string s)
+        public static int Parse(String s)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Number.ParseInt32(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
         }
 
-        public static int Parse(string s, NumberStyles style)
+        public static int Parse(String s, NumberStyles style)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -118,7 +118,7 @@ namespace System
         // a NumberFormatInfo isn't specified, the current culture's 
         // NumberFormatInfo is assumed.
         // 
-        public static int Parse(string s, IFormatProvider provider)
+        public static int Parse(String s, IFormatProvider provider)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Number.ParseInt32(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
@@ -128,7 +128,7 @@ namespace System
         // a NumberFormatInfo isn't specified, the current culture's 
         // NumberFormatInfo is assumed.
         // 
-        public static int Parse(string s, NumberStyles style, IFormatProvider provider)
+        public static int Parse(String s, NumberStyles style, IFormatProvider provider)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -144,7 +144,7 @@ namespace System
         // Parses an integer from a String. Returns false rather
         // than throwing exceptin if input is invalid
         // 
-        public static bool TryParse(string s, out int result)
+        public static bool TryParse(String s, out Int32 result)
         {
             if (s == null)
             {
@@ -163,7 +163,7 @@ namespace System
         // Parses an integer from a String in the given style. Returns false rather
         // than throwing exceptin if input is invalid
         // 
-        public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out int result)
+        public static bool TryParse(String s, NumberStyles style, IFormatProvider provider, out Int32 result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
 
@@ -251,7 +251,7 @@ namespace System
             return Convert.ToDouble(m_value);
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        Decimal IConvertible.ToDecimal(IFormatProvider provider)
         {
             return Convert.ToDecimal(m_value);
         }
@@ -261,7 +261,7 @@ namespace System
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "Int32", "DateTime"));
         }
 
-        object IConvertible.ToType(Type type, IFormatProvider provider)
+        Object IConvertible.ToType(Type type, IFormatProvider provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

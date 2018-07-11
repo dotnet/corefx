@@ -75,14 +75,14 @@ namespace System.Diagnostics
         private Hashtable messageLibraries;
         private readonly static Hashtable listenerInfos = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
-        private object m_InstanceLockObject;
-        private object InstanceLockObject
+        private Object m_InstanceLockObject;
+        private Object InstanceLockObject
         {
             get
             {
                 if (m_InstanceLockObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange(ref m_InstanceLockObject, o, null);
                 }
 
@@ -90,14 +90,14 @@ namespace System.Diagnostics
             }
         }
 
-        private static object s_InternalSyncObject;
-        private static object InternalSyncObject
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
                 }
 
@@ -1264,7 +1264,7 @@ namespace System.Diagnostics
 
         private static bool CharIsPrintable(char c)
         {
-            UnicodeCategory uc = char.GetUnicodeCategory(c);
+            UnicodeCategory uc = Char.GetUnicodeCategory(c);
             return (!(uc == UnicodeCategory.Control) || (uc == UnicodeCategory.Format) ||
                     (uc == UnicodeCategory.LineSeparator) || (uc == UnicodeCategory.ParagraphSeparator) ||
             (uc == UnicodeCategory.OtherNotAssigned));
@@ -1312,7 +1312,7 @@ namespace System.Diagnostics
                     {
                         string rightLogName = EventLog.LogNameFromSourceName(sourceName, currentMachineName);
                         string currentLogName = GetLogName(currentMachineName);
-                        if (rightLogName != null && currentLogName != null && !string.Equals(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase))
+                        if (rightLogName != null && currentLogName != null && String.Compare(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase) != 0)
                             throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source.ToString(), currentLogName, rightLogName));
                     }
                 }
@@ -1329,7 +1329,7 @@ namespace System.Diagnostics
             {
                 string rightLogName = EventLog._InternalLogNameFromSourceName(sourceName, currentMachineName);
                 string currentLogName = GetLogName(currentMachineName);
-                if (rightLogName != null && currentLogName != null && !string.Equals(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase))
+                if (rightLogName != null && currentLogName != null && String.Compare(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase) != 0)
                     throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source.ToString(), currentLogName, rightLogName));
             }
             boolFlags[Flag_sourceVerified] = true;
@@ -1361,7 +1361,7 @@ namespace System.Diagnostics
             InternalWriteEvent((uint)eventID, (ushort)category, type, new string[] { message }, rawData, currentMachineName);
         }
 
-        public void WriteEvent(EventInstance instance, byte[] data, params object[] values)
+        public void WriteEvent(EventInstance instance, byte[] data, params Object[] values)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
@@ -1386,7 +1386,7 @@ namespace System.Diagnostics
                     if (values[i] != null)
                         strings[i] = values[i].ToString();
                     else
-                        strings[i] = string.Empty;
+                        strings[i] = String.Empty;
                 }
             }
 
@@ -1405,7 +1405,7 @@ namespace System.Diagnostics
             for (int i = 0; i < strings.Length; i++)
             {
                 if (strings[i] == null)
-                    strings[i] = string.Empty;
+                    strings[i] = String.Empty;
 
                 // make sure the strings aren't too long.  MSDN says each string has a limit of 32k (32768) characters, but 
                 // experimentation shows that it doesn't like anything larger than 32766

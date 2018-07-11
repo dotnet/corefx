@@ -187,7 +187,7 @@ namespace System.Net
             }
         }
 
-        public override string ContentType
+        public override String ContentType
         {
             get
             {
@@ -858,7 +858,7 @@ namespace System.Net
                 // Handle the case where their object tries to change
                 //  name, value pairs after they call set, so therefore,
                 //  we need to clone their headers.
-                foreach (string headerName in webHeaders.AllKeys)
+                foreach (String headerName in webHeaders.AllKeys)
                 {
                     newWebHeaders[headerName] = webHeaders[headerName];
                 }
@@ -1051,7 +1051,7 @@ namespace System.Net
             return GetRequestStream();
         }
 
-        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
+        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, Object state)
         {
             CheckAbort();
 
@@ -1373,7 +1373,7 @@ namespace System.Net
             }
             else
             {
-                if (!string.Equals(curRange.Substring(0, curRange.IndexOf('=')), rangeSpecifier, StringComparison.OrdinalIgnoreCase))
+                if (String.Compare(curRange.Substring(0, curRange.IndexOf('=')), rangeSpecifier, StringComparison.OrdinalIgnoreCase) != 0)
                 {
                     return false;
                 }

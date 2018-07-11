@@ -4,6 +4,7 @@
 
 using System.ComponentModel.Composition.Primitives;
 using System.Reflection;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -13,10 +14,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionMethod(MethodInfo method)
         {
-            if (method == null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
+            Assumes.NotNull(method);
 
             _method = method;
         }

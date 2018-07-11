@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void CastIntToLongThrows()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > int.MinValue
+                    where x > Int32.MinValue
                     select x;
 
             var rst = q.Cast<long>();

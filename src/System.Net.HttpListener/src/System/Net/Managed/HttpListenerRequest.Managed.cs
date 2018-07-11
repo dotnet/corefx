@@ -225,14 +225,14 @@ namespace System.Net
                 }
             }
 
-            if (string.Equals(Headers[HttpKnownHeaderNames.Expect], "100-continue", StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(Headers[HttpKnownHeaderNames.Expect], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 HttpResponseStream output = _context.Connection.GetResponseStream();
                 output.InternalWrite(s_100continue, 0, s_100continue.Length);
             }
         }
 
-        internal static string Unquote(string str)
+        internal static string Unquote(String str)
         {
             int start = str.IndexOf('\"');
             int end = str.LastIndexOf('\"');

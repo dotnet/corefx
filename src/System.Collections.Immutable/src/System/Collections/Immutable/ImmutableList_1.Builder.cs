@@ -1100,7 +1100,7 @@ namespace System.Collections.Immutable
                 {
                     if (_syncRoot == null)
                     {
-                        System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
+                        System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
                     }
 
                     return _syncRoot;

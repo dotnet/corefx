@@ -26,9 +26,9 @@ namespace CoreXml.Test.XLinq
 {
     public class SchemaExtensionsTests
     {
-        public static string xsdString;
+        public static String xsdString;
 		public static XmlSchemaSet schemaSet;
-		public static string xmlString;
+		public static String xmlString;
 		public static XDocument xmlDocument;
 		public static bool validationSucceded;
 
@@ -86,7 +86,7 @@ namespace CoreXml.Test.XLinq
 		}
 
 		// Use this method to load data from disk
-		public static void LoadOutsideDocuments(string xsdDocumentPath, string xmlDocumentPath)
+		public static void LoadOutsideDocuments(String xsdDocumentPath, String xmlDocumentPath)
 		{
 			// Create a resolver with default credentials.
 			XmlUrlResolver resolver = new XmlUrlResolver();
@@ -126,7 +126,7 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XDocumentFailValidate()
 		{
-			string elementName = "AlteringElementName";
+			String elementName = "AlteringElementName";
 			object elementValue = "AlteringElementValue";
 
 			// alter XML document to invalidate
@@ -146,7 +146,7 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XDocumentThrowExceptionValidate()
 		{
-			string elementName = "AlteringElementName";
+			String elementName = "AlteringElementName";
 			object elementValue = "AlteringElementValue";
 
 			// alter XML document to invalidate
@@ -262,8 +262,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XAttributeSuccessValidate ()
 		{
-			string elementName = "note";
-			string attributeName = "date";
+			String elementName = "note";
+			String attributeName = "date";
 			object attributeValue = "2010-05-27";
 
 			// validate the entire document
@@ -284,8 +284,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XAttributeFailValidate()
 		{
-			string elementName = "note";
-			string attributeName = "date";
+			String elementName = "note";
+			String attributeName = "date";
 			object attributeValue = "2010-12-32";
 
 			// validate the entire document
@@ -309,8 +309,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XAttributeThrowExceptionValidate()
 		{
-			string elementName = "note";
-			string attributeName =  "date";
+			String elementName = "note";
+			String attributeName =  "date";
 			object attributeValue =  "2010-12-32";
 
 			// validate the entire document
@@ -329,8 +329,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XElementSuccessValidate()
 		{
-			string parentElementName = "note";
-			string childElementName = "body";
+			String parentElementName = "note";
+			String childElementName = "body";
 			object childElementValue = "Please call me!";
 
 			// validate the entire document
@@ -352,8 +352,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XElementFailValidate()
 		{
-			string parentElementName = "note";
-			string childElementName = "body";
+			String parentElementName = "note";
+			String childElementName = "body";
 			object childElementValue = "Don't forget to call me! Please!";
 
 			// validate the entire document
@@ -379,8 +379,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XElementThrowExceptionValidate()
 		{
-			string parentElementName = "note" ;
-			string childElementName = "body";
+			String parentElementName = "note" ;
+			String childElementName = "body";
 			object childElementValue = "Don't forget to call me! Please!";
 
 			// validate the entire document
@@ -400,8 +400,8 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XAttributeGetSchemaInfo ()
 		{
-			string elementName =  "note";
-			string attributeName = "date";
+			String elementName =  "note";
+			String attributeName = "date";
 
 			// validate the entire document
 			validationSucceded = true;
@@ -423,7 +423,7 @@ namespace CoreXml.Test.XLinq
 		[Fact]
 		public void XElementGetSchemaInfo()
 		{
-			string elementName = "body";
+			String elementName = "body";
 
 			// validate the entire document
 			validationSucceded = true;

@@ -1158,13 +1158,13 @@ namespace System.Xml
                     type = typeof(bool);
                     break;
                 case XmlBinaryNodeType.Int16TextWithEndElement:
-                    type = typeof(short);
+                    type = typeof(Int16);
                     break;
                 case XmlBinaryNodeType.Int32TextWithEndElement:
-                    type = typeof(int);
+                    type = typeof(Int32);
                     break;
                 case XmlBinaryNodeType.Int64TextWithEndElement:
-                    type = typeof(long);
+                    type = typeof(Int64);
                     break;
                 case XmlBinaryNodeType.FloatTextWithEndElement:
                     type = typeof(float);
@@ -1254,11 +1254,11 @@ namespace System.Xml
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        private unsafe int ReadArray(short[] array, int offset, int count)
+        private unsafe int ReadArray(Int16[] array, int offset, int count)
         {
             CheckArray(array, offset, count);
             int actual = Math.Min(count, _arrayCount);
-            fixed (short* items = &array[offset])
+            fixed (Int16* items = &array[offset])
             {
                 BufferReader.UnsafeReadArray((byte*)items, (byte*)&items[actual]);
             }
@@ -1266,25 +1266,25 @@ namespace System.Xml
             return actual;
         }
 
-        public override int ReadArray(string localName, string namespaceUri, short[] array, int offset, int count)
+        public override int ReadArray(string localName, string namespaceUri, Int16[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int16TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, short[] array, int offset, int count)
+        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int16[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int16TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        private unsafe int ReadArray(int[] array, int offset, int count)
+        private unsafe int ReadArray(Int32[] array, int offset, int count)
         {
             CheckArray(array, offset, count);
             int actual = Math.Min(count, _arrayCount);
-            fixed (int* items = &array[offset])
+            fixed (Int32* items = &array[offset])
             {
                 BufferReader.UnsafeReadArray((byte*)items, (byte*)&items[actual]);
             }
@@ -1292,25 +1292,25 @@ namespace System.Xml
             return actual;
         }
 
-        public override int ReadArray(string localName, string namespaceUri, int[] array, int offset, int count)
+        public override int ReadArray(string localName, string namespaceUri, Int32[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int32TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, int[] array, int offset, int count)
+        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int32[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int32TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        private unsafe int ReadArray(long[] array, int offset, int count)
+        private unsafe int ReadArray(Int64[] array, int offset, int count)
         {
             CheckArray(array, offset, count);
             int actual = Math.Min(count, _arrayCount);
-            fixed (long* items = &array[offset])
+            fixed (Int64* items = &array[offset])
             {
                 BufferReader.UnsafeReadArray((byte*)items, (byte*)&items[actual]);
             }
@@ -1318,14 +1318,14 @@ namespace System.Xml
             return actual;
         }
 
-        public override int ReadArray(string localName, string namespaceUri, long[] array, int offset, int count)
+        public override int ReadArray(string localName, string namespaceUri, Int64[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int64TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, long[] array, int offset, int count)
+        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int64[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int64TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
 //
@@ -64,7 +64,7 @@ namespace MonoTests.System.Runtime.Caching
             });
 
             paths.Clear();
-            paths.Add(string.Empty);
+            paths.Add(String.Empty);
             Assert.Throws<ArgumentException>(() =>
             {
                 new HostFileChangeMonitor(paths);
@@ -168,7 +168,7 @@ namespace MonoTests.System.Runtime.Caching
         private static void CleanupMonitoring(Tuple<string, string, string, IList<string>> setup)
         {
             string testPath = setup != null ? setup.Item1 : null;
-            if (string.IsNullOrEmpty(testPath) || !Directory.Exists(testPath))
+            if (String.IsNullOrEmpty(testPath) || !Directory.Exists(testPath))
                 return;
 
             foreach (string f in Directory.EnumerateFiles(testPath))

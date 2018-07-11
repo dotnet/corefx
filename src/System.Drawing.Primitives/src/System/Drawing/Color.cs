@@ -499,7 +499,7 @@ namespace System.Drawing
         }
 
 
-        public float GetHue()
+        public Single GetHue()
         {
             if (R == G && G == B)
                 return 0; // 0 makes as good an UNDEFINED value as any

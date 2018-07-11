@@ -159,12 +159,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static string CreateDisplayNameExpectation(string contractName)
         {
-            return string.Format("System.String (ContractName=\"{0}\")", contractName);
+            return String.Format("System.String (ContractName=\"{0}\")", contractName);
         }
 
         private static string CreateDisplayNameExpectation(MemberInfo member)
         {
-            return string.Format("{0} (ContractName=\"Contract\")", member.GetDisplayName());
+            return String.Format("{0} (ContractName=\"Contract\")", member.GetDisplayName());
         }
 
     }

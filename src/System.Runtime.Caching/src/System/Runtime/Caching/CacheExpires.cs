@@ -824,7 +824,7 @@ namespace System.Runtime.Caching
 
         internal CacheExpires(MemoryCacheStore cacheStore)
         {
-            Dbg.Assert(NUMBUCKETS < byte.MaxValue);
+            Dbg.Assert(NUMBUCKETS < Byte.MaxValue);
 
             DateTime utcNow = DateTime.UtcNow;
 

@@ -21,14 +21,14 @@ namespace System.Diagnostics
         public const int WAIT_OBJECT_0 = 0x00000000;
         public const int WAIT_ABANDONED = 0x00000080;
 
-        private static object s_InternalSyncObject;
-        private static object InternalSyncObject
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
@@ -229,7 +229,7 @@ namespace System.Diagnostics
                                                 continue;
                                             }
 
-                                            if (!int.TryParse(splitVersion[0], out currentVersion[0]) || !int.TryParse(splitVersion[1], out currentVersion[1]))
+                                            if (!Int32.TryParse(splitVersion[0], out currentVersion[0]) || !Int32.TryParse(splitVersion[1], out currentVersion[1]))
                                             {
                                                 continue;
                                             }
@@ -302,7 +302,7 @@ namespace System.Diagnostics
             for (int i = 0; i < minorVersions.Length; i++)
             {
                 int o;
-                if (int.TryParse(minorVersions[i], out o))
+                if (Int32.TryParse(minorVersions[i], out o))
                 {
                     largestBuild = (largestBuild > o) ? largestBuild : o;
                 }

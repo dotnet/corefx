@@ -1428,7 +1428,7 @@ namespace System.Net
             string clientSpn = context.ClientSpecifiedSpn;
 
             // An empty SPN is only allowed in the WhenSupported case
-            if (string.IsNullOrEmpty(clientSpn))
+            if (String.IsNullOrEmpty(clientSpn))
             {
                 if (policy.PolicyEnforcement == PolicyEnforcement.WhenSupported)
                 {
@@ -1824,7 +1824,7 @@ namespace System.Net
                     {
                         int tokenOffset = GetTokenOffsetFromBlob((IntPtr)blobPtr);
                         int tokenSize = GetTokenSizeFromBlob((IntPtr)blobPtr);
-                        Debug.Assert(tokenSize < int.MaxValue);
+                        Debug.Assert(tokenSize < Int32.MaxValue);
 
                         token = Interop.HttpApi.SafeLocalFreeChannelBinding.LocalAlloc(tokenSize);
                         if (token.IsInvalid)
@@ -1836,7 +1836,7 @@ namespace System.Net
                     else if (statusCode == Interop.HttpApi.ERROR_MORE_DATA)
                     {
                         int tokenSize = GetTokenSizeFromBlob((IntPtr)blobPtr);
-                        Debug.Assert(tokenSize < int.MaxValue);
+                        Debug.Assert(tokenSize < Int32.MaxValue);
 
                         size = sizeof(Interop.HttpApi.HTTP_REQUEST_CHANNEL_BIND_STATUS) + tokenSize;
                     }

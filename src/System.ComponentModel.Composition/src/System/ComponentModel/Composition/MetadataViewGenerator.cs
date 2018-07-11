@@ -91,15 +91,8 @@ namespace System.ComponentModel.Composition
 
         public static MetadataViewFactory GetMetadataViewFactory(Type viewType)
         {
-            if(viewType == null)
-            {
-                throw new ArgumentNullException(nameof(viewType));
-            }
-
-            if(!viewType.IsInterface)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(viewType);
+            Assumes.IsTrue(viewType.IsInterface);
 
             MetadataViewFactory metadataViewFactory;
             bool foundMetadataViewFactory;
@@ -114,17 +107,11 @@ namespace System.ComponentModel.Composition
             {
                 // Try again under a write lock if still none generate the proxy
                 Type generatedProxyType = GenerateInterfaceViewProxyType(viewType);
-                if(generatedProxyType == null)
-                {
-                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                }
+                Assumes.NotNull(generatedProxyType);
 
                 MetadataViewFactory generatedMetadataViewFactory = (MetadataViewFactory)Delegate.CreateDelegate(
                     typeof(MetadataViewFactory), generatedProxyType.GetMethod(MetadataViewGenerator.MetadataViewFactoryName, BindingFlags.Public | BindingFlags.Static));
-                if(generatedMetadataViewFactory == null)
-                {
-                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                }
+                Assumes.NotNull(generatedMetadataViewFactory);
 
                 using (new WriteLock(_lock))
                 {
@@ -140,10 +127,7 @@ namespace System.ComponentModel.Composition
 
         public static TMetadataView CreateMetadataView<TMetadataView>(MetadataViewFactory metadataViewFactory, IDictionary<string, object> metadata)
         {
-            if(metadataViewFactory == null)
-            {
-                throw new ArgumentNullException(nameof(metadataViewFactory));
-            }
+            Assumes.NotNull(metadataViewFactory);
             // we are simulating the Activator.CreateInstance behavior by wrapping everything in a TargetInvocationException
             try
             {
@@ -380,7 +364,7 @@ namespace System.ComponentModel.Composition
             factoryIL.Emit(OpCodes.Ret);
 
             // Finished implementing the type
-            proxyType = proxyTypeBuilder.CreateTypeInfo();
+            proxyType = proxyTypeBuilder.CreateType();
 
             return proxyType;
         }

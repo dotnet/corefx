@@ -11,16 +11,6 @@ using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    public interface ITrans_ExportableTest
-    {
-        string Var1 { get; }
-    }
-
-    public interface ITrans_CollectionOfStrings
-    {
-        IEnumerable<string> Values { get; }
-    }
-
     public class AdvancedValueComposition
     {
         [Fact]

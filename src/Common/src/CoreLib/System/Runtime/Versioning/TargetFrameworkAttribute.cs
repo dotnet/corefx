@@ -19,11 +19,11 @@ namespace System.Runtime.Versioning
     [AttributeUsageAttribute(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
     public sealed class TargetFrameworkAttribute : Attribute
     {
-        private string _frameworkName;  // A target framework moniker
-        private string _frameworkDisplayName;
+        private String _frameworkName;  // A target framework moniker
+        private String _frameworkDisplayName;
 
         // The frameworkName parameter is intended to be the string form of a FrameworkName instance.
-        public TargetFrameworkAttribute(string frameworkName)
+        public TargetFrameworkAttribute(String frameworkName)
         {
             if (frameworkName == null)
                 throw new ArgumentNullException(nameof(frameworkName));
@@ -32,12 +32,12 @@ namespace System.Runtime.Versioning
 
         // The target framework moniker that this assembly was compiled against.
         // Use the FrameworkName class to interpret target framework monikers.
-        public string FrameworkName
+        public String FrameworkName
         {
             get { return _frameworkName; }
         }
 
-        public string FrameworkDisplayName
+        public String FrameworkDisplayName
         {
             get { return _frameworkDisplayName; }
             set { _frameworkDisplayName = value; }

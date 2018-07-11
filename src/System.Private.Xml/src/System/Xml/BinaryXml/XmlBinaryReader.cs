@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -15,8 +15,8 @@ namespace System.Xml
 {
     internal sealed partial class XmlSqlBinaryReader : XmlReader, IXmlNamespaceResolver
     {
-        internal static readonly Type TypeOfObject = typeof(object);
-        internal static readonly Type TypeOfString = typeof(string);
+        internal static readonly Type TypeOfObject = typeof(System.Object);
+        internal static readonly Type TypeOfString = typeof(System.String);
 
         private static volatile Type[] s_tokenTypeMap = null;
 
@@ -75,7 +75,7 @@ namespace System.Xml
 
             public void Clear()
             {
-                this.prefix = this.localname = this.namespaceUri = string.Empty;
+                this.prefix = this.localname = this.namespaceUri = String.Empty;
             }
 
             public bool MatchNs(string lname, string nsUri)
@@ -90,7 +90,7 @@ namespace System.Xml
             public void CheckPrefixNS(string prefix, string namespaceUri)
             {
                 if (this.prefix == prefix && this.namespaceUri != namespaceUri)
-                    throw new XmlException(SR.XmlBinary_NoRemapPrefix, new string[] { prefix, this.namespaceUri, namespaceUri });
+                    throw new XmlException(SR.XmlBinary_NoRemapPrefix, new String[] { prefix, this.namespaceUri, namespaceUri });
             }
 
             public override int GetHashCode()
@@ -246,7 +246,7 @@ namespace System.Xml
             {
                 this.symtable = new string[64];
                 this.qnametable = new QName[16];
-                this.symtable[0] = string.Empty;
+                this.symtable[0] = String.Empty;
                 this.symCount = 1;
                 this.qnameCount = 1;
             }
@@ -318,7 +318,7 @@ namespace System.Xml
         // if it is a simple string value, we cache it
         private string _stringValue;
         // hashtable of current namespaces
-        private Dictionary<string, NamespaceDecl> _namespaces;
+        private Dictionary<String, NamespaceDecl> _namespaces;
         //Hashtable namespaces;
         // linked list of pushed nametables (to support nested binary-xml documents)
         private NestedBinXml _prevNameInfo;
@@ -373,8 +373,8 @@ namespace System.Xml
             _qnameElement.Clear();
             _xmlspacePreserve = false;
             _hasher = new SecureStringHasher();
-            _namespaces = new Dictionary<string, NamespaceDecl>(_hasher);
-            AddInitNamespace(string.Empty, string.Empty);
+            _namespaces = new Dictionary<String, NamespaceDecl>(_hasher);
+            AddInitNamespace(String.Empty, String.Empty);
             AddInitNamespace(_xml, _xnt.Add(XmlReservedNs.NsXml));
             AddInitNamespace(_xmlns, _nsxmlns);
             _valueType = TypeOfString;
@@ -532,7 +532,7 @@ namespace System.Xml
                     case ScanState.AttrVal:
                         return _stringValue = ValueAsString(_token);
                 }
-                return string.Empty;
+                return String.Empty;
             }
         }
 
@@ -677,7 +677,7 @@ namespace System.Xml
                 if (null == name)
                     throw new ArgumentNullException(nameof(name));
                 if (null == ns)
-                    ns = string.Empty;
+                    ns = String.Empty;
                 int index = LocateAttribute(name, ns);
                 if (-1 == index)
                     return null;
@@ -725,7 +725,7 @@ namespace System.Xml
                 if (null == name)
                     throw new ArgumentNullException(nameof(name));
                 if (null == ns)
-                    ns = string.Empty;
+                    ns = String.Empty;
                 int index = LocateAttribute(name, ns);
                 if ((-1 != index) && (_state < ScanState.Init))
                 {
@@ -1126,7 +1126,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToBoolean(string.Empty);
+                                return XmlConvert.ToBoolean(String.Empty);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1216,7 +1216,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToDateTime(string.Empty, XmlDateTimeSerializationMode.RoundtripKind);
+                                return XmlConvert.ToDateTime(String.Empty, XmlDateTimeSerializationMode.RoundtripKind);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1248,10 +1248,10 @@ namespace System.Xml
             return base.ReadContentAsDateTime();
         }
 
-        public override double ReadContentAsDouble()
+        public override Double ReadContentAsDouble()
         {
             int origPos = _pos;
-            double value;
+            Double value;
             try
             {
                 if (SetupContentAsXXX("ReadContentAsDouble"))
@@ -1311,7 +1311,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToDouble(string.Empty);
+                                return XmlConvert.ToDouble(String.Empty);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1406,7 +1406,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToSingle(string.Empty);
+                                return XmlConvert.ToSingle(String.Empty);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1501,7 +1501,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToDecimal(string.Empty);
+                                return XmlConvert.ToDecimal(String.Empty);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1596,7 +1596,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToInt32(string.Empty);
+                                return XmlConvert.ToInt32(String.Empty);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1691,7 +1691,7 @@ namespace System.Xml
 
                             case BinXmlToken.Element:
                             case BinXmlToken.EndElem:
-                                return XmlConvert.ToInt64(string.Empty);
+                                return XmlConvert.ToInt64(String.Empty);
 
                             default:
                                 Debug.Fail("should never happen");
@@ -1734,7 +1734,7 @@ namespace System.Xml
                     try
                     {
                         if (this.NodeType == XmlNodeType.Element || this.NodeType == XmlNodeType.EndElement)
-                            value = string.Empty;
+                            value = String.Empty;
                         else
                             value = this.ValueAsObject(_token, false);
                     }
@@ -1774,7 +1774,7 @@ namespace System.Xml
                     {
                         if (this.NodeType == XmlNodeType.Element || this.NodeType == XmlNodeType.EndElement)
                         {
-                            value = string.Empty;
+                            value = String.Empty;
                         }
                         else if (returnType == this.ValueType || returnType == typeof(object))
                         {
@@ -1820,7 +1820,7 @@ namespace System.Xml
             }
             else
             {
-                Dictionary<string, string> nstable = new Dictionary<string, string>();
+                Dictionary<String, String> nstable = new Dictionary<String, String>();
                 if (XmlNamespaceScope.Local == scope)
                 {
                     // are we even inside an element? (depth==0 is where we have xml, and xmlns declared...)
@@ -1949,7 +1949,7 @@ namespace System.Xml
                 else
                 {
                     lnameStr = prefixStr;
-                    prefixStr = string.Empty;
+                    prefixStr = String.Empty;
                 }
                 nsUriStr = _nsxmlns;
             }
@@ -1982,7 +1982,7 @@ namespace System.Xml
         {
             int nameNum = ParseMB32();
             if (nameNum < 0 || nameNum >= _symbolTables.qnameCount)
-                throw new XmlException(SR.XmlBin_InvalidQNameID, string.Empty);
+                throw new XmlException(SR.XmlBin_InvalidQNameID, String.Empty);
             return nameNum;
         }
 
@@ -1990,7 +1990,7 @@ namespace System.Xml
         {
             int nameNum = ParseMB32();
             if (nameNum < 0 || nameNum >= _symbolTables.symCount)
-                throw new XmlException(SR.XmlBin_InvalidQNameID, string.Empty);
+                throw new XmlException(SR.XmlBin_InvalidQNameID, String.Empty);
             return nameNum;
         }
 
@@ -2333,7 +2333,7 @@ namespace System.Xml
             if (checked(pos + (cch * 2)) > _end)
                 throw new XmlException(SR.Xml_UnexpectedEOF1, (string[])null);
             if (cch == 0)
-                return string.Empty;
+                return String.Empty;
             // GetStringUnaligned is _significantly_ faster than unicode.GetString()
             // but since IA64 doesn't support unaligned reads, we can't do it if
             // the address is not aligned properly.  Since the byte[] will be aligned,
@@ -2344,13 +2344,13 @@ namespace System.Xml
                 return _unicode.GetString(_data, pos, checked(cch * 2));
         }
 
-        private unsafe string GetStringAligned(byte[] data, int offset, int cch)
+        private unsafe String GetStringAligned(byte[] data, int offset, int cch)
         {
             Debug.Assert((offset & 1) == 0);
             fixed (byte* pb = data)
             {
                 char* p = (char*)(pb + offset);
-                return new string(p, 0, cch);
+                return new String(p, 0, cch);
             }
         }
 
@@ -2582,7 +2582,7 @@ namespace System.Xml
                 }
                 if (!skipXmlDecl)
                 {
-                    QName xmlDeclQName = new QName(string.Empty, _xnt.Add("xml"), string.Empty);
+                    QName xmlDeclQName = new QName(String.Empty, _xnt.Add("xml"), String.Empty);
                     _qnameOther = _qnameElement = xmlDeclQName;
                     _nodetype = XmlNodeType.XmlDeclaration;
                     _posAfterAttrs = _pos;
@@ -2644,7 +2644,7 @@ namespace System.Xml
                     else if (n.prefix.Length != 0)
                     {
                         if (n.namespaceUri.Length == 0)
-                            throw new XmlException(SR.Xml_PrefixForEmptyNs, string.Empty);
+                            throw new XmlException(SR.Xml_PrefixForEmptyNs, String.Empty);
                         this.PushNamespace(n.prefix, n.namespaceUri, true);
                     }
                     else if (n.namespaceUri.Length != 0)
@@ -2768,7 +2768,7 @@ namespace System.Xml
         {
             Debug.Assert(_stringValue == null, "this.stringValue == null");
             Debug.Assert(_token == BinXmlToken.CData, "this.token == BinXmlToken.CData");
-            string value = GetString(_tokDataPos, _tokLen);
+            String value = GetString(_tokDataPos, _tokLen);
             StringBuilder sb = null;
             while (PeekToken() == BinXmlToken.CData)
             {
@@ -3282,21 +3282,21 @@ namespace System.Xml
         private void GenerateTokenTypeMap()
         {
             Type[] map = new Type[256];
-            map[(int)BinXmlToken.XSD_BOOLEAN] = typeof(bool);
-            map[(int)BinXmlToken.SQL_TINYINT] = typeof(byte);
-            map[(int)BinXmlToken.XSD_BYTE] = typeof(sbyte);
-            map[(int)BinXmlToken.SQL_SMALLINT] = typeof(short);
-            map[(int)BinXmlToken.XSD_UNSIGNEDSHORT] = typeof(ushort);
-            map[(int)BinXmlToken.XSD_UNSIGNEDINT] = typeof(uint);
-            map[(int)BinXmlToken.SQL_REAL] = typeof(float);
-            map[(int)BinXmlToken.SQL_FLOAT] = typeof(double);
-            map[(int)BinXmlToken.SQL_BIGINT] = typeof(long);
-            map[(int)BinXmlToken.XSD_UNSIGNEDLONG] = typeof(ulong);
+            map[(int)BinXmlToken.XSD_BOOLEAN] = typeof(System.Boolean);
+            map[(int)BinXmlToken.SQL_TINYINT] = typeof(System.Byte);
+            map[(int)BinXmlToken.XSD_BYTE] = typeof(System.SByte);
+            map[(int)BinXmlToken.SQL_SMALLINT] = typeof(Int16);
+            map[(int)BinXmlToken.XSD_UNSIGNEDSHORT] = typeof(UInt16);
+            map[(int)BinXmlToken.XSD_UNSIGNEDINT] = typeof(UInt32);
+            map[(int)BinXmlToken.SQL_REAL] = typeof(Single);
+            map[(int)BinXmlToken.SQL_FLOAT] = typeof(Double);
+            map[(int)BinXmlToken.SQL_BIGINT] = typeof(Int64);
+            map[(int)BinXmlToken.XSD_UNSIGNEDLONG] = typeof(UInt64);
             map[(int)BinXmlToken.XSD_QNAME] = typeof(XmlQualifiedName);
-            Type TypeOfInt32 = typeof(int);
+            Type TypeOfInt32 = typeof(System.Int32);
             map[(int)BinXmlToken.SQL_BIT] = TypeOfInt32;
             map[(int)BinXmlToken.SQL_INT] = TypeOfInt32;
-            Type TypeOfDecimal = typeof(decimal);
+            Type TypeOfDecimal = typeof(System.Decimal);
             map[(int)BinXmlToken.SQL_SMALLMONEY] = TypeOfDecimal;
             map[(int)BinXmlToken.SQL_MONEY] = TypeOfDecimal;
             map[(int)BinXmlToken.SQL_DECIMAL] = TypeOfDecimal;
@@ -3315,7 +3315,7 @@ namespace System.Xml
             map[(int)BinXmlToken.XSD_KATMAI_DATEOFFSET] = TypeOfDateTimeOffset;
             map[(int)BinXmlToken.XSD_KATMAI_DATETIMEOFFSET] = TypeOfDateTimeOffset;
             map[(int)BinXmlToken.XSD_KATMAI_TIMEOFFSET] = TypeOfDateTimeOffset;
-            Type TypeOfByteArray = typeof(byte[]);
+            Type TypeOfByteArray = typeof(System.Byte[]);
             map[(int)BinXmlToken.SQL_VARBINARY] = TypeOfByteArray;
             map[(int)BinXmlToken.SQL_BINARY] = TypeOfByteArray;
             map[(int)BinXmlToken.SQL_IMAGE] = TypeOfByteArray;
@@ -3680,7 +3680,7 @@ namespace System.Xml
                 case BinXmlToken.SQL_NUMERIC:
                 case BinXmlToken.XSD_DECIMAL:
                     {
-                        decimal v = ValueAsDecimal();
+                        Decimal v = ValueAsDecimal();
                         return (long)v;
                     }
 
@@ -3702,7 +3702,7 @@ namespace System.Xml
             }
         }
 
-        private decimal ValueAsDecimal()
+        private Decimal ValueAsDecimal()
         {
             CheckValueTokenBounds();
             switch (_token)
@@ -3715,16 +3715,16 @@ namespace System.Xml
                 case BinXmlToken.XSD_BYTE:
                 case BinXmlToken.XSD_UNSIGNEDSHORT:
                 case BinXmlToken.XSD_UNSIGNEDINT:
-                    return new decimal(ValueAsLong());
+                    return new Decimal(ValueAsLong());
 
                 case BinXmlToken.XSD_UNSIGNEDLONG:
-                    return new decimal(ValueAsULong());
+                    return new Decimal(ValueAsULong());
 
                 case BinXmlToken.SQL_REAL:
-                    return new decimal(GetSingle(_tokDataPos));
+                    return new Decimal(GetSingle(_tokDataPos));
 
                 case BinXmlToken.SQL_FLOAT:
-                    return new decimal(GetDouble(_tokDataPos));
+                    return new Decimal(GetDouble(_tokDataPos));
 
                 case BinXmlToken.SQL_SMALLMONEY:
                     {
@@ -4042,12 +4042,12 @@ namespace System.Xml
                         {
                             int nameNum = ParseMB32(_tokDataPos);
                             if (nameNum < 0 || nameNum >= _symbolTables.qnameCount)
-                                throw new XmlException(SR.XmlBin_InvalidQNameID, string.Empty);
+                                throw new XmlException(SR.XmlBin_InvalidQNameID, String.Empty);
                             QName qname = _symbolTables.qnametable[nameNum];
                             if (qname.prefix.Length == 0)
                                 return qname.localname;
                             else
-                                return string.Concat(qname.prefix, ":", qname.localname);
+                                return String.Concat(qname.prefix, ":", qname.localname);
                         }
 
                     default:
@@ -4075,7 +4075,7 @@ namespace System.Xml
                     return (0 != _data[_tokDataPos]);
 
                 case BinXmlToken.SQL_BIT:
-                    return (int)_data[_tokDataPos];
+                    return (Int32)_data[_tokDataPos];
 
                 case BinXmlToken.SQL_TINYINT:
                     return _data[_tokDataPos];
@@ -4191,7 +4191,7 @@ namespace System.Xml
                     {
                         int nameNum = ParseMB32(_tokDataPos);
                         if (nameNum < 0 || nameNum >= _symbolTables.qnameCount)
-                            throw new XmlException(SR.XmlBin_InvalidQNameID, string.Empty);
+                            throw new XmlException(SR.XmlBin_InvalidQNameID, String.Empty);
                         QName qname = _symbolTables.qnametable[nameNum];
                         return new XmlQualifiedName(qname.localname, qname.namespaceUri);
                     }
@@ -4229,7 +4229,7 @@ namespace System.Xml
 
                 case BinXmlToken.SQL_BIT:
                     value = GetValueConverter(XmlTypeCode.NonNegativeInteger).ChangeType(
-                        (int)_data[_tokDataPos],
+                        (Int32)_data[_tokDataPos],
                         returnType, namespaceResolver);
                     break;
 
@@ -4283,21 +4283,21 @@ namespace System.Xml
                     }
                 case BinXmlToken.XSD_UNSIGNEDLONG:
                     {
-                        decimal v = (decimal)GetUInt64(_tokDataPos);
+                        Decimal v = (Decimal)GetUInt64(_tokDataPos);
                         value = GetValueConverter(XmlTypeCode.UnsignedLong).ChangeType(
                             v, returnType, namespaceResolver);
                         break;
                     }
                 case BinXmlToken.SQL_REAL:
                     {
-                        float v = GetSingle(_tokDataPos);
+                        Single v = GetSingle(_tokDataPos);
                         value = GetValueConverter(XmlTypeCode.Float).ChangeType(
                             v, returnType, namespaceResolver);
                         break;
                     }
                 case BinXmlToken.SQL_FLOAT:
                     {
-                        double v = GetDouble(_tokDataPos);
+                        Double v = GetDouble(_tokDataPos);
                         value = GetValueConverter(XmlTypeCode.Double).ChangeType(
                             v, returnType, namespaceResolver);
                         break;
@@ -4389,7 +4389,7 @@ namespace System.Xml
                     {
                         int nameNum = ParseMB32(_tokDataPos);
                         if (nameNum < 0 || nameNum >= _symbolTables.qnameCount)
-                            throw new XmlException(SR.XmlBin_InvalidQNameID, string.Empty);
+                            throw new XmlException(SR.XmlBin_InvalidQNameID, String.Empty);
                         QName qname = _symbolTables.qnametable[nameNum];
                         value = GetValueConverter(XmlTypeCode.QName).ChangeType(
                             new XmlQualifiedName(qname.localname, qname.namespaceUri),
@@ -4403,47 +4403,47 @@ namespace System.Xml
             return value;
         }
 
-        private short GetInt16(int pos)
+        private Int16 GetInt16(int pos)
         {
             byte[] data = _data;
-            return (short)(data[pos] | data[pos + 1] << 8);
+            return (Int16)(data[pos] | data[pos + 1] << 8);
         }
 
-        private ushort GetUInt16(int pos)
+        private UInt16 GetUInt16(int pos)
         {
             byte[] data = _data;
-            return (ushort)(data[pos] | data[pos + 1] << 8);
+            return (UInt16)(data[pos] | data[pos + 1] << 8);
         }
 
-        private int GetInt32(int pos)
+        private Int32 GetInt32(int pos)
         {
             byte[] data = _data;
-            return (int)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
+            return (Int32)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
         }
 
-        private uint GetUInt32(int pos)
+        private UInt32 GetUInt32(int pos)
         {
             byte[] data = _data;
-            return (uint)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
+            return (UInt32)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
         }
 
-        private long GetInt64(int pos)
-        {
-            byte[] data = _data;
-            uint lo = (uint)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
-            uint hi = (uint)(data[pos + 4] | data[pos + 5] << 8 | data[pos + 6] << 16 | data[pos + 7] << 24);
-            return (long)((ulong)hi) << 32 | lo;
-        }
-
-        private ulong GetUInt64(int pos)
+        private Int64 GetInt64(int pos)
         {
             byte[] data = _data;
             uint lo = (uint)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
             uint hi = (uint)(data[pos + 4] | data[pos + 5] << 8 | data[pos + 6] << 16 | data[pos + 7] << 24);
-            return (ulong)((ulong)hi) << 32 | lo;
+            return (Int64)((ulong)hi) << 32 | lo;
         }
 
-        private float GetSingle(int offset)
+        private UInt64 GetUInt64(int pos)
+        {
+            byte[] data = _data;
+            uint lo = (uint)(data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24);
+            uint hi = (uint)(data[pos + 4] | data[pos + 5] << 8 | data[pos + 6] << 16 | data[pos + 7] << 24);
+            return (UInt64)((ulong)hi) << 32 | lo;
+        }
+
+        private Single GetSingle(int offset)
         {
             byte[] data = _data;
             uint tmp = (uint)(data[offset]
@@ -4456,7 +4456,7 @@ namespace System.Xml
             }
         }
 
-        private double GetDouble(int offset)
+        private Double GetDouble(int offset)
         {
             uint lo = (uint)(_data[offset + 0]
                             | _data[offset + 1] << 8

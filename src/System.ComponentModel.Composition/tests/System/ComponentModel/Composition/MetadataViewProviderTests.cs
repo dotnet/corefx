@@ -8,14 +8,6 @@ using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    internal static class TransparentTestCase
-    {
-        public static int GetMetadataView_IMetadataViewWithDefaultedIntInTranparentType(ITrans_MetadataViewWithDefaultedInt view)
-        {
-            return view.MyInt;
-        }
-    }
-
     [MetadataViewImplementation(typeof(MetadataViewWithImplementation))]
     public interface IMetadataViewWithImplementation
     {
@@ -323,7 +315,7 @@ namespace System.ComponentModel.Composition
         public void GetMetadataView_IMetadataViewWithDefaultedInt64()
         {
             var view = MetadataViewProvider.GetMetadataView<ITrans_MetadataViewWithDefaultedInt64>(new Dictionary<string, object>());
-            Assert.Equal(long.MaxValue, view.MyInt64);
+            Assert.Equal(Int64.MaxValue, view.MyInt64);
         }
 
         [Fact]
@@ -362,7 +354,7 @@ namespace System.ComponentModel.Composition
         public void TestMetadataIntConversion()
         {
             var metadata = new Dictionary<string, object>();
-            metadata["Value"] = (long)45;
+            metadata["Value"] = (Int64)45;
 
             var exception = Assert.Throws<CompositionContractMismatchException>(() =>
             {

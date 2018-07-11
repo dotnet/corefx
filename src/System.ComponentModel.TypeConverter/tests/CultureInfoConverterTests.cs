@@ -47,7 +47,7 @@ namespace System.ComponentModel.Tests
             CultureInfo c;
 
             c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture,
-                string.Empty);
+                String.Empty);
             Assert.Equal(CultureInfo.InvariantCulture, c);
 
             c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture,

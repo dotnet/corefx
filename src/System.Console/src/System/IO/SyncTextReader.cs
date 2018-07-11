@@ -70,7 +70,7 @@ namespace System.IO
             }
         }
 
-        public override string ReadLine()
+        public override String ReadLine()
         {
             lock (this)
             {
@@ -78,7 +78,7 @@ namespace System.IO
             }
         }
 
-        public override string ReadToEnd()
+        public override String ReadToEnd()
         {
             lock (this)
             {
@@ -91,12 +91,12 @@ namespace System.IO
         // No explicit locking is needed, as they all just delegate
         //
 
-        public override Task<string> ReadLineAsync()
+        public override Task<String> ReadLineAsync()
         {
             return Task.FromResult(ReadLine());
         }
 
-        public override Task<string> ReadToEndAsync()
+        public override Task<String> ReadToEndAsync()
         {
             return Task.FromResult(ReadToEnd());
         }

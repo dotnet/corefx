@@ -62,7 +62,7 @@ namespace XmlCoreTest.Common
         {
             string value = CModInfo.Options[name] as string;
 
-            if (value == null || value.Equals(string.Empty))
+            if (value == null || value.Equals(String.Empty))
             {
                 value = "";
             }
@@ -158,7 +158,7 @@ namespace XmlCoreTest.Common
 
         public static Stream getStream(string filename)
         {
-            if (string.IsNullOrWhiteSpace(filename))
+            if (String.IsNullOrWhiteSpace(filename))
                 return null;
 
             initXmlFileCacheIfNotYet();

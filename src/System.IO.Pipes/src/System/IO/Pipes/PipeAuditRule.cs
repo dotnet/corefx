@@ -23,7 +23,7 @@ namespace System.IO.Pipes
         }
 
         public PipeAuditRule(
-            string identity,
+            String identity,
             PipeAccessRights rights,
             AuditFlags flags)
             : this(

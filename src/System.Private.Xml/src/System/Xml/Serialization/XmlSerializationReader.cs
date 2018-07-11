@@ -369,13 +369,13 @@ namespace System.Xml.Serialization
                 else if ((object)typeName.Name == (object)_unsignedByteID)
                     return typeof(byte);
                 else if ((object)typeName.Name == (object)_byteID)
-                    return typeof(sbyte);
+                    return typeof(SByte);
                 else if ((object)typeName.Name == (object)_unsignedShortID)
-                    return typeof(ushort);
+                    return typeof(UInt16);
                 else if ((object)typeName.Name == (object)_unsignedIntID)
-                    return typeof(uint);
+                    return typeof(UInt32);
                 else if ((object)typeName.Name == (object)_unsignedLongID)
-                    return typeof(ulong);
+                    return typeof(UInt64);
                 else
                     throw CreateUnknownTypeException(typeName);
             }
@@ -433,13 +433,13 @@ namespace System.Xml.Serialization
                 else if ((object)typeName.Name == (object)_hexBinaryID)
                     return typeof(byte[]);
                 else if ((object)typeName.Name == (object)_byteID)
-                    return typeof(sbyte);
+                    return typeof(SByte);
                 else if ((object)typeName.Name == (object)_unsignedShortID)
-                    return typeof(ushort);
+                    return typeof(UInt16);
                 else if ((object)typeName.Name == (object)_unsignedIntID)
-                    return typeof(uint);
+                    return typeof(UInt32);
                 else if ((object)typeName.Name == (object)_unsignedLongID)
-                    return typeof(ulong);
+                    return typeof(UInt64);
                 else
                     throw CreateUnknownTypeException(typeName);
             }
@@ -762,7 +762,7 @@ namespace System.Xml.Serialization
                 else if ((object)type.Name == (object)_booleanID)
                     value = default(Nullable<bool>);
                 else if ((object)type.Name == (object)_shortID)
-                    value = default(Nullable<short>);
+                    value = default(Nullable<Int16>);
                 else if ((object)type.Name == (object)_longID)
                     value = default(Nullable<long>);
                 else if ((object)type.Name == (object)_floatID)
@@ -782,13 +782,13 @@ namespace System.Xml.Serialization
                 else if ((object)type.Name == (object)_unsignedByteID)
                     value = default(Nullable<byte>);
                 else if ((object)type.Name == (object)_byteID)
-                    value = default(Nullable<sbyte>);
+                    value = default(Nullable<SByte>);
                 else if ((object)type.Name == (object)_unsignedShortID)
-                    value = default(Nullable<ushort>);
+                    value = default(Nullable<UInt16>);
                 else if ((object)type.Name == (object)_unsignedIntID)
-                    value = default(Nullable<uint>);
+                    value = default(Nullable<UInt32>);
                 else if ((object)type.Name == (object)_unsignedLongID)
-                    value = default(Nullable<ulong>);
+                    value = default(Nullable<UInt64>);
                 else if ((object)type.Name == (object)_hexBinaryID)
                     value = null;
                 else if ((object)type.Name == (object)_base64BinaryID)
@@ -1045,10 +1045,10 @@ namespace System.Xml.Serialization
             int len = charsLength - pos - 2;
             if (len > 0)
             {
-                string lengthString = new string(chars, pos + 1, len);
+                string lengthString = new String(chars, pos + 1, len);
                 try
                 {
-                    soapArrayInfo.length = int.Parse(lengthString, CultureInfo.InvariantCulture);
+                    soapArrayInfo.length = Int32.Parse(lengthString, CultureInfo.InvariantCulture);
                 }
                 catch (Exception e)
                 {
@@ -1083,7 +1083,7 @@ namespace System.Xml.Serialization
             soapArrayInfo.dimensions = 1;
 
             // everything else is qname - validation of qnames?
-            soapArrayInfo.qname = new string(chars, 0, pos + 1);
+            soapArrayInfo.qname = new String(chars, 0, pos + 1);
             return soapArrayInfo;
         }
 
@@ -1116,7 +1116,7 @@ namespace System.Xml.Serialization
                     {
                         try
                         {
-                            soapArrayInfo.length = int.Parse(dimensions[i], CultureInfo.InvariantCulture);
+                            soapArrayInfo.length = Int32.Parse(dimensions[i], CultureInfo.InvariantCulture);
                             soapArrayInfo.dimensions++;
                         }
                         catch (Exception e)
@@ -1199,7 +1199,7 @@ namespace System.Xml.Serialization
             }
             if (prefix == null || prefix.Length == 0)
             {
-                return new XmlQualifiedName(_r.NameTable.Add(value), _r.LookupNamespace(string.Empty));
+                return new XmlQualifiedName(_r.NameTable.Add(value), _r.LookupNamespace(String.Empty));
             }
             else
             {
@@ -5031,14 +5031,14 @@ namespace System.Xml.Serialization
 
         private int WriteWhileLoopStartCheck()
         {
-            Writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "int whileIterations{0} = 0;", _nextWhileLoopIndex));
-            Writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "int readerCount{0} = ReaderCount;", _nextWhileLoopIndex));
+            Writer.WriteLine(String.Format(CultureInfo.InvariantCulture, "int whileIterations{0} = 0;", _nextWhileLoopIndex));
+            Writer.WriteLine(String.Format(CultureInfo.InvariantCulture, "int readerCount{0} = ReaderCount;", _nextWhileLoopIndex));
             return _nextWhileLoopIndex++;
         }
 
         private void WriteWhileLoopEndCheck(int loopIndex)
         {
-            Writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "CheckReaderCount(ref whileIterations{0}, ref readerCount{1});", loopIndex, loopIndex));
+            Writer.WriteLine(String.Format(CultureInfo.InvariantCulture, "CheckReaderCount(ref whileIterations{0}, ref readerCount{1});", loopIndex, loopIndex));
         }
 
         private void WriteParamsRead(int length)

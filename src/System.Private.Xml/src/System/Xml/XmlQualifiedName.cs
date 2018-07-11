@@ -16,7 +16,7 @@ namespace System.Xml
     {
         private string _name;
         private string _ns;
-        private int _hash;
+        private Int32 _hash;
 
         /// <devdoc>
         ///    <para>[To be supplied.]</para>

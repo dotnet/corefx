@@ -42,7 +42,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        public abstract string Version
+        public abstract String Version
         { get; }
 
         public abstract bool CanRead(XmlReader reader);
@@ -51,7 +51,7 @@ namespace System.ServiceModel.Syndication
 
         public override string ToString()
         {
-            return string.Format(CultureInfo.CurrentCulture, "{0}, SyndicationVersion={1}", this.GetType(), this.Version);
+            return String.Format(CultureInfo.CurrentCulture, "{0}, SyndicationVersion={1}", this.GetType(), this.Version);
         }
 
         public abstract void WriteTo(XmlWriter writer);

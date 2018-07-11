@@ -2,10 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
+
+using Microsoft.Internal;
 
 namespace System.Composition.Convention
 {
@@ -31,12 +35,9 @@ namespace System.Composition.Convention
 
             private static MethodInfo SelectMethods(Expression<Action<T>> methodSelector)
             {
-                if (methodSelector == null)
-                {
-                    throw new ArgumentNullException(nameof(methodSelector));
-                }
+                Requires.NotNull(methodSelector, nameof(methodSelector));
 
-                Expression expr = Reduce(methodSelector).Body;
+                var expr = Reduce(methodSelector).Body;
                 if (expr.NodeType == ExpressionType.Call)
                 {
                     var memberInfo = ((MethodCallExpression)expr).Method as MethodInfo;
@@ -47,7 +48,7 @@ namespace System.Composition.Convention
                 }
 
                 // An error occurred the expression must be a void Method() Member Expression
-                throw new ArgumentException(SR.Format(SR.Argument_ExpressionMustBeVoidMethodWithNoArguments, nameof(methodSelector)), nameof(methodSelector));
+                throw ExceptionBuilder.Argument_ExpressionMustBeVoidMethodWithNoArguments(nameof(methodSelector));
             }
 
             protected static Expression<Func<T, object>> Reduce(Expression<Func<T, object>> expr)
@@ -92,22 +93,25 @@ namespace System.Composition.Convention
 
             public void ConfigureImport(PropertyInfo propertyInfo, ImportConventionBuilder importBuilder)
             {
-                _configureImport?.Invoke(importBuilder);
+                if (_configureImport != null)
+                {
+                    _configureImport(importBuilder);
+                }
             }
 
             public void ConfigureExport(PropertyInfo propertyInfo, ExportConventionBuilder exportBuilder)
             {
-                _configureExport?.Invoke(exportBuilder);
+                if (_configureExport != null)
+                {
+                    _configureExport(exportBuilder);
+                }
             }
 
             private static PropertyInfo SelectProperties(Expression<Func<T, object>> propertySelector)
             {
-                if (propertySelector == null)
-                {
-                    throw new ArgumentNullException(nameof(propertySelector));
-                }
+                Requires.NotNull(propertySelector, nameof(propertySelector));
 
-                Expression expr = Reduce(propertySelector).Body;
+                var expr = Reduce(propertySelector).Body;
                 if (expr.NodeType == ExpressionType.MemberAccess)
                 {
                     var memberInfo = ((MemberExpression)expr).Member as PropertyInfo;
@@ -118,7 +122,7 @@ namespace System.Composition.Convention
                 }
 
                 // An error occurred the expression must be a Property Member Expression
-                throw new ArgumentException(SR.Format(SR.Argument_ExpressionMustBePropertyMember, nameof(propertySelector)), nameof(propertySelector));
+                throw ExceptionBuilder.Argument_ExpressionMustBePropertyMember(nameof(propertySelector));
             }
 
             protected static Expression<Func<T, object>> Reduce(Expression<Func<T, object>> expr)
@@ -150,7 +154,8 @@ namespace System.Composition.Convention
             {
                 if (_importBuilders != null)
                 {
-                    if (_importBuilders.TryGetValue(parameterInfo, out Action<ImportConventionBuilder> parameterImportBuilder))
+                    Action<ImportConventionBuilder> parameterImportBuilder;
+                    if (_importBuilders.TryGetValue(parameterInfo, out parameterImportBuilder))
                     {
                         parameterImportBuilder(importBuilder);
                     }
@@ -161,34 +166,31 @@ namespace System.Composition.Convention
 
             private void ParseSelectConstructor(Expression<Func<ParameterImportConventionBuilder, T>> constructorSelector)
             {
-                if (constructorSelector == null)
-                {
-                    throw new ArgumentNullException(nameof(constructorSelector));
-                }
+                Requires.NotNull(constructorSelector, nameof(constructorSelector));
 
-                Expression expr = Reduce(constructorSelector).Body;
+                var expr = Reduce(constructorSelector).Body;
                 if (expr.NodeType != ExpressionType.New)
                 {
-                    throw new ArgumentException(SR.Format(SR.Argument_ExpressionMustBeNew, nameof(constructorSelector)), nameof(constructorSelector));
+                    throw ExceptionBuilder.Argument_ExpressionMustBeNew(nameof(constructorSelector));
                 }
                 var newExpression = (NewExpression)expr;
                 _constructorInfo = newExpression.Constructor;
 
                 int index = 0;
-                ParameterInfo[] parameterInfos = _constructorInfo.GetParameters();
+                var parameterInfos = _constructorInfo.GetParameters();
 
-                foreach (Expression argument in newExpression.Arguments)
+                foreach (var argument in newExpression.Arguments)
                 {
                     if (argument.NodeType == ExpressionType.Call)
                     {
                         var methodCallExpression = (MethodCallExpression)argument;
                         if (methodCallExpression.Arguments.Count() == 1)
                         {
-                            Expression parameter = methodCallExpression.Arguments[0];
+                            var parameter = methodCallExpression.Arguments[0];
                             if (parameter.NodeType == ExpressionType.Lambda)
                             {
                                 var lambdaExpression = (LambdaExpression)parameter;
-                                Delegate importDelegate = lambdaExpression.Compile();
+                                var importDelegate = lambdaExpression.Compile();
                                 if (_importBuilders == null)
                                 {
                                     _importBuilders = new Dictionary<ParameterInfo, Action<ImportConventionBuilder>>();
@@ -222,10 +224,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder<T> SelectConstructor(Expression<Func<ParameterImportConventionBuilder, T>> constructorSelector)
         {
-            if (constructorSelector == null)
-            {
-                throw new ArgumentNullException(nameof(constructorSelector));
-            }
+            Requires.NotNull(constructorSelector, nameof(constructorSelector));
 
             var adapter = new ConstructorExpressionAdapter(constructorSelector);
             base.SelectConstructor(adapter.SelectConstructor, adapter.ConfigureConstructorImports);
@@ -252,10 +251,7 @@ namespace System.Composition.Convention
             Expression<Func<T, object>> propertySelector,
             Action<ExportConventionBuilder> exportConfiguration)
         {
-            if (propertySelector == null)
-            {
-                throw new ArgumentNullException(nameof(propertySelector));
-            }
+            Requires.NotNull(propertySelector, nameof(propertySelector));
 
             var adapter = new PropertyExpressionAdapter(propertySelector, null, exportConfiguration);
             base.ExportProperties(adapter.VerifyPropertyInfo, adapter.ConfigureExport);
@@ -285,10 +281,7 @@ namespace System.Composition.Convention
             Expression<Func<T, object>> propertySelector,
             Action<ExportConventionBuilder> exportConfiguration)
         {
-            if (propertySelector == null)
-            {
-                throw new ArgumentNullException(nameof(propertySelector));
-            }
+            Requires.NotNull(propertySelector, nameof(propertySelector));
 
             var adapter = new PropertyExpressionAdapter(propertySelector, null, exportConfiguration);
             base.ExportProperties<TContract>(adapter.VerifyPropertyInfo, adapter.ConfigureExport);
@@ -315,10 +308,7 @@ namespace System.Composition.Convention
             Expression<Func<T, object>> propertySelector,
             Action<ImportConventionBuilder> importConfiguration)
         {
-            if (propertySelector == null)
-            {
-                throw new ArgumentNullException(nameof(propertySelector));
-            }
+            Requires.NotNull(propertySelector, nameof(propertySelector));
 
             var adapter = new PropertyExpressionAdapter(propertySelector, importConfiguration, null);
             base.ImportProperties(adapter.VerifyPropertyInfo, adapter.ConfigureImport);
@@ -347,10 +337,7 @@ namespace System.Composition.Convention
             Expression<Func<T, object>> propertySelector,
             Action<ImportConventionBuilder> importConfiguration)
         {
-            if (propertySelector == null)
-            {
-                throw new ArgumentNullException(nameof(propertySelector));
-            }
+            Requires.NotNull(propertySelector, nameof(propertySelector));
 
             var adapter = new PropertyExpressionAdapter(propertySelector, importConfiguration, null);
             base.ImportProperties<TContract>(adapter.VerifyPropertyInfo, adapter.ConfigureImport);
@@ -363,10 +350,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder<T> NotifyImportsSatisfied(Expression<Action<T>> methodSelector)
         {
-            if (methodSelector == null)
-            {
-                throw new ArgumentNullException(nameof(methodSelector));
-            }
+            Requires.NotNull(methodSelector, nameof(methodSelector));
 
             var adapter = new MethodExpressionAdapter(methodSelector);
             base.NotifyImportsSatisfied(adapter.VerifyMethodInfo);

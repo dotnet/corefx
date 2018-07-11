@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Composition.Hosting.Util;
 using System.Linq;
 using System.Text;
+using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Core
 {
@@ -39,20 +40,9 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Satisfied(CompositionContract contract, ExportDescriptorPromise target, bool isPrerequisite, object site)
         {
-            if (contract == null)
-            {
-                throw new ArgumentNullException(nameof(contract));
-            }
-
-            if (target == null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            if (site == null)
-            {
-                throw new ArgumentNullException(nameof(site));
-            }
+            Requires.NotNull(target, nameof(target));
+            Requires.NotNull(site, nameof(site));
+            Requires.NotNull(contract, nameof(contract));
 
             return new CompositionDependency(contract, target, isPrerequisite, site);
         }
@@ -66,15 +56,8 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Missing(CompositionContract contract, object site)
         {
-            if (contract == null)
-            {
-                throw new ArgumentNullException(nameof(contract));
-            }
-
-            if (site == null)
-            {
-                throw new ArgumentNullException(nameof(site));
-            }
+            Requires.NotNull(contract, nameof(contract));
+            Requires.NotNull(site, nameof(site));
 
             return new CompositionDependency(contract, site);
         }
@@ -89,20 +72,9 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Oversupplied(CompositionContract contract, IEnumerable<ExportDescriptorPromise> targets, object site)
         {
-            if (contract == null)
-            {
-                throw new ArgumentNullException(nameof(contract));
-            }
-
-            if (targets == null)
-            {
-                throw new ArgumentNullException(nameof(targets));
-            }
-
-            if (site == null)
-            {
-                throw new ArgumentNullException(nameof(site));
-            }
+            Requires.NotNull(targets, nameof(targets));
+            Requires.NotNull(site, nameof(site));
+            Requires.NotNull(contract, nameof(contract));
 
             return new CompositionDependency(contract, targets, site);
         }
@@ -168,10 +140,7 @@ namespace System.Composition.Hosting.Core
 
         internal void DescribeError(StringBuilder message)
         {
-            if(!IsError)
-            {
-                throw new Exception(SR.Dependency_Not_In_Error_State);
-            }
+            Assumes.IsTrue(IsError, "Dependency is not in an error state.");
 
             if (_oversuppliedTargets != null)
             {

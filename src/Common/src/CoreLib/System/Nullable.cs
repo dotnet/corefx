@@ -141,7 +141,7 @@ namespace System
             {
                 // instantiated generic type only                
                 Type genericType = nullableType.GetGenericTypeDefinition();
-                if (object.ReferenceEquals(genericType, typeof(Nullable<>)))
+                if (Object.ReferenceEquals(genericType, typeof(Nullable<>)))
                 {
                     return nullableType.GetGenericArguments()[0];
                 }

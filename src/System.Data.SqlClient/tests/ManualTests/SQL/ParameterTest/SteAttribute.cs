@@ -62,7 +62,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        public object Value
+        public Object Value
         {
             get
             {

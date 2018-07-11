@@ -15,10 +15,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         protected ImportingItem(ContractBasedImportDefinition definition, ImportType importType)
         {
-            if (definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
+            Assumes.NotNull(definition);
 
             _definition = definition;
             _importType = importType;
@@ -48,10 +45,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private object CastExportsToCollectionImportType(Export[] exports)
         {
-            if (exports == null)
-            {
-                throw new ArgumentNullException(nameof(exports));
-            }
+            Assumes.NotNull(exports);
 
             // Element type could be null if the actually import type of the member is not a collection
             // This particular case will end up failing when we set the member.
@@ -71,15 +65,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private object CastExportsToSingleImportType(Export[] exports)
         {
-            if (exports == null)
-            {
-                throw new ArgumentNullException(nameof(exports));
-            }
-
-            if (exports.Length >= 2) 
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(exports);
+            Assumes.IsTrue(exports.Length < 2);
 
             if (exports.Length == 0)
             {   
@@ -107,7 +94,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (!ContractServices.TryCast(type, value, out result))
             {
                 throw new ComposablePartException(
-                    string.Format(CultureInfo.CurrentCulture,
+                    String.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportNotAssignableFromExport,
                         export.ToElement().DisplayName,
                         type.FullName),

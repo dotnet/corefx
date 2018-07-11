@@ -308,7 +308,7 @@ namespace System.Tests
             }
             finally
             {
-                Environment.SetEnvironmentVariable(varName, string.Empty);
+                Environment.SetEnvironmentVariable(varName, String.Empty);
             }
         }
 
@@ -328,8 +328,8 @@ namespace System.Tests
             }
             finally
             {
-                Environment.SetEnvironmentVariable(varName, string.Empty);
-                Environment.SetEnvironmentVariable(varNamePrefix, string.Empty);
+                Environment.SetEnvironmentVariable(varName, String.Empty);
+                Environment.SetEnvironmentVariable(varNamePrefix, String.Empty);
             }
         }
 
@@ -348,7 +348,7 @@ namespace System.Tests
             }
             finally
             {
-                Environment.SetEnvironmentVariable(varName, string.Empty);
+                Environment.SetEnvironmentVariable(varName, String.Empty);
             }
         }
 
@@ -362,7 +362,7 @@ namespace System.Tests
                 Environment.SetEnvironmentVariable(varName, null);
             }
 
-            Environment.SetEnvironmentVariable("TestDeletingNonExistingEnvironmentVariable", string.Empty);
+            Environment.SetEnvironmentVariable("TestDeletingNonExistingEnvironmentVariable", String.Empty);
         }
     }
 }

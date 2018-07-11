@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -16,14 +17,8 @@ namespace System.ComponentModel.Composition.Hosting
 
             public ScopeManager(CatalogExportProvider catalogExportProvider, CompositionScopeDefinition scopeDefinition)
             {
-                if (catalogExportProvider == null)
-                {
-                    throw new ArgumentNullException(nameof(catalogExportProvider));
-                }
-                if (scopeDefinition == null)
-                {
-                    throw new ArgumentNullException(nameof(scopeDefinition));
-                }
+                Assumes.NotNull(catalogExportProvider);
+                Assumes.NotNull(scopeDefinition);
 
                 _scopeDefinition = scopeDefinition;
                 _catalogExportProvider = catalogExportProvider;

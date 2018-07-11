@@ -21,13 +21,13 @@ namespace System
             HResult = HResults.COR_E_MULTICASTNOTSUPPORTED;
         }
 
-        public MulticastNotSupportedException(string message)
+        public MulticastNotSupportedException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_MULTICASTNOTSUPPORTED;
         }
 
-        public MulticastNotSupportedException(string message, Exception inner)
+        public MulticastNotSupportedException(String message, Exception inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_MULTICASTNOTSUPPORTED;

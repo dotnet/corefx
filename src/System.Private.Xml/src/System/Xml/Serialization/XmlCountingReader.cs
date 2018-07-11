@@ -28,7 +28,7 @@ namespace System.Xml.Serialization
 
         private void IncrementCount()
         {
-            if (_advanceCount == int.MaxValue)
+            if (_advanceCount == Int32.MaxValue)
                 _advanceCount = 0;
             else
                 _advanceCount++;

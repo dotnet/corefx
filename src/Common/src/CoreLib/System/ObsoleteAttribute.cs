@@ -26,7 +26,7 @@ namespace System
         , Inherited = false)]
     public sealed class ObsoleteAttribute : Attribute
     {
-        private string _message;
+        private String _message;
         private bool _error;
 
         public ObsoleteAttribute()
@@ -35,19 +35,19 @@ namespace System
             _error = false;
         }
 
-        public ObsoleteAttribute(string message)
+        public ObsoleteAttribute(String message)
         {
             _message = message;
             _error = false;
         }
 
-        public ObsoleteAttribute(string message, bool error)
+        public ObsoleteAttribute(String message, bool error)
         {
             _message = message;
             _error = error;
         }
 
-        public string Message
+        public String Message
         {
             get { return _message; }
         }

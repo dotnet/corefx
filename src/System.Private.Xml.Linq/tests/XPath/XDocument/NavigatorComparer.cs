@@ -149,7 +149,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
             }
         }
 
-        public override double ValueAsDouble
+        public override Double ValueAsDouble
         {
             get
             {
@@ -160,7 +160,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
             }
         }
 
-        public override int ValueAsInt
+        public override Int32 ValueAsInt
         {
             get
             {
@@ -171,7 +171,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
             }
         }
 
-        public override long ValueAsLong
+        public override Int64 ValueAsLong
         {
             get
             {

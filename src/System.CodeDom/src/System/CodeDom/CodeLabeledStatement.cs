@@ -23,8 +23,8 @@ namespace System.CodeDom
 
         public string Label
         {
-            get => _label ?? string.Empty;
-            set => _label = value;
+            get { return _label ?? string.Empty; }
+            set { _label = value; }
         }
 
         public CodeStatement Statement { get; set; }

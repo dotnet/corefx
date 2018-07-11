@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -335,7 +335,7 @@ namespace System.PrivateUri.Tests
                     {
                         Assert.Equal(
                             0,
-                            string.CompareOrdinal(results1[i], results2[i]));
+                            String.CompareOrdinal(results1[i], results2[i]));
                     }
                 }
             }
@@ -349,37 +349,37 @@ namespace System.PrivateUri.Tests
             switch (component)
             {
                 case UriComponents.Fragment:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "http://userInfo@server:80/path/resource.ext?query=qvalue#{0}",
                         uriInput);
                     break;
                 case UriComponents.Host:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "http://userInfo@{0}:80/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.Path:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "http://userInfo@server:80/{0}/{0}/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.Port:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "http://userInfo@server:{0}/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.Query:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "http://userInfo@server:80/path/resource.ext?query{0}=qvalue{0}#fragment",
                         uriInput);
                     break;
                 case UriComponents.Scheme:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "{0}://userInfo@server:80/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.UserInfo:
-                    uriString = string.Format(
+                    uriString = String.Format(
                         "http://{0}@server:80/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;

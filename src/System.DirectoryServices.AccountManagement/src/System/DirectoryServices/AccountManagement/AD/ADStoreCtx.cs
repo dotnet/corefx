@@ -1208,7 +1208,7 @@ namespace System.DirectoryServices.AccountManagement
                         var gg = forest.FindAllGlobalCatalogs(dd.SiteName);
                         foreach (GlobalCatalog g in gg)
                         {
-                            if (string.Equals(this.DnsDomainName, g.Domain.Name, StringComparison.OrdinalIgnoreCase))
+                            if (0 == string.Compare(this.DnsDomainName, g.Domain.Name, StringComparison.OrdinalIgnoreCase))
                             {
                                 gc = g;
                                 break;
@@ -1217,7 +1217,7 @@ namespace System.DirectoryServices.AccountManagement
 
                         roots.Add(new DirectoryEntry("GC://" + gc.Name + "/" + p.DistinguishedName, this.credentials != null ? this.credentials.UserName : null, this.credentials != null ? this.credentials.Password : null, this.AuthTypes));
 
-                        if (!string.Equals(this.DnsDomainName, gc.Domain.Name, StringComparison.OrdinalIgnoreCase))
+                        if (0 != string.Compare(this.DnsDomainName, gc.Domain.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             //useASQ = false;
                             roots.Add(principalDE);
@@ -1409,9 +1409,9 @@ namespace System.DirectoryServices.AccountManagement
 
                 // If same forest but different domain then we have a child or alternate tree domain.  We don't have a starting user
                 // object and must do a search on all groups to find membership.
-                if (string.Equals(foreignADStore.DnsForestName, this.DnsForestName, StringComparison.OrdinalIgnoreCase))
+                if (0 == string.Compare(foreignADStore.DnsForestName, this.DnsForestName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (string.Equals(foreignADStore.DnsDomainName, this.DnsDomainName, StringComparison.OrdinalIgnoreCase))
+                    if (0 == string.Compare(foreignADStore.DnsDomainName, this.DnsDomainName, StringComparison.OrdinalIgnoreCase))
                     {
                         rootPrincipalExists = true;
                     }
@@ -1827,10 +1827,10 @@ namespace System.DirectoryServices.AccountManagement
 
             try
             {
-                string path = string.Format(
+                string path = String.Format(
                     CultureInfo.InvariantCulture,
                     "LDAP://{0}/{1}",
-                    string.IsNullOrEmpty(this.UserSuppliedServerName) ? this.DnsHostName : this.UserSuppliedServerName,
+                    String.IsNullOrEmpty(this.UserSuppliedServerName) ? this.DnsHostName : this.UserSuppliedServerName,
                     this.ContextBasePartitionDN
                     );
 
@@ -2146,7 +2146,7 @@ namespace System.DirectoryServices.AccountManagement
                                                 serverName);
 
                         throw new PrincipalOperationException(
-                                string.Format(CultureInfo.CurrentCulture,
+                                String.Format(CultureInfo.CurrentCulture,
                                                   SR.ADStoreCtxCantResolveSidForCrossStore,
                                                   err));
                     }
@@ -2511,10 +2511,10 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     // If it's not a "DC=" component, skip it
                     if ((component.Length > 3) &&
-                        string.Equals(component.Substring(0, 3), "DC=", StringComparison.OrdinalIgnoreCase))
+                        (String.Compare(component.Substring(0, 3), "DC=", StringComparison.OrdinalIgnoreCase) == 0))
                     {
-                        sb.Append(component, 3, component.Length - 3);
-                        sb.Append('.');
+                        sb.Append(component.Substring(3));
+                        sb.Append(".");
                     }
                 }
 

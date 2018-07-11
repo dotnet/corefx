@@ -942,7 +942,7 @@ namespace System.Xml.Xsl.IlGen
             }
             else
             {
-                int[] bits = decimal.GetBits(dec);
+                int[] bits = Decimal.GetBits(dec);
 
                 LoadInteger(bits[0]);
                 LoadInteger(bits[1]);

@@ -180,9 +180,9 @@ namespace System.Threading.Tasks.Tests
     public class LongTask
     {
         // Amount of time to SpinWait, in milliseconds.
-        protected readonly int _msWaitDuration;
+        protected readonly Int32 _msWaitDuration;
 
-        public LongTask(int milliseconds)
+        public LongTask(Int32 milliseconds)
         {
             _msWaitDuration = milliseconds;
         }
@@ -195,7 +195,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Asynchronous version of time-consuming method (Begin part)
-        public IAsyncResult BeginDoTask(AsyncCallback callback, object state)
+        public IAsyncResult BeginDoTask(AsyncCallback callback, Object state)
         {
             // Create IAsyncResult object identifying the asynchronous operation
             Task task = Task.Factory.StartNew(
@@ -231,7 +231,7 @@ namespace System.Threading.Tasks.Tests
     /// </summary>
     public sealed class LongTask<T> : LongTask
     {
-        public LongTask(int milliseconds)
+        public LongTask(Int32 milliseconds)
             : base(milliseconds)
         {
         }
@@ -243,7 +243,7 @@ namespace System.Threading.Tasks.Tests
             return input; // Return some result, for now, just return the input
         }
 
-        public IAsyncResult BeginDoTask(T input, AsyncCallback callback, object state)
+        public IAsyncResult BeginDoTask(T input, AsyncCallback callback, Object state)
         {
             // Create IAsyncResult object identifying the asynchronous operation
             Task<T> task = Task<T>.Factory.StartNew(

@@ -13,24 +13,24 @@ using System.Buffers;
 namespace System.IO
 {
     // This abstract base class represents a writer that can write a sequential
-    // stream of characters. A subclass must minimally implement the
+    // stream of characters. A subclass must minimally implement the 
     // Write(char) method.
     //
-    // This class is intended for character output, not bytes.
-    // There are methods on the Stream class for writing bytes.
+    // This class is intended for character output, not bytes.  
+    // There are methods on the Stream class for writing bytes. 
     public abstract partial class TextWriter : MarshalByRefObject, IDisposable
     {
         public static readonly TextWriter Null = new NullTextWriter();
 
-        // We don't want to allocate on every TextWriter creation, so cache the char array.
+        // We don't want to allocate on every TextWriter creation, so cache the char array.  
         private static readonly char[] s_coreNewLine = Environment.NewLine.ToCharArray();
 
         /// <summary>
-        /// This is the 'NewLine' property expressed as a char[].
+        /// This is the 'NewLine' property expressed as a char[].   
         /// It is exposed to subclasses as a protected field for read-only
-        /// purposes.  You should only modify it by using the 'NewLine' property.
-        /// In particular you should never modify the elements of the array
-        /// as they are shared among many instances of TextWriter.
+        /// purposes.  You should only modify it by using the 'NewLine' property.  
+        /// In particular you should never modify the elements of the array 
+        /// as they are shared among many instances of TextWriter.  
         /// </summary>
         protected char[] CoreNewLine = s_coreNewLine;
         private string CoreNewLineStr = Environment.NewLine;
@@ -94,7 +94,7 @@ namespace System.IO
 
         /// <summary>
         /// Returns the line terminator string used by this TextWriter. The default line
-        /// terminator string is Environment.NewLine, which is platform specific.
+        /// terminator string is Environment.NewLine, which is platform specific. 
         /// On Windows this is a carriage return followed by a line feed ("\r\n").
         /// On OSX and Linux this is a line feed ("\n").
         /// </summary>
@@ -184,7 +184,7 @@ namespace System.IO
         }
 
         // Writes the text representation of a boolean to the text stream. This
-        // method outputs either bool.TrueString or bool.FalseString.
+        // method outputs either Boolean.TrueString or Boolean.FalseString.
         //
         public virtual void Write(bool value)
         {
@@ -193,7 +193,7 @@ namespace System.IO
 
         // Writes the text representation of an integer to the text stream. The
         // text representation of the given value is produced by calling the
-        // int.ToString() method.
+        // Int32.ToString() method.
         //
         public virtual void Write(int value)
         {
@@ -202,7 +202,7 @@ namespace System.IO
 
         // Writes the text representation of an integer to the text stream. The
         // text representation of the given value is produced by calling the
-        // uint.ToString() method.
+        // UInt32.ToString() method.
         //
         [CLSCompliant(false)]
         public virtual void Write(uint value)
@@ -212,16 +212,16 @@ namespace System.IO
 
         // Writes the text representation of a long to the text stream. The
         // text representation of the given value is produced by calling the
-        // long.ToString() method.
+        // Int64.ToString() method.
         //
         public virtual void Write(long value)
         {
             Write(value.ToString(FormatProvider));
         }
 
-        // Writes the text representation of an unsigned long to the text
-        // stream. The text representation of the given value is produced
-        // by calling the ulong.ToString() method.
+        // Writes the text representation of an unsigned long to the text 
+        // stream. The text representation of the given value is produced 
+        // by calling the UInt64.ToString() method.
         //
         [CLSCompliant(false)]
         public virtual void Write(ulong value)
@@ -231,7 +231,7 @@ namespace System.IO
 
         // Writes the text representation of a float to the text stream. The
         // text representation of the given value is produced by calling the
-        // float.ToString(float) method.
+        // Float.toString(float) method.
         //
         public virtual void Write(float value)
         {
@@ -240,7 +240,7 @@ namespace System.IO
 
         // Writes the text representation of a double to the text stream. The
         // text representation of the given value is produced by calling the
-        // double.ToString(double) method.
+        // Double.toString(double) method.
         //
         public virtual void Write(double value)
         {
@@ -283,48 +283,33 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Equivalent to Write(stringBuilder.ToString()) however it uses the
-        /// StringBuilder.GetChunks() method to avoid creating the intermediate string
-        /// </summary>
-        /// <param name="value">The string (as a StringBuilder) to write to the stream</param>
-        public virtual void Write(StringBuilder value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-            foreach (ReadOnlyMemory<char> chunk in value.GetChunks())
-                Write(chunk);
-        }
-
         // Writes out a formatted string.  Uses the same semantics as
-        // string.Format.
-        //
+        // String.Format.
+        // 
         public virtual void Write(string format, object arg0)
         {
             Write(string.Format(FormatProvider, format, arg0));
         }
 
         // Writes out a formatted string.  Uses the same semantics as
-        // string.Format.
-        //
+        // String.Format.
+        // 
         public virtual void Write(string format, object arg0, object arg1)
         {
             Write(string.Format(FormatProvider, format, arg0, arg1));
         }
 
         // Writes out a formatted string.  Uses the same semantics as
-        // string.Format.
-        //
+        // String.Format.
+        // 
         public virtual void Write(string format, object arg0, object arg1, object arg2)
         {
             Write(string.Format(FormatProvider, format, arg0, arg1, arg2));
         }
 
         // Writes out a formatted string.  Uses the same semantics as
-        // string.Format.
-        //
+        // String.Format.
+        // 
         public virtual void Write(string format, params object[] arg)
         {
             Write(string.Format(FormatProvider, format, arg));
@@ -398,7 +383,7 @@ namespace System.IO
             WriteLine();
         }
 
-        // Writes the text representation of an unsigned integer followed by
+        // Writes the text representation of an unsigned integer followed by 
         // a line terminator to the text stream.
         //
         [CLSCompliant(false)]
@@ -417,7 +402,7 @@ namespace System.IO
             WriteLine();
         }
 
-        // Writes the text representation of an unsigned long followed by
+        // Writes the text representation of an unsigned long followed by 
         // a line terminator to the text stream.
         //
         [CLSCompliant(false)]
@@ -462,16 +447,6 @@ namespace System.IO
             Write(CoreNewLineStr);
         }
 
-        /// <summary>
-        /// Equivalent to WriteLine(stringBuilder.ToString()) however it uses the
-        /// StringBuilder.GetChunks() method to avoid creating the intermediate string
-        /// </summary>
-        public virtual void WriteLine(StringBuilder value)
-        {
-            Write(value);
-            WriteLine();
-        }
-
         // Writes the text representation of an object followed by a line
         // terminator to the text stream.
         //
@@ -497,33 +472,33 @@ namespace System.IO
             }
         }
 
-        // Writes out a formatted string and a new line.  Uses the same
-        // semantics as string.Format.
-        //
+        // Writes out a formatted string and a new line.  Uses the same 
+        // semantics as String.Format.
+        // 
         public virtual void WriteLine(string format, object arg0)
         {
             WriteLine(string.Format(FormatProvider, format, arg0));
         }
 
-        // Writes out a formatted string and a new line.  Uses the same
-        // semantics as string.Format.
-        //
+        // Writes out a formatted string and a new line.  Uses the same 
+        // semantics as String.Format.
+        // 
         public virtual void WriteLine(string format, object arg0, object arg1)
         {
             WriteLine(string.Format(FormatProvider, format, arg0, arg1));
         }
 
-        // Writes out a formatted string and a new line.  Uses the same
-        // semantics as string.Format.
-        //
+        // Writes out a formatted string and a new line.  Uses the same 
+        // semantics as String.Format.
+        // 
         public virtual void WriteLine(string format, object arg0, object arg1, object arg2)
         {
             WriteLine(string.Format(FormatProvider, format, arg0, arg1, arg2));
         }
 
-        // Writes out a formatted string and a new line.  Uses the same
-        // semantics as string.Format.
-        //
+        // Writes out a formatted string and a new line.  Uses the same 
+        // semantics as String.Format.
+        // 
         public virtual void WriteLine(string format, params object[] arg)
         {
             WriteLine(string.Format(FormatProvider, format, arg));
@@ -552,27 +527,6 @@ namespace System.IO
             tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
-        /// <summary>
-        /// Equivalent to WriteAsync(stringBuilder.ToString()) however it uses the
-        /// StringBuilder.GetChunks() method to avoid creating the intermediate string
-        /// </summary>
-        /// <param name="value">The string (as a StringBuilder) to write to the stream</param>
-        public virtual Task WriteAsync(StringBuilder value, CancellationToken cancellationToken = default)
-        {
-            return
-                cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
-                value == null ? Task.CompletedTask :
-                WriteAsyncCore(value, cancellationToken);
-
-            async Task WriteAsyncCore(StringBuilder sb, CancellationToken ct)
-            {
-                foreach (ReadOnlyMemory<char> chunk in sb.GetChunks())
-                {
-                    await WriteAsync(chunk, ct).ConfigureAwait(false);
-                }
-            }
-        }
-
         public Task WriteAsync(char[] buffer)
         {
             if (buffer == null)
@@ -595,7 +549,6 @@ namespace System.IO
         }
 
         public virtual Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = default) =>
-            cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
             MemoryMarshal.TryGetArray(buffer, out ArraySegment<char> array) ?
                 WriteAsync(array.Array, array.Offset, array.Count) :
                 Task.Factory.StartNew(state =>
@@ -626,28 +579,6 @@ namespace System.IO
             tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
-        /// <summary>
-        /// Equivalent to WriteLineAsync(stringBuilder.ToString()) however it uses the
-        /// StringBuilder.GetChunks() method to avoid creating the intermediate string
-        /// </summary>
-        /// <param name="value">The string (as a StringBuilder) to write to the stream</param>
-        public virtual Task WriteLineAsync(StringBuilder value, CancellationToken cancellationToken = default)
-        {
-            return
-                cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
-                value == null ? WriteAsync(CoreNewLine, cancellationToken) :
-                WriteLineAsyncCore(value, cancellationToken);
-
-            async Task WriteLineAsyncCore(StringBuilder sb, CancellationToken ct)
-            {
-                foreach (ReadOnlyMemory<char> chunk in sb.GetChunks())
-                {
-                    await WriteAsync(chunk, ct).ConfigureAwait(false);
-                }
-                await WriteAsync(CoreNewLine, ct).ConfigureAwait(false);
-            }
-        }
-
         public Task WriteLineAsync(char[] buffer)
         {
             if (buffer == null)
@@ -670,7 +601,6 @@ namespace System.IO
         }
 
         public virtual Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = default) =>
-            cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
             MemoryMarshal.TryGetArray(buffer, out ArraySegment<char> array) ?
                 WriteLineAsync(array.Array, array.Offset, array.Count) :
                 Task.Factory.StartNew(state =>
@@ -809,13 +739,10 @@ namespace System.IO
             public override void Write(double value) => _out.Write(value);
 
             [MethodImpl(MethodImplOptions.Synchronized)]
-            public override void Write(decimal value) => _out.Write(value);
+            public override void Write(Decimal value) => _out.Write(value);
 
             [MethodImpl(MethodImplOptions.Synchronized)]
             public override void Write(string value) => _out.Write(value);
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            public override void Write(StringBuilder value) => _out.Write(value);
 
             [MethodImpl(MethodImplOptions.Synchronized)]
             public override void Write(object value) => _out.Write(value);
@@ -872,9 +799,6 @@ namespace System.IO
             public override void WriteLine(string value) => _out.WriteLine(value);
 
             [MethodImpl(MethodImplOptions.Synchronized)]
-            public override void WriteLine(StringBuilder value) => _out.WriteLine(value);
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
             public override void WriteLine(object value) => _out.WriteLine(value);
 
             [MethodImpl(MethodImplOptions.Synchronized)]
@@ -908,13 +832,6 @@ namespace System.IO
             }
 
             [MethodImpl(MethodImplOptions.Synchronized)]
-            public override Task WriteAsync(StringBuilder value, CancellationToken cancellationToken = default)
-            {
-                Write(value);
-                return Task.CompletedTask;
-            }
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
             public override Task WriteAsync(char[] buffer, int index, int count)
             {
                 Write(buffer, index, count);
@@ -930,13 +847,6 @@ namespace System.IO
 
             [MethodImpl(MethodImplOptions.Synchronized)]
             public override Task WriteLineAsync(string value)
-            {
-                WriteLine(value);
-                return Task.CompletedTask;
-            }
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            public override Task WriteLineAsync(StringBuilder value, CancellationToken cancellationToken = default)
             {
                 WriteLine(value);
                 return Task.CompletedTask;

@@ -152,7 +152,7 @@ namespace System.DirectoryServices
 
         object ICollection.SyncRoot => this;
 
-        void ICollection.CopyTo(Array array, int index)
+        void ICollection.CopyTo(Array array, Int32 index)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));

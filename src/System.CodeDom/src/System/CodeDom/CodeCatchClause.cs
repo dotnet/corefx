@@ -32,14 +32,14 @@ namespace System.CodeDom
 
         public string LocalName
         {
-            get => _localName ?? string.Empty;
-            set => _localName = value;
+            get { return _localName ?? string.Empty; }
+            set { _localName = value; }
         }
 
         public CodeTypeReference CatchExceptionType
         {
-            get => _catchExceptionType ?? (_catchExceptionType = new CodeTypeReference(typeof(Exception)));
-            set => _catchExceptionType = value;
+            get { return _catchExceptionType ?? (_catchExceptionType = new CodeTypeReference(typeof(Exception))); }
+            set { _catchExceptionType = value; }
         }
 
         public CodeStatementCollection Statements => _statements ?? (_statements = new CodeStatementCollection());

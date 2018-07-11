@@ -117,7 +117,8 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (DataType == DataType.Custom && string.IsNullOrWhiteSpace(CustomDataType))
             {
-                throw new InvalidOperationException(SR.DataTypeAttribute_EmptyDataTypeString);
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                    SR.DataTypeAttribute_EmptyDataTypeString));
             }
         }
     }

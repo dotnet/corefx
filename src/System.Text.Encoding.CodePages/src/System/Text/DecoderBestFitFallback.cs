@@ -40,7 +40,7 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             InternalDecoderBestFitFallback that = value as InternalDecoderBestFitFallback;
             if (that != null)
@@ -65,14 +65,14 @@ namespace System.Text
         private InternalDecoderBestFitFallback _oFallback;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject;
-        private static object InternalSyncObject
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;

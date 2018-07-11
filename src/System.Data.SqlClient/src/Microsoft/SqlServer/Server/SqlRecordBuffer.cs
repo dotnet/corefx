@@ -41,25 +41,25 @@ namespace Microsoft.SqlServer.Server
         internal struct Storage
         {
             [FieldOffset(0)]
-            internal bool _boolean;
+            internal Boolean _boolean;
             [FieldOffset(0)]
-            internal byte _byte;
+            internal Byte _byte;
             [FieldOffset(0)]
             internal DateTime _dateTime;
             [FieldOffset(0)]
             internal DateTimeOffset _dateTimeOffset;
             [FieldOffset(0)]
-            internal double _double;
+            internal Double _double;
             [FieldOffset(0)]
             internal Guid _guid;
             [FieldOffset(0)]
-            internal short _int16;
+            internal Int16 _int16;
             [FieldOffset(0)]
-            internal int _int32;
+            internal Int32 _int32;
             [FieldOffset(0)]
-            internal long _int64;    // also used to BytesLength and CharsLength
+            internal Int64 _int64;    // also used to BytesLength and CharsLength
             [FieldOffset(0)]
-            internal float _single;
+            internal Single _single;
             [FieldOffset(0)]
             internal TimeSpan _timeSpan;
         }
@@ -84,7 +84,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal bool Boolean
+        internal Boolean Boolean
         {
             get
             {
@@ -101,7 +101,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal byte Byte
+        internal Byte Byte
         {
             get
             {
@@ -162,7 +162,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal double Double
+        internal Double Double
         {
             get
             {
@@ -196,7 +196,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal short Int16
+        internal Int16 Int16
         {
             get
             {
@@ -213,7 +213,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal int Int32
+        internal Int32 Int32
         {
             get
             {
@@ -230,7 +230,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal long Int64
+        internal Int64 Int64
         {
             get
             {
@@ -255,7 +255,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal float Single
+        internal Single Single
         {
             get
             {
@@ -272,7 +272,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal string String
+        internal String String
         {
             get
             {
@@ -280,11 +280,11 @@ namespace Microsoft.SqlServer.Server
 
                 if (StorageType.String == _type)
                 {
-                    return (string)_object;
+                    return (String)_object;
                 }
                 else if (StorageType.CharArray == _type)
                 {
-                    return new string((char[])_object, 0, (int)CharsLength);
+                    return new String((char[])_object, 0, (int)CharsLength);
                 }
                 else
                 {
@@ -349,7 +349,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal long BytesLength
+        internal Int64 BytesLength
         {
             get
             {
@@ -387,7 +387,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        internal long CharsLength
+        internal Int64 CharsLength
         {
             get
             {
@@ -577,7 +577,7 @@ namespace Microsoft.SqlServer.Server
                     if (ndataIndex + length > cchars)
                     {    // dynamic expansion
                         char[] data = new char[Math.Max(ndataIndex + length, 2 * cchars)];
-                        Debug.Assert(CharsLength < int.MaxValue);
+                        Debug.Assert(CharsLength < Int32.MaxValue);
                         Array.Copy((char[])_object, 0, data, 0, (int)CharsLength);
                         _object = data;
                     }

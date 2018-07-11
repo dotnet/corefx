@@ -59,10 +59,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private FilteredCatalog Traverse(IComposablePartCatalogTraversal traversal)
         {
-            if (traversal == null)
-            {
-                throw new ArgumentNullException(nameof(traversal));
-            }
+            Assumes.NotNull(traversal);
 
             // we make sure that the underlyiong catalog cannot change while we are doing the trasversal
             // After thaty traversal is done, the freeze is lifted, and the catalog is free to change, but the changes 
@@ -83,10 +80,8 @@ namespace System.ComponentModel.Composition.Hosting
 
         private static HashSet<ComposablePartDefinition> GetTraversalClosure(IEnumerable<ComposablePartDefinition> parts, IComposablePartCatalogTraversal traversal)
         {
-            if (traversal == null)
-            {
-                throw new ArgumentNullException(nameof(traversal));
-            }
+            Assumes.NotNull(traversal);
+
             var traversedParts = new HashSet<ComposablePartDefinition>();
             GetTraversalClosure(parts, traversedParts, traversal);
             return traversedParts;

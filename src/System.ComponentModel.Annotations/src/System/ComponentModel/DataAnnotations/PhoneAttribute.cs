@@ -39,7 +39,7 @@ namespace System.ComponentModel.DataAnnotations
             bool digitFound = false;
             foreach (char c in valueAsString)
             {
-                if (char.IsDigit(c))
+                if (Char.IsDigit(c))
                 {
                     digitFound = true;
                     break;
@@ -53,8 +53,8 @@ namespace System.ComponentModel.DataAnnotations
 
             foreach (char c in valueAsString)
             {
-                if (!(char.IsDigit(c)
-                    || char.IsWhiteSpace(c)
+                if (!(Char.IsDigit(c)
+                    || Char.IsWhiteSpace(c)
                     || AdditionalPhoneNumberCharacters.IndexOf(c) != -1))
                 {
                     return false;
@@ -115,7 +115,7 @@ namespace System.ComponentModel.DataAnnotations
 
             foreach (char c in potentialExtension)
             {
-                if (!char.IsDigit(c))
+                if (!Char.IsDigit(c))
                 {
                     return false;
                 }

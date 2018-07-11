@@ -16,7 +16,7 @@ namespace System.Xml.Tests
         {
             int ret = base.Init(objParam);
             // Create global usage test files
-            string strFile = string.Empty;
+            string strFile = String.Empty;
             // Create reader factory
             TestFiles.CreateTestFile(ref strFile, EREADER_TYPE.GENERIC);
             ReaderFactory = new ReaderSettingsFactory();

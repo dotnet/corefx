@@ -202,7 +202,7 @@ namespace System.ComponentModel.Composition
 
         public interface IOrderMetadata
         {
-            [DefaultValue(int.MaxValue)]
+            [DefaultValue(Int32.MaxValue)]
             int Order { get; }
         }
 

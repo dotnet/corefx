@@ -39,7 +39,7 @@ namespace System.DirectoryServices.AccountManagement
 
             SAMStoreKey that = (SAMStoreKey)o;
 
-            if (!string.Equals(_machineName, that._machineName, StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(_machineName, that._machineName, StringComparison.OrdinalIgnoreCase) != 0)
                 return false;
 
             return Utils.AreBytesEqual(_sid, that._sid);

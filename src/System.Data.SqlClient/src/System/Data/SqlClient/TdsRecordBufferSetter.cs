@@ -77,14 +77,14 @@ namespace System.Data.SqlClient
         }
 
         //  valid for SqlDbType.Bit
-        public override void SetBoolean(SmiEventSink sink, int ordinal, bool value)
+        public override void SetBoolean(SmiEventSink sink, int ordinal, Boolean value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetBoolean(value);
         }
 
         //  valid for SqlDbType.TinyInt
-        public override void SetByte(SmiEventSink sink, int ordinal, byte value)
+        public override void SetByte(SmiEventSink sink, int ordinal, Byte value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetByte(value);
@@ -129,35 +129,35 @@ namespace System.Data.SqlClient
         }
 
         // valid for SqlDbType.SmallInt
-        public override void SetInt16(SmiEventSink sink, int ordinal, short value)
+        public override void SetInt16(SmiEventSink sink, int ordinal, Int16 value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetInt16(value);
         }
 
         // valid for SqlDbType.Int
-        public override void SetInt32(SmiEventSink sink, int ordinal, int value)
+        public override void SetInt32(SmiEventSink sink, int ordinal, Int32 value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetInt32(value);
         }
 
         // valid for SqlDbType.BigInt, SqlDbType.Money, SqlDbType.SmallMoney
-        public override void SetInt64(SmiEventSink sink, int ordinal, long value)
+        public override void SetInt64(SmiEventSink sink, int ordinal, Int64 value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetInt64(value);
         }
 
         // valid for SqlDbType.Real
-        public override void SetSingle(SmiEventSink sink, int ordinal, float value)
+        public override void SetSingle(SmiEventSink sink, int ordinal, Single value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetSingle(value);
         }
 
         // valid for SqlDbType.Float
-        public override void SetDouble(SmiEventSink sink, int ordinal, double value)
+        public override void SetDouble(SmiEventSink sink, int ordinal, Double value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetDouble(value);

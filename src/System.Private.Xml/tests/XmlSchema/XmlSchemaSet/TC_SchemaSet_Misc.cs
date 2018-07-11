@@ -835,11 +835,11 @@ namespace System.Xml.Tests
         {
 #pragma warning disable 0618
             XmlSchemaAttribute attribute = new XmlSchemaAttribute();
-            object attributeType = attribute.AttributeType;
+            Object attributeType = attribute.AttributeType;
             XmlSchemaElement element = new XmlSchemaElement();
-            object elementType = element.ElementType;
+            Object elementType = element.ElementType;
             XmlSchemaType schemaType = new XmlSchemaType();
-            object BaseSchemaType = schemaType.BaseSchemaType;
+            Object BaseSchemaType = schemaType.BaseSchemaType;
 #pragma warning restore 0618
         }
 
@@ -928,7 +928,7 @@ namespace System.Xml.Tests
                     }
                     catch (XmlSchemaValidationException ex)
                     {
-                        if (ex.LineNumber == 1 && ex.LinePosition == 2 && !string.IsNullOrEmpty(ex.SourceUri))
+                        if (ex.LineNumber == 1 && ex.LinePosition == 2 && !String.IsNullOrEmpty(ex.SourceUri))
                         {
                             return;
                         }

@@ -242,11 +242,11 @@ namespace System.Text
                 // Have to check for charLeftOver
                 if (charLeftOver != 0)
                 {
-                    Debug.Assert(char.IsHighSurrogate(charLeftOver),
+                    Debug.Assert(Char.IsHighSurrogate(charLeftOver),
                         "[GB18030Encoding.GetBytes] leftover character should be high surrogate, not 0x" + ((int)charLeftOver).ToString("X4", CultureInfo.InvariantCulture));
 
                     // If our next char isn't a low surrogate, then we need to do fallback.
-                    if (!char.IsLowSurrogate(ch))
+                    if (!Char.IsLowSurrogate(ch))
                     {
                         // No low surrogate, fallback high surrogate & try this one again
                         buffer.MovePrevious(false);                  // (Ignoring this character, don't throw)
@@ -293,12 +293,12 @@ namespace System.Text
                         break;
                 }
                 // See if its a surrogate pair
-                else if (char.IsHighSurrogate(ch))
+                else if (Char.IsHighSurrogate(ch))
                 {
                     // Remember it for next time
                     charLeftOver = ch;
                 }
-                else if (char.IsLowSurrogate(ch))
+                else if (Char.IsLowSurrogate(ch))
                 {
                     // Low surrogates should've been found already
                     if (!buffer.Fallback(ch))

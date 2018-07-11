@@ -17,13 +17,13 @@ namespace System
             HResult = COR_E_CANNOTUNLOADAPPDOMAIN;
         }
 
-        public CannotUnloadAppDomainException(string message)
+        public CannotUnloadAppDomainException(String message)
             : base(message)
         {
             HResult = COR_E_CANNOTUNLOADAPPDOMAIN;
         }
 
-        public CannotUnloadAppDomainException(string message, Exception innerException)
+        public CannotUnloadAppDomainException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = COR_E_CANNOTUNLOADAPPDOMAIN;

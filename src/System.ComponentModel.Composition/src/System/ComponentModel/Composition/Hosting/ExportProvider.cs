@@ -108,10 +108,7 @@ namespace System.ComponentModel.Composition.Hosting
                 case ExportCardinalityCheckResult.NoExports:
                     throw new ImportCardinalityMismatchException(string.Format(CultureInfo.CurrentCulture, SR.CardinalityMismatch_NoExports, definition.ToString()));
                 default:
-                    if (result != ExportCardinalityCheckResult.TooManyExports)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.IsTrue(result == ExportCardinalityCheckResult.TooManyExports);
                     throw new ImportCardinalityMismatchException(string.Format(CultureInfo.CurrentCulture, SR.CardinalityMismatch_TooManyExports_Constraint, definition.ToString()));
             }
         }
@@ -207,10 +204,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private ExportCardinalityCheckResult TryGetExportsCore(ImportDefinition definition, AtomicComposition atomicComposition, out IEnumerable<Export> exports)
         {
-            if (definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
+            Assumes.NotNull(definition);
 
             exports = GetExportsCore(definition, atomicComposition);
 

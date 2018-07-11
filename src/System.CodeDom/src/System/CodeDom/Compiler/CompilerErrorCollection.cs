@@ -22,8 +22,8 @@ namespace System.CodeDom.Compiler
 
         public CompilerError this[int index]
         {
-            get => (CompilerError)List[index];
-            set => List[index] = value;
+            get { return (CompilerError)List[index]; }
+            set { List[index] = value; }
         }
 
         public int Add(CompilerError value) => List.Add(value);
@@ -37,7 +37,7 @@ namespace System.CodeDom.Compiler
 
             for (int i = 0; i < value.Length; i++)
             {
-                Add(value[i]);
+                this.Add(value[i]);
             }
         }
 

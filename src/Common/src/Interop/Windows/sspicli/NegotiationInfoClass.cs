@@ -40,11 +40,11 @@ namespace System.Net
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"packageInfo:{packageInfo} negotiationState:{negotiationState:x} name:{name}");
 
                 // An optimization for future string comparisons.
-                if (string.Equals(name, Kerberos, StringComparison.OrdinalIgnoreCase))
+                if (string.Compare(name, Kerberos, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     AuthenticationPackage = Kerberos;
                 }
-                else if (string.Equals(name, NTLM, StringComparison.OrdinalIgnoreCase))
+                else if (string.Compare(name, NTLM, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     AuthenticationPackage = NTLM;
                 }

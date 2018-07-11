@@ -55,7 +55,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 string rdn = Utils.GetRdnFromDN(transportDN);
                 string transport = (Utils.GetDNComponents(rdn))[0].Value;
 
-                if (string.Equals(transport, "SMTP", StringComparison.OrdinalIgnoreCase))
+                if (String.Compare(transport, "SMTP", StringComparison.OrdinalIgnoreCase) == 0)
                     TransportType = ActiveDirectoryTransportType.Smtp;
                 else
                     TransportType = ActiveDirectoryTransportType.Rpc;

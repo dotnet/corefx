@@ -10,9 +10,9 @@ namespace System.Diagnostics.TraceSourceTests
     {
         class TestSwitch : Switch
         {
-            public TestSwitch(string description = null) : base(null, description) { }
+            public TestSwitch(String description = null) : base(null, description) { }
 
-            public string SwitchValue
+            public String SwitchValue
             {
                 get { return this.Value; }
                 set { this.Value = value; }

@@ -51,7 +51,7 @@ namespace System.Management
         private string propertyOrMethodName; //remains null for object qualifiers
         private string qualifierName;
         private QualifierType qualifierType;
-        private object qualifierValue;
+        private Object qualifierValue;
         private int qualifierFlavor;
         private IWbemQualifierSetFreeThreaded qualifierSet;
 
@@ -106,7 +106,7 @@ namespace System.Management
             {
                 if (qualVal is Array)
                 {
-                    if ((qualVal is int[]) || (qualVal is double[]) || (qualVal is string[]) || (qualVal is bool[]))
+                    if ((qualVal is Int32[]) || (qualVal is Double[]) || (qualVal is String[]) || (qualVal is Boolean[]))
                         wmiValue = qualVal;
                     else
                     {
@@ -114,29 +114,29 @@ namespace System.Management
                         int length = valArray.Length;
                         Type elementType = (length > 0 ? valArray.GetValue(0).GetType() : null);
 
-                        if (elementType == typeof(int))
+                        if (elementType == typeof(Int32))
                         {
-                            wmiValue = new int [length];
+                            wmiValue = new Int32 [length];
                             for (int i = 0; i < length; i++)
-                                ((int[])(wmiValue))[i] = Convert.ToInt32(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int)));
+                                ((Int32[])(wmiValue))[i] = Convert.ToInt32(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32)));
                         }
-                        else if (elementType == typeof(double))
+                        else if (elementType == typeof(Double))
                         {
-                            wmiValue = new double [length];
+                            wmiValue = new Double [length];
                             for (int i = 0; i < length; i++)
-                                ((double[])(wmiValue))[i] = Convert.ToDouble(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(double)));
+                                ((Double[])(wmiValue))[i] = Convert.ToDouble(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Double)));
                         }
-                        else if (elementType == typeof(string))
+                        else if (elementType == typeof(String))
                         {
-                            wmiValue = new string [length];
+                            wmiValue = new String [length];
                             for (int i = 0; i < length; i++)
-                                ((string[])(wmiValue))[i] = (valArray.GetValue(i)).ToString();
+                                ((String[])(wmiValue))[i] = (valArray.GetValue(i)).ToString();
                         }
-                        else if (elementType == typeof(bool))
+                        else if (elementType == typeof(Boolean))
                         {
-                            wmiValue = new bool [length];
+                            wmiValue = new Boolean [length];
                             for (int i = 0; i < length; i++)
-                                ((bool[])(wmiValue))[i] = Convert.ToBoolean(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(bool)));
+                                ((Boolean[])(wmiValue))[i] = Convert.ToBoolean(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Boolean)));
                         }
                         else
                             wmiValue = valArray; //should this throw ?
@@ -175,7 +175,7 @@ namespace System.Management
         ///    <see langword='bool'/>.
         ///       </para>
         /// </remarks>
-        public object Value 
+        public Object Value 
         {
             get { 
                 RefreshQualifierInfo();

@@ -171,7 +171,7 @@ namespace XLinqTests
             {
                 string baseUri = node.BaseUri;
                 // fail when use stream replace file
-                if (!string.IsNullOrWhiteSpace(baseUri))
+                if (!String.IsNullOrWhiteSpace(baseUri))
                 {
                     TestLog.Compare(new Uri(baseUri), new Uri(GetFullTestPath(fileName)), "base uri failed");
                 }
@@ -332,7 +332,7 @@ namespace XLinqTests
             foreach (XObject node in e.DescendantNodesAndSelf().OfType<object>().Concat2(e.DescendantsAndSelf().Attributes().OfType<object>()))
             {
                 string baseUri = node.BaseUri;
-                if (!string.IsNullOrWhiteSpace(baseUri))
+                if (!String.IsNullOrWhiteSpace(baseUri))
                 {
                     TestLog.Compare(new Uri(baseUri), new Uri(GetFullTestPath(fileName)), "base uri failed");
                 }

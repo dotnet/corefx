@@ -652,7 +652,7 @@ namespace System.Runtime.Serialization.Json
                     _ilg.Stloc(growingCollection);
                 }
                 LocalBuilder i = _ilg.DeclareLocal(Globals.TypeOfInt, "i");
-                object forLoop = _ilg.For(i, 0, int.MaxValue);
+                object forLoop = _ilg.For(i, 0, Int32.MaxValue);
                 // Empty namespace
                 IsStartElement(_memberNamesArg, _emptyDictionaryStringArg);
                 _ilg.If();
@@ -783,7 +783,7 @@ namespace System.Runtime.Serialization.Json
                         pairKey = pairKeyNullable;
                     }
 
-                    LocalBuilder pairValue = ReadValue(valueType, string.Empty);
+                    LocalBuilder pairValue = ReadValue(valueType, String.Empty);
                     StoreKeyValuePair(_objectLocal, collectionContract, pairKey, pairValue);
 
                     _ilg.EndWhile();
@@ -844,7 +844,7 @@ namespace System.Runtime.Serialization.Json
                 }
 
                 LocalBuilder i = _ilg.DeclareLocal(Globals.TypeOfInt, "i");
-                object forLoop = _ilg.For(i, 0, int.MaxValue);
+                object forLoop = _ilg.For(i, 0, Int32.MaxValue);
                 IsStartElement(_memberNamesArg, _emptyDictionaryStringArg);
                 _ilg.If();
                 _ilg.Call(_contextArg, XmlFormatGeneratorStatics.IncrementItemCountMethod, 1);

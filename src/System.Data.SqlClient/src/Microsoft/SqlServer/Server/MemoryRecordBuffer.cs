@@ -46,20 +46,20 @@ namespace Microsoft.SqlServer.Server
         }
 
         //  valid for SqlDbType.Bit
-        public override bool GetBoolean(SmiEventSink sink, int ordinal)
+        public override Boolean GetBoolean(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Boolean;
         }
 
         //  valid for SqlDbType.TinyInt
-        public override byte GetByte(SmiEventSink sink, int ordinal)
+        public override Byte GetByte(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Byte;
         }
 
         // valid for SqlDbTypes: Binary, VarBinary, Image, Udt, Xml, Char, VarChar, Text, NChar, NVarChar, NText
         //  (Character type support needed for ExecuteXmlReader handling)
-        public override long GetBytesLength(SmiEventSink sink, int ordinal)
+        public override Int64 GetBytesLength(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].BytesLength;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // valid for character types: Char, VarChar, Text, NChar, NVarChar, NText
-        public override long GetCharsLength(SmiEventSink sink, int ordinal)
+        public override Int64 GetCharsLength(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].CharsLength;
         }
@@ -77,37 +77,37 @@ namespace Microsoft.SqlServer.Server
         {
             return _buffer[ordinal].GetChars(fieldOffset, buffer, bufferOffset, length);
         }
-        public override string GetString(SmiEventSink sink, int ordinal)
+        public override String GetString(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].String;
         }
 
         // valid for SqlDbType.SmallInt
-        public override short GetInt16(SmiEventSink sink, int ordinal)
+        public override Int16 GetInt16(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Int16;
         }
 
         // valid for SqlDbType.Int
-        public override int GetInt32(SmiEventSink sink, int ordinal)
+        public override Int32 GetInt32(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Int32;
         }
 
         // valid for SqlDbType.BigInt, SqlDbType.Money, SqlDbType.SmallMoney
-        public override long GetInt64(SmiEventSink sink, int ordinal)
+        public override Int64 GetInt64(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Int64;
         }
 
         // valid for SqlDbType.Real
-        public override float GetSingle(SmiEventSink sink, int ordinal)
+        public override Single GetSingle(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Single;
         }
 
         // valid for SqlDbType.Float
-        public override double GetDouble(SmiEventSink sink, int ordinal)
+        public override Double GetDouble(SmiEventSink sink, int ordinal)
         {
             return _buffer[ordinal].Double;
         }
@@ -152,13 +152,13 @@ namespace Microsoft.SqlServer.Server
         }
 
         //  valid for SqlDbType.Bit
-        public override void SetBoolean(SmiEventSink sink, int ordinal, bool value)
+        public override void SetBoolean(SmiEventSink sink, int ordinal, Boolean value)
         {
             _buffer[ordinal].Boolean = value;
         }
 
         //  valid for SqlDbType.TinyInt
-        public override void SetByte(SmiEventSink sink, int ordinal, byte value)
+        public override void SetByte(SmiEventSink sink, int ordinal, Byte value)
         {
             _buffer[ordinal].Byte = value;
         }
@@ -198,31 +198,31 @@ namespace Microsoft.SqlServer.Server
         }
 
         // valid for SqlDbType.SmallInt
-        public override void SetInt16(SmiEventSink sink, int ordinal, short value)
+        public override void SetInt16(SmiEventSink sink, int ordinal, Int16 value)
         {
             _buffer[ordinal].Int16 = value;
         }
 
         // valid for SqlDbType.Int
-        public override void SetInt32(SmiEventSink sink, int ordinal, int value)
+        public override void SetInt32(SmiEventSink sink, int ordinal, Int32 value)
         {
             _buffer[ordinal].Int32 = value;
         }
 
         // valid for SqlDbType.BigInt, SqlDbType.Money, SqlDbType.SmallMoney
-        public override void SetInt64(SmiEventSink sink, int ordinal, long value)
+        public override void SetInt64(SmiEventSink sink, int ordinal, Int64 value)
         {
             _buffer[ordinal].Int64 = value;
         }
 
         // valid for SqlDbType.Real
-        public override void SetSingle(SmiEventSink sink, int ordinal, float value)
+        public override void SetSingle(SmiEventSink sink, int ordinal, Single value)
         {
             _buffer[ordinal].Single = value;
         }
 
         // valid for SqlDbType.Float
-        public override void SetDouble(SmiEventSink sink, int ordinal, double value)
+        public override void SetDouble(SmiEventSink sink, int ordinal, Double value)
         {
             _buffer[ordinal].Double = value;
         }

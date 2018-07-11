@@ -1499,7 +1499,7 @@ namespace System.Xml
             return base.ReadContentAsString(_quotas.MaxStringContentLength);
         }
 
-        public override bool ReadContentAsBoolean()
+        public override Boolean ReadContentAsBoolean()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)
@@ -1511,24 +1511,24 @@ namespace System.Xml
             return XmlConverter.ToBoolean(ReadContentAsString());
         }
 
-        public override long ReadContentAsLong()
+        public override Int64 ReadContentAsLong()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)
             {
-                long value = node.Value.ToLong();
+                Int64 value = node.Value.ToLong();
                 SkipValue(node);
                 return value;
             }
             return XmlConverter.ToInt64(ReadContentAsString());
         }
 
-        public override int ReadContentAsInt()
+        public override Int32 ReadContentAsInt()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)
             {
-                int value = node.Value.ToInt();
+                Int32 value = node.Value.ToInt();
                 SkipValue(node);
                 return value;
             }
@@ -1547,7 +1547,7 @@ namespace System.Xml
             return XmlConverter.ToDateTime(ReadContentAsString());
         }
 
-        public override double ReadContentAsDouble()
+        public override Double ReadContentAsDouble()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)
@@ -1559,7 +1559,7 @@ namespace System.Xml
             return XmlConverter.ToDouble(ReadContentAsString());
         }
 
-        public override float ReadContentAsFloat()
+        public override Single ReadContentAsFloat()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)
@@ -1571,7 +1571,7 @@ namespace System.Xml
             return XmlConverter.ToSingle(ReadContentAsString());
         }
 
-        public override decimal ReadContentAsDecimal()
+        public override Decimal ReadContentAsDecimal()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)
@@ -1758,32 +1758,32 @@ namespace System.Xml
             return _node.TryGetValueAsDictionaryString(out value);
         }
 
-        public override short[] ReadInt16Array(string localName, string namespaceUri)
+        public override Int16[] ReadInt16Array(string localName, string namespaceUri)
         {
             return Int16ArrayHelperWithString.Instance.ReadArray(this, localName, namespaceUri, _quotas.MaxArrayLength);
         }
 
-        public override short[] ReadInt16Array(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
+        public override Int16[] ReadInt16Array(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
         {
             return Int16ArrayHelperWithDictionaryString.Instance.ReadArray(this, localName, namespaceUri, _quotas.MaxArrayLength);
         }
 
-        public override int[] ReadInt32Array(string localName, string namespaceUri)
+        public override Int32[] ReadInt32Array(string localName, string namespaceUri)
         {
             return Int32ArrayHelperWithString.Instance.ReadArray(this, localName, namespaceUri, _quotas.MaxArrayLength);
         }
 
-        public override int[] ReadInt32Array(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
+        public override Int32[] ReadInt32Array(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
         {
             return Int32ArrayHelperWithDictionaryString.Instance.ReadArray(this, localName, namespaceUri, _quotas.MaxArrayLength);
         }
 
-        public override long[] ReadInt64Array(string localName, string namespaceUri)
+        public override Int64[] ReadInt64Array(string localName, string namespaceUri)
         {
             return Int64ArrayHelperWithString.Instance.ReadArray(this, localName, namespaceUri, _quotas.MaxArrayLength);
         }
 
-        public override long[] ReadInt64Array(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
+        public override Int64[] ReadInt64Array(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
         {
             return Int64ArrayHelperWithDictionaryString.Instance.ReadArray(this, localName, namespaceUri, _quotas.MaxArrayLength);
         }

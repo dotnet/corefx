@@ -398,12 +398,12 @@ namespace System.Drawing.Imaging
                 throw SafeNativeMethods.Gdip.StatusException(status);
         }
 
-        public void SetOutputChannelColorProfile(string colorProfileFilename)
+        public void SetOutputChannelColorProfile(String colorProfileFilename)
         {
             SetOutputChannelColorProfile(colorProfileFilename, ColorAdjustType.Default);
         }
 
-        public void SetOutputChannelColorProfile(string colorProfileFilename,
+        public void SetOutputChannelColorProfile(String colorProfileFilename,
                                                  ColorAdjustType type)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.

@@ -16,8 +16,8 @@ namespace Microsoft.Test.ModuleCore
     {
         //Data
         private static TestProps s_pproperties;
-        private static string s_pinitstring;
-        private static string s_pcommandline;
+        private static String s_pinitstring;
+        private static String s_pcommandline;
 
         //Constructor
         public static TestProps Properties
@@ -29,7 +29,7 @@ namespace Microsoft.Test.ModuleCore
                     s_pproperties = new TestProps(new TestProperties());
 
                     //CommandLine
-                    string commandline = s_pcommandline;
+                    String commandline = s_pcommandline;
                     s_pproperties["CommandLine"] = commandline;
 
                     //CommandLine Options
@@ -37,7 +37,7 @@ namespace Microsoft.Test.ModuleCore
                     tokens.Equal = " ";
                     tokens.Seperator = "/";
                     Dictionary<string, string> options = KeywordParser.ParseKeywords(commandline, tokens);
-                    foreach (string key in options.Keys)
+                    foreach (String key in options.Keys)
                         s_pproperties["CommandLine/" + key] = options[key];
                 }
                 return s_pproperties;
@@ -50,12 +50,12 @@ namespace Microsoft.Test.ModuleCore
                     s_pproperties = null;
 
                     //InitString keywords
-                    string initstring = value["Alias/InitString"];
+                    String initstring = value["Alias/InitString"];
                     TestInput.Properties["Alias/InitString"] = initstring;
 
                     Dictionary<string, string> keywords = KeywordParser.ParseKeywords(initstring);
-                    foreach (string key in keywords.Keys)
-                        TestInput.Properties["Alias/InitString/" + key] = keywords[key] as string;
+                    foreach (String key in keywords.Keys)
+                        TestInput.Properties["Alias/InitString/" + key] = keywords[key] as String;
 
                     // Command line keywords (if any)
                     TestProp commandLineProp = value.Get("CommandLine");
@@ -69,7 +69,7 @@ namespace Microsoft.Test.ModuleCore
                         tokens.Equal = " ";
                         tokens.Seperator = "/";
                         Dictionary<string, string> options = KeywordParser.ParseKeywords(commandLine, tokens);
-                        foreach (string key in options.Keys)
+                        foreach (String key in options.Keys)
                             TestInput.Properties["CommandLine/" + key] = options[key];
                     }
                 }
@@ -142,7 +142,7 @@ namespace Microsoft.Test.ModuleCore
             }
         }
 
-        public static string Filter
+        public static String Filter
         {
             get
             {
@@ -152,7 +152,7 @@ namespace Microsoft.Test.ModuleCore
             }
         }
 
-        public static string MaxPriority
+        public static String MaxPriority
         {
             get
             {
@@ -206,7 +206,7 @@ namespace Microsoft.Test.ModuleCore
             }
         }
 
-        public virtual string this[string name]
+        public virtual String this[String name]
         {
             get
             {
@@ -221,7 +221,7 @@ namespace Microsoft.Test.ModuleCore
             }
         }
 
-        public virtual TestProp Get(string name)
+        public virtual TestProp Get(String name)
         {
             ITestProperty property = pinternal.Get(name);
             if (property != null)
@@ -229,12 +229,12 @@ namespace Microsoft.Test.ModuleCore
             return null;
         }
 
-        public virtual TestProp Add(string name)
+        public virtual TestProp Add(String name)
         {
             return new TestProp(pinternal.Add(name));
         }
 
-        public virtual void Remove(string name)
+        public virtual void Remove(String name)
         {
             pinternal.Remove(name);
         }
@@ -252,7 +252,7 @@ namespace Microsoft.Test.ModuleCore
             return true;
         }
 
-        public virtual object Current
+        public virtual Object Current
         {
             get { return this[penum]; }
         }
@@ -268,12 +268,12 @@ namespace Microsoft.Test.ModuleCore
                 pinternal.Clear();
         }
 
-        ITestProperty ITestProperties.Add(string name)
+        ITestProperty ITestProperties.Add(String name)
         {
             return pinternal.Add(name);
         }
 
-        ITestProperty ITestProperties.Get(string name)
+        ITestProperty ITestProperties.Get(String name)
         {
             return pinternal.Get(name);
         }
@@ -305,12 +305,12 @@ namespace Microsoft.Test.ModuleCore
             get { return pinternal; }
         }
 
-        public virtual string Name
+        public virtual String Name
         {
             get { return pinternal.Name; }
         }
 
-        public virtual string Desc
+        public virtual String Desc
         {
             get { return pinternal.Desc; }
         }
@@ -321,7 +321,7 @@ namespace Microsoft.Test.ModuleCore
             set { pinternal.Flags = value; }
         }
 
-        public virtual object Value
+        public virtual Object Value
         {
             get { return pinternal.Value; }
             set { pinternal.set_Value(ref value); }
@@ -360,15 +360,15 @@ namespace Microsoft.Test.ModuleCore
     public class TestProperty : ITestProperty
     {
         //Data
-        protected string pname = null;
-        protected string pdesc = null;
-        protected object pvalue = null;
+        protected String pname = null;
+        protected String pdesc = null;
+        protected Object pvalue = null;
         protected TestPropertyFlags pflags = 0;
         protected TestProperties pmetadata = null;
         protected TestProperties pchildren = null;
 
         //Constructor
-        public TestProperty(string name, object value)
+        public TestProperty(String name, Object value)
         {
             pname = name;
             pvalue = value;
@@ -441,7 +441,7 @@ namespace Microsoft.Test.ModuleCore
             get { return plist[index]; }
         }
 
-        public virtual object this[string name]
+        public virtual Object this[String name]
         {
             get
             {
@@ -458,7 +458,7 @@ namespace Microsoft.Test.ModuleCore
             int count = plist.Count;
             for (int i = 0; i < count; i++)
             {
-                if (string.Compare(plist[i].Name, name) == 0)
+                if (String.Compare(plist[i].Name, name) == 0)
                     return i;
             }
             return -1;
@@ -474,7 +474,7 @@ namespace Microsoft.Test.ModuleCore
             return this[index];
         }
 
-        public virtual ITestProperty Get(string name)
+        public virtual ITestProperty Get(String name)
         {
             int index = this.IndexOf(name);
             if (index >= 0)
@@ -482,12 +482,12 @@ namespace Microsoft.Test.ModuleCore
             return null;
         }
 
-        ITestProperty ITestProperties.Add(string name)
+        ITestProperty ITestProperties.Add(String name)
         {
             return (TestProperty)Add(name);
         }
 
-        public virtual TestProperty Add(string name)
+        public virtual TestProperty Add(String name)
         {
             //Exists
             int index = this.IndexOf(name);
@@ -500,7 +500,7 @@ namespace Microsoft.Test.ModuleCore
             return property;
         }
 
-        public virtual void Remove(string name)
+        public virtual void Remove(String name)
         {
             int index = this.IndexOf(name);
             if (index >= 0)

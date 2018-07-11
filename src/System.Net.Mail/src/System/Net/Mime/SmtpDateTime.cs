@@ -228,7 +228,7 @@ namespace System.Net.Mime
             // time zones must all be alphabetical characters
             for (int i = 0; i < value.Length; i++)
             {
-                if (!char.IsLetter(value, i))
+                if (!Char.IsLetter(value, i))
                 {
                     throw new FormatException(SR.Format(SR.MailHeaderFieldInvalidCharacter, value));
                 }

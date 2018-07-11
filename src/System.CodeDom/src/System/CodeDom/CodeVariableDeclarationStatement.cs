@@ -54,14 +54,14 @@ namespace System.CodeDom
 
         public string Name
         {
-            get => _name ?? string.Empty;
-            set => _name = value;
+            get { return _name ?? string.Empty; }
+            set { _name = value; }
         }
 
         public CodeTypeReference Type
         {
-            get => _type ?? (_type = new CodeTypeReference(""));
-            set => _type = value;
+            get { return _type ?? (_type = new CodeTypeReference("")); }
+            set { _type = value; }
         }
     }
 }

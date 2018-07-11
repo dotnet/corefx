@@ -13,8 +13,6 @@ namespace System.Text.RegularExpressions
 
     public partial class Regex
     {
-        private const int ReplaceBufferSize = 256;
-
         /// <summary>
         /// Replaces all occurrences of the pattern with the <paramref name="replacement"/> pattern, starting at
         /// the first character in the input string.
@@ -173,8 +171,7 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                Span<char> charInitSpan = stackalloc char[ReplaceBufferSize];
-                var vsb = new ValueStringBuilder(charInitSpan);
+                StringBuilder sb = StringBuilderCache.Acquire();
 
                 if (!regex.RightToLeft)
                 {
@@ -183,10 +180,11 @@ namespace System.Text.RegularExpressions
                     do
                     {
                         if (match.Index != prevat)
-                            vsb.Append(input.AsSpan(prevat, match.Index - prevat));
+                            sb.Append(input, prevat, match.Index - prevat);
 
                         prevat = match.Index + match.Length;
-                        vsb.Append(evaluator(match));
+
+                        sb.Append(evaluator(match));
 
                         if (--count == 0)
                             break;
@@ -195,23 +193,21 @@ namespace System.Text.RegularExpressions
                     } while (match.Success);
 
                     if (prevat < input.Length)
-                        vsb.Append(input.AsSpan(prevat, input.Length - prevat));
+                        sb.Append(input, prevat, input.Length - prevat);
                 }
                 else
                 {
-                    // In right to left mode append all the inputs in reversed order to avoid an extra dynamic data structure
-                    // and to be able to work with Spans. A final reverse of the transformed reversed input string generates
-                    // the desired output. Similar to Tower of Hanoi.
-
+                    List<string> al = new List<string>();
                     int prevat = input.Length;
 
                     do
                     {
                         if (match.Index + match.Length != prevat)
-                            vsb.AppendReversed(input.AsSpan(match.Index + match.Length, prevat - match.Index - match.Length));
+                            al.Add(input.Substring(match.Index + match.Length, prevat - match.Index - match.Length));
 
                         prevat = match.Index;
-                        vsb.AppendReversed(evaluator(match));
+
+                        al.Add(evaluator(match));
 
                         if (--count == 0)
                             break;
@@ -220,12 +216,15 @@ namespace System.Text.RegularExpressions
                     } while (match.Success);
 
                     if (prevat > 0)
-                        vsb.AppendReversed(input.AsSpan(0, prevat));
+                        sb.Append(input, 0, prevat);
 
-                    vsb.Reverse();
+                    for (int i = al.Count - 1; i >= 0; i--)
+                    {
+                        sb.Append(al[i]);
+                    }
                 }
 
-                return vsb.ToString();
+                return StringBuilderCache.GetStringAndRelease(sb);
             }
         }
     }

@@ -17,8 +17,8 @@ namespace System.CodeDom
 
         public string ParameterName
         {
-            get => _parameterName ?? string.Empty;
-            set => _parameterName = value;
+            get { return _parameterName ?? string.Empty; }
+            set { _parameterName = value; }
         }
     }
 }

@@ -12,15 +12,7 @@ namespace Microsoft.Internal.Collections
     {
         public static ICollection<object> GetCollectionWrapper(Type itemType, object collectionObject)
         {
-            if(itemType == null)
-            {
-                throw new ArgumentNullException(nameof(itemType));
-            }
-
-            if(collectionObject == null)
-            {
-                throw new ArgumentNullException(nameof(collectionObject));
-            }
+            Assumes.NotNull(itemType, collectionObject);
 
             var underlyingItemType = itemType.UnderlyingSystemType;
 
@@ -63,17 +55,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Contains(object item)
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<bool>();
             }
 
             public void CopyTo(object[] array, int arrayIndex)
             {
-                throw new NotImplementedException();
+                Assumes.NotReachable<object>();
             }
 
             public int Count
             {
-                get { throw new NotImplementedException(); }
+                get { return Assumes.NotReachable<int>(); }
             }
 
             public bool IsReadOnly
@@ -83,17 +75,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Remove(object item)
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<bool>();
             }
 
             public IEnumerator<object> GetEnumerator()
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<IEnumerator<object>>();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<IEnumerator>();
             }
         }
 
@@ -118,17 +110,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Contains(object item)
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<bool>();
             }
 
             public void CopyTo(object[] array, int arrayIndex)
             {
-                throw new NotImplementedException();
+                Assumes.NotReachable<object>();
             }
 
             public int Count
             {
-                get { throw new NotImplementedException(); }
+                get { return Assumes.NotReachable<int>(); }
             }
 
             public bool IsReadOnly
@@ -138,17 +130,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Remove(object item)
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<bool>();
             }
 
             public IEnumerator<object> GetEnumerator()
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<IEnumerator<object>>();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                throw new NotImplementedException();
+                return Assumes.NotReachable<IEnumerator>();
             }
         }
     }

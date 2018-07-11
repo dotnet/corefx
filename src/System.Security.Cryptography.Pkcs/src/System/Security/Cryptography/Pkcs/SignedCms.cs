@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -24,11 +23,6 @@ namespace System.Security.Cryptography.Pkcs
         // Due to the way the underlying Windows CMS API behaves a copy of the content
         // bytes will be held separate once the content is "bound" (first signature or decode)
         private ReadOnlyMemory<byte>? _heldContent;
-
-        // During decode, if the PKCS#7 fallback for a missing OCTET STRING is present, this
-        // becomes true and GetHashableContentSpan behaves differently.
-        // See https://tools.ietf.org/html/rfc5652#section-5.2.1
-        private bool _hasPkcs7Content;
 
         // Similar to _heldContent, the Windows CMS API held this separate internally,
         // and thus we need to be reslilient against modification.
@@ -133,33 +127,20 @@ namespace System.Security.Cryptography.Pkcs
             _heldData = contentInfo.Content.ToArray();
             _signedData = AsnSerializer.Deserialize<SignedDataAsn>(_heldData, AsnEncodingRules.BER);
             _contentType = _signedData.EncapContentInfo.ContentType;
-            _hasPkcs7Content = false;
 
             if (!Detached)
             {
                 ReadOnlyMemory<byte>? content = _signedData.EncapContentInfo.Content;
-                ReadOnlyMemory<byte> contentValue;
-
-                if (content.HasValue)
-                {
-                    contentValue = GetContent(content.Value, _contentType);
-                    // If no OCTET STRING was stripped off, we have PKCS7 interop concerns.
-                    _hasPkcs7Content = content.Value.Length == contentValue.Length;
-                }
-                else
-                {
-                    contentValue = ReadOnlyMemory<byte>.Empty;
-                }
 
                 // This is in _heldData, so we don't need a defensive copy.
-                _heldContent = contentValue;
+                _heldContent = content ?? ReadOnlyMemory<byte>.Empty;
 
                 // The ContentInfo object/property DOES need a defensive copy, because
                 // a) it is mutable by the user, and
                 // b) it is no longer authoritative
                 //
                 // (and c: it takes a byte[] and we have a ReadOnlyMemory<byte>)
-                ContentInfo = new ContentInfo(new Oid(_contentType), contentValue.ToArray());
+                ContentInfo = new ContentInfo(new Oid(_contentType), _heldContent.Value.ToArray());
             }
             else
             {
@@ -169,59 +150,6 @@ namespace System.Security.Cryptography.Pkcs
 
             Version = _signedData.Version;
             _hasData = true;
-        }
-
-        internal static ReadOnlyMemory<byte> GetContent(
-            ReadOnlyMemory<byte> wrappedContent,
-            string contentType)
-        {
-            // Read the input.
-            //
-            // PKCS7's id-data is written in both PKCS#7 and CMS as an OCTET STRING wrapping
-            // the arbitrary bytes, so the OCTET STRING must always be present.
-            //
-            // For other types, CMS says to always write an OCTET STRING, and to put the properly
-            // encoded data within it.
-            // PKCS#7 originally ommitted the OCTET STRING wrapper for this model, so this is the
-            // dynamic adapter.
-            //
-            // See https://tools.ietf.org/html/rfc5652#section-5.2.1
-            byte[] rented = null;
-            int bytesWritten = 0;
-            try
-            {
-                AsnReader reader = new AsnReader(wrappedContent, AsnEncodingRules.BER);
-
-                if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> inner))
-                {
-                    return inner;
-                }
-
-                rented = ArrayPool<byte>.Shared.Rent(wrappedContent.Length);
-
-                if (!reader.TryCopyOctetStringBytes(rented, out bytesWritten))
-                {
-                    Debug.Fail($"TryCopyOctetStringBytes failed with an array larger than the encoded value");
-                    throw new CryptographicException();
-                }
-
-                return rented.AsSpan(0, bytesWritten).ToArray();
-            }
-            catch (Exception) when (contentType != Oids.Pkcs7Data)
-            {
-            }
-            finally
-            {
-                if (rented != null)
-                {
-                    rented.AsSpan(0, bytesWritten).Clear();
-                    ArrayPool<byte>.Shared.Return(rented);
-                }
-            }
-
-            // PKCS#7 encoding for something other than id-data.
-            Debug.Assert(contentType != Oids.Pkcs7Data);
-            return wrappedContent;
         }
 
         public void ComputeSignature()
@@ -249,7 +177,7 @@ namespace System.Security.Cryptography.Pkcs
             // If we had content already, use that now.
             // (The second signer doesn't inherit edits to signedCms.ContentInfo.Content)
             ReadOnlyMemory<byte> content = _heldContent ?? ContentInfo.Content;
-            string contentType = _contentType ?? ContentInfo.ContentType.Value ?? Oids.Pkcs7Data;
+            string contentType = _contentType ?? ContentInfo.ContentType.Value;
 
             X509Certificate2Collection chainCerts;
             SignerInfoAsn newSigner = signer.Sign(content, contentType, silent, out chainCerts);
@@ -270,12 +198,7 @@ namespace System.Security.Cryptography.Pkcs
                 // the copy of _heldContent or _contentType here if we're attached.
                 if (!Detached)
                 {
-                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
-                    {
-                        writer.WriteOctetString(content.Span);
-
-                        _signedData.EncapContentInfo.Content = writer.Encode();
-                    }
+                    _signedData.EncapContentInfo.Content = content;
                 }
 
                 _hasData = true;
@@ -331,21 +254,7 @@ namespace System.Security.Cryptography.Pkcs
             RemoveSignature(idx);
         }
 
-        internal ReadOnlySpan<byte> GetHashableContentSpan()
-        {
-            ReadOnlyMemory<byte> content = _heldContent.Value;
-
-            if (!_hasPkcs7Content)
-            {
-                return content.Span;
-            }
-
-            // In PKCS#7 compat, only return the contents within the outermost tag.
-            // See https://tools.ietf.org/html/rfc5652#section-5.2.1
-            AsnReader reader = new AsnReader(content, AsnEncodingRules.BER);
-            // This span is safe to return because it's still bound under _heldContent.
-            return reader.PeekContentBytes().Span;
-        }
+        internal ReadOnlySpan<byte> GetContentSpan() => _heldContent.Value.Span;
 
         internal void Reencode()
         {

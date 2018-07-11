@@ -73,7 +73,7 @@ namespace System.Collections
         {
             if (index < 0 || index >= Count)
                 throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
-            object temp = InnerList[index];
+            Object temp = InnerList[index];
             OnValidate(temp);
             OnRemove(index, temp);
             InnerList.RemoveAt(index);
@@ -103,7 +103,7 @@ namespace System.Collections
             get { return InnerList.IsSynchronized; }
         }
 
-        object ICollection.SyncRoot
+        Object ICollection.SyncRoot
         {
             get { return InnerList.SyncRoot; }
         }
@@ -113,7 +113,7 @@ namespace System.Collections
             InnerList.CopyTo(array, index);
         }
 
-        object IList.this[int index]
+        Object IList.this[int index]
         {
             get
             {
@@ -126,7 +126,7 @@ namespace System.Collections
                 if (index < 0 || index >= Count)
                     throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
                 OnValidate(value);
-                object temp = InnerList[index];
+                Object temp = InnerList[index];
                 OnSet(index, temp, value);
                 InnerList[index] = value;
                 try
@@ -141,12 +141,12 @@ namespace System.Collections
             }
         }
 
-        bool IList.Contains(object value)
+        bool IList.Contains(Object value)
         {
             return InnerList.Contains(value);
         }
 
-        int IList.Add(object value)
+        int IList.Add(Object value)
         {
             OnValidate(value);
             OnInsert(InnerList.Count, value);
@@ -164,7 +164,7 @@ namespace System.Collections
         }
 
 
-        void IList.Remove(object value)
+        void IList.Remove(Object value)
         {
             OnValidate(value);
             int index = InnerList.IndexOf(value);
@@ -182,12 +182,12 @@ namespace System.Collections
             }
         }
 
-        int IList.IndexOf(object value)
+        int IList.IndexOf(Object value)
         {
             return InnerList.IndexOf(value);
         }
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, Object value)
         {
             if (index < 0 || index > Count)
                 throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
@@ -210,11 +210,11 @@ namespace System.Collections
             return InnerList.GetEnumerator();
         }
 
-        protected virtual void OnSet(int index, object oldValue, object newValue)
+        protected virtual void OnSet(int index, Object oldValue, Object newValue)
         {
         }
 
-        protected virtual void OnInsert(int index, object value)
+        protected virtual void OnInsert(int index, Object value)
         {
         }
 
@@ -222,20 +222,20 @@ namespace System.Collections
         {
         }
 
-        protected virtual void OnRemove(int index, object value)
+        protected virtual void OnRemove(int index, Object value)
         {
         }
 
-        protected virtual void OnValidate(object value)
+        protected virtual void OnValidate(Object value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
         }
 
-        protected virtual void OnSetComplete(int index, object oldValue, object newValue)
+        protected virtual void OnSetComplete(int index, Object oldValue, Object newValue)
         {
         }
 
-        protected virtual void OnInsertComplete(int index, object value)
+        protected virtual void OnInsertComplete(int index, Object value)
         {
         }
 
@@ -243,7 +243,7 @@ namespace System.Collections
         {
         }
 
-        protected virtual void OnRemoveComplete(int index, object value)
+        protected virtual void OnRemoveComplete(int index, Object value)
         {
         }
     }

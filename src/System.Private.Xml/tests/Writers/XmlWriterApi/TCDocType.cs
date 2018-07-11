@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -74,9 +74,9 @@ namespace System.Xml.Tests
         [XmlWriterInlineData("null")]
         public void docType_4(XmlWriterUtils utils, string param)
         {
-            string docName = "";
+            String docName = "";
             if (param == "String.Empty")
-                docName = string.Empty;
+                docName = String.Empty;
             else if (param == "null")
                 docName = null;
             using (XmlWriter w = utils.CreateWriter())
@@ -109,8 +109,8 @@ namespace System.Xml.Tests
         {
             using (XmlWriter w = utils.CreateWriter())
             {
-                string docName = "Root";
-                string docValue = "]>";
+                String docName = "Root";
+                String docValue = "]>";
                 w.WriteDocType(docName, null, null, docValue);
                 w.WriteStartElement("Root");
                 w.WriteEndElement();

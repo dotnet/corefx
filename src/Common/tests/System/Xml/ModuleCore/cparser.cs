@@ -64,7 +64,7 @@ namespace OLEDB.Test.ModuleCore
                     switch (state)
                     {
                         case PARSE.Initial:
-                            if (char.IsLetterOrDigit(ch))
+                            if (Char.IsLetterOrDigit(ch))
                             {
                                 keyStart = index;
                                 state = PARSE.Keyword;
@@ -81,7 +81,7 @@ namespace OLEDB.Test.ModuleCore
                             break;
 
                         case PARSE.Equal:
-                            if (char.IsWhiteSpace(ch))
+                            if (Char.IsWhiteSpace(ch))
                                 break;
                             builder.Length = 0;
 
@@ -97,7 +97,7 @@ namespace OLEDB.Test.ModuleCore
                             }
                             else if (tokens.Seperator.IndexOf(ch) >= 0)
                             {
-                                keywords[key] = string.Empty;
+                                keywords[key] = String.Empty;
                                 state = PARSE.Initial;
                             }
                             else
@@ -182,7 +182,7 @@ namespace OLEDB.Test.ModuleCore
                         break;
 
                     case PARSE.Equal:
-                        keywords[key] = string.Empty;
+                        keywords[key] = String.Empty;
                         break;
 
                     case PARSE.Value:

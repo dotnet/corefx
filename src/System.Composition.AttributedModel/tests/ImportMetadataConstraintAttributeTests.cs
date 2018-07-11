@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.Composition.AttributeModel.Tests
+namespace System.Composition.Tests
 {
     public class ImportMetadataConstraintAttributeTests
     {

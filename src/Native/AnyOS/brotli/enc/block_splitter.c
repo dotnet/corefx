@@ -8,15 +8,16 @@
 
 #include "./block_splitter.h"
 
+#include <assert.h>
 #include <string.h>  /* memcpy, memset */
 
-#include "../common/platform.h"
 #include "./bit_cost.h"
 #include "./cluster.h"
 #include "./command.h"
 #include "./fast_log.h"
 #include "./histogram.h"
 #include "./memory.h"
+#include "./port.h"
 #include "./quality.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
@@ -174,7 +175,7 @@ void BrotliSplitBlock(MemoryManager* m,
     for (i = 0; i < num_commands; ++i) {
       const Command* cmd = &cmds[i];
       if (CommandCopyLen(cmd) && cmd->cmd_prefix_ >= 128) {
-        distance_prefixes[j++] = cmd->dist_prefix_ & 0x3FF;
+        distance_prefixes[j++] = cmd->dist_prefix_;
       }
     }
     /* Create the block split on the array of distance prefixes. */

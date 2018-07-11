@@ -358,7 +358,7 @@ namespace System.Globalization
         //  (ie: en-US)
         //
         ////////////////////////////////////////////////////////////////////////
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             RegionInfo that = value as RegionInfo;
             if (that != null)

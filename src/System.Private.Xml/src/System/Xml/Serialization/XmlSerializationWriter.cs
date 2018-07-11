@@ -303,15 +303,15 @@ namespace System.Xml.Serialization
                     type = "byte";
                     break;
                 case TypeCode.UInt16:
-                    value = XmlConvert.ToString((ushort)o);
+                    value = XmlConvert.ToString((UInt16)o);
                     type = "unsignedShort";
                     break;
                 case TypeCode.UInt32:
-                    value = XmlConvert.ToString((uint)o);
+                    value = XmlConvert.ToString((UInt32)o);
                     type = "unsignedInt";
                     break;
                 case TypeCode.UInt64:
-                    value = XmlConvert.ToString((ulong)o);
+                    value = XmlConvert.ToString((UInt64)o);
                     type = "unsignedLong";
                     break;
 
@@ -330,7 +330,7 @@ namespace System.Xml.Serialization
                     }
                     else if (t == typeof(byte[]))
                     {
-                        value = string.Empty;
+                        value = String.Empty;
                         writeDirect = true;
                         type = "base64Binary";
                     }
@@ -542,7 +542,7 @@ namespace System.Xml.Serialization
                         bool numeric = true;
                         for (int j = prefixLength; j < name.Length; j++)
                         {
-                            if (!char.IsDigit(name, j))
+                            if (!Char.IsDigit(name, j))
                             {
                                 numeric = false;
                                 break;
@@ -550,10 +550,10 @@ namespace System.Xml.Serialization
                         }
                         if (numeric)
                         {
-                            long index = long.Parse(name.Substring(prefixLength), NumberStyles.Integer, CultureInfo.InvariantCulture);
-                            if (index <= int.MaxValue)
+                            Int64 index = Int64.Parse(name.Substring(prefixLength), NumberStyles.Integer, CultureInfo.InvariantCulture);
+                            if (index <= Int32.MaxValue)
                             {
-                                int newIndex = (int)index;
+                                Int32 newIndex = (Int32)index;
                                 qnIndexes.Add(newIndex);
                             }
                         }
@@ -1015,22 +1015,22 @@ namespace System.Xml.Serialization
             }
         }
 
-        protected void WriteElementString(string localName, string value)
+        protected void WriteElementString(String localName, String value)
         {
             WriteElementString(localName, null, value, null);
         }
 
-        protected void WriteElementString(string localName, string ns, string value)
+        protected void WriteElementString(String localName, String ns, String value)
         {
             WriteElementString(localName, ns, value, null);
         }
 
-        protected void WriteElementString(string localName, string value, XmlQualifiedName xsiType)
+        protected void WriteElementString(String localName, String value, XmlQualifiedName xsiType)
         {
             WriteElementString(localName, null, value, xsiType);
         }
 
-        protected void WriteElementString(string localName, string ns, string value, XmlQualifiedName xsiType)
+        protected void WriteElementString(String localName, String ns, String value, XmlQualifiedName xsiType)
         {
             if (value == null) return;
             if (xsiType == null)
@@ -1044,37 +1044,37 @@ namespace System.Xml.Serialization
             }
         }
 
-        protected void WriteElementStringRaw(string localName, string value)
+        protected void WriteElementStringRaw(String localName, String value)
         {
             WriteElementStringRaw(localName, null, value, null);
         }
 
-        protected void WriteElementStringRaw(string localName, byte[] value)
+        protected void WriteElementStringRaw(String localName, byte[] value)
         {
             WriteElementStringRaw(localName, null, value, null);
         }
 
-        protected void WriteElementStringRaw(string localName, string ns, string value)
+        protected void WriteElementStringRaw(String localName, String ns, String value)
         {
             WriteElementStringRaw(localName, ns, value, null);
         }
 
-        protected void WriteElementStringRaw(string localName, string ns, byte[] value)
+        protected void WriteElementStringRaw(String localName, String ns, byte[] value)
         {
             WriteElementStringRaw(localName, ns, value, null);
         }
 
-        protected void WriteElementStringRaw(string localName, string value, XmlQualifiedName xsiType)
+        protected void WriteElementStringRaw(String localName, String value, XmlQualifiedName xsiType)
         {
             WriteElementStringRaw(localName, null, value, xsiType);
         }
 
-        protected void WriteElementStringRaw(string localName, byte[] value, XmlQualifiedName xsiType)
+        protected void WriteElementStringRaw(String localName, byte[] value, XmlQualifiedName xsiType)
         {
             WriteElementStringRaw(localName, null, value, xsiType);
         }
 
-        protected void WriteElementStringRaw(string localName, string ns, string value, XmlQualifiedName xsiType)
+        protected void WriteElementStringRaw(String localName, String ns, String value, XmlQualifiedName xsiType)
         {
             if (value == null) return;
             _w.WriteStartElement(localName, ns);
@@ -1084,7 +1084,7 @@ namespace System.Xml.Serialization
             _w.WriteEndElement();
         }
 
-        protected void WriteElementStringRaw(string localName, string ns, byte[] value, XmlQualifiedName xsiType)
+        protected void WriteElementStringRaw(String localName, String ns, byte[] value, XmlQualifiedName xsiType)
         {
             if (value == null) return;
             _w.WriteStartElement(localName, ns);
@@ -1103,7 +1103,7 @@ namespace System.Xml.Serialization
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        protected void WriteElementQualifiedName(string localName, XmlQualifiedName value)
+        protected void WriteElementQualifiedName(String localName, XmlQualifiedName value)
         {
             WriteElementQualifiedName(localName, null, value, null);
         }
@@ -1116,7 +1116,7 @@ namespace System.Xml.Serialization
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        protected void WriteElementQualifiedName(string localName, string ns, XmlQualifiedName value)
+        protected void WriteElementQualifiedName(String localName, String ns, XmlQualifiedName value)
         {
             WriteElementQualifiedName(localName, ns, value, null);
         }
@@ -1342,7 +1342,7 @@ namespace System.Xml.Serialization
 
         private void WriteReferencedElement(string name, string ns, object o, Type ambientType)
         {
-            if (name == null) name = string.Empty;
+            if (name == null) name = String.Empty;
             Type t = o.GetType();
             if (t.IsArray || typeof(IEnumerable).IsAssignableFrom(t))
             {
@@ -1642,7 +1642,7 @@ namespace System.Xml.Serialization
             if (_reflectionVariables == null)
             {
                 _reflectionVariables = new Hashtable();
-                _writer.Write(string.Format(CultureInfo.InvariantCulture, s_helperClassesForUseReflection,
+                _writer.Write(String.Format(CultureInfo.InvariantCulture, s_helperClassesForUseReflection,
                     "object", "string", typeof(Type).FullName,
                     typeof(FieldInfo).FullName, typeof(PropertyInfo).FullName,
                     typeof(MemberInfo).FullName /*, typeof(MemberTypes).FullName*/));
@@ -3247,7 +3247,7 @@ namespace System.Xml.Serialization
                         Writer.Write("Writer.WriteStartAttribute(null, ");
                         WriteQuotedCSharpString(attribute.Name);
                         Writer.Write(", ");
-                        string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : string.Empty;
+                        string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty;
                         if (ns != null)
                         {
                             WriteQuotedCSharpString(ns);
@@ -3371,7 +3371,7 @@ namespace System.Xml.Serialization
                         Writer.Write("WriteAttribute(");
                         WriteQuotedCSharpString(attribute.Name);
                         Writer.Write(", ");
-                        string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : string.Empty;
+                        string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty;
                         if (ns != null)
                         {
                             WriteQuotedCSharpString(ns);
@@ -4153,7 +4153,7 @@ namespace System.Xml.Serialization
                 Writer.Write(source);
                 Writer.Write(".Length != 0)");
             }
-            else if(value is double || value is float)
+            else if(value is Double || value is Single)
             {
                 Writer.Write("!");
                 Writer.Write(source);
@@ -4210,12 +4210,12 @@ namespace System.Xml.Serialization
             {
                 Type type = value.GetType();
 
-                if (type == typeof(string))
+                if (type == typeof(String))
                 {
                     string s = (string)value;
                     WriteQuotedCSharpString(s);
                 }
-                else if (type == typeof(char))
+                else if (type == typeof(Char))
                 {
                     Writer.Write('\'');
                     char ch = (char)value;
@@ -4225,19 +4225,19 @@ namespace System.Xml.Serialization
                         Writer.Write(ch);
                     Writer.Write('\'');
                 }
-                else if (type == typeof(int))
+                else if (type == typeof(Int32))
                     Writer.Write(((Int32)value).ToString(null, NumberFormatInfo.InvariantInfo));
-                else if (type == typeof(double))
+                else if (type == typeof(Double))
                 {
-                    if (double.IsNaN((double)value))
+                    if (Double.IsNaN((Double)value))
                     {
                         Writer.Write("System.Double.NaN");
                     }
-                    else if(double.IsPositiveInfinity((double)value))
+                    else if(Double.IsPositiveInfinity((Double)value))
                     {
                         Writer.Write("System.Double.PositiveInfinity");
                     }
-                    else if(double.IsNegativeInfinity((double)value))
+                    else if(Double.IsNegativeInfinity((Double)value))
                     {
                         Writer.Write("System.Double.NegativeInfinity");
                     }
@@ -4246,9 +4246,9 @@ namespace System.Xml.Serialization
                         Writer.Write(((Double)value).ToString("R", NumberFormatInfo.InvariantInfo));
                     }
                 }
-                else if (type == typeof(bool))
+                else if (type == typeof(Boolean))
                     Writer.Write((bool)value ? "true" : "false");
-                else if ((type == typeof(short)) || (type == typeof(long)) || (type == typeof(ushort)) || (type == typeof(uint)) || (type == typeof(ulong)) || (type == typeof(byte)) || (type == typeof(sbyte)))
+                else if ((type == typeof(Int16)) || (type == typeof(Int64)) || (type == typeof(UInt16)) || (type == typeof(UInt32)) || (type == typeof(UInt64)) || (type == typeof(Byte)) || (type == typeof(SByte)))
                 {
                     Writer.Write("(");
                     Writer.Write(type.FullName);
@@ -4257,17 +4257,17 @@ namespace System.Xml.Serialization
                     Writer.Write(Convert.ToString(value, NumberFormatInfo.InvariantInfo));
                     Writer.Write(")");
                 }
-                else if (type == typeof(float))
+                else if (type == typeof(Single))
                 {
-                    if (float.IsNaN((float)value))
+                    if (Single.IsNaN((Single)value))
                     {
                         Writer.Write("System.Single.NaN");
                     }
-                    else if(float.IsPositiveInfinity((float)value))
+                    else if(Single.IsPositiveInfinity((Single)value))
                     {
                         Writer.Write("System.Single.PositiveInfinity");
                     }
-                    else if (float.IsNegativeInfinity((float)value))
+                    else if (Single.IsNegativeInfinity((Single)value))
                     {
                         Writer.Write("System.Single.NegativeInfinity");
                     }
@@ -4277,7 +4277,7 @@ namespace System.Xml.Serialization
                         Writer.Write("f");
                     }
                 }
-                else if (type == typeof(decimal))
+                else if (type == typeof(Decimal))
                 {
                     Writer.Write(((Decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
                     Writer.Write("m");

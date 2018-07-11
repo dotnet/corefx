@@ -5,6 +5,9 @@
 #pragma once
 
 #include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_types.h"
 #include <stdio.h>
 #include <string.h>
@@ -55,7 +58,7 @@ DLLEXPORT int32_t SystemNative_PClose(FILE* stream);
  * These values differ from OS to OS, so make a constant contract.
  * These values apply for the current process only
  */
-typedef enum
+enum RLimitResources : int32_t
 {
     PAL_RLIMIT_CPU = 0,     // CPU limit in seconds
     PAL_RLIMIT_FSIZE = 1,   // Largest file that can be created, in bytes
@@ -67,12 +70,12 @@ typedef enum
     PAL_RLIMIT_MEMLOCK = 7, // Locked-in-memory address space
     PAL_RLIMIT_NPROC = 8,   // Number of processes
     PAL_RLIMIT_NOFILE = 9,  // Number of open files
-} RLimitResources;
+};
 
-typedef enum
+enum Signals : int32_t
 {
     PAL_SIGKILL = 9, /* kill the specified process */
-} Signals;
+};
 
 /**
  * Constants for passing to the first parameter of syslog.
@@ -82,7 +85,7 @@ typedef enum
  *
  * These values keep their original definition and are taken from syslog.h
  */
-typedef enum
+enum SysLogPriority : int32_t
 {
     // Priorities
     PAL_LOG_EMERG = 0,   /* system is unusable */
@@ -115,7 +118,7 @@ typedef enum
     PAL_LOG_LOCAL5 = (21 << 3), /* reserved for local use */
     PAL_LOG_LOCAL6 = (22 << 3), /* reserved for local use */
     PAL_LOG_LOCAL7 = (23 << 3), /* reserved for local use */
-} SysLogPriority;
+};
 
 /**
  * Constants to pass into pathconf.
@@ -124,7 +127,7 @@ typedef enum
  *        values; they must be converted to the correct platform
  *        values before passing to pathconf.
  */
-typedef enum
+enum PathConfName : int32_t
 {
     PAL_PC_LINK_MAX = 1,
     PAL_PC_MAX_CANON = 2,
@@ -135,37 +138,37 @@ typedef enum
     PAL_PC_CHOWN_RESTRICTED = 7,
     PAL_PC_NO_TRUNC = 8,
     PAL_PC_VDISABLE = 9,
-} PathConfName;
+};
 
 /**
  * Constants for passing to GetPriority and SetPriority.
  */
-typedef enum
+enum PriorityWhich : int32_t
 {
     PAL_PRIO_PROCESS = 0,
     PAL_PRIO_PGRP = 1,
     PAL_PRIO_USER = 2,
-} PriorityWhich;
+};
 
 /**
  * The current and maximum resource values for the current process.
  * These values are depict the resource according to the above enum.
  */
-typedef struct
+struct RLimit
 {
     uint64_t CurrentLimit;
     uint64_t MaximumLimit;
-} RLimit;
+};
 
 /**
  * The native struct is dependent on the size of a numeric type
  * so make it the largest possible value here and then we will
  * copy to native as necessary
  */
-typedef struct
+struct CpuSetBits
 {
     uint64_t Bits[16]; // __CPU_SETSIZE / (8 * sizeof(int64_t))
-} CpuSetBits;
+};
 
 /**
  * Get the current limit for the specified resource of the current process.
@@ -191,7 +194,7 @@ DLLEXPORT int32_t SystemNative_Kill(int32_t pid, int32_t signal);
  * Returns the Process ID of the current executing process.
  * This call should never fail
  */
-DLLEXPORT int32_t SystemNative_GetPid(void);
+DLLEXPORT int32_t SystemNative_GetPid();
 
 /**
  * Returns the sessions ID of the specified process; if 0 is passed in, returns the
@@ -213,7 +216,7 @@ DLLEXPORT void SystemNative_SysLog(SysLogPriority priority, const char* message,
  * 2) if no children are terminated, 0 is returned
  * 3) on error, -1 is returned
  */
-DLLEXPORT int32_t SystemNative_WaitIdAnyExitedNoHangNoWait(void);
+DLLEXPORT extern "C" int32_t SystemNative_WaitIdAnyExitedNoHangNoWait();
 
 /**
  * Reaps a terminated child.
@@ -223,7 +226,7 @@ DLLEXPORT int32_t SystemNative_WaitIdAnyExitedNoHangNoWait(void);
  * 3) if the child has not yet terminated, 0 is returned
  * 4) on error, -1 is returned.
  */
-DLLEXPORT int32_t SystemNative_WaitPidExitedNoHang(int32_t pid, int32_t* exitCode);
+DLLEXPORT extern "C" int32_t SystemNative_WaitPidExitedNoHang(int32_t pid, int32_t* exitCode);
 
 /**
  * Gets the configurable limit or variable for system path or file descriptor options.
@@ -271,3 +274,5 @@ DLLEXPORT int32_t SystemNative_SchedSetAffinity(int32_t pid, intptr_t* mask);
  */
 DLLEXPORT int32_t SystemNative_SchedGetAffinity(int32_t pid, intptr_t* mask);
 #endif
+
+END_EXTERN_C

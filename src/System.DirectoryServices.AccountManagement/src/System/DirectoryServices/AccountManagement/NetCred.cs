@@ -73,9 +73,9 @@ namespace System.DirectoryServices.AccountManagement
             int result = UnsafeNativeMethods.CredUIParseUserName(
                                                 username,
                                                  splitUsername,
-                                                 (uint)splitUsername.Capacity,
+                                                 (System.UInt32)splitUsername.Capacity,
                                                  splitDomain,
-                                                 (uint)splitDomain.Capacity);
+                                                 (System.UInt32)splitDomain.Capacity);
 
             // If CredUiParseUsername fails then username format must have been in a format it does not expect.
             // Just pass then entire username as the user passed it with a null domain string.

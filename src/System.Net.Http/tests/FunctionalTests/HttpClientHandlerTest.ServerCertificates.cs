@@ -99,36 +99,36 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            var options = new LoopbackProxyServer.Options
-                { AuthenticationSchemes = AuthenticationSchemes.Basic,
-                  ConnectionCloseAfter407 = true
-                };
-            using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create(options))
+            const string content = "This is a test";
+
+            int port;
+            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
+                out port,
+                requireAuth: true,
+                expectCreds: true);
+            Uri proxyUrl = new Uri($"http://localhost:{port}");
+
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, new NetworkCredential("rightusername", "rightpassword"));
+            handler.ServerCertificateCustomValidationCallback = delegate { return true; };
+            using (var client = new HttpClient(handler))
             {
-                HttpClientHandler handler = CreateHttpClientHandler();
-                handler.ServerCertificateCustomValidationCallback = delegate { return true; };
-                handler.Proxy = new WebProxy(proxyServer.Uri)
-                {
-                    Credentials = new NetworkCredential("rightusername", "rightpassword")
-                };
+                HttpResponseMessage response = await client.PostAsync(
+                    Configuration.Http.SecureRemoteEchoServer,
+                    new StringContent(content));
 
-                const string content = "This is a test";
+                string responseContent = await response.Content.ReadAsStringAsync();
 
-                using (var client = new HttpClient(handler))
-                using (HttpResponseMessage response = await client.PostAsync(
-                        Configuration.Http.SecureRemoteEchoServer,
-                        new StringContent(content)))
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    TestHelper.VerifyResponseBody(
-                        responseContent,
-                        response.Content.Headers.ContentMD5,
-                        false,
-                        content);
-                }
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                TestHelper.VerifyResponseBody(
+                    responseContent,
+                    response.Content.Headers.ContentMD5,
+                    false,
+                    content);
             }
+
+            // Don't await proxyTask until the HttpClient is closed, otherwise it will wait for connection timeout.
+            await proxyTask;
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP won't send requests through a custom proxy")]
@@ -141,25 +141,29 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            var options = new LoopbackProxyServer.Options
-                { AuthenticationSchemes = AuthenticationSchemes.Basic,
-                  ConnectionCloseAfter407 = true
-                };
-            using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create(options))
+            int port;
+            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
+                out port,
+                requireAuth: true,
+                expectCreds: false);
+            Uri proxyUrl = new Uri($"http://localhost:{port}");
+
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, null);
+            handler.ServerCertificateCustomValidationCallback = delegate { return true; };
+            using (var client = new HttpClient(handler))
             {
-                HttpClientHandler handler = CreateHttpClientHandler();
-                handler.Proxy = new WebProxy(proxyServer.Uri);
-                handler.ServerCertificateCustomValidationCallback = delegate { return true; };
-                using (var client = new HttpClient(handler))
-                using (HttpResponseMessage response = await client.PostAsync(
+                Task<HttpResponseMessage> responseTask = client.PostAsync(
                     Configuration.Http.SecureRemoteEchoServer,
-                    new StringContent("This is a test")))
+                    new StringContent("This is a test"));
+                await TestHelper.WhenAllCompletedOrAnyFailed(proxyTask, responseTask);
+                using (responseTask.Result)
                 {
-                    Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, response.StatusCode);
+                    Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);
                 }
             }
         }
-
+        
         [OuterLoop("Uses external server")]
         [Fact]
         public async Task UseCallback_NotSecureConnection_CallbackNotCalled()

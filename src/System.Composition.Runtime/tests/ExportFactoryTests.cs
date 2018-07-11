@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.Composition.Runtime.Tests
+namespace System.Composition.Tests
 {
     public class ExportFactoryTests
     {

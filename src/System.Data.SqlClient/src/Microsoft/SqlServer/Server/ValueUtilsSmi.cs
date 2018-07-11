@@ -65,7 +65,7 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (bool)result;
+            return (Boolean)result;
         }
 
         internal static byte GetByte(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
@@ -80,7 +80,7 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (byte)result;
+            return (Byte)result;
         }
 
         private static long GetBytesConversion(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData, long fieldOffset, byte[] buffer, int bufferOffset, int length, bool throwOnNull)
@@ -197,7 +197,7 @@ namespace Microsoft.SqlServer.Server
                 return length;
             }
 
-            string value = ((string)GetValue(sink, getters, ordinal, metaData));
+            String value = ((String)GetValue(sink, getters, ordinal, metaData));
             if (null == value)
             {
                 throw ADP.InvalidCast();
@@ -254,7 +254,7 @@ namespace Microsoft.SqlServer.Server
             return (DateTimeOffset)GetValue200(sink, getters, ordinal, metaData);
         }
 
-        internal static decimal GetDecimal(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static Decimal GetDecimal(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.Decimal))
@@ -266,10 +266,10 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (decimal)result;
+            return (Decimal)result;
         }
 
-        internal static double GetDouble(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static Double GetDouble(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.Double))
@@ -281,7 +281,7 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (double)result;
+            return (Double)result;
         }
 
         internal static Guid GetGuid(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
@@ -299,7 +299,7 @@ namespace Microsoft.SqlServer.Server
             return (Guid)result;
         }
 
-        internal static short GetInt16(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static Int16 GetInt16(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.Int16))
@@ -311,10 +311,10 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (short)obj;
+            return (Int16)obj;
         }
 
-        internal static int GetInt32(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static Int32 GetInt32(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.Int32))
@@ -326,10 +326,10 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (int)result;
+            return (Int32)result;
         }
 
-        internal static long GetInt64(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static Int64 GetInt64(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.Int64))
@@ -341,10 +341,10 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (long)result;
+            return (Int64)result;
         }
 
-        internal static float GetSingle(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static Single GetSingle(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.Single))
@@ -356,7 +356,7 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (float)result;
+            return (Single)result;
         }
 
         internal static SqlBinary GetSqlBinary(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
@@ -579,7 +579,7 @@ namespace Microsoft.SqlServer.Server
                 }
                 else
                 {
-                    double temp = GetDouble_Unchecked(sink, getters, ordinal);
+                    Double temp = GetDouble_Unchecked(sink, getters, ordinal);
                     result = new SqlDouble(temp);
                 }
             }
@@ -635,7 +635,7 @@ namespace Microsoft.SqlServer.Server
                 }
                 else
                 {
-                    short temp = GetInt16_Unchecked(sink, getters, ordinal);
+                    Int16 temp = GetInt16_Unchecked(sink, getters, ordinal);
                     result = new SqlInt16(temp);
                 }
             }
@@ -663,7 +663,7 @@ namespace Microsoft.SqlServer.Server
                 }
                 else
                 {
-                    int temp = GetInt32_Unchecked(sink, getters, ordinal);
+                    Int32 temp = GetInt32_Unchecked(sink, getters, ordinal);
                     result = new SqlInt32(temp);
                 }
             }
@@ -690,7 +690,7 @@ namespace Microsoft.SqlServer.Server
                 }
                 else
                 {
-                    long temp = GetInt64_Unchecked(sink, getters, ordinal);
+                    Int64 temp = GetInt64_Unchecked(sink, getters, ordinal);
                     result = new SqlInt64(temp);
                 }
             }
@@ -745,7 +745,7 @@ namespace Microsoft.SqlServer.Server
                 }
                 else
                 {
-                    float temp = GetSingle_Unchecked(sink, getters, ordinal);
+                    Single temp = GetSingle_Unchecked(sink, getters, ordinal);
                     result = new SqlSingle(temp);
                 }
             }
@@ -773,7 +773,7 @@ namespace Microsoft.SqlServer.Server
                 }
                 else
                 {
-                    string temp = GetString_Unchecked(sink, getters, ordinal);
+                    String temp = GetString_Unchecked(sink, getters, ordinal);
                     result = new SqlString(temp);
                 }
             }
@@ -830,7 +830,7 @@ namespace Microsoft.SqlServer.Server
             return result;
         }
 
-        internal static string GetString(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        internal static String GetString(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             ThrowIfITypedGettersIsNull(sink, getters, ordinal);
             if (CanAccessGetterDirectly(metaData, ExtendedClrTypeCode.String))
@@ -842,7 +842,7 @@ namespace Microsoft.SqlServer.Server
             {
                 throw ADP.InvalidCast();
             }
-            return (string)obj;
+            return (String)obj;
         }
 
 
@@ -1212,19 +1212,19 @@ namespace Microsoft.SqlServer.Server
         // Strongly-typed setters are a bit simpler than their corresponding getters.
         //      1) check to make sure the type is compatible (exception if not)
         //      2) push the data
-        internal static void SetDBNull(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, bool value)
+        internal static void SetDBNull(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Boolean value)
         {
             SetDBNull_Unchecked(sink, setters, ordinal);
         }
 
-        internal static void SetBoolean(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, bool value)
+        internal static void SetBoolean(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Boolean value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Boolean);
 
             SetBoolean_Unchecked(sink, setters, ordinal, value);
         }
 
-        internal static void SetByte(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, byte value)
+        internal static void SetByte(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Byte value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Byte);
 
@@ -1306,14 +1306,14 @@ namespace Microsoft.SqlServer.Server
             SetDateTimeOffset_Unchecked(sink, (SmiTypedGetterSetter)setters, ordinal, value);
         }
 
-        internal static void SetDecimal(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, decimal value)
+        internal static void SetDecimal(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Decimal value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Decimal);
 
             SetDecimal_PossiblyMoney(sink, setters, ordinal, metaData, value);
         }
 
-        internal static void SetDouble(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, double value)
+        internal static void SetDouble(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Double value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Double);
 
@@ -1327,28 +1327,28 @@ namespace Microsoft.SqlServer.Server
             SetGuid_Unchecked(sink, setters, ordinal, value);
         }
 
-        internal static void SetInt16(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, short value)
+        internal static void SetInt16(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Int16 value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Int16);
 
             SetInt16_Unchecked(sink, setters, ordinal, value);
         }
 
-        internal static void SetInt32(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, int value)
+        internal static void SetInt32(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Int32 value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Int32);
 
             SetInt32_Unchecked(sink, setters, ordinal, value);
         }
 
-        internal static void SetInt64(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, long value)
+        internal static void SetInt64(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Int64 value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Int64);
 
             SetInt64_Unchecked(sink, setters, ordinal, value);
         }
 
-        internal static void SetSingle(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, float value)
+        internal static void SetSingle(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Single value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.Single);
 
@@ -1464,7 +1464,7 @@ namespace Microsoft.SqlServer.Server
             SetSqlXml_Unchecked(sink, setters, ordinal, value);
         }
 
-        internal static void SetString(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, string value)
+        internal static void SetString(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, String value)
         {
             ThrowIfInvalidSetterAccess(metaData, ExtendedClrTypeCode.String);
 
@@ -1504,8 +1504,8 @@ namespace Microsoft.SqlServer.Server
             switch (typeCode)
             {
                 case ExtendedClrTypeCode.Invalid: throw ADP.UnknownDataType(value.GetType());
-                case ExtendedClrTypeCode.Boolean: SetBoolean_Unchecked(sink, setters, ordinal, (bool)value); break;
-                case ExtendedClrTypeCode.Byte: SetByte_Unchecked(sink, setters, ordinal, (byte)value); break;
+                case ExtendedClrTypeCode.Boolean: SetBoolean_Unchecked(sink, setters, ordinal, (Boolean)value); break;
+                case ExtendedClrTypeCode.Byte: SetByte_Unchecked(sink, setters, ordinal, (Byte)value); break;
                 case ExtendedClrTypeCode.Char:
                     {
                         char[] charsValue = new char[] { (char)value };
@@ -1515,14 +1515,14 @@ namespace Microsoft.SqlServer.Server
                     }
                 case ExtendedClrTypeCode.DateTime: SetDateTime_Checked(sink, setters, ordinal, metaData, (DateTime)value); break;
                 case ExtendedClrTypeCode.DBNull: SetDBNull_Unchecked(sink, setters, ordinal); break;
-                case ExtendedClrTypeCode.Decimal: SetDecimal_PossiblyMoney(sink, setters, ordinal, metaData, (decimal)value); break;
-                case ExtendedClrTypeCode.Double: SetDouble_Unchecked(sink, setters, ordinal, (double)value); break;
+                case ExtendedClrTypeCode.Decimal: SetDecimal_PossiblyMoney(sink, setters, ordinal, metaData, (Decimal)value); break;
+                case ExtendedClrTypeCode.Double: SetDouble_Unchecked(sink, setters, ordinal, (Double)value); break;
                 case ExtendedClrTypeCode.Empty: SetDBNull_Unchecked(sink, setters, ordinal); break;
-                case ExtendedClrTypeCode.Int16: SetInt16_Unchecked(sink, setters, ordinal, (short)value); break;
-                case ExtendedClrTypeCode.Int32: SetInt32_Unchecked(sink, setters, ordinal, (int)value); break;
-                case ExtendedClrTypeCode.Int64: SetInt64_Unchecked(sink, setters, ordinal, (long)value); break;
+                case ExtendedClrTypeCode.Int16: SetInt16_Unchecked(sink, setters, ordinal, (Int16)value); break;
+                case ExtendedClrTypeCode.Int32: SetInt32_Unchecked(sink, setters, ordinal, (Int32)value); break;
+                case ExtendedClrTypeCode.Int64: SetInt64_Unchecked(sink, setters, ordinal, (Int64)value); break;
                 case ExtendedClrTypeCode.SByte: throw ADP.InvalidCast();
-                case ExtendedClrTypeCode.Single: SetSingle_Unchecked(sink, setters, ordinal, (float)value); break;
+                case ExtendedClrTypeCode.Single: SetSingle_Unchecked(sink, setters, ordinal, (Single)value); break;
                 case ExtendedClrTypeCode.String: SetString_LengthChecked(sink, setters, ordinal, metaData, (string)value, offset); break;
                 case ExtendedClrTypeCode.UInt16: throw ADP.InvalidCast();
                 case ExtendedClrTypeCode.UInt32: throw ADP.InvalidCast();
@@ -2236,7 +2236,7 @@ namespace Microsoft.SqlServer.Server
             return result;
         }
 
-        private static decimal GetDecimal_PossiblyMoney(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+        private static Decimal GetDecimal_PossiblyMoney(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
         {
             if (SqlDbType.Decimal == metaData.SqlDbType)
             {
@@ -2251,7 +2251,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        private static void SetDecimal_PossiblyMoney(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, decimal value)
+        private static void SetDecimal_PossiblyMoney(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, Decimal value)
         {
             if (SqlDbType.Decimal == metaData.SqlDbType || SqlDbType.Variant == metaData.SqlDbType)
             {
@@ -2365,7 +2365,7 @@ namespace Microsoft.SqlServer.Server
             // Deal with large values by sending bufferLength of NoLengthLimit (== assume 
             //  CheckXetParameters will ignore requested-length checks in this case
             long bufferLength = record.GetBytes(ordinal, 0, null, 0, 0);
-            if (bufferLength > int.MaxValue)
+            if (bufferLength > Int32.MaxValue)
             {
                 bufferLength = NoLengthLimit;
             }
@@ -2442,7 +2442,7 @@ namespace Microsoft.SqlServer.Server
                 // Deal with large values by sending bufferLength of NoLengthLimit (== assume 
                 //  CheckXetParameters will ignore requested-length checks in this case
                 long bufferLength = value.Length;
-                if (bufferLength > int.MaxValue)
+                if (bufferLength > Int32.MaxValue)
                 {
                     bufferLength = NoLengthLimit;
                 }
@@ -2458,7 +2458,7 @@ namespace Microsoft.SqlServer.Server
             // Deal with large values by sending bufferLength of NoLengthLimit
             //  CheckXetParameters will ignore length checks in this case
             long bufferLength = record.GetChars(ordinal, 0, null, 0, 0);
-            if (bufferLength > int.MaxValue)
+            if (bufferLength > Int32.MaxValue)
             {
                 bufferLength = NoLengthLimit;
             }
@@ -2585,7 +2585,7 @@ namespace Microsoft.SqlServer.Server
                 // Deal with large values by sending bufferLength of NoLengthLimit
                 //  CheckXetParameters will ignore length checks in this case
                 long bufferLength = value.Length;
-                if (bufferLength > int.MaxValue)
+                if (bufferLength > Int32.MaxValue)
                 {
                     bufferLength = NoLengthLimit;
                 }
@@ -3125,11 +3125,11 @@ namespace Microsoft.SqlServer.Server
             return result;
         }
 
-        private static double GetDouble_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
+        private static Double GetDouble_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            double result = getters.GetDouble(sink, ordinal);
+            Double result = getters.GetDouble(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return result;
         }
@@ -3143,38 +3143,38 @@ namespace Microsoft.SqlServer.Server
             return result;
         }
 
-        private static short GetInt16_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
+        private static Int16 GetInt16_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            short result = getters.GetInt16(sink, ordinal);
+            Int16 result = getters.GetInt16(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return result;
         }
 
-        private static int GetInt32_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
+        private static Int32 GetInt32_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            int result = getters.GetInt32(sink, ordinal);
+            Int32 result = getters.GetInt32(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return result;
         }
 
-        private static long GetInt64_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
+        private static Int64 GetInt64_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            long result = getters.GetInt64(sink, ordinal);
+            Int64 result = getters.GetInt64(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return result;
         }
 
-        private static float GetSingle_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
+        private static Single GetSingle_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            float result = getters.GetSingle(sink, ordinal);
+            Single result = getters.GetSingle(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return result;
         }
@@ -3200,7 +3200,7 @@ namespace Microsoft.SqlServer.Server
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            long temp = getters.GetInt64(sink, ordinal);
+            Int64 temp = getters.GetInt64(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return SqlTypeWorkarounds.SqlMoneyCtor(temp, 1 /* ignored */ );
         }
@@ -3218,7 +3218,7 @@ namespace Microsoft.SqlServer.Server
             return result;
         }
 
-        private static string GetString_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
+        private static String GetString_Unchecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
@@ -3226,7 +3226,7 @@ namespace Microsoft.SqlServer.Server
             // Inproc process, the getter is InProcRecordBuffer (implemented in SqlAcess), string will be
             // truncated to 4000 (if length is more than 4000). If MemoryRecordBuffer getter is used, data 
             // is not truncated. Please refer VSDD 479655 for more detailed information regarding the string length.
-            string result = getters.GetString(sink, ordinal);
+            String result = getters.GetString(sink, ordinal);
             sink.ProcessMessagesAndThrow();
             return result;
         }
@@ -3240,7 +3240,7 @@ namespace Microsoft.SqlServer.Server
             return result;
         }
 
-        private static void SetBoolean_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, bool value)
+        private static void SetBoolean_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Boolean value)
         {
             setters.SetBoolean(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
@@ -3323,7 +3323,7 @@ namespace Microsoft.SqlServer.Server
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetByte_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, byte value)
+        private static void SetByte_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Byte value)
         {
             setters.SetByte(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
@@ -3360,7 +3360,7 @@ namespace Microsoft.SqlServer.Server
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetDecimal_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, decimal value)
+        private static void SetDecimal_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Decimal value)
         {
             setters.SetSqlDecimal(sink, ordinal, new SqlDecimal(value));
             sink.ProcessMessagesAndThrow();
@@ -3400,7 +3400,7 @@ namespace Microsoft.SqlServer.Server
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetDouble_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, double value)
+        private static void SetDouble_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Double value)
         {
             setters.SetDouble(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
@@ -3412,25 +3412,25 @@ namespace Microsoft.SqlServer.Server
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetInt16_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, short value)
+        private static void SetInt16_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Int16 value)
         {
             setters.SetInt16(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetInt32_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, int value)
+        private static void SetInt32_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Int32 value)
         {
             setters.SetInt32(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetInt64_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, long value)
+        private static void SetInt64_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Int64 value)
         {
             setters.SetInt64(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetSingle_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, float value)
+        private static void SetSingle_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, Single value)
         {
             setters.SetSingle(sink, ordinal, value);
             sink.ProcessMessagesAndThrow();
@@ -3744,7 +3744,7 @@ namespace Microsoft.SqlServer.Server
             sink.ProcessMessagesAndThrow();
         }
 
-        private static void SetString_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, string value, int offset, int length)
+        private static void SetString_Unchecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, String value, int offset, int length)
         {
             setters.SetString(sink, ordinal, value, offset, length);
             sink.ProcessMessagesAndThrow();

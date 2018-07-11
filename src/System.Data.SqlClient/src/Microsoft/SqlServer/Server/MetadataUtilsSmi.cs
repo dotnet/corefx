@@ -202,7 +202,7 @@ namespace Microsoft.SqlServer.Server
                 switch (dbType)
                 {
                     case SqlDbType.BigInt:
-                        if (value.GetType() == typeof(long))
+                        if (value.GetType() == typeof(Int64))
                             extendedCode = ExtendedClrTypeCode.Int64;
                         else if (value.GetType() == typeof(SqlInt64))
                             extendedCode = ExtendedClrTypeCode.SqlInt64;
@@ -255,19 +255,19 @@ namespace Microsoft.SqlServer.Server
                             extendedCode = ExtendedClrTypeCode.SqlDateTime;
                         break;
                     case SqlDbType.Decimal:
-                        if (value.GetType() == typeof(decimal))
+                        if (value.GetType() == typeof(Decimal))
                             extendedCode = ExtendedClrTypeCode.Decimal;
                         else if (value.GetType() == typeof(SqlDecimal))
                             extendedCode = ExtendedClrTypeCode.SqlDecimal;
                         break;
                     case SqlDbType.Real:
-                        if (value.GetType() == typeof(float))
+                        if (value.GetType() == typeof(Single))
                             extendedCode = ExtendedClrTypeCode.Single;
                         else if (value.GetType() == typeof(SqlSingle))
                             extendedCode = ExtendedClrTypeCode.SqlSingle;
                         break;
                     case SqlDbType.Int:
-                        if (value.GetType() == typeof(int))
+                        if (value.GetType() == typeof(Int32))
                             extendedCode = ExtendedClrTypeCode.Int32;
                         else if (value.GetType() == typeof(SqlInt32))
                             extendedCode = ExtendedClrTypeCode.SqlInt32;
@@ -276,13 +276,13 @@ namespace Microsoft.SqlServer.Server
                     case SqlDbType.SmallMoney:
                         if (value.GetType() == typeof(SqlMoney))
                             extendedCode = ExtendedClrTypeCode.SqlMoney;
-                        else if (value.GetType() == typeof(decimal))
+                        else if (value.GetType() == typeof(Decimal))
                             extendedCode = ExtendedClrTypeCode.Decimal;
                         break;
                     case SqlDbType.Float:
                         if (value.GetType() == typeof(SqlDouble))
                             extendedCode = ExtendedClrTypeCode.SqlDouble;
-                        else if (value.GetType() == typeof(double))
+                        else if (value.GetType() == typeof(Double))
                             extendedCode = ExtendedClrTypeCode.Double;
                         break;
                     case SqlDbType.UniqueIdentifier:
@@ -292,13 +292,13 @@ namespace Microsoft.SqlServer.Server
                             extendedCode = ExtendedClrTypeCode.Guid;
                         break;
                     case SqlDbType.SmallInt:
-                        if (value.GetType() == typeof(short))
+                        if (value.GetType() == typeof(Int16))
                             extendedCode = ExtendedClrTypeCode.Int16;
                         else if (value.GetType() == typeof(SqlInt16))
                             extendedCode = ExtendedClrTypeCode.SqlInt16;
                         break;
                     case SqlDbType.TinyInt:
-                        if (value.GetType() == typeof(byte))
+                        if (value.GetType() == typeof(Byte))
                             extendedCode = ExtendedClrTypeCode.Byte;
                         else if (value.GetType() == typeof(SqlByte))
                             extendedCode = ExtendedClrTypeCode.SqlByte;
@@ -338,7 +338,7 @@ namespace Microsoft.SqlServer.Server
                             extendedCode = ExtendedClrTypeCode.SqlXml;
                         if (value.GetType() == typeof(XmlDataFeed))
                             extendedCode = ExtendedClrTypeCode.XmlReader;
-                        else if (value.GetType() == typeof(string))
+                        else if (value.GetType() == typeof(System.String))
                             extendedCode = ExtendedClrTypeCode.String;
                         break;
                     case SqlDbType.Structured:
@@ -604,7 +604,7 @@ namespace Microsoft.SqlServer.Server
                     object obj = row[column];
                     if (!(obj is DBNull))
                     {
-                        SqlDecimal value = (SqlDecimal)(decimal)obj;
+                        SqlDecimal value = (SqlDecimal)(Decimal)obj;
                         byte tempNonFractPrec = checked((byte)(value.Precision - value.Scale));
                         if (tempNonFractPrec > nonFractionalPrecision)
                         {

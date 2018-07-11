@@ -48,6 +48,6 @@ namespace System.ComponentModel
         ///    <para>When implemented by a class, gets or sets the name of
         ///       the component associated with the <see cref='System.ComponentModel.ISite'/>.</para>
         /// </summary>
-        string Name { get; set; }
+        String Name { get; set; }
     }
 }

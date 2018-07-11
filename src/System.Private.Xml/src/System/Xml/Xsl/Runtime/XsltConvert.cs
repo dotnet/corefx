@@ -136,7 +136,7 @@ namespace System.Xml.Xsl.Runtime
             XsltLibrary.CheckXsltValue(listItems);
 
             if (listItems.Count == 0)
-                return double.NaN;
+                return Double.NaN;
 
             return ToDouble(listItems[0]);
         }

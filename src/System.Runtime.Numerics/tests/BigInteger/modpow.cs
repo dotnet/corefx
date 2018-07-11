@@ -360,7 +360,7 @@ namespace System.Numerics.Tests
             return value;
         }
         
-        private static string Print(byte[] bytes)
+        private static String Print(byte[] bytes)
         {
             return MyBigIntImp.Print(bytes);
         }

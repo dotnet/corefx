@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public partial class AppDomainTests : RemoteExecutorTestBase
+    public class AppDomainTests : RemoteExecutorTestBase
     {
         [Fact]
         public void CurrentDomain_Not_Null()
@@ -37,14 +37,6 @@ namespace System.Tests
         {
             Assert.Null(AppDomain.CurrentDomain.RelativeSearchPath);
         } 
-
-        [Fact]
-        public void TargetFrameworkTest()
-        {
-            RemoteInvoke(() => {
-                Assert.Contains("DUMMY-TFA", AppContext.TargetFrameworkName);
-            }).Dispose();
-        }
 
         [Fact]
         public void UnhandledException_Add_Remove()

@@ -34,7 +34,7 @@ namespace System.Reflection.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                CustomAttributeExtensions.IsDefined(piWithAttributes, typeof(string));
+                CustomAttributeExtensions.IsDefined(piWithAttributes, typeof(String));
             });
 
             Assert.Throws<ArgumentNullException>(() =>
@@ -129,7 +129,7 @@ namespace System.Reflection.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                attribute = CustomAttributeExtensions.GetCustomAttribute(piWithAttributes, typeof(string));
+                attribute = CustomAttributeExtensions.GetCustomAttribute(piWithAttributes, typeof(String));
             });
 
             Assert.Throws<ArgumentNullException>(() =>
@@ -169,7 +169,7 @@ namespace System.Reflection.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                attributes = CustomAttributeExtensions.GetCustomAttributes(piWithAttributes, typeof(string));
+                attributes = CustomAttributeExtensions.GetCustomAttributes(piWithAttributes, typeof(String));
             });
 
             Assert.Throws<ArgumentNullException>(() =>
@@ -251,37 +251,37 @@ namespace System.Reflection.Tests
 
     public class ParameterInfoAttributeBase : Attribute
     {
-        private string _name;
-        public ParameterInfoAttributeBase(string name)
+        private String _name;
+        public ParameterInfoAttributeBase(String name)
         {
             _name = name;
         }
 
-        public override string ToString() { return this.GetType() + " " + _name; }
+        public override String ToString() { return this.GetType() + " " + _name; }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
     public class MyAttribute_Single_P : ParameterInfoAttributeBase
     {
-        public MyAttribute_Single_P(string name) : base(name) { }
+        public MyAttribute_Single_P(String name) : base(name) { }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class MyAttribute_AllowMultiple_P : ParameterInfoAttributeBase
     {
-        public MyAttribute_AllowMultiple_P(string name) : base(name) { }
+        public MyAttribute_AllowMultiple_P(String name) : base(name) { }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
     public class MyAttribute_Single_Inherited_P : ParameterInfoAttributeBase
     {
-        public MyAttribute_Single_Inherited_P(string name) : base(name) { }
+        public MyAttribute_Single_Inherited_P(String name) : base(name) { }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = true)]
     public class MyAttribute_AllowMultiple_Inherited_P : ParameterInfoAttributeBase
     {
-        public MyAttribute_AllowMultiple_Inherited_P(string name) : base(name) { }
+        public MyAttribute_AllowMultiple_Inherited_P(String name) : base(name) { }
     }
 
     public class TestClass_P

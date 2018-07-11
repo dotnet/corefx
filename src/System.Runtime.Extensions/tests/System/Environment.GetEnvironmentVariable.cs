@@ -35,7 +35,7 @@ namespace System.Tests
         [Fact]
         public void EmptyVariableReturnsNull()
         {
-            Assert.Null(Environment.GetEnvironmentVariable(string.Empty));
+            Assert.Null(Environment.GetEnvironmentVariable(String.Empty));
         }
 
         [Fact]

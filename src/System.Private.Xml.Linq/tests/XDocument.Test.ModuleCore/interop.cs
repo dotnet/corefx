@@ -97,11 +97,11 @@ namespace Microsoft.Test.ModuleCore
     {
         // Simple Meta-data about the item
         int Id { get; }
-        string Guid { get; }
-        string Name { get; }
-        string Desc { get; }
-        string Owner { get; }
-        string Version { get; }
+        String Guid { get; }
+        String Name { get; }
+        String Desc { get; }
+        String Owner { get; }
+        String Version { get; }
         int Priority { get; }
         TestType Type { get; }
         TestFlags Flags { get; }
@@ -137,10 +137,10 @@ namespace Microsoft.Test.ModuleCore
     public interface ITestProperty
     {
         // Simple Meta-data about the property
-        string Name { get; }
-        string Desc { get; }
+        String Name { get; }
+        String Desc { get; }
         TestPropertyFlags Flags { get; set; }
-        object Value { get; }
+        Object Value { get; }
         void set_Value(ref object value);
 
         // Extensible Meta-data about the property
@@ -174,9 +174,9 @@ namespace Microsoft.Test.ModuleCore
     public interface ITestLoader
     {
         //Simple Metadata
-        string Guid { get; }
-        string Name { get; }
-        string Desc { get; }
+        String Guid { get; }
+        String Name { get; }
+        String Desc { get; }
 
         // Extensible Meta-data about the item
         ITestProperties Metadata { get; }
@@ -187,7 +187,7 @@ namespace Microsoft.Test.ModuleCore
         void Terminate();
 
         //Enumeration
-        string[] Enumerate( string assembly);
+        String[] Enumerate( string assembly);
 
         //Input (get/set)
         ITestProperties Properties {  set; get; }
@@ -202,8 +202,8 @@ namespace Microsoft.Test.ModuleCore
     ////////////////////////////////////////////////////////////////////////
     public interface ITestLog
     {
-        string Name { get; }
-        string Desc { get; }
+        String Name { get; }
+        String Desc { get; }
 
         // Extensible Meta-data about the item
         ITestProperties Metadata { get; }

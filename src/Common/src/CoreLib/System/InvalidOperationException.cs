@@ -26,13 +26,13 @@ namespace System
             HResult = HResults.COR_E_INVALIDOPERATION;
         }
 
-        public InvalidOperationException(string message)
+        public InvalidOperationException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_INVALIDOPERATION;
         }
 
-        public InvalidOperationException(string message, Exception innerException)
+        public InvalidOperationException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_INVALIDOPERATION;

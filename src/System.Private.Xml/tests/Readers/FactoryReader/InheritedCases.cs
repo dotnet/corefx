@@ -19,7 +19,7 @@ namespace System.Xml.Tests
         {
             int ret = base.Init(objParam);
             // Create global usage test files
-            string strFile = string.Empty;
+            string strFile = String.Empty;
 
             TestFiles.CreateTestFile(ref strFile, EREADER_TYPE.GENERIC);
             TestFiles.CreateTestFile(ref strFile, EREADER_TYPE.XSLT_COPY);

@@ -346,10 +346,7 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
             Lazy<IDictionary<string, object>> metadata,
             ICompositionElement origin)
         {
-            if (partType == null)
-            {
-                throw new ArgumentNullException(nameof(partType));
-            }
+            Assumes.NotNull(partType);
 
             _partType = partType;
             _isDisposalRequired = isDisposalRequired;

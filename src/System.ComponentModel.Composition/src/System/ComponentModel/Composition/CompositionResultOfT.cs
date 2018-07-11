@@ -12,19 +12,19 @@ namespace System.ComponentModel.Composition
     {
         private readonly IEnumerable<CompositionError> _errors;
         private readonly T _value;
-
+        
         public CompositionResult(T value)
-            : this(value, null)
+            : this(value, (CompositionError[])null)
         {
         }
 
         public CompositionResult(params CompositionError[] errors)
-            : this(default, errors)
+            : this(default(T), (IEnumerable<CompositionError>)errors)
         {
         }
 
         public CompositionResult(IEnumerable<CompositionError> errors)
-            : this(default, errors)
+            : this(default(T), errors)
         {
         }
 
@@ -49,11 +49,11 @@ namespace System.ComponentModel.Composition
         /// </summary>
         public T Value
         {
-            get
+            get 
             {
                 ThrowOnErrors();
 
-                return _value;
+                return _value; 
             }
         }
 

@@ -1,4 +1,5 @@
-project(System.Security.Cryptography.Native.Apple C)
+
+project(System.Security.Cryptography.Native.Apple)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -8,21 +9,21 @@ find_library(COREFOUNDATION_LIBRARY CoreFoundation)
 find_library(SECURITY_LIBRARY Security)
 
 set(NATIVECRYPTO_SOURCES
-    pal_digest.c
-    pal_ecc.c
-    pal_hmac.c
-    pal_keyagree.c
-    pal_keychain.c
+    pal_digest.cpp
+    pal_ecc.cpp
+    pal_hmac.cpp
+    pal_keyagree.cpp
+    pal_keychain.cpp
     pal_random.c
-    pal_rsa.c
-    pal_sec.c
-    pal_seckey.c
-    pal_signverify.c
-    pal_ssl.c
-    pal_symmetric.c
-    pal_trust.c
-    pal_x509.c
-    pal_x509chain.c
+    pal_rsa.cpp
+    pal_sec.cpp
+    pal_seckey.cpp
+    pal_signverify.cpp
+    pal_ssl.cpp
+    pal_symmetric.cpp
+    pal_trust.cpp
+    pal_x509.cpp
+    pal_x509chain.cpp
 )
 
 add_library(System.Security.Cryptography.Native.Apple

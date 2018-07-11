@@ -58,7 +58,7 @@ namespace System.Xml.Tests
             var xmlDocument = new XmlDocument();
             var node = xmlDocument.CreateAttribute("attribute");
 
-            Assert.Equal(string.Empty, node.Value);
+            Assert.Equal(String.Empty, node.Value);
         }
 
         [Fact]

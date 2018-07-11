@@ -30,7 +30,6 @@ namespace System.Data.SqlClient
             Pooling,
             MinPoolSize,
             MaxPoolSize,
-            PoolBlockingPeriod,
 
             MultipleActiveResultSets,
             Replication,
@@ -107,7 +106,6 @@ namespace System.Data.SqlClient
             validKeywords[(int)Keywords.ApplicationIntent] = DbConnectionStringKeywords.ApplicationIntent;
             validKeywords[(int)Keywords.ApplicationName] = DbConnectionStringKeywords.ApplicationName;
             validKeywords[(int)Keywords.AttachDBFilename] = DbConnectionStringKeywords.AttachDBFilename;
-            validKeywords[(int)Keywords.PoolBlockingPeriod] = DbConnectionStringKeywords.PoolBlockingPeriod;
             validKeywords[(int)Keywords.ConnectTimeout] = DbConnectionStringKeywords.ConnectTimeout;
             validKeywords[(int)Keywords.CurrentLanguage] = DbConnectionStringKeywords.CurrentLanguage;
             validKeywords[(int)Keywords.DataSource] = DbConnectionStringKeywords.DataSource;
@@ -144,7 +142,6 @@ namespace System.Data.SqlClient
             hash.Add(DbConnectionStringKeywords.ApplicationIntent, Keywords.ApplicationIntent);
             hash.Add(DbConnectionStringKeywords.ApplicationName, Keywords.ApplicationName);
             hash.Add(DbConnectionStringKeywords.AttachDBFilename, Keywords.AttachDBFilename);
-            hash.Add(DbConnectionStringKeywords.PoolBlockingPeriod, Keywords.PoolBlockingPeriod);
             hash.Add(DbConnectionStringKeywords.ConnectTimeout, Keywords.ConnectTimeout);
             hash.Add(DbConnectionStringKeywords.CurrentLanguage, Keywords.CurrentLanguage);
             hash.Add(DbConnectionStringKeywords.DataSource, Keywords.DataSource);
@@ -242,9 +239,7 @@ namespace System.Data.SqlClient
                         case Keywords.PacketSize: PacketSize = ConvertToInt32(value); break;
 
                         case Keywords.IntegratedSecurity: IntegratedSecurity = ConvertToIntegratedSecurity(value); break;
-#if netcoreapp
-                        case Keywords.PoolBlockingPeriod: PoolBlockingPeriod = ConvertToPoolBlockingPeriod(keyword, value); break;
-#endif
+
                         case Keywords.Encrypt: Encrypt = ConvertToBoolean(value); break;
                         case Keywords.TrustServerCertificate: TrustServerCertificate = ConvertToBoolean(value); break;
                         case Keywords.Enlist: Enlist = ConvertToBoolean(value); break;
@@ -676,9 +671,6 @@ namespace System.Data.SqlClient
                 case Keywords.ApplicationIntent: return this.ApplicationIntent;
                 case Keywords.ApplicationName: return ApplicationName;
                 case Keywords.AttachDBFilename: return AttachDBFilename;
-#if netcoreapp
-                case Keywords.PoolBlockingPeriod: return PoolBlockingPeriod;
-#endif
                 case Keywords.ConnectTimeout: return ConnectTimeout;
                 case Keywords.CurrentLanguage: return CurrentLanguage;
                 case Keywords.DataSource: return DataSource;
@@ -753,11 +745,6 @@ namespace System.Data.SqlClient
                 case Keywords.AttachDBFilename:
                     _attachDBFilename = DbConnectionStringDefaults.AttachDBFilename;
                     break;
-#if netcoreapp
-                case Keywords.PoolBlockingPeriod:
-                    _poolBlockingPeriod = DbConnectionStringDefaults.PoolBlockingPeriod;
-                    break;
-#endif
                 case Keywords.ConnectTimeout:
                     _connectTimeout = DbConnectionStringDefaults.ConnectTimeout;
                     break;

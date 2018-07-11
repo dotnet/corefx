@@ -7,6 +7,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
@@ -56,10 +57,7 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateContractConstraintBody(string contractName, ParameterExpression parameter)
         {
-            if(parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
+            Assumes.NotNull(parameter);
 
             // export.ContractName=<contract>;
             return Expression.Equal(
@@ -69,15 +67,8 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateMetadataConstraintBody(IEnumerable<KeyValuePair<string, Type>> requiredMetadata, ParameterExpression parameter)
         {
-            if (requiredMetadata == null)
-            {
-                throw new ArgumentNullException(nameof(requiredMetadata));
-            }
-
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
+            Assumes.NotNull(requiredMetadata);
+            Assumes.NotNull(parameter);
 
             Expression body = null;
             foreach (KeyValuePair<string, Type> requiredMetadataItem in requiredMetadata)
@@ -94,15 +85,8 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateCreationPolicyContraint(CreationPolicy policy, ParameterExpression parameter)
         {
-            if(policy == CreationPolicy.Any)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
-
-            if(parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
+            Assumes.IsTrue(policy != CreationPolicy.Any);
+            Assumes.NotNull(parameter);
 
             //    !definition.Metadata.ContainsKey(CompositionConstants.PartCreationPolicyMetadataName) ||
             //        CreationPolicy.Any.Equals(definition.Metadata[CompositionConstants.PartCreationPolicyMetadataName]) ||
@@ -117,15 +101,8 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateTypeIdentityContraint(string requiredTypeIdentity, ParameterExpression parameter)
         {
-            if(requiredTypeIdentity == null)
-            {
-                throw new ArgumentNullException(requiredTypeIdentity);
-            }
-
-            if(parameter == null)
-            {
-                throw new ArgumentException(nameof(parameter));
-            }
+            Assumes.NotNull(requiredTypeIdentity);
+            Assumes.NotNull(parameter);
 
             //    definition.Metadata.ContainsKey(CompositionServices.ExportTypeIdentity) &&
             //        requiredTypeIdentity.Equals(definition.Metadata[CompositionConstants.ExportTypeIdentityMetadataName]);
@@ -137,15 +114,7 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateMetadataContainsKeyExpression(ParameterExpression parameter, string constantKey)
         {
-            if (parameter == null)
-            {
-                throw new ArgumentException(nameof(parameter));
-            }
-
-            if (constantKey == null)
-            {
-                throw new ArgumentException(nameof(constantKey));
-            }
+            Assumes.NotNull(parameter, constantKey);
 
             // definition.Metadata.ContainsKey(constantKey)
             return  Expression.Call(
@@ -156,20 +125,8 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateMetadataOfTypeExpression(ParameterExpression parameter, string constantKey, Type constantType)
         {
-            if(parameter == null)
-            {
-                throw new ArgumentException(nameof(parameter));
-            }
-
-            if (constantKey == null)
-            {
-                throw new ArgumentException(nameof(constantKey));
-            }
-
-            if (constantType == null)
-            {
-                throw new ArgumentException(nameof(constantType));
-            }
+            Assumes.NotNull(parameter, constantKey);
+            Assumes.NotNull(parameter, constantType);
 
             // constantType.IsInstanceOfType(definition.Metadata[constantKey])
             return Expression.Call(
@@ -184,15 +141,7 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateMetadataValueEqualsExpression(ParameterExpression parameter, object constantValue, string metadataName)
         {
-            if (parameter == null)
-            {
-                throw new ArgumentException(nameof(parameter));
-            }
-
-            if (constantValue == null)
-            {
-                throw new ArgumentException(nameof(constantValue));
-            }
+            Assumes.NotNull(parameter, constantValue);
 
             // constantValue.Equals(definition.Metadata[CompositionServices.PartCreationPolicyMetadataName])
             return  Expression.Call(

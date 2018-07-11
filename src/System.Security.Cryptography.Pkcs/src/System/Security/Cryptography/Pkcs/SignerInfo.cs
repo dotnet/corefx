@@ -559,17 +559,12 @@ namespace System.Security.Cryptography.Pkcs
 
                     if (embeddedContent != null)
                     {
-                        // Unwrap the OCTET STRING manually, because of PKCS#7 compatibility.
-                        // https://tools.ietf.org/html/rfc5652#section-5.2.1
-                        ReadOnlyMemory<byte> hashableContent = SignedCms.GetContent(
-                            embeddedContent.Value,
-                            documentData.EncapContentInfo.ContentType);
-
-                        hasher.AppendData(hashableContent.Span);
+                        hasher.AppendData(embeddedContent.Value.Span);
                     }
+
                 }
 
-                hasher.AppendData(_document.GetHashableContentSpan());
+                hasher.AppendData(_document.GetContentSpan());
             }
             else
             {

@@ -11,17 +11,15 @@
 
 #include <math.h>
 
-#include "../common/platform.h"
 #include <brotli/types.h>
+#include <brotli/port.h>
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
 #endif
 
 static BROTLI_INLINE uint32_t Log2FloorNonZero(size_t n) {
-  /* TODO: generalize and move to platform.h */
-#if BROTLI_GNUC_HAS_BUILTIN(__builtin_clz, 3, 4, 0) || \
-    BROTLI_INTEL_VERSION_CHECK(16, 0, 0)
+#if BROTLI_MODERN_COMPILER || __has_builtin(__builtin_clz)
   return 31u ^ (uint32_t)__builtin_clz((uint32_t)n);
 #else
   uint32_t result = 0;

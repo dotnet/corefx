@@ -16,13 +16,13 @@ namespace System
             HResult = HResults.COR_E_INSUFFICIENTEXECUTIONSTACK;
         }
 
-        public InsufficientExecutionStackException(string message)
+        public InsufficientExecutionStackException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_INSUFFICIENTEXECUTIONSTACK;
         }
 
-        public InsufficientExecutionStackException(string message, Exception innerException)
+        public InsufficientExecutionStackException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_INSUFFICIENTEXECUTIONSTACK;

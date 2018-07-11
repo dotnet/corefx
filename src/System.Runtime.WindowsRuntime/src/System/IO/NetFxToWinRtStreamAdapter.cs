@@ -222,7 +222,7 @@ namespace System.IO
 
         #region IInputStream public interface
 
-        public IAsyncOperationWithProgress<IBuffer, uint> ReadAsync(IBuffer buffer, uint count, InputStreamOptions options)
+        public IAsyncOperationWithProgress<IBuffer, UInt32> ReadAsync(IBuffer buffer, UInt32 count, InputStreamOptions options)
         {
             if (buffer == null)
             {
@@ -230,7 +230,7 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            if (count < 0 || int.MaxValue < count)
+            if (count < 0 || Int32.MaxValue < count)
             {
                 ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(nameof(count));
                 ex.SetErrorCode(__HResults.E_INVALIDARG);
@@ -258,7 +258,7 @@ namespace System.IO
 
             Stream str = EnsureNotDisposed();
 
-            IAsyncOperationWithProgress<IBuffer, uint> readAsyncOperation;
+            IAsyncOperationWithProgress<IBuffer, UInt32> readAsyncOperation;
             switch (_readOptimization)
             {
                 case StreamReadOperationOptimization.MemoryStream:
@@ -288,7 +288,7 @@ namespace System.IO
 
         #region IOutputStream public interface
 
-        public IAsyncOperationWithProgress<uint, uint> WriteAsync(IBuffer buffer)
+        public IAsyncOperationWithProgress<UInt32, UInt32> WriteAsync(IBuffer buffer)
         {
             if (buffer == null)
             {
@@ -312,7 +312,7 @@ namespace System.IO
         }
 
 
-        public IAsyncOperation<bool> FlushAsync()
+        public IAsyncOperation<Boolean> FlushAsync()
         {
             Contract.Ensures(Contract.Result<IAsyncOperation<Boolean>>() != null);
             Contract.EndContractBlock();
@@ -329,9 +329,9 @@ namespace System.IO
 
         #region IRandomAccessStream public interface: Not cloning related
 
-        public void Seek(ulong position)
+        public void Seek(UInt64 position)
         {
-            if (position > long.MaxValue)
+            if (position > Int64.MaxValue)
             {
                 ArgumentException ex = new ArgumentException(SR.IO_CannotSeekBeyondInt64MaxValue);
                 ex.SetErrorCode(__HResults.E_INVALIDARG);
@@ -342,7 +342,7 @@ namespace System.IO
             //Contract.EndContractBlock();
 
             Stream str = EnsureNotDisposed();
-            long pos = unchecked((long)position);
+            Int64 pos = unchecked((Int64)position);
 
             Debug.Assert(str != null);
             Debug.Assert(str.CanSeek, "The underlying str is expected to support Seek, but it does not.");
@@ -372,31 +372,31 @@ namespace System.IO
         }
 
 
-        public ulong Position
+        public UInt64 Position
         {
             get
             {
                 Contract.Ensures(Contract.Result<UInt64>() >= 0);
 
                 Stream str = EnsureNotDisposed();
-                return (ulong)str.Position;
+                return (UInt64)str.Position;
             }
         }
 
 
-        public ulong Size
+        public UInt64 Size
         {
             get
             {
                 Contract.Ensures(Contract.Result<UInt64>() >= 0);
 
                 Stream str = EnsureNotDisposed();
-                return (ulong)str.Length;
+                return (UInt64)str.Length;
             }
 
             set
             {
-                if (value > long.MaxValue)
+                if (value > Int64.MaxValue)
                 {
                     ArgumentException ex = new ArgumentException(SR.IO_CannotSetSizeBeyondInt64MaxValue);
                     ex.SetErrorCode(__HResults.E_INVALIDARG);
@@ -415,7 +415,7 @@ namespace System.IO
                     throw ex;
                 }
 
-                long val = unchecked((long)value);
+                Int64 val = unchecked((Int64)value);
 
                 Debug.Assert(str != null);
                 Debug.Assert(str.CanSeek, "The underlying str is expected to support Seek, but it does not.");
@@ -437,7 +437,7 @@ namespace System.IO
         // Cloning can be added in future, however, it would be quite complex
         // to support it correctly for generic streams.
 
-        private static void ThrowCloningNotSupported(string methodName)
+        private static void ThrowCloningNotSupported(String methodName)
         {
             NotSupportedException nse = new NotSupportedException(SR.Format(SR.NotSupported_CloningNotSupported, methodName));
             nse.SetErrorCode(__HResults.E_NOTIMPL);
@@ -452,14 +452,14 @@ namespace System.IO
         }
 
 
-        public IInputStream GetInputStreamAt(ulong position)
+        public IInputStream GetInputStreamAt(UInt64 position)
         {
             ThrowCloningNotSupported("GetInputStreamAt");
             return null;
         }
 
 
-        public IOutputStream GetOutputStreamAt(ulong position)
+        public IOutputStream GetOutputStreamAt(UInt64 position)
         {
             ThrowCloningNotSupported("GetOutputStreamAt");
             return null;

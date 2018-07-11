@@ -106,10 +106,10 @@ namespace System.DirectoryServices.ActiveDirectory
         internal DirectoryEntry GetCachedDirectoryEntry(string distinguishedName)
         {
             // check if it's not RootDSE
-            object dn = distinguishedName;
+            Object dn = distinguishedName;
 
-            if ((!string.Equals(distinguishedName, "rootdse", StringComparison.OrdinalIgnoreCase))
-            && (!string.Equals(distinguishedName, "schema", StringComparison.OrdinalIgnoreCase)))
+            if ((String.Compare(distinguishedName, "rootdse", StringComparison.OrdinalIgnoreCase) != 0)
+            && (String.Compare(distinguishedName, "schema", StringComparison.OrdinalIgnoreCase) != 0))
             {
                 dn = new DistinguishedName(distinguishedName);
             }
@@ -128,7 +128,7 @@ namespace System.DirectoryServices.ActiveDirectory
         internal void RemoveIfExists(string distinguishedName)
         {
             // check if it's not RootDSE
-            object dn = distinguishedName;
+            Object dn = distinguishedName;
 
             //
             // NOTE: Currently only comparing against "rootdse", but in the future if we are going to 
@@ -136,7 +136,7 @@ namespace System.DirectoryServices.ActiveDirectory
             //           special casing here.
             //
 
-            if (!string.Equals(distinguishedName, "rootdse", StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(distinguishedName, "rootdse", StringComparison.OrdinalIgnoreCase) != 0)
             {
                 dn = new DistinguishedName(distinguishedName);
             }

@@ -13,9 +13,9 @@ namespace System
     [CLSCompliant(false)]
     [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public readonly struct UInt16 : IComparable, IConvertible, IFormattable, IComparable<ushort>, IEquatable<ushort>, ISpanFormattable
+    public struct UInt16 : IComparable, IConvertible, IFormattable, IComparable<UInt16>, IEquatable<UInt16>, ISpanFormattable
     {
-        private readonly ushort m_value; // Do not rename (binary serialization)
+        private ushort m_value; // Do not rename (binary serialization)
 
         public const ushort MaxValue = (ushort)0xFFFF;
         public const ushort MinValue = 0;
@@ -27,35 +27,35 @@ namespace System
         // null is considered to be less than any instance.
         // If object is not of type UInt16, this method throws an ArgumentException.
         // 
-        public int CompareTo(object value)
+        public int CompareTo(Object value)
         {
             if (value == null)
             {
                 return 1;
             }
-            if (value is ushort)
+            if (value is UInt16)
             {
-                return ((int)m_value - (int)(((ushort)value).m_value));
+                return ((int)m_value - (int)(((UInt16)value).m_value));
             }
             throw new ArgumentException(SR.Arg_MustBeUInt16);
         }
 
-        public int CompareTo(ushort value)
+        public int CompareTo(UInt16 value)
         {
             return ((int)m_value - (int)value);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Object obj)
         {
-            if (!(obj is ushort))
+            if (!(obj is UInt16))
             {
                 return false;
             }
-            return m_value == ((ushort)obj).m_value;
+            return m_value == ((UInt16)obj).m_value;
         }
 
         [NonVersionable]
-        public bool Equals(ushort obj)
+        public bool Equals(UInt16 obj)
         {
             return m_value == obj;
         }
@@ -67,23 +67,23 @@ namespace System
         }
 
         // Converts the current value to a String in base-10 with no extra padding.
-        public override string ToString()
+        public override String ToString()
         {
             return Number.FormatUInt32(m_value, null, null);
         }
 
-        public string ToString(IFormatProvider provider)
+        public String ToString(IFormatProvider provider)
         {
             return Number.FormatUInt32(m_value, null, provider);
         }
 
 
-        public string ToString(string format)
+        public String ToString(String format)
         {
             return Number.FormatUInt32(m_value, format, null);
         }
 
-        public string ToString(string format, IFormatProvider provider)
+        public String ToString(String format, IFormatProvider provider)
         {
             return Number.FormatUInt32(m_value, format, provider);
         }
@@ -94,14 +94,14 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static ushort Parse(string s)
+        public static ushort Parse(String s)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
         }
 
         [CLSCompliant(false)]
-        public static ushort Parse(string s, NumberStyles style)
+        public static ushort Parse(String s, NumberStyles style)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -110,14 +110,14 @@ namespace System
 
 
         [CLSCompliant(false)]
-        public static ushort Parse(string s, IFormatProvider provider)
+        public static ushort Parse(String s, IFormatProvider provider)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
         }
 
         [CLSCompliant(false)]
-        public static ushort Parse(string s, NumberStyles style, IFormatProvider provider)
+        public static ushort Parse(String s, NumberStyles style, IFormatProvider provider)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -148,7 +148,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static bool TryParse(string s, out ushort result)
+        public static bool TryParse(String s, out UInt16 result)
         {
             if (s == null)
             {
@@ -166,7 +166,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out ushort result)
+        public static bool TryParse(String s, NumberStyles style, IFormatProvider provider, out UInt16 result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
 
@@ -186,10 +186,10 @@ namespace System
             return TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
         }
 
-        private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out ushort result)
+        private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out UInt16 result)
         {
             result = 0;
-            uint i;
+            UInt32 i;
             if (!Number.TryParseUInt32(s, style, info, out i))
             {
                 return false;
@@ -198,7 +198,7 @@ namespace System
             {
                 return false;
             }
-            result = (ushort)i;
+            result = (UInt16)i;
             return true;
         }
 
@@ -271,7 +271,7 @@ namespace System
             return Convert.ToDouble(m_value);
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        Decimal IConvertible.ToDecimal(IFormatProvider provider)
         {
             return Convert.ToDecimal(m_value);
         }
@@ -281,7 +281,7 @@ namespace System
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "UInt16", "DateTime"));
         }
 
-        object IConvertible.ToType(Type type, IFormatProvider provider)
+        Object IConvertible.ToType(Type type, IFormatProvider provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Composition.Hosting.Core;
 using System.Collections.Generic;
 using System.Composition.Hosting.Util;
+using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Providers.ExportFactory
 {
@@ -27,14 +28,14 @@ namespace System.Composition.Hosting.Providers.ExportFactory
         private static ExportDescriptorPromise[] GetExportFactoryDescriptors<TProduct>(CompositionContract exportFactoryContract, DependencyAccessor definitionAccessor)
         {
             var productContract = exportFactoryContract.ChangeType(typeof(TProduct));
-            var boundaries = Array.Empty<string>();
+            var boundaries = EmptyArray<string>.Value;
 
             IEnumerable<string> specifiedBoundaries;
             CompositionContract unwrapped;
             if (exportFactoryContract.TryUnwrapMetadataConstraint(Constants.SharingBoundaryImportMetadataConstraintName, out specifiedBoundaries, out unwrapped))
             {
                 productContract = unwrapped.ChangeType(typeof(TProduct));
-                boundaries = (specifiedBoundaries ?? Array.Empty<string>()).ToArray();
+                boundaries = (specifiedBoundaries ?? EmptyArray<string>.Value).ToArray();
             }
 
             return definitionAccessor.ResolveDependencies("product", productContract, false)

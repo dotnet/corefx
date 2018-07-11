@@ -130,7 +130,7 @@ namespace System.Threading.Tests
         [Fact]
         public static void TooManyParticipants()
         {
-            Barrier b = new Barrier(short.MaxValue);
+            Barrier b = new Barrier(Int16.MaxValue);
             Assert.Throws<InvalidOperationException>(() => b.AddParticipant());
         }
 

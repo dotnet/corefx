@@ -19,7 +19,7 @@ namespace System.Xml
         }
 
         // Gets the name of the node.
-        public override string Name
+        public override String Name
         {
             get
             {
@@ -28,7 +28,7 @@ namespace System.Xml
         }
 
         // Gets the name of the current node without the namespace prefix.
-        public override string LocalName
+        public override String LocalName
         {
             get
             {
@@ -76,7 +76,7 @@ namespace System.Xml
             return OwnerDocument.CreateTextNode(Data);
         }
 
-        public override string Value
+        public override String Value
         {
             get
             {
@@ -111,7 +111,7 @@ namespace System.Xml
                 throw new InvalidOperationException(SR.Xdom_TextNode_SplitText);
 
             int count = length - offset;
-            string splitData = Substring(offset, count);
+            String splitData = Substring(offset, count);
             DeleteData(offset, count);
             XmlText newTextNode = OwnerDocument.CreateTextNode(splitData);
             parentNode.InsertAfter(newTextNode, this);

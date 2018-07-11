@@ -156,7 +156,7 @@ namespace System.DirectoryServices.AccountManagement
         // returns null if no more results
         private IEnumerator GetNextChunk()
         {
-            string rangedAttribute = string.Format(
+            string rangedAttribute = String.Format(
                                         CultureInfo.InvariantCulture,
                                         "{0};range={1}-*",
                                         _propertyName,

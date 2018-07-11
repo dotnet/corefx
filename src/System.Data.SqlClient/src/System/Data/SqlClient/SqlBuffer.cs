@@ -43,61 +43,61 @@ namespace System.Data.SqlClient
         internal struct DateTimeInfo
         {
             // This is used to store DateTime
-            internal int daypart;
-            internal int timepart;
+            internal Int32 daypart;
+            internal Int32 timepart;
         }
 
         internal struct NumericInfo
         {
             // This is used to store Decimal data
-            internal int data1;
-            internal int data2;
-            internal int data3;
-            internal int data4;
-            internal byte precision;
-            internal byte scale;
-            internal bool positive;
+            internal Int32 data1;
+            internal Int32 data2;
+            internal Int32 data3;
+            internal Int32 data4;
+            internal Byte precision;
+            internal Byte scale;
+            internal Boolean positive;
         }
 
         internal struct TimeInfo
         {
-            internal long ticks;
+            internal Int64 ticks;
             internal byte scale;
         }
 
         internal struct DateTime2Info
         {
-            internal int date;
+            internal Int32 date;
             internal TimeInfo timeInfo;
         }
 
         internal struct DateTimeOffsetInfo
         {
             internal DateTime2Info dateTime2Info;
-            internal short offset;
+            internal Int16 offset;
         }
 
         [StructLayout(LayoutKind.Explicit)]
         internal struct Storage
         {
             [FieldOffset(0)]
-            internal bool _boolean;
+            internal Boolean _boolean;
             [FieldOffset(0)]
-            internal byte _byte;
+            internal Byte _byte;
             [FieldOffset(0)]
             internal DateTimeInfo _dateTimeInfo;
             [FieldOffset(0)]
-            internal double _double;
+            internal Double _double;
             [FieldOffset(0)]
             internal NumericInfo _numericInfo;
             [FieldOffset(0)]
-            internal short _int16;
+            internal Int16 _int16;
             [FieldOffset(0)]
-            internal int _int32;
+            internal Int32 _int32;
             [FieldOffset(0)]
-            internal long _int64;     // also used to store Money, UtcDateTime, Date , and Time
+            internal Int64 _int64;     // also used to store Money, UtcDateTime, Date , and Time
             [FieldOffset(0)]
-            internal float _single;
+            internal Single _single;
             [FieldOffset(0)]
             internal TimeInfo _timeInfo;
             [FieldOffset(0)]
@@ -147,7 +147,7 @@ namespace System.Data.SqlClient
             get { return _type; }
         }
 
-        internal bool Boolean
+        internal Boolean Boolean
         {
             get
             {
@@ -157,7 +157,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._boolean;
                 }
-                return (bool)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Boolean)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -168,7 +168,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal byte Byte
+        internal Byte Byte
         {
             get
             {
@@ -178,7 +178,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._byte;
                 }
-                return (byte)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Byte)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -189,7 +189,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal byte[] ByteArray
+        internal Byte[] ByteArray
         {
             get
             {
@@ -220,7 +220,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal decimal Decimal
+        internal Decimal Decimal
         {
             get
             {
@@ -232,7 +232,7 @@ namespace System.Data.SqlClient
                     {
                         throw new OverflowException(SQLResource.ConversionOverflowMessage);
                     }
-                    return new decimal(_value._numericInfo.data1, _value._numericInfo.data2, _value._numericInfo.data3, !_value._numericInfo.positive, _value._numericInfo.scale);
+                    return new Decimal(_value._numericInfo.data1, _value._numericInfo.data2, _value._numericInfo.data3, !_value._numericInfo.positive, _value._numericInfo.scale);
                 }
                 if (StorageType.Money == _type)
                 {
@@ -243,13 +243,13 @@ namespace System.Data.SqlClient
                         isNegative = true;
                         l = -l;
                     }
-                    return new decimal((int)(l & 0xffffffff), (int)(l >> 32), 0, isNegative, 4);
+                    return new Decimal((int)(l & 0xffffffff), (int)(l >> 32), 0, isNegative, 4);
                 }
-                return (decimal)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Decimal)this.Value; // anything else we haven't thought of goes through boxing.
             }
         }
 
-        internal double Double
+        internal Double Double
         {
             get
             {
@@ -259,7 +259,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._double;
                 }
-                return (double)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Double)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -279,7 +279,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal short Int16
+        internal Int16 Int16
         {
             get
             {
@@ -289,7 +289,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._int16;
                 }
-                return (short)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Int16)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -300,7 +300,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal int Int32
+        internal Int32 Int32
         {
             get
             {
@@ -310,7 +310,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._int32;
                 }
-                return (int)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Int32)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -321,7 +321,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal long Int64
+        internal Int64 Int64
         {
             get
             {
@@ -331,7 +331,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._int64;
                 }
-                return (long)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Int64)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -342,7 +342,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal float Single
+        internal Single Single
         {
             get
             {
@@ -352,7 +352,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._single;
                 }
-                return (float)this.Value; // anything else we haven't thought of goes through boxing.
+                return (Single)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -363,7 +363,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal string String
+        internal String String
         {
             get
             {
@@ -371,13 +371,13 @@ namespace System.Data.SqlClient
 
                 if (StorageType.String == _type)
                 {
-                    return (string)_object;
+                    return (String)_object;
                 }
                 else if (StorageType.SqlCachedBuffer == _type)
                 {
                     return ((SqlCachedBuffer)(_object)).ToString();
                 }
-                return (string)this.Value; // anything else we haven't thought of goes through boxing.
+                return (String)this.Value; // anything else we haven't thought of goes through boxing.
             }
         }
 
@@ -441,7 +441,7 @@ namespace System.Data.SqlClient
                     byte scale = _value._dateTimeOffsetInfo.dateTime2Info.timeInfo.scale;
                     return dto.ToString(s_katmaiDateTimeOffsetFormatByScale[scale], DateTimeFormatInfo.InvariantInfo);
                 }
-                return (string)this.Value; // anything else we haven't thought of goes through boxing.
+                return (String)this.Value; // anything else we haven't thought of goes through boxing.
             }
         }
 
@@ -762,7 +762,7 @@ namespace System.Data.SqlClient
                     {
                         return SqlString.Null;
                     }
-                    return new SqlString((string)_object);
+                    return new SqlString((String)_object);
                 }
                 else if (StorageType.SqlCachedBuffer == _type)
                 {
@@ -921,18 +921,18 @@ namespace System.Data.SqlClient
                 switch (_type)
                 {
                     case SqlBuffer.StorageType.Empty: return null;
-                    case SqlBuffer.StorageType.Boolean: return typeof(bool);
-                    case SqlBuffer.StorageType.Byte: return typeof(byte);
+                    case SqlBuffer.StorageType.Boolean: return typeof(Boolean);
+                    case SqlBuffer.StorageType.Byte: return typeof(Byte);
                     case SqlBuffer.StorageType.DateTime: return typeof(DateTime);
-                    case SqlBuffer.StorageType.Decimal: return typeof(decimal);
-                    case SqlBuffer.StorageType.Double: return typeof(double);
-                    case SqlBuffer.StorageType.Int16: return typeof(short);
-                    case SqlBuffer.StorageType.Int32: return typeof(int);
-                    case SqlBuffer.StorageType.Int64: return typeof(long);
-                    case SqlBuffer.StorageType.Money: return typeof(decimal);
-                    case SqlBuffer.StorageType.Single: return typeof(float);
-                    case SqlBuffer.StorageType.String: return typeof(string);
-                    case SqlBuffer.StorageType.SqlBinary: return typeof(byte[]);
+                    case SqlBuffer.StorageType.Decimal: return typeof(Decimal);
+                    case SqlBuffer.StorageType.Double: return typeof(Double);
+                    case SqlBuffer.StorageType.Int16: return typeof(Int16);
+                    case SqlBuffer.StorageType.Int32: return typeof(Int32);
+                    case SqlBuffer.StorageType.Int64: return typeof(Int64);
+                    case SqlBuffer.StorageType.Money: return typeof(Decimal);
+                    case SqlBuffer.StorageType.Single: return typeof(Single);
+                    case SqlBuffer.StorageType.String: return typeof(String);
+                    case SqlBuffer.StorageType.SqlBinary: return typeof(Byte[]);
                     case SqlBuffer.StorageType.SqlCachedBuffer: return typeof(string);
                     case SqlBuffer.StorageType.SqlGuid: return typeof(Guid);
                     case SqlBuffer.StorageType.SqlXml: return typeof(string);
@@ -1092,7 +1092,7 @@ namespace System.Data.SqlClient
             _type = StorageType.DateTimeOffset;
             FillInTimeInfo(ref _value._dateTimeOffsetInfo.dateTime2Info.timeInfo, bytes, length - 5, scale); // remaining 5 bytes are for date and offset
             _value._dateTimeOffsetInfo.dateTime2Info.date = GetDateFromByteArray(bytes, length - 5); // 3 bytes for date
-            _value._dateTimeOffsetInfo.offset = (short)(bytes[length - 2] + (bytes[length - 1] << 8)); // 2 bytes for offset (Int16)
+            _value._dateTimeOffsetInfo.offset = (Int16)(bytes[length - 2] + (bytes[length - 1] << 8)); // 2 bytes for offset (Int16)
             _isNull = false;
         }
 

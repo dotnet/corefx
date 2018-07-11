@@ -10,13 +10,13 @@
 #ifndef BROTLI_ENC_METABLOCK_H_
 #define BROTLI_ENC_METABLOCK_H_
 
-#include "../common/context.h"
-#include "../common/platform.h"
 #include <brotli/types.h>
 #include "./block_splitter.h"
 #include "./command.h"
+#include "./context.h"
 #include "./histogram.h"
 #include "./memory.h"
+#include "./port.h"
 #include "./quality.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
@@ -67,18 +67,15 @@ static BROTLI_INLINE void DestroyMetaBlockSplit(
   BROTLI_FREE(m, mb->distance_histograms);
 }
 
-/* Uses the slow shortest-path block splitter and does context clustering.
-   The distance parameters are dynamically selected based on the commands
-   which get recomputed under the new distance parameters. The new distance
-   parameters are stored into *params. */
+/* Uses the slow shortest-path block splitter and does context clustering. */
 BROTLI_INTERNAL void BrotliBuildMetaBlock(MemoryManager* m,
                                           const uint8_t* ringbuffer,
                                           const size_t pos,
                                           const size_t mask,
-                                          BrotliEncoderParams* params,
+                                          const BrotliEncoderParams* params,
                                           uint8_t prev_byte,
                                           uint8_t prev_byte2,
-                                          Command* cmds,
+                                          const Command* cmds,
                                           size_t num_commands,
                                           ContextType literal_context_mode,
                                           MetaBlockSplit* mb);
@@ -88,15 +85,13 @@ BROTLI_INTERNAL void BrotliBuildMetaBlock(MemoryManager* m,
    is the same for all block types. */
 BROTLI_INTERNAL void BrotliBuildMetaBlockGreedy(
     MemoryManager* m, const uint8_t* ringbuffer, size_t pos, size_t mask,
-    uint8_t prev_byte, uint8_t prev_byte2, ContextLut literal_context_lut,
+    uint8_t prev_byte, uint8_t prev_byte2, ContextType literal_context_mode,
     size_t num_contexts, const uint32_t* static_context_map,
     const Command* commands, size_t n_commands, MetaBlockSplit* mb);
 
-BROTLI_INTERNAL void BrotliOptimizeHistograms(uint32_t num_distance_codes,
+BROTLI_INTERNAL void BrotliOptimizeHistograms(size_t num_direct_distance_codes,
+                                              size_t distance_postfix_bits,
                                               MetaBlockSplit* mb);
-
-BROTLI_INTERNAL void BrotliInitDistanceParams(BrotliEncoderParams* params,
-    uint32_t npostfix, uint32_t ndirect);
 
 #if defined(__cplusplus) || defined(c_plusplus)
 }  /* extern "C" */

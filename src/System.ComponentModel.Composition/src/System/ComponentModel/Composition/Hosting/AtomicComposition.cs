@@ -232,10 +232,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void CopyComplete()
         {
-            if (_outerAtomicComposition == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(_outerAtomicComposition);
 
             _outerAtomicComposition.ContainsInnerAtomicComposition = false;
 

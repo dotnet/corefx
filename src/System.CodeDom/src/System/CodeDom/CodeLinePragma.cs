@@ -18,8 +18,8 @@ namespace System.CodeDom
 
         public string FileName
         {
-            get => _fileName ?? string.Empty;
-            set => _fileName = value;
+            get { return _fileName ?? string.Empty; }
+            set { _fileName = value; }
         }
 
         public int LineNumber { get; set; }

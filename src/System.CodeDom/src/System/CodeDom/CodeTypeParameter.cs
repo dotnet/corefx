@@ -19,8 +19,8 @@ namespace System.CodeDom
 
         public string Name
         {
-            get => _name ?? string.Empty;
-            set => _name = value;
+            get { return _name ?? string.Empty; }
+            set { _name = value; }
         }
 
         public CodeTypeReferenceCollection Constraints => _constraints ?? (_constraints = new CodeTypeReferenceCollection());
@@ -30,3 +30,5 @@ namespace System.CodeDom
         public bool HasConstructorConstraint { get; set; }
     }
 }
+
+

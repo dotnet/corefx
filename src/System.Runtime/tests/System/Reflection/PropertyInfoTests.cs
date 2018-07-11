@@ -69,10 +69,10 @@ namespace System.Reflection.Tests
             }
 
             // MyPropAA - ReadWrite property
-            public string MyPropAA
+            public String MyPropAA
             {
                 get { return m_PropAA.ToString(); }
-                set { m_PropAA = short.Parse(value); }
+                set { m_PropAA = Int16.Parse(value); }
             }
 
             public double MyPropBB

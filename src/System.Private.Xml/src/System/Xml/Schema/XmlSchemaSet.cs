@@ -57,14 +57,14 @@ namespace System.Xml.Schema
         private XmlSchemaObjectTable _typeExtensions;
 
         //Thread safety
-        private object _internalSyncObject;
-        internal object InternalSyncObject
+        private Object _internalSyncObject;
+        internal Object InternalSyncObject
         {
             get
             {
                 if (_internalSyncObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange<Object>(ref _internalSyncObject, o, null);
                 }
                 return _internalSyncObject;
@@ -303,7 +303,7 @@ namespace System.Xml.Schema
         ///       If the given schema references other namespaces, the schemas for those other
         ///       namespaces are NOT automatically loaded.</para>
         /// </devdoc>
-        public XmlSchema Add(string targetNamespace, string schemaUri)
+        public XmlSchema Add(String targetNamespace, String schemaUri)
         {
             if (schemaUri == null || schemaUri.Length == 0)
             {
@@ -352,7 +352,7 @@ namespace System.Xml.Schema
         ///       If the given schema references other namespaces, the schemas for those
         ///       other namespaces are NOT automatically loaded.</para>
         /// </devdoc>
-        public XmlSchema Add(string targetNamespace, XmlReader schemaDocument)
+        public XmlSchema Add(String targetNamespace, XmlReader schemaDocument)
         {
             if (schemaDocument == null)
             {
@@ -571,7 +571,7 @@ namespace System.Xml.Schema
         }
 
         /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Contains1"]/*' />
-        public bool Contains(string targetNamespace)
+        public bool Contains(String targetNamespace)
         {
             if (targetNamespace == null)
             {
@@ -809,7 +809,7 @@ namespace System.Xml.Schema
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public ICollection Schemas(string targetNamespace)
+        public ICollection Schemas(String targetNamespace)
         {
             ArrayList tnsSchemas = new ArrayList();
             XmlSchema currentSchema;
@@ -927,7 +927,7 @@ namespace System.Xml.Schema
 #endif
 
         //For use by the validator when loading schemaLocations in the instance
-        internal void Add(string targetNamespace, XmlReader reader, Hashtable validatedNamespaces)
+        internal void Add(String targetNamespace, XmlReader reader, Hashtable validatedNamespaces)
         {
             if (reader == null)
             {

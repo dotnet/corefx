@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Globalization;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -17,10 +18,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionMemberExportDefinition(LazyMemberInfo member, ExportDefinition exportDefinition, ICompositionElement origin)
         {
-            if (exportDefinition == null)
-            {
-                throw new ArgumentNullException(nameof(exportDefinition));
-            }
+            Assumes.NotNull(exportDefinition);
 
             _member = member;
             _exportDefinition = exportDefinition;

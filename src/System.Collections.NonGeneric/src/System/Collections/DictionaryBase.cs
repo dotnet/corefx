@@ -60,7 +60,7 @@ namespace System.Collections
             get { return InnerHashtable.Keys; }
         }
 
-        object ICollection.SyncRoot
+        Object ICollection.SyncRoot
         {
             get { return InnerHashtable.SyncRoot; }
         }
@@ -87,7 +87,7 @@ namespace System.Collections
             {
                 OnValidate(key, value);
                 bool keyExists = true;
-                object temp = InnerHashtable[key];
+                Object temp = InnerHashtable[key];
                 if (temp == null)
                 {
                     keyExists = InnerHashtable.Contains(key);
@@ -146,7 +146,7 @@ namespace System.Collections
         {
             if (InnerHashtable.Contains(key))
             {
-                object temp = InnerHashtable[key];
+                Object temp = InnerHashtable[key];
                 OnValidate(key, temp);
                 OnRemove(key, temp);
 

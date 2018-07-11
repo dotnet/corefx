@@ -82,7 +82,7 @@ namespace System.Diagnostics
         public override void Fail(string message, string detailMessage)
         {
             // UIAssert is not enabled.
-            WriteAssert(string.Empty, message, detailMessage);
+            WriteAssert(String.Empty, message, detailMessage);
         }
 
          private void InitializeSettings() 

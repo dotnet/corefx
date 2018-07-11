@@ -15,7 +15,7 @@ internal static partial class Interop
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ReleaseGssBuffer")]
         internal static extern void ReleaseGssBuffer(
             IntPtr bufferPtr,
-            ulong length);
+            UInt64 length);
 
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_DisplayMinorStatus")]
         internal static extern Status DisplayMinorStatus(

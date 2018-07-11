@@ -44,7 +44,7 @@ namespace System.Xml.Tests
         {
             try
             {
-                new XslCompiledTransform().Load(typeof(object));
+                new XslCompiledTransform().Load(typeof(Object));
             }
             catch (ArgumentException)
             {

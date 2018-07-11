@@ -259,11 +259,11 @@ namespace System.Xml.Schema
                           }
                       }
                   }*/
-                foreach (string prefix in _namespaceManager)
+                foreach (String prefix in _namespaceManager)
                 {
                     if (!prefix.Equals("xml") && !prefix.Equals("xmlns"))
                     {
-                        string ns = _namespaceManager.LookupNamespace(_nametable.Get(prefix));
+                        String ns = _namespaceManager.LookupNamespace(_nametable.Get(prefix));
                         if (ns.Length != 0)
                         { //Do not add xmlns=""
                             _rootSchema.Namespaces.Add(prefix, ns);
@@ -360,7 +360,7 @@ namespace System.Xml.Schema
                         xs.TargetNamespace = childURI;
                     //schemas.Add(childURI, xs);
                     _schemaSet.Add(xs);
-                    if (prefix.Length != 0 && !string.Equals(prefix, "xml", StringComparison.OrdinalIgnoreCase))
+                    if (prefix.Length != 0 && String.Compare(prefix, "xml", StringComparison.OrdinalIgnoreCase) != 0)
                         _namespaceManager.AddNamespace(prefix, childURI);
                 }
                 else
@@ -516,7 +516,7 @@ namespace System.Xml.Schema
             XmlSchemaElement returnedElement = xse; //this value will change to elementReference if childURI!= parentURI
             XmlSchema xs = null;
             bool bCreatingNewType = true;
-            if (childURI == string.Empty)
+            if (childURI == String.Empty)
             {
                 childURI = null;
             }
@@ -2422,11 +2422,11 @@ namespace System.Xml.Schema
             newElement.SourceUri = copyElement.SourceUri;
             newElement.SubstitutionGroup = copyElement.SubstitutionGroup;
             newElement.UnhandledAttributes = copyElement.UnhandledAttributes;
-            if (copyElement.MinOccurs != decimal.One && this.Occurrence == InferenceOption.Relaxed)
+            if (copyElement.MinOccurs != Decimal.One && this.Occurrence == InferenceOption.Relaxed)
             {
                 newElement.MinOccurs = copyElement.MinOccurs;
             }
-            if (copyElement.MaxOccurs != decimal.One)
+            if (copyElement.MaxOccurs != Decimal.One)
             {
                 newElement.MaxOccurs = copyElement.MaxOccurs;
             }

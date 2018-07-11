@@ -52,7 +52,7 @@ namespace System.Xml.Tests
         private int v16()
         {
             var param = (int)CurVariation.Params[0];
-            string input = string.Empty;
+            string input = String.Empty;
             switch (param)
             {
                 case 1:
@@ -132,7 +132,7 @@ namespace System.Xml.Tests
                     break;
             }
 
-            string expected = CurVariation.Params[1].ToString();
+            String expected = CurVariation.Params[1].ToString();
             try
             {
                 XmlConvert.VerifyNCName(input);
@@ -194,22 +194,22 @@ namespace System.Xml.Tests
                 switch (param)
                 {
                     case 1:
-                        XmlConvert.VerifyNMTOKEN(string.Empty);
+                        XmlConvert.VerifyNMTOKEN(String.Empty);
                         break;
                     case 2:
-                        XmlConvert.VerifyName(string.Empty);
+                        XmlConvert.VerifyName(String.Empty);
                         break;
                     case 3:
-                        XmlConvert.VerifyNCName(string.Empty);
+                        XmlConvert.VerifyNCName(String.Empty);
                         break;
                     case 5:
-                        XmlConvert.VerifyXmlChars(string.Empty);
+                        XmlConvert.VerifyXmlChars(String.Empty);
                         break;
                     case 6:
-                        XmlConvert.VerifyPublicId(string.Empty);
+                        XmlConvert.VerifyPublicId(String.Empty);
                         break;
                     case 7:
-                        XmlConvert.VerifyWhitespace(string.Empty);
+                        XmlConvert.VerifyWhitespace(String.Empty);
                         break;
                 }
             }

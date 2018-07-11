@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
@@ -16,9 +16,7 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='uapaot'  Or '$(TargetGroup)' == 'uap10.0.16299aot'">
     <PackageReference Include="Microsoft.TargetingPack.Private.NETNative">
-      <Version Condition="'$(TargetGroup)'=='uapaot'">1.1.0-$(ProjectNTfsExpectedPrerelease)</Version>
-      <!-- Following is version used in release/uwp6.0 -->
-      <Version Condition="'$(TargetGroup)'=='uap10.0.16299aot'">1.1.0-rel-25728-00</Version>
+      <Version>1.1.0-$(ProjectNTfsExpectedPrerelease)</Version>
     </PackageReference>
     <FileToExclude Include="System.Private.CoreLib.Augments" />
     <FileToExclude Include="System.Private.CoreLib.DynamicDelegate" />
@@ -31,8 +29,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
-      <!-- Following is version used in release/uwp6.0 -->
-      <Version Condition="'$(TargetGroup)'=='uap10.0.16299'">2.1.0-b-uwp6-25707-02</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.TestHost">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
@@ -48,21 +44,8 @@
     </PackageReference>
   </ItemGroup>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
-  <ItemGroup>
-    <!-- For IL rewrite tools of crossgen dll from CoreClr we need the respective IL and respective pdbs -->
-    <!-- For crossgen dlls save respective pdbs too -->
-    <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="$(Configuration)">
-      <ItemName>CoreCLRILFiles</ItemName>
-      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)il</RuntimePath>
-    </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="$(Configuration)">
-      <ItemName>CoreCLRCrossGenFiles</ItemName>
-      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)ni</RuntimePath>
-    </BinPlaceConfiguration>
-  </ItemGroup>
-  
   <!-- Setup the testing shared framework host -->
   <Target Name="SetupTestingHost" AfterTargets="ResolveNuGetPackages" Condition="'$(BinPlaceTestSharedFramework)' == 'true'">
 
@@ -123,13 +106,6 @@
         <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.pdb" />
         <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.dbg" />
         <ReferenceCopyLocalPaths Include="@(_CoreCLRSymbolFiles)"/>
-
-        <CoreCLRILFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/il/*.*">
-          <CrossGenAssemblyPath>%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/</CrossGenAssemblyPath>
-        </CoreCLRILFiles>
-        <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename)%(Extension)')" />
-        <CoreCLRCrossGenFiles Condition="'$(OSGroup)'=='Windows_NT'" Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).ni.pdb')" />
-        <CoreCLRILFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).pdb')" />
       </ItemGroup>
   </Target>
 
@@ -143,10 +119,6 @@
     </PropertyGroup>
     <ItemGroup>
       <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
-      <CoreCLRILFiles Include="$(CoreCLROverridePath)/IL/*.*" />
-      <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '$(CoreCLROverridePath)/%(Filename)%(Extension)')" />
-      <CoreCLRILFiles Include="@(CoreCLRILFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).pdb')" />
-      <CoreCLRCrossGenFiles Condition="'$(OSGroup)'=='Windows_NT'" Include="@(CoreCLRCrossGenFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).ni.pdb')" />
       <CoreCLRPDBFiles Condition="'$(CoreCLRPDBOverridePath)' != ''" Include="$(CoreCLRPDBOverridePath)/*.pdb" />
 
       <_ReferenceCopyLocalPathsToRemove Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'" />

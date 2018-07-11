@@ -25,13 +25,13 @@ namespace System
             HResult = HResults.COR_E_INDEXOUTOFRANGE;
         }
 
-        public IndexOutOfRangeException(string message)
+        public IndexOutOfRangeException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_INDEXOUTOFRANGE;
         }
 
-        public IndexOutOfRangeException(string message, Exception innerException)
+        public IndexOutOfRangeException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_INDEXOUTOFRANGE;

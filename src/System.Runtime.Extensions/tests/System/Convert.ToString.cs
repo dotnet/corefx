@@ -12,23 +12,23 @@ namespace System.Tests
         [Fact]
         public static void FromBoxedObject()
         {
-            object[] testValues =
+            Object[] testValues =
             {
             // Boolean
             true,
             false,
 
             // Byte
-            byte.MinValue,
-            (byte)100,
-            byte.MaxValue,
+            Byte.MinValue,
+            (Byte)100,
+            Byte.MaxValue,
 
             // Decimal
-            decimal.Zero,
-            decimal.One,
-            decimal.MinusOne,
-            decimal.MaxValue,
-            decimal.MinValue,
+            Decimal.Zero,
+            Decimal.One,
+            Decimal.MinusOne,
+            Decimal.MaxValue,
+            Decimal.MinValue,
             1.234567890123456789012345678m,
             1234.56m,
             -1234.56m,
@@ -39,29 +39,29 @@ namespace System.Tests
             -1.7753E-83,
             +12.345e+234,
             +12e+1,
-            double.NegativeInfinity,
-            double.PositiveInfinity,
-            double.NaN,
+            Double.NegativeInfinity,
+            Double.PositiveInfinity,
+            Double.NaN,
 
             // Int16
-            short.MinValue,
+            Int16.MinValue,
             0,
-            short.MaxValue,
+            Int16.MaxValue,
 
             // Int32
-            int.MinValue,
+            Int32.MinValue,
             0,
-            int.MaxValue,
+            Int32.MaxValue,
 
             // Int64
-            long.MinValue,
-            (long)0,
-            long.MaxValue,
+            Int64.MinValue,
+            (Int64)0,
+            Int64.MaxValue,
 
             // SByte
-            sbyte.MinValue,
-            (sbyte)0,
-            sbyte.MaxValue,
+            SByte.MinValue,
+            (SByte)0,
+            SByte.MaxValue,
 
             // Single
             -12.2364f,
@@ -69,9 +69,9 @@ namespace System.Tests
             -1.7753e-83f,
             (float)+12.345e+234,
             +12e+1f,
-            float.NegativeInfinity,
-            float.PositiveInfinity,
-            float.NaN,
+            Single.NegativeInfinity,
+            Single.PositiveInfinity,
+            Single.NaN,
 
             // TimeSpan
             TimeSpan.Zero,
@@ -81,22 +81,22 @@ namespace System.Tests
             TimeSpan.Parse("-2:34:56"),
 
             // UInt16
-            ushort.MinValue,
-            (ushort)100,
-            ushort.MaxValue,
+            UInt16.MinValue,
+            (UInt16)100,
+            UInt16.MaxValue,
 
             // UInt32
-            uint.MinValue,
-            (uint)100,
-            uint.MaxValue,
+            UInt32.MinValue,
+            (UInt32)100,
+            UInt32.MaxValue,
 
             // UInt64
-            ulong.MinValue,
-            (ulong)100,
-            ulong.MaxValue
+            UInt64.MinValue,
+            (UInt64)100,
+            UInt64.MaxValue
         };
 
-            string[] expectedValues =
+            String[] expectedValues =
             {
             // Boolean
             "True",
@@ -208,8 +208,8 @@ namespace System.Tests
         [Fact]
         public static void FromChar()
         {
-            char[] testValues = { 'a', 'A', '@', '\n' };
-            string[] expectedValues = { "a", "A", "@", "\n" };
+            Char[] testValues = { 'a', 'A', '@', '\n' };
+            String[] expectedValues = { "a", "A", "@", "\n" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -218,7 +218,7 @@ namespace System.Tests
             }
         }
 
-        private static void Verify<TInput>(Func<TInput, string> convert, Func<TInput, IFormatProvider, string> convertWithFormatProvider, TInput[] testValues, string[] expectedValues, IFormatProvider formatProvider = null)
+        private static void Verify<TInput>(Func<TInput, String> convert, Func<TInput, IFormatProvider, String> convertWithFormatProvider, TInput[] testValues, String[] expectedValues, IFormatProvider formatProvider = null)
         {
             Assert.Equal(expectedValues.Length, testValues.Length);
 
@@ -237,8 +237,8 @@ namespace System.Tests
         [Fact]
         public static void FromByteBase2()
         {
-            byte[] testValues = { byte.MinValue, 100, byte.MaxValue };
-            string[] expectedValues = { "0", "1100100", "11111111" };
+            Byte[] testValues = { Byte.MinValue, 100, Byte.MaxValue };
+            String[] expectedValues = { "0", "1100100", "11111111" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -249,8 +249,8 @@ namespace System.Tests
         [Fact]
         public static void FromByteBase8()
         {
-            byte[] testValues = { byte.MinValue, 100, byte.MaxValue };
-            string[] expectedValues = { "0", "144", "377" };
+            Byte[] testValues = { Byte.MinValue, 100, Byte.MaxValue };
+            String[] expectedValues = { "0", "144", "377" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -261,8 +261,8 @@ namespace System.Tests
         [Fact]
         public static void FromByteBase10()
         {
-            byte[] testValues = { byte.MinValue, 100, byte.MaxValue };
-            string[] expectedValues = { "0", "100", "255" };
+            Byte[] testValues = { Byte.MinValue, 100, Byte.MaxValue };
+            String[] expectedValues = { "0", "100", "255" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -273,8 +273,8 @@ namespace System.Tests
         [Fact]
         public static void FromByteBase16()
         {
-            byte[] testValues = { byte.MinValue, 100, byte.MaxValue };
-            string[] expectedValues = { "0", "64", "ff" };
+            Byte[] testValues = { Byte.MinValue, 100, Byte.MaxValue };
+            String[] expectedValues = { "0", "64", "ff" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -285,14 +285,14 @@ namespace System.Tests
         [Fact]
         public static void FromByteInvalidBase()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(byte.MaxValue, 13));
+            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(Byte.MaxValue, 13));
         }
 
         [Fact]
         public static void FromInt16Base2()
         {
-            short[] testValues = { short.MinValue, 0, short.MaxValue };
-            string[] expectedValues = { "1000000000000000", "0", "111111111111111" };
+            Int16[] testValues = { Int16.MinValue, 0, Int16.MaxValue };
+            String[] expectedValues = { "1000000000000000", "0", "111111111111111" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -303,8 +303,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt16Base8()
         {
-            short[] testValues = { short.MinValue, 0, short.MaxValue };
-            string[] expectedValues = { "100000", "0", "77777" };
+            Int16[] testValues = { Int16.MinValue, 0, Int16.MaxValue };
+            String[] expectedValues = { "100000", "0", "77777" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -315,8 +315,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt16Base10()
         {
-            short[] testValues = { short.MinValue, 0, short.MaxValue };
-            string[] expectedValues = { "-32768", "0", "32767" };
+            Int16[] testValues = { Int16.MinValue, 0, Int16.MaxValue };
+            String[] expectedValues = { "-32768", "0", "32767" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -327,8 +327,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt16Base16()
         {
-            short[] testValues = { short.MinValue, 0, short.MaxValue };
-            string[] expectedValues = { "8000", "0", "7fff" };
+            Int16[] testValues = { Int16.MinValue, 0, Int16.MaxValue };
+            String[] expectedValues = { "8000", "0", "7fff" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -339,14 +339,14 @@ namespace System.Tests
         [Fact]
         public static void FromInt16InvalidBase()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(short.MaxValue, 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(Int16.MaxValue, 0));
         }
 
         [Fact]
         public static void FromInt32Base2()
         {
-            int[] testValues = { int.MinValue, 0, int.MaxValue };
-            string[] expectedValues = { "10000000000000000000000000000000", "0", "1111111111111111111111111111111" };
+            Int32[] testValues = { Int32.MinValue, 0, Int32.MaxValue };
+            String[] expectedValues = { "10000000000000000000000000000000", "0", "1111111111111111111111111111111" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -357,8 +357,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt32Base8()
         {
-            int[] testValues = { int.MinValue, 0, int.MaxValue };
-            string[] expectedValues = { "20000000000", "0", "17777777777" };
+            Int32[] testValues = { Int32.MinValue, 0, Int32.MaxValue };
+            String[] expectedValues = { "20000000000", "0", "17777777777" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -369,8 +369,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt32Base10()
         {
-            int[] testValues = { int.MinValue, 0, int.MaxValue };
-            string[] expectedValues = { "-2147483648", "0", "2147483647" };
+            Int32[] testValues = { Int32.MinValue, 0, Int32.MaxValue };
+            String[] expectedValues = { "-2147483648", "0", "2147483647" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -381,8 +381,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt32Base16()
         {
-            int[] testValues = { int.MinValue, 0, int.MaxValue };
-            string[] expectedValues = { "80000000", "0", "7fffffff" };
+            Int32[] testValues = { Int32.MinValue, 0, Int32.MaxValue };
+            String[] expectedValues = { "80000000", "0", "7fffffff" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -393,14 +393,14 @@ namespace System.Tests
         [Fact]
         public static void FromInt32InvalidBase()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(int.MaxValue, 9));
+            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(Int32.MaxValue, 9));
         }
 
         [Fact]
         public static void FromInt64Base2()
         {
-            long[] testValues = { long.MinValue, 0, long.MaxValue };
-            string[] expectedValues = { "1000000000000000000000000000000000000000000000000000000000000000", "0", "111111111111111111111111111111111111111111111111111111111111111" };
+            Int64[] testValues = { Int64.MinValue, 0, Int64.MaxValue };
+            String[] expectedValues = { "1000000000000000000000000000000000000000000000000000000000000000", "0", "111111111111111111111111111111111111111111111111111111111111111" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -411,8 +411,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt64Base8()
         {
-            long[] testValues = { long.MinValue, 0, long.MaxValue };
-            string[] expectedValues = { "1000000000000000000000", "0", "777777777777777777777" };
+            Int64[] testValues = { Int64.MinValue, 0, Int64.MaxValue };
+            String[] expectedValues = { "1000000000000000000000", "0", "777777777777777777777" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -423,8 +423,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt64Base10()
         {
-            long[] testValues = { long.MinValue, 0, long.MaxValue };
-            string[] expectedValues = { "-9223372036854775808", "0", "9223372036854775807" };
+            Int64[] testValues = { Int64.MinValue, 0, Int64.MaxValue };
+            String[] expectedValues = { "-9223372036854775808", "0", "9223372036854775807" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -435,8 +435,8 @@ namespace System.Tests
         [Fact]
         public static void FromInt64Base16()
         {
-            long[] testValues = { long.MinValue, 0, long.MaxValue };
-            string[] expectedValues = { "8000000000000000", "0", "7fffffffffffffff" };
+            Int64[] testValues = { Int64.MinValue, 0, Int64.MaxValue };
+            String[] expectedValues = { "8000000000000000", "0", "7fffffffffffffff" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -447,13 +447,13 @@ namespace System.Tests
         [Fact]
         public static void FromInt64InvalidBase()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(long.MaxValue, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => Convert.ToString(Int64.MaxValue, 1));
         }
 
         [Fact]
         public static void FromBoolean()
         {
-            bool[] testValues = new[] { true, false };
+            Boolean[] testValues = new[] { true, false };
 
             for (int i = 0; i < testValues.Length; i++)
             {
@@ -468,11 +468,11 @@ namespace System.Tests
         [Fact]
         public static void FromSByte()
         {
-            sbyte[] testValues = new sbyte[] { sbyte.MinValue, -1, 0, 1, sbyte.MaxValue };
+            SByte[] testValues = new SByte[] { SByte.MinValue, -1, 0, 1, SByte.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -482,11 +482,11 @@ namespace System.Tests
         [Fact]
         public static void FromByte()
         {
-            byte[] testValues = new byte[] { byte.MinValue, 0, 1, 100, byte.MaxValue };
+            Byte[] testValues = new Byte[] { Byte.MinValue, 0, 1, 100, Byte.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -496,11 +496,11 @@ namespace System.Tests
         [Fact]
         public static void FromInt16Array()
         {
-            short[] testValues = new short[] { short.MinValue, -1000, -1, 0, 1, 1000, short.MaxValue };
+            Int16[] testValues = new Int16[] { Int16.MinValue, -1000, -1, 0, 1, 1000, Int16.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -510,11 +510,11 @@ namespace System.Tests
         [Fact]
         public static void FromUInt16Array()
         {
-            ushort[] testValues = new ushort[] { ushort.MinValue, 0, 1, 1000, ushort.MaxValue };
+            UInt16[] testValues = new UInt16[] { UInt16.MinValue, 0, 1, 1000, UInt16.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -524,11 +524,11 @@ namespace System.Tests
         [Fact]
         public static void FromInt32Array()
         {
-            int[] testValues = new int[] { int.MinValue, -1000, -1, 0, 1, 1000, int.MaxValue };
+            Int32[] testValues = new Int32[] { Int32.MinValue, -1000, -1, 0, 1, 1000, Int32.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -538,11 +538,11 @@ namespace System.Tests
         [Fact]
         public static void FromUInt32Array()
         {
-            uint[] testValues = new uint[] { uint.MinValue, 0, 1, 1000, uint.MaxValue };
+            UInt32[] testValues = new UInt32[] { UInt32.MinValue, 0, 1, 1000, UInt32.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -552,11 +552,11 @@ namespace System.Tests
         [Fact]
         public static void FromInt64Array()
         {
-            long[] testValues = new long[] { long.MinValue, -1000, -1, 0, 1, 1000, long.MaxValue };
+            Int64[] testValues = new Int64[] { Int64.MinValue, -1000, -1, 0, 1, 1000, Int64.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -566,11 +566,11 @@ namespace System.Tests
         [Fact]
         public static void FromUInt64Array()
         {
-            ulong[] testValues = new ulong[] { ulong.MinValue, 0, 1, 1000, ulong.MaxValue };
+            UInt64[] testValues = new UInt64[] { UInt64.MinValue, 0, 1, 1000, UInt64.MaxValue };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -580,11 +580,11 @@ namespace System.Tests
         [Fact]
         public static void FromSingleArray()
         {
-            float[] testValues = new float[] { float.MinValue, 0.0f, 1.0f, 1000.0f, float.MaxValue, float.NegativeInfinity, float.PositiveInfinity, float.Epsilon, float.NaN };
+            Single[] testValues = new Single[] { Single.MinValue, 0.0f, 1.0f, 1000.0f, Single.MaxValue, Single.NegativeInfinity, Single.PositiveInfinity, Single.Epsilon, Single.NaN };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -594,12 +594,12 @@ namespace System.Tests
         [Fact]
         public static void FromDoubleArray()
         {
-            double[] testValues = new double[] { double.MinValue, 0.0, 1.0, 1000.0, double.MaxValue, double.NegativeInfinity, double.PositiveInfinity, double.Epsilon, double.NaN };
+            Double[] testValues = new Double[] { Double.MinValue, 0.0, 1.0, 1000.0, Double.MaxValue, Double.NegativeInfinity, Double.PositiveInfinity, Double.Epsilon, Double.NaN };
 
             // Vanilla Test Cases
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -609,11 +609,11 @@ namespace System.Tests
         [Fact]
         public static void FromDecimalArray()
         {
-            decimal[] testValues = new decimal[] { decimal.MinValue, decimal.Parse("-1.234567890123456789012345678", NumberFormatInfo.InvariantInfo), (decimal)0.0, (decimal)1.0, (decimal)1000.0, decimal.MaxValue, decimal.One, decimal.Zero, decimal.MinusOne };
+            Decimal[] testValues = new Decimal[] { Decimal.MinValue, Decimal.Parse("-1.234567890123456789012345678", NumberFormatInfo.InvariantInfo), (Decimal)0.0, (Decimal)1.0, (Decimal)1000.0, Decimal.MaxValue, Decimal.One, Decimal.Zero, Decimal.MinusOne };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(NumberFormatInfo.CurrentInfo), result);
@@ -631,10 +631,10 @@ namespace System.Tests
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], formatProvider);
-                string expected = testValues[i].ToString(formatProvider);
+                String expected = testValues[i].ToString(formatProvider);
                 Assert.Equal(expected, result);
             }
         }
@@ -642,11 +642,11 @@ namespace System.Tests
         [Fact]
         public static void FromString()
         {
-            string[] testValues = new string[] { "Hello", " ", "", "\0" };
+            String[] testValues = new String[] { "Hello", " ", "", "\0" };
 
             for (int i = 0; i < testValues.Length; i++)
             {
-                string result = Convert.ToString(testValues[i]);
+                String result = Convert.ToString(testValues[i]);
                 Assert.Equal(testValues[i].ToString(), result);
                 result = Convert.ToString(testValues[i], NumberFormatInfo.CurrentInfo);
                 Assert.Equal(testValues[i].ToString(), result);
@@ -657,7 +657,7 @@ namespace System.Tests
         public static void FromIFormattable()
         {
             FooFormattable foo = new FooFormattable(3);
-            string result = Convert.ToString(foo);
+            String result = Convert.ToString(foo);
             Assert.Equal("FooFormattable: 3", result);
             result = Convert.ToString(foo, NumberFormatInfo.CurrentInfo);
             Assert.Equal("System.Globalization.NumberFormatInfo: 3", result);
@@ -671,7 +671,7 @@ namespace System.Tests
         public static void FromNonIConvertible()
         {
             Foo foo = new Foo(3);
-            string result = Convert.ToString(foo);
+            String result = Convert.ToString(foo);
             Assert.Equal("System.Tests.ConvertToStringTests+Foo", result);
             result = Convert.ToString(foo, NumberFormatInfo.CurrentInfo);
             Assert.Equal("System.Tests.ConvertToStringTests+Foo", result);
@@ -686,15 +686,15 @@ namespace System.Tests
             private int _value;
             public FooFormattable(int value) { _value = value; }
 
-            public string ToString(string format, IFormatProvider formatProvider)
+            public String ToString(String format, IFormatProvider formatProvider)
             {
                 if (formatProvider != null)
                 {
-                    return string.Format("{0}: {1}", formatProvider, _value);
+                    return String.Format("{0}: {1}", formatProvider, _value);
                 }
                 else
                 {
-                    return string.Format("FooFormattable: {0}", (_value));
+                    return String.Format("FooFormattable: {0}", (_value));
                 }
             }
         }
@@ -704,15 +704,15 @@ namespace System.Tests
             private int _value;
             public Foo(int value) { _value = value; }
 
-            public string ToString(IFormatProvider provider)
+            public String ToString(IFormatProvider provider)
             {
                 if (provider != null)
                 {
-                    return string.Format("{0}: {1}", provider, _value);
+                    return String.Format("{0}: {1}", provider, _value);
                 }
                 else
                 {
-                    return string.Format("Foo: {0}", _value);
+                    return String.Format("Foo: {0}", _value);
                 }
             }
         }

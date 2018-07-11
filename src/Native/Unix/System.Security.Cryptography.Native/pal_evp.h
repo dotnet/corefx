@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include "pal_compiler.h"
 #include <stdint.h>
 #include "opensslshim.h"
 
@@ -15,7 +14,7 @@ Implemented by:
 
 Returns new EVP_MD_CTX on success, nullptr on failure.
 */
-DLLEXPORT EVP_MD_CTX* CryptoNative_EvpMdCtxCreate(const EVP_MD* type);
+extern "C" EVP_MD_CTX* CryptoNative_EvpMdCtxCreate(const EVP_MD* type);
 
 /*
 Cleans up and deletes an EVP_MD_CTX instance created by EvpMdCtxCreate.
@@ -27,12 +26,12 @@ No-op if ctx is null.
 The given EVP_MD_CTX pointer is invalid after this call.
 Always succeeds.
 */
-DLLEXPORT void CryptoNative_EvpMdCtxDestroy(EVP_MD_CTX* ctx);
+extern "C" void CryptoNative_EvpMdCtxDestroy(EVP_MD_CTX* ctx);
 
 /*
 Resets an EVP_MD_CTX instance for a new computation.
 */
-DLLEXPORT int32_t CryptoNative_EvpDigestReset(EVP_MD_CTX* ctx, const EVP_MD* type);
+extern "C" int32_t CryptoNative_EvpDigestReset(EVP_MD_CTX* ctx, const EVP_MD* type);
 
 /*
 Function:
@@ -40,7 +39,7 @@ EvpDigestUpdate
 
 Direct shim to EVP_DigestUpdate.
 */
-DLLEXPORT int32_t CryptoNative_EvpDigestUpdate(EVP_MD_CTX* ctx, const void* d, size_t cnt);
+extern "C" int32_t CryptoNative_EvpDigestUpdate(EVP_MD_CTX* ctx, const void* d, size_t cnt);
 
 /*
 Function:
@@ -48,7 +47,7 @@ EvpDigestFinalEx
 
 Direct shim to EVP_DigestFinal_ex.
 */
-DLLEXPORT int32_t CryptoNative_EvpDigestFinalEx(EVP_MD_CTX* ctx, uint8_t* md, uint32_t* s);
+extern "C" int32_t CryptoNative_EvpDigestFinalEx(EVP_MD_CTX* ctx, uint8_t* md, uint32_t* s);
 
 /*
 Function:
@@ -56,7 +55,7 @@ EvpMdSize
 
 Direct shim to EVP_MD_size.
 */
-DLLEXPORT int32_t CryptoNative_EvpMdSize(const EVP_MD* md);
+extern "C" int32_t CryptoNative_EvpMdSize(const EVP_MD* md);
 
 /*
 Function:
@@ -64,7 +63,7 @@ EvpMd5
 
 Direct shim to EVP_md5.
 */
-DLLEXPORT const EVP_MD* CryptoNative_EvpMd5(void);
+extern "C" const EVP_MD* CryptoNative_EvpMd5();
 
 /*
 Function:
@@ -72,7 +71,7 @@ EvpSha1
 
 Direct shim to EVP_sha1.
 */
-DLLEXPORT const EVP_MD* CryptoNative_EvpSha1(void);
+extern "C" const EVP_MD* CryptoNative_EvpSha1();
 
 /*
 Function:
@@ -80,7 +79,7 @@ EvpSha256
 
 Direct shim to EVP_sha256.
 */
-DLLEXPORT const EVP_MD* CryptoNative_EvpSha256(void);
+extern "C" const EVP_MD* CryptoNative_EvpSha256();
 
 /*
 Function:
@@ -88,7 +87,7 @@ EvpSha384
 
 Direct shim to EVP_sha384.
 */
-DLLEXPORT const EVP_MD* CryptoNative_EvpSha384(void);
+extern "C" const EVP_MD* CryptoNative_EvpSha384();
 
 /*
 Function:
@@ -96,7 +95,7 @@ EvpSha512
 
 Direct shim to EVP_sha512.
 */
-DLLEXPORT const EVP_MD* CryptoNative_EvpSha512(void);
+extern "C" const EVP_MD* CryptoNative_EvpSha512();
 
 /*
 Function:
@@ -104,4 +103,4 @@ GetMaxMdSize
 
 Returns the maxium bytes for a message digest.
 */
-DLLEXPORT int32_t CryptoNative_GetMaxMdSize(void);
+extern "C" int32_t CryptoNative_GetMaxMdSize();

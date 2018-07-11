@@ -5,6 +5,11 @@
 #pragma once
 
 #include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_types.h"
 
 DLLEXPORT void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* buffer, int32_t bufferLength);
+
+END_EXTERN_C

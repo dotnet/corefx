@@ -25,7 +25,7 @@ namespace System.Net.Http
         private Version _version;
         private HttpContent _content;
         private bool _disposed;
-        private IDictionary<string, object> _properties;
+        private IDictionary<String, Object> _properties;
 
         public Version Version
         {
@@ -112,13 +112,13 @@ namespace System.Net.Http
 
         internal bool HasHeaders => _headers != null;
 
-        public IDictionary<string, object> Properties
+        public IDictionary<String, Object> Properties
         {
             get
             {
                 if (_properties == null)
                 {
-                    _properties = new Dictionary<string, object>();
+                    _properties = new Dictionary<String, Object>();
                 }
                 return _properties;
             }
@@ -174,7 +174,7 @@ namespace System.Net.Http
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
 
             sb.Append(", Headers:\r\n");
-            HeaderUtilities.DumpHeaders(sb, _headers, _content?.Headers);
+            sb.Append(HeaderUtilities.DumpHeaders(_headers, _content == null ? null : _content.Headers));
 
             return sb.ToString();
         }

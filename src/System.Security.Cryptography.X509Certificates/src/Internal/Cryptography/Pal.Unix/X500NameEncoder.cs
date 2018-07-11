@@ -40,7 +40,7 @@ namespace Internal.Cryptography.Pal
             byte[] encodedName,
             bool printOid,
             X500DistinguishedNameFlags flags,
-            bool addTrailingDelimiter = false)
+            bool addTrailingDelimieter=false)
         {
             bool reverse = (flags & X500DistinguishedNameFlags.Reversed) == X500DistinguishedNameFlags.Reversed;
             bool quoteIfNeeded = (flags & X500DistinguishedNameFlags.DoNotUseQuotes) != X500DistinguishedNameFlags.DoNotUseQuotes;
@@ -51,8 +51,7 @@ namespace Internal.Cryptography.Pal
             {
                 dnSeparator = "; ";
             }
-            // Explicit UseCommas has preference over explicit UseNewLines.
-            else if ((flags & (X500DistinguishedNameFlags.UseNewLines | X500DistinguishedNameFlags.UseCommas)) == X500DistinguishedNameFlags.UseNewLines)
+            else if ((flags & X500DistinguishedNameFlags.UseNewLines) == X500DistinguishedNameFlags.UseNewLines)
             {
                 dnSeparator = Environment.NewLine;
             }
@@ -74,7 +73,7 @@ namespace Internal.Cryptography.Pal
                     quoteIfNeeded,
                     dnSeparator,
                     multiValueSparator,
-                    addTrailingDelimiter);
+                    addTrailingDelimieter);
             }
             catch (CryptographicException)
             {

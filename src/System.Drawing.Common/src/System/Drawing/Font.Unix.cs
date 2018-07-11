@@ -65,12 +65,34 @@ namespace System.Drawing
             }
 
             setProperties(family, emSize, style, unit, charSet, isVertical);
-            int status = SafeNativeMethods.Gdip.GdipCreateFont(new HandleRef(this, family.NativeFamily), emSize, style, unit, out _nativeFont);
+            int status = SafeNativeMethods.Gdip.GdipCreateFont(family.NativeFamily, emSize, style, unit, out _nativeFont);
 
             if (status == SafeNativeMethods.Gdip.FontStyleNotFound)
                 throw new ArgumentException(string.Format("Style {0} isn't supported by font {1}.", style.ToString(), familyName));
 
             SafeNativeMethods.Gdip.CheckStatus(status);
+        }
+
+        ~Font()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (_nativeFont != IntPtr.Zero)
+            {
+                int status = SafeNativeMethods.Gdip.GdipDeleteFont(_nativeFont);
+                _nativeFont = IntPtr.Zero;
+                GC.SuppressFinalize(this);
+                // check the status code (throw) at the last step
+                SafeNativeMethods.Gdip.CheckStatus(status);
+            }
+        }
+
+        internal void SetSystemFontName(string newSystemFontName)
+        {
+            _systemFontName = newSystemFontName;
         }
 
         internal void unitConversion(GraphicsUnit fromUnit, GraphicsUnit toUnit, float nSrc, out float nTrg)
@@ -224,7 +246,7 @@ namespace System.Drawing
             // no null checks, MS throws a NullReferenceException if original is null
             setProperties(prototype.FontFamily, prototype.Size, newStyle, prototype.Unit, prototype.GdiCharSet, prototype.GdiVerticalFont);
 
-            int status = SafeNativeMethods.Gdip.GdipCreateFont(new HandleRef(_fontFamily, _fontFamily.NativeFamily), Size, Style, Unit, out _nativeFont);
+            int status = SafeNativeMethods.Gdip.GdipCreateFont(_fontFamily.NativeFamily, Size, Style, Unit, out _nativeFont);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -266,7 +288,7 @@ namespace System.Drawing
 
             int status;
             setProperties(family, emSize, style, unit, gdiCharSet, gdiVerticalFont);
-            status = SafeNativeMethods.Gdip.GdipCreateFont(new HandleRef(this, family.NativeFamily), emSize, style, unit, out _nativeFont);
+            status = SafeNativeMethods.Gdip.GdipCreateFont(family.NativeFamily, emSize, style, unit, out _nativeFont);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -310,6 +332,21 @@ namespace System.Drawing
 
         [Browsable(false)]
         public float SizeInPoints => _fontSizeInPoints;
+
+        public override bool Equals(object obj)
+        {
+            Font fnt = (obj as Font);
+            if (fnt == null)
+                return false;
+
+            if (fnt.FontFamily.Equals(FontFamily) && fnt.Size == Size &&
+                fnt.Style == Style && fnt.Unit == Unit &&
+                fnt.GdiCharSet == GdiCharSet &&
+                fnt.GdiVerticalFont == GdiVerticalFont)
+                return true;
+            else
+                return false;
+        }
 
         public static Font FromHdc(IntPtr hdc)
         {
@@ -373,7 +410,7 @@ namespace System.Drawing
                 {
                     Marshal.StructureToPtr(logFont, copy, false);
 
-                    status = SafeNativeMethods.Gdip.GdipGetLogFontW(new HandleRef(this, NativeFont), new HandleRef(graphics, graphics.NativeGraphics), logFont);
+                    status = SafeNativeMethods.Gdip.GdipGetLogFont(NativeFont, graphics.NativeObject, logFont);
                     if (status != SafeNativeMethods.Gdip.Ok)
                     {
                         // reset to original values
@@ -412,6 +449,25 @@ namespace System.Drawing
                 // now we can throw, if required
                 SafeNativeMethods.Gdip.CheckStatus(status);
             }
+        }
+
+        public float GetHeight(Graphics graphics)
+        {
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
+
+            float size;
+            int status = SafeNativeMethods.Gdip.GdipGetFontHeight(_nativeFont, graphics.NativeObject, out size);
+            SafeNativeMethods.Gdip.CheckStatus(status);
+            return size;
+        }
+
+        public float GetHeight(float dpi)
+        {
+            float size;
+            int status = SafeNativeMethods.Gdip.GdipGetFontHeightGivenDPI(_nativeFont, dpi, out size);
+            SafeNativeMethods.Gdip.CheckStatus(status);
+            return size;
         }
     }
 }

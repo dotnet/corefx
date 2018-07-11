@@ -30,8 +30,8 @@ namespace System
         // E.g. the offset for PST (Pacific Standard time) should be -8 * 60 * 60 * 1000 * 10000.
         // (1 millisecond = 10000 ticks)
         private long m_ticksOffset;
-        private string m_standardName;
-        private string m_daylightName;
+        private String m_standardName;
+        private String m_daylightName;
 
         internal CurrentSystemTimeZone()
         {
@@ -42,7 +42,7 @@ namespace System
             m_daylightName = local.DaylightName;
         }
 
-        public override string StandardName
+        public override String StandardName
         {
             get
             {
@@ -50,7 +50,7 @@ namespace System
             }
         }
 
-        public override string DaylightName
+        public override String DaylightName
         {
             get
             {
@@ -58,7 +58,7 @@ namespace System
             }
         }
 
-        internal long GetUtcOffsetFromUniversalTime(DateTime time, ref bool isAmbiguousLocalDst)
+        internal long GetUtcOffsetFromUniversalTime(DateTime time, ref Boolean isAmbiguousLocalDst)
         {
             // Get the daylight changes for the year of the specified time.
             TimeSpan offset = new TimeSpan(m_ticksOffset);
@@ -89,7 +89,7 @@ namespace System
                 ambiguousEnd = startTime - daylightTime.Delta;
             }
 
-            bool isDst = false;
+            Boolean isDst = false;
             if (startTime > endTime)
             {
                 // In southern hemisphere, the daylight saving time starts later in the year, and ends in the beginning of next year.
@@ -122,8 +122,8 @@ namespace System
             {
                 return time;
             }
-            bool isAmbiguousLocalDst = false;
-            long offset = GetUtcOffsetFromUniversalTime(time, ref isAmbiguousLocalDst);
+            Boolean isAmbiguousLocalDst = false;
+            Int64 offset = GetUtcOffsetFromUniversalTime(time, ref isAmbiguousLocalDst);
             long tick = time.Ticks + offset;
             if (tick > DateTime.MaxTicks)
             {
@@ -192,7 +192,7 @@ namespace System
 
         private DaylightTime GetCachedDaylightChanges(int year)
         {
-            object objYear = (object)year;
+            Object objYear = (Object)year;
 
             if (!m_CachedDaylightChanges.Contains(objYear))
             {

@@ -5,6 +5,9 @@
 #pragma once
 
 #include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_types.h"
 #include "pal_errno.h"
 #include <time.h>
@@ -15,7 +18,7 @@
 /**
  * File status returned by Stat or FStat.
  */
-typedef struct
+struct FileStatus
 {
     int32_t Flags;     // flags for testing if some members are present (see FileStatusFlags)
     int32_t Mode;      // file mode (see S_I* constants above for bit values)
@@ -32,7 +35,7 @@ typedef struct
     int64_t BirthTimeNsec; // nanosecond part
     int64_t Dev;       // ID of the device containing the file
     int64_t Ino;       // inode number of the file
-} FileStatus;
+};
 
 /* Provide consistent access to nanosecond fields, if they exist. */
 /* Seconds are always available through st_atime, st_mtime, st_ctime. */
@@ -153,7 +156,7 @@ enum
 /**
  * Constants from dirent.h for the inode type returned from readdir variants
  */
-typedef enum
+enum NodeType
 {
     PAL_DT_UNKNOWN = 0, // Unknown file type
     PAL_DT_FIFO = 1,    // Named Pipe
@@ -164,39 +167,39 @@ typedef enum
     PAL_DT_LNK = 10,    // Symlink
     PAL_DT_SOCK = 12,   // Socket
     PAL_DT_WHT = 14     // BSD Whiteout
-} NodeType;
+};
 
 /**
  * Constants from sys/file.h for lock types
  */
-typedef enum
+enum LockOperations
 {
     PAL_LOCK_SH = 1, /* shared lock */
     PAL_LOCK_EX = 2, /* exclusive lock */
     PAL_LOCK_NB = 4, /* don't block when locking*/
     PAL_LOCK_UN = 8, /* unlock */
-} LockOperations;
+};
 
 /**
  * Constants for changing the access permissions of a path
  */
-typedef enum
+enum AccessMode
 {
     PAL_F_OK = 0, /* Check for existence */
     PAL_X_OK = 1, /* Check for execute */
     PAL_W_OK = 2, /* Check for write */
     PAL_R_OK = 4, /* Check for read */
-} AccessMode;
+};
 
 /**
  * Constants passed to lseek telling the OS where to seek from
  */
-typedef enum
+enum SeekWhence
 {
     PAL_SEEK_SET = 0, /* seek from the beginning of the stream */
     PAL_SEEK_CUR = 1, /* seek from the current position */
     PAL_SEEK_END = 2, /* seek from the end of the stream, wrapping if necessary */
-} SeekWhence;
+};
 
 /**
  * Constants for protection argument to MMap.
@@ -236,25 +239,25 @@ enum
 /**
  * Advice argument to MAdvise.
  */
-typedef enum
+enum MemoryAdvice
 {
     PAL_MADV_DONTFORK = 1, // don't map pages in to forked process
-} MemmoryAdvice;
+};
 
 /**
  * Name argument to SysConf.
  */
-typedef enum
+enum SysConfName
 {
     PAL_SC_CLK_TCK = 1,  // Number of clock ticks per second
     PAL_SC_PAGESIZE = 2, // Size of a page in bytes
-} SysConfName;
+};
 
 /**
  * Constants passed to and from poll describing what to poll for and what
  * kind of data was received from poll.
  */
-typedef enum
+enum PollEvents
 {
     PAL_POLLIN = 0x0001,   /* non-urgent readable data available */
     PAL_POLLPRI = 0x0002,  /* urgent readable data available */
@@ -262,13 +265,13 @@ typedef enum
     PAL_POLLERR = 0x0008,  /* an error occurred */
     PAL_POLLHUP = 0x0010,  /* the file descriptor hung up */
     PAL_POLLNVAL = 0x0020, /* the requested events were invalid */
-} PollEvents;
+};
 
 /**
  * Constants passed to posix_advise to give hints to the kernel about the type of I/O
  * operations that will occur.
  */
-typedef enum
+enum FileAdvice
 {
     PAL_POSIX_FADV_NORMAL = 0,     /* no special advice, the default value */
     PAL_POSIX_FADV_RANDOM = 1,     /* random I/O access */
@@ -276,32 +279,32 @@ typedef enum
     PAL_POSIX_FADV_WILLNEED = 3,   /* will need specified pages */
     PAL_POSIX_FADV_DONTNEED = 4,   /* don't need the specified pages */
     PAL_POSIX_FADV_NOREUSE = 5,    /* data will only be acessed once */
-} FileAdvice;
+};
 
 /**
  * Our intermediate dirent struct that only gives back the data we need
  */
-typedef struct
+struct DirectoryEntry
 {
     const char* Name;   // Address of the name of the inode
     int32_t NameLength; // Length (in chars) of the inode name
     int32_t InodeType; // The inode type as described in the NodeType enum
-} DirectoryEntry;
+};
 
 /**
  * Our intermediate pollfd struct to normalize the data types
  */
-typedef struct
+struct PollEvent
 {
     int32_t FileDescriptor;  // The file descriptor to poll
     int16_t Events;          // The events to poll for
     int16_t TriggeredEvents; // The events that triggered the poll
-} PollEvent;
+};
 
 /**
 * Constants passed in the mask argument of INotifyAddWatch which identify inotify events.
 */
-typedef enum
+enum NotifyEvents
 {
     PAL_IN_ACCESS = 0x00000001,
     PAL_IN_MODIFY = 0x00000002,
@@ -316,28 +319,28 @@ typedef enum
     PAL_IN_DONT_FOLLOW = 0x02000000,
     PAL_IN_EXCL_UNLINK = 0x04000000,
     PAL_IN_ISDIR = 0x40000000,
-} NotifyEvents;
+};
 
 /**
  * Get file status from a descriptor. Implemented as shim to fstat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-DLLEXPORT int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output);
+DLLEXPORT int32_t SystemNative_FStat2(intptr_t fd, struct FileStatus* output);
 
 /**
  * Get file status from a full path. Implemented as shim to stat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-DLLEXPORT int32_t SystemNative_Stat2(const char* path, FileStatus* output);
+DLLEXPORT int32_t SystemNative_Stat2(const char* path, struct FileStatus* output);
 
 /**
  * Get file stats from a full path. Implemented as shim to lstat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-DLLEXPORT int32_t SystemNative_LStat2(const char* path, FileStatus* output);
+DLLEXPORT int32_t SystemNative_LStat2(const char* path, struct FileStatus* output);
 
 /**
  * Open or create a file or device. Implemented as shim to open(2).
@@ -391,7 +394,7 @@ DLLEXPORT int32_t SystemNative_GetReadDirRBufferSize(void);
  *
  * Returns 0 when data is retrieved; returns -1 when end-of-stream is reached; returns an error code on failure
  */
-DLLEXPORT int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, DirectoryEntry* outputEntry);
+DLLEXPORT int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, struct DirectoryEntry* outputEntry);
 
 /**
  * Returns a DIR struct containing info about the current path or NULL on failure; sets errno on fail.
@@ -589,7 +592,7 @@ DLLEXPORT int32_t SystemNative_FTruncate(intptr_t fd, int64_t length);
  * Returns an error or Error_SUCCESS. `triggered` is set to the number of ready descriptors if any. The number of
  * triggered descriptors may be zero in the event of a timeout.
  */
-DLLEXPORT int32_t SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered);
+DLLEXPORT int32_t SystemNative_Poll(struct PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered);
 
 /**
  * Notifies the OS kernel that the specified file will be accessed in a particular way soon; this allows the kernel to
@@ -704,3 +707,5 @@ DLLEXPORT int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid);
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
 DLLEXPORT int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType);
+
+END_EXTERN_C

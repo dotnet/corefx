@@ -9,14 +9,14 @@ namespace System.Xml
     {
         private string _publicId;
         private string _systemId;
-        private string _notationName;
-        private string _name;
-        private string _unparsedReplacementStr;
-        private string _baseURI;
+        private String _notationName;
+        private String _name;
+        private String _unparsedReplacementStr;
+        private String _baseURI;
         private XmlLinkedNode _lastChild;
         private bool _childrenFoliating;
 
-        internal XmlEntity(string name, string strdata, string publicId, string systemId, string notationName, XmlDocument doc) : base(doc)
+        internal XmlEntity(String name, String strdata, string publicId, string systemId, String notationName, XmlDocument doc) : base(doc)
         {
             _name = doc.NameTable.Add(name);
             _publicId = publicId;
@@ -109,33 +109,33 @@ namespace System.Xml
         }
 
         // Gets the value of the public identifier on the entity declaration.
-        public string PublicId
+        public String PublicId
         {
             get { return _publicId; }
         }
 
         // Gets the value of the system identifier on the entity declaration.
-        public string SystemId
+        public String SystemId
         {
             get { return _systemId; }
         }
 
         // Gets the name of the optional NDATA attribute on the
         // entity declaration.
-        public string NotationName
+        public String NotationName
         {
             get { return _notationName; }
         }
 
         //Without override these two functions, we can't guarantee that WriteTo()/WriteContent() functions will never be called
-        public override string OuterXml
+        public override String OuterXml
         {
-            get { return string.Empty; }
+            get { return String.Empty; }
         }
 
-        public override string InnerXml
+        public override String InnerXml
         {
-            get { return string.Empty; }
+            get { return String.Empty; }
             set { throw new InvalidOperationException(SR.Xdom_Set_InnerXml); }
         }
 
@@ -149,12 +149,12 @@ namespace System.Xml
         {
         }
 
-        public override string BaseURI
+        public override String BaseURI
         {
             get { return _baseURI; }
         }
 
-        internal void SetBaseURI(string inBaseURI)
+        internal void SetBaseURI(String inBaseURI)
         {
             _baseURI = inBaseURI;
         }

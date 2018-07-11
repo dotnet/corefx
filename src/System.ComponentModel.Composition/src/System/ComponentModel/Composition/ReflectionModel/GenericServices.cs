@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -13,10 +14,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
     {
         internal static IList<Type> GetPureGenericParameters(this Type type)
         {
-            if(type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            Assumes.NotNull(type);
 
             if (type.IsGenericType && type.ContainsGenericParameters)
             {
@@ -38,10 +36,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         internal static int GetPureGenericArity(this Type type)
         {
-            if(type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            Assumes.NotNull(type);
 
             int genericArity = 0;
             if (type.IsGenericType && type.ContainsGenericParameters)

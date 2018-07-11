@@ -221,7 +221,7 @@ namespace System.DirectoryServices.AccountManagement
                 GlobalDebug.WriteLineIf(GlobalDebug.Warn, "SDSUtils", "InsertPrincipal: Bad principal type:" + p.GetType().ToString());
 
                 throw new InvalidOperationException(
-                                string.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForSave, p.GetType().ToString()));
+                                String.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForSave, p.GetType().ToString()));
             }
 
             // Commit the properties
@@ -575,11 +575,11 @@ namespace System.DirectoryServices.AccountManagement
         static internal void AccountControlFromDirectoryEntry(dSPropertyCollection properties, string suggestedProperty, Principal p, string propertyName, bool testCantChangePassword)
         {
             Debug.Assert(
-                (!testCantChangePassword && (string.Equals(suggestedProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase))) ||
-                (testCantChangePassword && (string.Equals(suggestedProperty, "UserFlags", StringComparison.OrdinalIgnoreCase)))
+                (!testCantChangePassword && (String.Compare(suggestedProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0)) ||
+                (testCantChangePassword && (String.Compare(suggestedProperty, "UserFlags", StringComparison.OrdinalIgnoreCase) == 0))
                 );
 
-            Debug.Assert(!string.Equals(propertyName, PropertyNames.PwdInfoCannotChangePassword, StringComparison.OrdinalIgnoreCase) || testCantChangePassword);
+            Debug.Assert((String.Compare(propertyName, PropertyNames.PwdInfoCannotChangePassword, StringComparison.OrdinalIgnoreCase) != 0) || testCantChangePassword);
 
             dSPropertyValueCollection values = properties[suggestedProperty];
 
@@ -653,8 +653,8 @@ namespace System.DirectoryServices.AccountManagement
                                         bool isUnpersisted)
         {
             Debug.Assert(
-                (!isSAM && (string.Equals(suggestedProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase))) ||
-                (isSAM && (string.Equals(suggestedProperty, "UserFlags", StringComparison.OrdinalIgnoreCase)))
+                (!isSAM && (String.Compare(suggestedProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0)) ||
+                (isSAM && (String.Compare(suggestedProperty, "UserFlags", StringComparison.OrdinalIgnoreCase) == 0))
                 );
 
             bool flag = (bool)p.GetValueForProperty(propertyName);
@@ -795,10 +795,10 @@ namespace System.DirectoryServices.AccountManagement
             foreach (string component in ncComponents)
             {
                 if ((component.Length > 3) &&
-                    string.Equals(component.Substring(0, 3), "DC=", StringComparison.OrdinalIgnoreCase))
+                    (String.Compare(component.Substring(0, 3), "DC=", StringComparison.OrdinalIgnoreCase) == 0))
                 {
-                    sb.Append(component, 3, component.Length - 3);
-                    sb.Append('.');
+                    sb.Append(component.Substring(3));
+                    sb.Append(".");
                 }
             }
 

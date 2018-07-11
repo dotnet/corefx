@@ -62,7 +62,7 @@ namespace Microsoft.Test.ModuleCore
             Desc = desc;
         }
 
-        public TestAttribute(string desc, params object[] parameters)
+        public TestAttribute(string desc, params Object[] parameters)
         {
             Desc = desc;
             Params = parameters;
@@ -474,7 +474,7 @@ namespace Microsoft.Test.ModuleCore
         {
         }
 
-        public TestModuleAttribute(string desc, params object[] parameters)
+        public TestModuleAttribute(string desc, params Object[] parameters)
             : base(desc, parameters)
         {
         }
@@ -511,7 +511,7 @@ namespace Microsoft.Test.ModuleCore
         {
         }
 
-        public TestCaseAttribute(string desc, params object[] parameters)
+        public TestCaseAttribute(string desc, params Object[] parameters)
             : base(desc, parameters)
         {
         }
@@ -537,7 +537,7 @@ namespace Microsoft.Test.ModuleCore
         {
         }
 
-        public VariationAttribute(string desc, params object[] parameters)
+        public VariationAttribute(string desc, params Object[] parameters)
             : base(desc, parameters)
         {
         }

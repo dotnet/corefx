@@ -15,7 +15,7 @@ namespace Internal.Cryptography
         {
             // If OID is not present, then we can force CryptFormatObject 
             // to use hex formatting by providing an empty OID string.
-            string oidValue = string.Empty;
+            String oidValue = String.Empty;
             if (oid != null && oid.Value != null)
                 oidValue = oid.Value;
 

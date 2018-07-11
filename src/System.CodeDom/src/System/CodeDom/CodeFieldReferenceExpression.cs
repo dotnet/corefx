@@ -20,8 +20,8 @@ namespace System.CodeDom
 
         public string FieldName
         {
-            get => _fieldName ?? string.Empty;
-            set => _fieldName = value;
+            get { return _fieldName ?? string.Empty; }
+            set { _fieldName = value; }
         }
     }
 }

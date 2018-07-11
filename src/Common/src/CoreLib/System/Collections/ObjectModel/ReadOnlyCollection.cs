@@ -15,7 +15,7 @@ namespace System.Collections.ObjectModel
     {
         private IList<T> list; // Do not rename (binary serialization)
         [NonSerialized]
-        private object _syncRoot;
+        private Object _syncRoot;
 
         public ReadOnlyCollection(IList<T> list)
         {
@@ -127,7 +127,7 @@ namespace System.Collections.ObjectModel
                     }
                     else
                     {
-                        System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+                        System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
                     }
                 }
                 return _syncRoot;

@@ -50,15 +50,15 @@ namespace System.Reflection.PortableExecutable
             return _reader.ReadBytes(count);
         }
 
-        public byte ReadByte()
+        public Byte ReadByte()
         {
-            CheckBounds(sizeof(byte));
+            CheckBounds(sizeof(Byte));
             return _reader.ReadByte();
         }
 
-        public short ReadInt16()
+        public Int16 ReadInt16()
         {
-            CheckBounds(sizeof(short));
+            CheckBounds(sizeof(Int16));
             return _reader.ReadInt16();
         }
 
@@ -68,21 +68,21 @@ namespace System.Reflection.PortableExecutable
             return _reader.ReadUInt16();
         }
 
-        public int ReadInt32()
+        public Int32 ReadInt32()
         {
-            CheckBounds(sizeof(int));
+            CheckBounds(sizeof(Int32));
             return _reader.ReadInt32();
         }
 
-        public uint ReadUInt32()
+        public UInt32 ReadUInt32()
         {
-            CheckBounds(sizeof(uint));
+            CheckBounds(sizeof(UInt32));
             return _reader.ReadUInt32();
         }
 
         public ulong ReadUInt64()
         {
-            CheckBounds(sizeof(ulong));
+            CheckBounds(sizeof(UInt64));
             return _reader.ReadUInt64();
         }
 
@@ -111,7 +111,7 @@ namespace System.Reflection.PortableExecutable
 
         private void CheckBounds(uint count)
         {
-            Debug.Assert(count <= sizeof(long));  // Error message assumes we're trying to read constant small number of bytes.
+            Debug.Assert(count <= sizeof(Int64));  // Error message assumes we're trying to read constant small number of bytes.
             Debug.Assert(_reader.BaseStream.Position >= 0 && _maxOffset >= 0);
 
             // Add cannot overflow because the worst case is (ulong)long.MaxValue + uint.MaxValue < ulong.MaxValue.

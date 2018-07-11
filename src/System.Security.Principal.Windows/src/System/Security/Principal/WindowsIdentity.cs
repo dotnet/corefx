@@ -211,24 +211,6 @@ namespace System.Security.Principal
 
         private static SafeAccessTokenHandle DuplicateAccessToken(IntPtr accessToken)
         {
-            if (accessToken == IntPtr.Zero)
-            {
-                throw new ArgumentException(SR.Argument_TokenZero);
-            }
-
-            // Find out if the specified token is a valid.
-            uint dwLength = sizeof(uint);
-            if (!Interop.Advapi32.GetTokenInformation(
-                    accessToken,
-                    (uint)TokenInformationClass.TokenType,
-                    IntPtr.Zero,
-                    0,
-                    out dwLength) &&
-                Marshal.GetLastWin32Error() == Interop.Errors.ERROR_INVALID_HANDLE)
-            {
-                throw new ArgumentException(SR.Argument_InvalidImpersonationToken);
-            }
-
             SafeAccessTokenHandle duplicateAccessToken = SafeAccessTokenHandle.InvalidHandle;
             IntPtr currentProcessHandle = Interop.Kernel32.GetCurrentProcess();
             if (!Interop.Kernel32.DuplicateHandle(
@@ -270,6 +252,16 @@ namespace System.Security.Principal
 
         private void CreateFromToken(IntPtr userToken)
         {
+            if (userToken == IntPtr.Zero)
+                throw new ArgumentException(SR.Argument_TokenZero);
+
+            // Find out if the specified token is a valid.
+            uint dwLength = (uint)sizeof(uint);
+            bool result = Interop.Advapi32.GetTokenInformation(userToken, (uint)TokenInformationClass.TokenType,
+                                                          SafeLocalAllocHandle.InvalidHandle, 0, out dwLength);
+            if (Marshal.GetLastWin32Error() == Interop.Errors.ERROR_INVALID_HANDLE)
+                throw new ArgumentException(SR.Argument_InvalidImpersonationToken);
+
             _safeTokenHandle = DuplicateAccessToken(userToken);
         }
 
@@ -330,13 +322,13 @@ namespace System.Security.Principal
             {
                 // If this is an anonymous identity, return an empty string
                 if (_safeTokenHandle.IsInvalid)
-                    return string.Empty;
+                    return String.Empty;
 
                 if (_authType == null)
                 {
                     Interop.LUID authId = GetLogonAuthId(_safeTokenHandle);
                     if (authId.LowPart == Interop.LuidOptions.ANONYMOUS_LOGON_LUID)
-                        return string.Empty; // no authentication, just return an empty string
+                        return String.Empty; // no authentication, just return an empty string
 
                     SafeLsaReturnBufferHandle pLogonSessionData = SafeLsaReturnBufferHandle.InvalidHandle;
                     try
@@ -517,11 +509,11 @@ namespace System.Security.Principal
             }
         }
 
-        internal string GetName()
+        internal String GetName()
         {
             // special case the anonymous identity.
             if (_safeTokenHandle.IsInvalid)
-                return string.Empty;
+                return String.Empty;
 
             if (_name == null)
             {
@@ -980,7 +972,7 @@ namespace System.Security.Principal
                         _userClaims = new List<Claim>();
                         _deviceClaims = new List<Claim>();
 
-                        if (!string.IsNullOrEmpty(Name))
+                        if (!String.IsNullOrEmpty(Name))
                         {
                             //
                             // Add the name claim only if the WindowsIdentity.Name is populated

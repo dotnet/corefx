@@ -45,8 +45,6 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        public bool SupportsLargeExponent => true;
-
         public bool SupportsSha2Oaep { get; } =
             !PlatformDetection.IsFullFramework || !(RSA.Create() is RSACryptoServiceProvider);
 

@@ -315,7 +315,7 @@ namespace System.IO.Tests
         public static void TestWriteObject()
         {
             var sw = new StringWriter();
-            sw.Write(new object());
+            sw.Write(new Object());
             Assert.Equal("System.Object", sw.ToString());
         }
 
@@ -344,7 +344,7 @@ namespace System.IO.Tests
         public static void TestWriteLineObject()
         {
             var sw = new StringWriter();
-            sw.WriteLine(new object());
+            sw.WriteLine(new Object());
             Assert.Equal("System.Object" + Environment.NewLine, sw.ToString());
         }
     

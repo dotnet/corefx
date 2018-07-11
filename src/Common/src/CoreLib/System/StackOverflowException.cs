@@ -25,13 +25,13 @@ namespace System
             HResult = HResults.COR_E_STACKOVERFLOW;
         }
 
-        public StackOverflowException(string message)
+        public StackOverflowException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_STACKOVERFLOW;
         }
 
-        public StackOverflowException(string message, Exception innerException)
+        public StackOverflowException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_STACKOVERFLOW;

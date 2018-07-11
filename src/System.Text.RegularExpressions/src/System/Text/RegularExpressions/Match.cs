@@ -35,7 +35,6 @@ namespace System.Text.RegularExpressions
     /// </summary>
     public class Match : Group
     {
-        private const int ReplaceBufferSize = 256;
         internal GroupCollection _groupcoll;
 
         // input to the match
@@ -129,12 +128,8 @@ namespace System.Text.RegularExpressions
             // Gets the weakly cached replacement helper or creates one if there isn't one already.
             RegexReplacement repl = RegexReplacement.GetOrCreate(_regex._replref, replacement, _regex.caps, _regex.capsize,
                 _regex.capnames, _regex.roptions);
-            Span<char> charInitSpan = stackalloc char[ReplaceBufferSize];
-            var vsb = new ValueStringBuilder(charInitSpan);
 
-            repl.ReplacementImpl(ref vsb, this);
-
-            return vsb.ToString();
+            return repl.Replacement(this);
         }
 
         internal virtual ReadOnlySpan<char> GroupToStringImpl(int groupnum)

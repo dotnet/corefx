@@ -30,7 +30,7 @@ namespace System.Security.Cryptography
 
             internal ECDiffieHellmanCngPublicKey(byte[] keyBlob, string curveName) : base(keyBlob)
             {
-                Debug.Assert(keyBlob != null);
+                Debug.Assert(_curveName != null && keyBlob != null);
 
                 _keyBlob = keyBlob;
                 _curveName = curveName;

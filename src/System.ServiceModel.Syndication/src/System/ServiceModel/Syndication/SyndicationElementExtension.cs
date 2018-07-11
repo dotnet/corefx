@@ -66,7 +66,7 @@ namespace System.ServiceModel.Syndication
             }
             if (outerName == string.Empty)
             {
-                throw new ArgumentException(SR.OuterNameOfElementExtensionEmpty, nameof(outerName));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument(SR.Format(SR.OuterNameOfElementExtensionEmpty));
             }
             if (dataContractSerializer == null)
             {

@@ -101,7 +101,7 @@ namespace System.Xml
             _impl.OuterReader = this;
         }
 
-        public XmlTextReader(string url, XmlNameTable nt)
+        public XmlTextReader(String url, XmlNameTable nt)
         {
             _impl = new XmlTextReaderImpl(url, nt);
             _impl.OuterReader = this;
@@ -263,7 +263,7 @@ namespace System.Xml
             get { return _impl.NameTable; }
         }
 
-        public override string LookupNamespace(string prefix)
+        public override String LookupNamespace(String prefix)
         {
             string ns = _impl.LookupNamespace(prefix);
             if (ns != null && ns.Length == 0)

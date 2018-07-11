@@ -15,12 +15,12 @@ namespace System.Xml.Serialization
         {
         }
 
-        bool IEqualityComparer.Equals(object x, object y)
+        bool IEqualityComparer.Equals(Object x, Object y)
         {
             return (Compare(x, y) == 0);
         }
 
-        int IEqualityComparer.GetHashCode(object obj)
+        int IEqualityComparer.GetHashCode(Object obj)
         {
             string s = obj as string;
             if (s == null)

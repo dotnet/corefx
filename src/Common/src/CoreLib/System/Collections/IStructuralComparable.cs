@@ -8,6 +8,6 @@ namespace System.Collections
 {
     public interface IStructuralComparable
     {
-        int CompareTo(object other, IComparer comparer);
+        Int32 CompareTo(Object other, IComparer comparer);
     }
 }

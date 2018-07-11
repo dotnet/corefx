@@ -22,8 +22,8 @@ namespace System.CodeDom
 
         public CodeTypeParameter this[int index]
         {
-            get => (CodeTypeParameter)List[index];
-            set => List[index] = value;
+            get { return (CodeTypeParameter)List[index]; }
+            set { List[index] = value; }
         }
 
         public int Add(CodeTypeParameter value) => List.Add(value);

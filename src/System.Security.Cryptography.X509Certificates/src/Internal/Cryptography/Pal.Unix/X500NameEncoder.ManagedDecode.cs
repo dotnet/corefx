@@ -127,7 +127,7 @@ namespace Internal.Cryptography.Pal
                 }
             }
 
-            if (addTrailingDelimiter && decodedName.Length > 0)
+            if (addTrailingDelimiter)
             {
                 decodedName.Append(dnSeparator);
             }
@@ -150,7 +150,7 @@ namespace Internal.Cryptography.Pal
                 case DerSequenceReader.DerTag.UTF8String:
                     return tavReader.ReadUtf8String();
                 case DerSequenceReader.DerTag.T61String:
-                    return tavReader.ReadT61String();
+                    return "";
                 default:
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }

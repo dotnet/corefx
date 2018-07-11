@@ -464,7 +464,7 @@ namespace SerializationTestTypes
             this.List.Add(new Guid("00000000-0000-0000-0000-000000000011"), new Derived_Override_Prop_GetPrivate_Private(true));
             this.List.Add(new Guid("00000000-0000-0000-0000-000000000012"), new DerivedFromPriC(100));
 
-            this.List.Add(string.Empty, string.Empty);
+            this.List.Add(String.Empty, String.Empty);
             this.List.Add("null", null);
             this.List.Add(double.MaxValue, double.MinValue);
             this.List.Add(new DateTime(), DateTime.MaxValue);
@@ -588,21 +588,21 @@ namespace SerializationTestTypes
     public class SimpleBase
     {
         [DataMember]
-        public string BaseData = string.Empty;
+        public string BaseData = String.Empty;
     }
 
     [DataContract(IsReference = true)]
     public class SimpleBaseDerived : SimpleBase
     {
         [DataMember]
-        public string DerivedData = string.Empty;
+        public string DerivedData = String.Empty;
     }
 
     [DataContract(IsReference = true)]
     public class SimpleBaseDerived2 : SimpleBase
     {
         [DataMember]
-        public string DerivedData = string.Empty;
+        public string DerivedData = String.Empty;
     }
 
     [DataContract(IsReference = true)]
@@ -675,9 +675,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
             _internalList.Add(new SimpleDCWithRef(true));
         }
@@ -776,9 +776,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("899288c9-8bee-41c1-a6d4-13c477ec1b29"));
         }
 
@@ -876,9 +876,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -974,9 +974,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -1073,9 +1073,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -1171,9 +1171,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -1270,9 +1270,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
             _internalList.Add(new PrivateDC());
         }
@@ -2668,9 +2668,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
         public int Add(object value)
@@ -2714,9 +2714,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
         public int Add(object value)
@@ -2760,9 +2760,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
         public int Add(object value)
@@ -2805,9 +2805,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
         public int Add(object value)
@@ -2851,9 +2851,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -2897,9 +2897,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -2947,9 +2947,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
             _internalList.Add(new PrivateDC());
         }
@@ -2996,9 +2996,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
         public int Add(object value)
@@ -3024,9 +3024,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
         public int Add(object value)
@@ -3051,9 +3051,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -3078,9 +3078,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -3105,9 +3105,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -3132,9 +3132,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
         }
 
@@ -3160,9 +3160,9 @@ namespace SerializationTestTypes
         {
             _internalList.Add(new DateTime());
             _internalList.Add(TimeSpan.MaxValue);
-            _internalList.Add(string.Empty);
-            _internalList.Add(double.MaxValue);
-            _internalList.Add(double.NegativeInfinity);
+            _internalList.Add(String.Empty);
+            _internalList.Add(Double.MaxValue);
+            _internalList.Add(Double.NegativeInfinity);
             _internalList.Add(new Guid("0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb"));
             _internalList.Add(new PrivateDC());
         }
@@ -3779,9 +3779,9 @@ namespace SerializationTestTypes
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyGenericIDictionaryKVContainsPrivateDC", Namespace = "MyDictNS", ValueName = "DictValue")]
     [KnownType(typeof(PrivateDC))]
-    public class MyGenericIDictionaryKVContainsPrivateDC : IDictionary<object, object>
+    public class MyGenericIDictionaryKVContainsPrivateDC : IDictionary<Object, Object>
     {
-        private Dictionary<object, object> _data = new Dictionary<object, object>();
+        private Dictionary<Object, Object> _data = new Dictionary<Object, Object>();
 
         public MyGenericIDictionaryKVContainsPrivateDC()
         {
@@ -3792,7 +3792,7 @@ namespace SerializationTestTypes
             _data.Add(new PrivateDC(), new PrivateDC());
         }
 
-        public void Add(object key, object value)
+        public void Add(Object key, Object value)
         {
             _data.Add(key, value);
         }
@@ -3802,7 +3802,7 @@ namespace SerializationTestTypes
             _data.Clear();
         }
 
-        public bool Contains(object key)
+        public bool Contains(Object key)
         {
             return _data.ContainsKey(key);
         }
@@ -3827,7 +3827,7 @@ namespace SerializationTestTypes
             get { return _data.Keys; }
         }
 
-        public void Remove(object key)
+        public void Remove(Object key)
         {
             _data.Remove(key);
         }
@@ -3837,7 +3837,7 @@ namespace SerializationTestTypes
             get { return _data.Keys; }
         }
 
-        public object this[object key]
+        public Object this[Object key]
         {
             get
             {
@@ -3874,32 +3874,32 @@ namespace SerializationTestTypes
             return _data.GetEnumerator();
         }
 
-        public bool ContainsKey(object key)
+        public bool ContainsKey(Object key)
         {
             return _data.ContainsKey(key);
         }
 
-        ICollection<object> IDictionary<object, object>.Keys
+        ICollection<Object> IDictionary<Object, Object>.Keys
         {
             get { return _data.Keys; }
         }
 
-        bool IDictionary<object, object>.Remove(object key)
+        bool IDictionary<Object, Object>.Remove(Object key)
         {
             return _data.Remove(key);
         }
 
-        public bool TryGetValue(object key, out object value)
+        public bool TryGetValue(Object key, out Object value)
         {
             return _data.TryGetValue(key, out value);
         }
 
-        ICollection<object> IDictionary<object, object>.Values
+        ICollection<Object> IDictionary<Object, Object>.Values
         {
             get { return _data.Values; }
         }
 
-        object IDictionary<object, object>.this[object key]
+        Object IDictionary<Object, Object>.this[Object key]
         {
             get
             {
@@ -3911,27 +3911,27 @@ namespace SerializationTestTypes
             }
         }
 
-        public void Add(KeyValuePair<object, object> item)
+        public void Add(KeyValuePair<Object, Object> item)
         {
             _data.Add(item.Key, item.Value);
         }
 
-        public bool Contains(KeyValuePair<object, object> item)
+        public bool Contains(KeyValuePair<Object, Object> item)
         {
             return _data.ContainsKey(item.Key);
         }
 
-        public void CopyTo(KeyValuePair<object, object>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<Object, Object>[] array, int arrayIndex)
         {
             throw new Exception("TEST EXCEPTION!!: CopyTO: method or operation is not implemented.");
         }
 
-        public bool Remove(KeyValuePair<object, object> item)
+        public bool Remove(KeyValuePair<Object, Object> item)
         {
             return _data.Remove(item.Key);
         }
 
-        IEnumerator<KeyValuePair<object, object>> IEnumerable<KeyValuePair<object, object>>.GetEnumerator()
+        IEnumerator<KeyValuePair<Object, Object>> IEnumerable<KeyValuePair<Object, Object>>.GetEnumerator()
         {
             return _data.GetEnumerator();
         }
@@ -4090,7 +4090,7 @@ namespace SerializationTestTypes
         {
             PrivateDC other = obj as PrivateDC;
             if (other == null) return false;
-            if (string.IsNullOrEmpty(other.Data) && string.IsNullOrEmpty(Data)) { return true; }
+            if (String.IsNullOrEmpty(other.Data) && String.IsNullOrEmpty(Data)) { return true; }
             return other.Data.Equals(Data);
         }
         public override int GetHashCode()
@@ -4110,7 +4110,7 @@ namespace SerializationTestTypes
         {
             PublicDC other = obj as PublicDC;
             if (other == null) return false;
-            if (string.IsNullOrEmpty(other.Data) && string.IsNullOrEmpty(Data)) { return true; }
+            if (String.IsNullOrEmpty(other.Data) && String.IsNullOrEmpty(Data)) { return true; }
             return other.Data.Equals(Data);
         }
         public override int GetHashCode()
@@ -4418,7 +4418,7 @@ namespace SerializationTestTypes
         [DataMember]
         private string _data;
 
-        public PrivateDCClassPrivateDM() { _data = string.Empty; }
+        public PrivateDCClassPrivateDM() { _data = String.Empty; }
         public PrivateDCClassPrivateDM(bool init) { _data = "No change"; }
     }
 
@@ -4438,7 +4438,7 @@ namespace SerializationTestTypes
         [DataMember]
         private string _data;
 
-        public PublicDCClassPrivateDM() { _data = string.Empty; }
+        public PublicDCClassPrivateDM() { _data = String.Empty; }
         public PublicDCClassPrivateDM(bool init) { _data = "No change"; }
     }
 
@@ -4456,13 +4456,13 @@ namespace SerializationTestTypes
     public class PublicDCClassMixedDM
     {
         [DataMember]
-        public string Data1 = string.Empty;
+        public string Data1 = String.Empty;
 
         [DataMember]
-        private string _data2 = string.Empty;
+        private string _data2 = String.Empty;
 
         [DataMember]
-        internal string Data3 = string.Empty;
+        internal string Data3 = String.Empty;
 
         public PublicDCClassMixedDM() { }
         public PublicDCClassMixedDM(bool init) { Data1 = "No change"; }
@@ -4499,7 +4499,7 @@ namespace SerializationTestTypes
 
         public PublicDCClassPublicDM_DerivedDCClassPublicContainsPrivateDM()
         {
-            _derivedData1 = string.Empty;
+            _derivedData1 = String.Empty;
         }
     }
 
@@ -4670,7 +4670,7 @@ namespace SerializationTestTypes
     public class Prop_PublicDCClassPublicDM_DerivedDCClassPublicContainsPrivateDM : Prop_PublicDCClassPublicDM
     {
         [DataMember]
-        private string _derivedData1 = string.Empty;
+        private string _derivedData1 = String.Empty;
 
         [DataMember]
         public string DerivedData2;
@@ -4778,7 +4778,7 @@ namespace SerializationTestTypes
     public class DC2_Version4
     {
         [DataMember]
-        private string _data = string.Empty;
+        private string _data = String.Empty;
     }
 
     [DataContract(Name = "DC2_Version5")]
@@ -5253,7 +5253,7 @@ namespace SerializationTestTypes
     }
 
     [CollectionDataContract(IsReference = true)]
-    public class Base_Possitive_VirtualAdd : IEnumerable<string>
+    public class Base_Possitive_VirtualAdd : IEnumerable<String>
     {
         private List<string> _innerList = new List<string>();
 
@@ -5284,7 +5284,7 @@ namespace SerializationTestTypes
             }
         }
 
-        public virtual void Add(string item)
+        public virtual void Add(String item)
         {
             _innerList.Add(item.ToString());
         }
@@ -5341,7 +5341,7 @@ namespace SerializationTestTypes
     [CollectionDataContract(IsReference = true)]
     public class CDC_NewAddToPrivate : Base_Possitive_VirtualAdd
     {
-        private new void Add(string item)
+        private new void Add(String item)
         {
             base.Add(item.ToString());
         }

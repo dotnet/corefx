@@ -2,6 +2,7 @@
 set -e
 
 export CC=${CC:-cc}
+export CXX=${CXX:-c++}
 
 BROTLI="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 SRC=$BROTLI/c
@@ -12,12 +13,12 @@ rm -rf bin
 mkdir bin
 cd bin
 
-cmake $BROTLI -DCMAKE_C_COMPILER="$CC" \
+cmake $BROTLI -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX" \
     -DBUILD_TESTING=OFF -DENABLE_SANITIZER=address
 make -j$(nproc) brotlidec-static
 
-${CC} -o run_decode_fuzzer -std=c99 -fsanitize=address -I$SRC/include \
-    $SRC/fuzz/decode_fuzzer.c $SRC/fuzz/run_decode_fuzzer.c \
+${CXX} -o run_decode_fuzzer -std=c++11 -fsanitize=address -I$SRC/include \
+    $SRC/fuzz/decode_fuzzer.cc $SRC/fuzz/run_decode_fuzzer.cc \
     ./libbrotlidec-static.a ./libbrotlicommon-static.a
 
 mkdir decode_corpora

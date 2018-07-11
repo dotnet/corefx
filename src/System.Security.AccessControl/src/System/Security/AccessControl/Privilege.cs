@@ -416,7 +416,7 @@ namespace System.Security.AccessControl
 
         #endregion
 
-        private unsafe void ToggleState(bool enable)
+        private void ToggleState(bool enable)
         {
             int error = 0;
 
@@ -471,10 +471,13 @@ namespace System.Security.AccessControl
                         this.tlsContents.IncrementReferenceCount();
                     }
 
-                    Interop.Advapi32.TOKEN_PRIVILEGE newState;
+                    Interop.Advapi32.LUID_AND_ATTRIBUTES luidAndAttrs = new Interop.Advapi32.LUID_AND_ATTRIBUTES();
+                    luidAndAttrs.Luid = this.luid;
+                    luidAndAttrs.Attributes = enable ? Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED : Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_DISABLED;
+
+                    Interop.Advapi32.TOKEN_PRIVILEGE newState = new Interop.Advapi32.TOKEN_PRIVILEGE();
                     newState.PrivilegeCount = 1;
-                    newState.Privileges.Luid = this.luid;
-                    newState.Privileges.Attributes = enable ? Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED : Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_DISABLED;
+                    newState.Privileges[0] = luidAndAttrs;
 
                     Interop.Advapi32.TOKEN_PRIVILEGE previousState = new Interop.Advapi32.TOKEN_PRIVILEGE();
                     uint previousSize = 0;
@@ -483,13 +486,13 @@ namespace System.Security.AccessControl
                     // Place the new privilege on the thread token and remember the previous state.
                     //
 
-                    if (!Interop.Advapi32.AdjustTokenPrivileges(
+                    if (false == Interop.Advapi32.AdjustTokenPrivileges(
                                       this.tlsContents.ThreadHandle,
                                       false,
-                                      &newState,
-                                      (uint)sizeof(Interop.Advapi32.TOKEN_PRIVILEGE),
-                                      &previousState,
-                                      &previousSize))
+                                      ref newState,
+                                      (uint)Marshal.SizeOf(previousState),
+                                      ref previousState,
+                                      ref previousSize))
                     {
                         error = Marshal.GetLastWin32Error();
                     }
@@ -503,7 +506,7 @@ namespace System.Security.AccessControl
                         // This is the initial state that revert will have to go back to
                         //
 
-                        this.initialState = ((previousState.Privileges.Attributes & Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED) != 0);
+                        this.initialState = ((previousState.Privileges[0].Attributes & Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED) != 0);
 
                         //
                         // Remember whether state has changed at all
@@ -547,7 +550,7 @@ namespace System.Security.AccessControl
             }
         }
 
-        public unsafe void Revert()
+        public void Revert()
         {
             int error = 0;
 
@@ -588,18 +591,24 @@ namespace System.Security.AccessControl
                         (this.tlsContents.ReferenceCountValue > 1 ||
                           !this.tlsContents.IsImpersonating))
                     {
-                        Interop.Advapi32.TOKEN_PRIVILEGE newState;
-                        newState.PrivilegeCount = 1;
-                        newState.Privileges.Luid = this.luid;
-                        newState.Privileges.Attributes = (this.initialState ? Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED : Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_DISABLED);
+                        Interop.Advapi32.LUID_AND_ATTRIBUTES luidAndAttrs = new Interop.Advapi32.LUID_AND_ATTRIBUTES();
+                        luidAndAttrs.Luid = this.luid;
+                        luidAndAttrs.Attributes = (this.initialState ? Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_ENABLED : Interop.Advapi32.SEPrivileges.SE_PRIVILEGE_DISABLED);
 
-                        if (!Interop.Advapi32.AdjustTokenPrivileges(
+                        Interop.Advapi32.TOKEN_PRIVILEGE newState = new Interop.Advapi32.TOKEN_PRIVILEGE();
+                        newState.PrivilegeCount = 1;
+                        newState.Privileges[0] = luidAndAttrs;
+
+                        Interop.Advapi32.TOKEN_PRIVILEGE previousState = new Interop.Advapi32.TOKEN_PRIVILEGE();
+                        uint previousSize = 0;
+
+                        if (false == Interop.Advapi32.AdjustTokenPrivileges(
                                           this.tlsContents.ThreadHandle,
                                           false,
-                                          &newState,
-                                          0,
-                                          null,
-                                          null))
+                                          ref newState,
+                                          (uint)Marshal.SizeOf(previousState),
+                                          ref previousState,
+                                          ref previousSize))
                         {
                             error = Marshal.GetLastWin32Error();
                             success = false;

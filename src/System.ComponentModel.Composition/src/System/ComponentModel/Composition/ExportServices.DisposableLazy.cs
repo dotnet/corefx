@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
@@ -15,10 +16,7 @@ namespace System.ComponentModel.Composition
             public DisposableLazy(Func<T> valueFactory, TMetadataView metadataView, IDisposable disposable, LazyThreadSafetyMode mode)
                 : base(valueFactory, metadataView, mode)
             {
-                if(disposable == null)
-                {
-                    throw new ArgumentNullException(nameof(disposable));
-                }
+                Assumes.NotNull(disposable);
 
                 _disposable = disposable;
             }
@@ -36,10 +34,7 @@ namespace System.ComponentModel.Composition
             public DisposableLazy(Func<T> valueFactory, IDisposable disposable, LazyThreadSafetyMode mode)
                 : base(valueFactory, mode)
             {
-                if(disposable == null)
-                {
-                    throw new ArgumentNullException(nameof(disposable));
-                }
+                Assumes.NotNull(disposable);
 
                 _disposable = disposable;
             }

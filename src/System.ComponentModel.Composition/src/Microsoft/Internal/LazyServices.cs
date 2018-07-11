@@ -12,11 +12,7 @@ namespace Microsoft.Internal
         public static T GetNotNullValue<T>(this Lazy<T> lazy, string argument)
             where T : class
         {
-            if (lazy == null)
-            {
-                throw new ArgumentNullException(nameof(lazy));
-            }
-
+            Assumes.NotNull(lazy);
             T value = lazy.Value;
             if (value == null)
             {

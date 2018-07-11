@@ -813,7 +813,7 @@ namespace System.Net
                 _byteBuffer[_numBytes++] = b;
             }
 
-            internal string GetString()
+            internal String GetString()
             {
                 if (_numBytes > 0)
                     FlushBytes();

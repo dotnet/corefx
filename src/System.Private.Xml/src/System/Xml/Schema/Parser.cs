@@ -462,7 +462,7 @@ namespace System.Xml.Schema
                     case XmlNodeType.EndEntity:
                         if (eref.ChildNodes.Count == 0)
                         {
-                            eref.AppendChild(_dummyDocument.CreateTextNode(string.Empty));
+                            eref.AppendChild(_dummyDocument.CreateTextNode(String.Empty));
                         }
                         return eref;
                     case XmlNodeType.EntityReference:

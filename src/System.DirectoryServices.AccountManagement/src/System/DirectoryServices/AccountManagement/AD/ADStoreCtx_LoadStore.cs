@@ -275,7 +275,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     string dnsDomainName = SDSUtils.ConstructDnsDomainNameFromDn(distinguishedName);
                     if (targetIsFromGC ||
-                        (!string.IsNullOrEmpty(this.domainDnsName) && !string.Equals(this.DnsDomainName, dnsDomainName, StringComparison.OrdinalIgnoreCase)))
+                        (!String.IsNullOrEmpty(this.domainDnsName) && String.Compare(this.DnsDomainName, dnsDomainName, StringComparison.OrdinalIgnoreCase) != 0))
                     {
                         constructedContext = SDSCache.Domain.GetContext(dnsDomainName, this.Credentials, this.OwningContext.Options);
                     }
@@ -480,7 +480,7 @@ namespace System.DirectoryServices.AccountManagement
             {
                 ds.SizeLimit = 2;   // so we can efficiently check for duplicates
 
-                // If we are searching for AuthPrincpal or Principal in the end we will construct the actual type
+                // If we are searching for AuthPrincpal or Principal in the end we will construct the acutal type
                 // i.e. if the objects objectClass is User we will construct a UserPrincipal even though they searched for Principal.FindByIdentity
                 // At this time we don't know the actual object type so we have to ask AD for all the attributes of the derived types so they are there
                 // when we go to load the principal.
@@ -895,7 +895,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void CommaStringFromLdapConverter(dSPropertyCollection properties, string suggestedAdProperty, Principal p, string propertyName)
         {
-            Debug.Assert(string.Equals(suggestedAdProperty, "userWorkstations", StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(String.Compare(suggestedAdProperty, "userWorkstations", StringComparison.OrdinalIgnoreCase) == 0);
 
             // The userWorkstations attribute is odd.  Rather than being a multivalued string attribute, it's a single-valued
             // string of comma-separated values.
@@ -940,7 +940,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void UACFromLdapConverter(dSPropertyCollection properties, string suggestedAdProperty, Principal p, string propertyName)
         {
-            Debug.Assert(string.Equals(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(String.Compare(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0);
 
             SDSUtils.AccountControlFromDirectoryEntry(properties, suggestedAdProperty, p, propertyName, false);
         }
@@ -966,7 +966,7 @@ namespace System.DirectoryServices.AccountManagement
         {
             // W2k DCs support just "lastLogon".  W2k3 DCs also support "lastLogonTimestamp".  The latter is replicated, and
             // preferred over the former.
-            if (string.Equals(suggestedAdProperty, "lastLogon", StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(suggestedAdProperty, "lastLogon", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Is "lastLogonTimestamp" available instead?
 
@@ -998,10 +998,10 @@ namespace System.DirectoryServices.AccountManagement
             {
                 Debug.Assert(values.Count == 1);
 
-                long filetime;
+                Int64 filetime;
 
-                if (values[0] is long)
-                    filetime = (long)values[0];
+                if (values[0] is Int64)
+                    filetime = (Int64)values[0];
                 else
                     filetime = ADUtils.LargeIntToInt64((UnsafeNativeMethods.IADsLargeInteger)values[0]);
 
@@ -1022,7 +1022,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void GroupTypeFromLdapConverter(dSPropertyCollection properties, string suggestedAdProperty, Principal p, string propertyName)
         {
-            Debug.Assert(string.Equals(suggestedAdProperty, "groupType", StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(String.Compare(suggestedAdProperty, "groupType", StringComparison.OrdinalIgnoreCase) == 0);
 
             dSPropertyValueCollection values = properties[suggestedAdProperty];
 
@@ -1183,7 +1183,7 @@ namespace System.DirectoryServices.AccountManagement
             if ((value == null) || (value.Length > 0))
                 de.Properties[suggestedAdProperty].Value = value;
             else
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.InvalidStringValueForStore, propertyName));
+                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.InvalidStringValueForStore, propertyName));
         }
 
         protected static void BinaryToLdapConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedAdProperty)
@@ -1286,7 +1286,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void UACToLdapConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedAdProperty)
         {
-            Debug.Assert(string.Equals(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase));
+            Debug.Assert(String.Compare(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0);
 
             SDSUtils.AccountControlToDirectoryEntry(p, propertyName, de, suggestedAdProperty, false, p.unpersisted);
         }
@@ -1309,7 +1309,7 @@ namespace System.DirectoryServices.AccountManagement
             }
             else
             {
-                long filetime = ADUtils.DateTimeToADFileTime(dt.Value);
+                Int64 filetime = ADUtils.DateTimeToADFileTime(dt.Value);
 
                 uint lowPart = (uint)(((ulong)filetime) & ((ulong)0x00000000ffffffff));
                 uint highPart = (uint)((((ulong)filetime) & ((ulong)0xffffffff00000000)) >> 32);
@@ -1532,7 +1532,7 @@ namespace System.DirectoryServices.AccountManagement
                         (!memberType.IsSubclassOf(typeof(AuthenticablePrincipal))))
                     {
                         throw new InvalidOperationException(
-                                        string.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForGroupInsert, memberType.ToString()));
+                                        String.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForGroupInsert, memberType.ToString()));
                     }
                     // Can't inserted unpersisted principal
                     if (member.unpersisted)

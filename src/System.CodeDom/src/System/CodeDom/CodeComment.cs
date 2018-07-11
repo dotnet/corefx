@@ -25,8 +25,8 @@ namespace System.CodeDom
 
         public string Text
         {
-            get => _text ?? string.Empty;
-            set => _text = value;
+            get { return _text ?? string.Empty; }
+            set { _text = value; }
         }
     }
 }

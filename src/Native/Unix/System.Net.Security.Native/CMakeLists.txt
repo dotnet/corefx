@@ -1,4 +1,4 @@
-project(System.Net.Security.Native C)
+project(System.Net.Security.Native)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

@@ -32,7 +32,7 @@ namespace System.Xml.Tests
         public static void CreateEmptyCdata()
         {
             var xmlDocument = new XmlDocument();
-            var cdataNode = (XmlCharacterData)xmlDocument.CreateCDataSection(string.Empty);
+            var cdataNode = (XmlCharacterData)xmlDocument.CreateCDataSection(String.Empty);
 
             Assert.Equal(0, cdataNode.Length);
         }

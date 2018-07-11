@@ -40,17 +40,19 @@ namespace System.Net.WebSockets
                 WebSocketReceiveResult r = await ReceiveAsync(arraySegment, cancellationToken).ConfigureAwait(false);
                 return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
             }
-
-            byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
-            try
+            else
             {
-                WebSocketReceiveResult r = await ReceiveAsync(new ArraySegment<byte>(array, 0, buffer.Length), cancellationToken).ConfigureAwait(false);
-                new Span<byte>(array, 0, r.Count).CopyTo(buffer.Span);
-                return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(array);
+                byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+                try
+                {
+                    WebSocketReceiveResult r = await ReceiveAsync(new ArraySegment<byte>(array, 0, buffer.Length), cancellationToken).ConfigureAwait(false);
+                    new Span<byte>(array, 0, r.Count).CopyTo(buffer.Span);
+                    return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(array);
+                }
             }
         }
 

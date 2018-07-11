@@ -17,19 +17,19 @@ namespace System.IO
             HResult = HResults.COR_E_IO;
         }
 
-        public IOException(string message)
+        public IOException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_IO;
         }
 
-        public IOException(string message, int hresult)
+        public IOException(String message, int hresult)
             : base(message)
         {
             HResult = hresult;
         }
 
-        public IOException(string message, Exception innerException)
+        public IOException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_IO;

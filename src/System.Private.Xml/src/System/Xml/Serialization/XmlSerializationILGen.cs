@@ -214,7 +214,7 @@ namespace System.Xml.Serialization
             {
                 MethodInfo Hashtable_set_Item = typeof(Hashtable).GetMethod(
                     "set_Item",
-                    new Type[] { typeof(object), typeof(object) }
+                    new Type[] { typeof(Object), typeof(Object) }
                     );
                 for (int i = 0; i < methods.Length; i++)
                 {
@@ -327,7 +327,7 @@ namespace System.Xml.Serialization
 
             ilg = new CodeGenerator(typedSerializerTypeBuilder);
             ilg.BeginMethod(
-                typeof(bool),
+                typeof(Boolean),
                 "CanDeserialize",
                 new Type[] { typeof(XmlReader) },
                 new string[] { "xmlReader" },
@@ -345,7 +345,7 @@ namespace System.Xml.Serialization
                 MethodInfo XmlReader_IsStartElement = typeof(XmlReader).GetMethod(
                      "IsStartElement",
                      CodeGenerator.InstanceBindingFlags,
-                     new Type[] { typeof(string), typeof(string) }
+                     new Type[] { typeof(String), typeof(String) }
                      );
                 ilg.Ldarg(ilg.GetArg("xmlReader"));
                 ilg.Ldstr(GetCSharpString(mapping.Accessor.Name));
@@ -415,7 +415,7 @@ namespace System.Xml.Serialization
             MethodInfo Hashtable_Add = typeof(Hashtable).GetMethod(
                 "Add",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(object), typeof(object) }
+                new Type[] { typeof(Object), typeof(Object) }
                 );
 
             foreach (string key in serializers.Keys)

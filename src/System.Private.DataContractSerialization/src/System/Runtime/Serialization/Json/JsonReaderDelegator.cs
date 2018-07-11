@@ -56,7 +56,7 @@ namespace System.Runtime.Serialization.Json
             string name, ns;
             if (string.IsNullOrEmpty(qname))
             {
-                name = ns = string.Empty;
+                name = ns = String.Empty;
             }
             else
             {
@@ -193,7 +193,7 @@ namespace System.Runtime.Serialization.Json
 
             try
             {
-                millisecondsSinceUnixEpoch = long.Parse(ticksvalue, CultureInfo.InvariantCulture);
+                millisecondsSinceUnixEpoch = Int64.Parse(ticksvalue, CultureInfo.InvariantCulture);
             }
             catch (ArgumentException exception)
             {
@@ -319,7 +319,7 @@ namespace System.Runtime.Serialization.Json
         }
 
         // Overridden because base reader relies on XmlConvert.ToUInt64 for conversion to ulong
-        internal override ulong ReadElementContentAsUnsignedLong()
+        internal override UInt64 ReadElementContentAsUnsignedLong()
         {
             if (isEndOfEmptyElement)
             {

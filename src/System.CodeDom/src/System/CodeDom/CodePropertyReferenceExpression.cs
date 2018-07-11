@@ -20,8 +20,8 @@ namespace System.CodeDom
 
         public string PropertyName
         {
-            get => _propertyName ?? string.Empty;
-            set => _propertyName = value;
+            get { return _propertyName ?? string.Empty; }
+            set { _propertyName = value; }
         }
     }
 }

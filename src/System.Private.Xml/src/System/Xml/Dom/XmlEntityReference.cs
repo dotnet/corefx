@@ -59,7 +59,7 @@ namespace System.Xml
         }
 
         // Gets or sets the value of the node.
-        public override string Value
+        public override String Value
         {
             get
             {
@@ -171,7 +171,7 @@ namespace System.Xml
             }*/
         }
 
-        public override string BaseURI
+        public override String BaseURI
         {
             get
             {
@@ -193,7 +193,7 @@ namespace System.Xml
         }
 
         //childrenBaseURI returns where the entity reference node's children come from
-        internal string ChildBaseURI
+        internal String ChildBaseURI
         {
             get
             {
@@ -206,7 +206,7 @@ namespace System.Xml
                     else
                         return ent.BaseURI;
                 }
-                return string.Empty;
+                return String.Empty;
             }
         }
     }

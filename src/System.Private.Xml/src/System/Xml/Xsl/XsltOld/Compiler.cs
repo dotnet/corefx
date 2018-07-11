@@ -30,7 +30,7 @@ namespace System.Xml.Xsl.XsltOld
         internal XmlSortOrder order;
         internal XmlCaseOrder caseOrder;
 
-        public Sort(int sortkey, string xmllang, XmlDataType datatype, XmlSortOrder xmlorder, XmlCaseOrder xmlcaseorder)
+        public Sort(int sortkey, String xmllang, XmlDataType datatype, XmlSortOrder xmlorder, XmlCaseOrder xmlcaseorder)
         {
             select = sortkey;
             lang = xmllang;
@@ -269,12 +269,12 @@ namespace System.Xml.Xsl.XsltOld
             InsertExcludedNamespace(Input.Navigator.GetAttribute(Input.Atoms.ExcludeResultPrefixes, Input.Atoms.UriXsl));
         }
 
-        internal bool IsExtensionNamespace(string nspace)
+        internal bool IsExtensionNamespace(String nspace)
         {
             return _scopeManager.IsExtensionNamespace(nspace);
         }
 
-        internal bool IsExcludedNamespace(string nspace)
+        internal bool IsExcludedNamespace(String nspace)
         {
             return _scopeManager.IsExcludedNamespace(nspace);
         }
@@ -382,7 +382,7 @@ namespace System.Xml.Xsl.XsltOld
             return _currentTemplate.AllocateVariableSlot();
         }
 
-        internal void AddNamespaceAlias(string StylesheetURI, NamespaceInfo AliasInfo)
+        internal void AddNamespaceAlias(String StylesheetURI, NamespaceInfo AliasInfo)
         {
             if (_globalNamespaceAliasTable == null)
             {
@@ -395,7 +395,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal bool IsNamespaceAlias(string StylesheetURI)
+        internal bool IsNamespaceAlias(String StylesheetURI)
         {
             if (_globalNamespaceAliasTable == null)
             {
@@ -404,7 +404,7 @@ namespace System.Xml.Xsl.XsltOld
             return _globalNamespaceAliasTable.Contains(StylesheetURI);
         }
 
-        internal NamespaceInfo FindNamespaceAlias(string StylesheetURI)
+        internal NamespaceInfo FindNamespaceAlias(String StylesheetURI)
         {
             if (_globalNamespaceAliasTable != null)
             {
@@ -413,17 +413,17 @@ namespace System.Xml.Xsl.XsltOld
             return null;
         }
 
-        internal string ResolveXmlNamespace(string prefix)
+        internal String ResolveXmlNamespace(String prefix)
         {
             return _scopeManager.ResolveXmlNamespace(prefix);
         }
 
-        internal string ResolveXPathNamespace(string prefix)
+        internal String ResolveXPathNamespace(String prefix)
         {
             return _scopeManager.ResolveXPathNamespace(prefix);
         }
 
-        internal string DefaultNamespace
+        internal String DefaultNamespace
         {
             get { return _scopeManager.DefaultNamespace; }
         }

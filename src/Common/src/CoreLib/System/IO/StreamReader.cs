@@ -1059,7 +1059,7 @@ namespace System.IO
             // data read in, let's try writing directly to the user's buffer.
             bool readToUserBuffer = false;
 
-            byte[] tmpByteBuffer = _byteBuffer;
+            Byte[] tmpByteBuffer = _byteBuffer;
             Stream tmpStream = _stream;
 
             int count = buffer.Length;
@@ -1290,7 +1290,7 @@ namespace System.IO
         {
             _charLen = 0;
             _charPos = 0;
-            byte[] tmpByteBuffer = _byteBuffer;
+            Byte[] tmpByteBuffer = _byteBuffer;
             Stream tmpStream = _stream;
 
             if (!_checkPreamble)

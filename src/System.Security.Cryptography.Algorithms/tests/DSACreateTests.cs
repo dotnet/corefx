@@ -78,7 +78,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 exportedPrivate = dsa.ExportParameters(true);
             }
 
-            DSAImportExport.AssertKeyEquals(parameters, exportedPrivate);
+            DSAImportExport.AssertKeyEquals(ref parameters, ref exportedPrivate);
         }
 
         [Fact]

@@ -6,16 +6,10 @@
 // Don't override IsAlwaysNormalized because it is just a Unicode Transformation and could be confused.
 //
 
-// This define can be used to turn off the fast loops. Useful for finding whether
-// the problem is fastloop-specific.
-#define FASTLOOP
-
 using System;
 using System.Globalization;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-
-using Internal.Runtime.CompilerServices;
 
 namespace System.Text
 {
@@ -29,13 +23,16 @@ namespace System.Text
         private static readonly byte[] s_bigEndianPreamble = new byte[2] { 0xfe, 0xff };
         private static readonly byte[] s_littleEndianPreamble = new byte[2] { 0xff, 0xfe };
 
-        private bool isThrowException = false;
+        internal bool isThrowException = false;
 
-        private bool bigEndian = false;
-        private bool byteOrderMark = true;
+        internal bool bigEndian = false;
+        internal bool byteOrderMark = true;
 
         // Unicode version 2.0 character size in bytes
         public const int CharSize = 2;
+
+        // endianness-based bit pattern mask.
+        static readonly ulong highLowPatternMask = ((ulong) 0xd800d800d800d800 | (BitConverter.IsLittleEndian ? (ulong) 0x0400000004000000 : (ulong) 0x0000040000000400)); 
 
         public UnicodeEncoding()
             : this(false, true)
@@ -61,7 +58,7 @@ namespace System.Text
                 SetDefaultFallbacks();
         }
 
-        internal sealed override void SetDefaultFallbacks()
+        internal override void SetDefaultFallbacks()
         {
             // For UTF-X encodings, we use a replacement fallback with an empty string
             if (this.isThrowException)
@@ -116,7 +113,7 @@ namespace System.Text
         // EncodingNLS, UTF7Encoding, UTF8Encoding, UTF32Encoding, ASCIIEncoding, UnicodeEncoding
         // parent method is safe
 
-        public override unsafe int GetByteCount(string s)
+        public override unsafe int GetByteCount(String s)
         {
             // Validate input
             if (s==null)
@@ -149,7 +146,7 @@ namespace System.Text
         // So if you fix this, fix the others.  Currently those include:
         // EncodingNLS, UTF7Encoding, UTF8Encoding, UTF32Encoding, ASCIIEncoding, UnicodeEncoding
 
-        public override unsafe int GetBytes(string s, int charIndex, int charCount,
+        public override unsafe int GetBytes(String s, int charIndex, int charCount,
                                               byte[] bytes, int byteIndex)
         {
             if (s == null || bytes == null)
@@ -357,7 +354,7 @@ namespace System.Text
         // End of standard methods copied from EncodingNLS.cs
         //
 
-        internal sealed override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
+        internal override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
         {
             Debug.Assert(chars != null, "[UnicodeEncoding.GetByteCount]chars!=null");
             Debug.Assert(count >= 0, "[UnicodeEncoding.GetByteCount]count >=0");
@@ -376,6 +373,11 @@ namespace System.Text
             char charLeftOver = (char)0;
 
             bool wasHereBefore = false;
+
+            // Need -1 to check 2 at a time.  If we have an even #, longChars will go
+            // from longEnd - 1/2 long to longEnd + 1/2 long.  If we're odd, longChars
+            // will go from longEnd - 1 long to longEnd. (Might not get to use this)
+            ulong* longEnd = (ulong*)(charEnd - 3);
 
             // For fallback we may need a fallback buffer
             EncoderFallbackBuffer fallbackBuffer = null;
@@ -410,21 +412,16 @@ namespace System.Text
                 if (ch == 0)
                 {
                     // No fallback, maybe we can do it fast
-#if FASTLOOP
+#if !NO_FAST_UNICODE_LOOP
                     // If endianess is backwards then each pair of bytes would be backwards.
-                    if ( (bigEndian ^ BitConverter.IsLittleEndian) &&
-#if BIT64
-                        (unchecked((long)chars) & 7) == 0 &&
-#else
-                        (unchecked((int)chars) & 3) == 0 &&
-#endif
-                        charLeftOver == 0)
-                    {
-                        // Need -1 to check 2 at a time.  If we have an even #, longChars will go
-                        // from longEnd - 1/2 long to longEnd + 1/2 long.  If we're odd, longChars
-                        // will go from longEnd - 1 long to longEnd. (Might not get to use this)
-                        ulong* longEnd = (ulong*)(charEnd - 3);
+                    if ( (bigEndian ^ BitConverter.IsLittleEndian) && 
 
+#if BIT64           // 64 bit CPU needs to be long aligned for this to work.
+                          charLeftOver == 0 && (unchecked((long)chars) & 7) == 0)
+#else
+                          charLeftOver == 0 && (unchecked((int)chars) & 3) == 0)
+#endif
+                    {
                         // Need new char* so we can check 4 at a time
                         ulong* longChars = (ulong*)chars;
 
@@ -455,8 +452,7 @@ namespace System.Text
 
                                     // If they happen to be high/low/high/low, we may as well continue.  Check the next
                                     // bit to see if its set (low) or not (high) in the right pattern
-                                    if ((0xfc00fc00fc00fc00 & *longChars) !=
-                                            (BitConverter.IsLittleEndian ? (ulong)0xdc00d800dc00d800 : (ulong)0xd800dc00d800dc00))
+                                    if (((0xfc00fc00fc00fc00 & *longChars) ^ highLowPatternMask) != 0)
                                     {
                                         // Either there weren't 4 surrogates, or the 0x0400 bit was set when a high
                                         // was hoped for or the 0x0400 bit wasn't set where a low was hoped for.
@@ -479,7 +475,7 @@ namespace System.Text
                         if (chars >= charEnd)
                             break;
                     }
-#endif // FASTLOOP
+#endif // !NO_FAST_UNICODE_LOOP
 
                     // No fallback, just get next char
                     ch = *chars;
@@ -650,8 +646,8 @@ namespace System.Text
             return byteCount;
         }
 
-        internal sealed override unsafe int GetBytes(
-            char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
+        internal override unsafe int GetBytes(char* chars, int charCount,
+                                                byte* bytes, int byteCount, EncoderNLS encoder)
         {
             Debug.Assert(chars != null, "[UnicodeEncoding.GetBytes]chars!=null");
             Debug.Assert(byteCount >= 0, "[UnicodeEncoding.GetBytes]byteCount >=0");
@@ -699,14 +695,14 @@ namespace System.Text
                 if (ch == 0)
                 {
                     // No fallback, maybe we can do it fast
-#if FASTLOOP
+#if !NO_FAST_UNICODE_LOOP
                     // If endianess is backwards then each pair of bytes would be backwards.
                     if ( (bigEndian ^ BitConverter.IsLittleEndian) && 
-#if BIT64
-                        (unchecked((long)chars) & 7) == 0 &&
+#if BIT64           // 64 bit CPU needs to be long aligned for this to work, 32 bit CPU needs to be 32 bit aligned
+                        (unchecked((long)chars) & 7) == 0 && (unchecked((long)bytes) & 7) == 0 &&
 #else
-                        (unchecked((int)chars) & 3) == 0 &&
-#endif
+                        (unchecked((int)chars) & 3) == 0 && (unchecked((int)bytes) & 3) == 0 &&
+#endif // BIT64
                         charLeftOver == 0)
                     {
                         // Need -1 to check 2 at a time.  If we have an even #, longChars will go
@@ -748,8 +744,7 @@ namespace System.Text
 
                                     // If they happen to be high/low/high/low, we may as well continue.  Check the next
                                     // bit to see if its set (low) or not (high) in the right pattern
-                                    if ((0xfc00fc00fc00fc00 & *longChars) !=
-                                            (BitConverter.IsLittleEndian ? (ulong)0xdc00d800dc00d800 : (ulong)0xd800dc00d800dc00))
+                                    if (((0xfc00fc00fc00fc00 & *longChars) ^ highLowPatternMask) != 0)
                                     {
                                         // Either there weren't 4 surrogates, or the 0x0400 bit was set when a high
                                         // was hoped for or the 0x0400 bit wasn't set where a low was hoped for.
@@ -764,7 +759,7 @@ namespace System.Text
                             // else all < 0x8000 so we can use them
 
                             // We can use these 4 chars.
-                            Unsafe.WriteUnaligned<ulong>(longBytes, *longChars);
+                            *longBytes = *longChars;
                             longChars++;
                             longBytes++;
                         }
@@ -775,7 +770,62 @@ namespace System.Text
                         if (chars >= charEnd)
                             break;
                     }
-#endif // FASTLOOP
+                    // Not aligned, but maybe we can still be somewhat faster
+                    // Also somehow this optimizes the above loop?  It seems to cause something above
+                    // to get enregistered, but I haven't figured out how to make that happen without this loop.
+                    else if ((charLeftOver == 0) &&
+                        (bigEndian ^ BitConverter.IsLittleEndian) && 
+
+#if BIT64
+                        (unchecked((long)chars) & 7) != (unchecked((long)bytes) & 7) &&  // Only do this if chars & bytes are out of line, otherwise faster loop will be faster next time
+#else
+                        (unchecked((int)chars) & 3) != (unchecked((int)bytes) & 3) &&  // Only do this if chars & bytes are out of line, otherwise faster loop will be faster next time
+#endif // BIT64
+                        (unchecked((int)(bytes)) & 1) == 0)
+                    {
+                        // # to use
+                        long iCount = ((byteEnd - bytes) >> 1 < charEnd - chars) ?
+                                       (byteEnd - bytes) >> 1 : charEnd - chars;
+
+                        // Need new char*
+                        char* charOut = ((char*)bytes);     // a char* for our output
+                        char* tempEnd = chars + iCount - 1; // Our end pointer
+
+                        while (chars < tempEnd)
+                        {
+                            if (*chars >= (char)0xd800 && *chars <= (char)0xdfff)
+                            {
+                                // break for fallback for low surrogate
+                                if (*chars >= 0xdc00)
+                                    break;
+
+                                // break if next one's not a low surrogate (will do fallback)
+                                if (*(chars + 1) < 0xdc00 || *(chars + 1) > 0xdfff)
+                                    break;
+
+                                // They both exist, use them
+                            }
+                            // If 2nd char is surrogate & this one isn't then only add one
+                            else if (*(chars + 1) >= (char)0xd800 && *(chars + 1) <= 0xdfff)
+                            {
+                                *charOut = *chars;
+                                charOut++;
+                                chars++;
+                                continue;
+                            }
+
+                            *charOut = *chars;
+                            *(charOut + 1) = *(chars + 1);
+                            charOut += 2;
+                            chars += 2;
+                        }
+
+                        bytes = (byte*)charOut;
+
+                        if (chars >= charEnd)
+                            break;
+                    }
+#endif // !NO_FAST_UNICODE_LOOP
 
                     // No fallback, just get next char
                     ch = *chars;
@@ -1004,10 +1054,13 @@ namespace System.Text
                 encoder == null || !encoder._throwOnOverflow,
                 "[UnicodeEncoding.GetBytes]Expected empty fallback buffer if not converting");
 
+            // We used to copy it fast, but this doesn't check for surrogates
+            // System.IO.__UnmanagedMemoryStream.memcpyimpl(bytes, (byte*)chars, usedByteCount);
+
             return (int)(bytes - byteStart);
         }
 
-        internal sealed override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
+        internal override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
         {
             Debug.Assert(bytes != null, "[UnicodeEncoding.GetCharCount]bytes!=null");
             Debug.Assert(count >= 0, "[UnicodeEncoding.GetCharCount]count >=0");
@@ -1023,6 +1076,11 @@ namespace System.Text
 
             // Start by assuming same # of chars as bytes
             int charCount = count >> 1;
+
+            // Need -1 to check 2 at a time.  If we have an even #, longBytes will go
+            // from longEnd - 1/2 long to longEnd + 1/2 long.  If we're odd, longBytes
+            // will go from longEnd - 1 long to longEnd. (Might not get to use this)
+            ulong* longEnd = (ulong*)(byteEnd - 7);
 
             // For fallback we may need a fallback buffer
             DecoderFallbackBuffer fallbackBuffer = null;
@@ -1052,20 +1110,15 @@ namespace System.Text
             {
                 // If we're aligned then maybe we can do it fast
                 // That'll hurt if we're unaligned because we'll always test but never be aligned
-#if FASTLOOP
+#if !NO_FAST_UNICODE_LOOP
                 if ((bigEndian ^ BitConverter.IsLittleEndian) &&
-#if BIT64
+#if BIT64 // win64 has to be long aligned
                     (unchecked((long)bytes) & 7) == 0 &&
 #else
                     (unchecked((int)bytes) & 3) == 0 &&
 #endif // BIT64
                     lastByte == -1 && lastChar == 0)
                 {
-                    // Need -1 to check 2 at a time.  If we have an even #, longBytes will go
-                    // from longEnd - 1/2 long to longEnd + 1/2 long.  If we're odd, longBytes
-                    // will go from longEnd - 1 long to longEnd. (Might not get to use this)
-                    ulong* longEnd = (ulong*)(byteEnd - 7);
-
                     // Need new char* so we can check 4 at a time
                     ulong* longBytes = (ulong*)bytes;
 
@@ -1096,8 +1149,7 @@ namespace System.Text
 
                                 // If they happen to be high/low/high/low, we may as well continue.  Check the next
                                 // bit to see if its set (low) or not (high) in the right pattern
-                                if ((0xfc00fc00fc00fc00 & *longBytes) !=
-                                        (BitConverter.IsLittleEndian ? (ulong)0xdc00d800dc00d800 : (ulong)0xd800dc00d800dc00))
+                                if (((0xfc00fc00fc00fc00 & *longBytes) ^ highLowPatternMask) != 0)
                                 {
                                     // Either there weren't 4 surrogates, or the 0x0400 bit was set when a high
                                     // was hoped for or the 0x0400 bit wasn't set where a low was hoped for.
@@ -1120,7 +1172,7 @@ namespace System.Text
                     if (bytes >= byteEnd)
                         break;
                 }
-#endif // FASTLOOP
+#endif // !NO_FAST_UNICODE_LOOP
 
                 // Get 1st byte
                 if (lastByte < 0)
@@ -1334,8 +1386,8 @@ namespace System.Text
             return charCount;
         }
 
-        internal sealed override unsafe int GetChars(
-            byte* bytes, int byteCount, char* chars, int charCount, DecoderNLS baseDecoder)
+        internal override unsafe int GetChars(byte* bytes, int byteCount,
+                                                char* chars, int charCount, DecoderNLS baseDecoder)
         {
             Debug.Assert(chars != null, "[UnicodeEncoding.GetChars]chars!=null");
             Debug.Assert(byteCount >= 0, "[UnicodeEncoding.GetChars]byteCount >=0");
@@ -1373,13 +1425,13 @@ namespace System.Text
             {
                 // If we're aligned then maybe we can do it fast
                 // That'll hurt if we're unaligned because we'll always test but never be aligned
-#if FASTLOOP
+#if !NO_FAST_UNICODE_LOOP
                 if ((bigEndian ^ BitConverter.IsLittleEndian) &&
-#if BIT64
-                    (unchecked((long)chars) & 7) == 0 &&
+#if BIT64 // win64 has to be long aligned
+                    (unchecked((long)chars) & 7) == 0 && (unchecked((long)bytes) & 7) == 0 &&
 #else
-                    (unchecked((int)chars) & 3) == 0 &&
-#endif
+                    (unchecked((int)chars) & 3) == 0 && (unchecked((int)bytes) & 3) == 0 &&
+#endif // BIT64
                     lastByte == -1 && lastChar == 0)
                 {
                     // Need -1 to check 2 at a time.  If we have an even #, longChars will go
@@ -1421,8 +1473,7 @@ namespace System.Text
 
                                 // If they happen to be high/low/high/low, we may as well continue.  Check the next
                                 // bit to see if its set (low) or not (high) in the right pattern
-                                if ((0xfc00fc00fc00fc00 & *longBytes) !=
-                                        (BitConverter.IsLittleEndian ? (ulong)0xdc00d800dc00d800 : (ulong)0xd800dc00d800dc00))
+                                if (((0xfc00fc00fc00fc00 & *longBytes) ^ highLowPatternMask) != 0)
                                 {
                                     // Either there weren't 4 surrogates, or the 0x0400 bit was set when a high
                                     // was hoped for or the 0x0400 bit wasn't set where a low was hoped for.
@@ -1437,7 +1488,7 @@ namespace System.Text
                         // else all < 0x8000 so we can use them
 
                         // We can use these 4 chars.
-                        Unsafe.WriteUnaligned<ulong>(longChars, *longBytes);
+                        *longChars = *longBytes;
                         longBytes++;
                         longChars++;
                     }
@@ -1448,7 +1499,7 @@ namespace System.Text
                     if (bytes >= byteEnd)
                         break;
                 }
-#endif // FASTLOOP
+#endif // !NO_FAST_UNICODE_LOOP
 
                 // Get 1st byte
                 if (lastByte < 0)
@@ -1757,6 +1808,9 @@ namespace System.Text
                 decoder.lastByte = lastByte;
             }
 
+            // Used to do this the old way
+            // System.IO.__UnmanagedMemoryStream.memcpyimpl((byte*)chars, bytes, byteCount);
+
             // Shouldn't have anything in fallback buffer for GetChars
             // (don't have to check _throwOnOverflow for count or chars)
             Debug.Assert(fallbackBuffer == null || fallbackBuffer.Remaining == 0,
@@ -1789,7 +1843,7 @@ namespace System.Text
                 else
                     return new byte[2] { 0xff, 0xfe };
             }
-            return Array.Empty<byte>();
+            return Array.Empty<Byte>();
         }
 
         public override ReadOnlySpan<byte> Preamble =>
@@ -1842,7 +1896,7 @@ namespace System.Text
         }
 
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             UnicodeEncoding that = value as UnicodeEncoding;
             if (that != null)

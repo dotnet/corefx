@@ -12,15 +12,14 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Text;
 
 namespace System.Text.RegularExpressions
 {
-    internal ref struct RegexParser
+    internal sealed class RegexParser
     {
-        private const int EscapeMaxBufferSize = 256;
-        private const int OptionStackDefaultSize = 32;
         private const int MaxValueDiv10 = int.MaxValue / 10;
         private const int MaxValueMod10 = int.MaxValue % 10;
 
@@ -30,9 +29,9 @@ namespace System.Text.RegularExpressions
         private RegexNode _concatenation;
         private RegexNode _unit;
 
-        private readonly string _pattern;
+        private string _pattern;
         private int _currentPos;
-        private readonly CultureInfo _culture;
+        private CultureInfo _culture;
 
         private int _autocap;
         private int _capcount;
@@ -46,210 +45,189 @@ namespace System.Text.RegularExpressions
         private List<string> _capnamelist;
 
         private RegexOptions _options;
-        private ValueListBuilder<RegexOptions> _optionsStack;
+        private List<RegexOptions> _optionsStack;
 
-        private bool _ignoreNextParen; // flag to skip capturing a parentheses group
+        private bool _ignoreNextParen = false;
 
-        private RegexParser(string pattern, RegexOptions options, CultureInfo culture, Hashtable caps, int capsize, Hashtable capnames, Span<RegexOptions> optionSpan)
+        /*
+         * This static call constructs a RegexTree from a regular expression
+         * pattern string and an option string.
+         *
+         * The method creates, drives, and drops a parser instance.
+         */
+        public static RegexTree Parse(string re, RegexOptions op)
         {
-            Debug.Assert(pattern != null, "Pattern must be set");
-            Debug.Assert(culture != null, "Culture must be set");
+            RegexParser p;
+            RegexNode root;
+            string[] capnamelist;
 
-            _pattern = pattern;
-            _options = options;
-            _culture = culture;
-            _caps = caps;
-            _capsize = capsize;
-            _capnames = capnames;
+            p = new RegexParser((op & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
 
-            _optionsStack = new ValueListBuilder<RegexOptions>(optionSpan);
-            _stack = default;
-            _group = default;
-            _alternation = default;
-            _concatenation = default;
-            _unit = default;
-            _currentPos = 0;
-            _autocap = default;
-            _capcount = default;
-            _captop = default;
-            _capnumlist = default;
-            _capnamelist = default;
-            _ignoreNextParen = false;
+            p._options = op;
+
+            p.SetPattern(re);
+            p.CountCaptures();
+            p.Reset(op);
+            root = p.ScanRegex();
+
+            if (p._capnamelist == null)
+                capnamelist = null;
+            else
+                capnamelist = p._capnamelist.ToArray();
+
+            return new RegexTree(root, p._caps, p._capnumlist, p._captop, p._capnames, capnamelist, op);
         }
 
-        private RegexParser(string pattern, RegexOptions options, CultureInfo culture, Span<RegexOptions> optionSpan)
-            : this(pattern, options, culture, new Hashtable(), default, null, optionSpan)
+        /*
+         * This static call constructs a flat concatenation node given
+         * a replacement pattern.
+         */
+        public static RegexReplacement ParseReplacement(string rep, Hashtable caps, int capsize, Hashtable capnames, RegexOptions op)
         {
+            RegexParser p;
+            RegexNode root;
+
+            p = new RegexParser((op & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
+
+            p._options = op;
+
+            p.NoteCaptures(caps, capsize, capnames);
+            p.SetPattern(rep);
+            root = p.ScanReplacement();
+
+            return new RegexReplacement(rep, root, caps);
         }
 
-        public static RegexTree Parse(string pattern, RegexOptions options, CultureInfo culture)
-        {
-            Span<RegexOptions> optionSpan = stackalloc RegexOptions[OptionStackDefaultSize];
-            var parser = new RegexParser(pattern, options, culture, optionSpan);
-
-            parser.CountCaptures();
-            parser.Reset(options);
-            RegexNode root = parser.ScanRegex();
-            string[] capnamelist = parser._capnamelist?.ToArray();
-            var tree = new RegexTree(root, parser._caps, parser._capnumlist, parser._captop, parser._capnames, capnamelist, options);
-            parser.Dispose();
-
-            return tree;
-        }
-
-        /// <summary>
-        /// This static call constructs a flat concatenation node given a replacement pattern.
-        /// </summary>
-        public static RegexReplacement ParseReplacement(string pattern, RegexOptions options, Hashtable caps, int capsize, Hashtable capnames)
-        {
-            CultureInfo culture = (options & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture;
-            Span<RegexOptions> optionSpan = stackalloc RegexOptions[OptionStackDefaultSize];
-            var parser = new RegexParser(pattern, options, culture, caps, capsize, capnames, optionSpan);
-
-            RegexNode root = parser.ScanReplacement();
-            var regexReplacement = new RegexReplacement(pattern, root, caps);
-            parser.Dispose();
-
-            return regexReplacement;
-        }
-
-        /// <summary>
-        /// Escapes all metacharacters (including |,(,),[,{,|,^,$,*,+,?,\, spaces and #)
-        /// </summary>
+        /*
+         * Escapes all metacharacters (including |,(,),[,{,|,^,$,*,+,?,\, spaces and #)
+         */
         public static string Escape(string input)
         {
             for (int i = 0; i < input.Length; i++)
             {
                 if (IsMetachar(input[i]))
                 {
-                    return EscapeImpl(input, i);
+                    StringBuilder sb = StringBuilderCache.Acquire();
+                    char ch = input[i];
+                    int lastpos;
+
+                    sb.Append(input, 0, i);
+                    do
+                    {
+                        sb.Append('\\');
+                        switch (ch)
+                        {
+                            case '\n':
+                                ch = 'n';
+                                break;
+                            case '\r':
+                                ch = 'r';
+                                break;
+                            case '\t':
+                                ch = 't';
+                                break;
+                            case '\f':
+                                ch = 'f';
+                                break;
+                        }
+                        sb.Append(ch);
+                        i++;
+                        lastpos = i;
+
+                        while (i < input.Length)
+                        {
+                            ch = input[i];
+                            if (IsMetachar(ch))
+                                break;
+
+                            i++;
+                        }
+
+                        sb.Append(input, lastpos, i - lastpos);
+                    } while (i < input.Length);
+
+                    return StringBuilderCache.GetStringAndRelease(sb);
                 }
             }
 
             return input;
         }
 
-        private static string EscapeImpl(string input, int i)
-        {
-            // For small inputs we allocate on the stack. In most cases a buffer three 
-            // times larger the original string should be sufficient as usually not all 
-            // characters need to be encoded.
-            // For larger string we rent the input string's length plus a fixed 
-            // conservative amount of chars from the ArrayPool.
-            Span<char> buffer = input.Length <= (EscapeMaxBufferSize / 3) ? stackalloc char[EscapeMaxBufferSize] : default;
-            ValueStringBuilder vsb = !buffer.IsEmpty ?
-                new ValueStringBuilder(buffer) :
-                new ValueStringBuilder(input.Length + 200);
-
-            char ch = input[i];
-            vsb.Append(input.AsSpan(0, i));
-
-            do
-            {
-                vsb.Append('\\');
-                switch (ch)
-                {
-                    case '\n':
-                        ch = 'n';
-                        break;
-                    case '\r':
-                        ch = 'r';
-                        break;
-                    case '\t':
-                        ch = 't';
-                        break;
-                    case '\f':
-                        ch = 'f';
-                        break;
-                }
-                vsb.Append(ch);
-                i++;
-                int lastpos = i;
-
-                while (i < input.Length)
-                {
-                    ch = input[i];
-                    if (IsMetachar(ch))
-                        break;
-
-                    i++;
-                }
-
-                vsb.Append(input.AsSpan(lastpos, i - lastpos));
-            } while (i < input.Length);
-
-            return vsb.ToString();
-        }
-
-        /// <summary>
-        /// Unescapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #)
-        /// </summary>
+        /*
+         * Escapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #)
+         */
         public static string Unescape(string input)
         {
             for (int i = 0; i < input.Length; i++)
             {
                 if (input[i] == '\\')
                 {
-                    return UnescapeImpl(input, i);
+                    StringBuilder sb = StringBuilderCache.Acquire();
+                    RegexParser p = new RegexParser(CultureInfo.InvariantCulture);
+                    int lastpos;
+                    p.SetPattern(input);
+
+                    sb.Append(input, 0, i);
+                    do
+                    {
+                        i++;
+                        p.Textto(i);
+                        if (i < input.Length)
+                            sb.Append(p.ScanCharEscape());
+                        i = p.Textpos();
+                        lastpos = i;
+                        while (i < input.Length && input[i] != '\\')
+                            i++;
+                        sb.Append(input, lastpos, i - lastpos);
+                    } while (i < input.Length);
+
+                    return StringBuilderCache.GetStringAndRelease(sb);
                 }
             }
 
             return input;
         }
 
-        private static string UnescapeImpl(string input, int i)
+        /*
+         * Private constructor.
+         */
+        private RegexParser(CultureInfo culture)
         {
-            Span<RegexOptions> optionSpan = stackalloc RegexOptions[OptionStackDefaultSize];
-            var parser = new RegexParser(input, RegexOptions.None, CultureInfo.InvariantCulture, optionSpan);
-
-            // In the worst case the escaped string has the same length.
-            // For small inputs we use stack allocation.
-            Span<char> buffer = input.Length <= EscapeMaxBufferSize ? stackalloc char[EscapeMaxBufferSize] : default;
-            ValueStringBuilder vsb = !buffer.IsEmpty ?
-                new ValueStringBuilder(buffer) :
-                new ValueStringBuilder(input.Length);
-
-            vsb.Append(input.AsSpan(0, i));
-            do
-            {
-                i++;
-                parser.Textto(i);
-                if (i < input.Length)
-                    vsb.Append(parser.ScanCharEscape());
-                i = parser.Textpos();
-                int lastpos = i;
-                while (i < input.Length && input[i] != '\\')
-                    i++;
-                vsb.Append(input.AsSpan(lastpos, i - lastpos));
-            } while (i < input.Length);
-
-            parser.Dispose();
-
-            return vsb.ToString();
+            _culture = culture;
+            _optionsStack = new List<RegexOptions>();
+            _caps = new Hashtable();
         }
 
-        /// <summary>
-        /// Resets parsing to the beginning of the pattern.
-        /// </summary>
-        private void Reset(RegexOptions options)
+        /*
+         * Drops a string into the pattern buffer.
+         */
+        private void SetPattern(string Re)
+        {
+            if (Re == null)
+                Re = string.Empty;
+            _pattern = Re;
+            _currentPos = 0;
+        }
+
+        /*
+         * Resets parsing to the beginning of the pattern.
+         */
+        private void Reset(RegexOptions topopts)
         {
             _currentPos = 0;
             _autocap = 1;
             _ignoreNextParen = false;
-            _optionsStack.Length = 0;
-            _options = options;
-            _stack = null;
-        }
 
-        public void Dispose()
-        {
-            _optionsStack.Dispose();
+            if (_optionsStack.Count > 0)
+                _optionsStack.RemoveRange(0, _optionsStack.Count - 1);
+
+            _options = topopts;
+            _stack = null;
         }
 
         /*
          * The main parsing function.
          */
-
         private RegexNode ScanRegex()
         {
             char ch = '@'; // nonspecial ch, means at beginning
@@ -269,10 +247,10 @@ namespace System.Text.RegularExpressions
                 // move past all of the normal characters.  We'll stop when we hit some kind of control character,
                 // or if IgnorePatternWhiteSpace is on, we'll stop when we see some whitespace.
                 if (UseOptionX())
-                    while (CharsRight() > 0 && (!IsStopperX(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
+                    while (CharsRight() > 0 && (!IsStopperX(ch = RightChar()) || ch == '{' && !IsTrueQuantifier()))
                         MoveRight();
                 else
-                    while (CharsRight() > 0 && (!IsSpecial(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
+                    while (CharsRight() > 0 && (!IsSpecial(ch = RightChar()) || ch == '{' && !IsTrueQuantifier()))
                         MoveRight();
 
                 int endpos = Textpos();
@@ -349,9 +327,6 @@ namespace System.Text.RegularExpressions
                         break;
 
                     case '\\':
-                        if (CharsRight() == 0)
-                            throw MakeException(RegexParseError.IllegalEndEscape, SR.IllegalEndEscape);
-
                         AddUnitNode(ScanBackslash(scanOnly: false));
                         break;
 
@@ -488,15 +463,18 @@ namespace System.Text.RegularExpressions
          */
         private RegexNode ScanReplacement()
         {
+            int c;
+            int startpos;
+
             _concatenation = new RegexNode(RegexNode.Concatenate, _options);
 
             for (; ;)
             {
-                int c = CharsRight();
+                c = CharsRight();
                 if (c == 0)
                     break;
 
-                int startpos = Textpos();
+                startpos = Textpos();
 
                 while (c > 0 && RightChar() != '$')
                 {
@@ -618,13 +596,17 @@ namespace System.Text.RegularExpressions
                     // It currently doesn't do anything other than skip the whole thing!
                     if (CharsRight() > 0 && RightChar() == ':' && !inRange)
                     {
+                        string name;
                         int savePos = Textpos();
 
                         MoveRight();
+                        name = ScanCapname();
                         if (CharsRight() < 2 || RightCharMoveRight() != ':' || RightCharMoveRight() != ']')
                             Textto(savePos);
+                        // else lookup name (nyi)
                     }
                 }
+
 
                 if (inRange)
                 {
@@ -699,6 +681,11 @@ namespace System.Text.RegularExpressions
          */
         private RegexNode ScanGroupOpen()
         {
+            char ch = '\0';
+            int NodeType;
+            char close = '>';
+
+
             // just return a RegexNode if we have:
             // 1. "(" followed by nothing
             // 2. "(x" where x != ?
@@ -721,9 +708,6 @@ namespace System.Text.RegularExpressions
                 if (CharsRight() == 0)
                     break;
 
-                int NodeType;
-                char close = '>';
-                char ch;
                 switch (ch = RightCharMoveRight())
                 {
                     case ':':
@@ -992,7 +976,6 @@ namespace System.Text.RegularExpressions
                         RightChar(1) != '?' || RightChar() != '(')
                         return;
 
-                    // skip comment (?# ...)
                     while (CharsRight() > 0 && RightChar() != ')')
                         MoveRight();
                     if (CharsRight() == 0)
@@ -1008,9 +991,12 @@ namespace System.Text.RegularExpressions
          */
         private RegexNode ScanBackslash(bool scanOnly)
         {
-            Debug.Assert(CharsRight() > 0, "The current reading position must not be at the end of the pattern");
-
             char ch;
+            RegexCharClass cc;
+
+            if (CharsRight() == 0)
+                throw MakeException(RegexParseError.IllegalEndEscape, SR.IllegalEndEscape);
+
             switch (ch = RightChar())
             {
                 case 'b':
@@ -1077,7 +1063,7 @@ namespace System.Text.RegularExpressions
                     MoveRight();
                     if (scanOnly)
                         return null;
-                    var cc = new RegexCharClass();
+                    cc = new RegexCharClass();
                     cc.AddCategoryFromName(ParseProperty(), (ch != 'p'), UseOptionI(), _pattern, _currentPos);
                     if (UseOptionI())
                         cc.AddLowercase(_culture);
@@ -1097,10 +1083,13 @@ namespace System.Text.RegularExpressions
             if (CharsRight() == 0)
                 throw MakeException(RegexParseError.IllegalEndEscape, SR.IllegalEndEscape);
 
-            int backpos = Textpos();
-            char close = '\0';
+            char ch;
             bool angled = false;
-            char ch = RightChar();
+            char close = '\0';
+            int backpos;
+
+            backpos = Textpos();
+            ch = RightChar();
 
             // allow \k<foo> instead of \<foo>, which is now deprecated
 
@@ -1363,10 +1352,13 @@ namespace System.Text.RegularExpressions
          */
         private char ScanOctal()
         {
-            // Consume octal chars only up to 3 digits and value 0377
-            int c = 3;
             int d;
             int i;
+            int c;
+
+            // Consume octal chars only up to 3 digits and value 0377
+
+            c = 3;
 
             if (c > CharsRight())
                 c = CharsRight();
@@ -1414,8 +1406,10 @@ namespace System.Text.RegularExpressions
          */
         private char ScanHex(int c)
         {
-            int i = 0;
+            int i;
             int d;
+
+            i = 0;
 
             if (CharsRight() >= c)
             {
@@ -1456,10 +1450,12 @@ namespace System.Text.RegularExpressions
          */
         private char ScanControl()
         {
-            if (CharsRight() == 0)
+            char ch;
+
+            if (CharsRight() <= 0)
                 throw MakeException(RegexParseError.MissingControl, SR.MissingControl);
 
-            char ch = RightCharMoveRight();
+            ch = RightCharMoveRight();
 
             // \ca interpreted as \cA
 
@@ -1475,11 +1471,12 @@ namespace System.Text.RegularExpressions
         /*
          * Returns true for options allowed only at the top level
          */
-        private bool IsOnlyTopOption(RegexOptions options)
+        private bool IsOnlyTopOption(RegexOptions option)
         {
-            return options == RegexOptions.RightToLeft ||
-                options == RegexOptions.CultureInvariant ||
-                options == RegexOptions.ECMAScript;
+            return (option == RegexOptions.RightToLeft
+                || option == RegexOptions.CultureInvariant
+                || option == RegexOptions.ECMAScript
+            );
         }
 
         /*
@@ -1487,9 +1484,13 @@ namespace System.Text.RegularExpressions
          */
         private void ScanOptions()
         {
-            for (bool off = false; CharsRight() > 0; MoveRight())
+            char ch;
+            bool off;
+            RegexOptions option;
+
+            for (off = false; CharsRight() > 0; MoveRight())
             {
-                char ch = RightChar();
+                ch = RightChar();
 
                 if (ch == '-')
                 {
@@ -1501,14 +1502,14 @@ namespace System.Text.RegularExpressions
                 }
                 else
                 {
-                    RegexOptions options = OptionFromCode(ch);
-                    if (options == 0 || IsOnlyTopOption(options))
+                    option = OptionFromCode(ch);
+                    if (option == 0 || IsOnlyTopOption(option))
                         return;
 
                     if (off)
-                        _options &= ~options;
+                        _options &= ~option;
                     else
-                        _options |= options;
+                        _options |= option;
                 }
             }
         }
@@ -1518,7 +1519,9 @@ namespace System.Text.RegularExpressions
          */
         private char ScanCharEscape()
         {
-            char ch = RightCharMoveRight();
+            char ch;
+
+            ch = RightCharMoveRight();
 
             if (ch >= '0' && ch <= '7')
             {
@@ -1566,7 +1569,6 @@ namespace System.Text.RegularExpressions
             {
                 throw MakeException(RegexParseError.IncompleteSlashP, SR.IncompleteSlashP);
             }
-
             char ch = RightCharMoveRight();
             if (ch != '{')
             {
@@ -1655,6 +1657,8 @@ namespace System.Text.RegularExpressions
          */
         private void CountCaptures()
         {
+            char ch;
+
             NoteCaptureSlot(0, 0);
 
             _autocap = 1;
@@ -1662,7 +1666,7 @@ namespace System.Text.RegularExpressions
             while (CharsRight() > 0)
             {
                 int pos = Textpos();
-                char ch = RightCharMoveRight();
+                ch = RightCharMoveRight();
                 switch (ch)
                 {
                     case '\\':
@@ -1690,7 +1694,6 @@ namespace System.Text.RegularExpressions
                     case '(':
                         if (CharsRight() >= 2 && RightChar(1) == '#' && RightChar() == '?')
                         {
-                            // we have a comment (?#
                             MoveLeft();
                             ScanBlank();
                         }
@@ -1748,9 +1751,6 @@ namespace System.Text.RegularExpressions
                             }
                             else
                             {
-                                // Simple (unnamed) capture group.
-                                // Add unnamend parentheses if ExplicitCapture is not set
-                                // and the next parentheses is not ignored.
                                 if (!UseOptionN() && !_ignoreNextParen)
                                     NoteCaptureSlot(_autocap++, pos);
                             }
@@ -1778,7 +1778,10 @@ namespace System.Text.RegularExpressions
 
                 if (_captop <= i)
                 {
-                    _captop = i == int.MaxValue ? i : i + 1;
+                    if (i == int.MaxValue)
+                        _captop = i;
+                    else
+                        _captop = i + 1;
                 }
             }
         }
@@ -1799,6 +1802,16 @@ namespace System.Text.RegularExpressions
                 _capnames.Add(name, pos);
                 _capnamelist.Add(name);
             }
+        }
+
+        /*
+         * For when all the used captures are known: note them all at once
+         */
+        private void NoteCaptures(Hashtable caps, int capsize, Hashtable capnames)
+        {
+            _caps = caps;
+            _capsize = capsize;
+            _capnames = capnames;
         }
 
         /*
@@ -1862,7 +1875,7 @@ namespace System.Text.RegularExpressions
 
                 for (int i = 0; i < _capcount; i++)
                 {
-                    int j = (_capnumlist == null) ? i : _capnumlist[i];
+                    int j = (_capnumlist == null) ? i : (int)_capnumlist[i];
 
                     if (next == j)
                     {
@@ -2002,28 +2015,22 @@ namespace System.Text.RegularExpressions
 
         private bool IsTrueQuantifier()
         {
-            Debug.Assert(CharsRight() > 0, "The current reading position must not be at the end of the pattern");
-
+            int nChars = CharsRight();
+            if (nChars == 0)
+                return false;
             int startpos = Textpos();
             char ch = CharAt(startpos);
             if (ch != '{')
                 return ch <= '{' && s_category[ch] >= Q;
-
             int pos = startpos;
-            int nChars = CharsRight();
             while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
-
             if (nChars == 0 || pos - startpos == 1)
                 return false;
-
             if (ch == '}')
                 return true;
-
             if (ch != ',')
                 return false;
-
             while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
-
             return nChars > 0 && ch == '}';
         }
 
@@ -2049,21 +2056,25 @@ namespace System.Text.RegularExpressions
          */
         private void AddConcatenate(int pos, int cch, bool isReplacement)
         {
+            RegexNode node;
+
             if (cch == 0)
                 return;
 
-            RegexNode node;
             if (cch > 1)
             {
-                string str;
+                string str = _pattern.Substring(pos, cch);
+
                 if (UseOptionI() && !isReplacement)
                 {
-                    str = string.Create(cch, (_pattern, _culture, pos, cch), (span, state) =>
-                        state._pattern.AsSpan(state.pos, state.cch).ToLower(span, state._culture));
-                }
-                else
-                {
-                    str = _pattern.Substring(pos, cch);
+                    // We do the ToLower character by character for consistency.  With surrogate chars, doing
+                    // a ToLower on the entire string could actually change the surrogate pair.  This is more correct
+                    // linguistically, but since Regex doesn't support surrogates, it's more important to be
+                    // consistent.
+                    StringBuilder sb = StringBuilderCache.Acquire(str.Length);
+                    for (int i = 0; i < str.Length; i++)
+                        sb.Append(_culture.TextInfo.ToLower(str[i]));
+                    str = StringBuilderCache.GetStringAndRelease(sb);
                 }
 
                 node = new RegexNode(RegexNode.Multi, _options, str);
@@ -2250,7 +2261,7 @@ namespace System.Text.RegularExpressions
          */
         private void PushOptions()
         {
-            _optionsStack.Append(_options);
+            _optionsStack.Add(_options);
         }
 
         /*
@@ -2258,7 +2269,8 @@ namespace System.Text.RegularExpressions
          */
         private void PopOptions()
         {
-            _options = _optionsStack.Pop();
+            _options = _optionsStack[_optionsStack.Count - 1];
+            _optionsStack.RemoveAt(_optionsStack.Count - 1);
         }
 
         /*
@@ -2266,15 +2278,15 @@ namespace System.Text.RegularExpressions
          */
         private bool EmptyOptionsStack()
         {
-            return _optionsStack.Length == 0;
+            return (_optionsStack.Count == 0);
         }
 
         /*
-         * Pops the options stack, but keeps the current options unchanged.
+         * Pops the option stack, but keeps the current options unchanged.
          */
         private void PopKeepOptions()
         {
-            _optionsStack.Length--;
+            _optionsStack.RemoveAt(_optionsStack.Count - 1);
         }
 
         /*

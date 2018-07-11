@@ -67,7 +67,7 @@ internal static partial class Interop
             [System.Runtime.InteropServices.FieldOffset(4)]
             internal uint length;
             [System.Runtime.InteropServices.FieldOffset(8)]
-            internal long fileOffset;
+            internal Int64 fileOffset;
             [System.Runtime.InteropServices.FieldOffset(8)]
             internal IntPtr buffer;
             [System.Runtime.InteropServices.FieldOffset(16)]

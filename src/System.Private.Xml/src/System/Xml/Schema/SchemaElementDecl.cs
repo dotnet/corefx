@@ -42,7 +42,7 @@ namespace System.Xml.Schema
             _contentValidator = ContentValidator.TextOnly;
         }
 
-        internal SchemaElementDecl(XmlQualifiedName name, string prefix)
+        internal SchemaElementDecl(XmlQualifiedName name, String prefix)
         : base(name, prefix)
         {
         }

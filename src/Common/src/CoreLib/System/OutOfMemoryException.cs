@@ -24,13 +24,13 @@ namespace System
             HResult = HResults.COR_E_OUTOFMEMORY;
         }
 
-        public OutOfMemoryException(string message)
+        public OutOfMemoryException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_OUTOFMEMORY;
         }
 
-        public OutOfMemoryException(string message, Exception innerException)
+        public OutOfMemoryException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_OUTOFMEMORY;

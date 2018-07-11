@@ -80,7 +80,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(""NotANumber""))";
-            var expected = double.NaN;
+            var expected = Double.NaN;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
@@ -892,7 +892,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(0 div 0))";
-            var expected = double.NaN;
+            var expected = Double.NaN;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
@@ -918,7 +918,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(1 div 0))";
-            var expected = double.PositiveInfinity;
+            var expected = Double.PositiveInfinity;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
@@ -931,7 +931,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(-1 div 0))";
-            var expected = double.NegativeInfinity;
+            var expected = Double.NegativeInfinity;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }

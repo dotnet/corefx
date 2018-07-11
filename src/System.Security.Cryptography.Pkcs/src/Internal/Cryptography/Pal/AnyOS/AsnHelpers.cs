@@ -48,7 +48,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             }
 
             Debug.Fail("Unknown SubjectIdentifierOrKey state");
-            return new SubjectIdentifierOrKey(SubjectIdentifierOrKeyType.Unknown, string.Empty);
+            return new SubjectIdentifierOrKey(SubjectIdentifierOrKeyType.Unknown, String.Empty);
         }
 
         internal static AlgorithmIdentifier ToPresentationObject(this AlgorithmIdentifierAsn asn)

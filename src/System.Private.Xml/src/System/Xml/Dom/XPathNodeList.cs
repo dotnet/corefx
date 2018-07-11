@@ -28,7 +28,7 @@ namespace System.Xml
             {
                 if (!_done)
                 {
-                    ReadUntil(int.MaxValue);
+                    ReadUntil(Int32.MaxValue);
                 }
                 return _list.Count;
             }

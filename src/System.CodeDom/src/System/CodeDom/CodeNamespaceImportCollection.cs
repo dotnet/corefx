@@ -14,7 +14,7 @@ namespace System.CodeDom
 
         public CodeNamespaceImport this[int index]
         {
-            get => (CodeNamespaceImport)_data[index];
+            get { return (CodeNamespaceImport)_data[index]; }
             set
             {
                 _data[index] = value;
@@ -69,7 +69,7 @@ namespace System.CodeDom
 
         object IList.this[int index]
         {
-            get => this[index];
+            get { return this[index]; }
             set
             {
                 this[index] = (CodeNamespaceImport)value;

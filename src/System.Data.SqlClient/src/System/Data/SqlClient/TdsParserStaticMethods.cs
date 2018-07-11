@@ -23,9 +23,9 @@ namespace System.Data.SqlClient
         // The password exchange during Login phase happens over a secure channel i.e. SSL/TLS 
         // Note: The same logic is used in SNIPacketSetData (SniManagedWrapper) to encrypt passwords stored in SecureString
         //       If this logic changed, SNIPacketSetData needs to be changed as well
-        internal static byte[] ObfuscatePassword(string password)
+        internal static Byte[] ObfuscatePassword(string password)
         {
-            byte[] bObfuscated = new byte[password.Length << 1];
+            Byte[] bObfuscated = new Byte[password.Length << 1];
             int s;
             byte bLo;
             byte bHi;
@@ -35,8 +35,8 @@ namespace System.Data.SqlClient
                 s = (int)password[i];
                 bLo = (byte)(s & 0xff);
                 bHi = (byte)((s >> 8) & 0xff);
-                bObfuscated[i << 1] = (byte)((((bLo & 0x0f) << 4) | (bLo >> 4)) ^ 0xa5);
-                bObfuscated[(i << 1) + 1] = (byte)((((bHi & 0x0f) << 4) | (bHi >> 4)) ^ 0xa5);
+                bObfuscated[i << 1] = (Byte)((((bLo & 0x0f) << 4) | (bLo >> 4)) ^ 0xa5);
+                bObfuscated[(i << 1) + 1] = (Byte)((((bHi & 0x0f) << 4) | (bHi >> 4)) ^ 0xa5);
             }
             return bObfuscated;
         }
@@ -50,7 +50,7 @@ namespace System.Data.SqlClient
             {
                 bLo = (byte)(password[i] & 0x0f);
                 bHi = (byte)(password[i] & 0xf0);
-                password[i] = (byte)(((bHi >> 4) | (bLo << 4)) ^ 0xa5);
+                password[i] = (Byte)(((bHi >> 4) | (bLo << 4)) ^ 0xa5);
             }
             return password;
         }
@@ -74,7 +74,7 @@ namespace System.Data.SqlClient
         }
 
 
-        internal static int GetCurrentThreadIdForTdsLoginOnly()
+        internal static Int32 GetCurrentThreadIdForTdsLoginOnly()
         {
             return Environment.CurrentManagedThreadId;
         }
@@ -97,7 +97,7 @@ namespace System.Data.SqlClient
         }
 
         // translates remaining time in stateObj (from user specified timeout) to timeout value for SNI
-        internal static int GetTimeoutMilliseconds(long timeoutTime)
+        internal static Int32 GetTimeoutMilliseconds(long timeoutTime)
         {
             // User provided timeout t | timeout value for SNI | meaning
             // ------------------------+-----------------------+------------------------------
@@ -105,7 +105,7 @@ namespace System.Data.SqlClient
             //   t>0 && t<int.MaxValue |                     t |
             //          t>int.MaxValue |          int.MaxValue | must not exceed int.MaxValue
 
-            if (long.MaxValue == timeoutTime)
+            if (Int64.MaxValue == timeoutTime)
             {
                 return -1;  // infinite timeout
             }
@@ -116,11 +116,11 @@ namespace System.Data.SqlClient
             {
                 return 0;
             }
-            if (msecRemaining > (long)int.MaxValue)
+            if (msecRemaining > (long)Int32.MaxValue)
             {
-                return int.MaxValue;
+                return Int32.MaxValue;
             }
-            return (int)msecRemaining;
+            return (Int32)msecRemaining;
         }
 
 
@@ -129,7 +129,7 @@ namespace System.Data.SqlClient
             long result;
             if (timeoutMilliseconds <= 0)
             {
-                result = long.MaxValue; // no timeout...
+                result = Int64.MaxValue; // no timeout...
             }
             else
             {
@@ -140,7 +140,7 @@ namespace System.Data.SqlClient
                 catch (OverflowException)
                 {
                     // In case of overflow, set to 'infinite' timeout
-                    result = long.MaxValue;
+                    result = Int64.MaxValue;
                 }
             }
             return result;
@@ -150,7 +150,7 @@ namespace System.Data.SqlClient
         {
             bool result = false;
 
-            if (0 != timeoutTime && long.MaxValue != timeoutTime)
+            if (0 != timeoutTime && Int64.MaxValue != timeoutTime)
             {
                 result = ADP.TimerHasExpired(timeoutTime);
             }

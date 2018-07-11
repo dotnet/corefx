@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Composition.Diagnostics;
+using System.ComponentModel.Composition.Diagnostics;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -572,10 +572,7 @@ namespace System.ComponentModel.Composition.Hosting
         public void Refresh()
         {
             ThrowIfDisposed();
-            if (_loadedFiles == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(_loadedFiles);
 
             List<Tuple<string, AssemblyCatalog>> catalogsToAdd;
             List<Tuple<string, AssemblyCatalog>> catalogsToRemove;

@@ -26,13 +26,13 @@ namespace System
             HResult = HResults.COR_E_ENTRYPOINTNOTFOUND;
         }
 
-        public EntryPointNotFoundException(string message)
+        public EntryPointNotFoundException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_ENTRYPOINTNOTFOUND;
         }
 
-        public EntryPointNotFoundException(string message, Exception inner)
+        public EntryPointNotFoundException(String message, Exception inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_ENTRYPOINTNOTFOUND;

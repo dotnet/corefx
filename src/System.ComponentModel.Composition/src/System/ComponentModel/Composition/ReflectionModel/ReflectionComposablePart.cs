@@ -273,7 +273,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     if (constructor == null)
                     {
                         throw new ComposablePartException(
-                            string.Format(CultureInfo.CurrentCulture,
+                            String.Format(CultureInfo.CurrentCulture,
                                 SR.ReflectionModel_PartConstructorMissing,
                                 Definition.GetPartType().FullName),
                             Definition.ToElement());
@@ -321,7 +321,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     if (definition.Cardinality == ImportCardinality.ZeroOrMore && !import.ImportType.IsAssignableCollectionType)
                     {
                         throw new ComposablePartException(
-                            string.Format(CultureInfo.CurrentCulture,
+                            String.Format(CultureInfo.CurrentCulture,
                                 SR.ReflectionModel_ImportManyOnParameterCanOnlyBeAssigned,
                                 Definition.GetPartType().FullName,
                                 definition.ImportingLazyParameter.Value.Name),
@@ -370,7 +370,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 if (_importValues == null || !ImportValues.ContainsKey(definition))
                 {
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
                                                             SR.InvalidOperation_GetExportedValueBeforePrereqImportSet,
                                                             definition.ToElement().DisplayName));
                 }
@@ -403,10 +403,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     throw new ArgumentException(SR.Argument_ExportsTooMany, nameof(exports));
 
                 default:
-                    if(result != ExportCardinalityCheckResult.Match)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.IsTrue(result == ExportCardinalityCheckResult.Match);
                     break;
             }
         }
@@ -432,7 +429,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (exception != null)
             {
                 throw new ComposablePartException(
-                    string.Format(CultureInfo.CurrentCulture,
+                    String.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_PartConstructorThrewException,
                         Definition.GetPartType().FullName),
                     Definition.ToElement(),
@@ -547,7 +544,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     catch (Exception exception)
                     {
                         throw new ComposablePartException(
-                            string.Format(CultureInfo.CurrentCulture,
+                            String.Format(CultureInfo.CurrentCulture,
                                 SR.ReflectionModel_PartOnImportsSatisfiedThrewException,
                                 Definition.GetPartType().FullName),
                             Definition.ToElement(),

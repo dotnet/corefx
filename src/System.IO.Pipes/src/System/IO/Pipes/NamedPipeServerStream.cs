@@ -19,32 +19,32 @@ namespace System.IO.Pipes
         // Use the maximum number of server instances that the system resources allow
         public const int MaxAllowedServerInstances = -1;
 
-        public NamedPipeServerStream(string pipeName)
+        public NamedPipeServerStream(String pipeName)
             : this(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(string pipeName, PipeDirection direction)
+        public NamedPipeServerStream(String pipeName, PipeDirection direction)
             : this(pipeName, direction, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances)
+        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances)
             : this(pipeName, direction, maxNumberOfServerInstances, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode)
+        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options)
+        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize)
+        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options, inBufferSize, outBufferSize, HandleInheritability.None)
         {
         }
@@ -76,7 +76,7 @@ namespace System.IO.Pipes
         /// <param name="inheritability">Whether handle is inheritable</param>
         /// <param name="additionalAccessRights">Combination (logical OR) of PipeAccessRights.TakeOwnership, 
         /// PipeAccessRights.AccessSystemSecurity, and PipeAccessRights.ChangePermissions</param>
-        private NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances,
+        private NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances,
                 PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize,
                 HandleInheritability inheritability)
             : base(direction, transmissionMode, outBufferSize)

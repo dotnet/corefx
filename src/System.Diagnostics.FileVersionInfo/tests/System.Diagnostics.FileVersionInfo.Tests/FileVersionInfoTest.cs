@@ -208,7 +208,7 @@ namespace System.Diagnostics.Tests
             public string SpecialBuild;
         }
 
-        static string GetUnicodeString(string str)
+        static string GetUnicodeString(String str)
         {
             if (str == null)
                 return "<null>";

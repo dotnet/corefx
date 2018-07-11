@@ -154,10 +154,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (_importEngine == null)
                 {
-                    if (_sourceProvider == null)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.NotNull(_sourceProvider);
                     ImportEngine importEngine = new ImportEngine(_sourceProvider, _compositionOptions);
                     using (_lock.LockStateForWrite())
                     {
@@ -319,10 +316,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private List<ComposablePart> GetUpdatedPartsList(ref CompositionBatch batch)
         {
-            if (batch == null)
-            {
-                throw new ArgumentNullException(nameof(batch));
-            }
+            Assumes.NotNull(batch);
 
             // Copy the current list of parts - we are about to modify it
             // This is an OK thing to do as this is the only method that can modify the List AND Compose can
@@ -362,10 +356,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void Recompose(CompositionBatch batch, AtomicComposition atomicComposition)
         {
-            if (batch == null)
-            {
-                throw new ArgumentNullException(nameof(batch));
-            }
+            Assumes.NotNull(batch);
 
             // Unregister any removed component parts
             foreach (ComposablePart part in batch.PartsToRemove)

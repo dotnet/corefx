@@ -22,7 +22,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
 
         [OptionalValue]
         [ExpectedTag(0, ExplicitTag = true)]
-        [AnyValue]
+        [OctetString]
         public ReadOnlyMemory<byte>? Content;
     }
 }

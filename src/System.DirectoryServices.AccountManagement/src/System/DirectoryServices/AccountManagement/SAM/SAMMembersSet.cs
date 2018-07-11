@@ -429,12 +429,12 @@ namespace System.DirectoryServices.AccountManagement
                                         err);
 
                 throw new PrincipalOperationException(
-                            string.Format(CultureInfo.CurrentCulture,
+                            String.Format(CultureInfo.CurrentCulture,
                                           SR.SAMStoreCtxErrorEnumeratingGroup,
                                           err));
             }
 
-            if (string.Equals(_storeCtx.MachineFlatName, domainName, StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(_storeCtx.MachineFlatName, domainName, StringComparison.OrdinalIgnoreCase) == 0)
                 isLocal = true;
 
             GlobalDebug.WriteLineIf(GlobalDebug.Info,

@@ -27,14 +27,6 @@ namespace System.ComponentModel.Composition
         }
     }
 
-    public class TestAssemblyOne { }
-
-    public class TestAssemblyTwo { }
-
-    public class TestAssemblyThree { }
-
-    public class TestAssemblyFour { }
-
     public class AssemblyCatalogTestsHelper
     {
         protected string GetAttributedAssemblyCodeBase()

@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 #pragma once
-
 #include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_types.h"
 
 /**
@@ -26,7 +28,7 @@
  * the same value so that callers cannot not take a dependency on
  * being able to distinguish between them.
  */
-typedef enum
+enum Error
 {
     Error_SUCCESS = 0,
 
@@ -121,7 +123,7 @@ typedef enum
     // This one is not part of POSIX, but is a catch-all for the case
     // where we cannot convert the raw errno value to something above.
     Error_ENONSTANDARD = 0x1FFFF,
-} Error;
+};
 
 /**
  * Converts the given raw numeric value obtained via errno ->
@@ -160,3 +162,5 @@ DLLEXPORT int32_t SystemNative_ConvertErrorPalToPlatform(int32_t error);
  * as possible and null-terminated.
  */
 DLLEXPORT const char* SystemNative_StrErrorR(int32_t platformErrno, char* buffer, int32_t bufferSize);
+
+END_EXTERN_C

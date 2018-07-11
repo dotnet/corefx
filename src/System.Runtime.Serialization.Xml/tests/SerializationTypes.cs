@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1140,17 +1140,17 @@ public class TypeWithVirtualGenericPropertyDerived<T> : TypeWithVirtualGenericPr
 
 public class DefaultValuesSetToNaN
 {
-    [DefaultValue(double.NaN)]
-    public double DoubleProp { get; set; }
+    [DefaultValue(Double.NaN)]
+    public Double DoubleProp { get; set; }
 
-    [DefaultValue(float.NaN)]
-    public float FloatProp { get; set; }
+    [DefaultValue(Single.NaN)]
+    public Single FloatProp { get; set; }
 
-    [DefaultValue(double.NaN)]
-    public double DoubleField;
+    [DefaultValue(Double.NaN)]
+    public Double DoubleField;
 
-    [DefaultValue(float.NaN)]
-    public float SingleField;
+    [DefaultValue(Single.NaN)]
+    public Single SingleField;
 
     public override bool Equals(object obj)
     {
@@ -1169,17 +1169,17 @@ public class DefaultValuesSetToNaN
 
 public class DefaultValuesSetToPositiveInfinity
 {
-    [DefaultValue(double.PositiveInfinity)]
-    public double DoubleProp { get; set; }
+    [DefaultValue(Double.PositiveInfinity)]
+    public Double DoubleProp { get; set; }
 
-    [DefaultValue(float.PositiveInfinity)]
-    public float FloatProp { get; set; }
+    [DefaultValue(Single.PositiveInfinity)]
+    public Single FloatProp { get; set; }
 
-    [DefaultValue(double.PositiveInfinity)]
-    public double DoubleField;
+    [DefaultValue(Double.PositiveInfinity)]
+    public Double DoubleField;
 
-    [DefaultValue(float.PositiveInfinity)]
-    public float SingleField;
+    [DefaultValue(Single.PositiveInfinity)]
+    public Single SingleField;
 
     public override bool Equals(object obj)
     {
@@ -1198,17 +1198,17 @@ public class DefaultValuesSetToPositiveInfinity
 
 public class DefaultValuesSetToNegativeInfinity
 {
-    [DefaultValue(double.NegativeInfinity)]
-    public double DoubleProp { get; set; }
+    [DefaultValue(Double.NegativeInfinity)]
+    public Double DoubleProp { get; set; }
 
-    [DefaultValue(float.NegativeInfinity)]
-    public float FloatProp { get; set; }
+    [DefaultValue(Single.NegativeInfinity)]
+    public Single FloatProp { get; set; }
 
-    [DefaultValue(double.NegativeInfinity)]
-    public double DoubleField;
+    [DefaultValue(Double.NegativeInfinity)]
+    public Double DoubleField;
 
-    [DefaultValue(float.NegativeInfinity)]
-    public float SingleField;
+    [DefaultValue(Single.NegativeInfinity)]
+    public Single SingleField;
 
     public override bool Equals(object obj)
     {

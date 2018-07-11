@@ -190,7 +190,8 @@ namespace System.Management
         /// <param name="lang">The language to generate in.</param>
         /// <param name="FilePath">The path to the file where the generated code should be stored.</param>
         /// <param name="Namespace">The .NET namespace into which the class is generated.</param>
-        public bool GenerateCode(CodeLanguage lang ,string filePath,string netNamespace)
+        [ResourceExposure(ResourceScope.None),ResourceConsumption(ResourceScope.Machine,ResourceScope.Machine)]
+        public bool GenerateCode(CodeLanguage lang ,String filePath,String netNamespace)
         {
             // check for proper arguments
             if (filePath == null )
@@ -614,7 +615,7 @@ namespace System.Management
             bSingletonClass = false;            
             foreach (QualifierData q in classobj.Qualifiers)
             {
-                if (string.Equals(q.Name,"singleton",StringComparison.OrdinalIgnoreCase))
+                if (String.Compare(q.Name,"singleton",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     //This is a singleton class
                     bSingletonClass = true;
@@ -728,7 +729,7 @@ namespace System.Management
 
             //Process the collisions here
             //We will check each public names with the property names here.
-            foreach(string s in PublicNamesUsed.Values)
+            foreach(String s in PublicNamesUsed.Values)
             {
                 nIndex = IsContainedIn(s,ref PublicProperties);
                 if ( nIndex != -1)
@@ -752,7 +753,7 @@ namespace System.Management
             }
 
             //Now we will check for collision against private variables
-            foreach(string s in PublicProperties.Values)
+            foreach(String s in PublicProperties.Values)
             {
                 nIndex = IsContainedIn(s,ref PrivateNamesUsed);
                 if (nIndex != -1)
@@ -764,7 +765,7 @@ namespace System.Management
                 }
             }
         
-            foreach(string s in PublicMethods.Values)
+            foreach(String s in PublicMethods.Values)
             {
                 nIndex = IsContainedIn(s,ref PrivateNamesUsed);
                 if (nIndex != -1)
@@ -777,7 +778,7 @@ namespace System.Management
             }
 
             //Now we will check for collision against Methods and Public Properties
-            foreach(string s in PublicProperties.Values)
+            foreach(String s in PublicProperties.Values)
             {
                 nIndex = IsContainedIn(s,ref PublicMethods);
                 if (nIndex != -1)
@@ -808,7 +809,7 @@ namespace System.Management
         /// </summary>
         /// <param name="inString"> </param>
         /// <param name="bCheckthisFirst"></param> 
-        private string ResolveCollision(string inString,bool bCheckthisFirst)
+        private String ResolveCollision(string inString,bool bCheckthisFirst)
         {
             string strTemp = inString;
             bool bCollision = true;
@@ -817,7 +818,7 @@ namespace System.Management
             if (bCheckthisFirst == false)
             {
                 k++;
-                strTemp = strTemp + strToAdd +k.ToString((IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int)));
+                strTemp = strTemp + strToAdd +k.ToString((IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32)));
             }
 
             while(bCollision == true)
@@ -846,7 +847,7 @@ namespace System.Management
                     strToAdd = strToAdd + "_";
                     k = 0;
                 }
-                strTemp = inString + strToAdd +k.ToString((IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int)));
+                strTemp = inString + strToAdd +k.ToString((IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32)));
             }
 
             if(strTemp.Length > 0)            
@@ -897,7 +898,7 @@ namespace System.Management
             }
 
             // Check if the name of the class starts with a charachter. If not add "C" to the begining of the name
-            if(char.IsLetter(strClass[0]) == false)
+            if(Char.IsLetter(strClass[0]) == false)
             {
                 strClass = "C" + strClass;
             }
@@ -1152,7 +1153,7 @@ namespace System.Management
                 strPropTemp = prop.Name.ToCharArray();
                 for(i=0;i < strPropTemp.Length;i++)
                 {
-                    if (char.IsLetterOrDigit(strPropTemp[i]) == true)
+                    if (Char.IsLetterOrDigit(strPropTemp[i]) == true)
                     {
                         break;
                     }
@@ -1275,7 +1276,7 @@ namespace System.Management
 
 
                 bool bNullable = false;
-                string description = ProcessPropertyQualifiers(prop,ref bRead,ref bWrite,ref bStatic,bDynamicClass,out bNullable);
+                String description = ProcessPropertyQualifiers(prop,ref bRead,ref bWrite,ref bStatic,bDynamicClass,out bNullable);
 
                 // If the property is not readable and not writable then don't generate the property
                 if (bRead == false && bWrite == false)
@@ -1608,20 +1609,20 @@ namespace System.Management
             arrConvFuncName = "ToInt32";
             enumType = "System.Int32";
             
-            string description = string.Empty;
+            string description = String.Empty;
             foreach (QualifierData q in prop.Qualifiers)
             {
-                if (string.Equals(q.Name,"description",StringComparison.OrdinalIgnoreCase))
+                if (String.Compare(q.Name,"description",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     description = q.Value.ToString();
                 }
                 else
-                    if (string.Equals(q.Name,"Not_Null",StringComparison.OrdinalIgnoreCase))
+                    if (String.Compare(q.Name,"Not_Null",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     nullable = false;
                 }
                 else
-                    if (string.Equals(q.Name,"key",StringComparison.OrdinalIgnoreCase))
+                    if (String.Compare(q.Name,"key",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     //This is a key. So push it in to the key array
                     arrKeyType.Add(cmp.Type);
@@ -1629,13 +1630,13 @@ namespace System.Management
                     nullable = false;
                     break;
                 }
-                else if (string.Equals(q.Name,"static",StringComparison.OrdinalIgnoreCase))
+                else if (string.Compare(q.Name,"static",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     //This property is static. So add static to the Type of the object
                     bStatic = true;
                     cmp.Attributes |= MemberAttributes.Static;
                 }
-                else if (string.Equals(q.Name,"read",StringComparison.OrdinalIgnoreCase))
+                else if (string.Compare(q.Name,"read",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     if ((bool)q.Value == false)
                     {
@@ -1646,7 +1647,7 @@ namespace System.Management
                         bRead = true;
                     }
                 }
-                else if (string.Equals(q.Name,"write",StringComparison.OrdinalIgnoreCase))
+                else if (string.Compare(q.Name,"write",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     hasWrite = true;
                     if ((bool)q.Value == true)
@@ -1660,7 +1661,7 @@ namespace System.Management
                 }
                     // check for ValueMap/Values and BitMap/BitValues pair and create
                     // Enum Accordingly
-                else if (string.Equals(q.Name,"ValueMap",StringComparison.OrdinalIgnoreCase) && bMapsFailed == false)
+                else if (string.Compare(q.Name,"ValueMap",StringComparison.OrdinalIgnoreCase) == 0 && bMapsFailed == false)
                 {
                     try
                     {
@@ -1696,7 +1697,7 @@ namespace System.Management
                         ValueMap.Clear();
                     }
                 }
-                else if (string.Equals(q.Name,"Values",StringComparison.OrdinalIgnoreCase) && bMapsFailed == false)
+                else if (string.Compare(q.Name,"Values",StringComparison.OrdinalIgnoreCase) == 0 && bMapsFailed == false)
                 {
                     try
                     {
@@ -1729,7 +1730,7 @@ namespace System.Management
                     }
 
                 }
-                else if (string.Equals(q.Name,"BitMap",StringComparison.OrdinalIgnoreCase) && bMapsFailed == false)
+                else if (string.Compare(q.Name,"BitMap",StringComparison.OrdinalIgnoreCase) == 0 && bMapsFailed == false)
                 {
                     try
                     {
@@ -1758,7 +1759,7 @@ namespace System.Management
                         BitMap.Clear();
                     }
                 }
-                else if (string.Equals(q.Name,"BitValues",StringComparison.OrdinalIgnoreCase) && bMapsFailed == false)
+                else if (string.Compare(q.Name,"BitValues",StringComparison.OrdinalIgnoreCase) == 0 && bMapsFailed == false)
                 {
                     try
                     {
@@ -1853,7 +1854,7 @@ namespace System.Management
 
                 EnumObj.IsEnum = true;
                 EnumObj.TypeAttributes = TypeAttributes.Public;
-                long maxValue = 0;
+                Int64 maxValue = 0;
                 
                 for (int i = 0; i < Values.Count; i++)
                 {
@@ -1863,7 +1864,7 @@ namespace System.Management
                     if (ValueMap.Count > 0)
                     {
                         cmf.InitExpression = new CodePrimitiveExpression(ValueMap[i]);
-                        long test = System.Convert.ToInt64(ValueMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(ulong)));
+                        Int64 test = System.Convert.ToInt64(ValueMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.UInt64)));
                         if (test > maxValue) maxValue=test;
 
                         if (bZeroFieldInEnum == false)
@@ -1871,7 +1872,7 @@ namespace System.Management
                             if (System.Convert.ToInt64(
                                 ValueMap[i],
                                 (IFormatProvider)CultureInfo.InvariantCulture.GetFormat(
-                                typeof(ulong))) == 0)
+                                typeof(System.UInt64))) == 0)
                             {
                                 bZeroFieldInEnum = true;
                             }
@@ -1957,8 +1958,8 @@ namespace System.Management
 
                 EnumObj.IsEnum = true;
                 EnumObj.TypeAttributes = TypeAttributes.Public;
-                int bitValue = 1;
-                long maxBitValue = 0;
+                Int32 bitValue = 1;
+                Int64 maxBitValue = 0;
 
                 for (int i = 0; i < BitValues.Count; i++)
                 {
@@ -1967,7 +1968,7 @@ namespace System.Management
                     if (BitMap.Count > 0)
                     {
                         cmf.InitExpression = new CodePrimitiveExpression(BitMap[i]);
-                        long test = System.Convert.ToInt64(BitMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(ulong)));
+                        Int64 test = System.Convert.ToInt64(BitMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.UInt64)));
                         if (test > maxBitValue) maxBitValue=test;
                     }
                     else
@@ -1983,7 +1984,7 @@ namespace System.Management
 
                     if(bZeroFieldInEnum == false)
                     {
-                        if( (System.Convert.ToInt64(BitMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(ulong))) == 0) )
+                        if( (System.Convert.ToInt64(BitMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.UInt64))) == 0) )
                         {
                             bZeroFieldInEnum = true;
                         }
@@ -2839,7 +2840,7 @@ namespace System.Management
                 //Check if the method is static
                 foreach (QualifierData q in meth.Qualifiers)
                 {
-                    if (string.Equals(q.Name,"static",StringComparison.OrdinalIgnoreCase))
+                    if (string.Compare(q.Name,"static",StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         //It is a static function
                         cmm.Attributes |= MemberAttributes.Static;
@@ -2847,7 +2848,7 @@ namespace System.Management
                         break;
                     }
                     else
-                        if (string.Equals(q.Name,"privileges",StringComparison.OrdinalIgnoreCase))
+                        if (string.Compare(q.Name,"privileges",StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         //It is a function which needs privileges to be set
                         bPrivileges = true;
@@ -2957,7 +2958,7 @@ namespace System.Management
                             //Find out whether it is a in/out Parameter
                             for(int i=0; i < outParamsName.Count;i++)
                             {
-                                if (string.Equals(prop.Name,outParamsName[i].ToString(),StringComparison.OrdinalIgnoreCase))
+                                if (string.Compare(prop.Name,outParamsName[i].ToString(),StringComparison.OrdinalIgnoreCase) == 0)
                                 {
                                     //It is an in/out Parameter
                                     cpde.Direction = FieldDirection.Ref;
@@ -3045,7 +3046,7 @@ namespace System.Management
                             bInOut = false;
                             for(int i=0; i < inoutParams.Count;i++)
                             {
-                                if (string.Equals(prop.Name,inoutParams[i].ToString(),StringComparison.OrdinalIgnoreCase))
+                                if (string.Compare(prop.Name,inoutParams[i].ToString(),StringComparison.OrdinalIgnoreCase) == 0)
                                 {
                                     bInOut = true;
                                 }
@@ -3053,7 +3054,7 @@ namespace System.Management
                             if (bInOut == true)
                                 continue;
 
-                            if (string.Equals(prop.Name,"ReturnValue",StringComparison.OrdinalIgnoreCase))
+                            if (string.Compare(prop.Name,"ReturnValue",StringComparison.OrdinalIgnoreCase) == 0)
                             {
                                 cmm.ReturnType = ConvertCIMType(prop.Type,prop.IsArray);
                                 bRetVal = true;
@@ -4540,12 +4541,12 @@ namespace System.Management
         /// This function will find a given string in the passed 
         /// in a case insensitive manner and will return true if the string is found.
         /// </summary>
-        int IsContainedIn(string strToFind, ref SortedList sortedList)
+        int IsContainedIn(String strToFind, ref SortedList sortedList)
         {
             int nIndex = -1;
             for (int i=0; i < sortedList.Count; i++)
             {
-                if (string.Equals(sortedList.GetByIndex(i).ToString(),strToFind,StringComparison.OrdinalIgnoreCase))
+                if (String.Compare(sortedList.GetByIndex(i).ToString(),strToFind,StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     //The string is found. This is the index
                     nIndex = i;
@@ -4747,9 +4748,9 @@ namespace System.Management
         /// </summary>
         static string ConvertValuesToName(string str)
         {
-            string strRet = string.Empty;
+            string strRet = String.Empty;
             string strToReplace = "_";
-            string strToAdd = string.Empty;
+            string strToAdd = String.Empty;
             bool  bAdd = true;
             if (str.Length == 0)
             {
@@ -4758,7 +4759,7 @@ namespace System.Management
 
             char[] arrString = str.ToCharArray();
             // First character
-            if (char.IsLetter(arrString[0]) == false)
+            if (Char.IsLetter(arrString[0]) == false)
             {
                 strRet = "Val_";
                 strToAdd = "l";
@@ -4767,7 +4768,7 @@ namespace System.Management
             for(int i=0;i < str.Length;i++)
             {
                 bAdd = true;
-                if (char.IsLetterOrDigit(arrString[i]) == false)
+                if (Char.IsLetterOrDigit(arrString[i]) == false)
                 {
                     // if the previous character added is "_" then
                     // don't add that to the output string again
@@ -4787,7 +4788,7 @@ namespace System.Management
 
                 if (bAdd == true)
                 {
-                    strRet = string.Concat(strRet,strToAdd);
+                    strRet = String.Concat(strRet,strToAdd);
                 }
             }
             return strRet;
@@ -4801,8 +4802,8 @@ namespace System.Management
         {
             arrayOut.Clear();
             int        nCurIndex = 0;
-            string strToAdd = string.Empty;
-            IFormatProvider formatProv = (IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int));
+            string strToAdd = String.Empty;
+            IFormatProvider formatProv = (IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32));
             
             for( int i = 0 ; i < arrIn.Count ; i++)
             {
@@ -4828,11 +4829,11 @@ namespace System.Management
         /// This function will find a given string in the passed 
         /// array list.
         /// </summary>
-        static bool IsContainedInArray(string strToFind, ArrayList arrToSearch)
+        static bool IsContainedInArray(String strToFind, ArrayList arrToSearch)
         {
             for (int i=0; i < arrToSearch.Count; i++)
             {
-                if (string.Equals(arrToSearch[i].ToString(),strToFind,StringComparison.OrdinalIgnoreCase))
+                if (String.Compare(arrToSearch[i].ToString(),strToFind,StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return true;
                 }
@@ -4919,7 +4920,7 @@ namespace System.Management
             }
             catch
             {
-                throw new ArgumentOutOfRangeException(string.Format(SR.UnableToCreateCodeGeneratorException , strProvider ));
+                throw new ArgumentOutOfRangeException(String.Format(SR.UnableToCreateCodeGeneratorException , strProvider ));
             }
 
             if(bSucceeded == true)
@@ -4928,7 +4929,7 @@ namespace System.Management
             }
             else
             {
-                throw new ArgumentOutOfRangeException(string.Format(SR.UnableToCreateCodeGeneratorException , strProvider));
+                throw new ArgumentOutOfRangeException(String.Format(SR.UnableToCreateCodeGeneratorException , strProvider));
             }
             return true;
         }
@@ -5028,25 +5029,25 @@ namespace System.Management
         /// Function to convert a value in format "0x..." to a integer
         /// to the object to WMI
         /// </summary>
-        static int ConvertBitMapValueToInt32(string bitMap)
+        static Int32 ConvertBitMapValueToInt32(String bitMap)
         {
-            string strTemp = "0x";
-            int ret = 0;
+            String strTemp = "0x";
+            Int32 ret = 0;
 
             if (bitMap.StartsWith(strTemp, StringComparison.Ordinal) || bitMap.StartsWith(strTemp.ToUpper(CultureInfo.InvariantCulture), StringComparison.Ordinal))
             {
-                strTemp = string.Empty;
+                strTemp = String.Empty;
                 char[] arrString = bitMap.ToCharArray();
                 int Len = bitMap.Length;
                 for (int i = 2 ; i < Len ; i++)
                 {
                     strTemp = strTemp + arrString[i];
                 }
-                ret = System.Convert.ToInt32(strTemp,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int)));
+                ret = System.Convert.ToInt32(strTemp,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32)));
             }
             else
             {
-                ret = System.Convert.ToInt32(bitMap,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int)));
+                ret = System.Convert.ToInt32(bitMap,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32)));
             }
 
             return ret;
@@ -5056,9 +5057,9 @@ namespace System.Management
         /// <summary>
         /// Function to get the Converstion function to be used for Numeric datatypes
         /// </summary>
-        string GetConversionFunction(CimType cimType)
+        String GetConversionFunction(CimType cimType)
         {
-            string retFunctionName = string.Empty;
+            String retFunctionName = String.Empty;
 
             switch(cimType)
             {
@@ -5154,9 +5155,9 @@ namespace System.Management
         /// <summary>
         /// Checks if a given property is to be visible for Designer seriliazation
         /// </summary>
-        static bool IsDesignerSerializationVisibilityToBeSet(string propName)
+        static bool IsDesignerSerializationVisibilityToBeSet(String propName)
         {
-            if (!string.Equals(propName,"Path",StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(propName,"Path",StringComparison.OrdinalIgnoreCase) != 0)
             {
                 return true;
             }
@@ -5191,7 +5192,7 @@ namespace System.Management
             bool ret = false;
             try
             {
-                ret = System.Convert.ToBoolean(classobj.Qualifiers["dynamic"].Value,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(bool)));
+                ret = System.Convert.ToBoolean(classobj.Qualifiers["dynamic"].Value,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Boolean)));
             }
             catch(ManagementException)
             {
@@ -5207,8 +5208,8 @@ namespace System.Management
         /// </summary>
         private static string ConvertToNumericValueAndAddToArray(CimType cimType, string numericValue,ArrayList arrayToAdd,out string enumType)
         {
-            string retFunctionName = string.Empty;
-            enumType = string.Empty;
+            string retFunctionName = String.Empty;
+            enumType = String.Empty;
 
             switch(cimType)
             {
@@ -5217,13 +5218,13 @@ namespace System.Management
                 case CimType.SInt16:
                 case CimType.UInt16:
                 case CimType.SInt32:            
-                    arrayToAdd.Add(System.Convert.ToInt32(numericValue,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int))));
+                    arrayToAdd.Add(System.Convert.ToInt32(numericValue,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32))));
                     retFunctionName = "ToInt32";
                     enumType = "System.Int32";
                     break;
 
                 case CimType.UInt32:
-                    arrayToAdd.Add(System.Convert.ToInt32(numericValue,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int))));
+                    arrayToAdd.Add(System.Convert.ToInt32(numericValue,(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32))));
                     retFunctionName = "ToInt32";
                     enumType = "System.Int32";
                     break;
@@ -5607,7 +5608,7 @@ namespace System.Management
 
                 // if the type is string then check for null is to be done
                 // otherwise, the DateTime Conversion function will do for DateTime types
-                if(string.Equals(strType,PublicNamesUsed["PathClass"].ToString(),StringComparison.OrdinalIgnoreCase))
+                if(String.Compare(strType,PublicNamesUsed["PathClass"].ToString(),StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     CodeMethodReferenceExpression cmre = new CodeMethodReferenceExpression();
                     cmre.MethodName = "ToString";
@@ -6135,7 +6136,7 @@ namespace System.Management
 
             try
             {
-                if(string.Equals(prop.Qualifiers["SubType"].Value.ToString() ,"interval",StringComparison.OrdinalIgnoreCase))
+                if(String.Compare(prop.Qualifiers["SubType"].Value.ToString() ,"interval",StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     isTimeInterval = true;
                     if(prop.IsArray)
@@ -6318,17 +6319,17 @@ namespace System.Management
         /// </summary>
         void AddToDateTimeFunction()
         {
-            string dmtfParam = "dmtfDate";
-            string year    = "year";
-            string month = "month";
-            string day = "day";
-            string hour = "hour";
-            string minute = "minute";
-            string second = "second";
-            string ticks = "ticks";
-            string dmtf = "dmtf";
-            string tempStr = "tempString";
-            string datetimeVariable = "datetime";
+            String dmtfParam = "dmtfDate";
+            String year    = "year";
+            String month = "month";
+            String day = "day";
+            String hour = "hour";
+            String minute = "minute";
+            String second = "second";
+            String ticks = "ticks";
+            String dmtf = "dmtf";
+            String tempStr = "tempString";
+            String datetimeVariable = "datetime";
 
             CodeCastExpression cast = null;
 
@@ -6626,7 +6627,7 @@ namespace System.Management
             cmie1.Method = cmre1;
             cmie1.Parameters.Add(new CodeVariableReferenceExpression(datetimeVariable));
 
-            string tickoffset = "tickOffset";
+            String tickoffset = "tickOffset";
             cmmdt.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference("System.TimeSpan"),tickoffset,cmie1));
 
             /*
@@ -6635,12 +6636,12 @@ namespace System.Management
                 long OffsetMins = tickOffset.Ticks / System.TimeSpan.TicksPerMinute;
                 tempString = dmtf.Substring(22, 3);
             */
-            string utcOffset = "UTCOffset";
+            String utcOffset = "UTCOffset";
             cmmdt.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference("System.Int32"),utcOffset,new CodePrimitiveExpression(0)));
-            string offsetAdjust = "OffsetToBeAdjusted";
+            String offsetAdjust = "OffsetToBeAdjusted";
             cmmdt.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference("System.Int32"),offsetAdjust,new CodePrimitiveExpression(0)));
             
-            string OffsetMins = "OffsetMins";
+            String OffsetMins = "OffsetMins";
             cboe = new CodeBinaryOperatorExpression();
             cboe.Left = new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(tickoffset),"Ticks");
             cboe.Right = new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.TimeSpan"),"TicksPerMinute");
@@ -6737,12 +6738,12 @@ namespace System.Management
         /// Generates some common code used in conversion function for DateTime
         /// </summary>
         static void DateTimeConversionFunctionHelper(CodeStatementCollection cmmdt ,
-            string toCompare,
-            string tempVarName,
-            string dmtfVarName,
-            string toAssign,
-            int SubStringParam1, 
-            int SubStringParam2)
+            String toCompare,
+            String tempVarName,
+            String dmtfVarName,
+            String toAssign,
+            Int32 SubStringParam1, 
+            Int32 SubStringParam2)
         {
             CodeMethodReferenceExpression  cmre = new CodeMethodReferenceExpression(new CodeVariableReferenceExpression(dmtfVarName),"Substring");
             CodeMethodInvokeExpression cmie = new CodeMethodInvokeExpression();
@@ -6770,11 +6771,11 @@ namespace System.Management
 
         void AddToDMTFTimeIntervalFunction()
         {
-            string dmtfTimeSpan = "dmtftimespan";
-            string timespan    = "timespan";
-            string tsTemp = "tsTemp";
-            string microsec = "microsec";
-            string strmicrosec = "strMicroSec";
+            String dmtfTimeSpan = "dmtftimespan";
+            String timespan    = "timespan";
+            String tsTemp = "tsTemp";
+            String microsec = "microsec";
+            String strmicrosec = "strMicroSec";
 
             CodeMemberMethod cmmts = new CodeMemberMethod();
             cmmts.Name = PrivateNamesUsed["ToDMTFTimeIntervalMethod"].ToString();
@@ -7033,8 +7034,8 @@ namespace System.Management
 
         void AddToDMTFDateTimeFunction()
         {
-            string strUtc = "utcString";
-            string dateParam    = "date";
+            String strUtc = "utcString";
+            String dateParam    = "date";
 
             CodeCastExpression cast = null;
 
@@ -7067,7 +7068,7 @@ namespace System.Management
             cmie1.Method = cmre;
             cmie1.Parameters.Add(new CodeVariableReferenceExpression(dateParam));
 
-            string tickoffset = "tickOffset";
+            String tickoffset = "tickOffset";
             cmmdt.Statements.Add(
                 new CodeVariableDeclarationStatement(
                 new CodeTypeReference("System.TimeSpan"),
@@ -7076,7 +7077,7 @@ namespace System.Management
                 )
                 );
 
-            string OffsetMins = "OffsetMins";
+            String OffsetMins = "OffsetMins";
             cboe = new CodeBinaryOperatorExpression();
             cboe.Left = new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(tickoffset),"Ticks");
             cboe.Right = new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.TimeSpan"),"TicksPerMinute");
@@ -7180,7 +7181,7 @@ namespace System.Management
                 string dmtfDateTime = date.Year.ToString().PadLeft(4,'0');
             */
 
-            string dmtfDateTime = "dmtfDateTime";
+            String dmtfDateTime = "dmtfDateTime";
             cmie1 = new CodeMethodInvokeExpression();
             cmie1.Method = new CodeMethodReferenceExpression(new CodeCastExpression(new CodeTypeReference("System.Int32 "),
                 new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(dateParam),
@@ -7232,7 +7233,7 @@ namespace System.Management
                 DateTime dtTemp = new DateTime(date.Year ,date.Month,date.Day ,date.Hour ,date.Minute ,date.Second,0);
             */
 
-            string dtTemp = "dtTemp";
+            String dtTemp = "dtTemp";
             coce = new CodeObjectCreateExpression();
             coce.CreateType = new CodeTypeReference("System.DateTime");
             coce.Parameters.Add(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(dateParam),"Year"));
@@ -7248,7 +7249,7 @@ namespace System.Management
                 System.Int64 microsec = ((date.Ticks-dtTemp.Ticks) * 1000) / System.TimeSpan.TicksPerMillisecond;
             */
 
-            string microsec = "microsec";
+            String microsec = "microsec";
             cboe = new CodeBinaryOperatorExpression();
             cboe.Left = new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(dateParam),"Ticks");
             cboe.Right = new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(dtTemp),"Ticks");
@@ -7274,7 +7275,7 @@ namespace System.Management
             /*
                 System.String strMicrosec = microsec.ToString();    
             */    
-            string strmicrosec = "strMicrosec";
+            String strmicrosec = "strMicrosec";
             cmie1 = new CodeMethodInvokeExpression();
             cmie1.Method = new CodeMethodReferenceExpression(new CodeCastExpression(new CodeTypeReference("System.Int64 "),
                 new CodeVariableReferenceExpression(microsec)),"ToString");
@@ -7333,8 +7334,8 @@ namespace System.Management
         // Helper function exclusively added to be used from AddToDMTFFunction function
         void ToDMTFDateHelper(string dateTimeMember,CodeMemberMethod cmmdt,string strType)
         {
-            string dmtfDateTime = "dmtfDateTime";
-            string dateParam = "date";
+            String dmtfDateTime = "dmtfDateTime";
+            String dateParam = "date";
             CodeMethodInvokeExpression cmie = new CodeMethodInvokeExpression();
             cmie.Method = new CodeMethodReferenceExpression(new CodeCastExpression(new CodeTypeReference(strType),
                 new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(dateParam),
@@ -7358,12 +7359,12 @@ namespace System.Management
 
         void AddToTimeSpanFunction()
         {
-            string tsParam    = "dmtfTimespan";
-            string days = "days";
-            string hours = "hours";
-            string minutes = "minutes";
-            string seconds = "seconds";
-            string ticks = "ticks";
+            String tsParam    = "dmtfTimespan";
+            String days = "days";
+            String hours = "hours";
+            String minutes = "minutes";
+            String seconds = "seconds";
+            String ticks = "ticks";
 
             CodeMemberMethod cmmts = new CodeMemberMethod();
             cmmts.Name = PrivateNamesUsed["ToTimeSpanMethod"].ToString();
@@ -7664,10 +7665,10 @@ namespace System.Management
         }
 
         // Exclusive helper function to be used from AddToTimeSpanFunction
-        static void ToTimeSpanHelper(int start,int numOfCharacters,string strVarToAssign,CodeStatementCollection statCol)
+        static void ToTimeSpanHelper(int start,int numOfCharacters,String strVarToAssign,CodeStatementCollection statCol)
         {
-            string strTemp = "tempString";
-            string tsParam    = "dmtfTimespan";
+            String strTemp = "tempString";
+            String tsParam    = "dmtfTimespan";
 
             CodeMethodInvokeExpression cmie = new CodeMethodInvokeExpression();
             cmie.Method = new CodeMethodReferenceExpression(new CodeVariableReferenceExpression(tsParam),"Substring");

@@ -76,7 +76,7 @@ namespace System.Text
             int index = (int)(chars - charStart) - 1;
 
             // See if it was a high surrogate
-            if (char.IsHighSurrogate(ch))
+            if (Char.IsHighSurrogate(ch))
             {
                 // See if there's a low surrogate to go with it
                 if (chars >= charEnd)
@@ -99,11 +99,11 @@ namespace System.Text
                 {
                     // Might have a low surrogate
                     char cNext = *chars;
-                    if (char.IsLowSurrogate(cNext))
+                    if (Char.IsLowSurrogate(cNext))
                     {
                         // If already falling back then fail
                         if (bFallingBack && iRecursionCount++ > iMaxRecursion)
-                            ThrowLastCharRecursive(char.ConvertToUtf32(ch, cNext));
+                            ThrowLastCharRecursive(Char.ConvertToUtf32(ch, cNext));
 
                         // Next is a surrogate, add it as surrogate pair, and increment chars
                         chars++;

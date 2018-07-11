@@ -560,7 +560,7 @@ namespace System.Data
                                         }
                                         else
                                         {
-                                            if (!string.Equals(parentNs, rel.ParentTable.Namespace, StringComparison.Ordinal))
+                                            if (string.Compare(parentNs, rel.ParentTable.Namespace, StringComparison.Ordinal) != 0)
                                             {
                                                 _nested = false;
                                                 throw ExceptionBuilder.InvalidParentNamespaceinNestedRelation(ChildTable.TableName);

@@ -5,12 +5,15 @@
 #pragma once
 
 #include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_tcpstate.h"
 
 // Exchange types used to normalize Network protocol statistics information
 // from the OS, for use in the NetworkInformation library.
 
-typedef struct
+struct TcpGlobalStatistics
 {
     uint64_t ConnectionsAccepted;
     uint64_t ConnectionsInitiated;
@@ -22,9 +25,9 @@ typedef struct
     uint64_t SegmentsSent;
     int32_t CurrentConnections;
     int32_t __padding;
-} TcpGlobalStatistics;
+};
 
-typedef struct
+struct IPv4GlobalStatistics
 {
     uint64_t OutboundPackets;
     uint64_t OutputPacketsNoRoute;
@@ -40,18 +43,18 @@ typedef struct
     uint64_t UnknownProtos;
     int32_t DefaultTtl;
     int32_t Forwarding;
-} IPv4GlobalStatistics;
+};
 
-typedef struct
+struct UdpGlobalStatistics
 {
     uint64_t DatagramsReceived;
     uint64_t DatagramsSent;
     uint64_t IncomingDiscarded;
     uint64_t IncomingErrors;
     uint64_t UdpListeners;
-} UdpGlobalStatistics;
+};
 
-typedef struct
+struct Icmpv4GlobalStatistics
 {
     uint64_t AddressMaskRepliesReceived;
     uint64_t AddressMaskRepliesSent;
@@ -75,9 +78,9 @@ typedef struct
     uint64_t TimestampRepliesSent;
     uint64_t TimestampRequestsReceived;
     uint64_t TimestampRequestsSent;
-} Icmpv4GlobalStatistics;
+};
 
-typedef struct
+struct Icmpv6GlobalStatistics
 {
     uint64_t DestinationUnreachableMessagesReceived;
     uint64_t DestinationUnreachableMessagesSent;
@@ -107,24 +110,24 @@ typedef struct
     uint64_t RouterSolicitsSent;
     uint64_t TimeExceededMessagesReceived;
     uint64_t TimeExceededMessagesSent;
-} Icmpv6GlobalStatistics;
+};
 
-typedef struct
+struct IPEndPointInfo
 {
     uint8_t AddressBytes[16];
     uint32_t NumAddressBytes;
     uint32_t Port;
     uint32_t __padding1;
-} IPEndPointInfo;
+};
 
-typedef struct
+struct NativeTcpConnectionInformation
 {
-    IPEndPointInfo LocalEndPoint;
-    IPEndPointInfo RemoteEndPoint;
+    struct IPEndPointInfo LocalEndPoint;
+    struct IPEndPointInfo RemoteEndPoint;
     int32_t State;
-} NativeTcpConnectionInformation;
+};
 
-typedef struct
+struct NativeIPInterfaceStatistics
 {
     uint64_t SendQueueLength;
     uint64_t Mtu;
@@ -139,26 +142,28 @@ typedef struct
     uint64_t OutMulticastPackets;
     uint64_t InDrops;
     uint64_t InNoProto;
-} NativeIPInterfaceStatistics;
+};
 
-DLLEXPORT int32_t SystemNative_GetTcpGlobalStatistics(TcpGlobalStatistics* retStats);
+DLLEXPORT int32_t SystemNative_GetTcpGlobalStatistics(struct TcpGlobalStatistics* retStats);
 
-DLLEXPORT int32_t SystemNative_GetIPv4GlobalStatistics(IPv4GlobalStatistics* retStats);
+DLLEXPORT int32_t SystemNative_GetIPv4GlobalStatistics(struct IPv4GlobalStatistics* retStats);
 
-DLLEXPORT int32_t SystemNative_GetUdpGlobalStatistics(UdpGlobalStatistics* retStats);
+DLLEXPORT int32_t SystemNative_GetUdpGlobalStatistics(struct UdpGlobalStatistics* retStats);
 
-DLLEXPORT int32_t SystemNative_GetIcmpv4GlobalStatistics(Icmpv4GlobalStatistics* retStats);
+DLLEXPORT int32_t SystemNative_GetIcmpv4GlobalStatistics(struct Icmpv4GlobalStatistics* retStats);
 
-DLLEXPORT int32_t SystemNative_GetIcmpv6GlobalStatistics(Icmpv6GlobalStatistics* retStats);
+DLLEXPORT int32_t SystemNative_GetIcmpv6GlobalStatistics(struct Icmpv6GlobalStatistics* retStats);
 
 DLLEXPORT int32_t SystemNative_GetEstimatedTcpConnectionCount(void);
 
-DLLEXPORT int32_t SystemNative_GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* infos, int32_t* infoCount);
+DLLEXPORT int32_t SystemNative_GetActiveTcpConnectionInfos(struct NativeTcpConnectionInformation* infos, int32_t* infoCount);
 
 DLLEXPORT int32_t SystemNative_GetEstimatedUdpListenerCount(void);
 
-DLLEXPORT int32_t SystemNative_GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCount);
+DLLEXPORT int32_t SystemNative_GetActiveUdpListeners(struct IPEndPointInfo* infos, int32_t* infoCount);
 
-DLLEXPORT int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats);
+DLLEXPORT int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct NativeIPInterfaceStatistics* retStats);
 
 DLLEXPORT int32_t SystemNative_GetNumRoutes(void);
+
+END_EXTERN_C

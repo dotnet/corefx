@@ -18,10 +18,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public SingleExportComposablePart(Export export)
             {
-                if (export == null)
-                {
-                    throw new ArgumentNullException(nameof(export));
-                }
+                Assumes.NotNull(export);
 
                 _export = export;
             }

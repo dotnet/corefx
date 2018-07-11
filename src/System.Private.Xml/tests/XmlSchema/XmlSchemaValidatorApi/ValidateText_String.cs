@@ -61,7 +61,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("single")]
         [InlineData("multiple")]
-        public void SanityTestForSimpleType_MultipleCallInOneContext(string param)
+        public void SanityTestForSimpleType_MultipleCallInOneContext(String param)
         {
             XmlSchemaValidator val = CreateValidator(XSDFILE_VALIDATE_TEXT);
             CValidationEventHolder holder = new CValidationEventHolder();

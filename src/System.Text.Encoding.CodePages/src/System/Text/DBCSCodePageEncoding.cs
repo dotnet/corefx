@@ -212,14 +212,14 @@ namespace System.Text
         }
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject;
-        private static object InternalSyncObject
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
@@ -539,7 +539,7 @@ namespace System.Text
             // We may have a left over character from last time, try and process it.
             if (charLeftOver > 0)
             {
-                Debug.Assert(char.IsHighSurrogate(charLeftOver), "[DBCSCodePageEncoding.GetByteCount]leftover character should be high surrogate");
+                Debug.Assert(Char.IsHighSurrogate(charLeftOver), "[DBCSCodePageEncoding.GetByteCount]leftover character should be high surrogate");
                 Debug.Assert(encoder != null,
                     "[DBCSCodePageEncoding.GetByteCount]Expect to have encoder if we have a charLeftOver");
 
@@ -630,7 +630,7 @@ namespace System.Text
             if (encoder != null)
             {
                 charLeftOver = encoder.charLeftOver;
-                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
                     "[DBCSCodePageEncoding.GetBytes]leftover character should be high surrogate");
 
                 // Go ahead and get the fallback buffer (need leftover fallback if converting)

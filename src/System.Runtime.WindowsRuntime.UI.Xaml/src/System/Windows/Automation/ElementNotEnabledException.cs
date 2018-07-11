@@ -24,13 +24,13 @@ namespace Windows.UI.Xaml.Automation
             HResult = HResults.E_ELEMENTNOTENABLED;
         }
 
-        public ElementNotEnabledException(string message)
+        public ElementNotEnabledException(String message)
             : base(message)
         {
             HResult = HResults.E_ELEMENTNOTENABLED;
         }
 
-        public ElementNotEnabledException(string message, Exception innerException)
+        public ElementNotEnabledException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.E_ELEMENTNOTENABLED;

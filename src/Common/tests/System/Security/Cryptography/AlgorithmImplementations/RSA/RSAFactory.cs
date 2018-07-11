@@ -9,7 +9,6 @@ namespace System.Security.Cryptography.Rsa.Tests
         RSA Create();
         RSA Create(int keySize);
         bool Supports384PrivateKey { get; }
-        bool SupportsLargeExponent { get; }
         bool SupportsSha2Oaep { get; }
         bool SupportsPss { get; }
         bool SupportsDecryptingIntoExactSpaceRequired { get; }
@@ -35,8 +34,6 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         public static bool Supports384PrivateKey => s_provider.Supports384PrivateKey;
-
-        public static bool SupportsLargeExponent => s_provider.SupportsLargeExponent;
 
         public static bool SupportsSha2Oaep => s_provider.SupportsSha2Oaep;
 

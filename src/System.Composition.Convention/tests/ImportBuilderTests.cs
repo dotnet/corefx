@@ -2,11 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Composition;
+using System.Composition.Convention;
+using System.Composition.Convention.UnitTests;
 using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace System.Composition.Convention.Tests
+namespace System.Composition.Convention
 {
     public class ImportBuilderTests
     {
@@ -105,21 +109,21 @@ namespace System.Composition.Convention.Tests
 
         private static ImportAttribute GetImportAttribute(ConventionBuilder builder)
         {
-            Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
+            var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
             Assert.Equal(1, list.Length);
             return list.OfType<ImportAttribute>().FirstOrDefault();
         }
 
         private static ImportManyAttribute GetImportManyAttribute(ConventionBuilder builder)
         {
-            Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
+            var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
             Assert.Equal(1, list.Length);
             return list.OfType<ImportManyAttribute>().FirstOrDefault();
         }
 
         private static ImportMetadataConstraintAttribute GetImportMetadataConstraintAttribute(ConventionBuilder builder)
         {
-            Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
+            var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
             Assert.Equal(2, list.Length);
             return list.OfType<ImportMetadataConstraintAttribute>().FirstOrDefault();
         }

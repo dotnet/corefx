@@ -178,7 +178,7 @@ namespace System.Management
         /// <value>
         ///    <para> The object to be used for synchronization.</para>
         /// </value>
-        public object SyncRoot 
+        public Object SyncRoot 
         { 
             get
             {
@@ -197,7 +197,7 @@ namespace System.Management
         /// </summary>
         /// <param name='array'>An array to copy to. </param>
         /// <param name='index'>The index to start from. </param>
-        public void CopyTo (Array array, int index) 
+        public void CopyTo (Array array, Int32 index) 
         {
             if (isDisposed)
                 throw new ObjectDisposedException(name);
@@ -242,7 +242,7 @@ namespace System.Management
         /// </summary>
         /// <param name='objectCollection'>The target array.</param>
         /// <param name=' index'>The index to start from.</param>
-        public void CopyTo (ManagementBaseObject[] objectCollection, int index)
+        public void CopyTo (ManagementBaseObject[] objectCollection, Int32 index)
         {
             CopyTo ((Array)objectCollection, index);
         }
@@ -527,7 +527,7 @@ namespace System.Management
                 {
 
                     //If the timeout is set to infinite, need to use the WMI infinite constant
-                    int timeout = (collectionObject.options.Timeout.Ticks == long.MaxValue) ? 
+                    int timeout = (collectionObject.options.Timeout.Ticks == Int64.MaxValue) ? 
                         (int)tag_WBEM_TIMEOUT_TYPE.WBEM_INFINITE : (int)collectionObject.options.Timeout.TotalMilliseconds;
 
                     //Get the next [BLockSize] objects within the specified timeout

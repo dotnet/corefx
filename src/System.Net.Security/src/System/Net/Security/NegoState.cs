@@ -53,7 +53,10 @@ namespace System.Net.Security
 
         internal NegoState(Stream innerStream, bool leaveStreamOpen)
         {
-            Debug.Assert(innerStream != null);
+            if (innerStream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
 
             _innerStream = innerStream;
             _leaveStreamOpen = leaveStreamOpen;
@@ -415,7 +418,7 @@ namespace System.Net.Security
 
             string clientSpn = _context.ClientSpecifiedSpn;
 
-            if (string.IsNullOrEmpty(clientSpn))
+            if (String.IsNullOrEmpty(clientSpn))
             {
                 if (_extendedProtectionPolicy.PolicyEnforcement == PolicyEnforcement.WhenSupported)
                 {

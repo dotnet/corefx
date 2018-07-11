@@ -69,7 +69,7 @@ namespace System.DirectoryServices.AccountManagement
             }
             else
             {
-                if ((string.Equals(_domainName, that._domainName, StringComparison.OrdinalIgnoreCase)) &&
+                if ((String.Compare(_domainName, that._domainName, StringComparison.OrdinalIgnoreCase) == 0) &&
                      (Utils.AreBytesEqual(_sid, that._sid)))
                     return true;
             }

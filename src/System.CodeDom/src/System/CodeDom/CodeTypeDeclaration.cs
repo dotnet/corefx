@@ -33,19 +33,18 @@ namespace System.CodeDom
         {
             get
             {
-                if ((_populated & BaseTypesCollection) == 0)
+                if (0 == (_populated & BaseTypesCollection))
                 {
                     _populated |= BaseTypesCollection;
                     PopulateBaseTypes?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _baseTypes;
             }
         }
 
         public bool IsClass
         {
-            get => (TypeAttributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Class && !_isEnum && !_isStruct;
+            get { return (TypeAttributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Class && !_isEnum && !_isStruct; }
             set
             {
                 if (value)
@@ -60,7 +59,7 @@ namespace System.CodeDom
 
         public bool IsStruct
         {
-            get => _isStruct;
+            get { return _isStruct; }
             set
             {
                 if (value)
@@ -68,14 +67,13 @@ namespace System.CodeDom
                     TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
                     _isEnum = false;
                 }
-
                 _isStruct = value;
             }
         }
 
         public bool IsEnum
         {
-            get => _isEnum;
+            get { return _isEnum; }
             set
             {
                 if (value)
@@ -83,14 +81,13 @@ namespace System.CodeDom
                     TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
                     _isStruct = false;
                 }
-
                 _isEnum = value;
             }
         }
 
         public bool IsInterface
         {
-            get => (TypeAttributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Interface;
+            get { return (TypeAttributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Interface; }
             set
             {
                 if (value)
@@ -113,12 +110,11 @@ namespace System.CodeDom
         {
             get
             {
-                if ((_populated & MembersCollection) == 0)
+                if (0 == (_populated & MembersCollection))
                 {
                     _populated |= MembersCollection;
                     PopulateMembers?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _members;
             }
         }

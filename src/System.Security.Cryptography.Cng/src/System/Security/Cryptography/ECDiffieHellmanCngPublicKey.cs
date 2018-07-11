@@ -122,7 +122,7 @@ namespace System.Security.Cryptography
             using (CngKey key = Import())
             {
                 ECParameters ecparams = new ECParameters();
-                string curveName = key.GetCurveName(out _);
+                string curveName = key.GetCurveName();
 
                 if (string.IsNullOrEmpty(curveName))
                 {

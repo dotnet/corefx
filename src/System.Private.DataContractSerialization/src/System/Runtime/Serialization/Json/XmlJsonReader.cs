@@ -1258,7 +1258,7 @@ namespace System.Runtime.Serialization.Json
                 string bufferAsString = Encoding.UTF8.GetString(buffer, offset, 4);
                 BufferReader.Advance(4);
                 int charValue = ParseChar(bufferAsString, NumberStyles.HexNumber);
-                if (char.IsHighSurrogate((char)charValue))
+                if (Char.IsHighSurrogate((char)charValue))
                 {
                     byte nextByte = BufferReader.GetByte();
                     if (nextByte == (byte)'\\')
@@ -1269,7 +1269,7 @@ namespace System.Runtime.Serialization.Json
                         bufferAsString = Encoding.UTF8.GetString(buffer, offset, 4);
                         BufferReader.Advance(4);
                         char lowChar = ParseChar(bufferAsString, NumberStyles.HexNumber);
-                        if (!char.IsLowSurrogate(lowChar))
+                        if (!Char.IsLowSurrogate(lowChar))
                         {
                             XmlExceptionHelper.ThrowXmlException(this,
                                 new XmlException(SR.Format(SR.XmlInvalidLowSurrogate, bufferAsString)));

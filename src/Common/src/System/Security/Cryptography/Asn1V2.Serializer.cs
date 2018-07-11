@@ -585,19 +585,12 @@ namespace System.Security.Cryptography.Asn1
             {
                 if (fieldData.TagType == UniversalTagNumber.ObjectIdentifier)
                 {
-                    return (value, writer) =>
-                        writer.WriteObjectIdentifier(
-                            tag,
-                            (string)value ?? throw new CryptographicException(SR.Argument_InvalidOidValue));
+                    return (value, writer) => writer.WriteObjectIdentifier(tag, (string)value);
                 }
 
                 // Because all string types require an attribute saying their type, we'll
-                // definitely have a TagType value.
-                return (value, writer) =>
-                    writer.WriteCharacterString(
-                        tag,
-                        fieldData.TagType.Value,
-                        (string)value ?? throw new CryptographicException(SR.Argument_InvalidOidValue));
+                // definitely have a value.
+                return (value, writer) => writer.WriteCharacterString(tag, fieldData.TagType.Value, (string)value);
             }
 
             if (typeT == typeof(ReadOnlyMemory<byte>) && !fieldData.IsCollection)

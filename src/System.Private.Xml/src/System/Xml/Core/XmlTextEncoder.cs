@@ -93,7 +93,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    return string.Empty;
+                    return String.Empty;
                 }
             }
         }

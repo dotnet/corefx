@@ -262,16 +262,22 @@ namespace System.ComponentModel.DataAnnotations
 
             if (property == null)
             {
-                throw new InvalidOperationException(SR.Format(SR.ValidationAttribute_ResourceTypeDoesNotHaveProperty,
-                                                    _errorMessageResourceType.FullName,
-                                                    _errorMessageResourceName));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        SR.ValidationAttribute_ResourceTypeDoesNotHaveProperty,
+                        _errorMessageResourceType.FullName,
+                        _errorMessageResourceName));
             }
 
             if (property.PropertyType != typeof(string))
             {
-                throw new InvalidOperationException(SR.Format(SR.ValidationAttribute_ResourcePropertyNotStringType,
-                                                    property.Name,
-                                                    _errorMessageResourceType.FullName));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        SR.ValidationAttribute_ResourcePropertyNotStringType,
+                        property.Name,
+                        _errorMessageResourceType.FullName));
             }
 
             _errorMessageResourceAccessor = () => (string)property.GetValue(null, null);

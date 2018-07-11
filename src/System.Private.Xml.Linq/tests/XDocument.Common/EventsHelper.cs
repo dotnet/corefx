@@ -96,7 +96,7 @@ namespace CoreXml.Test.XLinq
         }
 
         // Single event and object
-        public void Verify(XObjectChange expectedEvent, object expectedObject)
+        public void Verify(XObjectChange expectedEvent, Object expectedObject)
         {
             TestLog.Compare(_events.Count, 1, "Mismatch in expected number of events");
             EventItem item = _events.Dequeue();
@@ -105,7 +105,7 @@ namespace CoreXml.Test.XLinq
         }
 
         // Same event for many different objects
-        public void Verify(XObjectChange expectedEvent, object[] expectedObjects)
+        public void Verify(XObjectChange expectedEvent, Object[] expectedObjects)
         {
             TestLog.Compare(_events.Count, expectedObjects.Length, "Mismatch in expected number of events");
             int i = 0;

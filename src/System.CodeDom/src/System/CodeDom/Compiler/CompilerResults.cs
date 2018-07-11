@@ -9,14 +9,27 @@ namespace System.CodeDom.Compiler
 {
     public partial class CompilerResults
     {
+        private readonly CompilerErrorCollection _errors = new CompilerErrorCollection();
+        private readonly StringCollection _output = new StringCollection();
         private Assembly _compiledAssembly;
+        private TempFileCollection _tempFiles;
 
         public CompilerResults(TempFileCollection tempFiles)
         {
-            TempFiles = tempFiles;
+            _tempFiles = tempFiles;
         }
 
-        public TempFileCollection TempFiles { get; set; }
+        public TempFileCollection TempFiles
+        {
+            get
+            {
+                return _tempFiles;
+            }
+            set
+            {
+                _tempFiles = value;
+            }
+        }
 
         public Assembly CompiledAssembly
         {
@@ -28,12 +41,13 @@ namespace System.CodeDom.Compiler
                 }
                 return _compiledAssembly;
             }
-            set => _compiledAssembly = value;
+            set { _compiledAssembly = value; }
         }
 
-        public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
+        public CompilerErrorCollection Errors => _errors;
 
-        public StringCollection Output { get; } = new StringCollection();
+        public StringCollection Output => _output;
+
         public string PathToAssembly { get; set; }
 
         public int NativeCompilerReturnValue { get; set; }

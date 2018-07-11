@@ -26,7 +26,7 @@ namespace System.Xml.Serialization
             {
                 return typeof(IList).GetMethod(
                     "get_Item",
-                    new Type[] { typeof(int) }
+                    new Type[] { typeof(Int32) }
                 );
             });
 
@@ -101,7 +101,7 @@ namespace System.Xml.Serialization
                     MethodInfo get_Item = varType.GetMethod(
                         "get_Item",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(int) }
+                        new Type[] { typeof(Int32) }
                         );
 
                     if (get_Item == null && typeof(IList).IsAssignableFrom(varType))

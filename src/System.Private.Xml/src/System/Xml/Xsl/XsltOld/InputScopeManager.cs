@@ -145,7 +145,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal bool IsExtensionNamespace(string nspace)
+        internal bool IsExtensionNamespace(String nspace)
         {
             Debug.Assert(_scopeStack != null, "PushScope wasn't called");
             for (InputScope inputScope = _scopeStack; inputScope != null; inputScope = inputScope.Parent)
@@ -168,7 +168,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal bool IsExcludedNamespace(string nspace)
+        internal bool IsExcludedNamespace(String nspace)
         {
             Debug.Assert(_scopeStack != null, "PushScope wasn't called");
             for (InputScope inputScope = _scopeStack; inputScope != null; inputScope = inputScope.Parent)

@@ -27,7 +27,7 @@ namespace System.Reflection.Emit
             // Create backing field as:
             // private string assemblyName;
             FieldBuilder assemblyNameField =
-                attributeTypeBuilder.DefineField("assemblyName", typeof(string), FieldAttributes.Private);
+                attributeTypeBuilder.DefineField("assemblyName", typeof(String), FieldAttributes.Private);
 
             // Create ctor as:
             // public IgnoresAccessChecksToAttribute(string)
@@ -52,14 +52,14 @@ namespace System.Reflection.Emit
                                                    "AssemblyName",
                                                    PropertyAttributes.None,
                                                    CallingConventions.HasThis,
-                                                   returnType: typeof(string),
+                                                   returnType: typeof(String),
                                                    parameterTypes: null);
 
             MethodBuilder getterMethodBuilder = attributeTypeBuilder.DefineMethod(
                                                    "get_AssemblyName",
                                                    MethodAttributes.Public,
                                                    CallingConventions.HasThis,
-                                                   returnType: typeof(string),
+                                                   returnType: typeof(String),
                                                    parameterTypes: null);
 
             // Generate body:

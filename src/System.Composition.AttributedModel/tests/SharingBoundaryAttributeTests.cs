@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using Xunit;
 
-namespace System.Composition.AttributeModel.Tests
+namespace System.Composition.Tests
 {
     public class SharingBoundaryAttributeTests
     {

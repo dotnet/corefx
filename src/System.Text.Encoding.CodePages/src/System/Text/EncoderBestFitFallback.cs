@@ -40,7 +40,7 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             InternalEncoderBestFitFallback that = value as InternalEncoderBestFitFallback;
             if (that != null)
@@ -65,14 +65,14 @@ namespace System.Text
         private int _iSize;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject;
-        private static object InternalSyncObject
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    object o = new object();
+                    Object o = new Object();
                     Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
@@ -115,10 +115,10 @@ namespace System.Text
         public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
         {
             // Double check input surrogate pair
-            if (!char.IsHighSurrogate(charUnknownHigh))
+            if (!Char.IsHighSurrogate(charUnknownHigh))
                 throw new ArgumentOutOfRangeException(nameof(charUnknownHigh), SR.Format(SR.ArgumentOutOfRange_Range, 0xD800, 0xDBFF));
 
-            if (!char.IsLowSurrogate(charUnknownLow))
+            if (!Char.IsLowSurrogate(charUnknownLow))
                 throw new ArgumentOutOfRangeException(nameof(charUnknownLow), SR.Format(SR.ArgumentOutOfRange_Range, 0xDC00, 0xDFFF));
 
             // If we had a buffer already we're being recursive, throw, it's probably at the suspect

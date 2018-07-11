@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -537,7 +537,7 @@ namespace System.Runtime.Serialization
                         int value = s_dataContractID++;
                         if (value >= s_dataContractCache.Length)
                         {
-                            int newSize = (value < int.MaxValue / 2) ? value * 2 : int.MaxValue;
+                            int newSize = (value < Int32.MaxValue / 2) ? value * 2 : Int32.MaxValue;
                             if (newSize <= value)
                             {
                                 DiagnosticUtility.DebugAssert("DataContract cache overflow");
@@ -760,39 +760,39 @@ namespace System.Runtime.Serialization
                         Type type = null;
                         string name = typeName.Substring(7);
                         if (name == "Char")
-                            type = typeof(char);
+                            type = typeof(Char);
                         else if (name == "Boolean")
-                            type = typeof(bool);
+                            type = typeof(Boolean);
                         else if (name == "SByte")
-                            type = typeof(sbyte);
+                            type = typeof(SByte);
                         else if (name == "Byte")
-                            type = typeof(byte);
+                            type = typeof(Byte);
                         else if (name == "Int16")
-                            type = typeof(short);
+                            type = typeof(Int16);
                         else if (name == "UInt16")
-                            type = typeof(ushort);
+                            type = typeof(UInt16);
                         else if (name == "Int32")
-                            type = typeof(int);
+                            type = typeof(Int32);
                         else if (name == "UInt32")
-                            type = typeof(uint);
+                            type = typeof(UInt32);
                         else if (name == "Int64")
-                            type = typeof(long);
+                            type = typeof(Int64);
                         else if (name == "UInt64")
-                            type = typeof(ulong);
+                            type = typeof(UInt64);
                         else if (name == "Single")
-                            type = typeof(float);
+                            type = typeof(Single);
                         else if (name == "Double")
-                            type = typeof(double);
+                            type = typeof(Double);
                         else if (name == "Decimal")
-                            type = typeof(decimal);
+                            type = typeof(Decimal);
                         else if (name == "DateTime")
                             type = typeof(DateTime);
                         else if (name == "String")
-                            type = typeof(string);
+                            type = typeof(String);
                         else if (name == "Byte[]")
                             type = typeof(byte[]);
                         else if (name == "Object")
-                            type = typeof(object);
+                            type = typeof(Object);
                         else if (name == "TimeSpan")
                             type = typeof(TimeSpan);
                         else if (name == "Guid")
@@ -1665,7 +1665,7 @@ namespace System.Runtime.Serialization
         {
             string clrNs = type.Namespace;
             if (clrNs == null)
-                clrNs = string.Empty;
+                clrNs = String.Empty;
             string ns = GetGlobalDataContractNamespace(clrNs, type.Module.GetCustomAttributes(typeof(ContractNamespaceAttribute)).ToArray());
             if (ns == null)
                 ns = GetGlobalDataContractNamespace(clrNs, type.Assembly.GetCustomAttributes(typeof(ContractNamespaceAttribute)).ToArray());
@@ -1700,11 +1700,11 @@ namespace System.Runtime.Serialization
                 startIndex = typeName.IndexOf('.', endIndex);
                 if (startIndex < 0)
                 {
-                    nestedParamCounts.Add(int.Parse(typeName.Substring(endIndex + 1), CultureInfo.InvariantCulture));
+                    nestedParamCounts.Add(Int32.Parse(typeName.Substring(endIndex + 1), CultureInfo.InvariantCulture));
                     break;
                 }
                 else
-                    nestedParamCounts.Add(int.Parse(typeName.Substring(endIndex + 1, startIndex - endIndex - 1), CultureInfo.InvariantCulture));
+                    nestedParamCounts.Add(Int32.Parse(typeName.Substring(endIndex + 1, startIndex - endIndex - 1), CultureInfo.InvariantCulture));
             }
             if (localName != null)
                 localName.Append("Of");
@@ -1730,7 +1730,7 @@ namespace System.Runtime.Serialization
 
         internal static string GetDefaultStableNamespace(string clrNs)
         {
-            if (clrNs == null) clrNs = string.Empty;
+            if (clrNs == null) clrNs = String.Empty;
             return new Uri(Globals.DataContractXsdBaseNamespaceUri, clrNs).AbsoluteUri;
         }
 
@@ -1809,7 +1809,7 @@ namespace System.Runtime.Serialization
 
         internal static string GetClrTypeFullName(Type type)
         {
-            return !type.IsGenericTypeDefinition && type.ContainsGenericParameters ? string.Format(CultureInfo.InvariantCulture, "{0}.{1}", type.Namespace, type.Name) : type.FullName;
+            return !type.IsGenericTypeDefinition && type.ContainsGenericParameters ? String.Format(CultureInfo.InvariantCulture, "{0}.{1}", type.Namespace, type.Name) : type.FullName;
         }
 
         internal static void GetClrNameAndNamespace(string fullTypeName, out string localName, out string ns)
@@ -1817,7 +1817,7 @@ namespace System.Runtime.Serialization
             int nsEnd = fullTypeName.LastIndexOf('.');
             if (nsEnd < 0)
             {
-                ns = string.Empty;
+                ns = String.Empty;
                 localName = fullTypeName.Replace('+', '.');
             }
             else
@@ -1843,7 +1843,7 @@ namespace System.Runtime.Serialization
                 ContractNamespaceAttribute nsAttribute = (ContractNamespaceAttribute)nsAttributes[i];
                 string clrNsInAttribute = nsAttribute.ClrNamespace;
                 if (clrNsInAttribute == null)
-                    clrNsInAttribute = string.Empty;
+                    clrNsInAttribute = String.Empty;
                 if (clrNsInAttribute == clrNs)
                 {
                     if (nsAttribute.ContractNamespace == null)
@@ -2045,7 +2045,7 @@ namespace System.Runtime.Serialization
                     else
                     {
                         int paramIndex;
-                        if (!int.TryParse(format.Substring(start, i - start), out paramIndex) || paramIndex < 0 || paramIndex >= genericNameProvider.GetParameterCount())
+                        if (!Int32.TryParse(format.Substring(start, i - start), out paramIndex) || paramIndex < 0 || paramIndex >= genericNameProvider.GetParameterCount())
                             throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.GenericParameterNotValid, format.Substring(start, i - start), genericNameProvider.GetGenericTypeName(), genericNameProvider.GetParameterCount() - 1)));
                         typeName.Append(genericNameProvider.GetParameterName(paramIndex));
                     }

@@ -22,10 +22,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionProperty(MethodInfo getMethod, MethodInfo setMethod)
         {
-            if (getMethod == null && setMethod == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(getMethod != null || setMethod != null);
 
             _getMethod = getMethod;
             _setMethod = setMethod;
@@ -64,11 +61,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
                 string name = method.Name;
 
-                if (name.Length <= 4)
-                {
-                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                }
-
+                Assumes.IsTrue(name.Length > 4);
 
                 // Remove 'get_' or 'set_'
                 return name.Substring(4);
@@ -101,10 +94,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
                 ParameterInfo[] parameters = UnderlyingSetMethod.GetParameters();
 
-                if (parameters.Length == 0)
-                {
-                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                }
+                Assumes.IsTrue(parameters.Length > 0);
+
                 return parameters[parameters.Length - 1].ParameterType;
             }
         }
@@ -116,20 +107,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override object GetValue(object instance)
         {
-            if (_getMethod == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(_getMethod);
 
             return UnderlyingGetMethod.SafeInvoke(instance);
         }
 
         public override void SetValue(object instance, object value)
         {
-            if (_setMethod == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(_setMethod);
+
             UnderlyingSetMethod.SafeInvoke(instance, value);
         }
 

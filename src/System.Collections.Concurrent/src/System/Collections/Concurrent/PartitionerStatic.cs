@@ -401,7 +401,7 @@ namespace System.Collections.Concurrent
             /// <summary>
             /// Get the current element in the current partition. Property required by IEnumerator interface
             /// </summary>
-            object IEnumerator.Current
+            Object IEnumerator.Current
             {
                 get
                 {
@@ -1491,7 +1491,7 @@ namespace System.Collections.Concurrent
                 }
             }
 
-            object IEnumerator.Current
+            Object IEnumerator.Current
             {
                 get
                 {

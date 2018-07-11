@@ -7,7 +7,7 @@ using System.Globalization;
 namespace System.Buffers.Text.Tests
 {
     //
-    // Used to model DateTime and DateTimeOffsets that have "illegal" values (e.g. Jan 32) This is used to generate a subset of DateTime
+    // Used to model DateTime and DateTimeOffsets that have "illegal" values (e.g. Jan 32) This is used to generate a subset of DateTime 
     // and DateTimeOffset ParserTestData objects.
     //
     public sealed class PseudoDateTime
@@ -85,18 +85,18 @@ namespace System.Buffers.Text.Tests
                     dayAbbreviation = "Sun";
                 }
 
-                string monthAbbreviation;
+                string monthAbbrevation;
                 if (Month >= 1 && Month <= 12)
                 {
-                    monthAbbreviation = s_monthAbbreviations[Month - 1];
+                    monthAbbrevation = s_monthAbbreviations[Month - 1];
                 }
                 else
                 {
                     // Pick something legal here as we're expecting code coverage of an error case and we don't want a bad day abbreviation to bypass that.
-                    monthAbbreviation = "Jan";
+                    monthAbbrevation = "Jan";
                 }
 
-                return dayAbbreviation + ", " + Day.ToString("D2", CultureInfo.InvariantCulture) + " " + monthAbbreviation + " " + Year.ToString("D4", CultureInfo.InvariantCulture) + " "
+                return dayAbbreviation + ", " + Day.ToString("D2", CultureInfo.InvariantCulture) + " " + monthAbbrevation + " " + Year.ToString("D4", CultureInfo.InvariantCulture) + " "
                     + Hour.ToString("D2", CultureInfo.InvariantCulture) + ":" + Minute.ToString("D2", CultureInfo.InvariantCulture) + ":" + Second.ToString("D2", CultureInfo.InvariantCulture) + " "
                     + "GMT";
             }

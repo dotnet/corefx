@@ -232,7 +232,7 @@ namespace System.IO.Pipes
             }
         }
 
-        protected internal void Persist(string name)
+        protected internal void Persist(String name)
         {
             WriteLock();
 

@@ -410,10 +410,8 @@ namespace System.ComponentModel.Composition.Hosting
 
         private CompositionResult TrySatisfyImports(PartManager partManager, ComposablePart part, bool shouldTrackImports)
         {
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            Assumes.NotNull(part);
+
             var result = CompositionResult.SucceededResult;
 
             // get out if the part is already composed
@@ -690,10 +688,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private EngineContext GetEngineContext(AtomicComposition atomicComposition)
         {
-            if (atomicComposition == null)
-            {
-                throw new ArgumentNullException(nameof(atomicComposition));
-            }
+            Assumes.NotNull(atomicComposition);
 
             EngineContext engineContext;
             if (!atomicComposition.TryGetValue(this, true, out engineContext))
@@ -727,10 +722,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
 
             // This should only be called when a loop has been detected - so it should always be on the stack
-            if (lastPart != firstPart)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(lastPart == firstPart);
             return false;
         }
 

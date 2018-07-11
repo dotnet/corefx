@@ -6,140 +6,140 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class ConvertToCharTests : ConvertTestBase<char>
+    public class ConvertToCharTests : ConvertTestBase<Char>
     {
         [Fact]
         public void FromByte()
         {
-            byte[] testValues = { byte.MaxValue, byte.MinValue };
-            char[] expectedValues = { (char)byte.MaxValue, (char)byte.MinValue };
+            Byte[] testValues = { Byte.MaxValue, Byte.MinValue };
+            Char[] expectedValues = { (Char)Byte.MaxValue, (Char)Byte.MinValue };
             Verify(Convert.ToChar, testValues, expectedValues);
         }
 
         [Fact]
         public void FromChar()
         {
-            object[] testValues = { char.MaxValue, char.MinValue, 'b' };
-            char[] expectedValues = { char.MaxValue, char.MinValue, 'b' };
-            Verify<object>(Convert.ToChar, testValues, expectedValues);
+            Object[] testValues = { Char.MaxValue, Char.MinValue, 'b' };
+            Char[] expectedValues = { Char.MaxValue, Char.MinValue, 'b' };
+            Verify<Object>(Convert.ToChar, testValues, expectedValues);
         }
 
         [Fact]
         public void FromDecimal()
         {
-            object[] invalidValues = { 0m, decimal.MinValue, decimal.MaxValue };
+            Object[] invalidValues = { 0m, Decimal.MinValue, Decimal.MaxValue };
             VerifyFromObjectThrows<InvalidCastException>(Convert.ToChar, Convert.ToChar, invalidValues);
         }
 
         [Fact]
         public void FromDouble()
         {
-            object[] invalidValues = { 0.0, double.MinValue, double.MaxValue };
+            Object[] invalidValues = { 0.0, Double.MinValue, Double.MaxValue };
             VerifyFromObjectThrows<InvalidCastException>(Convert.ToChar, Convert.ToChar, invalidValues);
         }
 
         [Fact]
         public void FromInt16()
         {
-            short[] testValues = { short.MaxValue, 0 };
-            char[] expectedValues = { (char)short.MaxValue, '\0' };
+            Int16[] testValues = { Int16.MaxValue, 0 };
+            Char[] expectedValues = { (Char)Int16.MaxValue, '\0' };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            short[] overflowValues = { short.MinValue, -1000 };
-            VerifyThrows<OverflowException, short>(Convert.ToChar, overflowValues);
+            Int16[] overflowValues = { Int16.MinValue, -1000 };
+            VerifyThrows<OverflowException, Int16>(Convert.ToChar, overflowValues);
         }
 
         [Fact]
         public void FromInt32()
         {
-            int[] testValues = { char.MaxValue, char.MinValue };
-            char[] expectedValues = { char.MaxValue, char.MinValue };
+            Int32[] testValues = { Char.MaxValue, Char.MinValue };
+            Char[] expectedValues = { Char.MaxValue, Char.MinValue };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            int[] overflowValues = { int.MinValue, int.MaxValue, (int)ushort.MaxValue + 1, -1000 };
-            VerifyThrows<OverflowException, int>(Convert.ToChar, overflowValues);
+            Int32[] overflowValues = { Int32.MinValue, Int32.MaxValue, (Int32)UInt16.MaxValue + 1, -1000 };
+            VerifyThrows<OverflowException, Int32>(Convert.ToChar, overflowValues);
         }
 
         [Fact]
         public void FromInt64()
         {
-            long[] testValues = { 0, 98, ushort.MaxValue };
-            char[] expectedValues = { '\0', 'b', char.MaxValue };
+            Int64[] testValues = { 0, 98, UInt16.MaxValue };
+            Char[] expectedValues = { '\0', 'b', Char.MaxValue };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            long[] overflowValues = { long.MinValue, long.MaxValue, -1 };
-            VerifyThrows<OverflowException, long>(Convert.ToChar, overflowValues);
+            Int64[] overflowValues = { Int64.MinValue, Int64.MaxValue, -1 };
+            VerifyThrows<OverflowException, Int64>(Convert.ToChar, overflowValues);
         }
 
         [Fact]
         public void FromObject()
         {
-            object[] testValues = { null };
-            char[] expectedValues = { '\0' };
+            Object[] testValues = { null };
+            Char[] expectedValues = { '\0' };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            object[] invalidValues = { new object(), DateTime.Now };
-            VerifyThrows<InvalidCastException, object>(Convert.ToChar, invalidValues);
+            Object[] invalidValues = { new Object(), DateTime.Now };
+            VerifyThrows<InvalidCastException, Object>(Convert.ToChar, invalidValues);
         }
 
         [Fact]
         public void FromSByte()
         {
-            sbyte[] testValues = { sbyte.MaxValue, 0 };
-            char[] expectedValues = { (char)sbyte.MaxValue, '\0' };
+            SByte[] testValues = { SByte.MaxValue, 0 };
+            Char[] expectedValues = { (Char)SByte.MaxValue, '\0' };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            sbyte[] overflowValues = { sbyte.MinValue, -100, -1 };
-            VerifyThrows<OverflowException, sbyte>(Convert.ToChar, overflowValues);
+            SByte[] overflowValues = { SByte.MinValue, -100, -1 };
+            VerifyThrows<OverflowException, SByte>(Convert.ToChar, overflowValues);
         }
 
         [Fact]
         public void FromSingle()
         {
-            object[] invalidValues = { 0f, float.MinValue, float.MaxValue };
+            Object[] invalidValues = { 0f, Single.MinValue, Single.MaxValue };
             VerifyFromObjectThrows<InvalidCastException>(Convert.ToChar, Convert.ToChar, invalidValues);
         }
 
         [Fact]
         public void FromString()
         {
-            string[] testValues = { "a", "T", "z", "a" };
-            char[] expectedValues = { 'a', 'T', 'z', 'a' };
+            String[] testValues = { "a", "T", "z", "a" };
+            Char[] expectedValues = { 'a', 'T', 'z', 'a' };
             VerifyFromString(Convert.ToChar, Convert.ToChar, testValues, expectedValues);
 
-            string[] formatExceptionValues = { string.Empty, "ab" };
+            String[] formatExceptionValues = { String.Empty, "ab" };
             VerifyFromStringThrows<FormatException>(Convert.ToChar, Convert.ToChar, formatExceptionValues);
-            VerifyFromStringThrows<ArgumentNullException>(Convert.ToChar, Convert.ToChar, new string[] { null });
+            VerifyFromStringThrows<ArgumentNullException>(Convert.ToChar, Convert.ToChar, new String[] { null });
         }
 
         [Fact]
         public void FromUInt16()
         {
-            ushort[] testValues = { 0, 98, ushort.MaxValue };
-            char[] expectedValues = { '\0', 'b', char.MaxValue };
+            UInt16[] testValues = { 0, 98, UInt16.MaxValue };
+            Char[] expectedValues = { '\0', 'b', Char.MaxValue };
             Verify(Convert.ToChar, testValues, expectedValues);
         }
 
         [Fact]
         public void FromUInt32()
         {
-            uint[] testValues = { ushort.MaxValue, 0 };
-            char[] expectedValues = { (char)ushort.MaxValue, '\0' };
+            UInt32[] testValues = { UInt16.MaxValue, 0 };
+            Char[] expectedValues = { (Char)UInt16.MaxValue, '\0' };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            uint[] overflowValues = { uint.MaxValue };
-            VerifyThrows<OverflowException, uint>(Convert.ToChar, overflowValues);
+            UInt32[] overflowValues = { UInt32.MaxValue };
+            VerifyThrows<OverflowException, UInt32>(Convert.ToChar, overflowValues);
         }
 
         [Fact]
         public void FromUInt64()
         {
-            ulong[] testValues = { 0, 98, ushort.MaxValue };
-            char[] expectedValues = { '\0', 'b', char.MaxValue };
+            UInt64[] testValues = { 0, 98, UInt16.MaxValue };
+            Char[] expectedValues = { '\0', 'b', Char.MaxValue };
             Verify(Convert.ToChar, testValues, expectedValues);
 
-            ulong[] overflowValues = { ulong.MaxValue, (ulong)ushort.MaxValue + 1 };
-            VerifyThrows<OverflowException, ulong>(Convert.ToChar, overflowValues);
+            UInt64[] overflowValues = { UInt64.MaxValue, (UInt64)UInt16.MaxValue + 1 };
+            VerifyThrows<OverflowException, UInt64>(Convert.ToChar, overflowValues);
         }
     }
 }

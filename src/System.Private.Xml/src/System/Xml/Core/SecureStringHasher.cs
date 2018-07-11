@@ -16,14 +16,14 @@ using System.Collections.Generic;
 namespace System.Xml
 {
     // The SecureStringHasher implements IEqualityComparer for strings and therefore can be used in generic IDictionary.
-    internal class SecureStringHasher : IEqualityComparer<string>
+    internal class SecureStringHasher : IEqualityComparer<String>
     {
-        public bool Equals(string x, string y)
+        public bool Equals(String x, String y)
         {
-            return string.Equals(x, y, StringComparison.Ordinal);
+            return String.Equals(x, y, StringComparison.Ordinal);
         }
 
-        public int GetHashCode(string key)
+        public int GetHashCode(String key)
         {
             return key.GetHashCode();
         }

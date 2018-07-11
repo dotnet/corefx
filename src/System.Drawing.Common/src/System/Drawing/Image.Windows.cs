@@ -9,7 +9,7 @@ using System.Drawing.Internal;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using Gdip = System.Drawing.SafeNativeMethods.Gdip;
+using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
@@ -34,16 +34,17 @@ namespace System.Drawing
             filename = Path.GetFullPath(filename);
 
             IntPtr image = IntPtr.Zero;
+            int status;
 
             if (useEmbeddedColorManagement)
             {
-                Gdip.CheckStatus(Gdip.GdipLoadImageFromFileICM(filename, out image));
+                status = SafeNativeMethods.Gdip.GdipLoadImageFromFileICM(filename, out image);
             }
             else
             {
-                Gdip.CheckStatus(Gdip.GdipLoadImageFromFile(filename, out image));
+                status = SafeNativeMethods.Gdip.GdipLoadImageFromFile(filename, out image);
             }
-
+            SafeNativeMethods.Gdip.CheckStatus(status);
             ValidateImage(image);
 
             Image img = CreateImageObject(image);
@@ -54,21 +55,27 @@ namespace System.Drawing
         public static Image FromStream(Stream stream, bool useEmbeddedColorManagement, bool validateImageData)
         {
             if (stream == null)
+            {
                 throw new ArgumentNullException(nameof(stream));
+            }
 
             IntPtr image = IntPtr.Zero;
+            int status;
 
             if (useEmbeddedColorManagement)
             {
-                Gdip.CheckStatus(Gdip.GdipLoadImageFromStreamICM(new GPStream(stream), out image));
+                status = SafeNativeMethods.Gdip.GdipLoadImageFromStreamICM(new GPStream(stream), out image);
             }
             else
             {
-                Gdip.CheckStatus(Gdip.GdipLoadImageFromStream(new GPStream(stream), out image));
+                status = SafeNativeMethods.Gdip.GdipLoadImageFromStream(new GPStream(stream), out image);
             }
+            SafeNativeMethods.Gdip.CheckStatus(status);
 
             if (validateImageData)
+            {
                 ValidateImage(image);
+            }
 
             Image img = CreateImageObject(image);
             EnsureSave(img, null, stream);
@@ -80,14 +87,16 @@ namespace System.Drawing
         {
             IntPtr image = IntPtr.Zero;
 
-            Gdip.CheckStatus(Gdip.GdipLoadImageFromStream(new GPStream(stream), out image));
+            int status = SafeNativeMethods.Gdip.GdipLoadImageFromStream(new GPStream(stream), out image);
+            SafeNativeMethods.Gdip.CheckStatus(status);
             ValidateImage(image);
 
             nativeImage = image;
 
             int type = -1;
 
-            Gdip.CheckStatus(Gdip.GdipGetImageType(new HandleRef(this, nativeImage), out type));
+            status = SafeNativeMethods.Gdip.GdipGetImageType(new HandleRef(this, nativeImage), out type);
+            SafeNativeMethods.Gdip.CheckStatus(status);
             EnsureSave(this, null, stream);
         }
 
@@ -100,7 +109,8 @@ namespace System.Drawing
         {
             IntPtr cloneImage = IntPtr.Zero;
 
-            Gdip.CheckStatus(Gdip.GdipCloneImage(new HandleRef(this, nativeImage), out cloneImage));
+            int status = SafeNativeMethods.Gdip.GdipCloneImage(new HandleRef(this, nativeImage), out cloneImage);
+            SafeNativeMethods.Gdip.CheckStatus(status);
             ValidateImage(cloneImage);
 
             return CreateImageObject(cloneImage);
@@ -112,47 +122,55 @@ namespace System.Drawing
             if (!disposing && nativeImage != IntPtr.Zero)
                 Debug.WriteLine("**********************\nDisposed through finalization:\n" + allocationSite);
 #endif
-            if (nativeImage == IntPtr.Zero)
-                return;
-
-            try
+            if (nativeImage != IntPtr.Zero)
             {
-#if DEBUG
-                int status =
-#endif
-                Gdip.GdipDisposeImage(new HandleRef(this, nativeImage));
-#if DEBUG
-                Debug.Assert(status == Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
-#endif
-            }
-            catch (Exception ex)
-            {
-                if (ClientUtils.IsSecurityOrCriticalException(ex))
+                try
                 {
-                    throw;
+#if DEBUG
+                    int status =
+#endif
+                    SafeNativeMethods.Gdip.GdipDisposeImage(new HandleRef(this, nativeImage));
+#if DEBUG
+                    Debug.Assert(status == SafeNativeMethods.Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
+#endif
                 }
+                catch (Exception ex)
+                {
+                    if (ClientUtils.IsSecurityOrCriticalException(ex))
+                    {
+                        throw;
+                    }
 
-                Debug.Fail("Exception thrown during Dispose: " + ex.ToString());
-            }
-            finally
-            {
-                nativeImage = IntPtr.Zero;
+                    Debug.Fail("Exception thrown during Dispose: " + ex.ToString());
+                }
+                finally
+                {
+                    nativeImage = IntPtr.Zero;
+                }
             }
         }
 
         internal static Image CreateImageObject(IntPtr nativeImage)
         {
             Image image;
-            Gdip.CheckStatus(Gdip.GdipGetImageType(new HandleRef(null, nativeImage), out int type));
+
+            int type = -1;
+
+            int status = SafeNativeMethods.Gdip.GdipGetImageType(new HandleRef(null, nativeImage), out type);
+
+            if (status != SafeNativeMethods.Gdip.Ok)
+                throw SafeNativeMethods.Gdip.StatusException(status);
 
             switch ((ImageType)type)
             {
                 case ImageType.Bitmap:
                     image = new Bitmap(nativeImage);
                     break;
+
                 case ImageType.Metafile:
                     image = Metafile.FromGDIplus(nativeImage);
                     break;
+
                 default:
                     throw new ArgumentException(SR.Format(SR.InvalidImage));
             }
@@ -166,11 +184,12 @@ namespace System.Drawing
         public EncoderParameters GetEncoderParameterList(Guid encoder)
         {
             EncoderParameters p;
+            int size;
 
-            Gdip.CheckStatus(Gdip.GdipGetEncoderParameterListSize(
-                new HandleRef(this, nativeImage),
-                ref encoder,
-                out int size));
+            int status = SafeNativeMethods.Gdip.GdipGetEncoderParameterListSize(new HandleRef(this, nativeImage),
+                                                                 ref encoder,
+                                                                 out size);
+            SafeNativeMethods.Gdip.CheckStatus(status);
 
             if (size <= 0)
                 return null;
@@ -178,11 +197,11 @@ namespace System.Drawing
             IntPtr buffer = Marshal.AllocHGlobal(size);
             try
             {
-                Gdip.CheckStatus(Gdip.GdipGetEncoderParameterList(
-                    new HandleRef(this, nativeImage),
-                    ref encoder,
-                    size,
-                    buffer));
+                status = SafeNativeMethods.Gdip.GdipGetEncoderParameterList(new HandleRef(this, nativeImage),
+                                                             ref encoder,
+                                                             size,
+                                                             buffer);
+                SafeNativeMethods.Gdip.CheckStatus(status);
 
                 p = EncoderParameters.ConvertFromMemory(buffer);
             }
@@ -228,6 +247,7 @@ namespace System.Drawing
                 _rawData = null;
                 encoderParamsMemory = encoderParams.ConvertToMemory();
             }
+            int status = SafeNativeMethods.Gdip.Ok;
 
             try
             {
@@ -249,11 +269,10 @@ namespace System.Drawing
 
                 if (!saved)
                 {
-                    Gdip.CheckStatus(Gdip.GdipSaveImageToFile(
-                        new HandleRef(this, nativeImage),
-                        filename,
-                        ref g,
-                        new HandleRef(encoderParams, encoderParamsMemory)));
+                    status = SafeNativeMethods.Gdip.GdipSaveImageToFile(new HandleRef(this, nativeImage),
+                                                             filename,
+                                                             ref g,
+                                                             new HandleRef(encoderParams, encoderParamsMemory));
                 }
             }
             finally
@@ -263,6 +282,7 @@ namespace System.Drawing
                     Marshal.FreeHGlobal(encoderParamsMemory);
                 }
             }
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         internal void Save(MemoryStream stream)
@@ -270,11 +290,17 @@ namespace System.Drawing
             // Jpeg loses data, so we don't want to use it to serialize...
             ImageFormat dest = RawFormat;
             if (dest == ImageFormat.Jpeg)
+            {
                 dest = ImageFormat.Png;
+            }
+            ImageCodecInfo codec = dest.FindEncoder();
 
-            // If we don't find an Encoder (for things like Icon), we just switch back to PNG...
-            ImageCodecInfo codec = dest.FindEncoder() ?? ImageFormat.Png.FindEncoder();
-
+            // If we don't find an Encoder (for things like Icon), we
+            // just switch back to PNG...
+            if (codec == null)
+            {
+                codec = ImageFormat.Png.FindEncoder();
+            }
             Save(stream, codec, null);
         }
 
@@ -297,9 +323,13 @@ namespace System.Drawing
         public void Save(Stream stream, ImageCodecInfo encoder, EncoderParameters encoderParams)
         {
             if (stream == null)
+            {
                 throw new ArgumentNullException(nameof(stream));
+            }
             if (encoder == null)
+            {
                 throw new ArgumentNullException(nameof(encoder));
+            }
 
             IntPtr encoderParamsMemory = IntPtr.Zero;
 
@@ -308,6 +338,8 @@ namespace System.Drawing
                 _rawData = null;
                 encoderParamsMemory = encoderParams.ConvertToMemory();
             }
+
+            int status = SafeNativeMethods.Gdip.Ok;
 
             try
             {
@@ -326,11 +358,10 @@ namespace System.Drawing
 
                 if (!saved)
                 {
-                    Gdip.CheckStatus(Gdip.GdipSaveImageToStream(
-                        new HandleRef(this, nativeImage),
-                        new UnsafeNativeMethods.ComStreamFromDataStream(stream),
-                        ref g,
-                        new HandleRef(encoderParams, encoderParamsMemory)));
+                    status = SafeNativeMethods.Gdip.GdipSaveImageToStream(new HandleRef(this, nativeImage),
+                                                                     new UnsafeNativeMethods.ComStreamFromDataStream(stream),
+                                                                     ref g,
+                                                                     new HandleRef(encoderParams, encoderParamsMemory));
                 }
             }
             finally
@@ -340,6 +371,7 @@ namespace System.Drawing
                     Marshal.FreeHGlobal(encoderParamsMemory);
                 }
             }
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         /// <summary>
@@ -350,21 +382,18 @@ namespace System.Drawing
         {
             IntPtr encoder = IntPtr.Zero;
             if (encoderParams != null)
+            {
                 encoder = encoderParams.ConvertToMemory();
+            }
 
             _rawData = null;
+            int status = SafeNativeMethods.Gdip.GdipSaveAdd(new HandleRef(this, nativeImage), new HandleRef(encoderParams, encoder));
 
-            try
+            if (encoder != IntPtr.Zero)
             {
-                Gdip.CheckStatus(Gdip.GdipSaveAdd(new HandleRef(this, nativeImage), new HandleRef(encoderParams, encoder)));
+                Marshal.FreeHGlobal(encoder);
             }
-            finally
-            {
-                if (encoder != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(encoder);
-                }
-            }
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         /// <summary>
@@ -376,35 +405,35 @@ namespace System.Drawing
             IntPtr encoder = IntPtr.Zero;
 
             if (image == null)
+            {
                 throw new ArgumentNullException(nameof(image));
+            }
             if (encoderParams != null)
+            {
                 encoder = encoderParams.ConvertToMemory();
+            }
 
             _rawData = null;
+            int status = SafeNativeMethods.Gdip.GdipSaveAddImage(new HandleRef(this, nativeImage), new HandleRef(image, image.nativeImage), new HandleRef(encoderParams, encoder));
 
-            try
+            if (encoder != IntPtr.Zero)
             {
-                Gdip.CheckStatus(Gdip.GdipSaveAddImage(
-                    new HandleRef(this, nativeImage),
-                    new HandleRef(image, image.nativeImage),
-                    new HandleRef(encoderParams, encoder)));
+                Marshal.FreeHGlobal(encoder);
             }
-            finally
-            {
-                if (encoder != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(encoder);
-                }
-            }
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         /// <summary>
         /// Gets a bounding rectangle in the specified units for this <see cref='Image'/>.
-        /// </summary>
+        /// </summary>        
         public RectangleF GetBounds(ref GraphicsUnit pageUnit)
         {
-            Gdip.CheckStatus(Gdip.GdipGetImageBounds(new HandleRef(this, nativeImage), out RectangleF bounds, out pageUnit));
-            return bounds;
+            GPRECTF gprectf = new GPRECTF();
+
+            int status = SafeNativeMethods.Gdip.GdipGetImageBounds(new HandleRef(this, nativeImage), ref gprectf, out pageUnit);
+            SafeNativeMethods.Gdip.CheckStatus(status);
+
+            return gprectf.ToRectangleF();
         }
 
         /// <summary>
@@ -415,8 +444,10 @@ namespace System.Drawing
         {
             get
             {
-                Gdip.CheckStatus(Gdip.GdipGetImagePaletteSize(new HandleRef(this, nativeImage), out int size));
+                int size = -1;
 
+                int status = SafeNativeMethods.Gdip.GdipGetImagePaletteSize(new HandleRef(this, nativeImage), out size);
+                SafeNativeMethods.Gdip.CheckStatus(status);
                 // "size" is total byte size:
                 // sizeof(ColorPalette) + (pal->Count-1)*sizeof(ARGB)
 
@@ -430,7 +461,9 @@ namespace System.Drawing
                 IntPtr memory = Marshal.AllocHGlobal(size);
                 try
                 {
-                    Gdip.CheckStatus(Gdip.GdipGetImagePalette(new HandleRef(this, nativeImage), memory, size));
+                    status = SafeNativeMethods.Gdip.GdipGetImagePalette(new HandleRef(this, nativeImage), memory, size);
+                    SafeNativeMethods.Gdip.CheckStatus(status);
+
                     palette.ConvertFromMemory(memory);
                 }
                 finally
@@ -443,18 +476,13 @@ namespace System.Drawing
             set
             {
                 IntPtr memory = value.ConvertToMemory();
+                int status = SafeNativeMethods.Gdip.GdipSetImagePalette(new HandleRef(this, nativeImage), memory);
 
-                try
+                if (memory != IntPtr.Zero)
                 {
-                    Gdip.CheckStatus(Gdip.GdipSetImagePalette(new HandleRef(this, nativeImage), memory));
+                    Marshal.FreeHGlobal(memory);
                 }
-                finally
-                {
-                    if (memory != IntPtr.Zero)
-                    {
-                        Marshal.FreeHGlobal(memory);
-                    }
-                }
+                SafeNativeMethods.Gdip.CheckStatus(status);
             }
         }
 
@@ -463,17 +491,15 @@ namespace System.Drawing
         /// <summary>
         /// Returns the thumbnail for this <see cref='Image'/>.
         /// </summary>
-        public Image GetThumbnailImage(int thumbWidth, int thumbHeight, GetThumbnailImageAbort callback, IntPtr callbackData)
+        public Image GetThumbnailImage(int thumbWidth, int thumbHeight,
+                                       GetThumbnailImageAbort callback, IntPtr callbackData)
         {
             IntPtr thumbImage = IntPtr.Zero;
 
-            Gdip.CheckStatus(Gdip.GdipGetImageThumbnail(
-                new HandleRef(this, nativeImage),
-                thumbWidth,
-                thumbHeight,
-                out thumbImage,
-                callback,
-                callbackData));
+            int status = SafeNativeMethods.Gdip.GdipGetImageThumbnail(new HandleRef(this, nativeImage), thumbWidth, thumbHeight, out thumbImage,
+                                                       callback, callbackData);
+            if (status != SafeNativeMethods.Gdip.Ok)
+                throw SafeNativeMethods.Gdip.StatusException(status);
 
             return CreateImageObject(thumbImage);
         }
@@ -482,30 +508,43 @@ namespace System.Drawing
 
         /// <summary>
         /// Gets an array of GUIDs that represent the dimensions of frames within this <see cref='Image'/>.
-        /// </summary>
+        /// </summary>        
         [Browsable(false)]
         public Guid[] FrameDimensionsList
         {
             get
             {
-                Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(this, nativeImage), out int count));
+                int count;
+
+                int status = SafeNativeMethods.Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(this, nativeImage), out count);
+                SafeNativeMethods.Gdip.CheckStatus(status);
 
                 Debug.Assert(count >= 0, "FrameDimensionsList returns bad count");
                 if (count <= 0)
+                {
                     return Array.Empty<Guid>();
+                }
 
-                int size = Marshal.SizeOf(typeof(Guid));
+                int size = (int)Marshal.SizeOf(typeof(Guid));
 
                 IntPtr buffer = Marshal.AllocHGlobal(checked(size * count));
                 if (buffer == IntPtr.Zero)
-                    throw Gdip.StatusException(Gdip.OutOfMemory);
+                {
+                    throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.OutOfMemory);
+                }
+
+                status = SafeNativeMethods.Gdip.GdipImageGetFrameDimensionsList(new HandleRef(this, nativeImage), buffer, count);
+
+                if (status != SafeNativeMethods.Gdip.Ok)
+                {
+                    Marshal.FreeHGlobal(buffer);
+                    throw SafeNativeMethods.Gdip.StatusException(status);
+                }
 
                 Guid[] guids = new Guid[count];
 
                 try
                 {
-                    Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(this, nativeImage), buffer, count));
-
                     for (int i = 0; i < count; i++)
                     {
                         guids[i] = (Guid)Marshal.PtrToStructure((IntPtr)((long)buffer + size * i), typeof(Guid));
@@ -528,7 +567,10 @@ namespace System.Drawing
         {
             get
             {
-                Gdip.CheckStatus(Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out int count));
+                int count;
+
+                int status = SafeNativeMethods.Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out count);
+                SafeNativeMethods.Gdip.CheckStatus(status);
 
                 int[] propid = new int[count];
 
@@ -536,7 +578,8 @@ namespace System.Drawing
                 if (count == 0)
                     return propid;
 
-                Gdip.CheckStatus(Gdip.GdipGetPropertyIdList(new HandleRef(this, nativeImage), count, propid));
+                status = SafeNativeMethods.Gdip.GdipGetPropertyIdList(new HandleRef(this, nativeImage), count, propid);
+                SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return propid;
             }
@@ -547,7 +590,11 @@ namespace System.Drawing
         /// </summary>
         public PropertyItem GetPropertyItem(int propid)
         {
-            Gdip.CheckStatus(Gdip.GdipGetPropertyItemSize(new HandleRef(this, nativeImage), propid, out int size));
+            PropertyItem propitem;
+            int size;
+
+            int status = SafeNativeMethods.Gdip.GdipGetPropertyItemSize(new HandleRef(this, nativeImage), propid, out size);
+            SafeNativeMethods.Gdip.CheckStatus(status);
 
             if (size == 0)
                 return null;
@@ -555,17 +602,21 @@ namespace System.Drawing
             IntPtr propdata = Marshal.AllocHGlobal(size);
 
             if (propdata == IntPtr.Zero)
-                throw Gdip.StatusException(Gdip.OutOfMemory);
+                throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.OutOfMemory);
 
             try
             {
-                Gdip.CheckStatus(Gdip.GdipGetPropertyItem(new HandleRef(this, nativeImage), propid, size, propdata));
-                return PropertyItemInternal.ConvertFromMemory(propdata, 1)[0];
+                status = SafeNativeMethods.Gdip.GdipGetPropertyItem(new HandleRef(this, nativeImage), propid, size, propdata);
+                SafeNativeMethods.Gdip.CheckStatus(status);
+
+                propitem = PropertyItemInternal.ConvertFromMemory(propdata, 1)[0];
             }
             finally
             {
                 Marshal.FreeHGlobal(propdata);
             }
+
+            return propitem;
         }
 
         /// <summary>
@@ -577,7 +628,8 @@ namespace System.Drawing
 
             using (propItemInternal)
             {
-                Gdip.CheckStatus(Gdip.GdipSetPropertyItem(new HandleRef(this, nativeImage), propItemInternal));
+                int status = SafeNativeMethods.Gdip.GdipSetPropertyItem(new HandleRef(this, nativeImage), propItemInternal);
+                SafeNativeMethods.Gdip.CheckStatus(status);
             }
         }
 
@@ -589,8 +641,14 @@ namespace System.Drawing
         {
             get
             {
-                Gdip.CheckStatus(Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out int count));
-                Gdip.CheckStatus(Gdip.GdipGetPropertySize(new HandleRef(this, nativeImage), out int size, ref count));
+                int size;
+                int count;
+
+                int status = SafeNativeMethods.Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out count);
+                SafeNativeMethods.Gdip.CheckStatus(status);
+
+                status = SafeNativeMethods.Gdip.GdipGetPropertySize(new HandleRef(this, nativeImage), out size, ref count);
+                SafeNativeMethods.Gdip.CheckStatus(status);
 
                 if (size == 0 || count == 0)
                     return Array.Empty<PropertyItem>();
@@ -598,7 +656,9 @@ namespace System.Drawing
                 IntPtr propdata = Marshal.AllocHGlobal(size);
                 try
                 {
-                    Gdip.CheckStatus(Gdip.GdipGetAllPropertyItems(new HandleRef(this, nativeImage), size, count, propdata));
+                    status = SafeNativeMethods.Gdip.GdipGetAllPropertyItems(new HandleRef(this, nativeImage), size, count, propdata);
+                    SafeNativeMethods.Gdip.CheckStatus(status);
+
                     return PropertyItemInternal.ConvertFromMemory(propdata, count);
                 }
                 finally
@@ -626,14 +686,11 @@ namespace System.Drawing
 
         internal static void ValidateImage(IntPtr image)
         {
-            try
+            int status = SafeNativeMethods.Gdip.GdipImageForceValidation(new HandleRef(null, image));
+            if (status != SafeNativeMethods.Gdip.Ok)
             {
-                Gdip.CheckStatus(Gdip.GdipImageForceValidation(new HandleRef(null, image)));
-            }
-            catch
-            {
-                Gdip.GdipDisposeImage(new HandleRef(null, image));
-                throw;
+                SafeNativeMethods.Gdip.GdipDisposeImage(new HandleRef(null, image));
+                throw SafeNativeMethods.Gdip.StatusException(status);
             }
         }
     }

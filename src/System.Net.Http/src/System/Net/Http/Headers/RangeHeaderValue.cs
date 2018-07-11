@@ -82,9 +82,9 @@ namespace System.Net.Http.Headers
                         sb.Append(", ");
                     }
 
-                    if (range.From.HasValue) sb.Append(range.From.GetValueOrDefault());
+                    sb.Append(range.From);
                     sb.Append('-');
-                    if (range.To.HasValue) sb.Append(range.To.GetValueOrDefault());
+                    sb.Append(range.To);
                 }
             }
 

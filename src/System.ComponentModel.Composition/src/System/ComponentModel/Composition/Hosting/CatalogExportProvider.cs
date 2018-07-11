@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Composition.Diagnostics;
+using System.ComponentModel.Composition.Diagnostics;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
 using System.Diagnostics;
@@ -26,10 +26,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public InnerCatalogExportProvider(CatalogExportProvider outerExportProvider)
             {
-                if(outerExportProvider == null)
-                {
-                    throw new ArgumentNullException(nameof(outerExportProvider));
-                }
+                Assumes.NotNull(outerExportProvider);
                 _outerExportProvider = outerExportProvider;
             }
 
@@ -313,10 +310,7 @@ namespace System.ComponentModel.Composition.Hosting
             ThrowIfDisposed();
             EnsureRunning();
 
-            if (_innerExportProvider == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(_innerExportProvider);
 
             IEnumerable<Export> exports;
             _innerExportProvider.TryGetExports(definition, atomicComposition, out exports);
@@ -530,15 +524,8 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
             EnsureRunning();
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
 
-            if (export == null)
-            {
-                throw new ArgumentNullException(nameof(export));
-            }
+            Assumes.NotNull(part, export);
 
             // We don't protect against thread racing here, as "importsSatisfied" is merely an optimization
             // if two threads satisfy imports twice, the results is the same, just the perf hit is heavier.
@@ -575,10 +562,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void DisposePart(object exportedValue, CatalogPart catalogPart, AtomicComposition atomicComposition)
         {
-            if (catalogPart == null)
-            {
-                throw new ArgumentNullException(nameof(catalogPart));
-            }
+            Assumes.NotNull(catalogPart);
 
             if (_isDisposed)
                 return;
@@ -630,15 +614,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void PreventPartCollection(object exportedValue, ComposablePart part)
         {
-            if (exportedValue == null)
-            {
-                throw new ArgumentNullException(nameof(exportedValue));
-            }
-
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            Assumes.NotNull(exportedValue, part);
 
             using (_lock.LockStateForWrite())
             {
@@ -697,10 +673,7 @@ namespace System.ComponentModel.Composition.Hosting
                         forceRejectionTest = true;
                         break;
                     default:
-                        if (state != AtomicCompositionQueryState.Unknown)
-                        {
-                            throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                        }
+                        Assumes.IsTrue(state == AtomicCompositionQueryState.Unknown);
                         // Need to do the work to determine the state
                         break;
                 }

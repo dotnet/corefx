@@ -21,7 +21,7 @@ namespace System.Net
                 throw new ArgumentNullException(nameof(host));
             }
 
-            if (string.IsNullOrEmpty(host))
+            if (String.IsNullOrEmpty(host))
             {
                 throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(host)));
             }

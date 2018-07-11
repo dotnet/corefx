@@ -13,12 +13,12 @@ namespace Internal.Cryptography
     //
     internal static partial class HashProviderDispenser
     {
-        public static HashProvider CreateHashProvider(string hashAlgorithmId)
+        public static HashProvider CreateHashProvider(String hashAlgorithmId)
         {
             return new HashProviderCng(hashAlgorithmId, null);
         }
 
-        public static HashProvider CreateMacProvider(string hashAlgorithmId, byte[] key)
+        public static HashProvider CreateMacProvider(String hashAlgorithmId, byte[] key)
         {
             return new HashProviderCng(hashAlgorithmId, key);
         }

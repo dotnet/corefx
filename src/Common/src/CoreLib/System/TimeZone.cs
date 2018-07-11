@@ -32,15 +32,15 @@ namespace System
         private static volatile TimeZone currentTimeZone = null;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject;
-        private static object InternalSyncObject
+        private static Object s_InternalSyncObject;
+        private static Object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    object o = new object();
-                    Interlocked.CompareExchange<object>(ref s_InternalSyncObject, o, null);
+                    Object o = new Object();
+                    Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
             }
@@ -87,12 +87,12 @@ namespace System
             }
         }
 
-        public abstract string StandardName
+        public abstract String StandardName
         {
             get;
         }
 
-        public abstract string DaylightName
+        public abstract String DaylightName
         {
             get;
         }
@@ -129,8 +129,8 @@ namespace System
             {
                 return time;
             }
-            bool isAmbiguousLocalDst = false;
-            long offset = ((CurrentSystemTimeZone)(TimeZone.CurrentTimeZone)).GetUtcOffsetFromUniversalTime(time, ref isAmbiguousLocalDst);
+            Boolean isAmbiguousLocalDst = false;
+            Int64 offset = ((CurrentSystemTimeZone)(TimeZone.CurrentTimeZone)).GetUtcOffsetFromUniversalTime(time, ref isAmbiguousLocalDst);
             return new DateTime(time.Ticks + offset, DateTimeKind.Local, isAmbiguousLocalDst);
         }
 
@@ -247,7 +247,7 @@ namespace System
                 ambiguousEnd = startTime - daylightTimes.Delta;
             }
 
-            bool isDst = false;
+            Boolean isDst = false;
             if (startTime > endTime)
             {
                 // In southern hemisphere, the daylight saving time starts later in the year, and ends in the beginning of next year.

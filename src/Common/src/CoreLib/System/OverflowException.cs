@@ -25,13 +25,13 @@ namespace System
             HResult = HResults.COR_E_OVERFLOW;
         }
 
-        public OverflowException(string message)
+        public OverflowException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_OVERFLOW;
         }
 
-        public OverflowException(string message, Exception innerException)
+        public OverflowException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_OVERFLOW;

@@ -29,35 +29,35 @@ namespace Microsoft.SqlServer.Server
         //
 
         //  valid for SqlDbType.Bit
-        bool GetBoolean(SmiEventSink sink, int ordinal);
+        Boolean GetBoolean(SmiEventSink sink, int ordinal);
 
         //  valid for SqlDbType.TinyInt
-        byte GetByte(SmiEventSink sink, int ordinal);
+        Byte GetByte(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbTypes: Binary, VarBinary, Image, Udt, Xml, Char, VarChar, Text, NChar, NVarChar, NText
         //  (Character type support needed for ExecuteXmlReader handling)
-        long GetBytesLength(SmiEventSink sink, int ordinal);
+        Int64 GetBytesLength(SmiEventSink sink, int ordinal);
         int GetBytes(SmiEventSink sink, int ordinal, long fieldOffset, byte[] buffer, int bufferOffset, int length);
 
         // valid for character types: Char, VarChar, Text, NChar, NVarChar, NText
-        long GetCharsLength(SmiEventSink sink, int ordinal);
+        Int64 GetCharsLength(SmiEventSink sink, int ordinal);
         int GetChars(SmiEventSink sink, int ordinal, long fieldOffset, char[] buffer, int bufferOffset, int length);
-        string GetString(SmiEventSink sink, int ordinal);
+        String GetString(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbType.SmallInt
-        short GetInt16(SmiEventSink sink, int ordinal);
+        Int16 GetInt16(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbType.Int
-        int GetInt32(SmiEventSink sink, int ordinal);
+        Int32 GetInt32(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbType.BigInt, SqlDbType.Money, SqlDbType.SmallMoney
-        long GetInt64(SmiEventSink sink, int ordinal);
+        Int64 GetInt64(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbType.Real
-        float GetSingle(SmiEventSink sink, int ordinal);
+        Single GetSingle(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbType.Float
-        double GetDouble(SmiEventSink sink, int ordinal);
+        Double GetDouble(SmiEventSink sink, int ordinal);
 
         // valid for SqlDbType.Numeric (uses SqlDecimal since Decimal cannot hold full range)
         SqlDecimal GetSqlDecimal(SmiEventSink sink, int ordinal);

@@ -1105,11 +1105,11 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 foreach (string supportedCapability in rootDSE.Properties[PropertyManager.SupportedCapabilities])
                 {
-                    if (string.Equals(supportedCapability, SupportedCapability.ADOid, StringComparison.OrdinalIgnoreCase))
+                    if (String.Compare(supportedCapability, SupportedCapability.ADOid, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         type = ApplicationPartitionType.ADApplicationPartition;
                     }
-                    if (string.Equals(supportedCapability, SupportedCapability.ADAMOid, StringComparison.OrdinalIgnoreCase))
+                    if (String.Compare(supportedCapability, SupportedCapability.ADAMOid, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         type = ApplicationPartitionType.ADAMApplicationPartition;
                     }

@@ -53,14 +53,14 @@ namespace Microsoft.SqlServer.Server
                                         | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth;
 
         // scalar types constructor without tvp extended properties
-        public SqlMetaData(string name, SqlDbType dbType)
+        public SqlMetaData(String name, SqlDbType dbType)
         {
             Construct(name, dbType, x_defaultUseServerDefault,
                     x_defaultIsUniqueKey, x_defaultColumnSortOrder, x_defaultSortOrdinal);
         }
 
         // scalar types constructor
-        public SqlMetaData(string name, SqlDbType dbType, bool useServerDefault,
+        public SqlMetaData(String name, SqlDbType dbType, bool useServerDefault,
                     bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             Construct(name, dbType, useServerDefault,
@@ -69,7 +69,7 @@ namespace Microsoft.SqlServer.Server
 
         // binary or string constructor with only max length
         // (for string types, locale and compare options will be picked up from the thread.
-        public SqlMetaData(string name, SqlDbType dbType, long maxLength)
+        public SqlMetaData(String name, SqlDbType dbType, long maxLength)
         {
             Construct(name, dbType, maxLength, x_defaultUseServerDefault,
                     x_defaultIsUniqueKey, x_defaultColumnSortOrder, x_defaultSortOrdinal);
@@ -77,7 +77,7 @@ namespace Microsoft.SqlServer.Server
 
         // binary or string constructor with only max length and tvp extended properties
         // (for string types, locale and compare options will be picked up from the thread.
-        public SqlMetaData(string name, SqlDbType dbType, long maxLength, bool useServerDefault,
+        public SqlMetaData(String name, SqlDbType dbType, long maxLength, bool useServerDefault,
                     bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             Construct(name, dbType, maxLength, useServerDefault,
@@ -85,21 +85,21 @@ namespace Microsoft.SqlServer.Server
         }
 
         // udt ctor without tvp extended properties
-        public SqlMetaData(string name, SqlDbType dbType, Type userDefinedType)
+        public SqlMetaData(String name, SqlDbType dbType, Type userDefinedType)
         {
             Construct(name, dbType, userDefinedType, null, x_defaultUseServerDefault,
                     x_defaultIsUniqueKey, x_defaultColumnSortOrder, x_defaultSortOrdinal);
         }
 
         // udt ctor without tvp extended properties
-        public SqlMetaData(string name, SqlDbType dbType, Type userDefinedType, string serverTypeName)
+        public SqlMetaData(String name, SqlDbType dbType, Type userDefinedType, string serverTypeName)
         {
             Construct(name, dbType, userDefinedType, serverTypeName, x_defaultUseServerDefault,
                     x_defaultIsUniqueKey, x_defaultColumnSortOrder, x_defaultSortOrdinal);
         }
 
         // udt ctor
-        public SqlMetaData(string name, SqlDbType dbType, Type userDefinedType, string serverTypeName,
+        public SqlMetaData(String name, SqlDbType dbType, Type userDefinedType, string serverTypeName,
                     bool useServerDefault, bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             Construct(name, dbType, userDefinedType, serverTypeName, useServerDefault,
@@ -107,7 +107,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // decimal ctor without tvp extended properties
-        public SqlMetaData(string name, SqlDbType dbType, byte precision, byte scale)
+        public SqlMetaData(String name, SqlDbType dbType, byte precision, byte scale)
         {
             Construct(name, dbType, precision, scale, x_defaultUseServerDefault,
                     x_defaultIsUniqueKey, x_defaultColumnSortOrder, x_defaultSortOrdinal);
@@ -122,7 +122,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // string type constructor with locale and compare options, no tvp extended properties
-        public SqlMetaData(string name, SqlDbType dbType, long maxLength, long locale,
+        public SqlMetaData(String name, SqlDbType dbType, long maxLength, long locale,
                            SqlCompareOptions compareOptions)
         {
             Construct(name, dbType, maxLength, locale, compareOptions, x_defaultUseServerDefault,
@@ -130,7 +130,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // string type constructor with locale and compare options
-        public SqlMetaData(string name, SqlDbType dbType, long maxLength, long locale,
+        public SqlMetaData(String name, SqlDbType dbType, long maxLength, long locale,
                            SqlCompareOptions compareOptions, bool useServerDefault,
                            bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
@@ -139,7 +139,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // typed xml ctor
-        public SqlMetaData(string name, SqlDbType dbType, string database, string owningSchema,
+        public SqlMetaData(String name, SqlDbType dbType, string database, string owningSchema,
                            string objectName, bool useServerDefault, bool isUniqueKey,
                            SortOrder columnSortOrder, int sortOrdinal)
         {
@@ -148,7 +148,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // everything except xml schema and tvp properties ctor
-        public SqlMetaData(string name, SqlDbType dbType, long maxLength, byte precision,
+        public SqlMetaData(String name, SqlDbType dbType, long maxLength, byte precision,
                            byte scale, long locale, SqlCompareOptions compareOptions,
                            Type userDefinedType) :
                            this(name, dbType, maxLength, precision, scale, locale, compareOptions,
@@ -158,7 +158,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // everything except xml schema ctor
-        public SqlMetaData(string name, SqlDbType dbType, long maxLength, byte precision,
+        public SqlMetaData(String name, SqlDbType dbType, long maxLength, byte precision,
                            byte scale, long localeId, SqlCompareOptions compareOptions,
                            Type userDefinedType, bool useServerDefault,
                            bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
@@ -216,14 +216,14 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        public SqlMetaData(string name, SqlDbType dbType, string database, string owningSchema, string objectName)
+        public SqlMetaData(String name, SqlDbType dbType, string database, string owningSchema, string objectName)
         {
             Construct(name, dbType, database, owningSchema, objectName, x_defaultUseServerDefault, x_defaultIsUniqueKey,
                     x_defaultColumnSortOrder, x_defaultSortOrdinal);
         }
 
         // Most general constructor, should be able to initialize all SqlMetaData fields.(Used by SqlParameter)
-        internal SqlMetaData(string name,
+        internal SqlMetaData(String name,
                               SqlDbType sqlDBType,
                               long maxLength,
                               byte precision,
@@ -255,7 +255,7 @@ namespace Microsoft.SqlServer.Server
 
         // Private constructor used to initialize default instance array elements.
         // DO NOT EXPOSE OUTSIDE THIS CLASS!  It performs no validation.
-        private SqlMetaData(string name,
+        private SqlMetaData(String name,
                              SqlDbType sqlDbType,
                              long maxLength,
                              byte precision,
@@ -411,7 +411,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Construction for all types that do not have variable attributes
-        private void Construct(string name, SqlDbType dbType, bool useServerDefault,
+        private void Construct(String name, SqlDbType dbType, bool useServerDefault,
                     bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             AssertNameIsValid(name);
@@ -460,7 +460,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Construction for all types that vary by user-specified length (not Udts)
-        private void Construct(string name, SqlDbType dbType, long maxLength, bool useServerDefault,
+        private void Construct(String name, SqlDbType dbType, long maxLength, bool useServerDefault,
                     bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             AssertNameIsValid(name);
@@ -530,7 +530,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Construction for string types with specified locale/compare options
-        private void Construct(string name,
+        private void Construct(String name,
                                SqlDbType dbType,
                                long maxLength,
                                long locale,
@@ -606,7 +606,7 @@ namespace Microsoft.SqlServer.Server
         private static byte[] s_maxVarTimeLenOffsetFromScale = new byte[] { 2, 2, 2, 1, 1, 0, 0, 0 };
 
         // Construction for Decimal type and new Katmai Date/Time types
-        private void Construct(string name, SqlDbType dbType, byte precision, byte scale, bool useServerDefault,
+        private void Construct(String name, SqlDbType dbType, byte precision, byte scale, bool useServerDefault,
                     bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             AssertNameIsValid(name);
@@ -652,7 +652,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Construction for Udt type
-        private void Construct(string name, SqlDbType dbType, Type userDefinedType, string serverTypeName, bool useServerDefault,
+        private void Construct(String name, SqlDbType dbType, Type userDefinedType, string serverTypeName, bool useServerDefault,
                     bool isUniqueKey, SortOrder columnSortOrder, int sortOrdinal)
         {
             AssertNameIsValid(name);
@@ -678,7 +678,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Construction for Xml type
-        private void Construct(string name, SqlDbType dbType, string database, string owningSchema,
+        private void Construct(String name, SqlDbType dbType, string database, string owningSchema,
                     string objectName, bool useServerDefault, bool isUniqueKey, SortOrder columnSortOrder,
                     int sortOrdinal)
         {
@@ -736,21 +736,21 @@ namespace Microsoft.SqlServer.Server
         }
 
 
-        public short Adjust(short value)
+        public Int16 Adjust(Int16 value)
         {
             if (SqlDbType.SmallInt != SqlDbType)
                 ThrowInvalidType();
             return value;
         }
 
-        public int Adjust(int value)
+        public Int32 Adjust(Int32 value)
         {
             if (SqlDbType.Int != SqlDbType)
                 ThrowInvalidType();
             return value;
         }
 
-        public long Adjust(long value)
+        public Int64 Adjust(Int64 value)
         {
             if (SqlDbType.BigInt != SqlDbType)
                 ThrowInvalidType();
@@ -1132,31 +1132,31 @@ namespace Microsoft.SqlServer.Server
             Type dataType = value.GetType();
             switch (Type.GetTypeCode(dataType))
             {
-                case TypeCode.Boolean: value = this.Adjust((bool)value); break;
-                case TypeCode.Byte: value = this.Adjust((byte)value); break;
-                case TypeCode.Char: value = this.Adjust((char)value); break;
+                case TypeCode.Boolean: value = this.Adjust((Boolean)value); break;
+                case TypeCode.Byte: value = this.Adjust((Byte)value); break;
+                case TypeCode.Char: value = this.Adjust((Char)value); break;
                 case TypeCode.DateTime: value = this.Adjust((DateTime)value); break;
                 case TypeCode.DBNull:    /* DBNull passes through as is for all types */   break;
-                case TypeCode.Decimal: value = this.Adjust((decimal)value); break;
-                case TypeCode.Double: value = this.Adjust((double)value); break;
+                case TypeCode.Decimal: value = this.Adjust((Decimal)value); break;
+                case TypeCode.Double: value = this.Adjust((Double)value); break;
                 case TypeCode.Empty: throw ADP.InvalidDataType(TypeCode.Empty);
-                case TypeCode.Int16: value = this.Adjust((short)value); break;
-                case TypeCode.Int32: value = this.Adjust((int)value); break;
-                case TypeCode.Int64: value = this.Adjust((long)value); break;
+                case TypeCode.Int16: value = this.Adjust((Int16)value); break;
+                case TypeCode.Int32: value = this.Adjust((Int32)value); break;
+                case TypeCode.Int64: value = this.Adjust((Int64)value); break;
                 case TypeCode.SByte: throw ADP.InvalidDataType(TypeCode.SByte);
-                case TypeCode.Single: value = this.Adjust((float)value); break;
-                case TypeCode.String: value = this.Adjust((string)value); break;
+                case TypeCode.Single: value = this.Adjust((Single)value); break;
+                case TypeCode.String: value = this.Adjust((String)value); break;
                 case TypeCode.UInt16: throw ADP.InvalidDataType(TypeCode.UInt16);
                 case TypeCode.UInt32: throw ADP.InvalidDataType(TypeCode.UInt32);
                 case TypeCode.UInt64: throw ADP.InvalidDataType(TypeCode.UInt64);
                 case TypeCode.Object:
-                    if (dataType == typeof(byte[]))
-                        value = this.Adjust((byte[])value);
-                    else if (dataType == typeof(char[]))
-                        value = this.Adjust((char[])value);
+                    if (dataType == typeof(System.Byte[]))
+                        value = this.Adjust((System.Byte[])value);
+                    else if (dataType == typeof(System.Char[]))
+                        value = this.Adjust((System.Char[])value);
                     else if (dataType == typeof(System.Guid))
                         value = this.Adjust((System.Guid)value);
-                    else if (dataType == typeof(object))
+                    else if (dataType == typeof(System.Object))
                     {
                         throw ADP.InvalidDataType(TypeCode.UInt64);
                     }
@@ -1210,7 +1210,7 @@ namespace Microsoft.SqlServer.Server
             return value;
         }
 
-        public static SqlMetaData InferFromValue(object value, string name)
+        public static SqlMetaData InferFromValue(object value, String name)
         {
             if (value == null)
                 throw ADP.ArgumentNull(nameof(value));
@@ -1226,7 +1226,7 @@ namespace Microsoft.SqlServer.Server
                 case TypeCode.Decimal:
                     {  // Add brackets in order to contain scope declare local variable "sd"
                        // use logic inside SqlDecimal to infer precision and scale.
-                        SqlDecimal sd = new SqlDecimal((decimal)value);
+                        SqlDecimal sd = new SqlDecimal((Decimal)value);
                         smd = new SqlMetaData(name, SqlDbType.Decimal, sd.Precision, sd.Scale);
                     }
                     break;
@@ -1252,7 +1252,7 @@ namespace Microsoft.SqlServer.Server
                 case TypeCode.UInt32: throw ADP.InvalidDataType(TypeCode.UInt32);
                 case TypeCode.UInt64: throw ADP.InvalidDataType(TypeCode.UInt64);
                 case TypeCode.Object:
-                    if (dataType == typeof(byte[]))
+                    if (dataType == typeof(System.Byte[]))
                     {
                         long maxLen = ((System.Byte[])value).Length;
                         if (maxLen < 1) maxLen = 1;
@@ -1262,7 +1262,7 @@ namespace Microsoft.SqlServer.Server
 
                         smd = new SqlMetaData(name, SqlDbType.VarBinary, maxLen);
                     }
-                    else if (dataType == typeof(char[]))
+                    else if (dataType == typeof(System.Char[]))
                     {
                         long maxLen = ((System.Char[])value).Length;
                         if (maxLen < 1) maxLen = 1;
@@ -1274,7 +1274,7 @@ namespace Microsoft.SqlServer.Server
                     }
                     else if (dataType == typeof(System.Guid))
                         smd = new SqlMetaData(name, SqlDbType.UniqueIdentifier);
-                    else if (dataType == typeof(object))
+                    else if (dataType == typeof(System.Object))
                         smd = new SqlMetaData(name, SqlDbType.Variant);
                     else if (dataType == typeof(SqlBinary))
                     {
@@ -1545,8 +1545,8 @@ namespace Microsoft.SqlServer.Server
                 ThrowInvalidType();
         }
 
-        private static readonly SqlMoney s_smSmallMax = new SqlMoney(((decimal)int.MaxValue) / 10000);
-        private static readonly SqlMoney s_smSmallMin = new SqlMoney(((decimal)int.MinValue) / 10000);
+        private static readonly SqlMoney s_smSmallMax = new SqlMoney(((Decimal)Int32.MaxValue) / 10000);
+        private static readonly SqlMoney s_smSmallMin = new SqlMoney(((Decimal)Int32.MinValue) / 10000);
         private void VerifyMoneyRange(SqlMoney value)
         {
             if (SqlDbType.SmallMoney == SqlDbType && ((s_smSmallMax < value).Value || (s_smSmallMin > value).Value))
@@ -1578,7 +1578,7 @@ namespace Microsoft.SqlServer.Server
             }
         }
 
-        private static readonly long[] s_unitTicksFromScale = {
+        private static readonly Int64[] s_unitTicksFromScale = {
             10000000,
             1000000,
             100000,
@@ -1589,12 +1589,12 @@ namespace Microsoft.SqlServer.Server
             1,
         };
 
-        private long InternalAdjustTimeTicks(long ticks)
+        private Int64 InternalAdjustTimeTicks(Int64 ticks)
         {
             return (ticks / s_unitTicksFromScale[Scale] * s_unitTicksFromScale[Scale]);
         }
 
-        private static byte InferScaleFromTimeTicks(long ticks)
+        private static byte InferScaleFromTimeTicks(Int64 ticks)
         {
             for (byte scale = 0; scale < MaxTimeScale; ++scale)
             {

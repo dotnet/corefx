@@ -827,6 +827,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.indexer.genclas
         private static int s_num = 0;
 
         [Fact]
+        [ActiveIssue(16747)]
         public static void DynamicCSharpRunTest()
         {
             Assert.Equal(0, MainMethod());

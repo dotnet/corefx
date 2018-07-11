@@ -188,8 +188,8 @@ namespace System.Xml.Tests
 
         private int v13()
         {
-            string input = CurVariation.Params[0].ToString();
-            string expected = CurVariation.Params[1].ToString();
+            String input = CurVariation.Params[0].ToString();
+            String expected = CurVariation.Params[1].ToString();
             try
             {
                 XmlConvert.VerifyNMTOKEN(input);
@@ -206,7 +206,7 @@ namespace System.Xml.Tests
         private int v15()
         {
             var param = (int)CurVariation.Params[0];
-            string input = string.Empty;
+            string input = String.Empty;
             switch (param)
             {
                 case 1:
@@ -286,7 +286,7 @@ namespace System.Xml.Tests
                     break;
             }
 
-            string expected = CurVariation.Params[1].ToString();
+            String expected = CurVariation.Params[1].ToString();
             try
             {
                 XmlConvert.VerifyName(input);

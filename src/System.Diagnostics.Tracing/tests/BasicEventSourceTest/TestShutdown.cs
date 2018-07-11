@@ -2,18 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 #if USE_MDT_EVENTSOURCE
 using Microsoft.Diagnostics.Tracing;
 #else
 using System.Diagnostics.Tracing;
 #endif
+using Xunit;
+#if USE_ETW
+using Microsoft.Diagnostics.Tracing;
+using Microsoft.Diagnostics.Tracing.Session;
+#endif
+using System.IO;
+using System.Threading;
 
 namespace BasicEventSourceTests
 {
     public class TestShutdown
     {
+
         // TODO: Depends on desktop APIs (AppDomainSetup and Evidence).
-#if FALSE
+#if USE_ETW && FALSE
         /// <summary>
         /// Test for manifest event being logged during AD/Process shutdown during EventSource Dispose(bool) method.
         /// </summary>
@@ -89,7 +103,7 @@ namespace BasicEventSourceTests
 
             logger.Dispose();
         }
-#endif
+#endif //USE_ETW
 
         public sealed class ADShutdownEventSourceTester //: MarshalByRefObject
         {

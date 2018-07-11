@@ -80,4 +80,11 @@ typedef void* (*brotli_alloc_func)(void* opaque, size_t size);
  */
 typedef void (*brotli_free_func)(void* opaque, void* address);
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
+    !defined(__cplusplus) && !defined(__PGI)
+#define BROTLI_ARRAY_PARAM(L) L
+#else
+#define BROTLI_ARRAY_PARAM(L)
+#endif
+
 #endif  /* BROTLI_COMMON_TYPES_H_ */

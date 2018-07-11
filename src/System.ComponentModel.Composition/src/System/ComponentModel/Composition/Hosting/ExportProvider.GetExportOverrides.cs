@@ -728,10 +728,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private T GetExportedValueCore<T>(string contractName, ImportCardinality cardinality)
         {
-            if (!cardinality.IsAtMostOne())
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(cardinality.IsAtMostOne());
 
             Export export = GetExportsCore(typeof(T), (Type)null, contractName, cardinality).SingleOrDefault();
 
@@ -802,20 +799,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private static ImportDefinition BuildImportDefinition(Type type, Type metadataViewType, string contractName, ImportCardinality cardinality)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            if (metadataViewType == null)
-            {
-                throw new ArgumentNullException(nameof(metadataViewType));
-            }
-
-            if (contractName == null)
-            {
-                throw new ArgumentNullException(nameof(contractName));
-            }
+            Assumes.NotNull(type, metadataViewType, contractName);
 
             IEnumerable<KeyValuePair<string, Type>> requiredMetadata = CompositionServices.GetRequiredMetadata(metadataViewType);
             IDictionary<string, object> metadata = CompositionServices.GetImportMetadata(type, null);

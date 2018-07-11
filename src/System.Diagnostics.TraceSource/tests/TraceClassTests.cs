@@ -175,7 +175,7 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTextTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.Write((object)"Text");
+            Trace.Write((Object)"Text");
             listener.Flush();
             Assert.Equal("Text", listener.Output);
         }
@@ -185,7 +185,7 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTextTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.Write((object)"Message", "Category");
+            Trace.Write((Object)"Message", "Category");
             Trace.Flush();
             Assert.Equal("Category: Message", listener.Output);
         }
@@ -195,7 +195,7 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTextTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.WriteLine((object)"Text");
+            Trace.WriteLine((Object)"Text");
             listener.Flush();
             Assert.Equal("Text" + Environment.NewLine, listener.Output);
         }
@@ -215,7 +215,7 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTextTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.WriteLine((object)"Message", "Category");
+            Trace.WriteLine((Object)"Message", "Category");
             listener.Flush();
             Assert.Equal("Category: Message" + Environment.NewLine, listener.Output);
         }
@@ -225,9 +225,9 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.WriteIf(false, (object)"Message");
+            Trace.WriteIf(false, (Object)"Message");
             Assert.Equal(0, listener.GetCallCount(Method.Write));
-            Trace.WriteIf(true, (object)"Message");
+            Trace.WriteIf(true, (Object)"Message");
             Assert.Equal(1, listener.GetCallCount(Method.Write));
         }
 
@@ -247,9 +247,9 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.WriteIf(false, (object)"Message", "Category");
+            Trace.WriteIf(false, (Object)"Message", "Category");
             Assert.Equal(0, listener.GetCallCount(Method.Write));
-            Trace.WriteIf(true, (object)"Message", "Category");
+            Trace.WriteIf(true, (Object)"Message", "Category");
             Assert.Equal(1, listener.GetCallCount(Method.Write));
         }
 
@@ -269,9 +269,9 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.WriteLineIf(false, (object)"Message");
+            Trace.WriteLineIf(false, (Object)"Message");
             Assert.Equal(0, listener.GetCallCount(Method.WriteLine));
-            Trace.WriteLineIf(true, (object)"Message");
+            Trace.WriteLineIf(true, (Object)"Message");
             Assert.Equal(1, listener.GetCallCount(Method.WriteLine));
         }
 
@@ -291,9 +291,9 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var listener = new TestTraceListener();
             Trace.Listeners.Add(listener);
-            Trace.WriteLineIf(false, (object)"Message", "Category");
+            Trace.WriteLineIf(false, (Object)"Message", "Category");
             Assert.Equal(0, listener.GetCallCount(Method.WriteLine));
-            Trace.WriteLineIf(true, (object)"Message", "Category");
+            Trace.WriteLineIf(true, (Object)"Message", "Category");
             Assert.Equal(1, listener.GetCallCount(Method.WriteLine));
         }
 
@@ -341,9 +341,9 @@ namespace System.Diagnostics.TraceSourceTests
             Trace.IndentLevel = 0;
             Trace.WriteLine("Message end.");
             textTL.Flush();
-            string newLine = Environment.NewLine;
+            String newLine = Environment.NewLine;
             var expected =
-                string.Format(
+                String.Format(
                     "Message start." + newLine + "    This message should be indented.{0} Error: 0 : This error not be indented." + newLine + "    {0} Error: 0 : This error is indented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
                     TestRunnerAssemblyName
                 );
@@ -354,7 +354,7 @@ namespace System.Diagnostics.TraceSourceTests
         [Fact]
         public void TraceTest02()
         {
-            string newLine = Environment.NewLine;
+            String newLine = Environment.NewLine;
             var textTL = new TestTextTraceListener();
             Trace.Listeners.Clear();
             Trace.Listeners.Add(textTL);

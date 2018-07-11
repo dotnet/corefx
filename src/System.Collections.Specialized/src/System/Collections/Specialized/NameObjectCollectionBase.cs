@@ -30,7 +30,7 @@ namespace System.Collections.Specialized
         private volatile NameObjectEntry _nullKeyEntry;
         private KeysCollection _keys;
         private int _version;
-        private object _syncRoot;
+        private Object _syncRoot;
 
         private static readonly StringComparer s_defaultComparer = CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(CompareOptions.IgnoreCase);
 
@@ -48,7 +48,7 @@ namespace System.Collections.Specialized
             Reset();
         }
 
-        protected NameObjectCollectionBase(int capacity, IEqualityComparer equalityComparer) : this(equalityComparer)
+        protected NameObjectCollectionBase(Int32 capacity, IEqualityComparer equalityComparer) : this(equalityComparer)
         {
             Reset(capacity);
         }
@@ -111,7 +111,7 @@ namespace System.Collections.Specialized
             _version++;
         }
 
-        private NameObjectEntry FindEntry(string key)
+        private NameObjectEntry FindEntry(String key)
         {
             if (key != null)
                 return (NameObjectEntry)_entriesTable[key];
@@ -158,7 +158,7 @@ namespace System.Collections.Specialized
         ///    <para>Adds an entry with the specified key and value into the
         ///    <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected void BaseAdd(string name, object value)
+        protected void BaseAdd(String name, Object value)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
@@ -187,7 +187,7 @@ namespace System.Collections.Specialized
         ///    <para>Removes the entries with the specified key from the
         ///    <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected void BaseRemove(string name)
+        protected void BaseRemove(String name)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
@@ -229,7 +229,7 @@ namespace System.Collections.Specialized
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
 
-            string key = BaseGetKey(index);
+            String key = BaseGetKey(index);
 
             if (key != null)
             {
@@ -267,7 +267,7 @@ namespace System.Collections.Specialized
         ///    <para>Gets the value of the first entry with the specified key from
         ///       the <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected object BaseGet(string name)
+        protected Object BaseGet(String name)
         {
             NameObjectEntry e = FindEntry(name);
             return (e != null) ? e.Value : null;
@@ -279,7 +279,7 @@ namespace System.Collections.Specialized
         /// into the <see cref='System.Collections.Specialized.NameObjectCollectionBase'/>
         /// instance.</para>
         /// </devdoc>
-        protected void BaseSet(string name, object value)
+        protected void BaseSet(String name, Object value)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
@@ -304,7 +304,7 @@ namespace System.Collections.Specialized
         ///    <para>Gets the value of the entry at the specified index of
         ///       the <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected object BaseGet(int index)
+        protected Object BaseGet(int index)
         {
             NameObjectEntry entry = (NameObjectEntry)_entriesArray[index];
             return entry.Value;
@@ -315,7 +315,7 @@ namespace System.Collections.Specialized
         ///    <see cref='System.Collections.Specialized.NameObjectCollectionBase'/>
         ///    instance.</para>
         /// </devdoc>
-        protected string BaseGetKey(int index)
+        protected String BaseGetKey(int index)
         {
             NameObjectEntry entry = (NameObjectEntry)_entriesArray[index];
             return entry.Key;
@@ -325,7 +325,7 @@ namespace System.Collections.Specialized
         ///    <para>Sets the value of the entry at the specified index of
         ///       the <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected void BaseSet(int index, object value)
+        protected void BaseSet(int index, Object value)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
@@ -384,13 +384,13 @@ namespace System.Collections.Specialized
                 array.SetValue(e.Current, index++);
         }
 
-        object ICollection.SyncRoot
+        Object ICollection.SyncRoot
         {
             get
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange(ref _syncRoot, new object(), null);
+                    System.Threading.Interlocked.CompareExchange(ref _syncRoot, new Object(), null);
                 }
                 return _syncRoot;
             }
@@ -409,10 +409,10 @@ namespace System.Collections.Specialized
         /// <para>Returns a <see cref='System.String' qualify='true'/> array containing all the keys in the
         /// <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected string[] BaseGetAllKeys()
+        protected String[] BaseGetAllKeys()
         {
             int n = _entriesArray.Count;
-            string[] allKeys = new string[n];
+            String[] allKeys = new String[n];
 
             for (int i = 0; i < n; i++)
                 allKeys[i] = BaseGetKey(i);
@@ -424,10 +424,10 @@ namespace System.Collections.Specialized
         /// <para>Returns an <see cref='System.Object' qualify='true'/> array containing all the values in the
         /// <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected object[] BaseGetAllValues()
+        protected Object[] BaseGetAllValues()
         {
             int n = _entriesArray.Count;
-            object[] allValues = new object[n];
+            Object[] allValues = new Object[n];
 
             for (int i = 0; i < n; i++)
                 allValues[i] = BaseGet(i);
@@ -480,14 +480,14 @@ namespace System.Collections.Specialized
 
         internal class NameObjectEntry
         {
-            internal NameObjectEntry(string name, object value)
+            internal NameObjectEntry(String name, Object value)
             {
                 Key = name;
                 Value = value;
             }
 
-            internal string Key;
-            internal object Value;
+            internal String Key;
+            internal Object Value;
         }
 
         //
@@ -531,7 +531,7 @@ namespace System.Collections.Specialized
                 _pos = -1;
             }
 
-            public object Current
+            public Object Current
             {
                 get
                 {
@@ -568,7 +568,7 @@ namespace System.Collections.Specialized
             /// <devdoc>
             ///    <para> Gets the key at the specified index of the collection.</para>
             /// </devdoc>
-            public virtual string Get(int index)
+            public virtual String Get(int index)
             {
                 return _coll.BaseGetKey(index);
             }
@@ -576,7 +576,7 @@ namespace System.Collections.Specialized
             /// <devdoc>
             ///    <para>Represents the entry at the specified index of the collection.</para>
             /// </devdoc>
-            public string this[int index]
+            public String this[int index]
             {
                 get
                 {
@@ -632,7 +632,7 @@ namespace System.Collections.Specialized
                     array.SetValue(e.Current, index++);
             }
 
-            object ICollection.SyncRoot
+            Object ICollection.SyncRoot
             {
                 get { return ((ICollection)_coll).SyncRoot; }
             }

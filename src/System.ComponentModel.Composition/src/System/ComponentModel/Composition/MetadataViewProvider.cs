@@ -15,10 +15,7 @@ namespace System.ComponentModel.Composition
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static TMetadataView GetMetadataView<TMetadataView>(IDictionary<string, object> metadata)
         {
-            if(metadata == null)
-            {
-                throw new ArgumentNullException(nameof(metadata));
-            }
+            Assumes.NotNull(metadata);
 
             Type metadataViewType = typeof(TMetadataView);
 
@@ -82,10 +79,7 @@ namespace System.ComponentModel.Composition
                     }
                     else
                     {
-                        if(proxyType == null)
-                        {
-                            throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                        }
+                        Assumes.NotNull(proxyType);
                         return (TMetadataView)proxyType.SafeCreateInstance(metadata);
                     }
                 }
@@ -129,10 +123,7 @@ namespace System.ComponentModel.Composition
 
         public static bool IsViewTypeValid(Type metadataViewType)
         {
-            if(metadataViewType == null)
-            {
-                throw new ArgumentNullException(nameof(metadataViewType));
-            }
+            Assumes.NotNull(metadataViewType);
 
             // If the Metadata dictionary is cast compatible with the passed in type
             if (ExportServices.IsDefaultMetadataViewType(metadataViewType)

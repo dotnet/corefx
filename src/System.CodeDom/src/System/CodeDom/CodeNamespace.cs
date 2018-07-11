@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.Serialization;
 
 namespace System.CodeDom
 {
@@ -32,12 +33,11 @@ namespace System.CodeDom
         {
             get
             {
-                if ((_populated & TypesCollection) == 0)
+                if (0 == (_populated & TypesCollection))
                 {
                     _populated |= TypesCollection;
                     PopulateTypes?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _classes;
             }
         }
@@ -46,32 +46,30 @@ namespace System.CodeDom
         {
             get
             {
-                if ((_populated & ImportsCollection) == 0)
+                if (0 == (_populated & ImportsCollection))
                 {
                     _populated |= ImportsCollection;
                     PopulateImports?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _imports;
             }
         }
 
         public string Name
         {
-            get => _name ?? string.Empty;
-            set => _name = value;
+            get { return _name ?? string.Empty; }
+            set { _name = value; }
         }
 
         public CodeCommentStatementCollection Comments
         {
             get
             {
-                if ((_populated & CommentsCollection) == 0)
+                if (0 == (_populated & CommentsCollection))
                 {
                     _populated |= CommentsCollection;
                     PopulateComments?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _comments;
             }
         }

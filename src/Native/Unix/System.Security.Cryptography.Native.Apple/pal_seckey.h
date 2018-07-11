@@ -5,7 +5,6 @@
 #pragma once
 
 #include "pal_types.h"
-#include "pal_compiler.h"
 
 #include <Security/Security.h>
 
@@ -31,7 +30,7 @@ An export passphrase is required for private keys, and ignored for public keys.
 
 Follows pal_seckey return conventions.
 */
-DLLEXPORT int32_t AppleCryptoNative_SecKeyExport(
+extern "C" int32_t AppleCryptoNative_SecKeyExport(
     SecKeyRef pKey, int32_t exportPrivate, CFStringRef cfExportPassphrase, CFDataRef* ppDataOut, int32_t* pOSStatus);
 
 /*
@@ -46,7 +45,7 @@ but is in fact the X.509 SubjectPublicKeyInfo structure.
 Returns 1 on success, 0 on failure (*pOSStatus should be set) and negative numbers for various
 state machine errors.
 */
-DLLEXPORT int32_t AppleCryptoNative_SecKeyImportEphemeral(
+extern "C" int32_t AppleCryptoNative_SecKeyImportEphemeral(
     uint8_t* pbKeyBlob, int32_t cbKeyBlob, int32_t isPrivateKey, SecKeyRef* ppKeyOut, int32_t* pOSStatus);
 
 /*
@@ -57,7 +56,7 @@ For ECC the value should not be used.
 
 0 is returned for invalid inputs.
 */
-DLLEXPORT uint64_t AppleCryptoNative_SecKeyGetSimpleKeySizeInBytes(SecKeyRef publicKey);
+extern "C" uint64_t AppleCryptoNative_SecKeyGetSimpleKeySizeInBytes(SecKeyRef publicKey);
 
 /*
 Export a key and re-import it to the NULL keychain.

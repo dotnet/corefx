@@ -192,7 +192,8 @@ namespace System.ComponentModel.DataAnnotations
         ///     property allows an override of the default behavior of the presentation layer.
         ///     <para>
         ///         Consumers must use the <see cref="GetAutoGenerateField" /> method to retrieve the value, as this property
-        ///         getter will throw an exception if the value has not been set.
+        ///         getter will throw
+        ///         an exception if the value has not been set.
         ///     </para>
         /// </summary>
         /// <exception cref="System.InvalidOperationException">
@@ -204,9 +205,9 @@ namespace System.ComponentModel.DataAnnotations
             {
                 if (!_autoGenerateField.HasValue)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.DisplayAttribute_PropertyNotSet,
-                                                        nameof(AutoGenerateField),
-                                                        nameof(GetAutoGenerateField)));
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                        SR.DisplayAttribute_PropertyNotSet, "AutoGenerateField",
+                        "GetAutoGenerateField"));
                 }
 
                 return _autoGenerateField.GetValueOrDefault();
@@ -216,7 +217,8 @@ namespace System.ComponentModel.DataAnnotations
 
         /// <summary>
         ///     Gets or sets whether UI should be generated automatically to display filtering for this field. If this property is
-        ///     not set then the presentation layer will automatically determine whether filtering UI should be generated. Setting this
+        ///     not
+        ///     set then the presentation layer will automatically determine whether filtering UI should be generated. Setting this
         ///     property allows an override of the default behavior of the presentation layer.
         ///     <para>
         ///         Consumers must use the <see cref="GetAutoGenerateFilter" /> method to retrieve the value, as this property
@@ -233,9 +235,9 @@ namespace System.ComponentModel.DataAnnotations
             {
                 if (!_autoGenerateFilter.HasValue)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.DisplayAttribute_PropertyNotSet,
-                                                        nameof(AutoGenerateFilter),
-                                                        nameof(GetAutoGenerateFilter)));
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                        SR.DisplayAttribute_PropertyNotSet, "AutoGenerateFilter",
+                        "GetAutoGenerateFilter"));
                 }
 
                 return _autoGenerateFilter.GetValueOrDefault();
@@ -261,9 +263,8 @@ namespace System.ComponentModel.DataAnnotations
             {
                 if (!_order.HasValue)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.DisplayAttribute_PropertyNotSet,
-                                                        nameof(Order),
-                                                        nameof(GetOrder)));
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                        SR.DisplayAttribute_PropertyNotSet, "Order", "GetOrder"));
                 }
 
                 return _order.GetValueOrDefault();

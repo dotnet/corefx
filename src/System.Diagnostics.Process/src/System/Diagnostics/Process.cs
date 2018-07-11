@@ -80,6 +80,14 @@ namespace System.Diagnostics
         internal AsyncStreamReader _error;
         internal bool _pendingOutputRead;
         internal bool _pendingErrorRead;
+#if FEATURE_TRACESWITCH
+        internal static TraceSwitch _processTracing =
+#if DEBUG
+            new TraceSwitch("processTracing", "Controls debug output from Process component");
+#else
+            null;
+#endif
+#endif
 
         /// <devdoc>
         ///    <para>
@@ -845,6 +853,9 @@ namespace System.Diagnostics
                         // This sets _waitHandle to null which causes CompletionCallback to not emit events.
                         StopWatchingForExit();
                     }
+#if FEATURE_TRACESWITCH
+                    Debug.WriteLineIf(_processTracing.TraceVerbose, "Process - CloseHandle(process) in Close()");
+#endif
                     _processHandle.Dispose();
                     _processHandle = null;
                     _haveProcessHandle = false;
@@ -1056,6 +1067,18 @@ namespace System.Diagnostics
                 ProcessInfo processInfo = processInfos[i];
                 processes[i] = new Process(machineName, isRemoteMachine, processInfo.ProcessId, processInfo);
             }
+#if FEATURE_TRACESWITCH
+            Debug.WriteLineIf(_processTracing.TraceVerbose, "Process.GetProcesses(" + machineName + ")");
+#if DEBUG
+            if (_processTracing.TraceVerbose) {
+                Debug.Indent();
+                for (int i = 0; i < processInfos.Length; i++) {
+                    Debug.WriteLine(processes[i].Id + ": " + processes[i].ProcessName);
+                }
+                Debug.Unindent();
+            }
+#endif
+#endif
             return processes;
         }
 
@@ -1305,7 +1328,7 @@ namespace System.Diagnostics
                 string processName = ProcessName;
                 if (processName.Length != 0)
                 {
-                    return string.Format(CultureInfo.CurrentCulture, "{0} ({1})", base.ToString(), processName);
+                    return String.Format(CultureInfo.CurrentCulture, "{0} ({1})", base.ToString(), processName);
                 }
             }
             return base.ToString();
@@ -1453,7 +1476,7 @@ namespace System.Diagnostics
             _pendingErrorRead = false;
         }
 
-        internal void OutputReadNotifyUser(string data)
+        internal void OutputReadNotifyUser(String data)
         {
             // To avoid race between remove handler and raising the event
             DataReceivedEventHandler outputDataReceived = OutputDataReceived;
@@ -1464,7 +1487,7 @@ namespace System.Diagnostics
             }
         }
 
-        internal void ErrorReadNotifyUser(string data)
+        internal void ErrorReadNotifyUser(String data)
         {
             // To avoid race between remove handler and raising the event
             DataReceivedEventHandler errorDataReceived = ErrorDataReceived;

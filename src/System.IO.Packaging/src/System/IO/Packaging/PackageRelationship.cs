@@ -77,7 +77,7 @@ namespace System.IO.Packaging
         /// PackageRelationship's identifier. Unique across relationships for the given source.
         /// </summary>
         /// <value>String</value>
-        public string Id
+        public String Id
         {
             get
             {
@@ -149,7 +149,7 @@ namespace System.IO.Packaging
                 "TargetMode enum value is out of Range");
 
             // Look for empty string or string with just spaces
-            Debug.Assert(relationshipType.Trim() != string.Empty,
+            Debug.Assert(relationshipType.Trim() != String.Empty,
                 "RelationshipType cannot be empty string or a string with just spaces");
 
             _package = package;
@@ -181,7 +181,7 @@ namespace System.IO.Packaging
         private Uri _targetUri;
         private string _relationshipType;
         private TargetMode _targetMode;
-        private string _id;
+        private String _id;
 
         private static readonly Uri s_containerRelationshipPartName = PackUriHelper.CreatePartUri(new Uri("/_rels/.rels", UriKind.Relative));
 

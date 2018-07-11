@@ -104,7 +104,7 @@ namespace System.Xml.Xsl.XsltOld
             }
             else if (Ref.Equal(name, compiler.Atoms.Priority))
             {
-                Debug.Assert(double.IsNaN(_priority));
+                Debug.Assert(Double.IsNaN(_priority));
                 _priority = XmlConvert.ToXPathDouble(value);
                 if (double.IsNaN(_priority) && !compiler.ForwardCompatibility)
                 {
@@ -135,7 +135,7 @@ namespace System.Xml.Xsl.XsltOld
         {
             NavigatorInput input = compiler.Input;
 
-            if (!double.IsNaN(_priority) || _matchKey == Compiler.InvalidQueryKey)
+            if (!Double.IsNaN(_priority) || _matchKey == Compiler.InvalidQueryKey)
             {
                 return;
             }

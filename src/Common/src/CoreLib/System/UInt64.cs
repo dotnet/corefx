@@ -13,9 +13,9 @@ namespace System
     [CLSCompliant(false)]
     [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public readonly struct UInt64 : IComparable, IConvertible, IFormattable, IComparable<ulong>, IEquatable<ulong>, ISpanFormattable
+    public struct UInt64 : IComparable, IConvertible, IFormattable, IComparable<UInt64>, IEquatable<UInt64>, ISpanFormattable
     {
-        private readonly ulong m_value; // Do not rename (binary serialization)
+        private ulong m_value; // Do not rename (binary serialization)
 
         public const ulong MaxValue = (ulong)0xffffffffffffffffL;
         public const ulong MinValue = 0x0;
@@ -26,13 +26,13 @@ namespace System
         // null is considered to be less than any instance.
         // If object is not of type UInt64, this method throws an ArgumentException.
         // 
-        public int CompareTo(object value)
+        public int CompareTo(Object value)
         {
             if (value == null)
             {
                 return 1;
             }
-            if (value is ulong)
+            if (value is UInt64)
             {
                 // Need to use compare because subtraction will wrap
                 // to positive for very large neg numbers, etc.
@@ -44,7 +44,7 @@ namespace System
             throw new ArgumentException(SR.Arg_MustBeUInt64);
         }
 
-        public int CompareTo(ulong value)
+        public int CompareTo(UInt64 value)
         {
             // Need to use compare because subtraction will wrap
             // to positive for very large neg numbers, etc.
@@ -53,17 +53,17 @@ namespace System
             return 0;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(Object obj)
         {
-            if (!(obj is ulong))
+            if (!(obj is UInt64))
             {
                 return false;
             }
-            return m_value == ((ulong)obj).m_value;
+            return m_value == ((UInt64)obj).m_value;
         }
 
         [NonVersionable]
-        public bool Equals(ulong obj)
+        public bool Equals(UInt64 obj)
         {
             return m_value == obj;
         }
@@ -74,22 +74,22 @@ namespace System
             return ((int)m_value) ^ (int)(m_value >> 32);
         }
 
-        public override string ToString()
+        public override String ToString()
         {
             return Number.FormatUInt64(m_value, null, null);
         }
 
-        public string ToString(IFormatProvider provider)
+        public String ToString(IFormatProvider provider)
         {
             return Number.FormatUInt64(m_value, null, provider);
         }
 
-        public string ToString(string format)
+        public String ToString(String format)
         {
             return Number.FormatUInt64(m_value, format, null);
         }
 
-        public string ToString(string format, IFormatProvider provider)
+        public String ToString(String format, IFormatProvider provider)
         {
             return Number.FormatUInt64(m_value, format, provider);
         }
@@ -100,14 +100,14 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(string s)
+        public static ulong Parse(String s)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Number.ParseUInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(string s, NumberStyles style)
+        public static ulong Parse(String s, NumberStyles style)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -122,7 +122,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(string s, NumberStyles style, IFormatProvider provider)
+        public static ulong Parse(String s, NumberStyles style, IFormatProvider provider)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -137,7 +137,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static bool TryParse(string s, out ulong result)
+        public static Boolean TryParse(String s, out UInt64 result)
         {
             if (s == null)
             {
@@ -155,7 +155,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out ulong result)
+        public static Boolean TryParse(String s, NumberStyles style, IFormatProvider provider, out UInt64 result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
 
@@ -244,7 +244,7 @@ namespace System
             return Convert.ToDouble(m_value);
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        Decimal IConvertible.ToDecimal(IFormatProvider provider)
         {
             return Convert.ToDecimal(m_value);
         }
@@ -254,7 +254,7 @@ namespace System
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "UInt64", "DateTime"));
         }
 
-        object IConvertible.ToType(Type type, IFormatProvider provider)
+        Object IConvertible.ToType(Type type, IFormatProvider provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

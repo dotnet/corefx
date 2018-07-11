@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
-using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Internal;
@@ -137,15 +136,7 @@ namespace System.ComponentModel.Composition
 
         private static bool TryParseExpressionAsMetadataConstraintBody(Expression expression, Expression parameter, out string requiredMetadataKey, out Type requiredMetadataType)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
+            Assumes.NotNull(expression, parameter);
 
             requiredMetadataKey = null;
             requiredMetadataType = null;
@@ -162,10 +153,7 @@ namespace System.ComponentModel.Composition
             {
                 return false;
             }
-            if (outerMethodCall.Arguments.Count != 1)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(outerMethodCall.Arguments.Count == 1);
 
             // 'this' should be a constant expression pointing at a Type object
             ConstantExpression targetType = outerMethodCall.Object as ConstantExpression;
@@ -200,10 +188,8 @@ namespace System.ComponentModel.Composition
 
             // There should only ever be one argument; otherwise, 
             // we've got the wrong IDictionary.get_Item method.
-            if(methodCall.Arguments.Count != 1)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(methodCall.Arguments.Count == 1);
+
             // Argument should a constant expression containing the metadata key
             ConstantExpression requiredMetadataKeyConstant = methodCall.Arguments[0] as ConstantExpression;
             if (requiredMetadataKeyConstant == null)
@@ -222,10 +208,7 @@ namespace System.ComponentModel.Composition
         private static bool TryParseConstant<T>(ConstantExpression constant, out T result)
             where T : class
         {
-            if (constant == null)
-            {
-                throw new ArgumentNullException(nameof(constant));
-            }
+            Assumes.NotNull(constant);
 
             if (constant.Type == typeof(T) && constant.Value != null)
             {

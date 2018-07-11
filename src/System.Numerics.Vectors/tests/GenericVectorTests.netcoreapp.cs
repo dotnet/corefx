@@ -20,25 +20,25 @@ namespace System.Numerics.Tests
 
         #region Tests for Span based constructor
         [Fact]
-        public void ConstructorWithSpanByte() => TestConstructorWithSpan<byte>();
+        public void ConstructorWithSpanByte() => TestConstructorWithSpan<Byte>();
         [Fact]
-        public void ConstructorWithSpanSByte() => TestConstructorWithSpan<sbyte>();
+        public void ConstructorWithSpanSByte() => TestConstructorWithSpan<SByte>();
         [Fact]
-        public void ConstructorWithSpanUInt16() => TestConstructorWithSpan<ushort>();
+        public void ConstructorWithSpanUInt16() => TestConstructorWithSpan<UInt16>();
         [Fact]
-        public void ConstructorWithSpanInt16() => TestConstructorWithSpan<short>();
+        public void ConstructorWithSpanInt16() => TestConstructorWithSpan<Int16>();
         [Fact]
-        public void ConstructorWithSpanUInt32() => TestConstructorWithSpan<uint>();
+        public void ConstructorWithSpanUInt32() => TestConstructorWithSpan<UInt32>();
         [Fact]
-        public void ConstructorWithSpanInt32() => TestConstructorWithSpan<int>();
+        public void ConstructorWithSpanInt32() => TestConstructorWithSpan<Int32>();
         [Fact]
-        public void ConstructorWithSpanUInt64() => TestConstructorWithSpan<ulong>();
+        public void ConstructorWithSpanUInt64() => TestConstructorWithSpan<UInt64>();
         [Fact]
-        public void ConstructorWithSpanInt64() => TestConstructorWithSpan<long>();
+        public void ConstructorWithSpanInt64() => TestConstructorWithSpan<Int64>();
         [Fact]
-        public void ConstructorWithSpanSingle() => TestConstructorWithSpan<float>();
+        public void ConstructorWithSpanSingle() => TestConstructorWithSpan<Single>();
         [Fact]
-        public void ConstructorWithSpanDouble() => TestConstructorWithSpan<double>();
+        public void ConstructorWithSpanDouble() => TestConstructorWithSpan<Double>();
 
         private void TestConstructorWithSpan<T>() where T : struct
         {
@@ -54,25 +54,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void SpanBasedConstructorWithLessElements_Byte() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<byte>());
+        public void SpanBasedConstructorWithLessElements_Byte() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<Byte>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_SByte() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<sbyte>());
+        public void SpanBasedConstructorWithLessElements_SByte() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<SByte>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_UInt16() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<ushort>());
+        public void SpanBasedConstructorWithLessElements_UInt16() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<UInt16>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_Int16() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<short>());
+        public void SpanBasedConstructorWithLessElements_Int16() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<Int16>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_UInt32() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<uint>());
+        public void SpanBasedConstructorWithLessElements_UInt32() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<UInt32>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_Int32() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<int>());
+        public void SpanBasedConstructorWithLessElements_Int32() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<Int32>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_UInt64() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<ulong>());
+        public void SpanBasedConstructorWithLessElements_UInt64() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<UInt64>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_Int64() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<long>());
+        public void SpanBasedConstructorWithLessElements_Int64() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<Int64>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_Single() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<float>());
+        public void SpanBasedConstructorWithLessElements_Single() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<Single>());
         [Fact]
-        public void SpanBasedConstructorWithLessElements_Double() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<double>());
+        public void SpanBasedConstructorWithLessElements_Double() => Assert.Throws<IndexOutOfRangeException>(() => TestSpanBasedConstructorWithLessElements<Double>());
 
         private void TestSpanBasedConstructorWithLessElements<T>() where T : struct
         {
@@ -85,25 +85,25 @@ namespace System.Numerics.Tests
         #region Tests for Array based constructor
 
         [Fact]
-        public void ArrayBasedConstructor_Byte() => TestArrayBasedConstructor<byte>();
+        public void ArrayBasedConstructor_Byte() => TestArrayBasedConstructor<Byte>();
         [Fact]
-        public void ArrayBasedConstructor_SByte() => TestArrayBasedConstructor<sbyte>();
+        public void ArrayBasedConstructor_SByte() => TestArrayBasedConstructor<SByte>();
         [Fact]
-        public void ArrayBasedConstructor_UInt16() => TestArrayBasedConstructor<ushort>();
+        public void ArrayBasedConstructor_UInt16() => TestArrayBasedConstructor<UInt16>();
         [Fact]
-        public void ArrayBasedConstructor_Int16() => TestArrayBasedConstructor<short>();
+        public void ArrayBasedConstructor_Int16() => TestArrayBasedConstructor<Int16>();
         [Fact]
-        public void ArrayBasedConstructor_UInt32() => TestArrayBasedConstructor<uint>();
+        public void ArrayBasedConstructor_UInt32() => TestArrayBasedConstructor<UInt32>();
         [Fact]
-        public void ArrayBasedConstructor_Int32() => TestArrayBasedConstructor<int>();
+        public void ArrayBasedConstructor_Int32() => TestArrayBasedConstructor<Int32>();
         [Fact]
-        public void ArrayBasedConstructor_UInt64() => TestArrayBasedConstructor<ulong>();
+        public void ArrayBasedConstructor_UInt64() => TestArrayBasedConstructor<UInt64>();
         [Fact]
-        public void ArrayBasedConstructor_Int64() => TestArrayBasedConstructor<long>();
+        public void ArrayBasedConstructor_Int64() => TestArrayBasedConstructor<Int64>();
         [Fact]
-        public void ArrayBasedConstructor_Single() => TestArrayBasedConstructor<float>();
+        public void ArrayBasedConstructor_Single() => TestArrayBasedConstructor<Single>();
         [Fact]
-        public void ArrayBasedConstructor_Double() => TestArrayBasedConstructor<double>();
+        public void ArrayBasedConstructor_Double() => TestArrayBasedConstructor<Double>();
 
         private void TestArrayBasedConstructor<T>() where T : struct
         {
@@ -117,25 +117,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ArrayIndexBasedConstructor_Byte() => TestArrayIndexBasedConstructor<byte>();
+        public void ArrayIndexBasedConstructor_Byte() => TestArrayIndexBasedConstructor<Byte>();
         [Fact]
-        public void ArrayIndexBasedConstructor_SByte() => TestArrayIndexBasedConstructor<sbyte>();
+        public void ArrayIndexBasedConstructor_SByte() => TestArrayIndexBasedConstructor<SByte>();
         [Fact]
-        public void ArrayIndexBasedConstructor_UInt16() => TestArrayIndexBasedConstructor<ushort>();
+        public void ArrayIndexBasedConstructor_UInt16() => TestArrayIndexBasedConstructor<UInt16>();
         [Fact]
-        public void ArrayIndexBasedConstructor_Int16() => TestArrayIndexBasedConstructor<short>();
+        public void ArrayIndexBasedConstructor_Int16() => TestArrayIndexBasedConstructor<Int16>();
         [Fact]
-        public void ArrayIndexBasedConstructor_UInt32() => TestArrayIndexBasedConstructor<uint>();
+        public void ArrayIndexBasedConstructor_UInt32() => TestArrayIndexBasedConstructor<UInt32>();
         [Fact]
-        public void ArrayIndexBasedConstructor_Int32() => TestArrayIndexBasedConstructor<int>();
+        public void ArrayIndexBasedConstructor_Int32() => TestArrayIndexBasedConstructor<Int32>();
         [Fact]
-        public void ArrayIndexBasedConstructor_UInt64() => TestArrayIndexBasedConstructor<ulong>();
+        public void ArrayIndexBasedConstructor_UInt64() => TestArrayIndexBasedConstructor<UInt64>();
         [Fact]
-        public void ArrayIndexBasedConstructor_Int64() => TestArrayIndexBasedConstructor<long>();
+        public void ArrayIndexBasedConstructor_Int64() => TestArrayIndexBasedConstructor<Int64>();
         [Fact]
-        public void ArrayIndexBasedConstructor_Single() => TestArrayIndexBasedConstructor<float>();
+        public void ArrayIndexBasedConstructor_Single() => TestArrayIndexBasedConstructor<Single>();
         [Fact]
-        public void ArrayIndexBasedConstructor_Double() => TestArrayIndexBasedConstructor<double>();
+        public void ArrayIndexBasedConstructor_Double() => TestArrayIndexBasedConstructor<Double>();
 
         private void TestArrayIndexBasedConstructor<T>() where T : struct
         {
@@ -150,25 +150,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_Byte() => TestArrayBasedConstructorWithLessElements<byte>();
+        public void ArrayBasedConstructorWithLessElements_Byte() => TestArrayBasedConstructorWithLessElements<Byte>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_SByte() => TestArrayBasedConstructorWithLessElements<sbyte>();
+        public void ArrayBasedConstructorWithLessElements_SByte() => TestArrayBasedConstructorWithLessElements<SByte>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_UInt16() => TestArrayBasedConstructorWithLessElements<ushort>();
+        public void ArrayBasedConstructorWithLessElements_UInt16() => TestArrayBasedConstructorWithLessElements<UInt16>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_Int16() => TestArrayBasedConstructorWithLessElements<short>();
+        public void ArrayBasedConstructorWithLessElements_Int16() => TestArrayBasedConstructorWithLessElements<Int16>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_UInt32() => TestArrayBasedConstructorWithLessElements<uint>();
+        public void ArrayBasedConstructorWithLessElements_UInt32() => TestArrayBasedConstructorWithLessElements<UInt32>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_Int32() => TestArrayBasedConstructorWithLessElements<int>();
+        public void ArrayBasedConstructorWithLessElements_Int32() => TestArrayBasedConstructorWithLessElements<Int32>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_UInt64() => TestArrayBasedConstructorWithLessElements<ulong>();
+        public void ArrayBasedConstructorWithLessElements_UInt64() => TestArrayBasedConstructorWithLessElements<UInt64>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_Int64() => TestArrayBasedConstructorWithLessElements<long>();
+        public void ArrayBasedConstructorWithLessElements_Int64() => TestArrayBasedConstructorWithLessElements<Int64>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_Single() => TestArrayBasedConstructorWithLessElements<float>();
+        public void ArrayBasedConstructorWithLessElements_Single() => TestArrayBasedConstructorWithLessElements<Single>();
         [Fact]
-        public void ArrayBasedConstructorWithLessElements_Double() => TestArrayBasedConstructorWithLessElements<double>();
+        public void ArrayBasedConstructorWithLessElements_Double() => TestArrayBasedConstructorWithLessElements<Double>();
 
         private void TestArrayBasedConstructorWithLessElements<T>() where T : struct
         {
@@ -177,25 +177,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_Byte() => TestArrayIndexBasedConstructorLessElements<byte>();
+        public void ArrayIndexBasedConstructorLessElements_Byte() => TestArrayIndexBasedConstructorLessElements<Byte>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_SByte() => TestArrayIndexBasedConstructorLessElements<sbyte>();
+        public void ArrayIndexBasedConstructorLessElements_SByte() => TestArrayIndexBasedConstructorLessElements<SByte>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_UInt16() => TestArrayIndexBasedConstructorLessElements<ushort>();
+        public void ArrayIndexBasedConstructorLessElements_UInt16() => TestArrayIndexBasedConstructorLessElements<UInt16>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_Int16() => TestArrayIndexBasedConstructorLessElements<short>();
+        public void ArrayIndexBasedConstructorLessElements_Int16() => TestArrayIndexBasedConstructorLessElements<Int16>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_UInt32() => TestArrayIndexBasedConstructorLessElements<uint>();
+        public void ArrayIndexBasedConstructorLessElements_UInt32() => TestArrayIndexBasedConstructorLessElements<UInt32>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_Int32() => TestArrayIndexBasedConstructorLessElements<int>();
+        public void ArrayIndexBasedConstructorLessElements_Int32() => TestArrayIndexBasedConstructorLessElements<Int32>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_UInt64() => TestArrayIndexBasedConstructorLessElements<ulong>();
+        public void ArrayIndexBasedConstructorLessElements_UInt64() => TestArrayIndexBasedConstructorLessElements<UInt64>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_Int64() => TestArrayIndexBasedConstructorLessElements<long>();
+        public void ArrayIndexBasedConstructorLessElements_Int64() => TestArrayIndexBasedConstructorLessElements<Int64>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_Single() => TestArrayIndexBasedConstructorLessElements<float>();
+        public void ArrayIndexBasedConstructorLessElements_Single() => TestArrayIndexBasedConstructorLessElements<Single>();
         [Fact]
-        public void ArrayIndexBasedConstructorLessElements_Double() => TestArrayIndexBasedConstructorLessElements<double>();
+        public void ArrayIndexBasedConstructorLessElements_Double() => TestArrayIndexBasedConstructorLessElements<Double>();
 
         private void TestArrayIndexBasedConstructorLessElements<T>() where T : struct
         {
@@ -212,7 +212,7 @@ namespace System.Numerics.Tests
         [Fact]
         public void ConstructorWithUnsupportedTypes_DateTime() => TestConstructorWithUnsupportedTypes<DateTime>();
         [Fact]
-        public void ConstructorWithUnsupportedTypes_Char() => TestConstructorWithUnsupportedTypes<char>();
+        public void ConstructorWithUnsupportedTypes_Char() => TestConstructorWithUnsupportedTypes<Char>();
 
         private void TestConstructorWithUnsupportedTypes<T>() where T : struct
         {

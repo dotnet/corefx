@@ -22,11 +22,11 @@ namespace System.Runtime.CompilerServices
         {
         }
 
-        public ReferenceAssemblyAttribute(string description)
+        public ReferenceAssemblyAttribute(String description)
         {
             Description = description;
         }
 
-        public string Description { get; }
+        public String Description { get; }
     }
 }

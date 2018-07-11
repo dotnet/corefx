@@ -64,16 +64,16 @@ namespace System.Threading.Tasks.Dataflow
         /// A constant used to specify an unlimited quantity for <see cref="DataflowBlockOptions"/> members 
         /// that provide an upper bound. This field is constant.
         /// </summary>
-        public const int Unbounded = -1;
+        public const Int32 Unbounded = -1;
 
         /// <summary>The scheduler to use for scheduling tasks to process messages.</summary>
         private TaskScheduler _taskScheduler = TaskScheduler.Default;
         /// <summary>The cancellation token to monitor for cancellation requests.</summary>
         private CancellationToken _cancellationToken = CancellationToken.None;
         /// <summary>The maximum number of messages that may be processed per task.</summary>
-        private int _maxMessagesPerTask = Unbounded;
+        private Int32 _maxMessagesPerTask = Unbounded;
         /// <summary>The maximum number of messages that may be buffered by the block.</summary>
-        private int _boundedCapacity = Unbounded;
+        private Int32 _boundedCapacity = Unbounded;
         /// <summary>The name format to use for creating a name for a block.</summary>
         private string _nameFormat = "{0} Id={1}"; // see NameFormat property for a description of format items
         /// <summary>Whether to force ordered processing of messages.</summary>
@@ -129,7 +129,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets the maximum number of messages that may be processed per task.</summary>
-        public int MaxMessagesPerTask
+        public Int32 MaxMessagesPerTask
         {
             get { return _maxMessagesPerTask; }
             set
@@ -143,13 +143,13 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a MaxMessagesPerTask value that may be used for comparison purposes.</summary>
         /// <returns>The maximum value, usable for comparison purposes.</returns>
         /// <remarks>Unlike MaxMessagesPerTask, this property will always return a positive value.</remarks>
-        internal int ActualMaxMessagesPerTask
+        internal Int32 ActualMaxMessagesPerTask
         {
-            get { return (_maxMessagesPerTask == Unbounded) ? int.MaxValue : _maxMessagesPerTask; }
+            get { return (_maxMessagesPerTask == Unbounded) ? Int32.MaxValue : _maxMessagesPerTask; }
         }
 
         /// <summary>Gets or sets the maximum number of messages that may be buffered by the block.</summary>
-        public int BoundedCapacity
+        public Int32 BoundedCapacity
         {
             get { return _boundedCapacity; }
             set
@@ -276,15 +276,15 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>The maximum number of tasks that may be used concurrently to process messages.</summary>
-        private int _maxDegreeOfParallelism = 1;
+        private Int32 _maxDegreeOfParallelism = 1;
         /// <summary>Whether the code using this block will only ever have a single producer accessing the block at any given time.</summary>
-        private bool _singleProducerConstrained = false;
+        private Boolean _singleProducerConstrained = false;
 
         /// <summary>Initializes the <see cref="ExecutionDataflowBlockOptions"/>.</summary>
         public ExecutionDataflowBlockOptions() { }
 
         /// <summary>Gets the maximum number of messages that may be processed by the block concurrently.</summary>
-        public int MaxDegreeOfParallelism
+        public Int32 MaxDegreeOfParallelism
         {
             get { return _maxDegreeOfParallelism; }
             set
@@ -307,7 +307,7 @@ namespace System.Threading.Tasks.Dataflow
         /// may choose to capitalize on the knowledge that there will only be one producer at a time
         /// in order to provide better performance.
         /// </remarks>
-        public bool SingleProducerConstrained
+        public Boolean SingleProducerConstrained
         {
             get { return _singleProducerConstrained; }
             set
@@ -320,13 +320,13 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a MaxDegreeOfParallelism value that may be used for comparison purposes.</summary>
         /// <returns>The maximum value, usable for comparison purposes.</returns>
         /// <remarks>Unlike MaxDegreeOfParallelism, this property will always return a positive value.</remarks>
-        internal int ActualMaxDegreeOfParallelism
+        internal Int32 ActualMaxDegreeOfParallelism
         {
-            get { return (_maxDegreeOfParallelism == Unbounded) ? int.MaxValue : _maxDegreeOfParallelism; }
+            get { return (_maxDegreeOfParallelism == Unbounded) ? Int32.MaxValue : _maxDegreeOfParallelism; }
         }
 
         /// <summary>Gets whether these dataflow block options allow for parallel execution.</summary>
-        internal bool SupportsParallelExecution { get { return _maxDegreeOfParallelism == Unbounded || _maxDegreeOfParallelism > 1; } }
+        internal Boolean SupportsParallelExecution { get { return _maxDegreeOfParallelism == Unbounded || _maxDegreeOfParallelism > 1; } }
     }
 
     /// <summary>
@@ -408,15 +408,15 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Whether the block should greedily consume offered messages.</summary>
-        private bool _greedy = true;
+        private Boolean _greedy = true;
         /// <summary>The maximum number of groups that should be generated by the block.</summary>
-        private long _maxNumberOfGroups = Unbounded;
+        private Int64 _maxNumberOfGroups = Unbounded;
 
         /// <summary>Initializes the <see cref="GroupingDataflowBlockOptions"/>.</summary>
         public GroupingDataflowBlockOptions() { }
 
         /// <summary>Gets or sets the Boolean value to use to determine whether to greedily consume offered messages.</summary>
-        public bool Greedy
+        public Boolean Greedy
         {
             get { return _greedy; }
             set
@@ -427,7 +427,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets the maximum number of groups that should be generated by the block.</summary>
-        public long MaxNumberOfGroups
+        public Int64 MaxNumberOfGroups
         {
             get { return _maxNumberOfGroups; }
             set
@@ -441,9 +441,9 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a MaxNumberOfGroups value that may be used for comparison purposes.</summary>
         /// <returns>The maximum value, usable for comparison purposes.</returns>
         /// <remarks>Unlike MaxNumberOfGroups, this property will always return a positive value.</remarks>
-        internal long ActualMaxNumberOfGroups
+        internal Int64 ActualMaxNumberOfGroups
         {
-            get { return (_maxNumberOfGroups == Unbounded) ? long.MaxValue : _maxNumberOfGroups; }
+            get { return (_maxNumberOfGroups == Unbounded) ? Int64.MaxValue : _maxNumberOfGroups; }
         }
     }
 }

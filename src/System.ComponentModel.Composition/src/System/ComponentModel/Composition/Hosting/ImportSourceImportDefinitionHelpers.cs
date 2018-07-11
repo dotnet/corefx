@@ -33,10 +33,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public NonImportSourceImportDefinition(ContractBasedImportDefinition sourceDefinition)
             {
-                if (sourceDefinition == null)
-                {
-                    throw new ArgumentNullException(nameof(sourceDefinition));
-                }
+                Assumes.NotNull(sourceDefinition);
                 _sourceDefinition = sourceDefinition;
                 _metadata = null;
             }

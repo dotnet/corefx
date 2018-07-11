@@ -26,7 +26,7 @@ namespace System.Diagnostics.TraceSourceTests
         /// </summary>
         public int WriteCount { get { return _writeCount; } }
 
-        public string Output
+        public String Output
         {
             get { return _output.ToString(); }
         }

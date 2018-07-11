@@ -22,29 +22,29 @@ namespace Microsoft.SqlServer.Server
         SqlDbType GetVariantType(int ordinal);
 
         // By value accessors  (data copy across the interface boundary implied)
-        bool GetBoolean(int ordinal);
+        Boolean GetBoolean(int ordinal);
 
-        byte GetByte(int ordinal);
+        Byte GetByte(int ordinal);
 
-        long GetBytes(int ordinal, long fieldOffset, byte[] buffer, int bufferOffset, int length);
+        Int64 GetBytes(int ordinal, long fieldOffset, byte[] buffer, int bufferOffset, int length);
 
-        char GetChar(int ordinal);
+        Char GetChar(int ordinal);
 
-        long GetChars(int ordinal, long fieldOffset, char[] buffer, int bufferOffset, int length);
+        Int64 GetChars(int ordinal, long fieldOffset, char[] buffer, int bufferOffset, int length);
 
-        short GetInt16(int ordinal);
+        Int16 GetInt16(int ordinal);
 
-        int GetInt32(int ordinal);
+        Int32 GetInt32(int ordinal);
 
-        long GetInt64(int ordinal);
+        Int64 GetInt64(int ordinal);
 
-        float GetFloat(int ordinal);
+        Single GetFloat(int ordinal);
 
-        double GetDouble(int ordinal);
+        Double GetDouble(int ordinal);
 
-        string GetString(int ordinal);
+        String GetString(int ordinal);
 
-        decimal GetDecimal(int ordinal);
+        Decimal GetDecimal(int ordinal);
 
         DateTime GetDateTime(int ordinal);
 

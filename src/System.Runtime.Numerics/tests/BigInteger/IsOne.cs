@@ -26,19 +26,19 @@ namespace System.Numerics.Tests
             VerifyIsOne(BigInteger.One, true);
 
             // -Int32.MaxValue
-            VerifyIsOne((BigInteger)int.MaxValue * -1, false);
+            VerifyIsOne((BigInteger)Int32.MaxValue * -1, false);
 
             // Int32.MaxValue
-            VerifyIsOne((BigInteger)int.MaxValue, false);
+            VerifyIsOne((BigInteger)Int32.MaxValue, false);
 
             // int32.MaxValue + 1
-            VerifyIsOne((BigInteger)int.MaxValue + 1, false);
+            VerifyIsOne((BigInteger)Int32.MaxValue + 1, false);
 
             // UInt32.MaxValue
-            VerifyIsOne((BigInteger)uint.MaxValue, false);
+            VerifyIsOne((BigInteger)UInt32.MaxValue, false);
 
             // Uint32.MaxValue + 1
-            VerifyIsOne((BigInteger)uint.MaxValue + 1, false);
+            VerifyIsOne((BigInteger)UInt32.MaxValue + 1, false);
         }
 
         private static void VerifyIsOne(BigInteger bigInt, bool expectedAnswer)

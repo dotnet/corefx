@@ -61,21 +61,18 @@ namespace System.Security.Cryptography
         /// <summary>
         /// Maps algorithm to curve name accounting for the special nist curves
         /// </summary>
-        internal static string SpecialNistAlgorithmToCurveName(string algorithm, out string oidValue)
+        internal static string SpecialNistAlgorithmToCurveName(string algorithm)
         {
             switch (algorithm)
             {
                 case BCryptNative.AlgorithmName.ECDHP256:
                 case BCryptNative.AlgorithmName.ECDsaP256:
-                    oidValue = Oids.secp256r1;
                     return "nistP256";
                 case BCryptNative.AlgorithmName.ECDHP384:
                 case BCryptNative.AlgorithmName.ECDsaP384:
-                    oidValue = Oids.secp384r1;
                     return "nistP384";
                 case BCryptNative.AlgorithmName.ECDHP521:
                 case BCryptNative.AlgorithmName.ECDsaP521:
-                    oidValue = Oids.secp521r1;
                     return "nistP521";
             }
             

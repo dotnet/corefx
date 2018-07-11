@@ -16,13 +16,13 @@ namespace System
             HResult = HResults.COR_E_MISSINGFIELD;
         }
 
-        public MissingFieldException(string message)
+        public MissingFieldException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_MISSINGFIELD;
         }
 
-        public MissingFieldException(string message, Exception inner)
+        public MissingFieldException(String message, Exception inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_MISSINGFIELD;

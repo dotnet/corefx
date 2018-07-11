@@ -17,22 +17,22 @@ namespace System.Numerics.Tests
         [Fact]
         public static void RunByteExplicitCastFromBigIntegerTests()
         {
-            byte value = 0;
+            Byte value = 0;
             BigInteger bigInteger;
 
             // Byte Explicit Cast from BigInteger: Random value < Byte.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(byte.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(Byte.MinValue, s_random);
             value = bigInteger.ToByteArray()[0];
             Assert.Throws<OverflowException>(() => VerifyByteExplicitCastFromBigInteger(value, bigInteger));
 
             // Byte Explicit Cast from BigInteger: Byte.MinValue - 1
-            bigInteger = new BigInteger(byte.MinValue);
+            bigInteger = new BigInteger(Byte.MinValue);
             bigInteger -= BigInteger.One;
             value = bigInteger.ToByteArray()[0];
             Assert.Throws<OverflowException>(() => VerifyByteExplicitCastFromBigInteger(value, bigInteger));
 
             // Byte Explicit Cast from BigInteger: Byte.MinValue
-            VerifyByteExplicitCastFromBigInteger(byte.MinValue);
+            VerifyByteExplicitCastFromBigInteger(Byte.MinValue);
 
             // Byte Explicit Cast from BigInteger: 0
             VerifyByteExplicitCastFromBigInteger(0);
@@ -43,17 +43,17 @@ namespace System.Numerics.Tests
             // Byte Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyByteExplicitCastFromBigInteger((byte)s_random.Next(1, byte.MaxValue));
+                VerifyByteExplicitCastFromBigInteger((Byte)s_random.Next(1, Byte.MaxValue));
             }
 
             // Byte Explicit Cast from BigInteger: Byte.MaxValue + 1
-            bigInteger = new BigInteger(byte.MaxValue);
+            bigInteger = new BigInteger(Byte.MaxValue);
             bigInteger += BigInteger.One;
             value = bigInteger.ToByteArray()[0];
             Assert.Throws<OverflowException>(() => VerifyByteExplicitCastFromBigInteger(value, bigInteger));
 
             // Byte Explicit Cast from BigInteger: Random value > Byte.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(byte.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(Byte.MaxValue, s_random);
             value = bigInteger.ToByteArray()[0];
             Assert.Throws<OverflowException>(() => VerifyByteExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -61,27 +61,27 @@ namespace System.Numerics.Tests
         [Fact]
         public static void RunSByteExplicitCastFromBigIntegerTests()
         {
-            sbyte value = 0;
+            SByte value = 0;
             BigInteger bigInteger;
 
             // SByte Explicit Cast from BigInteger: Random value < SByte.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(sbyte.MinValue, s_random);
-            value = unchecked((sbyte)bigInteger.ToByteArray()[0]);
+            bigInteger = GenerateRandomBigIntegerLessThan(SByte.MinValue, s_random);
+            value = unchecked((SByte)bigInteger.ToByteArray()[0]);
             Assert.Throws<OverflowException>(() => VerifySByteExplicitCastFromBigInteger(value, bigInteger));
 
             // SByte Explicit Cast from BigInteger: SByte.MinValue - 1
-            bigInteger = new BigInteger(sbyte.MinValue);
+            bigInteger = new BigInteger(SByte.MinValue);
             bigInteger -= BigInteger.One;
-            value = (sbyte)bigInteger.ToByteArray()[0];
+            value = (SByte)bigInteger.ToByteArray()[0];
             Assert.Throws<OverflowException>(() => VerifySByteExplicitCastFromBigInteger(value, bigInteger));
 
             // SByte Explicit Cast from BigInteger: SByte.MinValue
-            VerifySByteExplicitCastFromBigInteger(sbyte.MinValue);
+            VerifySByteExplicitCastFromBigInteger(SByte.MinValue);
 
             // SByte Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifySByteExplicitCastFromBigInteger((sbyte)s_random.Next(sbyte.MinValue, 0));
+                VerifySByteExplicitCastFromBigInteger((SByte)s_random.Next(SByte.MinValue, 0));
             }
 
             // SByte Explicit Cast from BigInteger: -1
@@ -96,21 +96,21 @@ namespace System.Numerics.Tests
             // SByte Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifySByteExplicitCastFromBigInteger((sbyte)s_random.Next(1, sbyte.MaxValue));
+                VerifySByteExplicitCastFromBigInteger((SByte)s_random.Next(1, SByte.MaxValue));
             }
 
             // SByte Explicit Cast from BigInteger: SByte.MaxValue
-            VerifySByteExplicitCastFromBigInteger(sbyte.MaxValue);
+            VerifySByteExplicitCastFromBigInteger(SByte.MaxValue);
 
             // SByte Explicit Cast from BigInteger: SByte.MaxValue + 1
-            bigInteger = new BigInteger(sbyte.MaxValue);
+            bigInteger = new BigInteger(SByte.MaxValue);
             bigInteger += BigInteger.One;
-            value = unchecked((sbyte)bigInteger.ToByteArray()[0]);
+            value = unchecked((SByte)bigInteger.ToByteArray()[0]);
             Assert.Throws<OverflowException>(() => VerifySByteExplicitCastFromBigInteger(value, bigInteger));
 
             // SByte Explicit Cast from BigInteger: Random value > SByte.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan((ulong)sbyte.MaxValue, s_random);
-            value = unchecked((sbyte)bigInteger.ToByteArray()[0]);
+            bigInteger = GenerateRandomBigIntegerGreaterThan((UInt64)SByte.MaxValue, s_random);
+            value = unchecked((SByte)bigInteger.ToByteArray()[0]);
             Assert.Throws<OverflowException>(() => VerifySByteExplicitCastFromBigInteger(value, bigInteger));
         }
 
@@ -121,18 +121,18 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // UInt16 Explicit Cast from BigInteger: Random value < UInt16.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(ushort.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(UInt16.MinValue, s_random);
             value = BitConverter.ToUInt16(ByteArrayMakeMinSize(bigInteger.ToByteArray(), 2), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt16ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt16 Explicit Cast from BigInteger: UInt16.MinValue - 1
-            bigInteger = new BigInteger(ushort.MinValue);
+            bigInteger = new BigInteger(UInt16.MinValue);
             bigInteger -= BigInteger.One;
             value = BitConverter.ToUInt16(new byte[] { 0xff, 0xff }, 0);
             Assert.Throws<OverflowException>(() => VerifyUInt16ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt16 Explicit Cast from BigInteger: UInt16.MinValue
-            VerifyUInt16ExplicitCastFromBigInteger(ushort.MinValue);
+            VerifyUInt16ExplicitCastFromBigInteger(UInt16.MinValue);
 
             // UInt16 Explicit Cast from BigInteger: 0
             VerifyUInt16ExplicitCastFromBigInteger(0);
@@ -143,20 +143,20 @@ namespace System.Numerics.Tests
             // UInt16 Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyUInt16ExplicitCastFromBigInteger((ushort)s_random.Next(1, ushort.MaxValue));
+                VerifyUInt16ExplicitCastFromBigInteger((UInt16)s_random.Next(1, UInt16.MaxValue));
             }
 
             // UInt16 Explicit Cast from BigInteger: UInt16.MaxValue
-            VerifyUInt16ExplicitCastFromBigInteger(ushort.MaxValue);
+            VerifyUInt16ExplicitCastFromBigInteger(UInt16.MaxValue);
 
             // UInt16 Explicit Cast from BigInteger: UInt16.MaxValue + 1
-            bigInteger = new BigInteger(ushort.MaxValue);
+            bigInteger = new BigInteger(UInt16.MaxValue);
             bigInteger += BigInteger.One;
             value = BitConverter.ToUInt16(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt16ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt16 Explicit Cast from BigInteger: Random value > UInt16.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(ushort.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(UInt16.MaxValue, s_random);
             value = BitConverter.ToUInt16(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt16ExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -168,23 +168,23 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // Int16 Explicit Cast from BigInteger: Random value < Int16.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(short.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(Int16.MinValue, s_random);
             value = BitConverter.ToInt16(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt16ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int16 Explicit Cast from BigInteger: Int16.MinValue - 1
-            bigInteger = new BigInteger(short.MinValue);
+            bigInteger = new BigInteger(Int16.MinValue);
             bigInteger -= BigInteger.One;
             value = BitConverter.ToInt16(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt16ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int16 Explicit Cast from BigInteger: Int16.MinValue
-            VerifyInt16ExplicitCastFromBigInteger(short.MinValue);
+            VerifyInt16ExplicitCastFromBigInteger(Int16.MinValue);
 
             // Int16 Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyInt16ExplicitCastFromBigInteger((short)s_random.Next(short.MinValue, 0));
+                VerifyInt16ExplicitCastFromBigInteger((Int16)s_random.Next(Int16.MinValue, 0));
             }
 
             // Int16 Explicit Cast from BigInteger: -1
@@ -199,20 +199,20 @@ namespace System.Numerics.Tests
             // Int16 Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyInt16ExplicitCastFromBigInteger((short)s_random.Next(1, short.MaxValue));
+                VerifyInt16ExplicitCastFromBigInteger((Int16)s_random.Next(1, Int16.MaxValue));
             }
 
             // Int16 Explicit Cast from BigInteger: Int16.MaxValue
-            VerifyInt16ExplicitCastFromBigInteger(short.MaxValue);
+            VerifyInt16ExplicitCastFromBigInteger(Int16.MaxValue);
 
             // Int16 Explicit Cast from BigInteger: Int16.MaxValue + 1
-            bigInteger = new BigInteger(short.MaxValue);
+            bigInteger = new BigInteger(Int16.MaxValue);
             bigInteger += BigInteger.One;
             value = BitConverter.ToInt16(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt16ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int16 Explicit Cast from BigInteger: Random value > Int16.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan((ulong)short.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan((UInt64)Int16.MaxValue, s_random);
             value = BitConverter.ToInt16(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt16ExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -224,18 +224,18 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // UInt32 Explicit Cast from BigInteger: Random value < UInt32.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(uint.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(UInt32.MinValue, s_random);
             value = BitConverter.ToUInt32(ByteArrayMakeMinSize(bigInteger.ToByteArray(), 4), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt32ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt32 Explicit Cast from BigInteger: UInt32.MinValue - 1
-            bigInteger = new BigInteger(uint.MinValue);
+            bigInteger = new BigInteger(UInt32.MinValue);
             bigInteger -= BigInteger.One;
             value = BitConverter.ToUInt32(new byte[] { 0xff, 0xff, 0xff, 0xff }, 0);
             Assert.Throws<OverflowException>(() => VerifyUInt32ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt32 Explicit Cast from BigInteger: UInt32.MinValue
-            VerifyUInt32ExplicitCastFromBigInteger(uint.MinValue);
+            VerifyUInt32ExplicitCastFromBigInteger(UInt32.MinValue);
 
             // UInt32 Explicit Cast from BigInteger: 0
             VerifyUInt32ExplicitCastFromBigInteger(0);
@@ -246,20 +246,20 @@ namespace System.Numerics.Tests
             // UInt32 Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyUInt32ExplicitCastFromBigInteger((uint)(uint.MaxValue * s_random.NextDouble()));
+                VerifyUInt32ExplicitCastFromBigInteger((UInt32)(UInt32.MaxValue * s_random.NextDouble()));
             }
 
             // UInt32 Explicit Cast from BigInteger: UInt32.MaxValue
-            VerifyUInt32ExplicitCastFromBigInteger(uint.MaxValue);
+            VerifyUInt32ExplicitCastFromBigInteger(UInt32.MaxValue);
 
             // UInt32 Explicit Cast from BigInteger: UInt32.MaxValue + 1
-            bigInteger = new BigInteger(uint.MaxValue);
+            bigInteger = new BigInteger(UInt32.MaxValue);
             bigInteger += BigInteger.One;
             value = BitConverter.ToUInt32(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt32ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt32 Explicit Cast from BigInteger: Random value > UInt32.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(uint.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(UInt32.MaxValue, s_random);
             value = BitConverter.ToUInt32(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt32ExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -271,23 +271,23 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // Int32 Explicit Cast from BigInteger: Random value < Int32.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(int.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(Int32.MinValue, s_random);
             value = BitConverter.ToInt32(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt32ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int32 Explicit Cast from BigInteger: Int32.MinValue - 1
-            bigInteger = new BigInteger(int.MinValue);
+            bigInteger = new BigInteger(Int32.MinValue);
             bigInteger -= BigInteger.One;
             value = BitConverter.ToInt32(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt32ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int32 Explicit Cast from BigInteger: Int32.MinValue
-            VerifyInt32ExplicitCastFromBigInteger(int.MinValue);
+            VerifyInt32ExplicitCastFromBigInteger(Int32.MinValue);
 
             // Int32 Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyInt32ExplicitCastFromBigInteger((int)s_random.Next(int.MinValue, 0));
+                VerifyInt32ExplicitCastFromBigInteger((Int32)s_random.Next(Int32.MinValue, 0));
             }
 
             // Int32 Explicit Cast from BigInteger: -1
@@ -302,20 +302,20 @@ namespace System.Numerics.Tests
             // Int32 Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyInt32ExplicitCastFromBigInteger((int)s_random.Next(1, int.MaxValue));
+                VerifyInt32ExplicitCastFromBigInteger((Int32)s_random.Next(1, Int32.MaxValue));
             }
 
             // Int32 Explicit Cast from BigInteger: Int32.MaxValue
-            VerifyInt32ExplicitCastFromBigInteger(int.MaxValue);
+            VerifyInt32ExplicitCastFromBigInteger(Int32.MaxValue);
 
             // Int32 Explicit Cast from BigInteger: Int32.MaxValue + 1
-            bigInteger = new BigInteger(int.MaxValue);
+            bigInteger = new BigInteger(Int32.MaxValue);
             bigInteger += BigInteger.One;
             value = BitConverter.ToInt32(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt32ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int32 Explicit Cast from BigInteger: Random value > Int32.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(int.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(Int32.MaxValue, s_random);
             value = BitConverter.ToInt32(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt32ExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -332,13 +332,13 @@ namespace System.Numerics.Tests
             Assert.Throws<OverflowException>(() => VerifyUInt64ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt64 Explicit Cast from BigInteger: UInt64.MinValue - 1
-            bigInteger = new BigInteger(ulong.MinValue);
+            bigInteger = new BigInteger(UInt64.MinValue);
             bigInteger -= BigInteger.One;
             value = BitConverter.ToUInt64(new byte[] { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, 0);
             Assert.Throws<OverflowException>(() => VerifyUInt64ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt64 Explicit Cast from BigInteger: UInt64.MinValue
-            VerifyUInt64ExplicitCastFromBigInteger(ulong.MinValue);
+            VerifyUInt64ExplicitCastFromBigInteger(UInt64.MinValue);
 
             // UInt64 Explicit Cast from BigInteger: 0
             VerifyUInt64ExplicitCastFromBigInteger(0);
@@ -349,20 +349,20 @@ namespace System.Numerics.Tests
             // UInt64 Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyUInt64ExplicitCastFromBigInteger((ulong)(ulong.MaxValue * s_random.NextDouble()));
+                VerifyUInt64ExplicitCastFromBigInteger((UInt64)(UInt64.MaxValue * s_random.NextDouble()));
             }
 
             // UInt64 Explicit Cast from BigInteger: UInt64.MaxValue
-            VerifyUInt64ExplicitCastFromBigInteger(ulong.MaxValue);
+            VerifyUInt64ExplicitCastFromBigInteger(UInt64.MaxValue);
 
             // UInt64 Explicit Cast from BigInteger: UInt64.MaxValue + 1
-            bigInteger = new BigInteger(ulong.MaxValue);
+            bigInteger = new BigInteger(UInt64.MaxValue);
             bigInteger += BigInteger.One;
             value = BitConverter.ToUInt64(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt64ExplicitCastFromBigInteger(value, bigInteger));
 
             // UInt64 Explicit Cast from BigInteger: Random value > UInt64.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(ulong.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(UInt64.MaxValue, s_random);
             value = BitConverter.ToUInt64(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyUInt64ExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -374,23 +374,23 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // Int64 Explicit Cast from BigInteger: Random value < Int64.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(long.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(Int64.MinValue, s_random);
             value = BitConverter.ToInt64(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt64ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int64 Explicit Cast from BigInteger: Int64.MinValue - 1
-            bigInteger = new BigInteger(long.MinValue);
+            bigInteger = new BigInteger(Int64.MinValue);
             bigInteger -= BigInteger.One;
             value = BitConverter.ToInt64(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt64ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int64 Explicit Cast from BigInteger: Int64.MinValue
-            VerifyInt64ExplicitCastFromBigInteger(long.MinValue);
+            VerifyInt64ExplicitCastFromBigInteger(Int64.MinValue);
 
             // Int64 Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyInt64ExplicitCastFromBigInteger(((long)(long.MaxValue * s_random.NextDouble())) - long.MaxValue);
+                VerifyInt64ExplicitCastFromBigInteger(((Int64)(Int64.MaxValue * s_random.NextDouble())) - Int64.MaxValue);
             }
 
             // Int64 Explicit Cast from BigInteger: -1
@@ -405,20 +405,20 @@ namespace System.Numerics.Tests
             // Int64 Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyInt64ExplicitCastFromBigInteger((long)(long.MaxValue * s_random.NextDouble()));
+                VerifyInt64ExplicitCastFromBigInteger((Int64)(Int64.MaxValue * s_random.NextDouble()));
             }
 
             // Int64 Explicit Cast from BigInteger: Int64.MaxValue
-            VerifyInt64ExplicitCastFromBigInteger(long.MaxValue);
+            VerifyInt64ExplicitCastFromBigInteger(Int64.MaxValue);
 
             // Int64 Explicit Cast from BigInteger: Int64.MaxValue + 1
-            bigInteger = new BigInteger(long.MaxValue);
+            bigInteger = new BigInteger(Int64.MaxValue);
             bigInteger += BigInteger.One;
             value = BitConverter.ToInt64(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt64ExplicitCastFromBigInteger(value, bigInteger));
 
             // Int64 Explicit Cast from BigInteger: Random value > Int64.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(long.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(Int64.MaxValue, s_random);
             value = BitConverter.ToInt64(bigInteger.ToByteArray(), 0);
             Assert.Throws<OverflowException>(() => VerifyInt64ExplicitCastFromBigInteger(value, bigInteger));
         }
@@ -429,27 +429,27 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // Single Explicit Cast from BigInteger: Random value < Single.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(float.MinValue * 2.0, s_random);
-            VerifySingleExplicitCastFromBigInteger(float.NegativeInfinity, bigInteger);
+            bigInteger = GenerateRandomBigIntegerLessThan(Single.MinValue * 2.0, s_random);
+            VerifySingleExplicitCastFromBigInteger(Single.NegativeInfinity, bigInteger);
 
             // Single Explicit Cast from BigInteger: Single.MinValue - 1
-            bigInteger = new BigInteger(float.MinValue);
+            bigInteger = new BigInteger(Single.MinValue);
             bigInteger -= BigInteger.One;
-            VerifySingleExplicitCastFromBigInteger(float.MinValue, bigInteger);
+            VerifySingleExplicitCastFromBigInteger(Single.MinValue, bigInteger);
 
             // Single Explicit Cast from BigInteger: Single.MinValue
-            VerifySingleExplicitCastFromBigInteger(float.MinValue);
+            VerifySingleExplicitCastFromBigInteger(Single.MinValue);
 
             // Single Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifySingleExplicitCastFromBigInteger(((float)(float.MaxValue * s_random.NextDouble())) - float.MaxValue);
+                VerifySingleExplicitCastFromBigInteger(((Single)(Single.MaxValue * s_random.NextDouble())) - Single.MaxValue);
             }
 
             // Single Explicit Cast from BigInteger: Random Negative Non-integral > -100
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifySingleExplicitCastFromBigInteger(((float)(100 * s_random.NextDouble())) - 100);
+                VerifySingleExplicitCastFromBigInteger(((Single)(100 * s_random.NextDouble())) - 100);
             }
 
             // Single Explicit Cast from BigInteger: -1
@@ -464,23 +464,23 @@ namespace System.Numerics.Tests
             // Single Explicit Cast from BigInteger: Random Positive Non-integral < 100
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifySingleExplicitCastFromBigInteger((float)(100 * s_random.NextDouble()));
+                VerifySingleExplicitCastFromBigInteger((Single)(100 * s_random.NextDouble()));
             }
 
             // Single Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifySingleExplicitCastFromBigInteger((float)(float.MaxValue * s_random.NextDouble()));
+                VerifySingleExplicitCastFromBigInteger((Single)(Single.MaxValue * s_random.NextDouble()));
             }
 
             // Single Explicit Cast from BigInteger: Single.MaxValue + 1
-            bigInteger = new BigInteger(float.MaxValue);
+            bigInteger = new BigInteger(Single.MaxValue);
             bigInteger += BigInteger.One;
-            VerifySingleExplicitCastFromBigInteger(float.MaxValue, bigInteger);
+            VerifySingleExplicitCastFromBigInteger(Single.MaxValue, bigInteger);
 
             // Single Explicit Cast from BigInteger: Random value > Single.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan((double)float.MaxValue * 2, s_random);
-            VerifySingleExplicitCastFromBigInteger(float.PositiveInfinity, bigInteger);
+            bigInteger = GenerateRandomBigIntegerGreaterThan((double)Single.MaxValue * 2, s_random);
+            VerifySingleExplicitCastFromBigInteger(Single.PositiveInfinity, bigInteger);
 
             // Single Explicit Cast from BigInteger: value < Single.MaxValue but can not be accurately represented in a Single
             bigInteger = new BigInteger(16777217);
@@ -497,28 +497,28 @@ namespace System.Numerics.Tests
             BigInteger bigInteger;
 
             // Double Explicit Cast from BigInteger: Random value < Double.MinValue
-            bigInteger = GenerateRandomBigIntegerLessThan(double.MinValue, s_random);
+            bigInteger = GenerateRandomBigIntegerLessThan(Double.MinValue, s_random);
             bigInteger *= 2;
-            VerifyDoubleExplicitCastFromBigInteger(double.NegativeInfinity, bigInteger);
+            VerifyDoubleExplicitCastFromBigInteger(Double.NegativeInfinity, bigInteger);
 
             // Double Explicit Cast from BigInteger: Double.MinValue - 1
-            bigInteger = new BigInteger(double.MinValue);
+            bigInteger = new BigInteger(Double.MinValue);
             bigInteger -= BigInteger.One;
-            VerifyDoubleExplicitCastFromBigInteger(double.MinValue, bigInteger);
+            VerifyDoubleExplicitCastFromBigInteger(Double.MinValue, bigInteger);
 
             // Double Explicit Cast from BigInteger: Double.MinValue
-            VerifyDoubleExplicitCastFromBigInteger(double.MinValue);
+            VerifyDoubleExplicitCastFromBigInteger(Double.MinValue);
 
             // Double Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyDoubleExplicitCastFromBigInteger(((double)(double.MaxValue * s_random.NextDouble())) - double.MaxValue);
+                VerifyDoubleExplicitCastFromBigInteger(((Double)(Double.MaxValue * s_random.NextDouble())) - Double.MaxValue);
             }
 
             // Double Explicit Cast from BigInteger: Random Negative Non-integral > -100
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyDoubleExplicitCastFromBigInteger(((double)(100 * s_random.NextDouble())) - 100);
+                VerifyDoubleExplicitCastFromBigInteger(((Double)(100 * s_random.NextDouble())) - 100);
             }
 
             // Double Explicit Cast from BigInteger: -1
@@ -533,35 +533,35 @@ namespace System.Numerics.Tests
             // Double Explicit Cast from BigInteger: Random Positive Non-integral < 100
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyDoubleExplicitCastFromBigInteger((double)(100 * s_random.NextDouble()));
+                VerifyDoubleExplicitCastFromBigInteger((Double)(100 * s_random.NextDouble()));
             }
 
             // Double Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyDoubleExplicitCastFromBigInteger((double)(double.MaxValue * s_random.NextDouble()));
+                VerifyDoubleExplicitCastFromBigInteger((Double)(Double.MaxValue * s_random.NextDouble()));
             }
 
             // Double Explicit Cast from BigInteger: Double.MaxValue
-            VerifyDoubleExplicitCastFromBigInteger(double.MaxValue);
+            VerifyDoubleExplicitCastFromBigInteger(Double.MaxValue);
 
             // Double Explicit Cast from BigInteger: Double.MaxValue + 1
-            bigInteger = new BigInteger(double.MaxValue);
+            bigInteger = new BigInteger(Double.MaxValue);
             bigInteger += BigInteger.One;
-            VerifyDoubleExplicitCastFromBigInteger(double.MaxValue, bigInteger);
+            VerifyDoubleExplicitCastFromBigInteger(Double.MaxValue, bigInteger);
 
             // Double Explicit Cast from BigInteger: Double.MinValue - 1
-            bigInteger = new BigInteger(double.MinValue);
+            bigInteger = new BigInteger(Double.MinValue);
             bigInteger -= BigInteger.One;
-            VerifyDoubleExplicitCastFromBigInteger(double.MinValue, bigInteger);
+            VerifyDoubleExplicitCastFromBigInteger(Double.MinValue, bigInteger);
 
             // Double Explicit Cast from BigInteger: Random value > Double.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(double.MaxValue, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan(Double.MaxValue, s_random);
             bigInteger *= 2;
-            VerifyDoubleExplicitCastFromBigInteger(double.PositiveInfinity, bigInteger);
+            VerifyDoubleExplicitCastFromBigInteger(Double.PositiveInfinity, bigInteger);
 
             // Double Explicit Cast from BigInteger: Random value < -Double.MaxValue
-            VerifyDoubleExplicitCastFromBigInteger(double.NegativeInfinity, -bigInteger);
+            VerifyDoubleExplicitCastFromBigInteger(Double.NegativeInfinity, -bigInteger);
 
             // Double Explicit Cast from BigInteger: very large values (more than Int32.MaxValue bits) should be infinity
             DoubleExplicitCastFromLargeBigIntegerTests(128, 1);
@@ -590,13 +590,13 @@ namespace System.Numerics.Tests
             uint temp2;
             bool carry;
             byte[] temp;
-            decimal value;
+            Decimal value;
             BigInteger bigInteger;
 
             // Decimal Explicit Cast from BigInteger: Random value < Decimal.MinValue
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                bigInteger = GenerateRandomBigIntegerLessThan(decimal.MinValue, s_random);
+                bigInteger = GenerateRandomBigIntegerLessThan(Decimal.MinValue, s_random);
                 temp = bigInteger.ToByteArray();
                 carry = true;
                 for (int j = 0; j < 3; j++)
@@ -614,12 +614,12 @@ namespace System.Numerics.Tests
                     }
                     bits[j] = unchecked((int)temp2);
                 }
-                value = new decimal(bits[0], bits[1], bits[2], true, 0);
+                value = new Decimal(bits[0], bits[1], bits[2], true, 0);
                 Assert.Throws<OverflowException>(() => VerifyDecimalExplicitCastFromBigInteger(value, bigInteger));
             }
 
             // Decimal Explicit Cast from BigInteger: Decimal.MinValue - 1
-            bigInteger = new BigInteger(decimal.MinValue);
+            bigInteger = new BigInteger(Decimal.MinValue);
             bigInteger -= BigInteger.One;
             temp = bigInteger.ToByteArray();
             carry = true;
@@ -638,23 +638,23 @@ namespace System.Numerics.Tests
                 }
                 bits[j] = (int)temp2;
             }
-            value = new decimal(bits[0], bits[1], bits[2], true, 0);
+            value = new Decimal(bits[0], bits[1], bits[2], true, 0);
             Assert.Throws<OverflowException>(() => VerifyDecimalExplicitCastFromBigInteger(value, bigInteger));
 
             // Decimal Explicit Cast from BigInteger: Decimal.MinValue
-            VerifyDecimalExplicitCastFromBigInteger(decimal.MinValue);
+            VerifyDecimalExplicitCastFromBigInteger(Decimal.MinValue);
 
             // Decimal Explicit Cast from BigInteger: Random Negative
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyDecimalExplicitCastFromBigInteger(((decimal)((double)decimal.MaxValue * s_random.NextDouble())) - decimal.MaxValue);
+                VerifyDecimalExplicitCastFromBigInteger(((Decimal)((Double)Decimal.MaxValue * s_random.NextDouble())) - Decimal.MaxValue);
             }
 
             // Decimal Explicit Cast from BigInteger: Random Negative Non-Integral > -100
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                value = (decimal)(100 * s_random.NextDouble() - 100);
-                VerifyDecimalExplicitCastFromBigInteger(decimal.Truncate(value), new BigInteger(value));
+                value = (Decimal)(100 * s_random.NextDouble() - 100);
+                VerifyDecimalExplicitCastFromBigInteger(Decimal.Truncate(value), new BigInteger(value));
             }
 
             // Decimal Explicit Cast from BigInteger: -1
@@ -669,40 +669,40 @@ namespace System.Numerics.Tests
             // Decimal Explicit Cast from BigInteger: Random Positive Non-Integral < 100
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                value = (decimal)(100 * s_random.NextDouble());
-                VerifyDecimalExplicitCastFromBigInteger(decimal.Truncate(value), new BigInteger(value));
+                value = (Decimal)(100 * s_random.NextDouble());
+                VerifyDecimalExplicitCastFromBigInteger(Decimal.Truncate(value), new BigInteger(value));
             }
 
             // Decimal Explicit Cast from BigInteger: Random Positive
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                VerifyDecimalExplicitCastFromBigInteger((decimal)((double)decimal.MaxValue * s_random.NextDouble()));
+                VerifyDecimalExplicitCastFromBigInteger((Decimal)((Double)Decimal.MaxValue * s_random.NextDouble()));
             }
 
             // Decimal Explicit Cast from BigInteger: Decimal.MaxValue
-            VerifyDecimalExplicitCastFromBigInteger(decimal.MaxValue);
+            VerifyDecimalExplicitCastFromBigInteger(Decimal.MaxValue);
 
             // Decimal Explicit Cast from BigInteger: Decimal.MaxValue + 1
-            bigInteger = new BigInteger(decimal.MaxValue);
+            bigInteger = new BigInteger(Decimal.MaxValue);
             bigInteger += BigInteger.One;
             temp = bigInteger.ToByteArray();
             for (int j = 0; j < 3; j++)
             {
                 bits[j] = BitConverter.ToInt32(temp, 4 * j);
             }
-            value = new decimal(bits[0], bits[1], bits[2], false, 0);
+            value = new Decimal(bits[0], bits[1], bits[2], false, 0);
             Assert.Throws<OverflowException>(() => VerifyDecimalExplicitCastFromBigInteger(value, bigInteger));
 
             // Decimal Explicit Cast from BigInteger: Random value > Decimal.MaxValue
             for (int i = 0; i < NumberOfRandomIterations; ++i)
             {
-                bigInteger = GenerateRandomBigIntegerGreaterThan(decimal.MaxValue, s_random);
+                bigInteger = GenerateRandomBigIntegerGreaterThan(Decimal.MaxValue, s_random);
                 temp = bigInteger.ToByteArray();
                 for (int j = 0; j < 3; j++)
                 {
                     bits[j] = BitConverter.ToInt32(temp, 4 * j);
                 }
-                value = new decimal(bits[0], bits[1], bits[2], false, 0);
+                value = new Decimal(bits[0], bits[1], bits[2], false, 0);
                 Assert.Throws<OverflowException>(() => VerifyDecimalExplicitCastFromBigInteger(value, bigInteger));
             }
         }
@@ -725,8 +725,8 @@ namespace System.Numerics.Tests
                 for (int j = 0; j < bigShiftLoopLimit; j++)
                 {
                     temp = temp << (int.MaxValue / 10);
-                    VerifyDoubleExplicitCastFromBigInteger(double.PositiveInfinity, temp);
-                    VerifyDoubleExplicitCastFromBigInteger(double.NegativeInfinity, -temp);
+                    VerifyDoubleExplicitCastFromBigInteger(Double.PositiveInfinity, temp);
+                    VerifyDoubleExplicitCastFromBigInteger(Double.NegativeInfinity, -temp);
                 }
             }
         }
@@ -765,156 +765,156 @@ namespace System.Numerics.Tests
             return bigInteger;
         }
 
-        private static BigInteger GenerateRandomBigIntegerLessThan(long value, Random random)
+        private static BigInteger GenerateRandomBigIntegerLessThan(Int64 value, Random random)
         {
             return (GenerateRandomNegativeBigInteger(random) + value) - 1;
         }
 
-        private static BigInteger GenerateRandomBigIntegerLessThan(double value, Random random)
+        private static BigInteger GenerateRandomBigIntegerLessThan(Double value, Random random)
         {
             return (GenerateRandomNegativeBigInteger(random) + (BigInteger)value) - 1;
         }
 
-        private static BigInteger GenerateRandomBigIntegerLessThan(decimal value, Random random)
+        private static BigInteger GenerateRandomBigIntegerLessThan(Decimal value, Random random)
         {
             return (GenerateRandomNegativeBigInteger(random) + (BigInteger)value) - 1;
         }
 
-        private static BigInteger GenerateRandomBigIntegerGreaterThan(ulong value, Random random)
+        private static BigInteger GenerateRandomBigIntegerGreaterThan(UInt64 value, Random random)
         {
             return (GenerateRandomPositiveBigInteger(random) + value) + 1;
         }
 
-        private static BigInteger GenerateRandomBigIntegerGreaterThan(double value, Random random)
+        private static BigInteger GenerateRandomBigIntegerGreaterThan(Double value, Random random)
         {
             return (GenerateRandomPositiveBigInteger(random) + (BigInteger)value) + 1;
         }
 
-        private static BigInteger GenerateRandomBigIntegerGreaterThan(decimal value, Random random)
+        private static BigInteger GenerateRandomBigIntegerGreaterThan(Decimal value, Random random)
         {
             return (GenerateRandomPositiveBigInteger(random) + (BigInteger)value) + 1;
         }
 
-        private static void VerifyByteExplicitCastFromBigInteger(byte value)
+        private static void VerifyByteExplicitCastFromBigInteger(Byte value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyByteExplicitCastFromBigInteger(value, bigInteger);
         }
 
-        private static void VerifyByteExplicitCastFromBigInteger(byte value, BigInteger bigInteger)
+        private static void VerifyByteExplicitCastFromBigInteger(Byte value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (byte)bigInteger);
+            Assert.Equal(value, (Byte)bigInteger);
         }
 
-        private static void VerifySByteExplicitCastFromBigInteger(sbyte value)
+        private static void VerifySByteExplicitCastFromBigInteger(SByte value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifySByteExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifySByteExplicitCastFromBigInteger(sbyte value, BigInteger bigInteger)
+        private static void VerifySByteExplicitCastFromBigInteger(SByte value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (sbyte)bigInteger);
+            Assert.Equal(value, (SByte)bigInteger);
         }
 
-        private static void VerifyUInt16ExplicitCastFromBigInteger(ushort value)
+        private static void VerifyUInt16ExplicitCastFromBigInteger(UInt16 value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyUInt16ExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyUInt16ExplicitCastFromBigInteger(ushort value, BigInteger bigInteger)
+        private static void VerifyUInt16ExplicitCastFromBigInteger(UInt16 value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (ushort)bigInteger);
+            Assert.Equal(value, (UInt16)bigInteger);
         }
 
-        private static void VerifyInt16ExplicitCastFromBigInteger(short value)
+        private static void VerifyInt16ExplicitCastFromBigInteger(Int16 value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyInt16ExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyInt16ExplicitCastFromBigInteger(short value, BigInteger bigInteger)
+        private static void VerifyInt16ExplicitCastFromBigInteger(Int16 value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (short)bigInteger);
+            Assert.Equal(value, (Int16)bigInteger);
         }
 
-        private static void VerifyUInt32ExplicitCastFromBigInteger(uint value)
+        private static void VerifyUInt32ExplicitCastFromBigInteger(UInt32 value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyUInt32ExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyUInt32ExplicitCastFromBigInteger(uint value, BigInteger bigInteger)
+        private static void VerifyUInt32ExplicitCastFromBigInteger(UInt32 value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (uint)bigInteger);
+            Assert.Equal(value, (UInt32)bigInteger);
         }
 
-        private static void VerifyInt32ExplicitCastFromBigInteger(int value)
+        private static void VerifyInt32ExplicitCastFromBigInteger(Int32 value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyInt32ExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyInt32ExplicitCastFromBigInteger(int value, BigInteger bigInteger)
+        private static void VerifyInt32ExplicitCastFromBigInteger(Int32 value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (int)bigInteger);
+            Assert.Equal(value, (Int32)bigInteger);
         }
 
-        private static void VerifyUInt64ExplicitCastFromBigInteger(ulong value)
+        private static void VerifyUInt64ExplicitCastFromBigInteger(UInt64 value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyUInt64ExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyUInt64ExplicitCastFromBigInteger(ulong value, BigInteger bigInteger)
+        private static void VerifyUInt64ExplicitCastFromBigInteger(UInt64 value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (ulong)bigInteger);
+            Assert.Equal(value, (UInt64)bigInteger);
         }
 
-        private static void VerifyInt64ExplicitCastFromBigInteger(long value)
+        private static void VerifyInt64ExplicitCastFromBigInteger(Int64 value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyInt64ExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyInt64ExplicitCastFromBigInteger(long value, BigInteger bigInteger)
+        private static void VerifyInt64ExplicitCastFromBigInteger(Int64 value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (long)bigInteger);
+            Assert.Equal(value, (Int64)bigInteger);
         }
 
-        private static void VerifySingleExplicitCastFromBigInteger(float value)
+        private static void VerifySingleExplicitCastFromBigInteger(Single value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifySingleExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifySingleExplicitCastFromBigInteger(float value, BigInteger bigInteger)
+        private static void VerifySingleExplicitCastFromBigInteger(Single value, BigInteger bigInteger)
         {
-            Assert.Equal((float)Math.Truncate(value), (float)bigInteger);
+            Assert.Equal((Single)Math.Truncate(value), (Single)bigInteger);
         }
 
-        private static void VerifyDoubleExplicitCastFromBigInteger(double value)
+        private static void VerifyDoubleExplicitCastFromBigInteger(Double value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyDoubleExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyDoubleExplicitCastFromBigInteger(double value, BigInteger bigInteger)
+        private static void VerifyDoubleExplicitCastFromBigInteger(Double value, BigInteger bigInteger)
         {
-            Assert.Equal(Math.Truncate(value), (double)bigInteger);
+            Assert.Equal(Math.Truncate(value), (Double)bigInteger);
         }
 
-        private static void VerifyDecimalExplicitCastFromBigInteger(decimal value)
+        private static void VerifyDecimalExplicitCastFromBigInteger(Decimal value)
         {
             BigInteger bigInteger = new BigInteger(value);
             VerifyDecimalExplicitCastFromBigInteger(value, bigInteger);
         }
-        private static void VerifyDecimalExplicitCastFromBigInteger(decimal value, BigInteger bigInteger)
+        private static void VerifyDecimalExplicitCastFromBigInteger(Decimal value, BigInteger bigInteger)
         {
-            Assert.Equal(value, (decimal)bigInteger);
+            Assert.Equal(value, (Decimal)bigInteger);
         }
 
-        public static byte[] ByteArrayMakeMinSize(byte[] input, int minSize)
+        public static byte[] ByteArrayMakeMinSize(Byte[] input, int minSize)
         {
             if (input.Length >= minSize)
             {
                 return input;
             }
 
-            byte[] output = new byte[minSize];
-            byte filler = 0;
+            Byte[] output = new byte[minSize];
+            Byte filler = 0;
 
             if ((input[input.Length - 1] & 0x80) != 0)
             {

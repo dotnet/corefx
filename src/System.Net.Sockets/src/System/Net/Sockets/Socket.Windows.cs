@@ -4,7 +4,6 @@
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -123,18 +122,16 @@ namespace System.Net.Sockets
             return transmitPackets(socketHandle, packetArray, elementCount, sendSize, overlapped, flags);
         }
 
-        internal static void SocketListToFileDescriptorSet(IList socketList, Span<IntPtr> fileDescriptorSet)
+        internal static IntPtr[] SocketListToFileDescriptorSet(IList socketList)
         {
-            int count;
-            if (socketList == null || (count = socketList.Count) == 0)
+            if (socketList == null || socketList.Count == 0)
             {
-                return;
+                return null;
             }
 
-            Debug.Assert(fileDescriptorSet.Length >= count + 1);
-
-            fileDescriptorSet[0] = (IntPtr)count;
-            for (int current = 0; current < count; current++)
+            IntPtr[] fileDescriptorSet = new IntPtr[socketList.Count + 1];
+            fileDescriptorSet[0] = (IntPtr)socketList.Count;
+            for (int current = 0; current < socketList.Count; current++)
             {
                 if (!(socketList[current] is Socket))
                 {
@@ -143,27 +140,24 @@ namespace System.Net.Sockets
 
                 fileDescriptorSet[current + 1] = ((Socket)socketList[current])._handle.DangerousGetHandle();
             }
+            return fileDescriptorSet;
         }
 
         // Transform the list socketList such that the only sockets left are those
         // with a file descriptor contained in the array "fileDescriptorArray".
-        internal static void SelectFileDescriptor(IList socketList, Span<IntPtr> fileDescriptorSet)
+        internal static void SelectFileDescriptor(IList socketList, IntPtr[] fileDescriptorSet)
         {
             // Walk the list in order.
             //
             // Note that the counter is not necessarily incremented at each step;
             // when the socket is removed, advancing occurs automatically as the
             // other elements are shifted down.
-            int count;
-            if (socketList == null || (count = socketList.Count) == 0)
+            if (socketList == null || socketList.Count == 0)
             {
                 return;
             }
 
-            Debug.Assert(fileDescriptorSet.Length >= count + 1);
-
-            int returnedCount = (int)fileDescriptorSet[0];
-            if (returnedCount == 0)
+            if ((int)fileDescriptorSet[0] == 0)
             {
                 // No socket present, will never find any socket, remove them all.
                 socketList.Clear();
@@ -172,13 +166,13 @@ namespace System.Net.Sockets
 
             lock (socketList)
             {
-                for (int currentSocket = 0; currentSocket < count; currentSocket++)
+                for (int currentSocket = 0; currentSocket < socketList.Count; currentSocket++)
                 {
                     Socket socket = socketList[currentSocket] as Socket;
 
                     // Look for the file descriptor in the array.
                     int currentFileDescriptor;
-                    for (currentFileDescriptor = 0; currentFileDescriptor < returnedCount; currentFileDescriptor++)
+                    for (currentFileDescriptor = 0; currentFileDescriptor < (int)fileDescriptorSet[0]; currentFileDescriptor++)
                     {
                         if (fileDescriptorSet[currentFileDescriptor + 1] == socket._handle.DangerousGetHandle())
                         {
@@ -186,11 +180,10 @@ namespace System.Net.Sockets
                         }
                     }
 
-                    if (currentFileDescriptor == returnedCount)
+                    if (currentFileDescriptor == (int)fileDescriptorSet[0])
                     {
                         // Descriptor not found: remove the current socket and start again.
                         socketList.RemoveAt(currentSocket--);
-                        count--;
                     }
                 }
             }

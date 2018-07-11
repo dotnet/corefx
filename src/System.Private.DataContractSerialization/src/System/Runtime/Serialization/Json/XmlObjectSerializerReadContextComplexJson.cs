@@ -291,7 +291,7 @@ namespace System.Runtime.Serialization.Json
             string name, ns;
             if (string.IsNullOrEmpty(qname))
             {
-                name = ns = string.Empty;
+                name = ns = String.Empty;
             }
             else
             {

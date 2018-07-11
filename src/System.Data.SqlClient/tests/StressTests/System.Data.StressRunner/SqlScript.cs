@@ -47,7 +47,7 @@ namespace DPStressHarness
                 {
                     string cmdText = m.Groups["COMMAND"].Value.Trim();
 
-                    if (cmdText == string.Empty)
+                    if (cmdText == String.Empty)
                         continue;
 
                     SqlCommand cmd = new SqlCommand(cmdText, conn);

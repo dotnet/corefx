@@ -574,7 +574,7 @@ namespace System.Collections
             }
         }
 
-        public object SyncRoot
+        public Object SyncRoot
         {
             get
             {

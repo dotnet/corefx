@@ -19,11 +19,11 @@ namespace System
 {
     public sealed class CharEnumerator : IEnumerator, IEnumerator<char>, IDisposable, ICloneable
     {
-        private string _str;
+        private String _str;
         private int _index;
         private char _currentElement;
 
-        internal CharEnumerator(string str)
+        internal CharEnumerator(String str)
         {
             _str = str;
             _index = -1;
@@ -54,7 +54,7 @@ namespace System
             _str = null;
         }
 
-        object IEnumerator.Current
+        Object IEnumerator.Current
         {
             get { return Current; }
         }

@@ -508,7 +508,7 @@ namespace System.ComponentModel.Composition
 
         private string GetDisplayName(bool useEllipses, Type catalogType, params Type[] types)
         {
-            return string.Format(CultureInfo.CurrentCulture,
+            return String.Format(CultureInfo.CurrentCulture,
                     SR.TypeCatalog_DisplayNameFormat,
                     catalogType.Name,
                     this.GetTypesDisplay(useEllipses, types));

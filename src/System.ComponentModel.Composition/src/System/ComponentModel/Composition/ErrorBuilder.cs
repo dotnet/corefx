@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel.Composition.Primitives;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
@@ -35,15 +36,7 @@ namespace System.ComponentModel.Composition
 
         public static CompositionError CreateImportCardinalityMismatch(ImportCardinalityMismatchException exception, ImportDefinition definition)
         {
-            if(exception == null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            if(definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
+            Assumes.NotNull(exception, definition);
 
             return CompositionError.Create(
                 CompositionErrorId.ImportEngine_ImportCardinalityMismatch, 
@@ -54,15 +47,7 @@ namespace System.ComponentModel.Composition
 
         public static CompositionError CreatePartCannotActivate(ComposablePart part, Exception innerException)
         {
-            if(part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
-
-            if(innerException == null)
-            {
-                throw new ArgumentNullException(nameof(innerException));
-            }
+            Assumes.NotNull(part, innerException);
 
             ICompositionElement element = part.ToElement();
             return CompositionError.Create(
@@ -75,20 +60,7 @@ namespace System.ComponentModel.Composition
 
         public static CompositionError CreatePartCannotSetImport(ComposablePart part, ImportDefinition definition, Exception innerException)
         {
-            if(part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
-
-            if(definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
-
-            if(innerException == null)
-            {
-                throw new ArgumentNullException(nameof(innerException));
-            }
+            Assumes.NotNull(part, definition, innerException);
 
             ICompositionElement element = definition.ToElement();
             return CompositionError.Create(
@@ -102,20 +74,7 @@ namespace System.ComponentModel.Composition
 
         public static CompositionError CreateCannotGetExportedValue(ComposablePart part, ExportDefinition definition, Exception innerException)
         {
-            if(part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
-
-            if(definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
-
-            if(innerException == null)
-            {
-                throw new ArgumentNullException(nameof(innerException));
-            }
+            Assumes.NotNull(part, definition, innerException);
 
             ICompositionElement element = definition.ToElement();
             return CompositionError.Create(
@@ -129,10 +88,7 @@ namespace System.ComponentModel.Composition
 
         public static CompositionError CreatePartCycle(ComposablePart part)
         {
-            if(part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            Assumes.NotNull(part);
 
             ICompositionElement element = part.ToElement();
             return CompositionError.Create(

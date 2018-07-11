@@ -27,13 +27,13 @@ namespace System.Collections
         private int version; // Do not rename (binary serialization)
         private int count; // Do not rename (binary serialization)
         [NonSerialized]
-        private object _syncRoot;
+        private Object _syncRoot;
 
         public ListDictionaryInternal()
         {
         }
 
-        public object this[object key]
+        public Object this[Object key]
         {
             get
             {
@@ -134,13 +134,13 @@ namespace System.Collections
             }
         }
 
-        public object SyncRoot
+        public Object SyncRoot
         {
             get
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
                 }
                 return _syncRoot;
             }
@@ -154,7 +154,7 @@ namespace System.Collections
             }
         }
 
-        public void Add(object key, object value)
+        public void Add(Object key, Object value)
         {
             if (key == null)
             {
@@ -201,7 +201,7 @@ namespace System.Collections
             version++;
         }
 
-        public bool Contains(object key)
+        public bool Contains(Object key)
         {
             if (key == null)
             {
@@ -248,7 +248,7 @@ namespace System.Collections
             return new NodeEnumerator(this);
         }
 
-        public void Remove(object key)
+        public void Remove(Object key)
         {
             if (key == null)
             {
@@ -296,7 +296,7 @@ namespace System.Collections
                 current = null;
             }
 
-            public object Current
+            public Object Current
             {
                 get
                 {
@@ -316,7 +316,7 @@ namespace System.Collections
                 }
             }
 
-            public object Key
+            public Object Key
             {
                 get
                 {
@@ -328,7 +328,7 @@ namespace System.Collections
                 }
             }
 
-            public object Value
+            public Object Value
             {
                 get
                 {
@@ -422,7 +422,7 @@ namespace System.Collections
                 }
             }
 
-            object ICollection.SyncRoot
+            Object ICollection.SyncRoot
             {
                 get
                 {
@@ -453,7 +453,7 @@ namespace System.Collections
                     current = null;
                 }
 
-                public object Current
+                public Object Current
                 {
                     get
                     {
@@ -501,8 +501,8 @@ namespace System.Collections
         [Serializable]
         private class DictionaryNode
         {
-            public object key;
-            public object value;
+            public Object key;
+            public Object value;
             public DictionaryNode next;
         }
     }

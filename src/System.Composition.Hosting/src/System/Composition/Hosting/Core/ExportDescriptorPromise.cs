@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Core
 {
@@ -83,10 +84,7 @@ namespace System.Composition.Hosting.Core
             try
             {
                 ExportDescriptor relay = _descriptor.Value;
-                if(relay == null)
-                {
-                    throw new ArgumentNullException("descriptor");
-                }
+                Requires.NotNull(relay, "descriptor");
                 return relay;
             }
             finally

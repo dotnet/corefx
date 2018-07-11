@@ -523,7 +523,7 @@ namespace System.Xml
                         {
                             throw new ArgumentException(SR.Xml_XmlnsPrefix);
                         }
-                        _curDeclPrefix = string.Empty;
+                        _curDeclPrefix = String.Empty;
                         SetSpecialAttribute(SpecialAttribute.DefaultXmlns);
                         goto SkipPushAndWrite;
                     }
@@ -883,7 +883,7 @@ namespace System.Xml
         {
             try
             {
-                if (char.IsSurrogate(ch))
+                if (Char.IsSurrogate(ch))
                 {
                     throw new ArgumentException(SR.Xml_InvalidSurrogateMissingLowChar);
                 }
@@ -909,7 +909,7 @@ namespace System.Xml
         {
             try
             {
-                if (!char.IsSurrogatePair(highChar, lowChar))
+                if (!Char.IsSurrogatePair(highChar, lowChar))
                 {
                     throw XmlConvert.CreateInvalidSurrogatePairException(lowChar, highChar);
                 }
@@ -1202,7 +1202,7 @@ namespace System.Xml
                 CheckNCName(localName);
 
                 await AdvanceStateAsync(Token.Text).ConfigureAwait(false);
-                string prefix = string.Empty;
+                string prefix = String.Empty;
                 if (ns != null && ns.Length != 0)
                 {
                     prefix = LookupPrefix(ns);

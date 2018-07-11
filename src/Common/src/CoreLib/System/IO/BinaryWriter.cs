@@ -166,7 +166,7 @@ namespace System.IO
         // 
         public unsafe virtual void Write(char ch)
         {
-            if (char.IsSurrogate(ch))
+            if (Char.IsSurrogate(ch))
                 throw new ArgumentException(SR.Arg_SurrogatesNotAllowedAsSingleChar);
 
             Debug.Assert(_encoding.GetMaxByteCount(1) <= 16, "_encoding.GetMaxByteCount(1) <= 16)");
@@ -223,7 +223,7 @@ namespace System.IO
 
         public virtual void Write(decimal value)
         {
-            decimal.GetBytes(value, _buffer);
+            Decimal.GetBytes(value, _buffer);
             OutStream.Write(_buffer, 0, 16);
         }
 
@@ -325,7 +325,7 @@ namespace System.IO
         // a four-byte unsigned integer, and then writes that many characters 
         // to the stream.
         // 
-        public unsafe virtual void Write(string value)
+        public unsafe virtual void Write(String value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));

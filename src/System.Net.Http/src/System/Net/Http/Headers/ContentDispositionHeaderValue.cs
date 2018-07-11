@@ -97,7 +97,7 @@ namespace System.Net.Http.Headers
                 if (sizeParameter != null)
                 {
                     string sizeString = sizeParameter.Value;
-                    if (ulong.TryParse(sizeString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
+                    if (UInt64.TryParse(sizeString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
                     {
                         return (long)value;
                     }

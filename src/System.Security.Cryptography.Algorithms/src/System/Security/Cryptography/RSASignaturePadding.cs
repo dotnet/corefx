@@ -64,9 +64,9 @@ namespace System.Security.Cryptography
 
         public static bool operator ==(RSASignaturePadding left, RSASignaturePadding right)
         {
-            if (object.ReferenceEquals(left, null))
+            if (Object.ReferenceEquals(left, null))
             {
-                return object.ReferenceEquals(right, null);
+                return Object.ReferenceEquals(right, null);
             }
 
             return left.Equals(right);

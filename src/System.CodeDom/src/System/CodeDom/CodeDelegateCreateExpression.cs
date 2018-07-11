@@ -20,16 +20,16 @@ namespace System.CodeDom
 
         public CodeTypeReference DelegateType
         {
-            get => _delegateType ?? (_delegateType = new CodeTypeReference(""));
-            set => _delegateType = value;
+            get { return _delegateType ?? (_delegateType = new CodeTypeReference("")); }
+            set { _delegateType = value; }
         }
 
         public CodeExpression TargetObject { get; set; }
 
         public string MethodName
         {
-            get => _methodName ?? string.Empty;
-            set => _methodName = value;
+            get { return _methodName ?? string.Empty; }
+            set { _methodName = value; }
         }
     }
 }

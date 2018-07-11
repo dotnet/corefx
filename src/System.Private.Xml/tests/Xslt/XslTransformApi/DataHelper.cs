@@ -15,7 +15,7 @@ public class CustomUrlResolver : XmlUrlResolver
         _output = output;
     }
 
-    public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
+    public override Object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
     {
         _output.WriteLine("Getting {0}", absoluteUri);
         return base.GetEntity(absoluteUri, role, ofObjectToReturn);
@@ -30,7 +30,7 @@ public class CustomNullResolver : XmlUrlResolver
         _output = output;
     }
 
-    public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
+    public override Object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
     {
         _output.WriteLine("Getting {0}", absoluteUri);
         return null;
@@ -65,7 +65,7 @@ public class MyObject
 {
     private int _iUniqueVal;
     private double _dNotUsed;
-    private string _strTestTmp;
+    private String _strTestTmp;
 
     private ITestOutputHelper _output;
 
@@ -87,40 +87,40 @@ public class MyObject
         _iUniqueVal--;
     }
 
-    public string ReduceCount(double n)
+    public String ReduceCount(double n)
     {
         _iUniqueVal -= (int)n;
         return _iUniqueVal.ToString();
     }
 
-    public string AddToString(string str)
+    public String AddToString(String str)
     {
-        _strTestTmp = string.Concat(_strTestTmp, str);
+        _strTestTmp = String.Concat(_strTestTmp, str);
         return _strTestTmp;
     }
 
-    public override string ToString()
+    public override String ToString()
     {
-        string S = string.Format("My Custom Object has a value of {0}", _iUniqueVal);
+        String S = String.Format("My Custom Object has a value of {0}", _iUniqueVal);
         return S;
     }
 
-    public string PublicFunction()
+    public String PublicFunction()
     {
         return "Inside Public Function";
     }
 
-    private string PrivateFunction()
+    private String PrivateFunction()
     {
         return "Inside Private Function";
     }
 
-    protected string ProtectedFunction()
+    protected String ProtectedFunction()
     {
         return "Inside Protected Function";
     }
 
-    private string DefaultFunction()
+    private String DefaultFunction()
     {
         return "Default Function";
     }
@@ -136,23 +136,23 @@ public class MyObject
         return _dNotUsed;
     }
 
-    public string GetNull()
+    public String GetNull()
     {
         return null;
     }
 
     // Basic Tests
-    public string Fn1()
+    public String Fn1()
     {
         return "Test1";
     }
 
-    public string Fn2()
+    public String Fn2()
     {
         return "Test2";
     }
 
-    public string Fn3()
+    public String Fn3()
     {
         return "Test3";
     }
@@ -163,23 +163,23 @@ public class MyObject
         _output.WriteLine("\r\r\n\n> Where did I see this");
     }
 
-    public string MessMeUp()
+    public String MessMeUp()
     {
         return ">\" $tmp >;\'\t \n&";
     }
 
-    public string MessMeUp2()
+    public String MessMeUp2()
     {
         return "<xsl:variable name=\"tmp\"/>";
     }
 
-    public string MessMeUp3()
+    public String MessMeUp3()
     {
         return "</xsl:stylesheet>";
     }
 
     //Recursion Tests
-    public string RecursionSample()
+    public String RecursionSample()
     {
         return (Factorial(5)).ToString();
     }
@@ -192,75 +192,75 @@ public class MyObject
     }
 
     //Overload by type
-    public string OverloadType(string str)
+    public String OverloadType(String str)
     {
         return "String Overlaod";
     }
 
-    public string OverloadType(int i)
+    public String OverloadType(int i)
     {
         return "Int Overlaod";
     }
 
-    public string OverloadType(double d)
+    public String OverloadType(double d)
     {
         return "Double Overload";
     }
 
     //Overload by arg
-    public string OverloadArgTest(string s1)
+    public String OverloadArgTest(string s1)
     {
         return "String";
     }
 
-    public string OverloadArgTest(string s1, string s2)
+    public String OverloadArgTest(string s1, string s2)
     {
         return "String, String";
     }
 
-    public string OverloadArgTest(string s1, double d, string s2)
+    public String OverloadArgTest(string s1, double d, string s2)
     {
         return "String, Double, String";
     }
 
-    public string OverloadArgTest(string s1, string s2, double d)
+    public String OverloadArgTest(string s1, string s2, double d)
     {
         return "String, String, Double";
     }
 
     // Overload conversion tests
-    public string IntArg(int i)
+    public String IntArg(int i)
     {
         return "Int";
     }
 
-    public string BoolArg(bool i)
+    public String BoolArg(Boolean i)
     {
         return "Boolean";
     }
 
     // Arg Tests
-    public string ArgBoolTest(bool bFlag)
+    public String ArgBoolTest(Boolean bFlag)
     {
         if (bFlag)
             return "Statement is True";
         return "Statement is False";
     }
 
-    public string ArgDoubleTest(double d)
+    public String ArgDoubleTest(double d)
     {
-        string s = string.Format("Received a double with value {0}", Convert.ToString(d, NumberFormatInfo.InvariantInfo));
+        String s = String.Format("Received a double with value {0}", Convert.ToString(d, NumberFormatInfo.InvariantInfo));
         return s;
     }
 
-    public string ArgStringTest(string s)
+    public String ArgStringTest(String s)
     {
-        string s1 = string.Format("Received a string with value: {0}", s);
+        String s1 = String.Format("Received a string with value: {0}", s);
         return s1;
     }
 
     //Return tests
-    public string ReturnString()
+    public String ReturnString()
     {
         return "Hello world";
     }
@@ -275,12 +275,12 @@ public class MyObject
         return 022.4127600;
     }
 
-    public bool ReturnBooleanTrue()
+    public Boolean ReturnBooleanTrue()
     {
         return true;
     }
 
-    public bool ReturnBooleanFalse()
+    public Boolean ReturnBooleanFalse()
     {
         return false;
     }

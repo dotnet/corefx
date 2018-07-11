@@ -58,7 +58,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal void InsertExtensionNamespace(string nspace)
+        internal void InsertExtensionNamespace(String nspace)
         {
             if (_extensionNamespaces == null)
             {
@@ -67,7 +67,7 @@ namespace System.Xml.Xsl.XsltOld
             _extensionNamespaces[nspace] = null;
         }
 
-        internal bool IsExtensionNamespace(string nspace)
+        internal bool IsExtensionNamespace(String nspace)
         {
             if (_extensionNamespaces == null)
             {
@@ -76,7 +76,7 @@ namespace System.Xml.Xsl.XsltOld
             return _extensionNamespaces.Contains(nspace);
         }
 
-        internal void InsertExcludedNamespace(string nspace)
+        internal void InsertExcludedNamespace(String nspace)
         {
             if (_excludedNamespaces == null)
             {
@@ -85,7 +85,7 @@ namespace System.Xml.Xsl.XsltOld
             _excludedNamespaces[nspace] = null;
         }
 
-        internal bool IsExcludedNamespace(string nspace)
+        internal bool IsExcludedNamespace(String nspace)
         {
             if (_excludedNamespaces == null)
             {

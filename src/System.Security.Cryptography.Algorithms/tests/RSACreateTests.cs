@@ -66,7 +66,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 exportedPrivate = rsa.ExportParameters(true);
             }
 
-            ImportExport.AssertKeyEquals(parameters, exportedPrivate);
+            ImportExport.AssertKeyEquals(ref parameters, ref exportedPrivate);
         }
 
         [Fact]

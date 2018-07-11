@@ -30,19 +30,19 @@ namespace System
             HResult = HResults.E_POINTER;
         }
 
-        public ArgumentNullException(string paramName)
+        public ArgumentNullException(String paramName)
             : base(SR.ArgumentNull_Generic, paramName)
         {
             HResult = HResults.E_POINTER;
         }
 
-        public ArgumentNullException(string message, Exception innerException)
+        public ArgumentNullException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.E_POINTER;
         }
 
-        public ArgumentNullException(string paramName, string message)
+        public ArgumentNullException(String paramName, String message)
             : base(message, paramName)
         {
             HResult = HResults.E_POINTER;

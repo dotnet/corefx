@@ -94,7 +94,7 @@ namespace System.Numerics.Tests
 
         public static T Abs<T>(T value) where T : struct
         {
-            Type[] unsignedTypes = new[] { typeof(byte), typeof(ushort), typeof(uint), typeof(ulong) };
+            Type[] unsignedTypes = new[] { typeof(Byte), typeof(UInt16), typeof(UInt32), typeof(UInt64) };
             if (unsignedTypes.Contains(typeof(T)))
             {
                 return value;

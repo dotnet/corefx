@@ -235,11 +235,11 @@ namespace System.Diagnostics
         /// <summary>
         /// The full number identifying the message in the event message dll.
         /// </summary>
-        public long InstanceId
+        public Int64 InstanceId
         {
             get
             {
-                return (uint)IntFrom(dataBuf, bufOffset + FieldOffsets.EVENTID);
+                return (UInt32)IntFrom(dataBuf, bufOffset + FieldOffsets.EVENTID);
             }
         }
 
@@ -331,7 +331,7 @@ namespace System.Diagnostics
             (0xFF00 & (buf[offset + 1] << 8)) | (0xFF & (buf[offset]));
         }
 
-        internal string ReplaceMessageParameters(string msg, string[] insertionStrings)
+        internal string ReplaceMessageParameters(String msg, string[] insertionStrings)
         {
             int percentIdx = msg.IndexOf('%');
             if (percentIdx < 0)
@@ -346,13 +346,13 @@ namespace System.Diagnostics
             {
                 string param = null;
                 int lasNumIdx = percentIdx + 1;
-                while (lasNumIdx < msgLength && char.IsDigit(msg, lasNumIdx))
+                while (lasNumIdx < msgLength && Char.IsDigit(msg, lasNumIdx))
                     lasNumIdx++;
 
                 uint paramMsgID = 0;
 
                 if (lasNumIdx != percentIdx + 1)
-                    uint.TryParse(msg.Substring(percentIdx + 1, lasNumIdx - percentIdx - 1), out paramMsgID);
+                    UInt32.TryParse(msg.Substring(percentIdx + 1, lasNumIdx - percentIdx - 1), out paramMsgID);
 
                 if (paramMsgID != 0)
                     param = owner.FormatMessageWrapper(paramDLLNames, paramMsgID, insertionStrings);

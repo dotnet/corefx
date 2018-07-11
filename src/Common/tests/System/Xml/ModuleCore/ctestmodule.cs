@@ -226,7 +226,7 @@ namespace OLEDB.Test.ModuleCore
                 {
                     //Add the Variation Scope, if no scope was specified
                     if (xpath[0] != '/')
-                        xpath = string.Format(varfilter, xpath);
+                        xpath = String.Format(varfilter, xpath);
                 }
             }
 

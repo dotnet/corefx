@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -12,10 +13,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionType(Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            Assumes.NotNull(type);
 
             _type = type;
         }

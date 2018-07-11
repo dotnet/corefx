@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_types.h"
-#include "pal_compiler.h"
 #include "opensslshim.h"
 
 /*
@@ -16,10 +15,10 @@ Implemented by:
 
 Returns new EVP_CIPHER_CTX on success, nullptr on failure.
 */
-DLLEXPORT EVP_CIPHER_CTX*
+extern "C" EVP_CIPHER_CTX*
 CryptoNative_EvpCipherCreate(const EVP_CIPHER* type, uint8_t* key, unsigned char* iv, int32_t enc);
 
-DLLEXPORT EVP_CIPHER_CTX*
+extern "C" EVP_CIPHER_CTX*
 CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyLength, int32_t effectiveKeyLength, unsigned char* iv, int32_t enc);
 /*
 Cleans up and deletes an EVP_CIPHER_CTX instance created by EvpCipherCreate.
@@ -32,7 +31,7 @@ No-op if ctx is null.
 The given EVP_CIPHER_CTX pointer is invalid after this call.
 Always succeeds.
 */
-DLLEXPORT void CryptoNative_EvpCipherDestroy(EVP_CIPHER_CTX* ctx);
+extern "C" void CryptoNative_EvpCipherDestroy(EVP_CIPHER_CTX* ctx);
 
 /*
 Function:
@@ -40,7 +39,7 @@ EvpCipherReset
 
 Resets an EVP_CIPHER_CTX instance for a new computation.
 */
-DLLEXPORT int32_t CryptoNative_EvpCipherReset(EVP_CIPHER_CTX* ctx);
+extern "C" int32_t CryptoNative_EvpCipherReset(EVP_CIPHER_CTX* ctx);
 
 /*
 Function:
@@ -48,7 +47,7 @@ EvpCipherCtxSetPadding
 
 Direct shim to EVP_CIPHER_CTX_set_padding.
 */
-DLLEXPORT int32_t CryptoNative_EvpCipherCtxSetPadding(EVP_CIPHER_CTX* x, int32_t padding);
+extern "C" int32_t CryptoNative_EvpCipherCtxSetPadding(EVP_CIPHER_CTX* x, int32_t padding);
 
 /*
 Function:
@@ -56,7 +55,7 @@ EvpCipherUpdate
 
 Direct shim to EVP_CipherUpdate.
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 CryptoNative_EvpCipherUpdate(EVP_CIPHER_CTX* ctx, uint8_t* out, int32_t* outl, unsigned char* in, int32_t inl);
 
 /*
@@ -65,7 +64,7 @@ EvpCipherFinalEx
 
 Direct shim to EVP_CipherFinal_ex.
 */
-DLLEXPORT int32_t CryptoNative_EvpCipherFinalEx(EVP_CIPHER_CTX* ctx, uint8_t* outm, int32_t* outl);
+extern "C" int32_t CryptoNative_EvpCipherFinalEx(EVP_CIPHER_CTX* ctx, uint8_t* outm, int32_t* outl);
 
 /*
 Function:
@@ -73,7 +72,7 @@ EvpAes128Ecb
 
 Direct shim to EVP_aes_128_ecb.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpAes128Ecb(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpAes128Ecb();
 
 /*
 Function:
@@ -81,7 +80,7 @@ EvpAes128Cbc
 
 Direct shim to EVP_aes_128_cbc.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpAes128Cbc(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpAes128Cbc();
 
 /*
 Function:
@@ -89,7 +88,7 @@ EvpAes192Ecb
 
 Direct shim to EVP_aes_192_ecb.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpAes192Ecb(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpAes192Ecb();
 
 /*
 Function:
@@ -97,7 +96,7 @@ EvpAes192Cbc
 
 Direct shim to EVP_aes_192_cbc.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpAes192Cbc(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpAes192Cbc();
 
 /*
 Function:
@@ -105,7 +104,7 @@ EvpAes256Ecb
 
 Direct shim to EVP_aes_256_ecb.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpAes256Ecb(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpAes256Ecb();
 
 /*
 Function:
@@ -113,7 +112,7 @@ EvpAes256Cbc
 
 Direct shim to EVP_aes_256_cbc.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpAes256Cbc(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpAes256Cbc();
 
 /*
 Function:
@@ -121,7 +120,7 @@ EvpDes3Ecb
 
 Direct shim to EVP_des_ede3.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpDes3Ecb(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpDes3Ecb();
 
 /*
 Function:
@@ -129,7 +128,7 @@ EvpDes3Cbc
 
 Direct shim to EVP_des_ede3_cbc.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpDes3Cbc(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpDes3Cbc();
 
 /*
 Function:
@@ -137,7 +136,7 @@ EvpDesEcb
 
 Direct shim to EVP_des_ecb.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpDesEcb(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpDesEcb();
 
 /*
 Function:
@@ -145,7 +144,7 @@ EvpDesCbc
 
 Direct shim to EVP_des_ede_cbc.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpDesCbc(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpDesCbc();
 
 /*
 Function:
@@ -153,7 +152,7 @@ EvpRC2Ecb
 
 Direct shim to EVP_rc2_ecb.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpRC2Ecb(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpRC2Ecb();
 
 /*
 Function:
@@ -161,4 +160,4 @@ EvpRC2Cbc
 
 Direct shim to EVP_des_rc2_cbc.
 */
-DLLEXPORT const EVP_CIPHER* CryptoNative_EvpRC2Cbc(void);
+extern "C" const EVP_CIPHER* CryptoNative_EvpRC2Cbc();

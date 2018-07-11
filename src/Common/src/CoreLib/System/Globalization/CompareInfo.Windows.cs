@@ -91,15 +91,14 @@ namespace System.Globalization
             return FindStringOrdinal(FIND_FROMSTART, source, startIndex, count, value, value.Length, ignoreCase);
         }
 
-        internal static int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase, bool fromBeginning)
+        internal static int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(source.Length != 0);
             Debug.Assert(value.Length != 0);
 
-            uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
-            return FindStringOrdinal(positionFlag, source, value, ignoreCase);
+            return FindStringOrdinal(FIND_FROMSTART, source, value, ignoreCase);
         }
 
         internal static int LastIndexOfOrdinalCore(string source, string value, int startIndex, int count, bool ignoreCase)
@@ -317,7 +316,7 @@ namespace System.Globalization
             }
         }
 
-        internal unsafe int IndexOfCore(string source, string target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
+        internal unsafe int IndexOfCore(String source, String target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
         {
             Debug.Assert(!_invariantMode);
 
@@ -360,7 +359,7 @@ namespace System.Globalization
             return -1;
         }
 
-        internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
+        internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr)
         {
             Debug.Assert(!_invariantMode);
 
@@ -368,8 +367,8 @@ namespace System.Globalization
             Debug.Assert(target.Length != 0);
             Debug.Assert((options == CompareOptions.None || options == CompareOptions.IgnoreCase));
 
-            uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
-            return FindString(positionFlag | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
+            int retValue = FindString(FIND_FROMSTART | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
+            return retValue;
         }
 
         private unsafe int LastIndexOfCore(string source, string target, int startIndex, int count, CompareOptions options)
@@ -534,7 +533,7 @@ namespace System.Globalization
             return retValue;
         }
 
-        private unsafe SortKey CreateSortKey(string source, CompareOptions options)
+        private unsafe SortKey CreateSortKey(String source, CompareOptions options)
         {
             Debug.Assert(!_invariantMode);
 

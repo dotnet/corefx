@@ -76,7 +76,7 @@ namespace Windows.Foundation
         {
             // Helper to get the numeric list separator for a given culture.
             char separator = TokenizerHelper.GetNumericListSeparator(provider);
-            return string.Format(provider,
+            return String.Format(provider,
                                  "{1:" + format + "}{0}{2:" + format + "}",
                                  separator,
                                  _x,

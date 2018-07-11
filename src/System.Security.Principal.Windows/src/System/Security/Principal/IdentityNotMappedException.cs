@@ -22,7 +22,7 @@ namespace System.Security.Principal
         {
         }
 
-        public IdentityNotMappedException(string message, Exception inner)
+        public IdentityNotMappedException(String message, Exception inner)
             : base(message, inner)
         {
         }

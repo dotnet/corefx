@@ -22,12 +22,12 @@ namespace System.Xml
         {
             _growthRate = GrowthRate;
             _used = 0;
-            _stack = new object[GrowthRate];
+            _stack = new Object[GrowthRate];
             _size = GrowthRate;
             _limit = limit;
         }
 
-        internal object Push()
+        internal Object Push()
         {
             if (_used == _size)
             {
@@ -35,7 +35,7 @@ namespace System.Xml
                 {
                     throw new XmlException(SR.Xml_StackOverflow, string.Empty);
                 }
-                object[] newstack = new object[_size + _growthRate];
+                Object[] newstack = new Object[_size + _growthRate];
                 if (_used > 0)
                 {
                     System.Array.Copy(_stack, 0, newstack, 0, _used);
@@ -46,12 +46,12 @@ namespace System.Xml
             return _stack[_used++];
         }
 
-        internal object Pop()
+        internal Object Pop()
         {
             if (0 < _used)
             {
                 _used--;
-                object result = _stack[_used];
+                Object result = _stack[_used];
                 return result;
             }
             return null;
@@ -70,13 +70,13 @@ namespace System.Xml
             }
         }
 
-        internal object this[int index]
+        internal Object this[int index]
         {
             get
             {
                 if (index >= 0 && index < _used)
                 {
-                    object result = _stack[index];
+                    Object result = _stack[index];
                     return result;
                 }
                 else
@@ -119,7 +119,7 @@ namespace System.Xml
             return new HWStack((object[])_stack.Clone(), _growthRate, _used, _size);
         }
 
-        private object[] _stack;
+        private Object[] _stack;
         private int _growthRate;
         private int _used;
         private int _size;

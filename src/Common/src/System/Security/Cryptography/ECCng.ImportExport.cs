@@ -470,11 +470,7 @@ namespace System.Security.Cryptography
             return curveType;
         }
 
-        internal static SafeNCryptKeyHandle ImportKeyBlob(
-            string blobType,
-            ReadOnlySpan<byte> keyBlob,
-            string curveName,
-            SafeNCryptProviderHandle provider)
+        internal static SafeNCryptKeyHandle ImportKeyBlob(string blobType, byte[] keyBlob, string curveName, SafeNCryptProviderHandle provider)
         {
             ErrorCode errorCode;
             SafeNCryptKeyHandle keyHandle;
@@ -500,15 +496,7 @@ namespace System.Security.Cryptography
                     desc.ulVersion = Interop.BCrypt.BCRYPTBUFFER_VERSION;
                     Marshal.StructureToPtr(desc, descPtr, false);
 
-                    errorCode = Interop.NCrypt.NCryptImportKey(
-                        provider,
-                        IntPtr.Zero,
-                        blobType,
-                        descPtr,
-                        out keyHandle,
-                        ref MemoryMarshal.GetReference(keyBlob),
-                        keyBlob.Length,
-                        0);
+                    errorCode = Interop.NCrypt.NCryptImportKey(provider, IntPtr.Zero, blobType, descPtr, out keyHandle, keyBlob, keyBlob.Length, 0);
                 }
                 finally
                 {

@@ -21,16 +21,7 @@ namespace System.Collections.Generic
             _pos = 0;
         }
 
-        public int Length
-        {
-            get => _pos;
-            set
-            {
-                Debug.Assert(value >= 0);
-                Debug.Assert(value <= _span.Length);
-                _pos = value;
-            }
-        }
+        public int Length => _pos;
 
         public ref T this[int index]
         {

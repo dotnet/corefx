@@ -20,7 +20,7 @@ namespace System.Reflection.Tests
             });
 
 
-            List<string> methods = new List<string>();
+            List<String> methods = new List<String>();
 
             foreach (TypeInfo type in types)
             {
@@ -28,10 +28,10 @@ namespace System.Reflection.Tests
                     continue;
 
                 methods.Clear();
-                methods.AddRange((IEnumerable<string>)type.GetDeclaredField("DeclaredMethodNames").GetValue(null));
-                methods.AddRange((IEnumerable<string>)type.GetDeclaredField("InheritedMethodNames").GetValue(null));
+                methods.AddRange((IEnumerable<String>)type.GetDeclaredField("DeclaredMethodNames").GetValue(null));
+                methods.AddRange((IEnumerable<String>)type.GetDeclaredField("InheritedMethodNames").GetValue(null));
                 if (type.GetDeclaredField("NewMethodNames") != null)
-                    methods.AddRange((IEnumerable<string>)type.GetDeclaredField("NewMethodNames").GetValue(null));
+                    methods.AddRange((IEnumerable<String>)type.GetDeclaredField("NewMethodNames").GetValue(null));
 
                 //inherited from object
                 methods.Add("System.String ToString()");
@@ -57,7 +57,7 @@ namespace System.Reflection.Tests
                 RuntimeReflectionExtensions.GetRuntimeFields(null);
             });
 
-            List<string> fields = new List<string>();
+            List<String> fields = new List<String>();
 
             foreach (TypeInfo type in types)
             {
@@ -65,10 +65,10 @@ namespace System.Reflection.Tests
                     continue;
 
                 fields.Clear();
-                fields.AddRange((IEnumerable<string>)type.GetDeclaredField("DeclaredFieldNames").GetValue(null));
-                fields.AddRange((IEnumerable<string>)type.GetDeclaredField("InheritedFieldNames").GetValue(null));
+                fields.AddRange((IEnumerable<String>)type.GetDeclaredField("DeclaredFieldNames").GetValue(null));
+                fields.AddRange((IEnumerable<String>)type.GetDeclaredField("InheritedFieldNames").GetValue(null));
                 if (type.GetDeclaredField("NewFieldNames") != null)
-                    fields.AddRange((IEnumerable<string>)type.GetDeclaredField("NewFieldNames").GetValue(null));
+                    fields.AddRange((IEnumerable<String>)type.GetDeclaredField("NewFieldNames").GetValue(null));
 
                 Assert.All(type.AsType().GetRuntimeFields(), f => Assert.True(fields.Remove(f.Name)));
                 Assert.Empty(fields);
@@ -93,7 +93,7 @@ namespace System.Reflection.Tests
             });
 
 
-            List<string> properties = new List<string>();
+            List<String> properties = new List<String>();
 
             foreach (TypeInfo type in types)
             {
@@ -101,11 +101,11 @@ namespace System.Reflection.Tests
                     continue;
 
                 properties.Clear();
-                properties.AddRange((IEnumerable<string>)type.GetDeclaredField("PublicPropertyNames").GetValue(null));
+                properties.AddRange((IEnumerable<String>)type.GetDeclaredField("PublicPropertyNames").GetValue(null));
 
-                foreach (string propertyName in properties)
+                foreach (String propertyName in properties)
                 {
-                    bool exceptionExpected = propertyName.Equals("Item");
+                    Boolean exceptionExpected = propertyName.Equals("Item");
 
                     // Slight duplication of code her to allow use of Assert.Throws
                     if (exceptionExpected == true)
@@ -140,7 +140,7 @@ namespace System.Reflection.Tests
                 typeof(RuntimeReflectionExtensionsTests).GetRuntimeEvent(null);
             });
 
-            List<string> events = new List<string>();
+            List<String> events = new List<String>();
 
             foreach (TypeInfo type in types)
             {
@@ -151,9 +151,9 @@ namespace System.Reflection.Tests
                     continue;
 
                 events.Clear();
-                events.AddRange((IEnumerable<string>)type.GetDeclaredField("PublicEvents").GetValue(null));
+                events.AddRange((IEnumerable<String>)type.GetDeclaredField("PublicEvents").GetValue(null));
 
-                foreach (string eventName in events)
+                foreach (String eventName in events)
                 {
                     Assert.NotNull(type.AsType().GetRuntimeEvent(eventName));
                 }
@@ -182,7 +182,7 @@ namespace System.Reflection.Tests
                 typeof(RuntimeReflectionExtensionsTests).GetRuntimeMethod("RunTest_GetRuntimeMethod", null);
             });
 
-            List<string> methods = new List<string>();
+            List<String> methods = new List<String>();
 
             foreach (TypeInfo type in types)
             {
@@ -190,11 +190,11 @@ namespace System.Reflection.Tests
                     continue;
 
                 methods.Clear();
-                methods.AddRange((IEnumerable<string>)type.GetDeclaredField("PublicMethodNames").GetValue(null));
+                methods.AddRange((IEnumerable<String>)type.GetDeclaredField("PublicMethodNames").GetValue(null));
 
-                foreach (string method in methods)
+                foreach (String method in methods)
                 {
-                    string methodName = GetMethodName(method);
+                    String methodName = GetMethodName(method);
                     Type[] parameters = GetMethodParameters(method);
                     Assert.NotNull(type.AsType().GetRuntimeMethod(methodName, parameters));
                 }
@@ -217,7 +217,7 @@ namespace System.Reflection.Tests
                 typeof(RuntimeReflectionExtensionsTests).GetRuntimeField(null);
             });
 
-            List<string> fields = new List<string>();
+            List<String> fields = new List<String>();
 
             foreach (TypeInfo type in types)
             {
@@ -225,32 +225,32 @@ namespace System.Reflection.Tests
                     continue;
 
                 fields.Clear();
-                fields.AddRange((IEnumerable<string>)type.GetDeclaredField("PublicFieldNames").GetValue(null));
+                fields.AddRange((IEnumerable<String>)type.GetDeclaredField("PublicFieldNames").GetValue(null));
 
-                foreach (string fieldName in fields)
+                foreach (String fieldName in fields)
                 {
                     Assert.NotNull(type.AsType().GetRuntimeField(fieldName));
                 }
             }
         }
 
-        private static string GetMethodName(string methodName)
+        private static String GetMethodName(String methodName)
         {
             int startIndex = methodName.IndexOf(" ") + 1;
             int endIndex = methodName.IndexOf("(");
             return methodName.Substring(startIndex, endIndex - startIndex);
         }
 
-        private static Type[] GetMethodParameters(string methodName)
+        private static Type[] GetMethodParameters(String methodName)
         {
             int startIndex = methodName.IndexOf("(") + 1;
             int endIndex = methodName.IndexOf(")");
             if (endIndex <= startIndex)
                 return new Type[0];
 
-            string[] parameters = methodName.Substring(startIndex, endIndex - startIndex).Split(',');
+            String[] parameters = methodName.Substring(startIndex, endIndex - startIndex).Split(',');
             List<Type> parameterList = new List<Type>();
-            foreach (string parameter in parameters)
+            foreach (String parameter in parameters)
                 parameterList.Add(Type.GetType(parameter.Trim()));
             return parameterList.ToArray();
         }

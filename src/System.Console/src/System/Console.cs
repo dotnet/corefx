@@ -115,7 +115,7 @@ namespace System
 
         private static TextWriter CreateOutputWriter(Stream outputStream)
         {
-            return TextWriter.Synchronized(outputStream == Stream.Null ?
+            return SyncTextWriter.GetSynchronizedTextWriter(outputStream == Stream.Null ?
                 StreamWriter.Null :
                 new StreamWriter(
                     stream: outputStream,
@@ -408,7 +408,7 @@ namespace System
         public static void SetOut(TextWriter newOut)
         {
             CheckNonNull(newOut, nameof(newOut));
-            newOut = TextWriter.Synchronized(newOut);
+            newOut = SyncTextWriter.GetSynchronizedTextWriter(newOut);
             Volatile.Write(ref s_isOutTextWriterRedirected, true);
 
             lock (InternalSyncObject)
@@ -420,7 +420,7 @@ namespace System
         public static void SetError(TextWriter newError)
         {
             CheckNonNull(newError, nameof(newError));
-            newError = TextWriter.Synchronized(newError);
+            newError = SyncTextWriter.GetSynchronizedTextWriter(newError);
             Volatile.Write(ref s_isErrorTextWriterRedirected, true);
 
             lock (InternalSyncObject)
@@ -449,7 +449,7 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static string ReadLine()
+        public static String ReadLine()
         {
             return In.ReadLine();
         }
@@ -529,37 +529,37 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(object value)
+        public static void WriteLine(Object value)
         {
             Out.WriteLine(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(string value)
+        public static void WriteLine(String value)
         {
             Out.WriteLine(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(string format, object arg0)
+        public static void WriteLine(String format, Object arg0)
         {
             Out.WriteLine(format, arg0);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(string format, object arg0, object arg1)
+        public static void WriteLine(String format, Object arg0, Object arg1)
         {
             Out.WriteLine(format, arg0, arg1);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(string format, object arg0, object arg1, object arg2)
+        public static void WriteLine(String format, Object arg0, Object arg1, Object arg2)
         {
             Out.WriteLine(format, arg0, arg1, arg2);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(string format, params object[] arg)
+        public static void WriteLine(String format, params Object[] arg)
         {
             if (arg == null)                       // avoid ArgumentNullException from String.Format
                 Out.WriteLine(format, null, null); // faster than Out.WriteLine(format, (Object)arg);
@@ -568,25 +568,25 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(string format, object arg0)
+        public static void Write(String format, Object arg0)
         {
             Out.Write(format, arg0);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(string format, object arg0, object arg1)
+        public static void Write(String format, Object arg0, Object arg1)
         {
             Out.Write(format, arg0, arg1);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(string format, object arg0, object arg1, object arg2)
+        public static void Write(String format, Object arg0, Object arg1, Object arg2)
         {
             Out.Write(format, arg0, arg1, arg2);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(string format, params object[] arg)
+        public static void Write(String format, params Object[] arg)
         {
             if (arg == null)                   // avoid ArgumentNullException from String.Format
                 Out.Write(format, null, null); // faster than Out.Write(format, (Object)arg);
@@ -663,13 +663,13 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(object value)
+        public static void Write(Object value)
         {
             Out.Write(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(string value)
+        public static void Write(String value)
         {
             Out.Write(value);
         }

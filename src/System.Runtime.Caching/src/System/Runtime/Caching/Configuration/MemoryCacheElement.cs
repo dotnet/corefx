@@ -43,7 +43,7 @@ namespace System.Runtime.Caching.Configuration
                                           typeof(int),
                                           (int)0,
                                           null,
-                                          new IntegerValidator(0, int.MaxValue),
+                                          new IntegerValidator(0, Int32.MaxValue),
                                           ConfigurationPropertyOptions.None);
 
             s_propPollingInterval =

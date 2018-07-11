@@ -5,7 +5,7 @@
 using System.Composition;
 using Xunit;
 
-namespace System.Compostition.Runtime.Tests
+namespace System.Compostition.Tests
 {
     public class ExportTests
     {

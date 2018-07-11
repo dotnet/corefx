@@ -61,10 +61,10 @@ namespace System.Collections
         // If a doesn't implement IComparable and b does, -(b.CompareTo(a)) is returned.
         // Otherwise an exception is thrown.
         // 
-        public int Compare(object a, object b)
+        public int Compare(Object a, Object b)
         {
-            string sa = a as string;
-            string sb = b as string;
+            String sa = a as String;
+            String sb = b as String;
             if (sa != null && sb != null)
                 return _compareInfo.Compare(sa, sb, CompareOptions.IgnoreCase);
             else

@@ -397,7 +397,7 @@ namespace System.Runtime.Serialization
 
         internal string ReadContentAsString()
         {
-            return isEndOfEmptyElement ? string.Empty : reader.ReadContentAsString();
+            return isEndOfEmptyElement ? String.Empty : reader.ReadContentAsString();
         }
 
 #if USE_REFEMIT
@@ -646,55 +646,55 @@ namespace System.Runtime.Serialization
         [CLSCompliant(false)]
         public SByte ReadElementContentAsSignedByte()
 #else
-        internal sbyte ReadElementContentAsSignedByte()
+        internal SByte ReadElementContentAsSignedByte()
 #endif
         {
             return ToSByte(ReadElementContentAsInt());
         }
 
-        internal sbyte ReadContentAsSignedByte()
+        internal SByte ReadContentAsSignedByte()
         {
             return ToSByte(ReadContentAsInt());
         }
 
-        private sbyte ToSByte(int value)
+        private SByte ToSByte(int value)
         {
-            if (value < sbyte.MinValue || value > sbyte.MaxValue)
+            if (value < SByte.MinValue || value > SByte.MaxValue)
             {
                 ThrowConversionException(value.ToString(NumberFormatInfo.CurrentInfo), "SByte");
             }
-            return (sbyte)value;
+            return (SByte)value;
         }
 
 #if USE_REFEMIT
         [CLSCompliant(false)]
         public UInt32 ReadElementContentAsUnsignedInt()
 #else
-        internal uint ReadElementContentAsUnsignedInt()
+        internal UInt32 ReadElementContentAsUnsignedInt()
 #endif
         {
             return ToUInt32(ReadElementContentAsLong());
         }
 
-        internal uint ReadContentAsUnsignedInt()
+        internal UInt32 ReadContentAsUnsignedInt()
         {
             return ToUInt32(ReadContentAsLong());
         }
 
-        private uint ToUInt32(long value)
+        private UInt32 ToUInt32(long value)
         {
-            if (value < uint.MinValue || value > uint.MaxValue)
+            if (value < UInt32.MinValue || value > UInt32.MaxValue)
             {
                 ThrowConversionException(value.ToString(NumberFormatInfo.CurrentInfo), "UInt32");
             }
-            return (uint)value;
+            return (UInt32)value;
         }
 
 #if USE_REFEMIT
         [CLSCompliant(false)]
         public virtual UInt64 ReadElementContentAsUnsignedLong()
 #else
-        internal virtual ulong ReadElementContentAsUnsignedLong()
+        internal virtual UInt64 ReadElementContentAsUnsignedLong()
 #endif
         {
             if (isEndOfEmptyElement)
@@ -708,7 +708,7 @@ namespace System.Runtime.Serialization
             return XmlConverter.ToUInt64(str);
         }
 
-        internal virtual ulong ReadContentAsUnsignedLong()
+        internal virtual UInt64 ReadContentAsUnsignedLong()
         {
             string str = reader.ReadContentAsString();
 
@@ -722,24 +722,24 @@ namespace System.Runtime.Serialization
         [CLSCompliant(false)]
         public UInt16 ReadElementContentAsUnsignedShort()
 #else
-        internal ushort ReadElementContentAsUnsignedShort()
+        internal UInt16 ReadElementContentAsUnsignedShort()
 #endif
         {
             return ToUInt16(ReadElementContentAsInt());
         }
 
-        internal ushort ReadContentAsUnsignedShort()
+        internal UInt16 ReadContentAsUnsignedShort()
         {
             return ToUInt16(ReadContentAsInt());
         }
 
-        private ushort ToUInt16(int value)
+        private UInt16 ToUInt16(int value)
         {
-            if (value < ushort.MinValue || value > ushort.MaxValue)
+            if (value < UInt16.MinValue || value > UInt16.MaxValue)
             {
                 ThrowConversionException(value.ToString(NumberFormatInfo.CurrentInfo), "UInt16");
             }
-            return (ushort)value;
+            return (UInt16)value;
         }
 
 #if USE_REFEMIT
@@ -872,7 +872,7 @@ namespace System.Runtime.Serialization
         {
             string name, ns, prefix;
             if (str == null || str.Length == 0)
-                name = ns = string.Empty;
+                name = ns = String.Empty;
             else
                 XmlObjectSerializerReadContext.ParseQualifiedName(str, this, out name, out ns, out prefix);
             return new XmlQualifiedName(name, ns);

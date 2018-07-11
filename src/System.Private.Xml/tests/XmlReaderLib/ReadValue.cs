@@ -15,14 +15,14 @@ namespace System.Xml.Tests
     [InheritRequired()]
     public abstract partial class TCReadValue : TCXMLReaderBaseGeneral
     {
-        public const string ST_TEST_NAME = "CHARS1";
-        public const string ST_GEN_ENT_NAME = "e1";
-        public const string ST_GEN_ENT_VALUE = "e1foo";
+        public const String ST_TEST_NAME = "CHARS1";
+        public const String ST_GEN_ENT_NAME = "e1";
+        public const String ST_GEN_ENT_VALUE = "e1foo";
 
         private bool VerifyInvalidReadValue(int iBufferSize, int iIndex, int iCount, Type exceptionType)
         {
             bool bPassed = false;
-            char[] buffer = new char[iBufferSize];
+            Char[] buffer = new Char[iBufferSize];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -272,7 +272,7 @@ namespace System.Xml.Tests
         [Variation("ReadValue with buffer = element content / 2", Pri = 0)]
         public int TestReadValue1()
         {
-            char[] buffer = new char[5];
+            Char[] buffer = new Char[5];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -303,7 +303,7 @@ namespace System.Xml.Tests
         [Variation("ReadValue entire value in one call", Pri = 0)]
         public int TestReadValue2()
         {
-            char[] buffer = new char[10];
+            Char[] buffer = new Char[10];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -330,7 +330,7 @@ namespace System.Xml.Tests
         [Variation("ReadValue bit by bit", Pri = 0)]
         public int TestReadValue3()
         {
-            char[] buffer = new char[10];
+            Char[] buffer = new Char[10];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -363,7 +363,7 @@ namespace System.Xml.Tests
         public int TestReadValue4()
         {
             int size = 8192;
-            char[] buffer = new char[size];
+            Char[] buffer = new Char[size];
 
             string val = new string('x', size);
 
@@ -397,7 +397,7 @@ namespace System.Xml.Tests
         public int TestReadValue5()
         {
             int size = 8192;
-            char[] buffer = new char[size];
+            Char[] buffer = new Char[size];
 
             string val = new string('x', size);
 
@@ -645,7 +645,7 @@ namespace System.Xml.Tests
 
             DataReader.Read();
 
-            CError.Compare(DataReader.VerifyNode(XmlNodeType.EndElement, "ROOT", string.Empty), "1vn");
+            CError.Compare(DataReader.VerifyNode(XmlNodeType.EndElement, "ROOT", String.Empty), "1vn");
 
             return TEST_PASS;
         }
@@ -655,7 +655,7 @@ namespace System.Xml.Tests
         {
             if (IsRoundTrippedReader() || IsSubtreeReader()) return TEST_SKIPPED;
 
-            char[] buffer = new char[9];
+            Char[] buffer = new Char[9];
 
             ReloadSource(new StringReader("<root>somevalue</root></root>"));
             DataReader.PositionOnElement("root");
@@ -705,7 +705,7 @@ namespace System.Xml.Tests
             int size = (int)CurVariation.Params[1];
 
             string somechar = new string('x', size);
-            string strxml = string.Format("<ROOT>a" + somechar + "{0}c</ROOT>", Convert.ToChar(0));
+            string strxml = String.Format("<ROOT>a" + somechar + "{0}c</ROOT>", Convert.ToChar(0));
             ReloadSourceStr(strxml);
             DataReader.PositionOnElement("ROOT");
             char[] buffer = new char[1];
@@ -1063,7 +1063,7 @@ namespace System.Xml.Tests
 
             string xml = @"<root a1='12345' a2='value'/>";
             ReloadSource(new StringReader(xml));
-            char[] buffer = new char[10];
+            Char[] buffer = new Char[10];
 
             CError.Compare(DataReader.Read(), "Read");
             CError.Compare(DataReader.MoveToNextAttribute(), "MoveToNextAttribute");
@@ -1091,7 +1091,7 @@ namespace System.Xml.Tests
                 return TEST_SKIPPED;
             string xml = @"<?xml version='1.0'?><root/>";
             ReloadSource(new StringReader(xml));
-            char[] buffer = new char[10];
+            Char[] buffer = new Char[10];
 
             CError.Compare(DataReader.Read(), "Read");
             CError.Compare(DataReader.MoveToFirstAttribute(), "MoveToFirstAttribute");

@@ -40,7 +40,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("empty")]
         [InlineData("full")]
-        public void SetXmlNameTableTo_Empty_Full(string nameTableStatus)
+        public void SetXmlNameTableTo_Empty_Full(String nameTableStatus)
         {
             XmlSchemaValidator val;
             ObservedNameTable nt = new ObservedNameTable();
@@ -89,7 +89,7 @@ namespace System.Xml.Tests
         [InlineData("empty")]
         [InlineData("notcompiled")]
         [InlineData("compiled")]
-        public void SetSchemaSetTo_Empty_NotCompiled_Compiled(string schemaSetStatus)
+        public void SetSchemaSetTo_Empty_NotCompiled_Compiled(String schemaSetStatus)
         {
             XmlSchemaValidator val;
             XmlSchemaSet sch = new XmlSchemaSet();

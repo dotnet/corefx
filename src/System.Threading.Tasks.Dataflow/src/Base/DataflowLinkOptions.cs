@@ -51,14 +51,14 @@ namespace System.Threading.Tasks.Dataflow
         /// A constant used to specify an unlimited quantity for <see cref="DataflowLinkOptions"/> members 
         /// that provide an upper bound. This field is a constant tied to <see cref="DataflowLinkOptions.Unbounded"/>.
         /// </summary>
-        internal const int Unbounded = DataflowBlockOptions.Unbounded;
+        internal const Int32 Unbounded = DataflowBlockOptions.Unbounded;
 
         /// <summary>Whether the linked target will have completion and faulting notification propagated to it automatically.</summary>
-        private bool _propagateCompletion = false;
+        private Boolean _propagateCompletion = false;
         /// <summary>The maximum number of messages that may be consumed across the link.</summary>
-        private int _maxNumberOfMessages = Unbounded;
+        private Int32 _maxNumberOfMessages = Unbounded;
         /// <summary>Whether the link should be appended to the source?s list of links, or whether it should be prepended.</summary>
-        private bool _append = true;
+        private Boolean _append = true;
 
         /// <summary>A default instance of <see cref="DataflowLinkOptions"/>.</summary>
         /// <remarks>
@@ -78,7 +78,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets whether the linked target will have completion and faulting notification propagated to it automatically.</summary>
-        public bool PropagateCompletion
+        public Boolean PropagateCompletion
         {
             get { return _propagateCompletion; }
             set
@@ -89,7 +89,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets the maximum number of messages that may be consumed across the link.</summary>
-        public int MaxMessages
+        public Int32 MaxMessages
         {
             get { return _maxNumberOfMessages; }
             set
@@ -101,7 +101,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets whether the link should be appended to the source?s list of links, or whether it should be prepended.</summary>
-        public bool Append
+        public Boolean Append
         {
             get { return _append; }
             set

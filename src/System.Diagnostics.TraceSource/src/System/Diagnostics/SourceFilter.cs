@@ -22,10 +22,10 @@ namespace System.Diagnostics
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            return string.Equals(_src, source);
+            return String.Equals(_src, source);
         }
 
-        public string Source
+        public String Source
         {
             get
             {

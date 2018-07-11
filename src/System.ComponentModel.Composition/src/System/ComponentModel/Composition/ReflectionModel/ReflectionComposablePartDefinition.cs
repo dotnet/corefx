@@ -8,6 +8,7 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Internal;
 using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
@@ -24,10 +25,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionComposablePartDefinition(IReflectionPartCreationInfo creationInfo)
         {
-            if (creationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(creationInfo));
-            }
+            Assumes.NotNull(creationInfo);
             _creationInfo = creationInfo;
         }
 

@@ -164,7 +164,7 @@ namespace XmlCoreTest.Common
             {
                 if (replaceFlag)
                 {
-                    iterContent = string.Format(tagContent, ++count);
+                    iterContent = String.Format(tagContent, ++count);
                 }
                 else
                 {

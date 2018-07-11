@@ -92,7 +92,7 @@ namespace System.Text.Unicode
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetScalarValueFromUtf16(char first, char? second, out bool wasSurrogatePair)
         {
-            if (!char.IsSurrogate(first))
+            if (!Char.IsSurrogate(first))
             {
                 wasSurrogatePair = false;
                 return first;
@@ -110,11 +110,11 @@ namespace System.Text.Unicode
                 return first;
             }
 #endif
-            if (char.IsHighSurrogate(first))
+            if (Char.IsHighSurrogate(first))
             {
                 if (second != null)
                 {
-                    if (char.IsLowSurrogate(second.Value))
+                    if (Char.IsLowSurrogate(second.Value))
                     {
                         // valid surrogate pair - extract codepoint
                         wasSurrogatePair = true;
@@ -137,7 +137,7 @@ namespace System.Text.Unicode
             else
             {
                 // unmatched surrogate - substitute
-                Debug.Assert(char.IsLowSurrogate(first));
+                Debug.Assert(Char.IsLowSurrogate(first));
                 wasSurrogatePair = false;
                 return UNICODE_REPLACEMENT_CHAR;
             }
@@ -153,19 +153,19 @@ namespace System.Text.Unicode
             // This method is marked as AggressiveInlining to handle the common case of a non-surrogate
             // character. The surrogate case is handled in the slower fallback code path.
             char thisChar = *pChar;
-            return (char.IsSurrogate(thisChar)) ? GetScalarValueFromUtf16Slow(pChar, endOfString) : thisChar;
+            return (Char.IsSurrogate(thisChar)) ? GetScalarValueFromUtf16Slow(pChar, endOfString) : thisChar;
         }
 
         private static int GetScalarValueFromUtf16Slow(char* pChar, bool endOfString)
         {
             char firstChar = pChar[0];
 
-            if (!char.IsSurrogate(firstChar))
+            if (!Char.IsSurrogate(firstChar))
             {
                 Debug.Assert(false, "This case should've been handled by the fast path.");
                 return firstChar;
             }
-            else if (char.IsHighSurrogate(firstChar))
+            else if (Char.IsHighSurrogate(firstChar))
             {
                 if (endOfString)
                 {
@@ -175,7 +175,7 @@ namespace System.Text.Unicode
                 else
                 {
                     char secondChar = pChar[1];
-                    if (char.IsLowSurrogate(secondChar))
+                    if (Char.IsLowSurrogate(secondChar))
                     {
                         // valid surrogate pair - extract codepoint
                         return GetScalarValueFromUtf16SurrogatePair(firstChar, secondChar);
@@ -190,15 +190,15 @@ namespace System.Text.Unicode
             else
             {
                 // unmatched surrogate - substitute
-                Debug.Assert(char.IsLowSurrogate(firstChar));
+                Debug.Assert(Char.IsLowSurrogate(firstChar));
                 return UNICODE_REPLACEMENT_CHAR;
             }
         }
 
         private static int GetScalarValueFromUtf16SurrogatePair(char highSurrogate, char lowSurrogate)
         {
-            Debug.Assert(char.IsHighSurrogate(highSurrogate));
-            Debug.Assert(char.IsLowSurrogate(lowSurrogate));
+            Debug.Assert(Char.IsHighSurrogate(highSurrogate));
+            Debug.Assert(Char.IsLowSurrogate(lowSurrogate));
 
             // See http://www.unicode.org/versions/Unicode6.2.0/ch03.pdf, Table 3.5 for the
             // details of this conversion. We don't use Char.ConvertToUtf32 because its exception
@@ -287,7 +287,7 @@ namespace System.Text.Unicode
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsSupplementaryCodePoint(int scalar)
         {
-            return ((scalar & ~((int)char.MaxValue)) != 0);
+            return ((scalar & ~((int)Char.MaxValue)) != 0);
         }
     }
 }

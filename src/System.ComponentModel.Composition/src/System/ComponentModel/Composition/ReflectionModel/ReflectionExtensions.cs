@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -16,17 +17,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
             switch (memberType)
             {
                 case MemberTypes.Field:
-                    if(accessors.Length != 1)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.IsTrue(accessors.Length == 1);
                     return ((FieldInfo)accessors[0]).ToReflectionField();
 
                 case MemberTypes.Property:
-                    if(accessors.Length != 2)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.IsTrue(accessors.Length == 2);
                     return ReflectionExtensions.CreateReflectionProperty((MethodInfo)accessors[0], (MethodInfo)accessors[1]);
 
                 case MemberTypes.NestedType:
@@ -34,28 +29,19 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     return ((Type)accessors[0]).ToReflectionType();
 
                 default:
-                    if(memberType != MemberTypes.Method)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.IsTrue(memberType == MemberTypes.Method);
                     return ((MethodInfo)accessors[0]).ToReflectionMethod();
             }
         }
 
         public static LazyMemberInfo ToLazyMember(this MemberInfo member)
         {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
+            Assumes.NotNull(member);
 
             if (member.MemberType == MemberTypes.Property)
             {
                 PropertyInfo property = member as PropertyInfo;
-                if (property == null)
-                {
-                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                }
+                Assumes.NotNull(property);
 
                 MemberInfo[] accessors = new MemberInfo[] { property.GetGetMethod(true), property.GetSetMethod(true) };
                 return new LazyMemberInfo(MemberTypes.Property, accessors);
@@ -68,87 +54,54 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static ReflectionWritableMember ToReflectionWriteableMember(this LazyMemberInfo lazyMember)
         {
-            if((lazyMember.MemberType != MemberTypes.Field) && (lazyMember.MemberType != MemberTypes.Property))
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue((lazyMember.MemberType == MemberTypes.Field) || (lazyMember.MemberType == MemberTypes.Property));
 
             ReflectionWritableMember reflectionMember = lazyMember.ToReflectionMember() as ReflectionWritableMember;
-            if (reflectionMember == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.NotNull(reflectionMember);
 
             return reflectionMember;
         }
 
         public static ReflectionProperty ToReflectionProperty(this PropertyInfo property)
         {
-            if (property == null)
-            {
-                throw new ArgumentNullException(nameof(property));
-            }
-
+            Assumes.NotNull(property);
             return CreateReflectionProperty(property.GetGetMethod(true), property.GetSetMethod(true));
         }
 
         public static ReflectionProperty CreateReflectionProperty(MethodInfo getMethod, MethodInfo setMethod)
         {
-            if(getMethod == null && setMethod == null)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(getMethod != null || setMethod != null);
 
             return new ReflectionProperty(getMethod, setMethod);
         }
 
         public static ReflectionParameter ToReflectionParameter(this ParameterInfo parameter)
         {
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
+            Assumes.NotNull(parameter);
             return new ReflectionParameter(parameter);
         }
 
         public static ReflectionMethod ToReflectionMethod(this MethodInfo method)
         {
-            if (method == null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
+            Assumes.NotNull(method);
             return new ReflectionMethod(method);
         }
 
         public static ReflectionField ToReflectionField(this FieldInfo field)
         {
-            if (field == null)
-            {
-                throw new ArgumentNullException(nameof(field));
-            }
-
+            Assumes.NotNull(field);
             return new ReflectionField(field);
         }
 
         public static ReflectionType ToReflectionType(this Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
+            Assumes.NotNull(type);
             return new ReflectionType(type);
         }
 
         public static ReflectionWritableMember ToReflectionWritableMember(this MemberInfo member)
         {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
+            Assumes.NotNull(member);
             if (member.MemberType == MemberTypes.Property)
             {
                 return ((PropertyInfo)member).ToReflectionProperty();

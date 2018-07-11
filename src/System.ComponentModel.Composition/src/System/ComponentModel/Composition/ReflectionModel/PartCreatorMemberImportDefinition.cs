@@ -6,6 +6,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq.Expressions;
 using System.Text;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -20,10 +21,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             : base(importingLazyMember, CompositionConstants.PartCreatorContractName, CompositionConstants.PartCreatorTypeIdentity,
                 productImportDefinition.RequiredMetadata, productImportDefinition.Cardinality, productImportDefinition.IsRecomposable, false, productImportDefinition.RequiredCreationPolicy, MetadataServices.EmptyMetadata, origin)
         {
-            if (productImportDefinition == null)
-            {
-                throw new ArgumentNullException(nameof(productImportDefinition));
-            }
+            Assumes.NotNull(productImportDefinition);
             _productImportDefinition = productImportDefinition;
         }
 

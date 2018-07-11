@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "pal_compiler.h"
 #include <Security/Security.h>
 
 enum
@@ -43,28 +42,28 @@ Create an SSL context, for the Server or Client role as determined by isServer.
 
 Returns NULL if an invalid boolean is given for isServer, an SSLContextRef otherwise.
 */
-DLLEXPORT SSLContextRef AppleCryptoNative_SslCreateContext(int32_t isServer);
+extern "C" SSLContextRef AppleCryptoNative_SslCreateContext(int32_t isServer);
 
 /*
 Indicate that an SSL Context (in server mode) should allow a client to present a mutual auth cert.
 
 Returns The result of SSLSetClientSideAuthenticate
 */
-DLLEXPORT int32_t AppleCryptoNative_SslSetAcceptClientCert(SSLContextRef sslContext);
+extern "C" int32_t AppleCryptoNative_SslSetAcceptClientCert(SSLContextRef sslContext);
 
 /*
 Assign a minimum to the TLS protocol version for this connection.
 
 Returns the output of SSLSetProtocolVersionMin
 */
-DLLEXPORT int32_t AppleCryptoNative_SslSetMinProtocolVersion(SSLContextRef sslContext, PAL_SslProtocol sslProtocol);
+extern "C" int32_t AppleCryptoNative_SslSetMinProtocolVersion(SSLContextRef sslContext, PAL_SslProtocol sslProtocol);
 
 /*
 Assign a maximum to the TLS protocol version for this connection.
 
 Returns the output of SSLSetProtocolVersionMax
 */
-DLLEXPORT int32_t AppleCryptoNative_SslSetMaxProtocolVersion(SSLContextRef sslContext, PAL_SslProtocol sslProtocol);
+extern "C" int32_t AppleCryptoNative_SslSetMaxProtocolVersion(SSLContextRef sslContext, PAL_SslProtocol sslProtocol);
 
 /*
 Get the SecTrustRef from the SSL context which represents the certificte chain.
@@ -75,7 +74,7 @@ Output:
 pChainOut: Receives the SecTrustRef representing the populated chain
 pOSStatus: Receives the value returned by SSLCopyPeerTrust
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_SslCopyCertChain(SSLContextRef sslContext, SecTrustRef* pChainOut, int32_t* pOSStatus);
 
 /*
@@ -89,7 +88,7 @@ values sent by the server.
 
 pOSStatus: Receives the output of SSLCopyDistinguishedNames.
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_SslCopyCADistinguishedNames(SSLContextRef sslContext, CFArrayRef* pArrayOut, int32_t* pOSStatus);
 
 /*
@@ -100,7 +99,7 @@ Returns 1 on success, 0 on failure, other values on invalid state.
 Output:
 pOSStatus: Receives the value returned by SSLSetSessionOption
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_SslSetBreakOnServerAuth(SSLContextRef sslContext, int32_t setBreak, int32_t* pOSStatus);
 
 /*
@@ -111,7 +110,7 @@ Returns 1 on success, 0 on failure, other values on invalid state.
 Output:
 pOSStatus: Receives the value returned by SSLSetSessionOption
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_SslSetBreakOnClientAuth(SSLContextRef sslContext, int32_t setBreak, int32_t* pOSStatus);
 
 /*
@@ -123,7 +122,7 @@ intermediate (non-root) certificate.
 
 Returns the output of SSLSetCertificate
 */
-DLLEXPORT int32_t AppleCryptoNative_SslSetCertificate(SSLContextRef sslContext, CFArrayRef certRefs);
+extern "C" int32_t AppleCryptoNative_SslSetCertificate(SSLContextRef sslContext, CFArrayRef certRefs);
 
 /*
 Set the target hostname for SNI. pszTargetName must already be converted for IDNA if required.
@@ -133,17 +132,17 @@ Returns 1 on success, 0 on failure, other values for invalid state.
 Output:
 pOSStatus: Receives the value for SSLSetPeerDomainName
 */
-DLLEXPORT int32_t AppleCryptoNative_SslSetTargetName(SSLContextRef sslContext,
-                                                     const char* pszTargetName,
-                                                     int32_t cbTargetName,
-                                                     int32_t* pOSStatus);
+extern "C" int32_t AppleCryptoNative_SslSetTargetName(SSLContextRef sslContext,
+                                                      const char* pszTargetName,
+                                                      int32_t cbTargetName,
+                                                      int32_t* pOSStatus);
 
 /*
 Register the callbacks for reading and writing data to the SSL context.
 
 Returns the output of SSLSetIOFuncs.
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_SslSetIoCallbacks(SSLContextRef sslContext, SSLReadFunc readFunc, SSLWriteFunc writeFunc);
 
 /*
@@ -151,7 +150,7 @@ Pump the TLS handshake.
 
 Returns an indication of what state the error is in. Any negative number means an error occurred.
 */
-DLLEXPORT PAL_TlsHandshakeState AppleCryptoNative_SslHandshake(SSLContextRef sslContext);
+extern "C" PAL_TlsHandshakeState AppleCryptoNative_SslHandshake(SSLContextRef sslContext);
 
 /*
 Take bufLen bytes of cleartext data from buf and encrypt/frame the data.
@@ -164,7 +163,7 @@ bytesWritten: When any value other than PAL_TlsIo_Success is returned, receives 
 which were read from buf. On PAL_TlsIo_Success the parameter is not written through (but must still
 not be NULL)
 */
-DLLEXPORT PAL_TlsIo
+extern "C" PAL_TlsIo
 AppleCryptoNative_SslWrite(SSLContextRef sslContext, const uint8_t* buf, uint32_t bufLen, uint32_t* bytesWritten);
 
 /*
@@ -177,7 +176,7 @@ Returns a PAL_TlsIo code indicating how to proceed.
 Output:
 written: Receives the number of bytes written into buf
 */
-DLLEXPORT PAL_TlsIo
+extern "C" PAL_TlsIo
 AppleCryptoNative_SslRead(SSLContextRef sslContext, uint8_t* buf, uint32_t bufLen, uint32_t* written);
 
 /*
@@ -188,7 +187,7 @@ the certificate being expired (or not yet valid).
 
 Returns 1 on match, 0 on mismatch, any other value indicates an invalid state.
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_SslIsHostnameMatch(SSLContextRef sslContext, CFStringRef cfHostname, CFDateRef notBefore);
 
 /*
@@ -196,7 +195,7 @@ Generate a TLS Close alert to terminate the session.
 
 Returns the output of SSLClose
 */
-DLLEXPORT int32_t AppleCryptoNative_SslShutdown(SSLContextRef sslContext);
+extern "C" int32_t AppleCryptoNative_SslShutdown(SSLContextRef sslContext);
 
 /*
 Retrieve the TLS Protocol Version (e.g. TLS1.2) for the current session.
@@ -206,7 +205,7 @@ Returns the output of SSLGetNegotiatedProtocolVersion.
 Output:
 pProtocol: Receives the protocol ID. PAL_SslProtocol_None is issued on error or an unknown mapping.
 */
-DLLEXPORT int32_t AppleCryptoNative_SslGetProtocolVersion(SSLContextRef sslContext, PAL_SslProtocol* pProtocol);
+extern "C" int32_t AppleCryptoNative_SslGetProtocolVersion(SSLContextRef sslContext, PAL_SslProtocol* pProtocol);
 
 /*
 Retrieve the TLS Cipher Suite which was negotiated for the current session.
@@ -217,4 +216,4 @@ Output:
 pProtocol: The TLS CipherSuite value (from the RFC), e.g. ((uint32_t)0xC030) for
 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 */
-DLLEXPORT int32_t AppleCryptoNative_SslGetCipherSuite(SSLContextRef sslContext, uint32_t* pCipherSuiteOut);
+extern "C" int32_t AppleCryptoNative_SslGetCipherSuite(SSLContextRef sslContext, uint32_t* pCipherSuiteOut);

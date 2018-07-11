@@ -26,7 +26,7 @@ namespace System.Security.Cryptography
 
         internal int KeySize { get; private set; }
 
-        internal string GetCurveName(int callerKeySizeProperty, out string oidValue)
+        internal string GetCurveName(int callerKeySizeProperty)
         {
             // Ensure key\handle is created
             using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle(callerKeySizeProperty))
@@ -35,12 +35,11 @@ namespace System.Security.Cryptography
 
                 if (ECCng.IsECNamedCurve(algorithm))
                 {
-                    oidValue = null;
                     return CngKeyLite.GetCurveName(keyHandle);
                 }
 
                 // Use hard-coded values (for use with pre-Win10 APIs)
-                return ECCng.SpecialNistAlgorithmToCurveName(algorithm, out oidValue);
+                return ECCng.SpecialNistAlgorithmToCurveName(algorithm);
             }
         }
 

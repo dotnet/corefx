@@ -16,7 +16,7 @@ namespace System.Xml
         }
 
         // Gets the name of the node.
-        public override string Name
+        public override String Name
         {
             get
             {
@@ -25,7 +25,7 @@ namespace System.Xml
         }
 
         // Gets the name of the node without the namespace prefix.
-        public override string LocalName
+        public override String LocalName
         {
             get
             {

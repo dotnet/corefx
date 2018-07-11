@@ -54,10 +54,10 @@ namespace System
         ulong ToUInt64(IFormatProvider provider);
         float ToSingle(IFormatProvider provider);
         double ToDouble(IFormatProvider provider);
-        decimal ToDecimal(IFormatProvider provider);
+        Decimal ToDecimal(IFormatProvider provider);
         DateTime ToDateTime(IFormatProvider provider);
-        string ToString(IFormatProvider provider);
-        object ToType(Type conversionType, IFormatProvider provider);
+        String ToString(IFormatProvider provider);
+        Object ToType(Type conversionType, IFormatProvider provider);
     }
 }
 

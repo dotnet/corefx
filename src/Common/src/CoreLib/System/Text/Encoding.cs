@@ -603,7 +603,7 @@ namespace System.Text
         }
 
 
-        public virtual object Clone()
+        public virtual Object Clone()
         {
             Encoding newEncoding = (Encoding)this.MemberwiseClone();
 
@@ -1089,7 +1089,7 @@ namespace System.Text
         {
             fixed (byte* bytesPtr = &MemoryMarshal.GetNonNullPinnableReference(bytes))
             {
-                return string.CreateStringFromEncoding(bytesPtr, bytes.Length, this);
+                return GetString(bytesPtr, bytes.Length);
             }
         }
 
@@ -1241,7 +1241,7 @@ namespace System.Text
 
         private static Encoding BigEndianUTF32 => UTF32Encoding.s_bigEndianDefault;
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             Encoding that = value as Encoding;
             if (that != null)
@@ -1325,7 +1325,7 @@ namespace System.Text
                 _encoding = encoding;
             }
             
-            public object GetRealObject(StreamingContext context)
+            public Object GetRealObject(StreamingContext context)
             {
                 throw new PlatformNotSupportedException();
             }
@@ -1390,7 +1390,7 @@ namespace System.Text
                 _encoding = encoding;
             }
 
-            public object GetRealObject(StreamingContext context)
+            public Object GetRealObject(StreamingContext context)
             {
                 throw new PlatformNotSupportedException();
             }

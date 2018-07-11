@@ -17,8 +17,8 @@ namespace System.CodeDom
 
         public string Value
         {
-            get => _value ?? string.Empty;
-            set => _value = value;
+            get { return _value ?? string.Empty; }
+            set { _value = value; }
         }
     }
 }

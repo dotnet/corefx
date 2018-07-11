@@ -27,11 +27,11 @@ namespace System.Xml
 
         private int _nAttrInd; //used to identify virtual attributes of DocumentType node and XmlDeclaration node
 
-        private const string strPublicID = "PUBLIC";
-        private const string strSystemID = "SYSTEM";
-        private const string strVersion = "version";
-        private const string strStandalone = "standalone";
-        private const string strEncoding = "encoding";
+        private const String strPublicID = "PUBLIC";
+        private const String strSystemID = "SYSTEM";
+        private const String strVersion = "version";
+        private const String strStandalone = "standalone";
+        private const String strEncoding = "encoding";
 
 
         //caching variables for perf reasons
@@ -46,10 +46,10 @@ namespace System.Xml
 
         internal struct VirtualAttribute
         {
-            internal string name;
-            internal string value;
+            internal String name;
+            internal String value;
 
-            internal VirtualAttribute(string name, string value)
+            internal VirtualAttribute(String name, String value)
             {
                 this.name = name;
                 this.value = value;
@@ -117,12 +117,12 @@ namespace System.Xml
             }
         }
 
-        public string NamespaceURI
+        public String NamespaceURI
         {
             get { return _curNode.NamespaceURI; }
         }
 
-        public string Name
+        public String Name
         {
             get
             {
@@ -130,7 +130,7 @@ namespace System.Xml
                 {
                     Debug.Assert(_curNode.NodeType == XmlNodeType.XmlDeclaration || _curNode.NodeType == XmlNodeType.DocumentType);
                     if (_bOnAttrVal)
-                        return string.Empty; //Text node's name is String.Empty
+                        return String.Empty; //Text node's name is String.Empty
                     else
                     {
                         Debug.Assert(_nAttrInd >= 0 && _nAttrInd < AttributeCount);
@@ -141,12 +141,12 @@ namespace System.Xml
                     }
                 }
                 if (IsLocalNameEmpty(_curNode.NodeType))
-                    return string.Empty;
+                    return String.Empty;
                 return _curNode.Name;
             }
         }
 
-        public string LocalName
+        public String LocalName
         {
             get
             {
@@ -154,7 +154,7 @@ namespace System.Xml
                     //for the nodes in this case, their LocalName should be the same as their name
                     return Name;
                 if (IsLocalNameEmpty(_curNode.NodeType))
-                    return string.Empty;
+                    return String.Empty;
                 return _curNode.LocalName;
             }
         }
@@ -196,7 +196,7 @@ namespace System.Xml
             }
         }
 
-        public string Prefix
+        public String Prefix
         {
             get { return _curNode.Prefix; }
         }
@@ -221,12 +221,12 @@ namespace System.Xml
             }
         }
 
-        public string Value
+        public String Value
         {
             //See comments in HasValue
             get
             {
-                string retValue = null;
+                String retValue = null;
                 XmlNodeType nt = _curNode.NodeType;
                 if (_nAttrInd != -1)
                 {
@@ -242,7 +242,7 @@ namespace System.Xml
                     retValue = ((XmlDocumentType)_curNode).InternalSubset; //in this case nav.Value will be null
                 else if (nt == XmlNodeType.XmlDeclaration)
                 {
-                    StringBuilder strb = new StringBuilder(string.Empty);
+                    StringBuilder strb = new StringBuilder(String.Empty);
                     if (_nDeclarationAttrCount == -1)
                         InitDecAttr();
                     for (int i = 0; i < _nDeclarationAttrCount; i++)
@@ -255,11 +255,11 @@ namespace System.Xml
                 }
                 else
                     retValue = _curNode.Value;
-                return (retValue == null) ? string.Empty : retValue;
+                return (retValue == null) ? String.Empty : retValue;
             }
         }
 
-        public string BaseURI
+        public String BaseURI
         {
             get { return _curNode.BaseURI; }
         }
@@ -269,7 +269,7 @@ namespace System.Xml
             get { return _curNode.XmlSpace; }
         }
 
-        public string XmlLang
+        public String XmlLang
         {
             get { return _curNode.XmlLang; }
         }
@@ -353,7 +353,7 @@ namespace System.Xml
         private void InitDecAttr()
         {
             int i = 0;
-            string strTemp = _doc.Version;
+            String strTemp = _doc.Version;
             if (strTemp != null && strTemp.Length != 0)
             {
                 decNodeAttributes[i].name = strVersion;
@@ -377,7 +377,7 @@ namespace System.Xml
             _nDeclarationAttrCount = i;
         }
 
-        public string GetDeclarationAttr(XmlDeclaration decl, string name)
+        public String GetDeclarationAttr(XmlDeclaration decl, String name)
         {
             //PreCondition: curNode is pointing at Declaration node or one of its virtual attributes
             if (name == strVersion)
@@ -389,14 +389,14 @@ namespace System.Xml
             return null;
         }
 
-        public string GetDeclarationAttr(int i)
+        public String GetDeclarationAttr(int i)
         {
             if (_nDeclarationAttrCount == -1)
                 InitDecAttr();
             return decNodeAttributes[i].value;
         }
 
-        public int GetDecAttrInd(string name)
+        public int GetDecAttrInd(String name)
         {
             if (_nDeclarationAttrCount == -1)
                 InitDecAttr();
@@ -417,7 +417,7 @@ namespace System.Xml
                 _nDocTypeAttrCount = 0;
                 return;
             }
-            string strTemp = docType.PublicId;
+            String strTemp = docType.PublicId;
             if (strTemp != null)
             {
                 docTypeNodeAttributes[i].name = strPublicID;
@@ -434,7 +434,7 @@ namespace System.Xml
             _nDocTypeAttrCount = i;
         }
 
-        public string GetDocumentTypeAttr(XmlDocumentType docType, string name)
+        public String GetDocumentTypeAttr(XmlDocumentType docType, String name)
         {
             //PreCondition: nav is pointing at DocumentType node or one of its virtual attributes
             if (name == strPublicID)
@@ -444,14 +444,14 @@ namespace System.Xml
             return null;
         }
 
-        public string GetDocumentTypeAttr(int i)
+        public String GetDocumentTypeAttr(int i)
         {
             if (_nDocTypeAttrCount == -1)
                 InitDocTypeAttr();
             return docTypeNodeAttributes[i].value;
         }
 
-        public int GetDocTypeAttrInd(string name)
+        public int GetDocTypeAttrInd(String name)
         {
             if (_nDocTypeAttrCount == -1)
                 InitDocTypeAttr();
@@ -463,7 +463,7 @@ namespace System.Xml
             return -1;
         }
 
-        private string GetAttributeFromElement(XmlElement elem, string name)
+        private String GetAttributeFromElement(XmlElement elem, String name)
         {
             XmlAttribute attr = elem.GetAttributeNode(name);
             if (attr != null)
@@ -471,7 +471,7 @@ namespace System.Xml
             return null;
         }
 
-        public string GetAttribute(string name)
+        public String GetAttribute(String name)
         {
             if (_bCreatedOnAttribute)
                 return null;
@@ -489,14 +489,14 @@ namespace System.Xml
             return null;
         }
 
-        private string GetAttributeFromElement(XmlElement elem, string name, string ns)
+        private String GetAttributeFromElement(XmlElement elem, String name, String ns)
         {
             XmlAttribute attr = elem.GetAttributeNode(name, ns);
             if (attr != null)
                 return attr.Value;
             return null;
         }
-        public string GetAttribute(string name, string ns)
+        public String GetAttribute(String name, String ns)
         {
             if (_bCreatedOnAttribute)
                 return null;
@@ -514,7 +514,7 @@ namespace System.Xml
             return null;
         }
 
-        public string GetAttribute(int attributeIndex)
+        public String GetAttribute(int attributeIndex)
         {
             if (_bCreatedOnAttribute)
                 return null;
@@ -626,7 +626,7 @@ namespace System.Xml
         {
             return MoveToAttribute(name, string.Empty);
         }
-        private bool MoveToAttributeFromElement(XmlElement elem, string name, string ns)
+        private bool MoveToAttributeFromElement(XmlElement elem, String name, String ns)
         {
             XmlAttribute attr = null;
             if (ns.Length == 0)
@@ -839,7 +839,7 @@ namespace System.Xml
             return false;
         }
 
-        public string LookupNamespace(string prefix)
+        public String LookupNamespace(string prefix)
         {
             if (_bCreatedOnAttribute)
                 return null;
@@ -911,7 +911,7 @@ namespace System.Xml
             return null;
         }
 
-        internal string LookupPrefix(string namespaceName)
+        internal String LookupPrefix(string namespaceName)
         {
             if (_bCreatedOnAttribute || namespaceName == null)
             {
@@ -1169,7 +1169,7 @@ namespace System.Xml
             get
             {
                 if (!IsInReadingStates())
-                    return string.Empty;
+                    return String.Empty;
                 return _readerNav.Name;
             }
         }
@@ -1180,7 +1180,7 @@ namespace System.Xml
             get
             {
                 if (!IsInReadingStates())
-                    return string.Empty;
+                    return String.Empty;
                 return _readerNav.LocalName;
             }
         }
@@ -1192,7 +1192,7 @@ namespace System.Xml
             get
             {
                 if (!IsInReadingStates())
-                    return string.Empty;
+                    return String.Empty;
                 return _readerNav.NamespaceURI;
             }
         }
@@ -1203,7 +1203,7 @@ namespace System.Xml
             get
             {
                 if (!IsInReadingStates())
-                    return string.Empty;
+                    return String.Empty;
                 return _readerNav.Prefix;
             }
         }
@@ -1226,7 +1226,7 @@ namespace System.Xml
             get
             {
                 if (!IsInReadingStates())
-                    return string.Empty;
+                    return String.Empty;
                 return _readerNav.Value;
             }
         }
@@ -1239,7 +1239,7 @@ namespace System.Xml
         }
 
         // Gets the base URI of the current node.
-        public override string BaseURI
+        public override String BaseURI
         {
             get { return _readerNav.BaseURI; }
         }
@@ -1292,7 +1292,7 @@ namespace System.Xml
             get
             {
                 if (!IsInReadingStates())
-                    return string.Empty;
+                    return String.Empty;
                 return _readerNav.XmlLang;
             }
         }
@@ -1339,7 +1339,7 @@ namespace System.Xml
             //if not on Attribute, only element node could have attributes
             if (!IsInReadingStates())
                 return null;
-            string ns = (namespaceURI == null) ? string.Empty : namespaceURI;
+            String ns = (namespaceURI == null) ? String.Empty : namespaceURI;
             return _readerNav.GetAttribute(name, ns);
         }
 
@@ -1379,7 +1379,7 @@ namespace System.Xml
             if (!IsInReadingStates())
                 return false;
             _readerNav.ResetMove(ref _curDepth, ref _nodeType);
-            string ns = (namespaceURI == null) ? string.Empty : namespaceURI;
+            String ns = (namespaceURI == null) ? String.Empty : namespaceURI;
             if (_readerNav.MoveToAttribute(name, ns))
             { //, ref curDepth ) ) {
                 _curDepth++;
@@ -1750,7 +1750,7 @@ namespace System.Xml
         }
 
         // Resolves a namespace prefix in the current element's scope.
-        public override string LookupNamespace(string prefix)
+        public override String LookupNamespace(string prefix)
         {
             if (!IsInReadingStates())
                 return null;
@@ -1908,7 +1908,7 @@ namespace System.Xml
             return _readerNav.LookupPrefix(namespaceName);
         }
 
-        string IXmlNamespaceResolver.LookupNamespace(string prefix)
+        String IXmlNamespaceResolver.LookupNamespace(string prefix)
         {
             if (!IsInReadingStates())
             {

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Common.Tests;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Primitives;
 using System.Globalization;
@@ -368,15 +367,14 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void Message_ShouldFormatCountOfRootCausesUsingTheCurrentCulture()
         {
-            IEnumerable<CultureInfo> cultures = Expectations.GetCulturesForFormatting();
+            var cultures = Expectations.GetCulturesForFormatting();
 
-            foreach (CultureInfo culture in cultures)
+            foreach (var culture in cultures)
             {
-                // Save old culture and set a fixed culture for object instantiation
-                using (new ThreadCultureChange(culture))
+                using (new CurrentCultureContext(culture))
                 {
-                    CompositionError[] errors = CreateCompositionErrors(1000);
-                    CompositionException exception = CreateCompositionException(errors);
+                    var errors = CreateCompositionErrors(1000);
+                    var exception = CreateCompositionException(errors);
                     AssertMessage(exception, 1000, culture);
 
                     errors = CreateCompositionErrors(1);

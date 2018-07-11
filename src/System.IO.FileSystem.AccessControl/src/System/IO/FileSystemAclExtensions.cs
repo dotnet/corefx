@@ -25,7 +25,7 @@ namespace System.IO
             if (directorySecurity == null)
                 throw new ArgumentNullException(nameof(directorySecurity));
 
-            string fullPath = Path.GetFullPath(directoryInfo.FullName);
+            String fullPath = Path.GetFullPath(directoryInfo.FullName);
             directorySecurity.Persist(fullPath);
         }
 
@@ -44,7 +44,7 @@ namespace System.IO
             if (fileSecurity == null)
                 throw new ArgumentNullException(nameof(fileSecurity));
 
-            string fullPath = Path.GetFullPath(fileInfo.FullName);
+            String fullPath = Path.GetFullPath(fileInfo.FullName);
             // Appropriate security check should be done for us by FileSecurity.
             fileSecurity.Persist(fullPath);
         }

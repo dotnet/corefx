@@ -94,7 +94,7 @@ namespace System.Reflection.Internal
             internal byte[] UnderlyingArray;
 
             [FieldOffset(0)]
-            internal ImmutableArray<byte> ImmutableArray;
+            internal ImmutableArray<Byte> ImmutableArray;
         }
     }
 }

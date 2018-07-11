@@ -1401,7 +1401,7 @@ namespace System.IO.Ports
 
         // ----SUBSECTION: internal methods supporting public read/write methods-------*
 
-        unsafe private SerialStreamAsyncResult BeginReadCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
+        unsafe private SerialStreamAsyncResult BeginReadCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, Object stateObject)
         {
             // Create and store async stream class library specific data in the
             // async result
@@ -1441,14 +1441,14 @@ namespace System.IO.Ports
                     if (hr == Interop.Errors.ERROR_HANDLE_EOF)
                         InternalResources.EndOfFile();
                     else
-                        InternalResources.WinIOError(hr, string.Empty);
+                        InternalResources.WinIOError(hr, String.Empty);
                 }
             }
 
             return asyncResult;
         }
 
-        unsafe private SerialStreamAsyncResult BeginWriteCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
+        unsafe private SerialStreamAsyncResult BeginWriteCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, Object stateObject)
         {
             // Create and store async stream class library specific data in the
             // async result
@@ -1488,7 +1488,7 @@ namespace System.IO.Ports
                     if (hr == Interop.Errors.ERROR_HANDLE_EOF)
                         InternalResources.EndOfFile();
                     else
-                        InternalResources.WinIOError(hr, string.Empty);
+                        InternalResources.WinIOError(hr, String.Empty);
                 }
             }
             return asyncResult;
@@ -1915,7 +1915,7 @@ namespace System.IO.Ports
             // User code callback
             internal AsyncCallback _userCallback;
 
-            internal object _userStateObject;
+            internal Object _userStateObject;
 
             internal bool _isWrite;     // Whether this is a read or a write
             internal bool _isComplete;
@@ -1927,7 +1927,7 @@ namespace System.IO.Ports
             internal int _errorCode;
             internal NativeOverlapped* _overlapped;
 
-            public object AsyncState
+            public Object AsyncState
             {
                 get { return _userStateObject; }
             }

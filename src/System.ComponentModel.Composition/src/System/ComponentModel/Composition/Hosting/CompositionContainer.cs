@@ -610,17 +610,11 @@ namespace System.ComponentModel.Composition.Hosting
             switch((ImportSource)source)
             {
                 case ImportSource.Any:
-                    if (_rootProvider == null)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.NotNull(_rootProvider);
                     _rootProvider.TryGetExports(definition, atomicComposition, out exports);
                     break;
                 case ImportSource.Local:
-                    if (_localExportProvider == null)
-                    {
-                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                    }
+                    Assumes.NotNull(_localExportProvider);
                     _localExportProvider.TryGetExports(definition.RemoveImportSource(), atomicComposition, out exports);
                     break;
                 case ImportSource.NonLocal:

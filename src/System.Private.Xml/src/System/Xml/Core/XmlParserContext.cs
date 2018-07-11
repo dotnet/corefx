@@ -13,38 +13,38 @@ namespace System.Xml
     {
         private XmlNameTable _nt = null;
         private XmlNamespaceManager _nsMgr = null;
-        private string _docTypeName = string.Empty;
-        private string _pubId = string.Empty;
-        private string _sysId = string.Empty;
-        private string _internalSubset = string.Empty;
-        private string _xmlLang = string.Empty;
+        private String _docTypeName = String.Empty;
+        private String _pubId = String.Empty;
+        private String _sysId = String.Empty;
+        private String _internalSubset = String.Empty;
+        private String _xmlLang = String.Empty;
         private XmlSpace _xmlSpace;
-        private string _baseURI = string.Empty;
+        private String _baseURI = String.Empty;
         private Encoding _encoding = null;
 
-        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string xmlLang, XmlSpace xmlSpace)
-        : this(nt, nsMgr, null, null, null, null, string.Empty, xmlLang, xmlSpace)
+        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, String xmlLang, XmlSpace xmlSpace)
+        : this(nt, nsMgr, null, null, null, null, String.Empty, xmlLang, xmlSpace)
         {
             // Intentionally Empty
         }
 
-        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string xmlLang, XmlSpace xmlSpace, Encoding enc)
-        : this(nt, nsMgr, null, null, null, null, string.Empty, xmlLang, xmlSpace, enc)
+        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, String xmlLang, XmlSpace xmlSpace, Encoding enc)
+        : this(nt, nsMgr, null, null, null, null, String.Empty, xmlLang, xmlSpace, enc)
         {
             // Intentionally Empty
         }
 
-        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string docTypeName,
-                  string pubId, string sysId, string internalSubset, string baseURI,
-                  string xmlLang, XmlSpace xmlSpace)
+        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, String docTypeName,
+                  String pubId, String sysId, String internalSubset, String baseURI,
+                  String xmlLang, XmlSpace xmlSpace)
         : this(nt, nsMgr, docTypeName, pubId, sysId, internalSubset, baseURI, xmlLang, xmlSpace, null)
         {
             // Intentionally Empty
         }
 
-        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string docTypeName,
-                          string pubId, string sysId, string internalSubset, string baseURI,
-                          string xmlLang, XmlSpace xmlSpace, Encoding enc)
+        public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, String docTypeName,
+                          String pubId, String sysId, String internalSubset, String baseURI,
+                          String xmlLang, XmlSpace xmlSpace, Encoding enc)
         {
             if (nsMgr != null)
             {
@@ -67,12 +67,12 @@ namespace System.Xml
             }
 
             _nsMgr = nsMgr;
-            _docTypeName = (null == docTypeName ? string.Empty : docTypeName);
-            _pubId = (null == pubId ? string.Empty : pubId);
-            _sysId = (null == sysId ? string.Empty : sysId);
-            _internalSubset = (null == internalSubset ? string.Empty : internalSubset);
-            _baseURI = (null == baseURI ? string.Empty : baseURI);
-            _xmlLang = (null == xmlLang ? string.Empty : xmlLang);
+            _docTypeName = (null == docTypeName ? String.Empty : docTypeName);
+            _pubId = (null == pubId ? String.Empty : pubId);
+            _sysId = (null == sysId ? String.Empty : sysId);
+            _internalSubset = (null == internalSubset ? String.Empty : internalSubset);
+            _baseURI = (null == baseURI ? String.Empty : baseURI);
+            _xmlLang = (null == xmlLang ? String.Empty : xmlLang);
             _xmlSpace = xmlSpace;
             _encoding = enc;
         }
@@ -101,7 +101,7 @@ namespace System.Xml
             }
         }
 
-        public string DocTypeName
+        public String DocTypeName
         {
             get
             {
@@ -109,11 +109,11 @@ namespace System.Xml
             }
             set
             {
-                _docTypeName = (null == value ? string.Empty : value);
+                _docTypeName = (null == value ? String.Empty : value);
             }
         }
 
-        public string PublicId
+        public String PublicId
         {
             get
             {
@@ -121,11 +121,11 @@ namespace System.Xml
             }
             set
             {
-                _pubId = (null == value ? string.Empty : value);
+                _pubId = (null == value ? String.Empty : value);
             }
         }
 
-        public string SystemId
+        public String SystemId
         {
             get
             {
@@ -133,11 +133,11 @@ namespace System.Xml
             }
             set
             {
-                _sysId = (null == value ? string.Empty : value);
+                _sysId = (null == value ? String.Empty : value);
             }
         }
 
-        public string BaseURI
+        public String BaseURI
         {
             get
             {
@@ -145,11 +145,11 @@ namespace System.Xml
             }
             set
             {
-                _baseURI = (null == value ? string.Empty : value);
+                _baseURI = (null == value ? String.Empty : value);
             }
         }
 
-        public string InternalSubset
+        public String InternalSubset
         {
             get
             {
@@ -157,11 +157,11 @@ namespace System.Xml
             }
             set
             {
-                _internalSubset = (null == value ? string.Empty : value);
+                _internalSubset = (null == value ? String.Empty : value);
             }
         }
 
-        public string XmlLang
+        public String XmlLang
         {
             get
             {
@@ -169,7 +169,7 @@ namespace System.Xml
             }
             set
             {
-                _xmlLang = (null == value ? string.Empty : value);
+                _xmlLang = (null == value ? String.Empty : value);
             }
         }
 

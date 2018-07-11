@@ -25,13 +25,13 @@ namespace System
             HResult = HResults.COR_E_TIMEOUT;
         }
 
-        public TimeoutException(string message)
+        public TimeoutException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_TIMEOUT;
         }
 
-        public TimeoutException(string message, Exception innerException)
+        public TimeoutException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_TIMEOUT;

@@ -300,23 +300,23 @@ namespace System.DirectoryServices.AccountManagement
             return fileTime.ToString(CultureInfo.InvariantCulture);
         }
 
-        static internal DateTime ADFileTimeToDateTime(long filetime)
+        static internal DateTime ADFileTimeToDateTime(Int64 filetime)
         {
             // int64 FILETIME --> DateTime
             return DateTime.FromFileTimeUtc(filetime);
         }
 
-        static internal long DateTimeToADFileTime(DateTime dt)
+        static internal Int64 DateTimeToADFileTime(DateTime dt)
         {
             // DateTime --> int64 FILETIME
             return dt.ToFileTimeUtc();
         }
 
-        static internal long LargeIntToInt64(UnsafeNativeMethods.IADsLargeInteger largeInt)
+        static internal Int64 LargeIntToInt64(UnsafeNativeMethods.IADsLargeInteger largeInt)
         {
             uint lowPart = (uint)largeInt.LowPart;
             uint highPart = (uint)largeInt.HighPart;
-            long i = (long)(((ulong)lowPart) | (((ulong)highPart) << 32));
+            Int64 i = (long)(((ulong)lowPart) | (((ulong)highPart) << 32));
 
             return i;
         }
@@ -363,7 +363,7 @@ namespace System.DirectoryServices.AccountManagement
             string p1DnsForestName = ((ADStoreCtx)p1.GetStoreCtxToUse()).DnsForestName;
             string p2DnsForestName = ((ADStoreCtx)p2.GetStoreCtxToUse()).DnsForestName;
 
-            return (string.Equals(p1DnsForestName, p2DnsForestName, StringComparison.OrdinalIgnoreCase));
+            return (String.Compare(p1DnsForestName, p2DnsForestName, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         /// 
@@ -453,7 +453,7 @@ namespace System.DirectoryServices.AccountManagement
             // If this is the same domain then we have a trust.
             // Domain.Name always returns full dns name.
             // function is always supplied with a full DNS domain name.
-            if (string.Equals(currentDom.Name, targetDomain, StringComparison.OrdinalIgnoreCase))
+            if (String.Compare(currentDom.Name, targetDomain, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return true;
             }
@@ -492,7 +492,7 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        static internal string RetriveWkDn(DirectoryEntry deBase, string defaultNamingContext, string serverName, byte[] wellKnownContainerGuid)
+        static internal string RetriveWkDn(DirectoryEntry deBase, string defaultNamingContext, string serverName, Byte[] wellKnownContainerGuid)
         {
             /*
                             bool w2k3Supported  = false;

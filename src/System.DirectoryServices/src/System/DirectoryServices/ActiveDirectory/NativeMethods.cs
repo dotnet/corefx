@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
+#pragma warning disable BCL0015 // CoreFxPort
 
     /*typedef struct _DOMAIN_CONTROLLER_INFO {
 		LPTSTR DomainControllerName;
@@ -711,18 +712,18 @@ namespace System.DirectoryServices.ActiveDirectory
 
             void SetInfo();
 
-            object Get([In, MarshalAs(UnmanagedType.BStr)] string bstrName);
+            Object Get([In, MarshalAs(UnmanagedType.BStr)] string bstrName);
 
             void Put([In, MarshalAs(UnmanagedType.BStr)] string bstrName,
-                        [In] object vProp);
+                        [In] Object vProp);
 
-            object GetEx([In, MarshalAs(UnmanagedType.BStr)] string bstrName);
+            Object GetEx([In, MarshalAs(UnmanagedType.BStr)] String bstrName);
 
             void PutEx([In, MarshalAs(UnmanagedType.U4)] int lnControlCode,
                         [In, MarshalAs(UnmanagedType.BStr)] string bstrName,
-                        [In] object vProp);
+                        [In] Object vProp);
 
-            void GetInfoEx([In] object vProperties,
+            void GetInfoEx([In] Object vProperties,
                         [In, MarshalAs(UnmanagedType.U4)] int lnReserved);
 
             //
@@ -816,18 +817,18 @@ namespace System.DirectoryServices.ActiveDirectory
 
             void SetInfo();
 
-            object Get([In, MarshalAs(UnmanagedType.BStr)] string bstrName);
+            Object Get([In, MarshalAs(UnmanagedType.BStr)] string bstrName);
 
             void Put([In, MarshalAs(UnmanagedType.BStr)] string bstrName,
-                        [In] object vProp);
+                        [In] Object vProp);
 
-            object GetEx([In, MarshalAs(UnmanagedType.BStr)] string bstrName);
+            Object GetEx([In, MarshalAs(UnmanagedType.BStr)] String bstrName);
 
             void PutEx([In, MarshalAs(UnmanagedType.U4)] int lnControlCode,
                         [In, MarshalAs(UnmanagedType.BStr)] string bstrName,
-                        [In] object vProp);
+                        [In] Object vProp);
 
-            void GetInfoEx([In] object vProperties,
+            void GetInfoEx([In] Object vProperties,
                         [In, MarshalAs(UnmanagedType.U4)] int lnReserved);
 
             //

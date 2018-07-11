@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace System.Composition.Convention.Tests
+namespace System.Composition.Convention
 {
     public class PartBuilderInterfaceTests
     {
@@ -68,7 +68,7 @@ namespace System.Composition.Convention.Tests
             builder.ForTypesMatching((t) => true).ExportInterfaces();
             builder.ForTypesMatching((t) => t.GetTypeInfo().ImplementedInterfaces.Where((iface) => iface != typeof(System.IDisposable)).Count() == 0).Export();
 
-            CompositionHost container = new ContainerConfiguration()
+            var container = new ContainerConfiguration()
                 .WithPart<Standard>(builder)
                 .WithPart<Dippy>(builder)
                 .WithPart<Derived>(builder)
@@ -106,7 +106,7 @@ namespace System.Composition.Convention.Tests
             builder.ForTypesMatching((t) => true).ExportInterfaces((iface) => iface != typeof(System.IDisposable));
             builder.ForTypesMatching((t) => t.GetTypeInfo().ImplementedInterfaces.Where((iface) => iface != typeof(System.IDisposable)).Count() == 0).Export();
 
-            CompositionHost container = new ContainerConfiguration()
+            var container = new ContainerConfiguration()
                 .WithPart<Standard>(builder)
                 .WithPart<Dippy>(builder)
                 .WithPart<Derived>(builder)
@@ -143,7 +143,7 @@ namespace System.Composition.Convention.Tests
             builder.ForTypesMatching((t) => true).ExportInterfaces((iface) => iface != typeof(System.IDisposable), (iface, bldr) => bldr.AsContractType((Type)iface));
             builder.ForTypesMatching((t) => t.GetTypeInfo().ImplementedInterfaces.Where((iface) => iface != typeof(System.IDisposable)).Count() == 0).Export();
 
-            CompositionHost container = new ContainerConfiguration()
+            var container = new ContainerConfiguration()
                 .WithPart<Standard>(builder)
                 .WithPart<Dippy>(builder)
                 .WithPart<Derived>(builder)

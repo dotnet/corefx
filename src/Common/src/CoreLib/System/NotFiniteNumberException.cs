@@ -55,13 +55,13 @@ namespace System
 
         protected NotFiniteNumberException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            _offendingNumber = info.GetDouble("OffendingNumber"); // Do not rename (binary serialization)
+            _offendingNumber = info.GetInt32("OffendingNumber");
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue("OffendingNumber", _offendingNumber, typeof(double)); // Do not rename (binary serialization)
+            info.AddValue("OffendingNumber", _offendingNumber, typeof(int));
         }
 
         public double OffendingNumber

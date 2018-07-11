@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
@@ -28,10 +29,7 @@ namespace System.ComponentModel.Composition
 
         public static T GetValue<T>(this IDictionary<string, object> metadata, string key)
         {
-            if(metadata == null)
-            {
-                throw new ArgumentNullException(nameof(metadata));
-            }
+            Assumes.NotNull(metadata, nameof(metadata));
 
             object untypedValue = null;
             if (!metadata.TryGetValue(key, out untypedValue))

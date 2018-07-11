@@ -332,13 +332,6 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Tracks whether we've ever successfully received a response to a cursor position request (CPR).
-        /// If we have, then we can be more aggressive about expecting a response to subsequent requests,
-        /// e.g. using a longer timeout.
-        /// </summary>
-        private static bool s_everReceivedCursorPositionResponse;
-
         /// <summary>Gets the current cursor position.  This involves both writing to stdout and reading stdin.</summary>
         private static unsafe void GetCursorPosition(out int left, out int top)
         {
@@ -365,15 +358,7 @@ namespace System
             // one thread's get_CursorLeft/Top from providing input to the other's Console.Read*.
             lock (StdInReader) 
             {
-                // Because the CPR request/response protocol involves blocking until we get a certain
-                // response from the terminal, we want to avoid doing so if we don't know the terminal
-                // will definitely response.  As such, we start with minChars == 0, which causes the
-                // terminal's read timer to start immediately.  Once we've received a response for
-                // a request such that we know the terminal supports the protocol, we then specify
-                // minChars == 1.  With that, the timer won't start until the first character is
-                // received.  This makes the mechanism more reliable when there are high latencies
-                // involved in reading/writing, such as when accessing a remote system.
-                Interop.Sys.InitializeConsoleBeforeRead(minChars: (byte)(s_everReceivedCursorPositionResponse ? 1 : 0), decisecondsTimeout: 10);
+                Interop.Sys.InitializeConsoleBeforeRead(minChars: 0, decisecondsTimeout: 10);
                 try
                 {
                     // Write out the cursor position report request.
@@ -440,9 +425,6 @@ namespace System
                     // else back into the StdInReader.
                     ReadRowOrCol(bracketPos, semiPos, r, readBytes, ref top);
                     ReadRowOrCol(semiPos, rPos, r, readBytes, ref left);
-
-                    // Mark that we've successfully received a CPR response at least once.
-                    s_everReceivedCursorPositionResponse = true;
                 }
                 finally
                 {

@@ -5,13 +5,16 @@
 #pragma once
 
 #include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_types.h"
 #include <sys/types.h>
 
 /**
 * Passwd struct
 */
-typedef struct
+struct Passwd
 {
     char* Name;
     char* Password;
@@ -20,7 +23,7 @@ typedef struct
     char* UserInfo;
     char* HomeDirectory;
     char* Shell;
-} Passwd;
+};
 
 /**
 * Gets a password structure for the given uid.
@@ -47,7 +50,7 @@ DLLEXPORT int32_t SystemNative_GetPwNamR(const char* name, Passwd* pwd, char* bu
 *
 * Always succeeds.
 */
-DLLEXPORT uint32_t SystemNative_GetEUid(void);
+DLLEXPORT uint32_t SystemNative_GetEUid();
 
 /**
 * Gets and returns the effective group's identity.
@@ -55,7 +58,7 @@ DLLEXPORT uint32_t SystemNative_GetEUid(void);
 *
 * Always succeeds.
 */
-DLLEXPORT uint32_t SystemNative_GetEGid(void);
+DLLEXPORT uint32_t SystemNative_GetEGid();
 
 /**
 * Sets the effective user ID of the calling process
@@ -64,3 +67,5 @@ DLLEXPORT uint32_t SystemNative_GetEGid(void);
 * Returns 0 for success. On error, -1 is returned and errno is set.
 */
 DLLEXPORT int32_t SystemNative_SetEUid(uid_t euid);
+
+END_EXTERN_C

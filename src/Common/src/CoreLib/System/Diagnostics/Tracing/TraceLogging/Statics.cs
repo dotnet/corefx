@@ -548,51 +548,51 @@ namespace System.Diagnostics.Tracing
             else if (dataType.IsArray)
             {
                 var elementType = dataType.GetElementType();
-                if (elementType == typeof(bool))
+                if (elementType == typeof(Boolean))
                 {
                     result = ScalarArrayTypeInfo.Boolean();
                 }
-                else if (elementType == typeof(byte))
+                else if (elementType == typeof(Byte))
                 {
                     result = ScalarArrayTypeInfo.Byte();
                 }
-                else if (elementType == typeof(sbyte))
+                else if (elementType == typeof(SByte))
                 {
                     result = ScalarArrayTypeInfo.SByte();
                 }
-                else if (elementType == typeof(short))
+                else if (elementType == typeof(Int16))
                 {
                     result = ScalarArrayTypeInfo.Int16();
                 }
-                else if (elementType == typeof(ushort))
+                else if (elementType == typeof(UInt16))
                 {
                     result = ScalarArrayTypeInfo.UInt16();
                 }
-                else if (elementType == typeof(int))
+                else if (elementType == typeof(Int32))
                 {
                     result = ScalarArrayTypeInfo.Int32();
                 }
-                else if (elementType == typeof(uint))
+                else if (elementType == typeof(UInt32))
                 {
                     result = ScalarArrayTypeInfo.UInt32();
                 }
-                else if (elementType == typeof(long))
+                else if (elementType == typeof(Int64))
                 {
                     result = ScalarArrayTypeInfo.Int64();
                 }
-                else if (elementType == typeof(ulong))
+                else if (elementType == typeof(UInt64))
                 {
                     result = ScalarArrayTypeInfo.UInt64();
                 }
-                else if (elementType == typeof(char))
+                else if (elementType == typeof(Char))
                 {
                     result = ScalarArrayTypeInfo.Char();
                 }
-                else if (elementType == typeof(double))
+                else if (elementType == typeof(Double))
                 {
                     result = ScalarArrayTypeInfo.Double();
                 }
-                else if (elementType == typeof(float))
+                else if (elementType == typeof(Single))
                 {
                     result = ScalarArrayTypeInfo.Single();
                 }
@@ -618,55 +618,55 @@ namespace System.Diagnostics.Tracing
                 if (Statics.IsEnum(dataType))
                     dataType = Enum.GetUnderlyingType(dataType);
 
-                if (dataType == typeof(string))
+                if (dataType == typeof(String))
                 {
                     result = new StringTypeInfo();
                 }
-                else if (dataType == typeof(bool))
+                else if (dataType == typeof(Boolean))
                 {
                     result = ScalarTypeInfo.Boolean();
                 }
-                else if (dataType == typeof(byte))
+                else if (dataType == typeof(Byte))
                 {
                     result = ScalarTypeInfo.Byte();
                 }
-                else if (dataType == typeof(sbyte))
+                else if (dataType == typeof(SByte))
                 {
                     result = ScalarTypeInfo.SByte();
                 }
-                else if (dataType == typeof(short))
+                else if (dataType == typeof(Int16))
                 {
                     result = ScalarTypeInfo.Int16();
                 }
-                else if (dataType == typeof(ushort))
+                else if (dataType == typeof(UInt16))
                 {
                     result = ScalarTypeInfo.UInt16();
                 }
-                else if (dataType == typeof(int))
+                else if (dataType == typeof(Int32))
                 {
                     result = ScalarTypeInfo.Int32();
                 }
-                else if (dataType == typeof(uint))
+                else if (dataType == typeof(UInt32))
                 {
                     result = ScalarTypeInfo.UInt32();
                 }
-                else if (dataType == typeof(long))
+                else if (dataType == typeof(Int64))
                 {
                     result = ScalarTypeInfo.Int64();
                 }
-                else if (dataType == typeof(ulong))
+                else if (dataType == typeof(UInt64))
                 {
                     result = ScalarTypeInfo.UInt64();
                 }
-                else if (dataType == typeof(char))
+                else if (dataType == typeof(Char))
                 {
                     result = ScalarTypeInfo.Char();
                 }
-                else if (dataType == typeof(double))
+                else if (dataType == typeof(Double))
                 {
                     result = ScalarTypeInfo.Double();
                 }
-                else if (dataType == typeof(float))
+                else if (dataType == typeof(Single))
                 {
                     result = ScalarTypeInfo.Single();
                 }
@@ -674,7 +674,7 @@ namespace System.Diagnostics.Tracing
                 {
                     result = new DateTimeTypeInfo();
                 }
-                else if (dataType == typeof(decimal))
+                else if (dataType == typeof(Decimal))
                 {
                     result = new DecimalTypeInfo();
                 }

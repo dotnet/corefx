@@ -325,7 +325,7 @@ namespace System.Runtime.Serialization
                         MethodInfo XName_op_Implicit = xName.GetMethod(
                             "op_Implicit",
                             BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public,
-                            new Type[] { typeof(string) }
+                            new Type[] { typeof(String) }
                             );
                         ConstructorInfo XElement_ctor = type.GetConstructor(
                             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,

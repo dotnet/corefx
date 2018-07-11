@@ -258,10 +258,7 @@ namespace System.ComponentModel.Composition.Hosting
                     {
                         if (_parts == null)
                         {
-                            if (_types == null)
-                            {
-                                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                            }
+                            Assumes.NotNull(_types);
 
                             var collection = new List<ComposablePartDefinition>();
                             foreach (Type type in _types)
@@ -286,10 +283,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal override IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
         {
-            if (definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
+            Assumes.NotNull(definition);
 
             string contractName = definition.ContractName;
             if (string.IsNullOrEmpty(contractName))
@@ -360,7 +354,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private string GetDisplayName()
         {
-            return string.Format(CultureInfo.CurrentCulture,
+            return String.Format(CultureInfo.CurrentCulture,
                                 SR.TypeCatalog_DisplayNameFormat,
                                 GetType().Name,
                                 GetTypesDisplay());

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="Directory.Build.props" />
-  <Import Project="..\Directory.Build.targets" />
+  <Import Project="dir.props" />
+  <Import Project="..\dir.targets" />
 
   <PropertyGroup>
     <!-- The SignFiles target needs OutDir to be defined -->
@@ -36,6 +36,7 @@
   </Target>
 
   <Target Name="Build"
+          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
           DependsOnTargets="GetFilesToSignItems;SignFiles">
 
     <!-- now that the files have been signed delete the marker files -->

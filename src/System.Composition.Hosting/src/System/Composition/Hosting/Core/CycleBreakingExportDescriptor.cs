@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Internal;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -42,9 +43,7 @@ namespace System.Composition.Hosting.Core
         {
             if (!_exportDescriptor.IsValueCreated)
             {
-                var ex = new NotImplementedException(SR.NotImplemented_MetadataCycles);
-                Debug.WriteLine(SR.Diagnostic_ThrowingException, ex.ToString());
-                throw ex;
+                throw ThrowHelper.NotImplemented_MetadataCycles();
             }
 
             Debug.WriteLine("[System.Composition] Activating via cycle-breaking proxy.");

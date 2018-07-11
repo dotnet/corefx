@@ -12,9 +12,9 @@ namespace System
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public readonly struct Byte : IComparable, IConvertible, IFormattable, IComparable<byte>, IEquatable<byte>, ISpanFormattable
+    public struct Byte : IComparable, IConvertible, IFormattable, IComparable<Byte>, IEquatable<Byte>, ISpanFormattable
     {
-        private readonly byte m_value; // Do not rename (binary serialization)
+        private byte m_value; // Do not rename (binary serialization)
 
         // The maximum value that a Byte may represent: 255.
         public const byte MaxValue = (byte)0xFF;
@@ -29,37 +29,37 @@ namespace System
         // null is considered to be less than any instance.
         // If object is not of type byte, this method throws an ArgumentException.
         // 
-        public int CompareTo(object value)
+        public int CompareTo(Object value)
         {
             if (value == null)
             {
                 return 1;
             }
-            if (!(value is byte))
+            if (!(value is Byte))
             {
                 throw new ArgumentException(SR.Arg_MustBeByte);
             }
 
-            return m_value - (((byte)value).m_value);
+            return m_value - (((Byte)value).m_value);
         }
 
-        public int CompareTo(byte value)
+        public int CompareTo(Byte value)
         {
             return m_value - value;
         }
 
         // Determines whether two Byte objects are equal.
-        public override bool Equals(object obj)
+        public override bool Equals(Object obj)
         {
-            if (!(obj is byte))
+            if (!(obj is Byte))
             {
                 return false;
             }
-            return m_value == ((byte)obj).m_value;
+            return m_value == ((Byte)obj).m_value;
         }
 
         [NonVersionable]
-        public bool Equals(byte obj)
+        public bool Equals(Byte obj)
         {
             return m_value == obj;
         }
@@ -70,20 +70,20 @@ namespace System
             return m_value;
         }
 
-        public static byte Parse(string s)
+        public static byte Parse(String s)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
         }
 
-        public static byte Parse(string s, NumberStyles style)
+        public static byte Parse(String s, NumberStyles style)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, style, NumberFormatInfo.CurrentInfo);
         }
 
-        public static byte Parse(string s, IFormatProvider provider)
+        public static byte Parse(String s, IFormatProvider provider)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
@@ -92,7 +92,7 @@ namespace System
         // Parses an unsigned byte from a String in the given style.  If
         // a NumberFormatInfo isn't specified, the current culture's 
         // NumberFormatInfo is assumed.
-        public static byte Parse(string s, NumberStyles style, IFormatProvider provider)
+        public static byte Parse(String s, NumberStyles style, IFormatProvider provider)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -121,7 +121,7 @@ namespace System
             return (byte)i;
         }
 
-        public static bool TryParse(string s, out byte result)
+        public static bool TryParse(String s, out Byte result)
         {
             if (s == null)
             {
@@ -137,7 +137,7 @@ namespace System
             return TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
         }
 
-        public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out byte result)
+        public static bool TryParse(String s, NumberStyles style, IFormatProvider provider, out Byte result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
 
@@ -156,7 +156,7 @@ namespace System
             return TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
         }
 
-        private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out byte result)
+        private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out Byte result)
         {
             result = 0;
             int i;
@@ -172,22 +172,22 @@ namespace System
             return true;
         }
 
-        public override string ToString()
+        public override String ToString()
         {
             return Number.FormatInt32(m_value, null, null);
         }
 
-        public string ToString(string format)
+        public String ToString(String format)
         {
             return Number.FormatInt32(m_value, format, null);
         }
 
-        public string ToString(IFormatProvider provider)
+        public String ToString(IFormatProvider provider)
         {
             return Number.FormatInt32(m_value, null, provider);
         }
 
-        public string ToString(string format, IFormatProvider provider)
+        public String ToString(String format, IFormatProvider provider)
         {
             return Number.FormatInt32(m_value, format, provider);
         }
@@ -266,7 +266,7 @@ namespace System
             return Convert.ToDouble(m_value);
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        Decimal IConvertible.ToDecimal(IFormatProvider provider)
         {
             return Convert.ToDecimal(m_value);
         }
@@ -276,7 +276,7 @@ namespace System
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "Byte", "DateTime"));
         }
 
-        object IConvertible.ToType(Type type, IFormatProvider provider)
+        Object IConvertible.ToType(Type type, IFormatProvider provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

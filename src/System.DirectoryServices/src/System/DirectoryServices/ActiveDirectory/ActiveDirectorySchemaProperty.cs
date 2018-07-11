@@ -46,16 +46,16 @@ namespace System.DirectoryServices.ActiveDirectory
         private bool _isSingleValuedInitialized = false;
         private bool _isInGlobalCatalog = false;
         private bool _isInGlobalCatalogInitialized = false;
-        private Nullable<int> _rangeLower = null;
+        private Nullable<Int32> _rangeLower = null;
         private bool _rangeLowerInitialized = false;
-        private Nullable<int> _rangeUpper = null;
+        private Nullable<Int32> _rangeUpper = null;
         private bool _rangeUpperInitialized = false;
         private bool _isDefunct = false;
         private SearchFlags _searchFlags = SearchFlags.None;
         private bool _searchFlagsInitialized = false;
         private ActiveDirectorySchemaProperty _linkedProperty = null;
         private bool _linkedPropertyInitialized = false;
-        private Nullable<int> _linkId = null;
+        private Nullable<Int32> _linkId = null;
         private bool _linkIdInitialized = false;
         private byte[] _schemaGuidBinaryForm = null;
 
@@ -856,7 +856,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public Nullable<int> RangeLower
+        public Nullable<Int32> RangeLower
         {
             get
             {
@@ -909,7 +909,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public Nullable<int> RangeUpper
+        public Nullable<Int32> RangeUpper
         {
             get
             {
@@ -1029,7 +1029,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        public Nullable<int> LinkId
+        public Nullable<Int32> LinkId
         {
             get
             {

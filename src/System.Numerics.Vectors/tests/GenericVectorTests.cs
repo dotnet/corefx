@@ -26,25 +26,25 @@ namespace System.Numerics.Tests
         #region Constructor Tests
 
         [Fact]
-        public void ConstructorByte() { TestConstructor<byte>(); }
+        public void ConstructorByte() { TestConstructor<Byte>(); }
         [Fact]
-        public void ConstructorSByte() { TestConstructor<sbyte>(); }
+        public void ConstructorSByte() { TestConstructor<SByte>(); }
         [Fact]
-        public void ConstructorUInt16() { TestConstructor<ushort>(); }
+        public void ConstructorUInt16() { TestConstructor<UInt16>(); }
         [Fact]
-        public void ConstructorInt16() { TestConstructor<short>(); }
+        public void ConstructorInt16() { TestConstructor<Int16>(); }
         [Fact]
-        public void ConstructorUInt32() { TestConstructor<uint>(); }
+        public void ConstructorUInt32() { TestConstructor<UInt32>(); }
         [Fact]
-        public void ConstructorInt32() { TestConstructor<int>(); }
+        public void ConstructorInt32() { TestConstructor<Int32>(); }
         [Fact]
-        public void ConstructorUInt64() { TestConstructor<ulong>(); }
+        public void ConstructorUInt64() { TestConstructor<UInt64>(); }
         [Fact]
-        public void ConstructorInt64() { TestConstructor<long>(); }
+        public void ConstructorInt64() { TestConstructor<Int64>(); }
         [Fact]
-        public void ConstructorSingle() { TestConstructor<float>(); }
+        public void ConstructorSingle() { TestConstructor<Single>(); }
         [Fact]
-        public void ConstructorDouble() { TestConstructor<double>(); }
+        public void ConstructorDouble() { TestConstructor<Double>(); }
 
         private void TestConstructor<T>() where T : struct
         {
@@ -61,25 +61,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ConstructorWithOffsetByte() { TestConstructorWithOffset<byte>(); }
+        public void ConstructorWithOffsetByte() { TestConstructorWithOffset<Byte>(); }
         [Fact]
-        public void ConstructorWithOffsetSByte() { TestConstructorWithOffset<sbyte>(); }
+        public void ConstructorWithOffsetSByte() { TestConstructorWithOffset<SByte>(); }
         [Fact]
-        public void ConstructorWithOffsetUInt16() { TestConstructorWithOffset<ushort>(); }
+        public void ConstructorWithOffsetUInt16() { TestConstructorWithOffset<UInt16>(); }
         [Fact]
-        public void ConstructorWithOffsetInt16() { TestConstructorWithOffset<short>(); }
+        public void ConstructorWithOffsetInt16() { TestConstructorWithOffset<Int16>(); }
         [Fact]
-        public void ConstructorWithOffsetUInt32() { TestConstructorWithOffset<uint>(); }
+        public void ConstructorWithOffsetUInt32() { TestConstructorWithOffset<UInt32>(); }
         [Fact]
-        public void ConstructorWithOffsetInt32() { TestConstructorWithOffset<int>(); }
+        public void ConstructorWithOffsetInt32() { TestConstructorWithOffset<Int32>(); }
         [Fact]
-        public void ConstructorWithOffsetUInt64() { TestConstructorWithOffset<ulong>(); }
+        public void ConstructorWithOffsetUInt64() { TestConstructorWithOffset<UInt64>(); }
         [Fact]
-        public void ConstructorWithOffsetInt64() { TestConstructorWithOffset<long>(); }
+        public void ConstructorWithOffsetInt64() { TestConstructorWithOffset<Int64>(); }
         [Fact]
-        public void ConstructorWithOffsetSingle() { TestConstructorWithOffset<float>(); }
+        public void ConstructorWithOffsetSingle() { TestConstructorWithOffset<Single>(); }
         [Fact]
-        public void ConstructorWithOffsetDouble() { TestConstructorWithOffset<double>(); }
+        public void ConstructorWithOffsetDouble() { TestConstructorWithOffset<Double>(); }
         private void TestConstructorWithOffset<T>() where T : struct
         {
             Assert.Throws<NullReferenceException>(() => new Vector<T>((T[])null, 0));
@@ -95,25 +95,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ConstructorConstantValueByte() { TestConstructorConstantValue<byte>(); }
+        public void ConstructorConstantValueByte() { TestConstructorConstantValue<Byte>(); }
         [Fact]
-        public void ConstructorConstantValueSByte() { TestConstructorConstantValue<sbyte>(); }
+        public void ConstructorConstantValueSByte() { TestConstructorConstantValue<SByte>(); }
         [Fact]
-        public void ConstructorConstantValueUInt16() { TestConstructorConstantValue<ushort>(); }
+        public void ConstructorConstantValueUInt16() { TestConstructorConstantValue<UInt16>(); }
         [Fact]
-        public void ConstructorConstantValueInt16() { TestConstructorConstantValue<short>(); }
+        public void ConstructorConstantValueInt16() { TestConstructorConstantValue<Int16>(); }
         [Fact]
-        public void ConstructorConstantValueUInt32() { TestConstructorConstantValue<uint>(); }
+        public void ConstructorConstantValueUInt32() { TestConstructorConstantValue<UInt32>(); }
         [Fact]
-        public void ConstructorConstantValueInt32() { TestConstructorConstantValue<int>(); }
+        public void ConstructorConstantValueInt32() { TestConstructorConstantValue<Int32>(); }
         [Fact]
-        public void ConstructorConstantValueUInt64() { TestConstructorConstantValue<ulong>(); }
+        public void ConstructorConstantValueUInt64() { TestConstructorConstantValue<UInt64>(); }
         [Fact]
-        public void ConstructorConstantValueInt64() { TestConstructorConstantValue<long>(); }
+        public void ConstructorConstantValueInt64() { TestConstructorConstantValue<Int64>(); }
         [Fact]
-        public void ConstructorConstantValueSingle() { TestConstructorConstantValue<float>(); }
+        public void ConstructorConstantValueSingle() { TestConstructorConstantValue<Single>(); }
         [Fact]
-        public void ConstructorConstantValueDouble() { TestConstructorConstantValue<double>(); }
+        public void ConstructorConstantValueDouble() { TestConstructorConstantValue<Double>(); }
         private void TestConstructorConstantValue<T>() where T : struct
         {
             T constantValue = Util.GenerateSingleValue<T>(GetMinValue<T>(), GetMaxValue<T>());
@@ -126,25 +126,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ConstructorDefaultByte() { TestConstructorDefault<byte>(); }
+        public void ConstructorDefaultByte() { TestConstructorDefault<Byte>(); }
         [Fact]
-        public void ConstructorDefaultSByte() { TestConstructorDefault<sbyte>(); }
+        public void ConstructorDefaultSByte() { TestConstructorDefault<SByte>(); }
         [Fact]
-        public void ConstructorDefaultUInt16() { TestConstructorDefault<ushort>(); }
+        public void ConstructorDefaultUInt16() { TestConstructorDefault<UInt16>(); }
         [Fact]
-        public void ConstructorDefaultInt16() { TestConstructorDefault<short>(); }
+        public void ConstructorDefaultInt16() { TestConstructorDefault<Int16>(); }
         [Fact]
-        public void ConstructorDefaultUInt32() { TestConstructorDefault<uint>(); }
+        public void ConstructorDefaultUInt32() { TestConstructorDefault<UInt32>(); }
         [Fact]
-        public void ConstructorDefaultInt32() { TestConstructorDefault<int>(); }
+        public void ConstructorDefaultInt32() { TestConstructorDefault<Int32>(); }
         [Fact]
-        public void ConstructorDefaultUInt64() { TestConstructorDefault<ulong>(); }
+        public void ConstructorDefaultUInt64() { TestConstructorDefault<UInt64>(); }
         [Fact]
-        public void ConstructorDefaultInt64() { TestConstructorDefault<long>(); }
+        public void ConstructorDefaultInt64() { TestConstructorDefault<Int64>(); }
         [Fact]
-        public void ConstructorDefaultSingle() { TestConstructorDefault<float>(); }
+        public void ConstructorDefaultSingle() { TestConstructorDefault<Single>(); }
         [Fact]
-        public void ConstructorDefaultDouble() { TestConstructorDefault<double>(); }
+        public void ConstructorDefaultDouble() { TestConstructorDefault<Double>(); }
         private void TestConstructorDefault<T>() where T : struct
         {
             var vector = new Vector<T>();
@@ -156,25 +156,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ConstructorExceptionByte() { TestConstructorArrayTooSmallException<byte>(); }
+        public void ConstructorExceptionByte() { TestConstructorArrayTooSmallException<Byte>(); }
         [Fact]
-        public void ConstructorExceptionSByte() { TestConstructorArrayTooSmallException<sbyte>(); }
+        public void ConstructorExceptionSByte() { TestConstructorArrayTooSmallException<SByte>(); }
         [Fact]
-        public void ConstructorExceptionUInt16() { TestConstructorArrayTooSmallException<ushort>(); }
+        public void ConstructorExceptionUInt16() { TestConstructorArrayTooSmallException<UInt16>(); }
         [Fact]
-        public void ConstructorExceptionInt16() { TestConstructorArrayTooSmallException<short>(); }
+        public void ConstructorExceptionInt16() { TestConstructorArrayTooSmallException<Int16>(); }
         [Fact]
-        public void ConstructorExceptionUInt32() { TestConstructorArrayTooSmallException<uint>(); }
+        public void ConstructorExceptionUInt32() { TestConstructorArrayTooSmallException<UInt32>(); }
         [Fact]
-        public void ConstructorExceptionInt32() { TestConstructorArrayTooSmallException<int>(); }
+        public void ConstructorExceptionInt32() { TestConstructorArrayTooSmallException<Int32>(); }
         [Fact]
-        public void ConstructorExceptionUInt64() { TestConstructorArrayTooSmallException<ulong>(); }
+        public void ConstructorExceptionUInt64() { TestConstructorArrayTooSmallException<UInt64>(); }
         [Fact]
-        public void ConstructorExceptionInt64() { TestConstructorArrayTooSmallException<long>(); }
+        public void ConstructorExceptionInt64() { TestConstructorArrayTooSmallException<Int64>(); }
         [Fact]
-        public void ConstructorExceptionSingle() { TestConstructorArrayTooSmallException<float>(); }
+        public void ConstructorExceptionSingle() { TestConstructorArrayTooSmallException<Single>(); }
         [Fact]
-        public void ConstructorExceptionDouble() { TestConstructorArrayTooSmallException<double>(); }
+        public void ConstructorExceptionDouble() { TestConstructorArrayTooSmallException<Double>(); }
         private void TestConstructorArrayTooSmallException<T>() where T : struct
         {
             T[] values = GenerateRandomValuesForVector<T>().Skip(1).ToArray();
@@ -188,25 +188,25 @@ namespace System.Numerics.Tests
         #region Indexer Tests
 
         [Fact]
-        public void IndexerOutOfRangeByte() { TestIndexerOutOfRange<byte>(); }
+        public void IndexerOutOfRangeByte() { TestIndexerOutOfRange<Byte>(); }
         [Fact]
-        public void IndexerOutOfRangeSByte() { TestIndexerOutOfRange<sbyte>(); }
+        public void IndexerOutOfRangeSByte() { TestIndexerOutOfRange<SByte>(); }
         [Fact]
-        public void IndexerOutOfRangeUInt16() { TestIndexerOutOfRange<ushort>(); }
+        public void IndexerOutOfRangeUInt16() { TestIndexerOutOfRange<UInt16>(); }
         [Fact]
-        public void IndexerOutOfRangeInt16() { TestIndexerOutOfRange<short>(); }
+        public void IndexerOutOfRangeInt16() { TestIndexerOutOfRange<Int16>(); }
         [Fact]
-        public void IndexerOutOfRangeUInt32() { TestIndexerOutOfRange<uint>(); }
+        public void IndexerOutOfRangeUInt32() { TestIndexerOutOfRange<UInt32>(); }
         [Fact]
-        public void IndexerOutOfRangeInt32() { TestIndexerOutOfRange<int>(); }
+        public void IndexerOutOfRangeInt32() { TestIndexerOutOfRange<Int32>(); }
         [Fact]
-        public void IndexerOutOfRangeUInt64() { TestIndexerOutOfRange<ulong>(); }
+        public void IndexerOutOfRangeUInt64() { TestIndexerOutOfRange<UInt64>(); }
         [Fact]
-        public void IndexerOutOfRangeInt64() { TestIndexerOutOfRange<long>(); }
+        public void IndexerOutOfRangeInt64() { TestIndexerOutOfRange<Int64>(); }
         [Fact]
-        public void IndexerOutOfRangeSingle() { TestIndexerOutOfRange<float>(); }
+        public void IndexerOutOfRangeSingle() { TestIndexerOutOfRange<Single>(); }
         [Fact]
-        public void IndexerOutOfRangeDouble() { TestIndexerOutOfRange<double>(); }
+        public void IndexerOutOfRangeDouble() { TestIndexerOutOfRange<Double>(); }
         private void TestIndexerOutOfRange<T>() where T : struct
         {
             Vector<T> vector = Vector<T>.One;
@@ -219,25 +219,25 @@ namespace System.Numerics.Tests
 
         #region Static Member Tests
         [Fact]
-        public void StaticOneVectorByte() { TestStaticOneVector<byte>(); }
+        public void StaticOneVectorByte() { TestStaticOneVector<Byte>(); }
         [Fact]
-        public void StaticOneVectorSByte() { TestStaticOneVector<sbyte>(); }
+        public void StaticOneVectorSByte() { TestStaticOneVector<SByte>(); }
         [Fact]
-        public void StaticOneVectorUInt16() { TestStaticOneVector<ushort>(); }
+        public void StaticOneVectorUInt16() { TestStaticOneVector<UInt16>(); }
         [Fact]
-        public void StaticOneVectorInt16() { TestStaticOneVector<short>(); }
+        public void StaticOneVectorInt16() { TestStaticOneVector<Int16>(); }
         [Fact]
-        public void StaticOneVectorUInt32() { TestStaticOneVector<uint>(); }
+        public void StaticOneVectorUInt32() { TestStaticOneVector<UInt32>(); }
         [Fact]
-        public void StaticOneVectorInt32() { TestStaticOneVector<int>(); }
+        public void StaticOneVectorInt32() { TestStaticOneVector<Int32>(); }
         [Fact]
-        public void StaticOneVectorUInt64() { TestStaticOneVector<ulong>(); }
+        public void StaticOneVectorUInt64() { TestStaticOneVector<UInt64>(); }
         [Fact]
-        public void StaticOneVectorInt64() { TestStaticOneVector<long>(); }
+        public void StaticOneVectorInt64() { TestStaticOneVector<Int64>(); }
         [Fact]
-        public void StaticOneVectorSingle() { TestStaticOneVector<float>(); }
+        public void StaticOneVectorSingle() { TestStaticOneVector<Single>(); }
         [Fact]
-        public void StaticOneVectorDouble() { TestStaticOneVector<double>(); }
+        public void StaticOneVectorDouble() { TestStaticOneVector<Double>(); }
         private void TestStaticOneVector<T>() where T : struct
         {
             Vector<T> vector = Vector<T>.One;
@@ -250,25 +250,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void StaticZeroVectorByte() { TestStaticZeroVector<byte>(); }
+        public void StaticZeroVectorByte() { TestStaticZeroVector<Byte>(); }
         [Fact]
-        public void StaticZeroVectorSByte() { TestStaticZeroVector<sbyte>(); }
+        public void StaticZeroVectorSByte() { TestStaticZeroVector<SByte>(); }
         [Fact]
-        public void StaticZeroVectorUInt16() { TestStaticZeroVector<ushort>(); }
+        public void StaticZeroVectorUInt16() { TestStaticZeroVector<UInt16>(); }
         [Fact]
-        public void StaticZeroVectorInt16() { TestStaticZeroVector<short>(); }
+        public void StaticZeroVectorInt16() { TestStaticZeroVector<Int16>(); }
         [Fact]
-        public void StaticZeroVectorUInt32() { TestStaticZeroVector<uint>(); }
+        public void StaticZeroVectorUInt32() { TestStaticZeroVector<UInt32>(); }
         [Fact]
-        public void StaticZeroVectorInt32() { TestStaticZeroVector<int>(); }
+        public void StaticZeroVectorInt32() { TestStaticZeroVector<Int32>(); }
         [Fact]
-        public void StaticZeroVectorUInt64() { TestStaticZeroVector<ulong>(); }
+        public void StaticZeroVectorUInt64() { TestStaticZeroVector<UInt64>(); }
         [Fact]
-        public void StaticZeroVectorInt64() { TestStaticZeroVector<long>(); }
+        public void StaticZeroVectorInt64() { TestStaticZeroVector<Int64>(); }
         [Fact]
-        public void StaticZeroVectorSingle() { TestStaticZeroVector<float>(); }
+        public void StaticZeroVectorSingle() { TestStaticZeroVector<Single>(); }
         [Fact]
-        public void StaticZeroVectorDouble() { TestStaticZeroVector<double>(); }
+        public void StaticZeroVectorDouble() { TestStaticZeroVector<Double>(); }
         private void TestStaticZeroVector<T>() where T : struct
         {
             Vector<T> vector = Vector<T>.Zero;
@@ -283,25 +283,25 @@ namespace System.Numerics.Tests
 
         #region CopyTo (array) Tests
         [Fact]
-        public void CopyToByte() { TestCopyTo<byte>(); }
+        public void CopyToByte() { TestCopyTo<Byte>(); }
         [Fact]
-        public void CopyToSByte() { TestCopyTo<sbyte>(); }
+        public void CopyToSByte() { TestCopyTo<SByte>(); }
         [Fact]
-        public void CopyToUInt16() { TestCopyTo<ushort>(); }
+        public void CopyToUInt16() { TestCopyTo<UInt16>(); }
         [Fact]
-        public void CopyToInt16() { TestCopyTo<short>(); }
+        public void CopyToInt16() { TestCopyTo<Int16>(); }
         [Fact]
-        public void CopyToUInt32() { TestCopyTo<uint>(); }
+        public void CopyToUInt32() { TestCopyTo<UInt32>(); }
         [Fact]
-        public void CopyToInt32() { TestCopyTo<int>(); }
+        public void CopyToInt32() { TestCopyTo<Int32>(); }
         [Fact]
-        public void CopyToUInt64() { TestCopyTo<ulong>(); }
+        public void CopyToUInt64() { TestCopyTo<UInt64>(); }
         [Fact]
-        public void CopyToInt64() { TestCopyTo<long>(); }
+        public void CopyToInt64() { TestCopyTo<Int64>(); }
         [Fact]
-        public void CopyToSingle() { TestCopyTo<float>(); }
+        public void CopyToSingle() { TestCopyTo<Single>(); }
         [Fact]
-        public void CopyToDouble() { TestCopyTo<double>(); }
+        public void CopyToDouble() { TestCopyTo<Double>(); }
         private void TestCopyTo<T>() where T : struct
         {
             var initialValues = GenerateRandomValuesForVector<T>();
@@ -322,25 +322,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void CopyToWithOffsetByte() { TestCopyToWithOffset<byte>(); }
+        public void CopyToWithOffsetByte() { TestCopyToWithOffset<Byte>(); }
         [Fact]
-        public void CopyToWithOffsetSByte() { TestCopyToWithOffset<sbyte>(); }
+        public void CopyToWithOffsetSByte() { TestCopyToWithOffset<SByte>(); }
         [Fact]
-        public void CopyToWithOffsetUInt16() { TestCopyToWithOffset<ushort>(); }
+        public void CopyToWithOffsetUInt16() { TestCopyToWithOffset<UInt16>(); }
         [Fact]
-        public void CopyToWithOffsetInt16() { TestCopyToWithOffset<short>(); }
+        public void CopyToWithOffsetInt16() { TestCopyToWithOffset<Int16>(); }
         [Fact]
-        public void CopyToWithOffsetUInt32() { TestCopyToWithOffset<uint>(); }
+        public void CopyToWithOffsetUInt32() { TestCopyToWithOffset<UInt32>(); }
         [Fact]
-        public void CopyToWithOffsetInt32() { TestCopyToWithOffset<int>(); }
+        public void CopyToWithOffsetInt32() { TestCopyToWithOffset<Int32>(); }
         [Fact]
-        public void CopyToWithOffsetUInt64() { TestCopyToWithOffset<ulong>(); }
+        public void CopyToWithOffsetUInt64() { TestCopyToWithOffset<UInt64>(); }
         [Fact]
-        public void CopyToWithOffsetInt64() { TestCopyToWithOffset<long>(); }
+        public void CopyToWithOffsetInt64() { TestCopyToWithOffset<Int64>(); }
         [Fact]
-        public void CopyToWithOffsetSingle() { TestCopyToWithOffset<float>(); }
+        public void CopyToWithOffsetSingle() { TestCopyToWithOffset<Single>(); }
         [Fact]
-        public void CopyToWithOffsetDouble() { TestCopyToWithOffset<double>(); }
+        public void CopyToWithOffsetDouble() { TestCopyToWithOffset<Double>(); }
         private void TestCopyToWithOffset<T>() where T : struct
         {
             int offset = Util.GenerateSingleValue<int>(5, 500);
@@ -358,25 +358,25 @@ namespace System.Numerics.Tests
 
         #region EqualsTests
         [Fact]
-        public void EqualsObjectByte() { TestEqualsObject<byte>(); }
+        public void EqualsObjectByte() { TestEqualsObject<Byte>(); }
         [Fact]
-        public void EqualsObjectSByte() { TestEqualsObject<sbyte>(); }
+        public void EqualsObjectSByte() { TestEqualsObject<SByte>(); }
         [Fact]
-        public void EqualsObjectUInt16() { TestEqualsObject<ushort>(); }
+        public void EqualsObjectUInt16() { TestEqualsObject<UInt16>(); }
         [Fact]
-        public void EqualsObjectInt16() { TestEqualsObject<short>(); }
+        public void EqualsObjectInt16() { TestEqualsObject<Int16>(); }
         [Fact]
-        public void EqualsObjectUInt32() { TestEqualsObject<uint>(); }
+        public void EqualsObjectUInt32() { TestEqualsObject<UInt32>(); }
         [Fact]
-        public void EqualsObjectInt32() { TestEqualsObject<int>(); }
+        public void EqualsObjectInt32() { TestEqualsObject<Int32>(); }
         [Fact]
-        public void EqualsObjectUInt64() { TestEqualsObject<ulong>(); }
+        public void EqualsObjectUInt64() { TestEqualsObject<UInt64>(); }
         [Fact]
-        public void EqualsObjectInt64() { TestEqualsObject<long>(); }
+        public void EqualsObjectInt64() { TestEqualsObject<Int64>(); }
         [Fact]
-        public void EqualsObjectSingle() { TestEqualsObject<float>(); }
+        public void EqualsObjectSingle() { TestEqualsObject<Single>(); }
         [Fact]
-        public void EqualsObjectDouble() { TestEqualsObject<double>(); }
+        public void EqualsObjectDouble() { TestEqualsObject<Double>(); }
         private void TestEqualsObject<T>() where T : struct
         {
             T[] values = GenerateRandomValuesForVector<T>();
@@ -389,40 +389,40 @@ namespace System.Numerics.Tests
             Assert.False(vector1.Equals(dateTimeObject));
             Assert.True(vector1.Equals((object)vector1));
 
-            if (typeof(T) != typeof(int))
+            if (typeof(T) != typeof(Int32))
             {
-                Vector<int> intVector = new Vector<int>(GenerateRandomValuesForVector<int>());
+                Vector<Int32> intVector = new Vector<Int32>(GenerateRandomValuesForVector<Int32>());
                 Assert.False(vector1.Equals(intVector));
                 Assert.False(intVector.Equals(vector1));
             }
             else
             {
-                Vector<float> floatVector = new Vector<float>(GenerateRandomValuesForVector<float>());
+                Vector<Single> floatVector = new Vector<Single>(GenerateRandomValuesForVector<Single>());
                 Assert.False(vector1.Equals(floatVector));
                 Assert.False(floatVector.Equals(vector1));
             }
         }
 
         [Fact]
-        public void EqualsVectorByte() { TestEqualsVector<byte>(); }
+        public void EqualsVectorByte() { TestEqualsVector<Byte>(); }
         [Fact]
-        public void EqualsVectorSByte() { TestEqualsVector<sbyte>(); }
+        public void EqualsVectorSByte() { TestEqualsVector<SByte>(); }
         [Fact]
-        public void EqualsVectorUInt16() { TestEqualsVector<ushort>(); }
+        public void EqualsVectorUInt16() { TestEqualsVector<UInt16>(); }
         [Fact]
-        public void EqualsVectorInt16() { TestEqualsVector<short>(); }
+        public void EqualsVectorInt16() { TestEqualsVector<Int16>(); }
         [Fact]
-        public void EqualsVectorUInt32() { TestEqualsVector<uint>(); }
+        public void EqualsVectorUInt32() { TestEqualsVector<UInt32>(); }
         [Fact]
-        public void EqualsVectorInt32() { TestEqualsVector<int>(); }
+        public void EqualsVectorInt32() { TestEqualsVector<Int32>(); }
         [Fact]
-        public void EqualsVectorUInt64() { TestEqualsVector<ulong>(); }
+        public void EqualsVectorUInt64() { TestEqualsVector<UInt64>(); }
         [Fact]
-        public void EqualsVectorInt64() { TestEqualsVector<long>(); }
+        public void EqualsVectorInt64() { TestEqualsVector<Int64>(); }
         [Fact]
-        public void EqualsVectorSingle() { TestEqualsVector<float>(); }
+        public void EqualsVectorSingle() { TestEqualsVector<Single>(); }
         [Fact]
-        public void EqualsVectorDouble() { TestEqualsVector<double>(); }
+        public void EqualsVectorDouble() { TestEqualsVector<Double>(); }
         private void TestEqualsVector<T>() where T : struct
         {
             T[] values = GenerateRandomValuesForVector<T>();
@@ -445,25 +445,25 @@ namespace System.Numerics.Tests
 
         #region System.Object Overloads
         [Fact]
-        public void GetHashCodeByte() { TestGetHashCode<byte>(); }
+        public void GetHashCodeByte() { TestGetHashCode<Byte>(); }
         [Fact]
-        public void GetHashCodeSByte() { TestGetHashCode<sbyte>(); }
+        public void GetHashCodeSByte() { TestGetHashCode<SByte>(); }
         [Fact]
-        public void GetHashCodeUInt16() { TestGetHashCode<ushort>(); }
+        public void GetHashCodeUInt16() { TestGetHashCode<UInt16>(); }
         [Fact]
-        public void GetHashCodeInt16() { TestGetHashCode<short>(); }
+        public void GetHashCodeInt16() { TestGetHashCode<Int16>(); }
         [Fact]
-        public void GetHashCodeUInt32() { TestGetHashCode<uint>(); }
+        public void GetHashCodeUInt32() { TestGetHashCode<UInt32>(); }
         [Fact]
-        public void GetHashCodeInt32() { TestGetHashCode<int>(); }
+        public void GetHashCodeInt32() { TestGetHashCode<Int32>(); }
         [Fact]
-        public void GetHashCodeUInt64() { TestGetHashCode<ulong>(); }
+        public void GetHashCodeUInt64() { TestGetHashCode<UInt64>(); }
         [Fact]
-        public void GetHashCodeInt64() { TestGetHashCode<long>(); }
+        public void GetHashCodeInt64() { TestGetHashCode<Int64>(); }
         [Fact]
-        public void GetHashCodeSingle() { TestGetHashCode<float>(); }
+        public void GetHashCodeSingle() { TestGetHashCode<Single>(); }
         [Fact]
-        public void GetHashCodeDouble() { TestGetHashCode<double>(); }
+        public void GetHashCodeDouble() { TestGetHashCode<Double>(); }
         private void TestGetHashCode<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -484,65 +484,65 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ToStringGeneralByte() { TestToString<byte>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralByte() { TestToString<Byte>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralSByte() { TestToString<sbyte>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralSByte() { TestToString<SByte>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralUInt16() { TestToString<ushort>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralUInt16() { TestToString<UInt16>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralInt16() { TestToString<short>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralInt16() { TestToString<Int16>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralUInt32() { TestToString<uint>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralUInt32() { TestToString<UInt32>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralInt32() { TestToString<int>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralInt32() { TestToString<Int32>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralUInt64() { TestToString<ulong>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralUInt64() { TestToString<UInt64>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralInt64() { TestToString<long>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralInt64() { TestToString<Int64>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralSingle() { TestToString<float>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralSingle() { TestToString<Single>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringGeneralDouble() { TestToString<double>("G", CultureInfo.CurrentCulture); }
+        public void ToStringGeneralDouble() { TestToString<Double>("G", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyByte() { TestToString<byte>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyByte() { TestToString<Byte>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencySByte() { TestToString<sbyte>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencySByte() { TestToString<SByte>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyUInt16() { TestToString<ushort>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyUInt16() { TestToString<UInt16>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyInt16() { TestToString<short>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyInt16() { TestToString<Int16>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyUInt32() { TestToString<uint>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyUInt32() { TestToString<UInt32>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyInt32() { TestToString<int>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyInt32() { TestToString<Int32>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyUInt64() { TestToString<ulong>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyUInt64() { TestToString<UInt64>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyInt64() { TestToString<long>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyInt64() { TestToString<Int64>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencySingle() { TestToString<float>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencySingle() { TestToString<Single>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringCurrencyDouble() { TestToString<double>("c", CultureInfo.CurrentCulture); }
+        public void ToStringCurrencyDouble() { TestToString<Double>("c", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialByte() { TestToString<byte>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialByte() { TestToString<Byte>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialSByte() { TestToString<sbyte>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialSByte() { TestToString<SByte>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialUInt16() { TestToString<ushort>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialUInt16() { TestToString<UInt16>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialInt16() { TestToString<short>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialInt16() { TestToString<Int16>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialUInt32() { TestToString<uint>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialUInt32() { TestToString<UInt32>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialInt32() { TestToString<int>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialInt32() { TestToString<Int32>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialUInt64() { TestToString<ulong>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialUInt64() { TestToString<UInt64>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialInt64() { TestToString<long>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialInt64() { TestToString<Int64>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialSingle() { TestToString<float>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialSingle() { TestToString<Single>("E3", CultureInfo.CurrentCulture); }
         [Fact]
-        public void ToStringExponentialDouble() { TestToString<double>("E3", CultureInfo.CurrentCulture); }
+        public void ToStringExponentialDouble() { TestToString<Double>("E3", CultureInfo.CurrentCulture); }
 
         private void TestToString<T>(string format, IFormatProvider provider) where T : struct
         {
@@ -565,25 +565,25 @@ namespace System.Numerics.Tests
 
         #region Arithmetic Operator Tests
         [Fact]
-        public void AdditionByte() { TestAddition<byte>(); }
+        public void AdditionByte() { TestAddition<Byte>(); }
         [Fact]
-        public void AdditionSByte() { TestAddition<sbyte>(); }
+        public void AdditionSByte() { TestAddition<SByte>(); }
         [Fact]
-        public void AdditionUInt16() { TestAddition<ushort>(); }
+        public void AdditionUInt16() { TestAddition<UInt16>(); }
         [Fact]
-        public void AdditionInt16() { TestAddition<short>(); }
+        public void AdditionInt16() { TestAddition<Int16>(); }
         [Fact]
-        public void AdditionUInt32() { TestAddition<uint>(); }
+        public void AdditionUInt32() { TestAddition<UInt32>(); }
         [Fact]
-        public void AdditionInt32() { TestAddition<int>(); }
+        public void AdditionInt32() { TestAddition<Int32>(); }
         [Fact]
-        public void AdditionUInt64() { TestAddition<ulong>(); }
+        public void AdditionUInt64() { TestAddition<UInt64>(); }
         [Fact]
-        public void AdditionInt64() { TestAddition<long>(); }
+        public void AdditionInt64() { TestAddition<Int64>(); }
         [Fact]
-        public void AdditionSingle() { TestAddition<float>(); }
+        public void AdditionSingle() { TestAddition<Single>(); }
         [Fact]
-        public void AdditionDouble() { TestAddition<double>(); }
+        public void AdditionDouble() { TestAddition<Double>(); }
         private void TestAddition<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -599,21 +599,21 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void AdditionOverflowByte() { TestAdditionOverflow<byte>(); }
+        public void AdditionOverflowByte() { TestAdditionOverflow<Byte>(); }
         [Fact]
-        public void AdditionOverflowSByte() { TestAdditionOverflow<sbyte>(); }
+        public void AdditionOverflowSByte() { TestAdditionOverflow<SByte>(); }
         [Fact]
-        public void AdditionOverflowUInt16() { TestAdditionOverflow<ushort>(); }
+        public void AdditionOverflowUInt16() { TestAdditionOverflow<UInt16>(); }
         [Fact]
-        public void AdditionOverflowInt16() { TestAdditionOverflow<short>(); }
+        public void AdditionOverflowInt16() { TestAdditionOverflow<Int16>(); }
         [Fact]
-        public void AdditionOverflowUInt32() { TestAdditionOverflow<uint>(); }
+        public void AdditionOverflowUInt32() { TestAdditionOverflow<UInt32>(); }
         [Fact]
-        public void AdditionOverflowInt32() { TestAdditionOverflow<int>(); }
+        public void AdditionOverflowInt32() { TestAdditionOverflow<Int32>(); }
         [Fact]
-        public void AdditionOverflowUInt64() { TestAdditionOverflow<ulong>(); }
+        public void AdditionOverflowUInt64() { TestAdditionOverflow<UInt64>(); }
         [Fact]
-        public void AdditionOverflowInt64() { TestAdditionOverflow<long>(); }
+        public void AdditionOverflowInt64() { TestAdditionOverflow<Int64>(); }
         private void TestAdditionOverflow<T>() where T : struct
         {
             T maxValue = (T)(dynamic)typeof(T).GetRuntimeField("MaxValue").GetValue(null);
@@ -630,25 +630,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void SubtractionByte() { TestSubtraction<byte>(); }
+        public void SubtractionByte() { TestSubtraction<Byte>(); }
         [Fact]
-        public void SubtractionSByte() { TestSubtraction<sbyte>(); }
+        public void SubtractionSByte() { TestSubtraction<SByte>(); }
         [Fact]
-        public void SubtractionUInt16() { TestSubtraction<ushort>(); }
+        public void SubtractionUInt16() { TestSubtraction<UInt16>(); }
         [Fact]
-        public void SubtractionInt16() { TestSubtraction<short>(); }
+        public void SubtractionInt16() { TestSubtraction<Int16>(); }
         [Fact]
-        public void SubtractionUInt32() { TestSubtraction<uint>(); }
+        public void SubtractionUInt32() { TestSubtraction<UInt32>(); }
         [Fact]
-        public void SubtractionInt32() { TestSubtraction<int>(); }
+        public void SubtractionInt32() { TestSubtraction<Int32>(); }
         [Fact]
-        public void SubtractionUInt64() { TestSubtraction<ulong>(); }
+        public void SubtractionUInt64() { TestSubtraction<UInt64>(); }
         [Fact]
-        public void SubtractionInt64() { TestSubtraction<long>(); }
+        public void SubtractionInt64() { TestSubtraction<Int64>(); }
         [Fact]
-        public void SubtractionSingle() { TestSubtraction<float>(); }
+        public void SubtractionSingle() { TestSubtraction<Single>(); }
         [Fact]
-        public void SubtractionDouble() { TestSubtraction<double>(); }
+        public void SubtractionDouble() { TestSubtraction<Double>(); }
         private void TestSubtraction<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -664,21 +664,21 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void SubtractionOverflowByte() { TestSubtractionOverflow<byte>(); }
+        public void SubtractionOverflowByte() { TestSubtractionOverflow<Byte>(); }
         [Fact]
-        public void SubtractionOverflowSByte() { TestSubtractionOverflow<sbyte>(); }
+        public void SubtractionOverflowSByte() { TestSubtractionOverflow<SByte>(); }
         [Fact]
-        public void SubtractionOverflowUInt16() { TestSubtractionOverflow<ushort>(); }
+        public void SubtractionOverflowUInt16() { TestSubtractionOverflow<UInt16>(); }
         [Fact]
-        public void SubtractionOverflowInt16() { TestSubtractionOverflow<short>(); }
+        public void SubtractionOverflowInt16() { TestSubtractionOverflow<Int16>(); }
         [Fact]
-        public void SubtractionOverflowUInt32() { TestSubtractionOverflow<uint>(); }
+        public void SubtractionOverflowUInt32() { TestSubtractionOverflow<UInt32>(); }
         [Fact]
-        public void SubtractionOverflowInt32() { TestSubtractionOverflow<int>(); }
+        public void SubtractionOverflowInt32() { TestSubtractionOverflow<Int32>(); }
         [Fact]
-        public void SubtractionOverflowUInt64() { TestSubtractionOverflow<ulong>(); }
+        public void SubtractionOverflowUInt64() { TestSubtractionOverflow<UInt64>(); }
         [Fact]
-        public void SubtractionOverflowInt64() { TestSubtractionOverflow<long>(); }
+        public void SubtractionOverflowInt64() { TestSubtractionOverflow<Int64>(); }
         private void TestSubtractionOverflow<T>() where T : struct
         {
             T minValue = (T)(dynamic)typeof(T).GetRuntimeField("MinValue").GetValue(null);
@@ -695,25 +695,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void MultiplicationByte() { TestMultiplication<byte>(); }
+        public void MultiplicationByte() { TestMultiplication<Byte>(); }
         [Fact]
-        public void MultiplicationSByte() { TestMultiplication<sbyte>(); }
+        public void MultiplicationSByte() { TestMultiplication<SByte>(); }
         [Fact]
-        public void MultiplicationUInt16() { TestMultiplication<ushort>(); }
+        public void MultiplicationUInt16() { TestMultiplication<UInt16>(); }
         [Fact]
-        public void MultiplicationInt16() { TestMultiplication<short>(); }
+        public void MultiplicationInt16() { TestMultiplication<Int16>(); }
         [Fact]
-        public void MultiplicationUInt32() { TestMultiplication<uint>(); }
+        public void MultiplicationUInt32() { TestMultiplication<UInt32>(); }
         [Fact]
-        public void MultiplicationInt32() { TestMultiplication<int>(); }
+        public void MultiplicationInt32() { TestMultiplication<Int32>(); }
         [Fact]
-        public void MultiplicationUInt64() { TestMultiplication<ulong>(); }
+        public void MultiplicationUInt64() { TestMultiplication<UInt64>(); }
         [Fact]
-        public void MultiplicationInt64() { TestMultiplication<long>(); }
+        public void MultiplicationInt64() { TestMultiplication<Int64>(); }
         [Fact]
-        public void MultiplicationSingle() { TestMultiplication<float>(); }
+        public void MultiplicationSingle() { TestMultiplication<Single>(); }
         [Fact]
-        public void MultiplicationDouble() { TestMultiplication<double>(); }
+        public void MultiplicationDouble() { TestMultiplication<Double>(); }
         private void TestMultiplication<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -729,25 +729,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void MultiplicationWithScalarByte() { TestMultiplicationWithScalar<byte>(); }
+        public void MultiplicationWithScalarByte() { TestMultiplicationWithScalar<Byte>(); }
         [Fact]
-        public void MultiplicationWithScalarSByte() { TestMultiplicationWithScalar<sbyte>(); }
+        public void MultiplicationWithScalarSByte() { TestMultiplicationWithScalar<SByte>(); }
         [Fact]
-        public void MultiplicationWithScalarUInt16() { TestMultiplicationWithScalar<ushort>(); }
+        public void MultiplicationWithScalarUInt16() { TestMultiplicationWithScalar<UInt16>(); }
         [Fact]
-        public void MultiplicationWithScalarInt16() { TestMultiplicationWithScalar<short>(); }
+        public void MultiplicationWithScalarInt16() { TestMultiplicationWithScalar<Int16>(); }
         [Fact]
-        public void MultiplicationWithScalarUInt32() { TestMultiplicationWithScalar<uint>(); }
+        public void MultiplicationWithScalarUInt32() { TestMultiplicationWithScalar<UInt32>(); }
         [Fact]
-        public void MultiplicationWithScalarInt32() { TestMultiplicationWithScalar<int>(); }
+        public void MultiplicationWithScalarInt32() { TestMultiplicationWithScalar<Int32>(); }
         [Fact]
-        public void MultiplicationWithScalarUInt64() { TestMultiplicationWithScalar<ulong>(); }
+        public void MultiplicationWithScalarUInt64() { TestMultiplicationWithScalar<UInt64>(); }
         [Fact]
-        public void MultiplicationWithScalarInt64() { TestMultiplicationWithScalar<long>(); }
+        public void MultiplicationWithScalarInt64() { TestMultiplicationWithScalar<Int64>(); }
         [Fact]
-        public void MultiplicationWithScalarSingle() { TestMultiplicationWithScalar<float>(); }
+        public void MultiplicationWithScalarSingle() { TestMultiplicationWithScalar<Single>(); }
         [Fact]
-        public void MultiplicationWithScalarDouble() { TestMultiplicationWithScalar<double>(); }
+        public void MultiplicationWithScalarDouble() { TestMultiplicationWithScalar<Double>(); }
         private void TestMultiplicationWithScalar<T>() where T : struct
         {
             T[] values = GenerateRandomValuesForVector<T>();
@@ -771,25 +771,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void DivisionByte() { TestDivision<byte>(); }
+        public void DivisionByte() { TestDivision<Byte>(); }
         [Fact]
-        public void DivisionSByte() { TestDivision<sbyte>(); }
+        public void DivisionSByte() { TestDivision<SByte>(); }
         [Fact]
-        public void DivisionUInt16() { TestDivision<ushort>(); }
+        public void DivisionUInt16() { TestDivision<UInt16>(); }
         [Fact]
-        public void DivisionInt16() { TestDivision<short>(); }
+        public void DivisionInt16() { TestDivision<Int16>(); }
         [Fact]
-        public void DivisionUInt32() { TestDivision<uint>(); }
+        public void DivisionUInt32() { TestDivision<UInt32>(); }
         [Fact]
-        public void DivisionInt32() { TestDivision<int>(); }
+        public void DivisionInt32() { TestDivision<Int32>(); }
         [Fact]
-        public void DivisionUInt64() { TestDivision<ulong>(); }
+        public void DivisionUInt64() { TestDivision<UInt64>(); }
         [Fact]
-        public void DivisionInt64() { TestDivision<long>(); }
+        public void DivisionInt64() { TestDivision<Int64>(); }
         [Fact]
-        public void DivisionSingle() { TestDivision<float>(); }
+        public void DivisionSingle() { TestDivision<Single>(); }
         [Fact]
-        public void DivisionDouble() { TestDivision<double>(); }
+        public void DivisionDouble() { TestDivision<Double>(); }
         private void TestDivision<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -809,17 +809,17 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void DivisionByZeroExceptionByte() { TestDivisionByZeroException<byte>(); }
+        public void DivisionByZeroExceptionByte() { TestDivisionByZeroException<Byte>(); }
         [Fact]
-        public void DivisionByZeroExceptionSByte() { TestDivisionByZeroException<sbyte>(); }
+        public void DivisionByZeroExceptionSByte() { TestDivisionByZeroException<SByte>(); }
         [Fact]
-        public void DivisionByZeroExceptionUInt16() { TestDivisionByZeroException<ushort>(); }
+        public void DivisionByZeroExceptionUInt16() { TestDivisionByZeroException<UInt16>(); }
         [Fact]
-        public void DivisionByZeroExceptionInt16() { TestDivisionByZeroException<short>(); }
+        public void DivisionByZeroExceptionInt16() { TestDivisionByZeroException<Int16>(); }
         [Fact]
-        public void DivisionByZeroExceptionInt32() { TestDivisionByZeroException<int>(); }
+        public void DivisionByZeroExceptionInt32() { TestDivisionByZeroException<Int32>(); }
         [Fact]
-        public void DivisionByZeroExceptionInt64() { TestDivisionByZeroException<long>(); }
+        public void DivisionByZeroExceptionInt64() { TestDivisionByZeroException<Int64>(); }
         private void TestDivisionByZeroException<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -831,25 +831,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void UnaryMinusByte() { TestUnaryMinus<byte>(); }
+        public void UnaryMinusByte() { TestUnaryMinus<Byte>(); }
         [Fact]
-        public void UnaryMinusSByte() { TestUnaryMinus<sbyte>(); }
+        public void UnaryMinusSByte() { TestUnaryMinus<SByte>(); }
         [Fact]
-        public void UnaryMinusUInt16() { TestUnaryMinus<ushort>(); }
+        public void UnaryMinusUInt16() { TestUnaryMinus<UInt16>(); }
         [Fact]
-        public void UnaryMinusInt16() { TestUnaryMinus<short>(); }
+        public void UnaryMinusInt16() { TestUnaryMinus<Int16>(); }
         [Fact]
-        public void UnaryMinusUInt32() { TestUnaryMinus<uint>(); }
+        public void UnaryMinusUInt32() { TestUnaryMinus<UInt32>(); }
         [Fact]
-        public void UnaryMinusInt32() { TestUnaryMinus<int>(); }
+        public void UnaryMinusInt32() { TestUnaryMinus<Int32>(); }
         [Fact]
-        public void UnaryMinusUInt64() { TestUnaryMinus<ulong>(); }
+        public void UnaryMinusUInt64() { TestUnaryMinus<UInt64>(); }
         [Fact]
-        public void UnaryMinusInt64() { TestUnaryMinus<long>(); }
+        public void UnaryMinusInt64() { TestUnaryMinus<Int64>(); }
         [Fact]
-        public void UnaryMinusSingle() { TestUnaryMinus<float>(); }
+        public void UnaryMinusSingle() { TestUnaryMinus<Single>(); }
         [Fact]
-        public void UnaryMinusDouble() { TestUnaryMinus<double>(); }
+        public void UnaryMinusDouble() { TestUnaryMinus<Double>(); }
         private void TestUnaryMinus<T>() where T : struct
         {
             T[] values = GenerateRandomValuesForVector<T>();
@@ -866,25 +866,25 @@ namespace System.Numerics.Tests
 
         #region Bitwise Operator Tests
         [Fact]
-        public void BitwiseAndOperatorByte() { TestBitwiseAndOperator<byte>(); }
+        public void BitwiseAndOperatorByte() { TestBitwiseAndOperator<Byte>(); }
         [Fact]
-        public void BitwiseAndOperatorSByte() { TestBitwiseAndOperator<sbyte>(); }
+        public void BitwiseAndOperatorSByte() { TestBitwiseAndOperator<SByte>(); }
         [Fact]
-        public void BitwiseAndOperatorUInt16() { TestBitwiseAndOperator<ushort>(); }
+        public void BitwiseAndOperatorUInt16() { TestBitwiseAndOperator<UInt16>(); }
         [Fact]
-        public void BitwiseAndOperatorInt16() { TestBitwiseAndOperator<short>(); }
+        public void BitwiseAndOperatorInt16() { TestBitwiseAndOperator<Int16>(); }
         [Fact]
-        public void BitwiseAndOperatorUInt32() { TestBitwiseAndOperator<uint>(); }
+        public void BitwiseAndOperatorUInt32() { TestBitwiseAndOperator<UInt32>(); }
         [Fact]
-        public void BitwiseAndOperatorInt32() { TestBitwiseAndOperator<int>(); }
+        public void BitwiseAndOperatorInt32() { TestBitwiseAndOperator<Int32>(); }
         [Fact]
-        public void BitwiseAndOperatorUInt64() { TestBitwiseAndOperator<ulong>(); }
+        public void BitwiseAndOperatorUInt64() { TestBitwiseAndOperator<UInt64>(); }
         [Fact]
-        public void BitwiseAndOperatorInt64() { TestBitwiseAndOperator<long>(); }
+        public void BitwiseAndOperatorInt64() { TestBitwiseAndOperator<Int64>(); }
         [Fact]
-        public void BitwiseAndOperatorSingle() { TestBitwiseAndOperator<float>(); }
+        public void BitwiseAndOperatorSingle() { TestBitwiseAndOperator<Single>(); }
         [Fact]
-        public void BitwiseAndOperatorDouble() { TestBitwiseAndOperator<double>(); }
+        public void BitwiseAndOperatorDouble() { TestBitwiseAndOperator<Double>(); }
         private void TestBitwiseAndOperator<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -899,21 +899,21 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void BitwiseOrOperatorByte() { TestBitwiseOrOperator<byte>(); }
+        public void BitwiseOrOperatorByte() { TestBitwiseOrOperator<Byte>(); }
         [Fact]
-        public void BitwiseOrOperatorSByte() { TestBitwiseOrOperator<sbyte>(); }
+        public void BitwiseOrOperatorSByte() { TestBitwiseOrOperator<SByte>(); }
         [Fact]
-        public void BitwiseOrOperatorUInt16() { TestBitwiseOrOperator<ushort>(); }
+        public void BitwiseOrOperatorUInt16() { TestBitwiseOrOperator<UInt16>(); }
         [Fact]
-        public void BitwiseOrOperatorInt16() { TestBitwiseOrOperator<short>(); }
+        public void BitwiseOrOperatorInt16() { TestBitwiseOrOperator<Int16>(); }
         [Fact]
-        public void BitwiseOrOperatorUInt32() { TestBitwiseOrOperator<uint>(); }
+        public void BitwiseOrOperatorUInt32() { TestBitwiseOrOperator<UInt32>(); }
         [Fact]
-        public void BitwiseOrOperatorInt32() { TestBitwiseOrOperator<int>(); }
+        public void BitwiseOrOperatorInt32() { TestBitwiseOrOperator<Int32>(); }
         [Fact]
-        public void BitwiseOrOperatorUInt64() { TestBitwiseOrOperator<ulong>(); }
+        public void BitwiseOrOperatorUInt64() { TestBitwiseOrOperator<UInt64>(); }
         [Fact]
-        public void BitwiseOrOperatorInt64() { TestBitwiseOrOperator<long>(); }
+        public void BitwiseOrOperatorInt64() { TestBitwiseOrOperator<Int64>(); }
         private void TestBitwiseOrOperator<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -932,21 +932,21 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void BitwiseXorOperatorByte() { TestBitwiseXorOperator<byte>(); }
+        public void BitwiseXorOperatorByte() { TestBitwiseXorOperator<Byte>(); }
         [Fact]
-        public void BitwiseXorOperatorSByte() { TestBitwiseXorOperator<sbyte>(); }
+        public void BitwiseXorOperatorSByte() { TestBitwiseXorOperator<SByte>(); }
         [Fact]
-        public void BitwiseXorOperatorUInt16() { TestBitwiseXorOperator<ushort>(); }
+        public void BitwiseXorOperatorUInt16() { TestBitwiseXorOperator<UInt16>(); }
         [Fact]
-        public void BitwiseXorOperatorInt16() { TestBitwiseXorOperator<short>(); }
+        public void BitwiseXorOperatorInt16() { TestBitwiseXorOperator<Int16>(); }
         [Fact]
-        public void BitwiseXorOperatorUInt32() { TestBitwiseXorOperator<uint>(); }
+        public void BitwiseXorOperatorUInt32() { TestBitwiseXorOperator<UInt32>(); }
         [Fact]
-        public void BitwiseXorOperatorInt32() { TestBitwiseXorOperator<int>(); }
+        public void BitwiseXorOperatorInt32() { TestBitwiseXorOperator<Int32>(); }
         [Fact]
-        public void BitwiseXorOperatorUInt64() { TestBitwiseXorOperator<ulong>(); }
+        public void BitwiseXorOperatorUInt64() { TestBitwiseXorOperator<UInt64>(); }
         [Fact]
-        public void BitwiseXorOperatorInt64() { TestBitwiseXorOperator<long>(); }
+        public void BitwiseXorOperatorInt64() { TestBitwiseXorOperator<Int64>(); }
         private void TestBitwiseXorOperator<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -964,21 +964,21 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void BitwiseOnesComplementOperatorByte() { TestBitwiseOnesComplementOperator<byte>(); }
+        public void BitwiseOnesComplementOperatorByte() { TestBitwiseOnesComplementOperator<Byte>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorSByte() { TestBitwiseOnesComplementOperator<sbyte>(); }
+        public void BitwiseOnesComplementOperatorSByte() { TestBitwiseOnesComplementOperator<SByte>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorUInt16() { TestBitwiseOnesComplementOperator<ushort>(); }
+        public void BitwiseOnesComplementOperatorUInt16() { TestBitwiseOnesComplementOperator<UInt16>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorInt16() { TestBitwiseOnesComplementOperator<short>(); }
+        public void BitwiseOnesComplementOperatorInt16() { TestBitwiseOnesComplementOperator<Int16>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorUInt32() { TestBitwiseOnesComplementOperator<uint>(); }
+        public void BitwiseOnesComplementOperatorUInt32() { TestBitwiseOnesComplementOperator<UInt32>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorInt32() { TestBitwiseOnesComplementOperator<int>(); }
+        public void BitwiseOnesComplementOperatorInt32() { TestBitwiseOnesComplementOperator<Int32>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorUInt64() { TestBitwiseOnesComplementOperator<ulong>(); }
+        public void BitwiseOnesComplementOperatorUInt64() { TestBitwiseOnesComplementOperator<UInt64>(); }
         [Fact]
-        public void BitwiseOnesComplementOperatorInt64() { TestBitwiseOnesComplementOperator<long>(); }
+        public void BitwiseOnesComplementOperatorInt64() { TestBitwiseOnesComplementOperator<Int64>(); }
         private void TestBitwiseOnesComplementOperator<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -994,21 +994,21 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void BitwiseAndNotByte() { TestBitwiseAndNot<byte>(); }
+        public void BitwiseAndNotByte() { TestBitwiseAndNot<Byte>(); }
         [Fact]
-        public void BitwiseAndNotSByte() { TestBitwiseAndNot<sbyte>(); }
+        public void BitwiseAndNotSByte() { TestBitwiseAndNot<SByte>(); }
         [Fact]
-        public void BitwiseAndNotUInt16() { TestBitwiseAndNot<ushort>(); }
+        public void BitwiseAndNotUInt16() { TestBitwiseAndNot<UInt16>(); }
         [Fact]
-        public void BitwiseAndNotInt16() { TestBitwiseAndNot<short>(); }
+        public void BitwiseAndNotInt16() { TestBitwiseAndNot<Int16>(); }
         [Fact]
-        public void BitwiseAndNotUInt32() { TestBitwiseAndNot<uint>(); }
+        public void BitwiseAndNotUInt32() { TestBitwiseAndNot<UInt32>(); }
         [Fact]
-        public void BitwiseAndNotInt32() { TestBitwiseAndNot<int>(); }
+        public void BitwiseAndNotInt32() { TestBitwiseAndNot<Int32>(); }
         [Fact]
-        public void BitwiseAndNotUInt64() { TestBitwiseAndNot<ulong>(); }
+        public void BitwiseAndNotUInt64() { TestBitwiseAndNot<UInt64>(); }
         [Fact]
-        public void BitwiseAndNotInt64() { TestBitwiseAndNot<long>(); }
+        public void BitwiseAndNotInt64() { TestBitwiseAndNot<Int64>(); }
         private void TestBitwiseAndNot<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1031,25 +1031,25 @@ namespace System.Numerics.Tests
 
         #region Comparison Tests
         [Fact]
-        public void VectorGreaterThanByte() { TestVectorGreaterThan<byte>(); }
+        public void VectorGreaterThanByte() { TestVectorGreaterThan<Byte>(); }
         [Fact]
-        public void VectorGreaterThanSByte() { TestVectorGreaterThan<sbyte>(); }
+        public void VectorGreaterThanSByte() { TestVectorGreaterThan<SByte>(); }
         [Fact]
-        public void VectorGreaterThanUInt16() { TestVectorGreaterThan<ushort>(); }
+        public void VectorGreaterThanUInt16() { TestVectorGreaterThan<UInt16>(); }
         [Fact]
-        public void VectorGreaterThanInt16() { TestVectorGreaterThan<short>(); }
+        public void VectorGreaterThanInt16() { TestVectorGreaterThan<Int16>(); }
         [Fact]
-        public void VectorGreaterThanUInt32() { TestVectorGreaterThan<uint>(); }
+        public void VectorGreaterThanUInt32() { TestVectorGreaterThan<UInt32>(); }
         [Fact]
-        public void VectorGreaterThanInt32() { TestVectorGreaterThan<int>(); }
+        public void VectorGreaterThanInt32() { TestVectorGreaterThan<Int32>(); }
         [Fact]
-        public void VectorGreaterThanUInt64() { TestVectorGreaterThan<ulong>(); }
+        public void VectorGreaterThanUInt64() { TestVectorGreaterThan<UInt64>(); }
         [Fact]
-        public void VectorGreaterThanInt64() { TestVectorGreaterThan<long>(); }
+        public void VectorGreaterThanInt64() { TestVectorGreaterThan<Int64>(); }
         [Fact]
-        public void VectorGreaterThanSingle() { TestVectorGreaterThan<float>(); }
+        public void VectorGreaterThanSingle() { TestVectorGreaterThan<Single>(); }
         [Fact]
-        public void VectorGreaterThanDouble() { TestVectorGreaterThan<double>(); }
+        public void VectorGreaterThanDouble() { TestVectorGreaterThan<Double>(); }
         private void TestVectorGreaterThan<T>() where T : struct
         {
             var values1 = GenerateRandomValuesForVector<T>();
@@ -1068,25 +1068,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void GreaterThanOrEqualByte() { TestVectorGreaterThanOrEqual<byte>(); }
+        public void GreaterThanOrEqualByte() { TestVectorGreaterThanOrEqual<Byte>(); }
         [Fact]
-        public void GreaterThanOrEqualSByte() { TestVectorGreaterThanOrEqual<sbyte>(); }
+        public void GreaterThanOrEqualSByte() { TestVectorGreaterThanOrEqual<SByte>(); }
         [Fact]
-        public void GreaterThanOrEqualUInt16() { TestVectorGreaterThanOrEqual<ushort>(); }
+        public void GreaterThanOrEqualUInt16() { TestVectorGreaterThanOrEqual<UInt16>(); }
         [Fact]
-        public void GreaterThanOrEqualInt16() { TestVectorGreaterThanOrEqual<short>(); }
+        public void GreaterThanOrEqualInt16() { TestVectorGreaterThanOrEqual<Int16>(); }
         [Fact]
-        public void GreaterThanOrEqualUInt32() { TestVectorGreaterThanOrEqual<uint>(); }
+        public void GreaterThanOrEqualUInt32() { TestVectorGreaterThanOrEqual<UInt32>(); }
         [Fact]
-        public void GreaterThanOrEqualInt32() { TestVectorGreaterThanOrEqual<int>(); }
+        public void GreaterThanOrEqualInt32() { TestVectorGreaterThanOrEqual<Int32>(); }
         [Fact]
-        public void GreaterThanOrEqualUInt64() { TestVectorGreaterThanOrEqual<ulong>(); }
+        public void GreaterThanOrEqualUInt64() { TestVectorGreaterThanOrEqual<UInt64>(); }
         [Fact]
-        public void GreaterThanOrEqualInt64() { TestVectorGreaterThanOrEqual<long>(); }
+        public void GreaterThanOrEqualInt64() { TestVectorGreaterThanOrEqual<Int64>(); }
         [Fact]
-        public void GreaterThanOrEqualSingle() { TestVectorGreaterThanOrEqual<float>(); }
+        public void GreaterThanOrEqualSingle() { TestVectorGreaterThanOrEqual<Single>(); }
         [Fact]
-        public void GreaterThanOrEqualDouble() { TestVectorGreaterThanOrEqual<double>(); }
+        public void GreaterThanOrEqualDouble() { TestVectorGreaterThanOrEqual<Double>(); }
         private void TestVectorGreaterThanOrEqual<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1105,25 +1105,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void GreaterThanAnyByte() { TestVectorGreaterThanAny<byte>(); }
+        public void GreaterThanAnyByte() { TestVectorGreaterThanAny<Byte>(); }
         [Fact]
-        public void GreaterThanAnySByte() { TestVectorGreaterThanAny<sbyte>(); }
+        public void GreaterThanAnySByte() { TestVectorGreaterThanAny<SByte>(); }
         [Fact]
-        public void GreaterThanAnyUInt16() { TestVectorGreaterThanAny<ushort>(); }
+        public void GreaterThanAnyUInt16() { TestVectorGreaterThanAny<UInt16>(); }
         [Fact]
-        public void GreaterThanAnyInt16() { TestVectorGreaterThanAny<short>(); }
+        public void GreaterThanAnyInt16() { TestVectorGreaterThanAny<Int16>(); }
         [Fact]
-        public void GreaterThanAnyUInt32() { TestVectorGreaterThanAny<uint>(); }
+        public void GreaterThanAnyUInt32() { TestVectorGreaterThanAny<UInt32>(); }
         [Fact]
-        public void GreaterThanAnyInt32() { TestVectorGreaterThanAny<int>(); }
+        public void GreaterThanAnyInt32() { TestVectorGreaterThanAny<Int32>(); }
         [Fact]
-        public void GreaterThanAnyUInt64() { TestVectorGreaterThanAny<ulong>(); }
+        public void GreaterThanAnyUInt64() { TestVectorGreaterThanAny<UInt64>(); }
         [Fact]
-        public void GreaterThanAnyInt64() { TestVectorGreaterThanAny<long>(); }
+        public void GreaterThanAnyInt64() { TestVectorGreaterThanAny<Int64>(); }
         [Fact]
-        public void GreaterThanAnySingle() { TestVectorGreaterThanAny<float>(); }
+        public void GreaterThanAnySingle() { TestVectorGreaterThanAny<Single>(); }
         [Fact]
-        public void GreaterThanAnyDouble() { TestVectorGreaterThanAny<double>(); }
+        public void GreaterThanAnyDouble() { TestVectorGreaterThanAny<Double>(); }
         private void TestVectorGreaterThanAny<T>() where T : struct
         {
             T[] values1 = new T[Vector<T>.Count];
@@ -1155,25 +1155,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void GreaterThanAllByte() { TestVectorGreaterThanAll<byte>(); }
+        public void GreaterThanAllByte() { TestVectorGreaterThanAll<Byte>(); }
         [Fact]
-        public void GreaterThanAllSByte() { TestVectorGreaterThanAll<sbyte>(); }
+        public void GreaterThanAllSByte() { TestVectorGreaterThanAll<SByte>(); }
         [Fact]
-        public void GreaterThanAllUInt16() { TestVectorGreaterThanAll<ushort>(); }
+        public void GreaterThanAllUInt16() { TestVectorGreaterThanAll<UInt16>(); }
         [Fact]
-        public void GreaterThanAllInt16() { TestVectorGreaterThanAll<short>(); }
+        public void GreaterThanAllInt16() { TestVectorGreaterThanAll<Int16>(); }
         [Fact]
-        public void GreaterThanAllUInt32() { TestVectorGreaterThanAll<uint>(); }
+        public void GreaterThanAllUInt32() { TestVectorGreaterThanAll<UInt32>(); }
         [Fact]
-        public void GreaterThanAllInt32() { TestVectorGreaterThanAll<int>(); }
+        public void GreaterThanAllInt32() { TestVectorGreaterThanAll<Int32>(); }
         [Fact]
-        public void GreaterThanAllUInt64() { TestVectorGreaterThanAll<ulong>(); }
+        public void GreaterThanAllUInt64() { TestVectorGreaterThanAll<UInt64>(); }
         [Fact]
-        public void GreaterThanAllInt64() { TestVectorGreaterThanAll<long>(); }
+        public void GreaterThanAllInt64() { TestVectorGreaterThanAll<Int64>(); }
         [Fact]
-        public void GreaterThanAllSingle() { TestVectorGreaterThanAll<float>(); }
+        public void GreaterThanAllSingle() { TestVectorGreaterThanAll<Single>(); }
         [Fact]
-        public void GreaterThanAllDouble() { TestVectorGreaterThanAll<double>(); }
+        public void GreaterThanAllDouble() { TestVectorGreaterThanAll<Double>(); }
         private void TestVectorGreaterThanAll<T>() where T : struct
         {
             T[] values1 = new T[Vector<T>.Count];
@@ -1204,25 +1204,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void GreaterThanOrEqualAnyByte() { TestVectorGreaterThanOrEqualAny<byte>(); }
+        public void GreaterThanOrEqualAnyByte() { TestVectorGreaterThanOrEqualAny<Byte>(); }
         [Fact]
-        public void GreaterThanOrEqualAnySByte() { TestVectorGreaterThanOrEqualAny<sbyte>(); }
+        public void GreaterThanOrEqualAnySByte() { TestVectorGreaterThanOrEqualAny<SByte>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyUInt16() { TestVectorGreaterThanOrEqualAny<ushort>(); }
+        public void GreaterThanOrEqualAnyUInt16() { TestVectorGreaterThanOrEqualAny<UInt16>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyInt16() { TestVectorGreaterThanOrEqualAny<short>(); }
+        public void GreaterThanOrEqualAnyInt16() { TestVectorGreaterThanOrEqualAny<Int16>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyUInt32() { TestVectorGreaterThanOrEqualAny<uint>(); }
+        public void GreaterThanOrEqualAnyUInt32() { TestVectorGreaterThanOrEqualAny<UInt32>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyInt32() { TestVectorGreaterThanOrEqualAny<int>(); }
+        public void GreaterThanOrEqualAnyInt32() { TestVectorGreaterThanOrEqualAny<Int32>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyUInt64() { TestVectorGreaterThanOrEqualAny<ulong>(); }
+        public void GreaterThanOrEqualAnyUInt64() { TestVectorGreaterThanOrEqualAny<UInt64>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyInt64() { TestVectorGreaterThanOrEqualAny<long>(); }
+        public void GreaterThanOrEqualAnyInt64() { TestVectorGreaterThanOrEqualAny<Int64>(); }
         [Fact]
-        public void GreaterThanOrEqualAnySingle() { TestVectorGreaterThanOrEqualAny<float>(); }
+        public void GreaterThanOrEqualAnySingle() { TestVectorGreaterThanOrEqualAny<Single>(); }
         [Fact]
-        public void GreaterThanOrEqualAnyDouble() { TestVectorGreaterThanOrEqualAny<double>(); }
+        public void GreaterThanOrEqualAnyDouble() { TestVectorGreaterThanOrEqualAny<Double>(); }
         private void TestVectorGreaterThanOrEqualAny<T>() where T : struct
         {
             int maxT = GetMaxValue<T>();
@@ -1263,25 +1263,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void GreaterThanOrEqualAllByte() { TestVectorGreaterThanOrEqualAll<byte>(); }
+        public void GreaterThanOrEqualAllByte() { TestVectorGreaterThanOrEqualAll<Byte>(); }
         [Fact]
-        public void GreaterThanOrEqualAllSByte() { TestVectorGreaterThanOrEqualAll<sbyte>(); }
+        public void GreaterThanOrEqualAllSByte() { TestVectorGreaterThanOrEqualAll<SByte>(); }
         [Fact]
-        public void GreaterThanOrEqualAllUInt16() { TestVectorGreaterThanOrEqualAll<ushort>(); }
+        public void GreaterThanOrEqualAllUInt16() { TestVectorGreaterThanOrEqualAll<UInt16>(); }
         [Fact]
-        public void GreaterThanOrEqualAllInt16() { TestVectorGreaterThanOrEqualAll<short>(); }
+        public void GreaterThanOrEqualAllInt16() { TestVectorGreaterThanOrEqualAll<Int16>(); }
         [Fact]
-        public void GreaterThanOrEqualAllUInt32() { TestVectorGreaterThanOrEqualAll<uint>(); }
+        public void GreaterThanOrEqualAllUInt32() { TestVectorGreaterThanOrEqualAll<UInt32>(); }
         [Fact]
-        public void GreaterThanOrEqualAllInt32() { TestVectorGreaterThanOrEqualAll<int>(); }
+        public void GreaterThanOrEqualAllInt32() { TestVectorGreaterThanOrEqualAll<Int32>(); }
         [Fact]
-        public void GreaterThanOrEqualAllUInt64() { TestVectorGreaterThanOrEqualAll<ulong>(); }
+        public void GreaterThanOrEqualAllUInt64() { TestVectorGreaterThanOrEqualAll<UInt64>(); }
         [Fact]
-        public void GreaterThanOrEqualAllInt64() { TestVectorGreaterThanOrEqualAll<long>(); }
+        public void GreaterThanOrEqualAllInt64() { TestVectorGreaterThanOrEqualAll<Int64>(); }
         [Fact]
-        public void GreaterThanOrEqualAllSingle() { TestVectorGreaterThanOrEqualAll<float>(); }
+        public void GreaterThanOrEqualAllSingle() { TestVectorGreaterThanOrEqualAll<Single>(); }
         [Fact]
-        public void GreaterThanOrEqualAllDouble() { TestVectorGreaterThanOrEqualAll<double>(); }
+        public void GreaterThanOrEqualAllDouble() { TestVectorGreaterThanOrEqualAll<Double>(); }
         private void TestVectorGreaterThanOrEqualAll<T>() where T : struct
         {
             int maxT = GetMaxValue<T>();
@@ -1321,25 +1321,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void LessThanByte() { TestVectorLessThan<byte>(); }
+        public void LessThanByte() { TestVectorLessThan<Byte>(); }
         [Fact]
-        public void LessThanSByte() { TestVectorLessThan<sbyte>(); }
+        public void LessThanSByte() { TestVectorLessThan<SByte>(); }
         [Fact]
-        public void LessThanUInt16() { TestVectorLessThan<ushort>(); }
+        public void LessThanUInt16() { TestVectorLessThan<UInt16>(); }
         [Fact]
-        public void LessThanInt16() { TestVectorLessThan<short>(); }
+        public void LessThanInt16() { TestVectorLessThan<Int16>(); }
         [Fact]
-        public void LessThanUInt32() { TestVectorLessThan<uint>(); }
+        public void LessThanUInt32() { TestVectorLessThan<UInt32>(); }
         [Fact]
-        public void LessThanInt32() { TestVectorLessThan<int>(); }
+        public void LessThanInt32() { TestVectorLessThan<Int32>(); }
         [Fact]
-        public void LessThanUInt64() { TestVectorLessThan<ulong>(); }
+        public void LessThanUInt64() { TestVectorLessThan<UInt64>(); }
         [Fact]
-        public void LessThanInt64() { TestVectorLessThan<long>(); }
+        public void LessThanInt64() { TestVectorLessThan<Int64>(); }
         [Fact]
-        public void LessThanSingle() { TestVectorLessThan<float>(); }
+        public void LessThanSingle() { TestVectorLessThan<Single>(); }
         [Fact]
-        public void LessThanDouble() { TestVectorLessThan<double>(); }
+        public void LessThanDouble() { TestVectorLessThan<Double>(); }
         private void TestVectorLessThan<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1358,25 +1358,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void LessThanOrEqualByte() { TestVectorLessThanOrEqual<byte>(); }
+        public void LessThanOrEqualByte() { TestVectorLessThanOrEqual<Byte>(); }
         [Fact]
-        public void LessThanOrEqualSByte() { TestVectorLessThanOrEqual<sbyte>(); }
+        public void LessThanOrEqualSByte() { TestVectorLessThanOrEqual<SByte>(); }
         [Fact]
-        public void LessThanOrEqualUInt16() { TestVectorLessThanOrEqual<ushort>(); }
+        public void LessThanOrEqualUInt16() { TestVectorLessThanOrEqual<UInt16>(); }
         [Fact]
-        public void LessThanOrEqualInt16() { TestVectorLessThanOrEqual<short>(); }
+        public void LessThanOrEqualInt16() { TestVectorLessThanOrEqual<Int16>(); }
         [Fact]
-        public void LessThanOrEqualUInt32() { TestVectorLessThanOrEqual<uint>(); }
+        public void LessThanOrEqualUInt32() { TestVectorLessThanOrEqual<UInt32>(); }
         [Fact]
-        public void LessThanOrEqualInt32() { TestVectorLessThanOrEqual<int>(); }
+        public void LessThanOrEqualInt32() { TestVectorLessThanOrEqual<Int32>(); }
         [Fact]
-        public void LessThanOrEqualUInt64() { TestVectorLessThanOrEqual<ulong>(); }
+        public void LessThanOrEqualUInt64() { TestVectorLessThanOrEqual<UInt64>(); }
         [Fact]
-        public void LessThanOrEqualInt64() { TestVectorLessThanOrEqual<long>(); }
+        public void LessThanOrEqualInt64() { TestVectorLessThanOrEqual<Int64>(); }
         [Fact]
-        public void LessThanOrEqualSingle() { TestVectorLessThanOrEqual<float>(); }
+        public void LessThanOrEqualSingle() { TestVectorLessThanOrEqual<Single>(); }
         [Fact]
-        public void LessThanOrEqualDouble() { TestVectorLessThanOrEqual<double>(); }
+        public void LessThanOrEqualDouble() { TestVectorLessThanOrEqual<Double>(); }
         private void TestVectorLessThanOrEqual<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1395,25 +1395,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void LessThanAnyByte() { TestVectorLessThanAny<byte>(); }
+        public void LessThanAnyByte() { TestVectorLessThanAny<Byte>(); }
         [Fact]
-        public void LessThanAnySByte() { TestVectorLessThanAny<sbyte>(); }
+        public void LessThanAnySByte() { TestVectorLessThanAny<SByte>(); }
         [Fact]
-        public void LessThanAnyUInt16() { TestVectorLessThanAny<ushort>(); }
+        public void LessThanAnyUInt16() { TestVectorLessThanAny<UInt16>(); }
         [Fact]
-        public void LessThanAnyInt16() { TestVectorLessThanAny<short>(); }
+        public void LessThanAnyInt16() { TestVectorLessThanAny<Int16>(); }
         [Fact]
-        public void LessThanAnyUInt32() { TestVectorLessThanAny<uint>(); }
+        public void LessThanAnyUInt32() { TestVectorLessThanAny<UInt32>(); }
         [Fact]
-        public void LessThanAnyInt32() { TestVectorLessThanAny<int>(); }
+        public void LessThanAnyInt32() { TestVectorLessThanAny<Int32>(); }
         [Fact]
-        public void LessThanAnyUInt64() { TestVectorLessThanAny<ulong>(); }
+        public void LessThanAnyUInt64() { TestVectorLessThanAny<UInt64>(); }
         [Fact]
-        public void LessThanAnyInt64() { TestVectorLessThanAny<long>(); }
+        public void LessThanAnyInt64() { TestVectorLessThanAny<Int64>(); }
         [Fact]
-        public void LessThanAnySingle() { TestVectorLessThanAny<float>(); }
+        public void LessThanAnySingle() { TestVectorLessThanAny<Single>(); }
         [Fact]
-        public void LessThanAnyDouble() { TestVectorLessThanAny<double>(); }
+        public void LessThanAnyDouble() { TestVectorLessThanAny<Double>(); }
         private void TestVectorLessThanAny<T>() where T : struct
         {
             T[] values1 = new T[Vector<T>.Count];
@@ -1430,25 +1430,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void LessThanAllByte() { TestVectorLessThanAll<byte>(); }
+        public void LessThanAllByte() { TestVectorLessThanAll<Byte>(); }
         [Fact]
-        public void LessThanAllSByte() { TestVectorLessThanAll<sbyte>(); }
+        public void LessThanAllSByte() { TestVectorLessThanAll<SByte>(); }
         [Fact]
-        public void LessThanAllUInt16() { TestVectorLessThanAll<ushort>(); }
+        public void LessThanAllUInt16() { TestVectorLessThanAll<UInt16>(); }
         [Fact]
-        public void LessThanAllInt16() { TestVectorLessThanAll<short>(); }
+        public void LessThanAllInt16() { TestVectorLessThanAll<Int16>(); }
         [Fact]
-        public void LessThanAllUInt32() { TestVectorLessThanAll<uint>(); }
+        public void LessThanAllUInt32() { TestVectorLessThanAll<UInt32>(); }
         [Fact]
-        public void LessThanAllInt32() { TestVectorLessThanAll<int>(); }
+        public void LessThanAllInt32() { TestVectorLessThanAll<Int32>(); }
         [Fact]
-        public void LessThanAllUInt64() { TestVectorLessThanAll<ulong>(); }
+        public void LessThanAllUInt64() { TestVectorLessThanAll<UInt64>(); }
         [Fact]
-        public void LessThanAllInt64() { TestVectorLessThanAll<long>(); }
+        public void LessThanAllInt64() { TestVectorLessThanAll<Int64>(); }
         [Fact]
-        public void LessThanAllSingle() { TestVectorLessThanAll<float>(); }
+        public void LessThanAllSingle() { TestVectorLessThanAll<Single>(); }
         [Fact]
-        public void LessThanAllDouble() { TestVectorLessThanAll<double>(); }
+        public void LessThanAllDouble() { TestVectorLessThanAll<Double>(); }
         private void TestVectorLessThanAll<T>() where T : struct
         {
             T[] values1 = new T[Vector<T>.Count];
@@ -1478,25 +1478,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void LessThanOrEqualAnyByte() { TestVectorLessThanOrEqualAny<byte>(); }
+        public void LessThanOrEqualAnyByte() { TestVectorLessThanOrEqualAny<Byte>(); }
         [Fact]
-        public void LessThanOrEqualAnySByte() { TestVectorLessThanOrEqualAny<sbyte>(); }
+        public void LessThanOrEqualAnySByte() { TestVectorLessThanOrEqualAny<SByte>(); }
         [Fact]
-        public void LessThanOrEqualAnyUInt16() { TestVectorLessThanOrEqualAny<ushort>(); }
+        public void LessThanOrEqualAnyUInt16() { TestVectorLessThanOrEqualAny<UInt16>(); }
         [Fact]
-        public void LessThanOrEqualAnyInt16() { TestVectorLessThanOrEqualAny<short>(); }
+        public void LessThanOrEqualAnyInt16() { TestVectorLessThanOrEqualAny<Int16>(); }
         [Fact]
-        public void LessThanOrEqualAnyUInt32() { TestVectorLessThanOrEqualAny<uint>(); }
+        public void LessThanOrEqualAnyUInt32() { TestVectorLessThanOrEqualAny<UInt32>(); }
         [Fact]
-        public void LessThanOrEqualAnyInt32() { TestVectorLessThanOrEqualAny<int>(); }
+        public void LessThanOrEqualAnyInt32() { TestVectorLessThanOrEqualAny<Int32>(); }
         [Fact]
-        public void LessThanOrEqualAnyUInt64() { TestVectorLessThanOrEqualAny<ulong>(); }
+        public void LessThanOrEqualAnyUInt64() { TestVectorLessThanOrEqualAny<UInt64>(); }
         [Fact]
-        public void LessThanOrEqualAnyInt64() { TestVectorLessThanOrEqualAny<long>(); }
+        public void LessThanOrEqualAnyInt64() { TestVectorLessThanOrEqualAny<Int64>(); }
         [Fact]
-        public void LessThanOrEqualAnySingle() { TestVectorLessThanOrEqualAny<float>(); }
+        public void LessThanOrEqualAnySingle() { TestVectorLessThanOrEqualAny<Single>(); }
         [Fact]
-        public void LessThanOrEqualAnyDouble() { TestVectorLessThanOrEqualAny<double>(); }
+        public void LessThanOrEqualAnyDouble() { TestVectorLessThanOrEqualAny<Double>(); }
         private void TestVectorLessThanOrEqualAny<T>() where T : struct
         {
             T[] values1 = new T[Vector<T>.Count];
@@ -1532,25 +1532,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void LessThanOrEqualAllByte() { TestVectorLessThanOrEqualAll<byte>(); }
+        public void LessThanOrEqualAllByte() { TestVectorLessThanOrEqualAll<Byte>(); }
         [Fact]
-        public void LessThanOrEqualAllSByte() { TestVectorLessThanOrEqualAll<sbyte>(); }
+        public void LessThanOrEqualAllSByte() { TestVectorLessThanOrEqualAll<SByte>(); }
         [Fact]
-        public void LessThanOrEqualAllUInt16() { TestVectorLessThanOrEqualAll<ushort>(); }
+        public void LessThanOrEqualAllUInt16() { TestVectorLessThanOrEqualAll<UInt16>(); }
         [Fact]
-        public void LessThanOrEqualAllInt16() { TestVectorLessThanOrEqualAll<short>(); }
+        public void LessThanOrEqualAllInt16() { TestVectorLessThanOrEqualAll<Int16>(); }
         [Fact]
-        public void LessThanOrEqualAllUInt32() { TestVectorLessThanOrEqualAll<uint>(); }
+        public void LessThanOrEqualAllUInt32() { TestVectorLessThanOrEqualAll<UInt32>(); }
         [Fact]
-        public void LessThanOrEqualAllInt32() { TestVectorLessThanOrEqualAll<int>(); }
+        public void LessThanOrEqualAllInt32() { TestVectorLessThanOrEqualAll<Int32>(); }
         [Fact]
-        public void LessThanOrEqualAllUInt64() { TestVectorLessThanOrEqualAll<ulong>(); }
+        public void LessThanOrEqualAllUInt64() { TestVectorLessThanOrEqualAll<UInt64>(); }
         [Fact]
-        public void LessThanOrEqualAllInt64() { TestVectorLessThanOrEqualAll<long>(); }
+        public void LessThanOrEqualAllInt64() { TestVectorLessThanOrEqualAll<Int64>(); }
         [Fact]
-        public void LessThanOrEqualAllSingle() { TestVectorLessThanOrEqualAll<float>(); }
+        public void LessThanOrEqualAllSingle() { TestVectorLessThanOrEqualAll<Single>(); }
         [Fact]
-        public void LessThanOrEqualAllDouble() { TestVectorLessThanOrEqualAll<double>(); }
+        public void LessThanOrEqualAllDouble() { TestVectorLessThanOrEqualAll<Double>(); }
         private void TestVectorLessThanOrEqualAll<T>() where T : struct
         {
             T[] values1 = new T[Vector<T>.Count];
@@ -1585,25 +1585,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void VectorEqualsByte() { TestVectorEquals<byte>(); }
+        public void VectorEqualsByte() { TestVectorEquals<Byte>(); }
         [Fact]
-        public void VectorEqualsSByte() { TestVectorEquals<sbyte>(); }
+        public void VectorEqualsSByte() { TestVectorEquals<SByte>(); }
         [Fact]
-        public void VectorEqualsUInt16() { TestVectorEquals<ushort>(); }
+        public void VectorEqualsUInt16() { TestVectorEquals<UInt16>(); }
         [Fact]
-        public void VectorEqualsInt16() { TestVectorEquals<short>(); }
+        public void VectorEqualsInt16() { TestVectorEquals<Int16>(); }
         [Fact]
-        public void VectorEqualsUInt32() { TestVectorEquals<uint>(); }
+        public void VectorEqualsUInt32() { TestVectorEquals<UInt32>(); }
         [Fact]
-        public void VectorEqualsInt32() { TestVectorEquals<int>(); }
+        public void VectorEqualsInt32() { TestVectorEquals<Int32>(); }
         [Fact]
-        public void VectorEqualsUInt64() { TestVectorEquals<ulong>(); }
+        public void VectorEqualsUInt64() { TestVectorEquals<UInt64>(); }
         [Fact]
-        public void VectorEqualsInt64() { TestVectorEquals<long>(); }
+        public void VectorEqualsInt64() { TestVectorEquals<Int64>(); }
         [Fact]
-        public void VectorEqualsSingle() { TestVectorEquals<float>(); }
+        public void VectorEqualsSingle() { TestVectorEquals<Single>(); }
         [Fact]
-        public void VectorEqualsDouble() { TestVectorEquals<double>(); }
+        public void VectorEqualsDouble() { TestVectorEquals<Double>(); }
         private void TestVectorEquals<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1630,25 +1630,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void VectorEqualsAnyByte() { TestVectorEqualsAny<byte>(); }
+        public void VectorEqualsAnyByte() { TestVectorEqualsAny<Byte>(); }
         [Fact]
-        public void VectorEqualsAnySByte() { TestVectorEqualsAny<sbyte>(); }
+        public void VectorEqualsAnySByte() { TestVectorEqualsAny<SByte>(); }
         [Fact]
-        public void VectorEqualsAnyUInt16() { TestVectorEqualsAny<ushort>(); }
+        public void VectorEqualsAnyUInt16() { TestVectorEqualsAny<UInt16>(); }
         [Fact]
-        public void VectorEqualsAnyInt16() { TestVectorEqualsAny<short>(); }
+        public void VectorEqualsAnyInt16() { TestVectorEqualsAny<Int16>(); }
         [Fact]
-        public void VectorEqualsAnyUInt32() { TestVectorEqualsAny<uint>(); }
+        public void VectorEqualsAnyUInt32() { TestVectorEqualsAny<UInt32>(); }
         [Fact]
-        public void VectorEqualsAnyInt32() { TestVectorEqualsAny<int>(); }
+        public void VectorEqualsAnyInt32() { TestVectorEqualsAny<Int32>(); }
         [Fact]
-        public void VectorEqualsAnyUInt64() { TestVectorEqualsAny<ulong>(); }
+        public void VectorEqualsAnyUInt64() { TestVectorEqualsAny<UInt64>(); }
         [Fact]
-        public void VectorEqualsAnyInt64() { TestVectorEqualsAny<long>(); }
+        public void VectorEqualsAnyInt64() { TestVectorEqualsAny<Int64>(); }
         [Fact]
-        public void VectorEqualsAnySingle() { TestVectorEqualsAny<float>(); }
+        public void VectorEqualsAnySingle() { TestVectorEqualsAny<Single>(); }
         [Fact]
-        public void VectorEqualsAnyDouble() { TestVectorEqualsAny<double>(); }
+        public void VectorEqualsAnyDouble() { TestVectorEqualsAny<Double>(); }
         private void TestVectorEqualsAny<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1678,25 +1678,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void VectorEqualsAllByte() { TestVectorEqualsAll<byte>(); }
+        public void VectorEqualsAllByte() { TestVectorEqualsAll<Byte>(); }
         [Fact]
-        public void VectorEqualsAllSByte() { TestVectorEqualsAll<sbyte>(); }
+        public void VectorEqualsAllSByte() { TestVectorEqualsAll<SByte>(); }
         [Fact]
-        public void VectorEqualsAllUInt16() { TestVectorEqualsAll<ushort>(); }
+        public void VectorEqualsAllUInt16() { TestVectorEqualsAll<UInt16>(); }
         [Fact]
-        public void VectorEqualsAllInt16() { TestVectorEqualsAll<short>(); }
+        public void VectorEqualsAllInt16() { TestVectorEqualsAll<Int16>(); }
         [Fact]
-        public void VectorEqualsAllUInt32() { TestVectorEqualsAll<uint>(); }
+        public void VectorEqualsAllUInt32() { TestVectorEqualsAll<UInt32>(); }
         [Fact]
-        public void VectorEqualsAllInt32() { TestVectorEqualsAll<int>(); }
+        public void VectorEqualsAllInt32() { TestVectorEqualsAll<Int32>(); }
         [Fact]
-        public void VectorEqualsAllUInt64() { TestVectorEqualsAll<ulong>(); }
+        public void VectorEqualsAllUInt64() { TestVectorEqualsAll<UInt64>(); }
         [Fact]
-        public void VectorEqualsAllInt64() { TestVectorEqualsAll<long>(); }
+        public void VectorEqualsAllInt64() { TestVectorEqualsAll<Int64>(); }
         [Fact]
-        public void VectorEqualsAllSingle() { TestVectorEqualsAll<float>(); }
+        public void VectorEqualsAllSingle() { TestVectorEqualsAll<Single>(); }
         [Fact]
-        public void VectorEqualsAllDouble() { TestVectorEqualsAll<double>(); }
+        public void VectorEqualsAllDouble() { TestVectorEqualsAll<Double>(); }
         private void TestVectorEqualsAll<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1721,25 +1721,25 @@ namespace System.Numerics.Tests
 
         #region Selection Tests
         [Fact]
-        public void ConditionalSelectByte() { TestConditionalSelect<byte>(); }
+        public void ConditionalSelectByte() { TestConditionalSelect<Byte>(); }
         [Fact]
-        public void ConditionalSelectSByte() { TestConditionalSelect<sbyte>(); }
+        public void ConditionalSelectSByte() { TestConditionalSelect<SByte>(); }
         [Fact]
-        public void ConditionalSelectUInt16() { TestConditionalSelect<ushort>(); }
+        public void ConditionalSelectUInt16() { TestConditionalSelect<UInt16>(); }
         [Fact]
-        public void ConditionalSelectInt16() { TestConditionalSelect<short>(); }
+        public void ConditionalSelectInt16() { TestConditionalSelect<Int16>(); }
         [Fact]
-        public void ConditionalSelectUInt32() { TestConditionalSelect<uint>(); }
+        public void ConditionalSelectUInt32() { TestConditionalSelect<UInt32>(); }
         [Fact]
-        public void ConditionalSelectInt32() { TestConditionalSelect<int>(); }
+        public void ConditionalSelectInt32() { TestConditionalSelect<Int32>(); }
         [Fact]
-        public void ConditionalSelectUInt64() { TestConditionalSelect<ulong>(); }
+        public void ConditionalSelectUInt64() { TestConditionalSelect<UInt64>(); }
         [Fact]
-        public void ConditionalSelectInt64() { TestConditionalSelect<long>(); }
+        public void ConditionalSelectInt64() { TestConditionalSelect<Int64>(); }
         [Fact]
-        public void ConditionalSelectSingle() { TestConditionalSelect<float>(); }
+        public void ConditionalSelectSingle() { TestConditionalSelect<Single>(); }
         [Fact]
-        public void ConditionalSelectDouble() { TestConditionalSelect<double>(); }
+        public void ConditionalSelectDouble() { TestConditionalSelect<Double>(); }
         private void TestConditionalSelect<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1773,25 +1773,25 @@ namespace System.Numerics.Tests
 
         #region Vector Tests
         [Fact]
-        public void DotProductByte() { TestDotProduct<byte>(); }
+        public void DotProductByte() { TestDotProduct<Byte>(); }
         [Fact]
-        public void DotProductSByte() { TestDotProduct<sbyte>(); }
+        public void DotProductSByte() { TestDotProduct<SByte>(); }
         [Fact]
-        public void DotProductUInt16() { TestDotProduct<ushort>(); }
+        public void DotProductUInt16() { TestDotProduct<UInt16>(); }
         [Fact]
-        public void DotProductInt16() { TestDotProduct<short>(); }
+        public void DotProductInt16() { TestDotProduct<Int16>(); }
         [Fact]
-        public void DotProductUInt32() { TestDotProduct<uint>(); }
+        public void DotProductUInt32() { TestDotProduct<UInt32>(); }
         [Fact]
-        public void DotProductInt32() { TestDotProduct<int>(); }
+        public void DotProductInt32() { TestDotProduct<Int32>(); }
         [Fact]
-        public void DotProductUInt64() { TestDotProduct<ulong>(); }
+        public void DotProductUInt64() { TestDotProduct<UInt64>(); }
         [Fact]
-        public void DotProductInt64() { TestDotProduct<long>(); }
+        public void DotProductInt64() { TestDotProduct<Int64>(); }
         [Fact]
-        public void DotProductSingle() { TestDotProduct<float>(); }
+        public void DotProductSingle() { TestDotProduct<Single>(); }
         [Fact]
-        public void DotProductDouble() { TestDotProduct<double>(); }
+        public void DotProductDouble() { TestDotProduct<Double>(); }
         private void TestDotProduct<T>() where T : struct
         {
             T[] values1 = Util.GenerateRandomValues<T>(Vector<T>.Count);
@@ -1809,25 +1809,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void MaxByte() { TestMax<byte>(); }
+        public void MaxByte() { TestMax<Byte>(); }
         [Fact]
-        public void MaxSByte() { TestMax<sbyte>(); }
+        public void MaxSByte() { TestMax<SByte>(); }
         [Fact]
-        public void MaxUInt16() { TestMax<ushort>(); }
+        public void MaxUInt16() { TestMax<UInt16>(); }
         [Fact]
-        public void MaxInt16() { TestMax<short>(); }
+        public void MaxInt16() { TestMax<Int16>(); }
         [Fact]
-        public void MaxUInt32() { TestMax<uint>(); }
+        public void MaxUInt32() { TestMax<UInt32>(); }
         [Fact]
-        public void MaxInt32() { TestMax<int>(); }
+        public void MaxInt32() { TestMax<Int32>(); }
         [Fact]
-        public void MaxUInt64() { TestMax<ulong>(); }
+        public void MaxUInt64() { TestMax<UInt64>(); }
         [Fact]
-        public void MaxInt64() { TestMax<long>(); }
+        public void MaxInt64() { TestMax<Int64>(); }
         [Fact]
-        public void MaxSingle() { TestMax<float>(); }
+        public void MaxSingle() { TestMax<Single>(); }
         [Fact]
-        public void MaxDouble() { TestMax<double>(); }
+        public void MaxDouble() { TestMax<Double>(); }
         private void TestMax<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1845,25 +1845,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void MinByte() { TestMin<byte>(); }
+        public void MinByte() { TestMin<Byte>(); }
         [Fact]
-        public void MinSByte() { TestMin<sbyte>(); }
+        public void MinSByte() { TestMin<SByte>(); }
         [Fact]
-        public void MinUInt16() { TestMin<ushort>(); }
+        public void MinUInt16() { TestMin<UInt16>(); }
         [Fact]
-        public void MinInt16() { TestMin<short>(); }
+        public void MinInt16() { TestMin<Int16>(); }
         [Fact]
-        public void MinUInt32() { TestMin<uint>(); }
+        public void MinUInt32() { TestMin<UInt32>(); }
         [Fact]
-        public void MinInt32() { TestMin<int>(); }
+        public void MinInt32() { TestMin<Int32>(); }
         [Fact]
-        public void MinUInt64() { TestMin<ulong>(); }
+        public void MinUInt64() { TestMin<UInt64>(); }
         [Fact]
-        public void MinInt64() { TestMin<long>(); }
+        public void MinInt64() { TestMin<Int64>(); }
         [Fact]
-        public void MinSingle() { TestMin<float>(); }
+        public void MinSingle() { TestMin<Single>(); }
         [Fact]
-        public void MinDouble() { TestMin<double>(); }
+        public void MinDouble() { TestMin<Double>(); }
         private void TestMin<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1881,25 +1881,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void SquareRootByte() { TestSquareRoot<byte>(-1); }
+        public void SquareRootByte() { TestSquareRoot<Byte>(-1); }
         [Fact]
-        public void SquareRootSByte() { TestSquareRoot<sbyte>(-1); }
+        public void SquareRootSByte() { TestSquareRoot<SByte>(-1); }
         [Fact]
-        public void SquareRootUInt16() { TestSquareRoot<ushort>(-1); }
+        public void SquareRootUInt16() { TestSquareRoot<UInt16>(-1); }
         [Fact]
-        public void SquareRootInt16() { TestSquareRoot<short>(-1); }
+        public void SquareRootInt16() { TestSquareRoot<Int16>(-1); }
         [Fact]
-        public void SquareRootUInt32() { TestSquareRoot<uint>(-1); }
+        public void SquareRootUInt32() { TestSquareRoot<UInt32>(-1); }
         [Fact]
-        public void SquareRootInt32() { TestSquareRoot<int>(-1); }
+        public void SquareRootInt32() { TestSquareRoot<Int32>(-1); }
         [Fact]
-        public void SquareRootUInt64() { TestSquareRoot<ulong>(-1); }
+        public void SquareRootUInt64() { TestSquareRoot<UInt64>(-1); }
         [Fact]
-        public void SquareRootInt64() { TestSquareRoot<long>(-1); }
+        public void SquareRootInt64() { TestSquareRoot<Int64>(-1); }
         [Fact]
-        public void SquareRootSingle() { TestSquareRoot<float>(6); }
+        public void SquareRootSingle() { TestSquareRoot<Single>(6); }
         [Fact]
-        public void SquareRootDouble() { TestSquareRoot<double>(15); }
+        public void SquareRootDouble() { TestSquareRoot<Double>(15); }
         private void TestSquareRoot<T>(int precision = -1) where T : struct, IEquatable<T>
         {
             T[] values = GenerateRandomValuesForVector<T>();
@@ -1915,25 +1915,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void AbsByte() { TestAbs<byte>(); }
+        public void AbsByte() { TestAbs<Byte>(); }
         [Fact]
-        public void AbsSByte() { TestAbs<sbyte>(); }
+        public void AbsSByte() { TestAbs<SByte>(); }
         [Fact]
-        public void AbsUInt16() { TestAbs<ushort>(); }
+        public void AbsUInt16() { TestAbs<UInt16>(); }
         [Fact]
-        public void AbsInt16() { TestAbs<short>(); }
+        public void AbsInt16() { TestAbs<Int16>(); }
         [Fact]
-        public void AbsUInt32() { TestAbs<uint>(); }
+        public void AbsUInt32() { TestAbs<UInt32>(); }
         [Fact]
-        public void AbsInt32() { TestAbs<int>(); }
+        public void AbsInt32() { TestAbs<Int32>(); }
         [Fact]
-        public void AbsUInt64() { TestAbs<ulong>(); }
+        public void AbsUInt64() { TestAbs<UInt64>(); }
         [Fact]
-        public void AbsInt64() { TestAbs<long>(); }
+        public void AbsInt64() { TestAbs<Int64>(); }
         [Fact]
-        public void AbsSingle() { TestAbs<float>(); }
+        public void AbsSingle() { TestAbs<Single>(); }
         [Fact]
-        public void AbsDouble() { TestAbs<double>(); }
+        public void AbsDouble() { TestAbs<Double>(); }
         private void TestAbs<T>() where T : struct
         {
             T[] values = Util.GenerateRandomValues<T>(Vector<T>.Count, GetMinValue<T>() + 1, GetMaxValue<T>());
@@ -1953,25 +1953,25 @@ namespace System.Numerics.Tests
         // These tests ensure that, when invoked through reflection, methods behave as expected. There are potential
         // oddities when intrinsic methods are invoked through reflection which could have unexpected effects for the developer.
         [Fact]
-        public void MultiplicationReflectionByte() { TestMultiplicationReflection<byte>(); }
+        public void MultiplicationReflectionByte() { TestMultiplicationReflection<Byte>(); }
         [Fact]
-        public void MultiplicationReflectionSByte() { TestMultiplicationReflection<sbyte>(); }
+        public void MultiplicationReflectionSByte() { TestMultiplicationReflection<SByte>(); }
         [Fact]
-        public void MultiplicationReflectionUInt16() { TestMultiplicationReflection<ushort>(); }
+        public void MultiplicationReflectionUInt16() { TestMultiplicationReflection<UInt16>(); }
         [Fact]
-        public void MultiplicationReflectionInt16() { TestMultiplicationReflection<short>(); }
+        public void MultiplicationReflectionInt16() { TestMultiplicationReflection<Int16>(); }
         [Fact]
-        public void MultiplicationReflectionUInt32() { TestMultiplicationReflection<uint>(); }
+        public void MultiplicationReflectionUInt32() { TestMultiplicationReflection<UInt32>(); }
         [Fact]
-        public void MultiplicationReflectionInt32() { TestMultiplicationReflection<int>(); }
+        public void MultiplicationReflectionInt32() { TestMultiplicationReflection<Int32>(); }
         [Fact]
-        public void MultiplicationReflectionUInt64() { TestMultiplicationReflection<ulong>(); }
+        public void MultiplicationReflectionUInt64() { TestMultiplicationReflection<UInt64>(); }
         [Fact]
-        public void MultiplicationReflectionInt64() { TestMultiplicationReflection<long>(); }
+        public void MultiplicationReflectionInt64() { TestMultiplicationReflection<Int64>(); }
         [Fact]
-        public void MultiplicationReflectionSingle() { TestMultiplicationReflection<float>(); }
+        public void MultiplicationReflectionSingle() { TestMultiplicationReflection<Single>(); }
         [Fact]
-        public void MultiplicationReflectionDouble() { TestMultiplicationReflection<double>(); }
+        public void MultiplicationReflectionDouble() { TestMultiplicationReflection<Double>(); }
         private void TestMultiplicationReflection<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -1990,25 +1990,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void AdditionReflectionByte() { TestAdditionReflection<byte>(); }
+        public void AdditionReflectionByte() { TestAdditionReflection<Byte>(); }
         [Fact]
-        public void AdditionReflectionSByte() { TestAdditionReflection<sbyte>(); }
+        public void AdditionReflectionSByte() { TestAdditionReflection<SByte>(); }
         [Fact]
-        public void AdditionReflectionUInt16() { TestAdditionReflection<ushort>(); }
+        public void AdditionReflectionUInt16() { TestAdditionReflection<UInt16>(); }
         [Fact]
-        public void AdditionReflectionInt16() { TestAdditionReflection<short>(); }
+        public void AdditionReflectionInt16() { TestAdditionReflection<Int16>(); }
         [Fact]
-        public void AdditionReflectionUInt32() { TestAdditionReflection<uint>(); }
+        public void AdditionReflectionUInt32() { TestAdditionReflection<UInt32>(); }
         [Fact]
-        public void AdditionReflectionInt32() { TestAdditionReflection<int>(); }
+        public void AdditionReflectionInt32() { TestAdditionReflection<Int32>(); }
         [Fact]
-        public void AdditionReflectionUInt64() { TestAdditionReflection<ulong>(); }
+        public void AdditionReflectionUInt64() { TestAdditionReflection<UInt64>(); }
         [Fact]
-        public void AdditionReflectionInt64() { TestAdditionReflection<long>(); }
+        public void AdditionReflectionInt64() { TestAdditionReflection<Int64>(); }
         [Fact]
-        public void AdditionReflectionSingle() { TestAdditionReflection<float>(); }
+        public void AdditionReflectionSingle() { TestAdditionReflection<Single>(); }
         [Fact]
-        public void AdditionReflectionDouble() { TestAdditionReflection<double>(); }
+        public void AdditionReflectionDouble() { TestAdditionReflection<Double>(); }
         private void TestAdditionReflection<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -2027,25 +2027,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void DivisionReflectionByte() { TestDivisionReflection<byte>(); }
+        public void DivisionReflectionByte() { TestDivisionReflection<Byte>(); }
         [Fact]
-        public void DivisionReflectionSByte() { TestDivisionReflection<sbyte>(); }
+        public void DivisionReflectionSByte() { TestDivisionReflection<SByte>(); }
         [Fact]
-        public void DivisionReflectionUInt16() { TestDivisionReflection<ushort>(); }
+        public void DivisionReflectionUInt16() { TestDivisionReflection<UInt16>(); }
         [Fact]
-        public void DivisionReflectionInt16() { TestDivisionReflection<short>(); }
+        public void DivisionReflectionInt16() { TestDivisionReflection<Int16>(); }
         [Fact]
-        public void DivisionReflectionUInt32() { TestDivisionReflection<uint>(); }
+        public void DivisionReflectionUInt32() { TestDivisionReflection<UInt32>(); }
         [Fact]
-        public void DivisionReflectionInt32() { TestDivisionReflection<int>(); }
+        public void DivisionReflectionInt32() { TestDivisionReflection<Int32>(); }
         [Fact]
-        public void DivisionReflectionUInt64() { TestDivisionReflection<ulong>(); }
+        public void DivisionReflectionUInt64() { TestDivisionReflection<UInt64>(); }
         [Fact]
-        public void DivisionReflectionInt64() { TestDivisionReflection<long>(); }
+        public void DivisionReflectionInt64() { TestDivisionReflection<Int64>(); }
         [Fact]
-        public void DivisionReflectionSingle() { TestDivisionReflection<float>(); }
+        public void DivisionReflectionSingle() { TestDivisionReflection<Single>(); }
         [Fact]
-        public void DivisionReflectionDouble() { TestDivisionReflection<double>(); }
+        public void DivisionReflectionDouble() { TestDivisionReflection<Double>(); }
         private void TestDivisionReflection<T>() where T : struct
         {
             T[] values1 = GenerateRandomValuesForVector<T>();
@@ -2068,25 +2068,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ConstructorSingleValueReflectionByte() { TestConstructorSingleValueReflection<byte>(); }
+        public void ConstructorSingleValueReflectionByte() { TestConstructorSingleValueReflection<Byte>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionSByte() { TestConstructorSingleValueReflection<sbyte>(); }
+        public void ConstructorSingleValueReflectionSByte() { TestConstructorSingleValueReflection<SByte>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionUInt16() { TestConstructorSingleValueReflection<ushort>(); }
+        public void ConstructorSingleValueReflectionUInt16() { TestConstructorSingleValueReflection<UInt16>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionInt16() { TestConstructorSingleValueReflection<short>(); }
+        public void ConstructorSingleValueReflectionInt16() { TestConstructorSingleValueReflection<Int16>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionUInt32() { TestConstructorSingleValueReflection<uint>(); }
+        public void ConstructorSingleValueReflectionUInt32() { TestConstructorSingleValueReflection<UInt32>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionInt32() { TestConstructorSingleValueReflection<int>(); }
+        public void ConstructorSingleValueReflectionInt32() { TestConstructorSingleValueReflection<Int32>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionUInt64() { TestConstructorSingleValueReflection<ulong>(); }
+        public void ConstructorSingleValueReflectionUInt64() { TestConstructorSingleValueReflection<UInt64>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionInt64() { TestConstructorSingleValueReflection<long>(); }
+        public void ConstructorSingleValueReflectionInt64() { TestConstructorSingleValueReflection<Int64>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionSingle() { TestConstructorSingleValueReflection<float>(); }
+        public void ConstructorSingleValueReflectionSingle() { TestConstructorSingleValueReflection<Single>(); }
         [Fact]
-        public void ConstructorSingleValueReflectionDouble() { TestConstructorSingleValueReflection<double>(); }
+        public void ConstructorSingleValueReflectionDouble() { TestConstructorSingleValueReflection<Double>(); }
         private void TestConstructorSingleValueReflection<T>() where T : struct
         {
             ConstructorInfo constructor = typeof(Vector<T>).GetTypeInfo().DeclaredConstructors
@@ -2104,25 +2104,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void ConstructorArrayReflectionByte() { TestConstructorArrayReflection<byte>(); }
+        public void ConstructorArrayReflectionByte() { TestConstructorArrayReflection<Byte>(); }
         [Fact]
-        public void ConstructorArrayReflectionSByte() { TestConstructorArrayReflection<sbyte>(); }
+        public void ConstructorArrayReflectionSByte() { TestConstructorArrayReflection<SByte>(); }
         [Fact]
-        public void ConstructorArrayReflectionUInt16() { TestConstructorArrayReflection<ushort>(); }
+        public void ConstructorArrayReflectionUInt16() { TestConstructorArrayReflection<UInt16>(); }
         [Fact]
-        public void ConstructorArrayReflectionInt16() { TestConstructorArrayReflection<short>(); }
+        public void ConstructorArrayReflectionInt16() { TestConstructorArrayReflection<Int16>(); }
         [Fact]
-        public void ConstructorArrayReflectionUInt32() { TestConstructorArrayReflection<uint>(); }
+        public void ConstructorArrayReflectionUInt32() { TestConstructorArrayReflection<UInt32>(); }
         [Fact]
-        public void ConstructorArrayReflectionInt32() { TestConstructorArrayReflection<int>(); }
+        public void ConstructorArrayReflectionInt32() { TestConstructorArrayReflection<Int32>(); }
         [Fact]
-        public void ConstructorArrayReflectionUInt64() { TestConstructorArrayReflection<ulong>(); }
+        public void ConstructorArrayReflectionUInt64() { TestConstructorArrayReflection<UInt64>(); }
         [Fact]
-        public void ConstructorArrayReflectionInt64() { TestConstructorArrayReflection<long>(); }
+        public void ConstructorArrayReflectionInt64() { TestConstructorArrayReflection<Int64>(); }
         [Fact]
-        public void ConstructorArrayReflectionSingle() { TestConstructorArrayReflection<float>(); }
+        public void ConstructorArrayReflectionSingle() { TestConstructorArrayReflection<Single>(); }
         [Fact]
-        public void ConstructorArrayReflectionDouble() { TestConstructorArrayReflection<double>(); }
+        public void ConstructorArrayReflectionDouble() { TestConstructorArrayReflection<Double>(); }
         private void TestConstructorArrayReflection<T>() where T : struct
         {
             ConstructorInfo constructor = typeof(Vector<T>).GetTypeInfo().DeclaredConstructors
@@ -2140,25 +2140,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void CopyToReflectionByte() { TestCopyToReflection<byte>(); }
+        public void CopyToReflectionByte() { TestCopyToReflection<Byte>(); }
         [Fact]
-        public void CopyToReflectionSByte() { TestCopyToReflection<sbyte>(); }
+        public void CopyToReflectionSByte() { TestCopyToReflection<SByte>(); }
         [Fact]
-        public void CopyToReflectionUInt16() { TestCopyToReflection<ushort>(); }
+        public void CopyToReflectionUInt16() { TestCopyToReflection<UInt16>(); }
         [Fact]
-        public void CopyToReflectionInt16() { TestCopyToReflection<short>(); }
+        public void CopyToReflectionInt16() { TestCopyToReflection<Int16>(); }
         [Fact]
-        public void CopyToReflectionUInt32() { TestCopyToReflection<uint>(); }
+        public void CopyToReflectionUInt32() { TestCopyToReflection<UInt32>(); }
         [Fact]
-        public void CopyToReflectionInt32() { TestCopyToReflection<int>(); }
+        public void CopyToReflectionInt32() { TestCopyToReflection<Int32>(); }
         [Fact]
-        public void CopyToReflectionUInt64() { TestCopyToReflection<ulong>(); }
+        public void CopyToReflectionUInt64() { TestCopyToReflection<UInt64>(); }
         [Fact]
-        public void CopyToReflectionInt64() { TestCopyToReflection<long>(); }
+        public void CopyToReflectionInt64() { TestCopyToReflection<Int64>(); }
         [Fact]
-        public void CopyToReflectionSingle() { TestCopyToReflection<float>(); }
+        public void CopyToReflectionSingle() { TestCopyToReflection<Single>(); }
         [Fact]
-        public void CopyToReflectionDouble() { TestCopyToReflection<double>(); }
+        public void CopyToReflectionDouble() { TestCopyToReflection<Double>(); }
         private void TestCopyToReflection<T>() where T : struct
         {
             MethodInfo copyToMethod = typeof(Vector<T>).GetTypeInfo().GetDeclaredMethods("CopyTo")
@@ -2176,25 +2176,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void CopyToWithOffsetReflectionByte() { TestCopyToWithOffsetReflection<byte>(); }
+        public void CopyToWithOffsetReflectionByte() { TestCopyToWithOffsetReflection<Byte>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionSByte() { TestCopyToWithOffsetReflection<sbyte>(); }
+        public void CopyToWithOffsetReflectionSByte() { TestCopyToWithOffsetReflection<SByte>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionUInt16() { TestCopyToWithOffsetReflection<ushort>(); }
+        public void CopyToWithOffsetReflectionUInt16() { TestCopyToWithOffsetReflection<UInt16>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionInt16() { TestCopyToWithOffsetReflection<short>(); }
+        public void CopyToWithOffsetReflectionInt16() { TestCopyToWithOffsetReflection<Int16>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionUInt32() { TestCopyToWithOffsetReflection<uint>(); }
+        public void CopyToWithOffsetReflectionUInt32() { TestCopyToWithOffsetReflection<UInt32>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionInt32() { TestCopyToWithOffsetReflection<int>(); }
+        public void CopyToWithOffsetReflectionInt32() { TestCopyToWithOffsetReflection<Int32>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionUInt64() { TestCopyToWithOffsetReflection<ulong>(); }
+        public void CopyToWithOffsetReflectionUInt64() { TestCopyToWithOffsetReflection<UInt64>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionInt64() { TestCopyToWithOffsetReflection<long>(); }
+        public void CopyToWithOffsetReflectionInt64() { TestCopyToWithOffsetReflection<Int64>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionSingle() { TestCopyToWithOffsetReflection<float>(); }
+        public void CopyToWithOffsetReflectionSingle() { TestCopyToWithOffsetReflection<Single>(); }
         [Fact]
-        public void CopyToWithOffsetReflectionDouble() { TestCopyToWithOffsetReflection<double>(); }
+        public void CopyToWithOffsetReflectionDouble() { TestCopyToWithOffsetReflection<Double>(); }
         private void TestCopyToWithOffsetReflection<T>() where T : struct
         {
             MethodInfo copyToMethod = typeof(Vector<T>).GetTypeInfo().GetDeclaredMethods("CopyTo")
@@ -2213,25 +2213,25 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        public void CountViaReflectionConsistencyByte() { TestCountViaReflectionConsistency<byte>(); }
+        public void CountViaReflectionConsistencyByte() { TestCountViaReflectionConsistency<Byte>(); }
         [Fact]
-        public void CountViaReflectionConsistencySByte() { TestCountViaReflectionConsistency<sbyte>(); }
+        public void CountViaReflectionConsistencySByte() { TestCountViaReflectionConsistency<SByte>(); }
         [Fact]
-        public void CountViaReflectionConsistencyUInt16() { TestCountViaReflectionConsistency<ushort>(); }
+        public void CountViaReflectionConsistencyUInt16() { TestCountViaReflectionConsistency<UInt16>(); }
         [Fact]
-        public void CountViaReflectionConsistencyInt16() { TestCountViaReflectionConsistency<short>(); }
+        public void CountViaReflectionConsistencyInt16() { TestCountViaReflectionConsistency<Int16>(); }
         [Fact]
-        public void CountViaReflectionConsistencyUInt32() { TestCountViaReflectionConsistency<uint>(); }
+        public void CountViaReflectionConsistencyUInt32() { TestCountViaReflectionConsistency<UInt32>(); }
         [Fact]
-        public void CountViaReflectionConsistencyInt32() { TestCountViaReflectionConsistency<int>(); }
+        public void CountViaReflectionConsistencyInt32() { TestCountViaReflectionConsistency<Int32>(); }
         [Fact]
-        public void CountViaReflectionConsistencyUInt64() { TestCountViaReflectionConsistency<ulong>(); }
+        public void CountViaReflectionConsistencyUInt64() { TestCountViaReflectionConsistency<UInt64>(); }
         [Fact]
-        public void CountViaReflectionConsistencyInt64() { TestCountViaReflectionConsistency<long>(); }
+        public void CountViaReflectionConsistencyInt64() { TestCountViaReflectionConsistency<Int64>(); }
         [Fact]
-        public void CountViaReflectionConsistencySingle() { TestCountViaReflectionConsistency<float>(); }
+        public void CountViaReflectionConsistencySingle() { TestCountViaReflectionConsistency<Single>(); }
         [Fact]
-        public void CountViaReflectionConsistencyDouble() { TestCountViaReflectionConsistency<double>(); }
+        public void CountViaReflectionConsistencyDouble() { TestCountViaReflectionConsistency<Double>(); }
         private void TestCountViaReflectionConsistency<T>() where T : struct
         {
             MethodInfo countMethod = typeof(Vector<T>).GetTypeInfo().GetDeclaredProperty("Count").GetMethod;
@@ -2245,96 +2245,96 @@ namespace System.Numerics.Tests
         [Fact]
         public void ConvertInt32ToSingle()
         {
-            int[] source = GenerateRandomValuesForVector<int>();
-            Vector<int> sourceVec = new Vector<int>(source);
-            Vector<float> targetVec = Vector.ConvertToSingle(sourceVec);
+            Int32[] source = GenerateRandomValuesForVector<Int32>();
+            Vector<Int32> sourceVec = new Vector<Int32>(source);
+            Vector<Single> targetVec = Vector.ConvertToSingle(sourceVec);
             for (int i = 0; i < Vector<Single>.Count; i++)
             {
-                Assert.Equal(unchecked((float)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((Single)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertUInt32ToSingle()
         {
-            uint[] source = GenerateRandomValuesForVector<uint>();
-            Vector<uint> sourceVec = new Vector<uint>(source);
-            Vector<float> targetVec = Vector.ConvertToSingle(sourceVec);
+            UInt32[] source = GenerateRandomValuesForVector<UInt32>();
+            Vector<UInt32> sourceVec = new Vector<UInt32>(source);
+            Vector<Single> targetVec = Vector.ConvertToSingle(sourceVec);
             for (int i = 0; i < Vector<Single>.Count; i++)
             {
-                Assert.Equal(unchecked((float)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((Single)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertInt64ToDouble()
         {
-            long[] source = GenerateRandomValuesForVector<long>();
-            Vector<long> sourceVec = new Vector<long>(source);
-            Vector<double> targetVec = Vector.ConvertToDouble(sourceVec);
+            Int64[] source = GenerateRandomValuesForVector<Int64>();
+            Vector<Int64> sourceVec = new Vector<Int64>(source);
+            Vector<Double> targetVec = Vector.ConvertToDouble(sourceVec);
             for (int i = 0; i < Vector<Double>.Count; i++)
             {
-                Assert.Equal(unchecked((double)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((Double)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertUInt64ToDouble()
         {
-            ulong[] source = GenerateRandomValuesForVector<ulong>();
-            Vector<ulong> sourceVec = new Vector<ulong>(source);
-            Vector<double> targetVec = Vector.ConvertToDouble(sourceVec);
+            UInt64[] source = GenerateRandomValuesForVector<UInt64>();
+            Vector<UInt64> sourceVec = new Vector<UInt64>(source);
+            Vector<Double> targetVec = Vector.ConvertToDouble(sourceVec);
             for (int i = 0; i < Vector<Double>.Count; i++)
             {
-                Assert.Equal(unchecked((double)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((Double)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertSingleToInt32()
         {
-            float[] source = GenerateRandomValuesForVector<float>();
-            Vector<float> sourceVec = new Vector<float>(source);
-            Vector<int> targetVec = Vector.ConvertToInt32(sourceVec);
+            Single[] source = GenerateRandomValuesForVector<Single>();
+            Vector<Single> sourceVec = new Vector<Single>(source);
+            Vector<Int32> targetVec = Vector.ConvertToInt32(sourceVec);
             for (int i = 0; i < Vector<Int32>.Count; i++)
             {
-                Assert.Equal(unchecked((int)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((Int32)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertSingleToUInt32()
         {
-            float[] source = GenerateRandomValuesForVector<float>();
-            Vector<float> sourceVec = new Vector<float>(source);
-            Vector<uint> targetVec = Vector.ConvertToUInt32(sourceVec);
+            Single[] source = GenerateRandomValuesForVector<Single>();
+            Vector<Single> sourceVec = new Vector<Single>(source);
+            Vector<UInt32> targetVec = Vector.ConvertToUInt32(sourceVec);
             for (int i = 0; i < Vector<UInt32>.Count; i++)
             {
-                Assert.Equal(unchecked((uint)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((UInt32)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertDoubleToInt64()
         {
-            double[] source = GenerateRandomValuesForVector<double>();
-            Vector<double> sourceVec = new Vector<double>(source);
-            Vector<long> targetVec = Vector.ConvertToInt64(sourceVec);
+            Double[] source = GenerateRandomValuesForVector<Double>();
+            Vector<Double> sourceVec = new Vector<Double>(source);
+            Vector<Int64> targetVec = Vector.ConvertToInt64(sourceVec);
             for (int i = 0; i < Vector<Int64>.Count; i++)
             {
-                Assert.Equal(unchecked((long)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((Int64)source[i]), targetVec[i]);
             }
         }
 
         [Fact]
         public void ConvertDoubleToUInt64()
         {
-            double[] source = GenerateRandomValuesForVector<double>();
-            Vector<double> sourceVec = new Vector<double>(source);
-            Vector<ulong> targetVec = Vector.ConvertToUInt64(sourceVec);
+            Double[] source = GenerateRandomValuesForVector<Double>();
+            Vector<Double> sourceVec = new Vector<Double>(source);
+            Vector<UInt64> targetVec = Vector.ConvertToUInt64(sourceVec);
             for (int i = 0; i < Vector<UInt64>.Count; i++)
             {
-                Assert.Equal(unchecked((ulong)source[i]), targetVec[i]);
+                Assert.Equal(unchecked((UInt64)source[i]), targetVec[i]);
             }
         }
 
@@ -2344,133 +2344,133 @@ namespace System.Numerics.Tests
         [Fact]
         public void WidenByte()
         {
-            byte[] source = GenerateRandomValuesForVector<byte>();
-            Vector<byte> sourceVec = new Vector<byte>(source);
-            Vector<ushort> dest1;
-            Vector<ushort> dest2;
+            Byte[] source = GenerateRandomValuesForVector<Byte>();
+            Vector<Byte> sourceVec = new Vector<Byte>(source);
+            Vector<UInt16> dest1;
+            Vector<UInt16> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((ushort)source[index], val);
+                Assert.Equal((UInt16)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((ushort)source[index + Vector<UInt16>.Count], val);
+                Assert.Equal((UInt16)source[index + Vector<UInt16>.Count], val);
             });
         }
 
         [Fact]
         public void WidenUInt16()
         {
-            ushort[] source = GenerateRandomValuesForVector<ushort>();
-            Vector<ushort> sourceVec = new Vector<ushort>(source);
-            Vector<uint> dest1;
-            Vector<uint> dest2;
+            UInt16[] source = GenerateRandomValuesForVector<UInt16>();
+            Vector<UInt16> sourceVec = new Vector<UInt16>(source);
+            Vector<UInt32> dest1;
+            Vector<UInt32> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((uint)source[index], val);
+                Assert.Equal((UInt32)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((uint)source[index + Vector<UInt32>.Count], val);
+                Assert.Equal((UInt32)source[index + Vector<UInt32>.Count], val);
             });
         }
 
         [Fact]
         public void WidenUInt32()
         {
-            uint[] source = GenerateRandomValuesForVector<uint>();
-            Vector<uint> sourceVec = new Vector<uint>(source);
-            Vector<ulong> dest1;
-            Vector<ulong> dest2;
+            UInt32[] source = GenerateRandomValuesForVector<UInt32>();
+            Vector<UInt32> sourceVec = new Vector<UInt32>(source);
+            Vector<UInt64> dest1;
+            Vector<UInt64> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((ulong)source[index], val);
+                Assert.Equal((UInt64)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((ulong)source[index + Vector<UInt64>.Count], val);
+                Assert.Equal((UInt64)source[index + Vector<UInt64>.Count], val);
             });
         }
 
         [Fact]
         public void WidenSByte()
         {
-            sbyte[] source = GenerateRandomValuesForVector<sbyte>();
-            Vector<sbyte> sourceVec = new Vector<sbyte>(source);
-            Vector<short> dest1;
-            Vector<short> dest2;
+            SByte[] source = GenerateRandomValuesForVector<SByte>();
+            Vector<SByte> sourceVec = new Vector<SByte>(source);
+            Vector<Int16> dest1;
+            Vector<Int16> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((short)source[index], val);
+                Assert.Equal((Int16)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((short)source[index + Vector<Int16>.Count], val);
+                Assert.Equal((Int16)source[index + Vector<Int16>.Count], val);
             });
         }
 
         [Fact]
         public void WidenInt16()
         {
-            short[] source = GenerateRandomValuesForVector<short>();
-            Vector<short> sourceVec = new Vector<short>(source);
-            Vector<int> dest1;
-            Vector<int> dest2;
+            Int16[] source = GenerateRandomValuesForVector<Int16>();
+            Vector<Int16> sourceVec = new Vector<Int16>(source);
+            Vector<Int32> dest1;
+            Vector<Int32> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((int)source[index], val);
+                Assert.Equal((Int32)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((int)source[index + Vector<Int32>.Count], val);
+                Assert.Equal((Int32)source[index + Vector<Int32>.Count], val);
             });
         }
 
         [Fact]
         public void WidenInt32()
         {
-            int[] source = GenerateRandomValuesForVector<int>();
-            Vector<int> sourceVec = new Vector<int>(source);
-            Vector<long> dest1;
-            Vector<long> dest2;
+            Int32[] source = GenerateRandomValuesForVector<Int32>();
+            Vector<Int32> sourceVec = new Vector<Int32>(source);
+            Vector<Int64> dest1;
+            Vector<Int64> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((long)source[index], val);
+                Assert.Equal((Int64)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((long)source[index + Vector<Int64>.Count], val);
+                Assert.Equal((Int64)source[index + Vector<Int64>.Count], val);
             });
         }
 
         [Fact]
         public void WidenSingle()
         {
-            float[] source = GenerateRandomValuesForVector<float>();
-            Vector<float> sourceVec = new Vector<float>(source);
-            Vector<double> dest1;
-            Vector<double> dest2;
+            Single[] source = GenerateRandomValuesForVector<Single>();
+            Vector<Single> sourceVec = new Vector<Single>(source);
+            Vector<Double> dest1;
+            Vector<Double> dest2;
             Vector.Widen(sourceVec, out dest1, out dest2);
             ValidateVector(dest1, (index, val) =>
             {
-                Assert.Equal((double)source[index], val);
+                Assert.Equal((Double)source[index], val);
             });
 
             ValidateVector(dest2, (index, val) =>
             {
-                Assert.Equal((double)source[index + Vector<Double>.Count], val);
+                Assert.Equal((Double)source[index + Vector<Double>.Count], val);
             });
         }
 
@@ -2478,133 +2478,133 @@ namespace System.Numerics.Tests
         [Fact]
         public void NarrowUInt16()
         {
-            ushort[] source1 = GenerateRandomValuesForVector<ushort>();
-            ushort[] source2 = GenerateRandomValuesForVector<ushort>();
-            Vector<ushort> sourceVec1 = new Vector<ushort>(source1);
-            Vector<ushort> sourceVec2 = new Vector<ushort>(source2);
-            Vector<byte> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            UInt16[] source1 = GenerateRandomValuesForVector<UInt16>();
+            UInt16[] source2 = GenerateRandomValuesForVector<UInt16>();
+            Vector<UInt16> sourceVec1 = new Vector<UInt16>(source1);
+            Vector<UInt16> sourceVec2 = new Vector<UInt16>(source2);
+            Vector<Byte> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<UInt16>.Count; i++)
             {
-                Assert.Equal(unchecked((byte)source1[i]), dest[i]);
+                Assert.Equal(unchecked((Byte)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<UInt16>.Count; i++)
             {
-                Assert.Equal(unchecked((byte)source2[i]), dest[i + Vector<UInt16>.Count]);
+                Assert.Equal(unchecked((Byte)source2[i]), dest[i + Vector<UInt16>.Count]);
             }
         }
 
         [Fact]
         public void NarrowUInt32()
         {
-            uint[] source1 = GenerateRandomValuesForVector<uint>();
-            uint[] source2 = GenerateRandomValuesForVector<uint>();
-            Vector<uint> sourceVec1 = new Vector<uint>(source1);
-            Vector<uint> sourceVec2 = new Vector<uint>(source2);
-            Vector<ushort> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            UInt32[] source1 = GenerateRandomValuesForVector<UInt32>();
+            UInt32[] source2 = GenerateRandomValuesForVector<UInt32>();
+            Vector<UInt32> sourceVec1 = new Vector<UInt32>(source1);
+            Vector<UInt32> sourceVec2 = new Vector<UInt32>(source2);
+            Vector<UInt16> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<UInt32>.Count; i++)
             {
-                Assert.Equal(unchecked((ushort)source1[i]), dest[i]);
+                Assert.Equal(unchecked((UInt16)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<UInt32>.Count; i++)
             {
-                Assert.Equal(unchecked((ushort)source2[i]), dest[i + Vector<UInt32>.Count]);
+                Assert.Equal(unchecked((UInt16)source2[i]), dest[i + Vector<UInt32>.Count]);
             }
         }
 
         [Fact]
         public void NarrowUInt64()
         {
-            ulong[] source1 = GenerateRandomValuesForVector<ulong>();
-            ulong[] source2 = GenerateRandomValuesForVector<ulong>();
-            Vector<ulong> sourceVec1 = new Vector<ulong>(source1);
-            Vector<ulong> sourceVec2 = new Vector<ulong>(source2);
-            Vector<uint> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            UInt64[] source1 = GenerateRandomValuesForVector<UInt64>();
+            UInt64[] source2 = GenerateRandomValuesForVector<UInt64>();
+            Vector<UInt64> sourceVec1 = new Vector<UInt64>(source1);
+            Vector<UInt64> sourceVec2 = new Vector<UInt64>(source2);
+            Vector<UInt32> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<UInt64>.Count; i++)
             {
-                Assert.Equal(unchecked((uint)source1[i]), dest[i]);
+                Assert.Equal(unchecked((UInt32)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<UInt64>.Count; i++)
             {
-                Assert.Equal(unchecked((uint)source2[i]), dest[i + Vector<UInt64>.Count]);
+                Assert.Equal(unchecked((UInt32)source2[i]), dest[i + Vector<UInt64>.Count]);
             }
         }
 
         [Fact]
         public void NarrowInt16()
         {
-            short[] source1 = GenerateRandomValuesForVector<short>();
-            short[] source2 = GenerateRandomValuesForVector<short>();
-            Vector<short> sourceVec1 = new Vector<short>(source1);
-            Vector<short> sourceVec2 = new Vector<short>(source2);
-            Vector<sbyte> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            Int16[] source1 = GenerateRandomValuesForVector<Int16>();
+            Int16[] source2 = GenerateRandomValuesForVector<Int16>();
+            Vector<Int16> sourceVec1 = new Vector<Int16>(source1);
+            Vector<Int16> sourceVec2 = new Vector<Int16>(source2);
+            Vector<SByte> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<Int16>.Count; i++)
             {
-                Assert.Equal(unchecked((sbyte)source1[i]), dest[i]);
+                Assert.Equal(unchecked((SByte)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<Int16>.Count; i++)
             {
-                Assert.Equal(unchecked((sbyte)source2[i]), dest[i + Vector<Int16>.Count]);
+                Assert.Equal(unchecked((SByte)source2[i]), dest[i + Vector<Int16>.Count]);
             }
         }
 
         [Fact]
         public void NarrowInt32()
         {
-            int[] source1 = GenerateRandomValuesForVector<int>();
-            int[] source2 = GenerateRandomValuesForVector<int>();
-            Vector<int> sourceVec1 = new Vector<int>(source1);
-            Vector<int> sourceVec2 = new Vector<int>(source2);
-            Vector<short> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            Int32[] source1 = GenerateRandomValuesForVector<Int32>();
+            Int32[] source2 = GenerateRandomValuesForVector<Int32>();
+            Vector<Int32> sourceVec1 = new Vector<Int32>(source1);
+            Vector<Int32> sourceVec2 = new Vector<Int32>(source2);
+            Vector<Int16> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<Int32>.Count; i++)
             {
-                Assert.Equal(unchecked((short)source1[i]), dest[i]);
+                Assert.Equal(unchecked((Int16)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<Int32>.Count; i++)
             {
-                Assert.Equal(unchecked((short)source2[i]), dest[i + Vector<Int32>.Count]);
+                Assert.Equal(unchecked((Int16)source2[i]), dest[i + Vector<Int32>.Count]);
             }
         }
 
         [Fact]
         public void NarrowInt64()
         {
-            long[] source1 = GenerateRandomValuesForVector<long>();
-            long[] source2 = GenerateRandomValuesForVector<long>();
-            Vector<long> sourceVec1 = new Vector<long>(source1);
-            Vector<long> sourceVec2 = new Vector<long>(source2);
-            Vector<int> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            Int64[] source1 = GenerateRandomValuesForVector<Int64>();
+            Int64[] source2 = GenerateRandomValuesForVector<Int64>();
+            Vector<Int64> sourceVec1 = new Vector<Int64>(source1);
+            Vector<Int64> sourceVec2 = new Vector<Int64>(source2);
+            Vector<Int32> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<Int64>.Count; i++)
             {
-                Assert.Equal(unchecked((int)source1[i]), dest[i]);
+                Assert.Equal(unchecked((Int32)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<Int64>.Count; i++)
             {
-                Assert.Equal(unchecked((int)source2[i]), dest[i + Vector<Int64>.Count]);
+                Assert.Equal(unchecked((Int32)source2[i]), dest[i + Vector<Int64>.Count]);
             }
         }
 
         [Fact]
         public void NarrowDouble()
         {
-            double[] source1 = GenerateRandomValuesForVector<double>();
-            double[] source2 = GenerateRandomValuesForVector<double>();
-            Vector<double> sourceVec1 = new Vector<double>(source1);
-            Vector<double> sourceVec2 = new Vector<double>(source2);
-            Vector<float> dest = Vector.Narrow(sourceVec1, sourceVec2);
+            Double[] source1 = GenerateRandomValuesForVector<Double>();
+            Double[] source2 = GenerateRandomValuesForVector<Double>();
+            Vector<Double> sourceVec1 = new Vector<Double>(source1);
+            Vector<Double> sourceVec2 = new Vector<Double>(source2);
+            Vector<Single> dest = Vector.Narrow(sourceVec1, sourceVec2);
 
             for (int i = 0; i < Vector<Double>.Count; i++)
             {
-                Assert.Equal(unchecked((float)source1[i]), dest[i]);
+                Assert.Equal(unchecked((Single)source1[i]), dest[i]);
             }
             for (int i = 0; i < Vector<Double>.Count; i++)
             {
-                Assert.Equal(unchecked((float)source2[i]), dest[i + Vector<Double>.Count]);
+                Assert.Equal(unchecked((Single)source2[i]), dest[i + Vector<Double>.Count]);
             }
         }
 
@@ -2708,7 +2708,7 @@ namespace System.Numerics.Tests
 
         internal static int GetMinValue<T>() where T : struct
         {
-            if (typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(uint) || typeof(T) == typeof(ulong))
+            if (typeof(T) == typeof(Int64) || typeof(T) == typeof(Single) || typeof(T) == typeof(Double) || typeof(T) == typeof(UInt32) || typeof(T) == typeof(UInt64))
             {
                 return int.MinValue;
             }
@@ -2720,7 +2720,7 @@ namespace System.Numerics.Tests
 
         internal static int GetMaxValue<T>() where T : struct
         {
-            if (typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(uint) || typeof(T) == typeof(ulong))
+            if (typeof(T) == typeof(Int64) || typeof(T) == typeof(Single) || typeof(T) == typeof(Double) || typeof(T) == typeof(UInt32) || typeof(T) == typeof(UInt64))
             {
                 return int.MaxValue;
             }
@@ -2732,43 +2732,43 @@ namespace System.Numerics.Tests
 
         internal static T GetValueWithAllOnesSet<T>() where T : struct
         {
-            if (typeof(T) == typeof(byte))
+            if (typeof(T) == typeof(Byte))
             {
                 return (T)(object)ConstantHelper.GetByteWithAllBitsSet();
             }
-            else if (typeof(T) == typeof(sbyte))
+            else if (typeof(T) == typeof(SByte))
             {
                 return (T)(object)ConstantHelper.GetSByteWithAllBitsSet();
             }
-            else if (typeof(T) == typeof(ushort))
+            else if (typeof(T) == typeof(UInt16))
             {
                 return (T)(object)ConstantHelper.GetUInt16WithAllBitsSet();
             }
-            else if (typeof(T) == typeof(short))
+            else if (typeof(T) == typeof(Int16))
             {
                 return (T)(object)ConstantHelper.GetInt16WithAllBitsSet();
             }
-            else if (typeof(T) == typeof(int))
+            else if (typeof(T) == typeof(Int32))
             {
                 return (T)(object)ConstantHelper.GetInt32WithAllBitsSet();
             }
-            else if (typeof(T) == typeof(long))
+            else if (typeof(T) == typeof(Int64))
             {
                 return (T)(object)ConstantHelper.GetInt64WithAllBitsSet();
             }
-            else if (typeof(T) == typeof(float))
+            else if (typeof(T) == typeof(Single))
             {
                 return (T)(object)ConstantHelper.GetSingleWithAllBitsSet();
             }
-            else if (typeof(T) == typeof(double))
+            else if (typeof(T) == typeof(Double))
             {
                 return (T)(object)ConstantHelper.GetDoubleWithAllBitsSet();
             }
-            else if (typeof(T) == typeof(uint))
+            else if (typeof(T) == typeof(UInt32))
             {
                 return (T)(object)ConstantHelper.GetUInt32WithAllBitsSet();
             }
-            else if (typeof(T) == typeof(ulong))
+            else if (typeof(T) == typeof(UInt64))
             {
                 return (T)(object)ConstantHelper.GetUInt64WithAllBitsSet();
             }

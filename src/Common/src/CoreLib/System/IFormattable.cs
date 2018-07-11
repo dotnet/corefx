@@ -8,6 +8,6 @@ namespace System
 {
     public interface IFormattable
     {
-        string ToString(string format, IFormatProvider formatProvider);
+        String ToString(String format, IFormatProvider formatProvider);
     }
 }

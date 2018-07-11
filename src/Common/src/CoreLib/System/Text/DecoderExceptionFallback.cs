@@ -29,7 +29,7 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             DecoderExceptionFallback that = value as DecoderExceptionFallback;
             if (that != null)
@@ -112,19 +112,19 @@ namespace System.Text
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public DecoderFallbackException(string message)
+        public DecoderFallbackException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public DecoderFallbackException(string message, Exception innerException)
+        public DecoderFallbackException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public DecoderFallbackException(string message, byte[] bytesUnknown, int index)
+        public DecoderFallbackException(String message, byte[] bytesUnknown, int index)
             : base(message)
         {
             _bytesUnknown = bytesUnknown;

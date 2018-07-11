@@ -170,7 +170,7 @@ namespace System.Xml.Tests
         {
             var param = (int)CurVariation.Params[0];
             var exceptionType = (Type)CurVariation.Params[1];
-            string inputString = string.Empty;
+            string inputString = String.Empty;
             switch (param)
             {
                 case 1:

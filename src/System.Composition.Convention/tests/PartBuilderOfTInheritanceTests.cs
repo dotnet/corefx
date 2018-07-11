@@ -3,10 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Composition.Convention;
+using System.Linq;
 using System.Reflection;
+using System.Composition.Convention.UnitTests;
 using Xunit;
 
-namespace System.Composition.Convention.Tests
+namespace System.Composition.Convention
 {
     public class PartBuilderOfTInheritanceTests
     {
@@ -86,8 +89,8 @@ namespace System.Composition.Convention.Tests
 
         private static Attribute GetAttributeFromMember(ConventionBuilder builder, Type type, string member)
         {
-            PropertyInfo pi = type.GetRuntimeProperty(member);
-            Attribute[] list = builder.GetDeclaredAttributes(type, pi);
+            var pi = type.GetRuntimeProperty(member);
+            var list = builder.GetDeclaredAttributes(type, pi);
             return list[0] as Attribute;
         }
     }

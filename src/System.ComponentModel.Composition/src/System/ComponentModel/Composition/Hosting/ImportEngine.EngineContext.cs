@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using Microsoft.Internal;
 using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
@@ -28,11 +29,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public void AddPartManager(PartManager part)
             {
-                if (part == null)
-                {
-                    throw new ArgumentNullException(nameof(part));
-                }
-
+                Assumes.NotNull(part);
                 if (!_removedPartManagers.Remove(part))
                 {
                     _addedPartManagers.Add(part);
@@ -41,11 +38,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public void RemovePartManager(PartManager part)
             {
-                if (part == null)
-                {
-                    throw new ArgumentNullException(nameof(part));
-                }
-
+                Assumes.NotNull(part);
                 if (!_addedPartManagers.Remove(part))
                 {
                     _removedPartManagers.Add(part);

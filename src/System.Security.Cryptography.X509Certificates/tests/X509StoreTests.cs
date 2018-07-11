@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if netcoreapp || uap
-#define HAVE_STORE_ISOPEN
-#endif
-
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -21,7 +17,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             {
                 store.Open(OpenFlags.ReadOnly);
-                Assert.Equal("My", store.Name);
             }
         }
 
@@ -30,11 +25,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             using (X509Store store = new X509Store(StoreLocation.CurrentUser))
             {
-                Assert.Equal("MY", store.Name);
+                Assert.Equal("My", store.Name);
             }
         }
 
-#if HAVE_STORE_ISOPEN
         [Fact]
         public static void Constructor_IsNotOpen()
         {
@@ -43,7 +37,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.False(store.IsOpen);
             }
         }
-#endif
 
         [Fact]
         public static void Constructor_DefaultStoreLocation()
@@ -107,7 +100,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Throws<PlatformNotSupportedException>(() => new X509Chain(IntPtr.Zero));
         }
 
-#if HAVE_STORE_ISOPEN
         [Fact]
         public static void Constructor_OpenFlags()
         {
@@ -143,7 +135,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 new X509Store(new Guid().ToString("D"), StoreLocation.CurrentUser, OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly)
             );
         }
-#endif
 
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)] // StoreHandle not supported via OpenSSL
         [Fact]
@@ -186,7 +177,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-#if HAVE_STORE_ISOPEN
         [Fact]
         public static void Open_IsOpenTrue()
         {
@@ -215,7 +205,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             store.Open(OpenFlags.ReadOnly);
             Assert.True(store.IsOpen);
         }
-#endif
 
         [Fact]
         public static void AddReadOnlyThrows()

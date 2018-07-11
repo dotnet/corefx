@@ -107,7 +107,7 @@ namespace System.Globalization
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
-            if (assembly != typeof(object).Module.Assembly)
+            if (assembly != typeof(Object).Module.Assembly)
             {
                 throw new ArgumentException(SR.Argument_OnlyMscorlib);
             }
@@ -134,7 +134,7 @@ namespace System.Globalization
                 throw new ArgumentNullException(name == null ? nameof(name) : nameof(assembly));
             }
 
-            if (assembly != typeof(object).Module.Assembly)
+            if (assembly != typeof(Object).Module.Assembly)
             {
                 throw new ArgumentException(SR.Argument_OnlyMscorlib);
             }
@@ -633,7 +633,7 @@ namespace System.Globalization
         //  IsPrefix
         //
         //  Determines whether prefix is a prefix of string.  If prefix equals
-        //  string.Empty, true is returned.
+        //  String.Empty, true is returned.
         //
         ////////////////////////////////////////////////////////////////////////
         public virtual bool IsPrefix(string source, string prefix, CompareOptions options)
@@ -698,7 +698,7 @@ namespace System.Globalization
         //  IsSuffix
         //
         //  Determines whether suffix is a suffix of string.  If suffix equals
-        //  string.Empty, true is returned.
+        //  String.Empty, true is returned.
         //
         ////////////////////////////////////////////////////////////////////////
         public virtual bool IsSuffix(string source, string suffix, CompareOptions options)
@@ -765,7 +765,7 @@ namespace System.Globalization
         //
         //  Returns the first index where value is found in string.  The
         //  search starts from startIndex and ends at endIndex.  Returns -1 if
-        //  the specified value is not found.  If value equals string.Empty,
+        //  the specified value is not found.  If value equals String.Empty,
         //  startIndex is returned.  Throws IndexOutOfRange if startIndex or
         //  endIndex is less than zero or greater than the length of string.
         //  Throws ArgumentException if value is null.
@@ -939,15 +939,7 @@ namespace System.Globalization
             Debug.Assert(!_invariantMode);
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!value.IsEmpty);
-            return IndexOfOrdinalCore(source, value, ignoreCase, fromBeginning: true);
-        }
-
-        internal int LastIndexOfOrdinal(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
-        {
-            Debug.Assert(!_invariantMode);
-            Debug.Assert(!source.IsEmpty);
-            Debug.Assert(!value.IsEmpty);
-            return IndexOfOrdinalCore(source, value, ignoreCase, fromBeginning: false);
+            return IndexOfOrdinalCore(source, value, ignoreCase);
         }
 
         internal unsafe int IndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, CompareOptions options)
@@ -955,15 +947,7 @@ namespace System.Globalization
             Debug.Assert(!_invariantMode);
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!value.IsEmpty);
-            return IndexOfCore(source, value, options, null, fromBeginning: true);
-        }
-
-        internal unsafe int LastIndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, CompareOptions options)
-        {
-            Debug.Assert(!_invariantMode);
-            Debug.Assert(!source.IsEmpty);
-            Debug.Assert(!value.IsEmpty);
-            return IndexOfCore(source, value, options, null, fromBeginning: false);
+            return IndexOfCore(source, value, options, null);
         }
 
         // The following IndexOf overload is mainly used by String.Replace. This overload assumes the parameters are already validated
@@ -1029,7 +1013,7 @@ namespace System.Globalization
         //
         //  Returns the last index where value is found in string.  The
         //  search starts from startIndex and ends at endIndex.  Returns -1 if
-        //  the specified value is not found.  If value equals string.Empty,
+        //  the specified value is not found.  If value equals String.Empty,
         //  endIndex is returned.  Throws IndexOutOfRange if startIndex or
         //  endIndex is less than zero or greater than the length of string.
         //  Throws ArgumentException if value is null.
@@ -1037,7 +1021,7 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
 
 
-        public virtual int LastIndexOf(string source, char value)
+        public virtual int LastIndexOf(String source, char value)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
@@ -1252,7 +1236,7 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
 
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             CompareInfo that = value as CompareInfo;
 

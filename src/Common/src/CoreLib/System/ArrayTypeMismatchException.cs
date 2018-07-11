@@ -34,13 +34,13 @@ namespace System
         // message, its HRESULT set to COR_E_ARRAYTYPEMISMATCH, 
         // and its ExceptionInfo reference set to null. 
         // 
-        public ArrayTypeMismatchException(string message)
+        public ArrayTypeMismatchException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_ARRAYTYPEMISMATCH;
         }
 
-        public ArrayTypeMismatchException(string message, Exception innerException)
+        public ArrayTypeMismatchException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ARRAYTYPEMISMATCH;

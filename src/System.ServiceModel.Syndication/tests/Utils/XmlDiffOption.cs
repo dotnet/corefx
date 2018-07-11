@@ -32,18 +32,65 @@ namespace System.ServiceModel.Syndication.Tests
 
     public class XmlDiffAdvancedOptions
     {
-        public XmlDiffAdvancedOptions() => AddedNamespaces = new Dictionary<string, string>();
+        private string _ignoreNodesExpr;
+        private string _ignoreValuesExpr;
+        private string _ignoreChildOrderExpr;
+        private IDictionary<string, string> _addedNamespaces;
 
-        public string IgnoreNodesExpr { get; set; }
+        public XmlDiffAdvancedOptions()
+        {
+            _addedNamespaces = new Dictionary<string, string>();
+        }
 
-        public string IgnoreValuesExpr { get; set; }
+        public string IgnoreNodesExpr
+        {
+            get
+            {
+                return _ignoreNodesExpr;
+            }
+            set
+            {
+                _ignoreNodesExpr = value;
+            }
+        }
 
-        public string IgnoreChildOrderExpr { get; set; }
+        public string IgnoreValuesExpr
+        {
+            get
+            {
+                return _ignoreValuesExpr;
+            }
+            set
+            {
+                _ignoreValuesExpr = value;
+            }
+        }
 
-        public void AddNamespace(string prefix, string uri) => AddedNamespaces[prefix] = uri;
+        public string IgnoreChildOrderExpr
+        {
+            get
+            {
+                return _ignoreChildOrderExpr;
+            }
+            set
+            {
+                _ignoreChildOrderExpr = value;
+            }
+        }
 
-        public bool HadAddedNamespace() => AddedNamespaces.Count != 0;
+        public void AddNamespace(string prefix, string uri)
+        {
+            _addedNamespaces[prefix] = uri;
+        }
 
-        public IDictionary<string, string> AddedNamespaces { get; }
+        public bool HadAddedNamespace()
+        {
+            return 0 != _addedNamespaces.Count;
+        }
+
+        public IDictionary<string, string> AddedNamespaces
+        {
+            get { return _addedNamespaces; }
+        }
     }
 }

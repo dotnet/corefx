@@ -24,20 +24,19 @@ namespace System.CodeDom
 
         public CodeTypeReference ReturnType
         {
-            get => _returnType ?? (_returnType = new CodeTypeReference(typeof(void).FullName));
-            set => _returnType = value;
+            get { return _returnType ?? (_returnType = new CodeTypeReference(typeof(void).FullName)); }
+            set { _returnType = value; }
         }
 
         public CodeStatementCollection Statements
         {
             get
             {
-                if ((_populated & StatementsCollection) == 0)
+                if (0 == (_populated & StatementsCollection))
                 {
                     _populated |= StatementsCollection;
                     PopulateStatements?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _statements;
             }
         }
@@ -46,12 +45,11 @@ namespace System.CodeDom
         {
             get
             {
-                if ((_populated & ParametersCollection) == 0)
+                if (0 == (_populated & ParametersCollection))
                 {
                     _populated |= ParametersCollection;
                     PopulateParameters?.Invoke(this, EventArgs.Empty);
                 }
-
                 return _parameters;
             }
         }
@@ -67,7 +65,7 @@ namespace System.CodeDom
                     _implementationTypes = new CodeTypeReferenceCollection();
                 }
 
-                if ((_populated & ImplTypesCollection) == 0)
+                if (0 == (_populated & ImplTypesCollection))
                 {
                     _populated |= ImplTypesCollection;
                     PopulateImplementationTypes?.Invoke(this, EventArgs.Empty);

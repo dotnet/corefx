@@ -75,7 +75,7 @@ namespace System.Diagnostics
         }
     }
 
-    internal static class NtProcessInfoHelper
+    internal static partial class NtProcessInfoHelper
     {
         internal static ProcessInfo[] GetProcessInfos(Predicate<int> processIdFilter = null)
         {

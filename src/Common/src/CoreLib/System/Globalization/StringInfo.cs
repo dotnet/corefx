@@ -32,7 +32,7 @@ namespace System.Globalization
             this.String = value;
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(Object value)
         {
             StringInfo that = value as StringInfo;
             if (that != null)

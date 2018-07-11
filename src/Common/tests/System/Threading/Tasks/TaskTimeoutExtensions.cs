@@ -23,7 +23,7 @@ namespace System.Threading.Tasks
             }
             else
             {
-                throw new TimeoutException($"Task timed out after {millisecondsTimeout}ms");
+                throw new TimeoutException($"Task timed out after {millisecondsTimeout}");
             }
         }
 
@@ -38,7 +38,7 @@ namespace System.Threading.Tasks
             }
             else
             {
-                throw new TimeoutException($"Task timed out after {millisecondsTimeout}ms");
+                throw new TimeoutException($"Task timed out after {millisecondsTimeout}");
             }
         }
 
@@ -53,7 +53,7 @@ namespace System.Threading.Tasks
             }
             else
             {
-                throw new TimeoutException($"{nameof(WhenAllOrAnyFailed)} timed out after {millisecondsTimeout}ms");
+                throw new TimeoutException($"{nameof(WhenAllOrAnyFailed)} timed out after {millisecondsTimeout}");
             }
         }
 

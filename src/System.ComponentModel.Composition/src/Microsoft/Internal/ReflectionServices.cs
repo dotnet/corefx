@@ -56,20 +56,14 @@ namespace Microsoft.Internal
 
         public static string GetDisplayName(Type declaringType, string name)
         {
-            if(declaringType == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            Assumes.NotNull(declaringType);
 
             return declaringType.GetDisplayName() + "." + name;
         }
 
         public static string GetDisplayName(this MemberInfo member)
         {
-            if(member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
+            Assumes.NotNull(member);
 
             switch (member.MemberType)
             {
@@ -85,12 +79,9 @@ namespace Microsoft.Internal
         internal static bool TryGetGenericInterfaceType(Type instanceType, Type targetOpenInterfaceType, out Type targetClosedInterfaceType)
         {
             // The interface must be open
-            if(!targetOpenInterfaceType.IsInterface ||
-                !targetOpenInterfaceType.IsGenericTypeDefinition ||
-                instanceType.IsGenericTypeDefinition)
-            {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-            }
+            Assumes.IsTrue(targetOpenInterfaceType.IsInterface);
+            Assumes.IsTrue(targetOpenInterfaceType.IsGenericTypeDefinition);
+            Assumes.IsTrue(!instanceType.IsGenericTypeDefinition);
 
             // if instanceType is an interface, we must first check it directly
             if (instanceType.IsInterface &&

@@ -8,9 +8,9 @@
 
 #include "./histogram.h"
 
-#include "../common/context.h"
 #include "./block_splitter.h"
 #include "./command.h"
+#include "./context.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
@@ -63,16 +63,13 @@ void BrotliBuildHistogramsWithContext(
     BlockSplitIteratorNext(&insert_and_copy_it);
     HistogramAddCommand(&insert_and_copy_histograms[insert_and_copy_it.type_],
         cmd->cmd_prefix_);
-    /* TODO: unwrap iterator blocks. */
     for (j = cmd->insert_len_; j != 0; --j) {
       size_t context;
       BlockSplitIteratorNext(&literal_it);
-      context = literal_it.type_;
-      if (context_modes) {
-        ContextLut lut = BROTLI_CONTEXT_LUT(context_modes[context]);
-        context = (context << BROTLI_LITERAL_CONTEXT_BITS) +
-            BROTLI_CONTEXT(prev_byte, prev_byte2, lut);
-      }
+      context = context_modes ?
+          ((literal_it.type_ << BROTLI_LITERAL_CONTEXT_BITS) +
+              Context(prev_byte, prev_byte2, context_modes[literal_it.type_])) :
+          literal_it.type_;
       HistogramAddLiteral(&literal_histograms[context],
           ringbuffer[pos & mask]);
       prev_byte2 = prev_byte;
@@ -89,7 +86,7 @@ void BrotliBuildHistogramsWithContext(
         context = (dist_it.type_ << BROTLI_DISTANCE_CONTEXT_BITS) +
             CommandDistanceContext(cmd);
         HistogramAddDistance(&copy_dist_histograms[context],
-            cmd->dist_prefix_ & 0x3FF);
+            cmd->dist_prefix_);
       }
     }
   }

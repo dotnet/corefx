@@ -148,7 +148,9 @@ namespace System.ComponentModel.DataAnnotations
                     // If the property is not configured properly, then throw a missing member exception
                     if (badlyConfigured)
                     {
-                        string exceptionMessage = SR.Format(SR.LocalizableString_LocalizationFailed, _propertyName, _resourceType.FullName, _propertyValue);
+                        string exceptionMessage = string.Format(CultureInfo.CurrentCulture,
+                            SR.LocalizableString_LocalizationFailed,
+                            _propertyName, _resourceType.FullName, _propertyValue);
                         _cachedResult = () => { throw new InvalidOperationException(exceptionMessage); };
                     }
                     else

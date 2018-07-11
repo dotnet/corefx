@@ -28,9 +28,9 @@ namespace System.IO.Tests
 
                 // write 119 bytes starting from Pos = 28 
                 fs.Seek(28, SeekOrigin.Begin);
-                byte[] buffer = new byte[119];
+                Byte[] buffer = new Byte[119];
                 for (int i = 0; i < buffer.Length; i++)
-                    buffer[i] = byte.MaxValue;
+                    buffer[i] = Byte.MaxValue;
                 fs.Write(buffer, 0, buffer.Length);
                 fs.Flush();
 
@@ -43,7 +43,7 @@ namespace System.IO.Tests
 
                 // read one byte at Pos = 97
                 fs.Seek(97, SeekOrigin.Begin);
-                Assert.Equal(fs.ReadByte(), (int)byte.MaxValue);
+                Assert.Equal(fs.ReadByte(), (int)Byte.MaxValue);
             }
         }
     }

@@ -87,8 +87,8 @@ namespace Windows.Foundation
             Size size = new Size();
             // We can't set these via the property setters because negatives widths
             // are rejected in those APIs.
-            size._width = float.NegativeInfinity;
-            size._height = float.NegativeInfinity;
+            size._width = Single.NegativeInfinity;
+            size._height = Single.NegativeInfinity;
             return size;
         }
 
@@ -147,7 +147,7 @@ namespace Windows.Foundation
                 return "Empty";
             }
 
-            return string.Format("{0},{1}", _width, _height);
+            return String.Format("{0},{1}", _width, _height);
         }
     }
 }

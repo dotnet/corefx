@@ -69,7 +69,7 @@ namespace System.Reflection.Internal
 
             if (byteCount == 0)
             {
-                return string.Empty;
+                return String.Empty;
             }
 
             return utf8Decoder.GetString(bytes, byteCount);
@@ -83,7 +83,7 @@ namespace System.Reflection.Internal
 
             if (prefixedByteCount == 0)
             {
-                return string.Empty;
+                return String.Empty;
             }
 
             byte[] buffer = AcquireBuffer(prefixedByteCount);
@@ -172,7 +172,7 @@ namespace System.Reflection.Internal
 
             MethodInfo getStringInfo = LightUpHelper.GetMethod(typeof(Encoding), "GetString", typeof(byte*), typeof(int));
 
-            if (getStringInfo != null && getStringInfo.ReturnType == typeof(string))
+            if (getStringInfo != null && getStringInfo.ReturnType == typeof(String))
             {
                 try
                 {
@@ -217,7 +217,7 @@ namespace System.Reflection.Internal
                     && parameters[0].ParameterType == typeof(byte*)
                     && parameters[1].ParameterType == typeof(int)
                     && parameters[2].ParameterType == typeof(Encoding)
-                    && methodInfo.ReturnType == typeof(string))
+                    && methodInfo.ReturnType == typeof(String))
                 {
                     try
                     {

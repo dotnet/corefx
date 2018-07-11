@@ -523,14 +523,14 @@ namespace System.Runtime.Serialization
         {
             if (array.Length <= index)
             {
-                if (index == int.MaxValue)
+                if (index == Int32.MaxValue)
                 {
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(
                         XmlObjectSerializer.CreateSerializationException(
-                        SR.Format(SR.MaxArrayLengthExceeded, int.MaxValue,
+                        SR.Format(SR.MaxArrayLengthExceeded, Int32.MaxValue,
                         DataContract.GetClrTypeFullName(typeof(T)))));
                 }
-                int newSize = (index < int.MaxValue / 2) ? index * 2 : int.MaxValue;
+                int newSize = (index < Int32.MaxValue / 2) ? index * 2 : Int32.MaxValue;
                 T[] newArray = new T[newSize];
                 Array.Copy(array, 0, newArray, 0, array.Length);
                 array = newArray;
@@ -638,7 +638,7 @@ namespace System.Runtime.Serialization
                 if (attributes.Ref != Globals.NewObjectId)
                 {
                     xmlReader.Skip();
-                    value = GetExistingObject(attributes.Ref, null, name, string.Empty);
+                    value = GetExistingObject(attributes.Ref, null, name, String.Empty);
                 }
                 else if (attributes.XsiNil)
                 {
@@ -647,7 +647,7 @@ namespace System.Runtime.Serialization
                 }
                 else
                 {
-                    value = InternalDeserialize(xmlReader, Globals.TypeOfObject, name, string.Empty);
+                    value = InternalDeserialize(xmlReader, Globals.TypeOfObject, name, String.Empty);
                 }
 
                 serInfo.AddValue(name, value);
@@ -1028,8 +1028,8 @@ namespace System.Runtime.Serialization
                             elementNs = ns;
                         }
                         else
-                            couldBeCollectionData = (string.CompareOrdinal(elementName, name) == 0) &&
-                                (string.CompareOrdinal(elementNs, ns) == 0);
+                            couldBeCollectionData = (String.CompareOrdinal(elementName, name) == 0) &&
+                                (String.CompareOrdinal(elementNs, ns) == 0);
                     }
                 }
                 else if (xmlReader.EOF)

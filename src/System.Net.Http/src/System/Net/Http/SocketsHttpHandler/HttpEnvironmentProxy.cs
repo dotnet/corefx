@@ -185,7 +185,7 @@ namespace System.Net.Http
 
             string user = null;
             string password = null;
-            ushort port = 80;
+            UInt16 port = 80;
             string host = null;
 
             // Check if there is authentication part with user and possibly password.
@@ -227,7 +227,7 @@ namespace System.Net.Http
             else
             {
                 host = value.Substring(0, separatorIndex);
-                if (!ushort.TryParse(value.AsSpan(separatorIndex + 1), out port))
+                if (!UInt16.TryParse(value.AsSpan(separatorIndex + 1), out port))
                 {
                     return null;
                 }
@@ -267,7 +267,7 @@ namespace System.Net.Http
                         // This should match either domain it self or any subdomain or host
                         // .foo.com will match foo.com it self or *.foo.com
                         if ((s.Length - 1) == input.Host.Length &&
-                            string.Compare(s, 1, input.Host, 0, input.Host.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                            String.Compare(s, 1, input.Host, 0, input.Host.Length, StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             return true;
                         }
@@ -279,7 +279,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        if (string.Equals(s, input.Host, StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(s, input.Host, StringComparison.OrdinalIgnoreCase))
                         {
                             return true;
                         }

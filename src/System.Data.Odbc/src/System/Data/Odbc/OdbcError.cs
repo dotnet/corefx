@@ -26,7 +26,7 @@ namespace System.Data.Odbc
         {
             get
             {
-                return ((null != _message) ? _message : string.Empty);
+                return ((null != _message) ? _message : String.Empty);
             }
         }
 
@@ -50,7 +50,7 @@ namespace System.Data.Odbc
         {
             get
             {
-                return ((null != _source) ? _source : string.Empty);
+                return ((null != _source) ? _source : String.Empty);
             }
         }
 

@@ -28,7 +28,7 @@ namespace System.ComponentModel
 
         private bool _localized;
 
-        private object _locker = new object();
+        private object _locker = new Object();
 
         /// <summary>
         ///    <para>

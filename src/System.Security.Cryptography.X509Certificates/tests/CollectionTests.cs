@@ -228,8 +228,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Throws<ArgumentNullException>(() => ilist.Remove(null));
             }
 
-            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(
-                () => new X509CertificateCollection.X509CertificateEnumerator(null));
+            Assert.Throws<ArgumentNullException>(() => new X509CertificateCollection.X509CertificateEnumerator(null));
         }
 
         [Fact]
@@ -365,14 +364,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // has been deliberately changed to no longer throw to match the behavior of
                 // X509CertificateCollection.Contains and the IList.Contains implementation, which do not
                 // throw.
-                if (PlatformDetection.IsFullFramework)
-                {
-                    Assert.Throws<ArgumentNullException>(() => collection.Contains(null));
-                }
-                else
-                {
-                    Assert.False(collection.Contains(null));
-                }
+                Assert.False(collection.Contains(null));
 
                 IList ilist = (IList)collection;
                 Assert.True(ilist.Contains(c1));

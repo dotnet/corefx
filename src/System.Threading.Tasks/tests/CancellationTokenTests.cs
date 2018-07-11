@@ -1240,7 +1240,7 @@ namespace System.Threading.Tasks.Tests
         {
             public bool DidSendOccur = false;
 
-            override public void Send(SendOrPostCallback d, object state)
+            override public void Send(SendOrPostCallback d, Object state)
             {
                 //Note: another idea was to install this syncContext on the executing thread.
                 //unfortunately, the ExecutionContext business gets in the way and reestablishes a default SyncContext.
@@ -1258,7 +1258,7 @@ namespace System.Threading.Tasks.Tests
         {
             public bool DidSendOccur = false;
 
-            override public void Send(SendOrPostCallback d, object state)
+            override public void Send(SendOrPostCallback d, Object state)
             {
                 Exception marshalledException = null;
                 Task t = new Task(

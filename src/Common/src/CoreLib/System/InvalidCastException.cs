@@ -22,19 +22,19 @@ namespace System
             HResult = HResults.COR_E_INVALIDCAST;
         }
 
-        public InvalidCastException(string message)
+        public InvalidCastException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_INVALIDCAST;
         }
 
-        public InvalidCastException(string message, Exception innerException)
+        public InvalidCastException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_INVALIDCAST;
         }
 
-        public InvalidCastException(string message, int errorCode)
+        public InvalidCastException(String message, int errorCode)
             : base(message)
         {
             HResult = errorCode;

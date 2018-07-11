@@ -109,7 +109,7 @@ namespace XPathTests.XPathExpressionTests
         [Fact]
         public static void Variation_6()
         {
-            CompileTestsErrors(string.Empty, "Xp_NodeSetExpected");
+            CompileTestsErrors(String.Empty, "Xp_NodeSetExpected");
         }
 
         /// <summary>

@@ -21,9 +21,9 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DuplicateWaitObjectException : ArgumentException
     {
-        private static volatile string s_duplicateWaitObjectMessage = null;
+        private static volatile String s_duplicateWaitObjectMessage = null;
 
-        private static string DuplicateWaitObjectMessage
+        private static String DuplicateWaitObjectMessage
         {
             get
             {
@@ -41,19 +41,19 @@ namespace System
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(string parameterName)
+        public DuplicateWaitObjectException(String parameterName)
             : base(DuplicateWaitObjectMessage, parameterName)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(string parameterName, string message)
+        public DuplicateWaitObjectException(String parameterName, String message)
             : base(message, parameterName)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(string message, Exception innerException)
+        public DuplicateWaitObjectException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;

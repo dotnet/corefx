@@ -29,13 +29,13 @@ namespace System
             HResult = HResults.COR_E_UNAUTHORIZEDACCESS;
         }
 
-        public UnauthorizedAccessException(string message)
+        public UnauthorizedAccessException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_UNAUTHORIZEDACCESS;
         }
 
-        public UnauthorizedAccessException(string message, Exception inner)
+        public UnauthorizedAccessException(String message, Exception inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_UNAUTHORIZEDACCESS;

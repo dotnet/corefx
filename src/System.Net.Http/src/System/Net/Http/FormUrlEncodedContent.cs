@@ -46,9 +46,9 @@ namespace System.Net.Http
 
         private static string Encode(string data)
         {
-            if (string.IsNullOrEmpty(data))
+            if (String.IsNullOrEmpty(data))
             {
-                return string.Empty;
+                return String.Empty;
             }
             // Escape spaces as '+'.
             return Uri.EscapeDataString(data).Replace("%20", "+");

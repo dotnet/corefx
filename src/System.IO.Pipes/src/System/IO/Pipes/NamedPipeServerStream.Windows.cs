@@ -34,7 +34,7 @@ namespace System.IO.Pipes
             string fullPipeName = Path.GetFullPath(@"\\.\pipe\" + pipeName);
 
             // Make sure the pipe name isn't one of our reserved names for anonymous pipes.
-            if (string.Equals(fullPipeName, @"\\.\pipe\anonymous", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(fullPipeName, @"\\.\pipe\anonymous", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ArgumentOutOfRangeException(nameof(pipeName), SR.ArgumentOutOfRange_AnonymousReserved);
             }
@@ -166,23 +166,22 @@ namespace System.IO.Pipes
             State = PipeState.Disconnected;
         }
 
-        // Gets the username of the connected client.  Note that we will not have access to the client's 
+        // Gets the username of the connected client.  Not that we will not have access to the client's 
         // username until it has written at least once to the pipe (and has set its impersonationLevel 
         // argument appropriately). 
-        public unsafe string GetImpersonationUserName()
+        public String GetImpersonationUserName()
         {
             CheckWriteOperations();
 
-            const int UserNameMaxLength = Interop.Kernel32.CREDUI_MAX_USERNAME_LENGTH + 1;
-            char* userName = stackalloc char[UserNameMaxLength]; // ~1K
+            StringBuilder userName = new StringBuilder(Interop.Kernel32.CREDUI_MAX_USERNAME_LENGTH + 1);
 
             if (!Interop.Kernel32.GetNamedPipeHandleState(InternalHandle, IntPtr.Zero, IntPtr.Zero,
-                IntPtr.Zero, IntPtr.Zero, userName, UserNameMaxLength))
+                IntPtr.Zero, IntPtr.Zero, userName, userName.Capacity))
             {
                 throw WinIOError(Marshal.GetLastWin32Error());
             }
 
-            return new string(userName);
+            return userName.ToString();
         }
 
         // -----------------------------
@@ -214,7 +213,7 @@ namespace System.IO.Pipes
         private static RuntimeHelpers.TryCode tryCode = new RuntimeHelpers.TryCode(ImpersonateAndTryCode);
         private static RuntimeHelpers.CleanupCode cleanupCode = new RuntimeHelpers.CleanupCode(RevertImpersonationOnBackout);
 
-        private static void ImpersonateAndTryCode(object helper)
+        private static void ImpersonateAndTryCode(Object helper)
         {
             ExecuteHelper execHelper = (ExecuteHelper)helper;
 
@@ -239,7 +238,7 @@ namespace System.IO.Pipes
             }
         }
 
-        private static void RevertImpersonationOnBackout(object helper, bool exceptionThrown)
+        private static void RevertImpersonationOnBackout(Object helper, bool exceptionThrown)
         {
             ExecuteHelper execHelper = (ExecuteHelper)helper;
 

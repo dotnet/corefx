@@ -1,4 +1,4 @@
-project(System.Net.Http.Native C)
+project(System.Net.Http.Native)
 
 find_package(CURL)
 if(NOT CURL_FOUND)

@@ -6,7 +6,6 @@
 
 #include "pal_digest.h"
 #include "pal_seckey.h"
-#include "pal_compiler.h"
 
 #include <Security/Security.h>
 
@@ -41,20 +40,23 @@ enum
 };
 typedef uint32_t PAL_X509ChainStatusFlags;
 
-#define PAL_X509ChainErrorNone             0
-#define PAL_X509ChainErrorUnknownValueType 0x0001L << 32
-#define PAL_X509ChainErrorUnknownValue     0x0002L << 32
+enum
+{
+    PAL_X509ChainErrorNone = 0,
+    PAL_X509ChainErrorUnknownValueType = 0x0001L << 32,
+    PAL_X509ChainErrorUnknownValue = 0x0002L << 32,
+};
 typedef uint64_t PAL_X509ChainErrorFlags;
 
 /*
 Create a SecPolicyRef representing the basic X.509 policy
 */
-DLLEXPORT SecPolicyRef AppleCryptoNative_X509ChainCreateDefaultPolicy(void);
+extern "C" SecPolicyRef AppleCryptoNative_X509ChainCreateDefaultPolicy();
 
 /*
 Create a SecPolicyRef which checks for revocation (OCSP or CRL)
 */
-DLLEXPORT SecPolicyRef AppleCryptoNative_X509ChainCreateRevocationPolicy(void);
+extern "C" SecPolicyRef AppleCryptoNative_X509ChainCreateRevocationPolicy();
 
 /*
 Create a SecTrustRef to build a chain over the specified certificates with the given policies.
@@ -69,7 +71,7 @@ Output:
 pTrustOut: Receives the SecTrustRef to build the chain, in an unbuilt state
 pOSStatus: Receives the result of SecTrustCreateWithCertificates
 */
-DLLEXPORT int32_t
+extern "C" int32_t
 AppleCryptoNative_X509ChainCreate(CFTypeRef certs, CFTypeRef policies, SecTrustRef* pTrustOut, int32_t* pOSStatus);
 
 /*
@@ -83,27 +85,27 @@ state.  Note that an untrusted chain building successfully still returns 1.
 Output:
 pOSStatus: Receives the result of SecTrustEvaluate
 */
-DLLEXPORT int32_t AppleCryptoNative_X509ChainEvaluate(SecTrustRef chain,
-                                                      CFDateRef cfEvaluationTime,
-                                                      bool allowNetwork,
-                                                      int32_t* pOSStatus);
+extern "C" int32_t AppleCryptoNative_X509ChainEvaluate(SecTrustRef chain,
+                                                       CFDateRef cfEvaluationTime,
+                                                       bool allowNetwork,
+                                                       int32_t* pOSStatus);
 
 /*
 Gets the number of certificates in the chain.
 */
-DLLEXPORT int64_t AppleCryptoNative_X509ChainGetChainSize(SecTrustRef chain);
+extern "C" int64_t AppleCryptoNative_X509ChainGetChainSize(SecTrustRef chain);
 
 /*
 Fetches the SecCertificateRef at a given position in the chain. Position 0 is the End-Entity
 certificate, postiion 1 is the issuer of position 0, et cetera.
 */
-DLLEXPORT SecCertificateRef AppleCryptoNative_X509ChainGetCertificateAtIndex(SecTrustRef chain, int64_t index);
+extern "C" SecCertificateRef AppleCryptoNative_X509ChainGetCertificateAtIndex(SecTrustRef chain, int64_t index);
 
 /*
 Get a CFRetain()ed array of dictionaries which contain the detailed results for each element in
 the certificate chain.
 */
-DLLEXPORT CFArrayRef AppleCryptoNative_X509ChainGetTrustResults(SecTrustRef chain);
+extern "C" CFArrayRef AppleCryptoNative_X509ChainGetTrustResults(SecTrustRef chain);
 
 /*
 Get the PAL_X509ChainStatusFlags values for the certificate at the requested position within the
@@ -114,7 +116,7 @@ Returns 0 on success, non-zero on error.
 Output:
 pdwStatus: Receives a flags value for the various status codes that went awry at the given position
 */
-DLLEXPORT int32_t AppleCryptoNative_X509ChainGetStatusAtIndex(CFArrayRef details, int64_t index, int32_t* pdwStatus);
+extern "C" int32_t AppleCryptoNative_X509ChainGetStatusAtIndex(CFArrayRef details, int64_t index, int32_t* pdwStatus);
 
 /*
 Looks up the equivalent OSStatus code for a given PAL_X509ChainStatusFlags single-bit value.
@@ -124,4 +126,4 @@ Returns errSecCoreFoundationUnknown on bad/unmapped input, otherwise the appropr
 Note that PAL_X509ChainNotTimeValid is an ambiguous code, it could be errSecCertificateExpired or
 errSecCertificateNotValidYet. A caller should resolve that code via other means.
 */
-DLLEXPORT int32_t AppleCryptoNative_GetOSStatusForChainStatus(PAL_X509ChainStatusFlags chainStatusFlag);
+extern "C" int32_t AppleCryptoNative_GetOSStatusForChainStatus(PAL_X509ChainStatusFlags chainStatusFlag);

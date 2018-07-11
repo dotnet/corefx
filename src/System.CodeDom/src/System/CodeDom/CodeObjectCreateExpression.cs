@@ -30,8 +30,8 @@ namespace System.CodeDom
 
         public CodeTypeReference CreateType
         {
-            get => _createType ?? (_createType = new CodeTypeReference(""));
-            set => _createType = value;
+            get { return _createType ?? (_createType = new CodeTypeReference("")); }
+            set { _createType = value; }
         }
 
         public CodeExpressionCollection Parameters { get; } = new CodeExpressionCollection();

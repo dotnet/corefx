@@ -304,7 +304,7 @@ namespace System.Management
         /// <returns>
         ///    <para>The new cloned object.</para>
         /// </returns>
-        public virtual object Clone()
+        public virtual Object Clone()
         {
             IWbemClassObjectFreeThreaded theClone = null;
 
@@ -409,9 +409,9 @@ namespace System.Management
         { 
             get 
             { 
-                object serverName = null;
-                object scopeName = null;
-                object className = null;
+                Object serverName = null;
+                Object scopeName = null;
+                Object className = null;
                 int propertyType = 0;
                 int propertyFlavor = 0;
                 int status = (int)ManagementStatus.NoError;
@@ -437,9 +437,9 @@ namespace System.Management
                 ManagementPath classPath = new ManagementPath();
 
                 // initialize in case of throw
-                classPath.Server = string.Empty;
-                classPath.NamespacePath = string.Empty;
-                classPath.ClassName = string.Empty;
+                classPath.Server = String.Empty;
+                classPath.NamespacePath = String.Empty;
+                classPath.ClassName = String.Empty;
 
                 // Some of these may throw if they are NULL
                 try 
@@ -472,7 +472,7 @@ namespace System.Management
         ///    An <see cref='System.Object'/> containing the
         ///    value of the requested property.
         /// </value>
-        public object this[string propertyName] 
+        public Object this[string propertyName] 
         { 
             get { return GetPropertyValue(propertyName); }
             set 
@@ -499,7 +499,7 @@ namespace System.Management
         /// <returns>
         ///    <para>The value of the specified property.</para>
         /// </returns>
-        public object GetPropertyValue(string propertyName)
+        public Object GetPropertyValue(string propertyName)
         { 
             if (null == propertyName)
                 throw new ArgumentNullException (nameof(propertyName));
@@ -521,7 +521,7 @@ namespace System.Management
         /// <returns>
         ///    <para>The value of the specified qualifier.</para>
         /// </returns>
-        public object GetQualifierValue(string qualifierName)
+        public Object GetQualifierValue(string qualifierName)
         {
             return Qualifiers [qualifierName].Value;
         }
@@ -551,7 +551,7 @@ namespace System.Management
         /// <returns>
         ///    <para>The value of the specified qualifier.</para>
         /// </returns>
-        public object GetPropertyQualifierValue(string propertyName, string qualifierName)
+        public Object GetPropertyQualifierValue(string propertyName, string qualifierName)
         {
             return Properties[propertyName].Qualifiers[qualifierName].Value;
         }
@@ -676,7 +676,7 @@ namespace System.Management
 
                     if (this is ManagementObject && obj is ManagementObject)
                     {
-                        int compareRes = string.Compare(((ManagementObject)this).Path.Path,
+                        int compareRes = String.Compare(((ManagementObject)this).Path.Path,
                             ((ManagementObject)obj).Path.Path,
                             StringComparison.OrdinalIgnoreCase);
                         return (compareRes == 0);
@@ -781,7 +781,7 @@ namespace System.Management
                 }
 
                 if (val is System.DBNull)
-                    return string.Empty;
+                    return String.Empty;
                 else
                     return ((string) val);
             }

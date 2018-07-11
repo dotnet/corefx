@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
+using Microsoft.Internal;
+
 namespace System.Composition.Convention
 {
     /// <summary>
@@ -41,7 +43,8 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractType(Type type)
         {
-            _contractType = type ?? throw new ArgumentNullException(nameof(type));
+            Requires.NotNull(type, nameof(type));
+            _contractType = type;
             return this;
         }
 
@@ -52,14 +55,7 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractName(string contractName)
         {
-            if(contractName == null)
-            {
-                throw new ArgumentNullException(nameof(contractName));
-            }
-            if(contractName.Length == 0)
-            {
-                throw new ArgumentException(SR.Format(SR.ArgumentException_EmptyString, nameof(contractName)), nameof(contractName));
-            }
+            Requires.NotNullOrEmpty(contractName, nameof(contractName));
             _contractName = contractName;
             return this;
         }
@@ -71,7 +67,8 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractName(Func<Type, string> getContractNameFromPartType)
         {
-            _getContractNameFromPartType = getContractNameFromPartType ?? throw new ArgumentNullException(nameof(getContractNameFromPartType));
+            Requires.NotNull(getContractNameFromPartType, nameof(getContractNameFromPartType));
+            _getContractNameFromPartType = getContractNameFromPartType;
             return this;
         }
 
@@ -83,15 +80,7 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AddMetadata(string name, object value)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (name.Length == 0)
-            {
-                throw new ArgumentException(SR.Format(SR.ArgumentException_EmptyString, nameof(name)), nameof(name));
-            }
+            Requires.NotNullOrEmpty(name, nameof(name));
             if (_metadataItems == null)
             {
                 _metadataItems = new List<Tuple<string, object>>();
@@ -108,20 +97,8 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AddMetadata(string name, Func<Type, object> getValueFromPartType)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-            if (name.Length == 0)
-            {
-                throw new ArgumentException(SR.Format(SR.ArgumentException_EmptyString, nameof(name)), nameof(name));
-            }
-
-            if (getValueFromPartType == null)
-            {
-                throw new ArgumentNullException(nameof(getValueFromPartType));
-            }
-            
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNull(getValueFromPartType, nameof(getValueFromPartType));
             if (_metadataItemFuncs == null)
             {
                 _metadataItemFuncs = new List<Tuple<string, Func<Type, object>>>();
@@ -143,7 +120,7 @@ namespace System.Composition.Convention
             //Add metadata attributes from direct specification
             if (_metadataItems != null)
             {
-                foreach (Tuple<string, object> item in _metadataItems)
+                foreach (var item in _metadataItems)
                 {
                     attributes.Add(new ExportMetadataAttribute(item.Item1, item.Item2));
                 }
@@ -152,7 +129,7 @@ namespace System.Composition.Convention
             //Add metadata attributes from func specification
             if (_metadataItemFuncs != null)
             {
-                foreach (Tuple<string, Func<Type, object>> item in _metadataItemFuncs)
+                foreach (var item in _metadataItemFuncs)
                 {
                     var name = item.Item1;
                     var value = (item.Item2 != null) ? item.Item2(type) : null;

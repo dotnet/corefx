@@ -336,6 +336,8 @@ namespace System.Security.Cryptography.Xml
 
         // What we want to do is pump the input throug the TransformChain and then 
         // hash the output of the chain document is the document context for resolving relative references
+        [ResourceExposure(ResourceScope.None)]
+        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         internal byte[] CalculateHashValue(XmlDocument document, CanonicalXmlNodeList refList)
         {
             // refList is a list of elements that might be targets of references

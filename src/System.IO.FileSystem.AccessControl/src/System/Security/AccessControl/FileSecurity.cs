@@ -87,7 +87,7 @@ namespace System.Security.AccessControl
         }
 
         public FileSystemAccessRule(
-            string identity,
+            String identity,
             FileSystemRights fileSystemRights,
             AccessControlType type)
             : this(
@@ -121,7 +121,7 @@ namespace System.Security.AccessControl
         }
 
         public FileSystemAccessRule(
-            string identity,
+            String identity,
             FileSystemRights fileSystemRights,
             InheritanceFlags inheritanceFlags,
             PropagationFlags propagationFlags,
@@ -237,7 +237,7 @@ namespace System.Security.AccessControl
         }
 
         public FileSystemAuditRule(
-            string identity,
+            String identity,
             FileSystemRights fileSystemRights,
             AuditFlags flags)
             : this(
@@ -250,7 +250,7 @@ namespace System.Security.AccessControl
         }
 
         public FileSystemAuditRule(
-            string identity,
+            String identity,
             FileSystemRights fileSystemRights,
             InheritanceFlags inheritanceFlags,
             PropagationFlags propagationFlags,
@@ -319,7 +319,7 @@ namespace System.Security.AccessControl
         {
         }
 
-        internal FileSystemSecurity(bool isContainer, string name, AccessControlSections includeSections, bool isDirectory)
+        internal FileSystemSecurity(bool isContainer, String name, AccessControlSections includeSections, bool isDirectory)
             : base(isContainer, s_ResourceType, name, includeSections, _HandleErrorCode, isDirectory)
         {
         }
@@ -421,7 +421,7 @@ namespace System.Security.AccessControl
             return persistRules;
         }
 
-        internal void Persist(string fullPath)
+        internal void Persist(String fullPath)
         {
             WriteLock();
 
@@ -437,7 +437,7 @@ namespace System.Security.AccessControl
             }
         }
 
-        internal void Persist(SafeFileHandle handle, string fullPath)
+        internal void Persist(SafeFileHandle handle, String fullPath)
         {
             WriteLock();
 
@@ -612,17 +612,17 @@ namespace System.Security.AccessControl
         {
         }
 
-        public FileSecurity(string fileName, AccessControlSections includeSections)
+        public FileSecurity(String fileName, AccessControlSections includeSections)
             : base(false, fileName, includeSections, false)
         {
-            string fullPath = Path.GetFullPath(fileName);
+            String fullPath = Path.GetFullPath(fileName);
         }
 
         // Warning!  Be exceedingly careful with this constructor.  Do not make
         // it public.  We don't want to get into a situation where someone can
         // pass in the string foo.txt and a handle to bar.exe, and we do a
         // demand on the wrong file name.
-        internal FileSecurity(SafeFileHandle handle, string fullPath, AccessControlSections includeSections)
+        internal FileSecurity(SafeFileHandle handle, String fullPath, AccessControlSections includeSections)
             : base(false, handle, includeSections, false)
         {
         }
@@ -639,10 +639,10 @@ namespace System.Security.AccessControl
         {
         }
 
-        public DirectorySecurity(string name, AccessControlSections includeSections)
+        public DirectorySecurity(String name, AccessControlSections includeSections)
             : base(true, name, includeSections, true)
         {
-            string fullPath = Path.GetFullPath(name);
+            String fullPath = Path.GetFullPath(name);
         }
         #endregion
     }

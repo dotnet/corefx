@@ -54,13 +54,13 @@ namespace System.Xml
         }
 
         // Gets the name of the node.
-        public override string Name
+        public override String Name
         {
             get { return OwnerDocument.strDocumentFragmentName; }
         }
 
         // Gets the name of the current node without the namespace prefix.
-        public override string LocalName
+        public override String LocalName
         {
             get { return OwnerDocument.strDocumentFragmentName; }
         }

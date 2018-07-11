@@ -23,13 +23,13 @@ namespace System
             HResult = HResults.COR_E_METHODACCESS;
         }
 
-        public MethodAccessException(string message)
+        public MethodAccessException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_METHODACCESS;
         }
 
-        public MethodAccessException(string message, Exception inner)
+        public MethodAccessException(String message, Exception inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_METHODACCESS;

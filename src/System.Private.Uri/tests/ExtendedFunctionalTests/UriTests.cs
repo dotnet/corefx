@@ -21,10 +21,10 @@ namespace System.PrivateUri.Tests
 #pragma warning restore 0618
 
             int i;
-            string s;
+            String s;
             bool b;
             UriHostNameType uriHostNameType;
-            string[] ss;
+            String[] ss;
 
             s = uri.ToString();
             Assert.Equal(s, @"http://foo/bar/baz#frag");
@@ -109,10 +109,10 @@ namespace System.PrivateUri.Tests
 #pragma warning restore 0618
 
             int i;
-            string s;
+            String s;
             bool b;
             UriHostNameType uriHostNameType;
-            string[] ss;
+            String[] ss;
 
             s = uri.ToString();
             Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");

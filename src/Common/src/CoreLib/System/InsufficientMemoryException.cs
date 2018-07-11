@@ -30,13 +30,13 @@ namespace System
             HResult = HResults.COR_E_INSUFFICIENTMEMORY;
         }
 
-        public InsufficientMemoryException(string message)
+        public InsufficientMemoryException(String message)
             : base(message)
         {
             HResult = HResults.COR_E_INSUFFICIENTMEMORY;
         }
 
-        public InsufficientMemoryException(string message, Exception innerException)
+        public InsufficientMemoryException(String message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_INSUFFICIENTMEMORY;

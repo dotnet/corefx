@@ -15,13 +15,13 @@ namespace System.IO.Pipes
     public sealed partial class AnonymousPipeClientStream : PipeStream
     {
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "By design")]
-        public AnonymousPipeClientStream(string pipeHandleAsString)
+        public AnonymousPipeClientStream(String pipeHandleAsString)
             : this(PipeDirection.In, pipeHandleAsString)
         {
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "By design")]
-        public AnonymousPipeClientStream(PipeDirection direction, string pipeHandleAsString)
+        public AnonymousPipeClientStream(PipeDirection direction, String pipeHandleAsString)
             : base(direction, 0)
         {
             if (direction == PipeDirection.InOut)
