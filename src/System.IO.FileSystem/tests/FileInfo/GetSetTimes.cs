@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
@@ -64,20 +65,28 @@ namespace System.IO.Tests
                 ((testFile, time) => { testFile.LastWriteTimeUtc = time; }),
                 ((testFile) => testFile.LastWriteTimeUtc),
                 DateTimeKind.Utc);
-            yield return TimeFunction.Create(
-                ((testFile, time) => CopytoOperation()),
-                ((testFile) => testFile.LastWriteTimeUtc),
-                DateTimeKind.Utc);
         }
 
-        private void CopytoOperation()
+        [Fact]
+        public void CopyToMillisecondPresent()
         {
-            string fileName = GetTestFileName();
-            FileInfo input = new FileInfo(Path.Combine(TestDirectory, fileName));
-            FileInfo output = new FileInfo(Path.Combine(TestDirectory, GetTestFileName(), fileName));
+            FileInfo input = new FileInfo(Path.Combine(TestDirectory, GetTestFileName()));
             input.Create().Dispose();
+            for (int i = 0; i < 5; i++)
+            {
+                if (input.LastWriteTime.Millisecond != 0)
+                    break;
 
-            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+                // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                // not support millisecond granularity.
+
+                // If it's 1/1000, or low granularity, this may help:
+                Thread.Sleep(1234);
+                input = new FileInfo(Path.Combine(TestDirectory, GetTestFileName()));
+                input.Create().Dispose();
+            }
+
+            FileInfo output = new FileInfo(Path.Combine(TestDirectory, GetTestFileName(), input.Name));
             Assert.Equal(0, output.LastWriteTime.Millisecond);
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
