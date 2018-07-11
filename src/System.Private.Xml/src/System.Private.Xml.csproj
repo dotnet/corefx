@@ -755,5 +755,4 @@
     <Compile Include="System\Xml\Xsl\Runtime\XmlCollation.Unix.cs" />
     <Compile Include="System\Xml\Core\XmlTextReaderImpl.Unix.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
