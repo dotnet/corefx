@@ -28,31 +28,67 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        public static void TestDateBefore1950_Utc()
+        public static void InputDateTimeAsX509TimeBefore1950_Utc()
         {
-            DateTime dt = new DateTime(1949, 12, 31, 11, 59, 59, DateTimeKind.Utc);
+            DateTime dt = new DateTime(1949, 12, 31, 23, 59, 59, DateTimeKind.Utc);
             Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
         [Fact]
-        public static void TestDateBefore1950_Local()
+        public static void InputDateTimeAsX509TimeBefore1950_Unspecified()
         {
-            DateTime dt = new DateTime(1949, 12, 31, 11, 59, 59, DateTimeKind.Local);
+            DateTime dt = new DateTime(1949, 12, 30);
             Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
         [Fact]
-        public static void TestDateAfter2049_Utc()
+        public static void InputDateTimeAsX509TimeBefore1950_Local()
+        {
+            DateTime dt = new DateTime(1949, 12, 30, 00, 00, 00, DateTimeKind.Local);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeAfter2049_Utc()
         {
             DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00, DateTimeKind.Utc);
             Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
         }
 
         [Fact]
-        public static void TestDateAfter2049_Local()
+        public static void InputDateTimeAsX509TimeAfter2049_Unspecified()
         {
-            DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00, DateTimeKind.Local);
+            DateTime dt = new DateTime(2050, 01, 02);
             Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeAfter2049_Local()
+        {
+            DateTime dt = new DateTime(2050, 01, 02, 00, 00, 00, DateTimeKind.Local);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeBetween1950And2049_Utc()
+        {
+            var exception = Record.Exception(() => {
+                DateTime dt = new DateTime(1950, 1, 1, 00, 00, 00, DateTimeKind.Utc);
+                Pkcs9SigningTime st = new Pkcs9SigningTime(dt);
+                dt = new DateTime(2049, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+                st = new Pkcs9SigningTime(dt);
+
+                dt = new DateTime(1950, 1, 2);
+                st = new Pkcs9SigningTime(dt);
+                dt = new DateTime(2049, 12, 30);
+                st = new Pkcs9SigningTime(dt); 
+
+                dt = new DateTime(1950, 1, 2, 00, 00, 00, DateTimeKind.Local);
+                st = new Pkcs9SigningTime(dt);
+                dt = new DateTime(2049, 12, 30, 23, 59, 59, DateTimeKind.Local);
+                st = new Pkcs9SigningTime(dt);
+            });
+            Assert.Null(exception);
         }
 
         [Fact]
@@ -229,7 +265,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(dateTime, cookedData.ToLocalTime());
             Assert.Equal(DateTimeKind.Utc, cookedData.Kind);
         }
-        
+
         [Fact]
         public static void SigningTimeFromCookedData_Utc()
         {
