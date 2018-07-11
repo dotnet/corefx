@@ -9,8 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Ole32
     {
-        [DllImport("ole32.dll")]
+        [DllImport(Interop.Libraries.Ole32)]
         internal static extern int CoGetStandardMarshal(ref Guid riid, IntPtr pv, int dwDestContext, IntPtr pvDestContext, int mshlflags, out IntPtr ppMarshal);
-
     }
 }

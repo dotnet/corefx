@@ -13,24 +13,6 @@
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.SafeHandle))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.Missing))]
 
-namespace Microsoft.Win32
-{
-    internal partial interface IMarshal
-    {
-        [System.Runtime.InteropServices.PreserveSig]
-        int GetUnmarshalClass(ref System.Guid riid, System.IntPtr pv, int dwDestContext, System.IntPtr pvDestContext, int mshlflags, out System.Guid pCid);
-        [System.Runtime.InteropServices.PreserveSig]
-        int GetMarshalSizeMax(ref System.Guid riid, System.IntPtr pv, int dwDestContext, System.IntPtr pvDestContext, int mshlflags, out int pSize);
-        [System.Runtime.InteropServices.PreserveSig]
-        int MarshalInterface(System.IntPtr pStm, ref System.Guid riid, System.IntPtr pv, int dwDestContext, System.IntPtr pvDestContext, int mshlflags);
-        [System.Runtime.InteropServices.PreserveSig]
-        int UnmarshalInterface(System.IntPtr pStm, ref System.Guid riid, out System.IntPtr ppv);
-        [System.Runtime.InteropServices.PreserveSig]
-        int ReleaseMarshalData(System.IntPtr pStm);
-        [System.Runtime.InteropServices.PreserveSig]
-        int DisconnectObject(int dwReserved);
-    }
-}
 namespace System
 {
     public sealed partial class DataMisalignedException : System.SystemException
@@ -785,15 +767,9 @@ namespace System.Runtime.InteropServices
         public SafeArrayTypeMismatchException(string message) { }
         public SafeArrayTypeMismatchException(string message, System.Exception inner) { }
     }
-    public partial class StandardOleMarshalObject : MarshalByRefObject, Microsoft.Win32.IMarshal
+    public partial class StandardOleMarshalObject : MarshalByRefObject
     {
         protected StandardOleMarshalObject() { }
-        int Microsoft.Win32.IMarshal.GetUnmarshalClass(ref Guid riid, IntPtr pv, int dwDestContext, IntPtr pvDestContext, int mshlflags, out Guid pCid) { throw null; }
-        int Microsoft.Win32.IMarshal.GetMarshalSizeMax(ref Guid riid, IntPtr pv, int dwDestContext, IntPtr pvDestContext, int mshlflags, out int pSize) { throw null; }
-        int Microsoft.Win32.IMarshal.MarshalInterface(IntPtr pStm, ref Guid riid, IntPtr pv, int dwDestContext, IntPtr pvDestContext, int mshlflags) { throw null; }
-        int Microsoft.Win32.IMarshal.UnmarshalInterface(IntPtr pStm, ref Guid riid, out IntPtr ppv) { throw null; }
-        int Microsoft.Win32.IMarshal.ReleaseMarshalData(IntPtr pStm) { throw null; }
-        int Microsoft.Win32.IMarshal.DisconnectObject(int dwReserved) { throw null; }
     }
     public abstract partial class SafeBuffer : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
     {

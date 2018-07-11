@@ -10,11 +10,14 @@
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(CommonPath)\CoreLib\System\HResults.cs">
+      <Link>Common\CoreLib\System\HResults.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Interop.Libraries.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs">
       <Link>Common\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\IMarshal.cs">
-      <Link>Common\Microsoft\Win32\IMarshal.cs</Link>
     </Compile>
     <Compile Include="System\Runtime\CompilerServices\Attributes.cs" />
     <Compile Include="System\Runtime\InteropServices\Attributes.cs" />
@@ -22,6 +25,7 @@
     <Compile Include="System\Runtime\InteropServices\ComEventInterfaceAttribute.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
     <Compile Include="System\Runtime\InteropServices\DefaultParameterValueAttribute.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
     <Compile Include="System\Runtime\InteropServices\HandleCollector.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
+    <Compile Include="System\Runtime\InteropServices\IMarshal.cs" />
     <Compile Include="System\Runtime\InteropServices\RuntimeEnvironment.cs" />
     <Compile Include="System\Runtime\InteropServices\ComTypes\advf.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
     <Compile Include="System\Runtime\InteropServices\ComTypes\datadir.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
