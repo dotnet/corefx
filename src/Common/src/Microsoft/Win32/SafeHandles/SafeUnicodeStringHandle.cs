@@ -24,6 +24,11 @@ namespace Microsoft.Win32.SafeHandles
         public unsafe SafeUnicodeStringHandle(ReadOnlySpan<char> s)
             : base(IntPtr.Zero, ownsHandle: true)
         {
+            // If s == default then the span represents the null string,
+            // and handle should be IntPtr.Zero to match Marshal.StringToHGlobalUni.
+            //
+            // Since that was already done in the base ctor call, we only need to do
+            // work when s != default.
             if (s != default)
             {
                 int cch = checked(s.Length + 1);
