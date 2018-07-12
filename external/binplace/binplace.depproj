@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <PropertyGroup>
+    <BinPlaceRef>true</BinPlaceRef>
+    <BinPlaceRuntime>true</BinPlaceRuntime>
+    <NETStandardVersion Condition="$(NuGetTargetMoniker.StartsWith('.NETStandard,Version=v'))">$(NuGetTargetMoniker.SubString(22))</NETStandardVersion>
+    <IsNetStandard Condition="'$(NETStandardVersion)' != ''">true</IsNetStandard>
+    <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
+  </PropertyGroup>
+
+    <!-- Ref binplacing for all configurations -->
+  <ItemGroup>
+    <BinPlaceConfiguration Include="$(Configuration)">
+      <RefPath>$(RefPath)</RefPath>
+    </BinPlaceConfiguration>
+  </ItemGroup>
+
+  <!-- Runtime / test-runtime binplacing -->
+  <ItemGroup Condition="'$(IsNetStandard)' != 'true'">
+    <BinPlaceConfiguration Include="$(Configuration)">
+      <ItemName>HarvestBinPlaceLib</ItemName>
+      <RuntimePath>$(TestHostRootPath)</RuntimePath>
+    </BinPlaceConfiguration>
+    <BinPlaceConfiguration Include="$(Configuration)">
+      <ItemName>HarvestBinPlaceLib</ItemName>
+      <RuntimePath>$(RuntimePath)</RuntimePath>
+    </BinPlaceConfiguration>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Condition="'$(TargetGroup)' == 'netfx' OR '$(NETStandardVersion)' &gt;= 1.1">
+  	  <Version>4.5.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target Name="AddHarvestedLibraries" BeforeTargets="CoreCompile"
+          Condition="'$(IsNetStandard)' != 'true'">
+    <ItemGroup>
+      <HarvestBinPlaceLib Include="$(PackagesDir)system.memory\4.5.1\lib\netstandard2.0\System.Memory.dll" />
+    </ItemGroup>
+  </Target>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
+</Project>
