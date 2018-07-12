@@ -102,7 +102,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         {
             Pkcs12SafeContents contents = MakeReadonly(new Pkcs12SafeContents());
 
-            using (RSA rsa = RSA.Create(512))
+            using (RSA rsa = RSA.Create())
             {
                 Assert.Throws<InvalidOperationException>(() => contents.AddKeyUnencrypted(rsa));
             }
@@ -201,7 +201,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         {
             Pkcs12SafeContents contents = MakeReadonly(new Pkcs12SafeContents());
 
-            using (RSA rsa = RSA.Create(512))
+            using (RSA rsa = RSA.Create())
             {
                 Assert.Throws<InvalidOperationException>(
                     () => contents.AddShroudedKey(rsa, ReadOnlySpan<byte>.Empty, s_pbeParameters));
@@ -213,7 +213,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         {
             Pkcs12SafeContents contents = MakeReadonly(new Pkcs12SafeContents());
 
-            using (RSA rsa = RSA.Create(512))
+            using (RSA rsa = RSA.Create())
             {
                 Assert.Throws<InvalidOperationException>(
                     () => contents.AddShroudedKey(rsa, ReadOnlySpan<char>.Empty, s_pbeParameters));

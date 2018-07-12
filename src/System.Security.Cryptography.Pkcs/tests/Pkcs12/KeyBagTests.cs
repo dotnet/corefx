@@ -14,7 +14,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         [Fact]
         public static void BuildWithFactoryReadDirect()
         {
-            using (RSA rsa = RSA.Create(512))
+            using (RSA rsa = RSA.Create())
             {
                 Pkcs12SafeContents contents = new Pkcs12SafeContents();
                 Pkcs12KeyBag keyBag = contents.AddKeyUnencrypted(rsa);

@@ -24,7 +24,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         [Fact]
         public static void BuildWithCharsFactoryReadDirect()
         {
-            using (RSA rsa = RSA.Create(512))
+            using (RSA rsa = RSA.Create())
             {
                 Pkcs12SafeContents contents = new Pkcs12SafeContents();
                 Pkcs12ShroudedKeyBag keyBag = contents.AddShroudedKey(rsa, nameof(rsa), s_win7Pbe);
@@ -59,7 +59,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         [Fact]
         public static void BuildWithBytesFactoryReadDirect()
         {
-            using (RSA rsa = RSA.Create(512))
+            using (RSA rsa = RSA.Create())
             {
                 Pkcs12SafeContents contents = new Pkcs12SafeContents();
                 byte[] encryptionKey = new byte[] { 1, 2, 3, 4, 5 };
