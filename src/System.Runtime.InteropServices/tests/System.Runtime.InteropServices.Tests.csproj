@@ -51,7 +51,6 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\IntPtrArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Copy\SingleArrayTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\AddRefTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\AllocCoTaskMemTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\AllocHGlobalTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\AreComObjectsAvailableForCleanupTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\BindToMonikerTests.cs" />

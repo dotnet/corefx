@@ -12,32 +12,6 @@ namespace System.Runtime.InteropServices.Tests
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(100)]
-        public void AllocHGlobal_Int32_ReadableWritable(int size)
-        {
-            IntPtr p = Marshal.AllocHGlobal(size);
-            Assert.NotEqual(IntPtr.Zero, p);
-            try
-            {
-                for (int i = 0; i < size; i++)
-                {
-                    Marshal.WriteByte(p + i, (byte)i);
-                }
-
-                for (int i = 0; i < size; i++)
-                {
-                    Assert.Equal((byte)i, Marshal.ReadByte(p + i));
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(p);
-            }
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(100)]
         public void AllocHGlobal_IntPtr_ReadableWritable(int size)
         {
             IntPtr p = Marshal.AllocHGlobal((IntPtr)size);
