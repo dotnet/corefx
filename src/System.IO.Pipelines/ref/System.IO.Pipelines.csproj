@@ -10,7 +10,7 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netstandard1.3'">
+  <ItemGroup Condition="'$(TargetsNetStandard)' == 'true'">
     <Reference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup>
