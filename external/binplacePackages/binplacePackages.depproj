@@ -19,11 +19,11 @@
   <!-- Runtime / test-runtime binplacing -->
   <ItemGroup Condition="'$(IsNetStandard)' != 'true'">
     <BinPlaceConfiguration Include="$(Configuration)">
-      <ItemName>HarvestBinPlaceLib</ItemName>
+      <ItemName>BinPlacePackage</ItemName>
       <RuntimePath>$(TestHostRootPath)</RuntimePath>
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Include="$(Configuration)">
-      <ItemName>HarvestBinPlaceLib</ItemName>
+      <ItemName>BinPlacePackage</ItemName>
       <RuntimePath>$(RuntimePath)</RuntimePath>
     </BinPlaceConfiguration>
   </ItemGroup>
@@ -37,7 +37,7 @@
   <Target Name="AddHarvestedLibraries" BeforeTargets="CoreCompile"
           Condition="'$(IsNetStandard)' != 'true'">
     <ItemGroup>
-      <HarvestBinPlaceLib Include="$(PackagesDir)system.memory\4.5.1\lib\netstandard2.0\System.Memory.dll" />
+      <BinPlacePackage Include="$(PackagesDir)system.memory\4.5.1\lib\netstandard2.0\System.Memory.dll" />
     </ItemGroup>
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
