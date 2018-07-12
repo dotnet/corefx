@@ -2,11 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
@@ -24,6 +19,44 @@ namespace System.Threading.Tasks.Tests
             using (var ctr = cts.Token.Register(() => { }))
             {
                 Assert.Equal(cts.Token, ctr.Token);
+            }
+        }
+
+        [Fact]
+        public static void CancellationTokenRegistration_UnregisterOnDefaultIsNop()
+        {
+            Assert.False(default(CancellationTokenRegistration).Unregister());
+        }
+
+        [Fact]
+        public static void CancellationTokenRegistration_UnregisterRemovesDelegate()
+        {
+            var cts = new CancellationTokenSource();
+            bool invoked = false;
+            var ctr = cts.Token.Register(() => invoked = true);
+            Assert.True(ctr.Unregister());
+            Assert.False(ctr.Unregister());
+            cts.Cancel();
+            Assert.False(invoked);
+        }
+
+        [Fact]
+        public static void CancellationTokenRegistration_UnregisterDoesntWaitForCallbackToComplete()
+        {
+            using (var barrier = new Barrier(2))
+            {
+                var cts = new CancellationTokenSource();
+                var ctr = cts.Token.Register(() =>
+                {
+                    barrier.SignalAndWait();
+                    barrier.SignalAndWait();
+                });
+
+                Task.Run(() => cts.Cancel());
+
+                barrier.SignalAndWait();
+                Assert.False(ctr.Unregister());
+                barrier.SignalAndWait();
             }
         }
     }
