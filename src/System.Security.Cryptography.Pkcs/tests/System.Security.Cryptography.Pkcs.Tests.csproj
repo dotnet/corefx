@@ -48,6 +48,7 @@
     <Compile Include="SignedCms\SignedCmsTests.netcoreapp.cs" />
     <Compile Include="SignedCms\SignerInfoTests.netcoreapp.cs" />
     <Compile Include="Pkcs8PrivateKeyInfoTests.cs" />
+    <Compile Include="Pkcs9AttributeWindowsFileTimeTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)'=='netcoreapp'">
     <Compile Include="EnvelopedCms\DecryptTests.KeyPersistence.cs" />
