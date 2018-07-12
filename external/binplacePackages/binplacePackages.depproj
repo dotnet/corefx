@@ -2,6 +2,8 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
+    <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
+    <RidSpecificAssets>true</RidSpecificAssets>
     <BinPlaceRef>true</BinPlaceRef>
     <BinPlaceRuntime>true</BinPlaceRuntime>
     <NETStandardVersion Condition="$(NuGetTargetMoniker.StartsWith('.NETStandard,Version=v'))">$(NuGetTargetMoniker.SubString(22))</NETStandardVersion>
@@ -36,7 +38,7 @@
   <Target Name="AddHarvestedLibraries" BeforeTargets="CoreCompile"
           Condition="'$(TargetsNetStandard)' != 'true'">
     <ItemGroup>
-      <BinPlaceLib Include="$(PackagesDir)system.memory\4.5.1\lib\netstandard2.0\System.Memory.dll" />
+      <BinPlaceLib Include="@(ReferenceCopyLocalPaths)" />
     </ItemGroup>
   </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
