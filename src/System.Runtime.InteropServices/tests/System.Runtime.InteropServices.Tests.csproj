@@ -57,8 +57,8 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\BindToMonikerTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\ChangeWrapperHandleStrengthTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\CleanupUnusedObjectsInCurrentContextTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\CommonTypes.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\CommonTypes.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\Common\CommonTypes.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\Common\CommonTypes.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\DestroyStructureTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateGuidForTypeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateGuidForTypeTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />

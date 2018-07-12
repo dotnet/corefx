@@ -9,11 +9,13 @@ namespace System.Runtime.InteropServices.Tests
     public class CleanupUnusedObjectsInCurrentContextTests
     {
         [Fact]
-        public void CleanupUnusedObjectsInCurrentContext_Invoke_Success()
+        public void CleanupUnusedObjectsInCurrentContext_InvokeSeveralTimes_Success()
         {
             Marshal.CleanupUnusedObjectsInCurrentContext();
             Assert.False(Marshal.AreComObjectsAvailableForCleanup());
 
+            // Invoke twice to make sure things work when unused objects have already been
+            // cleaned up and there is nothing to do.
             Marshal.CleanupUnusedObjectsInCurrentContext();
             Assert.False(Marshal.AreComObjectsAvailableForCleanup());
         }

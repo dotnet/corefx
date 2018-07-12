@@ -8,6 +8,13 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class BindToMonikerTests
     {
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void BindToMoniker_Unix_ThrowsPlatformNotSupportedException()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => Marshal.BindToMoniker(null));
+        }
+
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNative), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(null)]
@@ -23,13 +30,6 @@ namespace System.Runtime.InteropServices.Tests
         public void BindToMoniker_InvalidMonikerName_ThrowsCOMException(string monikerName)
         {
             Assert.Throws<COMException>(() => Marshal.BindToMoniker(monikerName));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void BindToMoniker_Unix_ThrowsPlatformNotSupportedException()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => Marshal.BindToMoniker(null));
         }
     }
 }

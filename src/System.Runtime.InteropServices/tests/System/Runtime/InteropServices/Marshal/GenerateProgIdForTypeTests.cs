@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices.Tests.Common;
 using Xunit;
 
 namespace System.Runtime.InteropServices.Tests

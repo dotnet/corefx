@@ -21,16 +21,16 @@ namespace System.Runtime.InteropServices.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetExceptionForHR_ThrowExceptionForHR_ThrowsSameException()
         {
-            int errorCode = -2146231029;
-            COMException getHRException = Marshal.GetExceptionForHR(errorCode) as COMException;
-            Assert.Equal(errorCode, getHRException.HResult);
+            const int ErrorCode = unchecked((int)0x80131D0B);
+            COMException getHRException = Marshal.GetExceptionForHR(ErrorCode) as COMException;
+            Assert.Equal(ErrorCode, getHRException.HResult);
             try
             {
-                Marshal.ThrowExceptionForHR(errorCode);
+                Marshal.ThrowExceptionForHR(ErrorCode);
             }
             catch (COMException e)
             {
-                Assert.Equal(errorCode, e.HResult);
+                Assert.Equal(ErrorCode, e.HResult);
                 Assert.Equal(e.HResult, getHRException.HResult);
             }
         }

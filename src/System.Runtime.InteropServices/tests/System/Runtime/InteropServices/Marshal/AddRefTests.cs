@@ -13,19 +13,20 @@ namespace System.Runtime.InteropServices.Tests
         public void AddRef_ValidPointer_Success()
         {
             IntPtr iUnknown = Marshal.GetIUnknownForObject(new object());
-            Assert.Equal(2, Marshal.AddRef(iUnknown));
-            Assert.Equal(3, Marshal.AddRef(iUnknown));
+            try
+            {
+                Assert.Equal(2, Marshal.AddRef(iUnknown));
+                Assert.Equal(3, Marshal.AddRef(iUnknown));
 
-            Marshal.Release(iUnknown);
-            Marshal.Release(iUnknown);
-            Assert.Equal(2, Marshal.AddRef(iUnknown));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void AddRef_ZeroPointer_ThrowsArgumentNullException()
-        {
-            AssertExtensions.Throws<ArgumentNullException>("pUnk", () => Marshal.AddRef(IntPtr.Zero));
+                Marshal.Release(iUnknown);
+                Marshal.Release(iUnknown);
+                Assert.Equal(2, Marshal.AddRef(iUnknown));
+                Marshal.Release(iUnknown);
+            }
+            finally
+            {
+                Marshal.Release(iUnknown);
+            }
         }
 
         [Fact]
@@ -33,6 +34,13 @@ namespace System.Runtime.InteropServices.Tests
         public void AddRef_Unix_ThrowsPlatformNotSupportedException()
         {
             Assert.Throws<PlatformNotSupportedException>(() => Marshal.AddRef(IntPtr.Zero));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void AddRef_ZeroPointer_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("pUnk", () => Marshal.AddRef(IntPtr.Zero));
         }
     }
 }
