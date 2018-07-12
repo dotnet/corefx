@@ -164,10 +164,6 @@
       <NuGetTargetMoniker>.NETCoreApp,Version=v1.2</NuGetTargetMoniker>
       <NuGetTargetMonikerShort>netcoreapp1.2</NuGetTargetMonikerShort>
     </TargetGroups>
-    <TargetGroups Include="netcoreapp1.2corert">
-      <NuGetTargetMoniker>.NETCoreApp,Version=v1.2</NuGetTargetMoniker>
-      <NuGetTargetMonikerShort>netcoreapp1.2</NuGetTargetMonikerShort>
-    </TargetGroups>
     <TargetGroups Include="netcoreapp2.1aot">
       <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
       <NuGetTargetMoniker>.NETCoreApp,Version=v2.1</NuGetTargetMoniker>
