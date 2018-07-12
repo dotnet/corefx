@@ -107,7 +107,15 @@ namespace System.Security.Cryptography.Pkcs
             int SLen = ((salt.Length - 1 + vBytes) / vBytes) * vBytes;
 
             // The password is a null-terminated UTF-16BE version of the input.
-            int passLen = (password.Length + 1) * 2;
+            int passLen = checked((password.Length + 1) * 2);
+
+            // "" will have a pointer value pointing at the terminating \0, and length 0.
+            // null will have a pointer pointing to null and length 0.
+            // The == operator can make the distinction
+            if (password == default)
+            {
+                passLen = 0;
+            }
 
             // 3.  Concatenate copies of the password together to create a string P
             // of length v(ceiling(p/v)) bits (the final copy of the password

@@ -24,13 +24,16 @@ namespace Microsoft.Win32.SafeHandles
         public unsafe SafeUnicodeStringHandle(ReadOnlySpan<char> s)
             : base(IntPtr.Zero, ownsHandle: true)
         {
-            int cch = checked(s.Length + 1);
-            int cb = checked(cch * sizeof(char));
-            handle = Marshal.AllocHGlobal(cb);
+            if (s != default)
+            {
+                int cch = checked(s.Length + 1);
+                int cb = checked(cch * sizeof(char));
+                handle = Marshal.AllocHGlobal(cb);
 
-            Span<char> dest = new Span<char>(handle.ToPointer(), cch);
-            s.CopyTo(dest);
-            dest[s.Length] = (char)0;
+                Span<char> dest = new Span<char>(handle.ToPointer(), cch);
+                s.CopyTo(dest);
+                dest[s.Length] = (char)0;
+            }
         }
 
         public sealed override bool IsInvalid
