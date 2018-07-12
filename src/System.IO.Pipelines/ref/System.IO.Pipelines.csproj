@@ -10,9 +10,11 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netstandard1.3'">
+    <Reference Include="System.Memory" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Buffers\ref\System.Buffers.csproj" />
     <ProjectReference Include="..\..\System.Threading.Tasks.Extensions\ref\System.Threading.Tasks.Extensions.csproj" />
-    <Reference Include="System.Memory" />
   </ItemGroup>
 </Project>
