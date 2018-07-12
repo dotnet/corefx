@@ -235,8 +235,8 @@
     <Compile Include="System\StringSplitExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
-    <Compile Include="$(CommonTestPath)\Tests\System\SpanExtensions.netstandard.cs">
-      <Link>System\SpanExtensions.netstandard.cs</Link>
+    <Compile Include="$(CommonTestPath)\Tests\System\SpanExtensions.netfx.cs">
+      <Link>System\SpanExtensions.netfx.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
