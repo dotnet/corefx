@@ -33,7 +33,7 @@ namespace System.Threading.Tasks.Tests
         {
             var cts = new CancellationTokenSource();
             bool invoked = false;
-            var ctr = cts.Token.Register(() => invoked = true);
+            CancellationTokenRegistration ctr = cts.Token.Register(() => invoked = true);
             Assert.True(ctr.Unregister());
             Assert.False(ctr.Unregister());
             cts.Cancel();
@@ -46,7 +46,7 @@ namespace System.Threading.Tasks.Tests
             using (var barrier = new Barrier(2))
             {
                 var cts = new CancellationTokenSource();
-                var ctr = cts.Token.Register(() =>
+                CancellationTokenRegistration ctr = cts.Token.Register(() =>
                 {
                     barrier.SignalAndWait();
                     barrier.SignalAndWait();
@@ -54,6 +54,8 @@ namespace System.Threading.Tasks.Tests
 
                 Task.Run(() => cts.Cancel());
 
+                // Validate that Unregister doesn't block waiting for the callback to complete.
+                // (If it did block, this would deadlock.)
                 barrier.SignalAndWait();
                 Assert.False(ctr.Unregister());
                 barrier.SignalAndWait();
