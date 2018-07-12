@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Security.Cryptography.Asn1;
-using Internal.Cryptography;
+using Internal.Cryptography.Pal.AnyOS;
 
 namespace System.Security.Cryptography.Pkcs
 {
@@ -48,7 +48,7 @@ namespace System.Security.Cryptography.Pkcs
                 return null;
             }
 
-            return PkcsPal.Instance.DecodeOctetString(rawData);
+            return ManagedPkcsPal.Instance.DecodeOctetString(rawData);
         }
     }
 }

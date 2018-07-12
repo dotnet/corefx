@@ -56,6 +56,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         [Theory]
         [InlineData("040301")]
         [InlineData("3000")]
+        [InlineData("04010203")]
         [InlineData("030100")]
         public static void KeyIdFromInvalidData(string invalidHex)
         {
@@ -68,7 +69,6 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
         [Theory]
         [InlineData("0400", "")]
-        [InlineData("04010203", "02")]
         [InlineData("040440302010", "40302010")]
         [InlineData("248004030100010000", "010001")]
         public static void KeyIdFromRawData(string inputHex, string expectedHex)
