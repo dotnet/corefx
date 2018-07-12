@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Test.Cryptography;
@@ -402,9 +403,13 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
                 Assert.Equal(EmptyHex, encoded.ByteArrayToHex());
             }
 
-            X509Certificate2Collection collection = new X509Certificate2Collection();
-            collection.Import(encoded, password, X509KeyStorageFlags.DefaultKeySet);
-            Assert.Equal(0, collection.Count);
+            // [ActiveIssue(11046, TestPlatforms.AnyUnix)]
+            if (withMac || RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                X509Certificate2Collection collection = new X509Certificate2Collection();
+                collection.Import(encoded, password, X509KeyStorageFlags.DefaultKeySet);
+                Assert.Equal(0, collection.Count);
+            }
         }
 
         [Theory]
@@ -453,9 +458,13 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
                 Assert.Equal(FullyEmptyHex, encoded.ByteArrayToHex());
             }
 
-            X509Certificate2Collection collection = new X509Certificate2Collection();
-            collection.Import(encoded, password, X509KeyStorageFlags.DefaultKeySet);
-            Assert.Equal(0, collection.Count);
+            // [ActiveIssue(11046, TestPlatforms.AnyUnix)]
+            if (withMac || RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                X509Certificate2Collection collection = new X509Certificate2Collection();
+                collection.Import(encoded, password, X509KeyStorageFlags.DefaultKeySet);
+                Assert.Equal(0, collection.Count);
+            }
         }
 
         [Fact]
