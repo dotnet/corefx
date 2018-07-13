@@ -97,6 +97,7 @@ namespace System.Linq.Tests
             Assert.Empty(GetEmptyPartition<int>().ToList());
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx's Take returns a compiler-generated iterator whose Reset throws.")]
         [Fact]
         public void ResetIsNop()
         {
