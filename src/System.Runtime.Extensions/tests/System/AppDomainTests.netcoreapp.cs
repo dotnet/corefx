@@ -23,8 +23,8 @@ namespace System.Tests
         }        
  
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandle))]
-        static void TestingCreateInstanceFromObjectHandle(string physicalFileName, string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleData))]
+        public static void TestingCreateInstanceFromObjectHandle(string physicalFileName, string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
             object obj = null;
@@ -37,12 +37,10 @@ namespace System.Tests
             else
             {
                 oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type);
-                Assert.NotNull(oh);
-                Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+                CheckValidity(oh, returnedFullNameType);
 
                 obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type);
-                Assert.NotNull(obj);
-                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+                CheckValidity(obj, returnedFullNameType);
             }
 
             if (exceptionType != null)
@@ -53,32 +51,30 @@ namespace System.Tests
             else
             {
                 oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null);
-                Assert.NotNull(oh);
-                Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+                CheckValidity(oh, returnedFullNameType);
 
                 obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, null);
-                Assert.NotNull(obj);
-                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+                CheckValidity(obj, returnedFullNameType);
             }
             Assert.True(File.Exists(physicalFileName));
         }
 
-        public static IEnumerable<object[]> TestingCreateInstanceFromObjectHandle()
+        public static TheoryData<string, string, string, string, Type> TestingCreateInstanceFromObjectHandleData => new TheoryData<string, string, string, string, Type>
         {
-            //string physicalFileName, string assemblyFile, string typeName, returnedFullNameType, expectedException
-            yield return new object[] { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PublicClassSample", "AssemblyResolveTests.PublicClassSample", null };
-            yield return new object[] { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.publicclasssample", "AssemblyResolveTests.PublicClassSample", typeof(TypeLoadException) };
+            // string physicalFileName, string assemblyFile, string typeName, returnedFullNameType, expectedException
+            { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PublicClassSample", "AssemblyResolveTests.PublicClassSample", null },
+            { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.publicclasssample", "AssemblyResolveTests.PublicClassSample", typeof(TypeLoadException) },
 
-            yield return new object[] { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PrivateClassSample", "AssemblyResolveTests.PrivateClassSample", null };
-            yield return new object[] { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.privateclasssample", "AssemblyResolveTests.PrivateClassSample", typeof(TypeLoadException) };
+            { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PrivateClassSample", "AssemblyResolveTests.PrivateClassSample", null },
+            { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.privateclasssample", "AssemblyResolveTests.PrivateClassSample", typeof(TypeLoadException) },
 
-            yield return new object[] { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(MissingMethodException) };
-            yield return new object[] { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.publicclassnodefaultconstructorsample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) };
-        }
+            { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(MissingMethodException) },
+            { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.publicclassnodefaultconstructorsample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) }
+        };
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandle))]
-        static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType)
+        [MemberData(nameof(TestingCreateInstanceObjectHandleData))]
+        public static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
             object obj = null;
@@ -91,12 +87,10 @@ namespace System.Tests
             else
             {
                 oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type);
-                Assert.NotNull(oh);
-                Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+                CheckValidity(oh, returnedFullNameType);
 
                 obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type);
-                Assert.NotNull(obj);
-                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+                CheckValidity(obj, returnedFullNameType);
             }
 
             if (exceptionType != null)
@@ -107,46 +101,42 @@ namespace System.Tests
             else
             {
                 oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, null);
-                Assert.NotNull(oh);
-                Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+                CheckValidity(oh, returnedFullNameType);
 
                 obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, null);
-                Assert.NotNull(obj);
-                Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+                CheckValidity(obj, returnedFullNameType);
             }
         }
 
-        public static IEnumerable<object[]> TestingCreateInstanceObjectHandle()
+        public static TheoryData<string, string, string, Type> TestingCreateInstanceObjectHandleData => new TheoryData<string, string, string, Type>()
         {
-            //string assemblyName, string typeName, returnedFullNameType, expectedException
-            yield return new object[] { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassSample", "AssemblyResolveTests.PublicClassSample", null };
-            yield return new object[] { "assemblyresolvetests", "assemblyresolvetests.publicclasssample", "AssemblyResolveTests.PublicClassSample", typeof(TypeLoadException) };
+            // string assemblyName, string typeName, returnedFullNameType, expectedException
+            { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassSample", "AssemblyResolveTests.PublicClassSample", null },
+            { "assemblyresolvetests", "assemblyresolvetests.publicclasssample", "AssemblyResolveTests.PublicClassSample", typeof(TypeLoadException) },
 
-            yield return new object[] { "AssemblyResolveTests", "AssemblyResolveTests.PrivateClassSample", "AssemblyResolveTests.PrivateClassSample", null };
-            yield return new object[] { "assemblyresolvetests", "assemblyresolvetests.privateclasssample", "AssemblyResolveTests.PrivateClassSample", typeof(TypeLoadException) };
+            { "AssemblyResolveTests", "AssemblyResolveTests.PrivateClassSample", "AssemblyResolveTests.PrivateClassSample", null },
+            { "assemblyresolvetests", "assemblyresolvetests.privateclasssample", "AssemblyResolveTests.PrivateClassSample", typeof(TypeLoadException) },
 
-            yield return new object[] { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(MissingMethodException) };
-            yield return new object[] { "assemblyresolvetests", "assemblyresolvetests.publicclassnodefaultconstructorsample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) };
-        }
+            { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(MissingMethodException) },
+            { "assemblyresolvetests", "assemblyresolvetests.publicclassnodefaultconstructorsample", "AssemblyResolveTests.PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) }
+        };
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignature))]
-        static void TestingCreateInstanceFromObjectHandleFullSignature(string physicalFileName, string assemblyFile, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignatureData))]
+        public static void TestingCreateInstanceFromObjectHandleFullSignature(string physicalFileName, string assemblyFile, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {
             ObjectHandle oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
-            Assert.NotNull(oh);
-            Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+            CheckValidity(oh, returnedFullNameType);
 
             object obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
-            Assert.NotNull(obj);
-            Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+            CheckValidity(obj, returnedFullNameType);
 
             Assert.True(File.Exists(physicalFileName));
         }
 
-        public static IEnumerable<object[]> TestingCreateInstanceFromObjectHandleFullSignature()
+        public static IEnumerable<object[]> TestingCreateInstanceFromObjectHandleFullSignatureData()
         {
-            //string physicalFileName, string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
+            // string physicalFileName, string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
             yield return new object[] { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };
             yield return new object[] { "AssemblyResolveTests.dll", "assemblyresolvetests.dll", "assemblyresolvetests.publicclasssample", true, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };
             yield return new object[] { "AssemblyResolveTests.dll", "AssemblyResolveTests.dll", "AssemblyResolveTests.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };
@@ -159,19 +149,29 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignature))]
-        static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
+        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignatureData))]
+        public static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {
             ObjectHandle oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
-            Assert.NotNull(oh);
-            Assert.Equal(returnedFullNameType, oh.Unwrap().GetType().FullName);
+            CheckValidity(oh, returnedFullNameType);
 
             object obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
-            Assert.NotNull(obj);
-            Assert.Equal(returnedFullNameType, obj.GetType().FullName);
+            CheckValidity(obj, returnedFullNameType);
         }
 
-        public static IEnumerable<object[]> TestingCreateInstanceObjectHandleFullSignature()
+        private static void CheckValidity(object instance, string expected)
+        {
+            Assert.NotNull(instance);
+            Assert.Equal(expected, instance.GetType().FullName);
+        }
+
+        private static void CheckValidity(ObjectHandle instance, string expected)
+        {
+            Assert.NotNull(instance);
+            Assert.Equal(expected, instance.Unwrap().GetType().FullName);
+        }
+
+        public static IEnumerable<object[]> TestingCreateInstanceObjectHandleFullSignatureData()
         {
             //string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
             yield return new object[] { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };

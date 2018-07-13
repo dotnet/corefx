@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 public class PublicClassSample
 {
     public PublicClassSample() { }
     public PublicClassSample(int param) { }
 }
 
-class PrivateClassSample
+private class PrivateClassSample
 {
     public PrivateClassSample() { }
     public PrivateClassSample(int param) { }

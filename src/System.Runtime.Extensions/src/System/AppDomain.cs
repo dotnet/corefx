@@ -290,17 +290,21 @@ namespace System
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName)
-        { 
+        {
             if (assemblyName == null)
+            {
                 throw new ArgumentNullException(nameof(assemblyName));
+            }
 
             return Activator.CreateInstance(assemblyName, typeName);
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
-        { 
+        {
             if (assemblyName == null)
+            {
                 throw new ArgumentNullException(nameof(assemblyName));
+            }
 
             return Activator.CreateInstance(assemblyName,
                                             typeName,
@@ -313,9 +317,11 @@ namespace System
         }
 
         public ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes)
-        { 
+        {
             if (assemblyName == null)
+            {
                 throw new ArgumentNullException(nameof(assemblyName));
+            }
 
             return Activator.CreateInstance(assemblyName, typeName, activationAttributes);
         }
@@ -323,7 +329,6 @@ namespace System
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName)
         {
             ObjectHandle oh = CreateInstance(assemblyName, typeName);
-
             return oh?.Unwrap();
         }
 
@@ -336,25 +341,23 @@ namespace System
                                              binder, 
                                              args, 
                                              culture, 
-                                             activationAttributes);
- 
+                                             activationAttributes); 
             return oh?.Unwrap();
         }
 
         public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
         {
-            ObjectHandle oh = CreateInstance(assemblyName, typeName, activationAttributes);
-            
+            ObjectHandle oh = CreateInstance(assemblyName, typeName, activationAttributes);            
             return oh?.Unwrap();
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
-        {            
+        {
             return Activator.CreateInstanceFrom(assemblyFile, typeName);
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
-        {            
+        {
             return Activator.CreateInstanceFrom(assemblyFile,
                                                 typeName,
                                                 ignoreCase,
@@ -366,14 +369,13 @@ namespace System
         }
 
         public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes)
-        {            
+        {
             return Activator.CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName)
         {
             ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName);
-
             return oh?.Unwrap(); 
         }
 
@@ -387,14 +389,12 @@ namespace System
                                                  args, 
                                                  culture, 
                                                  activationAttributes);
- 
             return oh?.Unwrap();
         }
 
         public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes)
         {
-            ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
-            
+            ObjectHandle oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);            
             return oh?.Unwrap();
         }
 
