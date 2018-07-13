@@ -26,7 +26,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(TestingCreateInstanceFromObjectHandleData))]
-        static void TestingCreateInstanceFromObjectHandle(string physicalFileName, string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
+        public static void TestingCreateInstanceFromObjectHandle(string physicalFileName, string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
         {
             ObjectHandle oh = null;
 
@@ -67,7 +67,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(TestingCreateInstanceObjectHandleData))]
-        static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType, bool returnNull)
+        public static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType, bool returnNull)
         {
             ObjectHandle oh = null;
 
@@ -146,7 +146,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignatureData))]
-        static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType, bool returnNull)
+        public static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType, bool returnNull)
         {
             ObjectHandle oh = Activator.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
             if (returnNull)
@@ -181,7 +181,7 @@ namespace System.Tests
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWinRTSupported), nameof(PlatformDetection.IsNotWindows8x), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignatureWinRTData))]
-        static void TestingCreateInstanceObjectHandleFullSignatureWinRT(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
+        public static void TestingCreateInstanceObjectHandleFullSignatureWinRT(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
         {
             ObjectHandle oh = Activator.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
             CheckValidity(oh, returnedFullNameType);
@@ -204,13 +204,13 @@ namespace System.Tests
             public PublicType() { }
         }
 
-        class PrivateType
+        private class PrivateType
         {
             public PrivateType() { }
         }
 
         [Fact]
-        static void CreateInstanceAssemblyResolve()
+        public static void CreateInstanceAssemblyResolve()
         {
             RemoteInvoke(() =>
             {
