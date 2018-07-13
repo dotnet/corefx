@@ -30,7 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Condition="'$(TargetGroup)' == 'netcoreapp2.0' OR '$(TargetsNetfx)' == 'true' OR ('$(TargetsNetStandard)' == 'true' AND '$(NETStandardVersion)' &gt;= 1.1)">
+    <!-- runtime dependency: System.Data.SqlClient uap10.0.16299 -->
+    <!-- runtime dependency: System.Diagnostics.PerformanceCounters netcoreapp2.0,net461 -->
+    <PackageReference Include="System.Memory" Condition="'$(TargetGroup)' == 'netcoreapp2.0' OR '$(TargetGroup)' == 'uap10.0.16299' OR '$(TargetsNetfx)' == 'true' OR ('$(TargetsNetStandard)' == 'true' AND '$(NETStandardVersion)' &gt;= 1.1)">
   	  <Version>4.5.1</Version>
     </PackageReference>
   </ItemGroup>
