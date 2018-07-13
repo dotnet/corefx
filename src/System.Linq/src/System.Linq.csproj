@@ -10,35 +10,35 @@
       <TargetGroup>netcoreapp</TargetGroup>
     </ContractProject>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="System\Linq\AppendPrepend.netcoreapp.cs" />
-    <Compile Include="System\Linq\Concat.netcoreapp.cs" />
-    <Compile Include="System\Linq\DefaultIfEmpty.netcoreapp.cs" />
-    <Compile Include="System\Linq\Distinct.netcoreapp.cs" />
-    <Compile Include="System\Linq\Enumerable.netcoreapp.cs" />
-    <Compile Include="System\Linq\Grouping.netcoreapp.cs" />
-    <Compile Include="System\Linq\Lookup.netcoreapp.cs" />
-    <Compile Include="System\Linq\OrderedEnumerable.netcoreapp.cs" />
-    <Compile Include="System\Linq\Partition.netcoreapp.cs" />
-    <Compile Include="System\Linq\Range.netcoreapp.cs" />
-    <Compile Include="System\Linq\Repeat.netcoreapp.cs" />
-    <Compile Include="System\Linq\Reverse.netcoreapp.cs" />
-    <Compile Include="System\Linq\Select.netcoreapp.cs" />
-    <Compile Include="System\Linq\SelectMany.netcoreapp.cs" />
-    <Compile Include="System\Linq\Skip.netcoreapp.cs" />
-    <Compile Include="System\Linq\Take.netcoreapp.cs" />
-    <Compile Include="System\Linq\Union.netcoreapp.cs" />
-    <Compile Include="System\Linq\Where.netcoreapp.cs" />
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.netcoreapp.cs">
-      <Link>System\Collections\Generic\LargeArrayBuilder.netcoreapp.cs</Link>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'"> <!-- Optimize for speed -->
+    <Compile Include="System\Linq\AppendPrepend.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Concat.SpeedOpt.cs" />
+    <Compile Include="System\Linq\DefaultIfEmpty.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Distinct.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Enumerable.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Grouping.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Lookup.SpeedOpt.cs" />
+    <Compile Include="System\Linq\OrderedEnumerable.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Partition.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Range.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Repeat.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Reverse.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Select.SpeedOpt.cs" />
+    <Compile Include="System\Linq\SelectMany.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Skip.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Take.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Union.SpeedOpt.cs" />
+    <Compile Include="System\Linq\Where.SpeedOpt.cs" />
+    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.SpeedOpt.cs">
+      <Link>System\Collections\Generic\LargeArrayBuilder.SpeedOpt.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <Compile Include="System\Linq\Enumerable.uap.cs" />
-    <Compile Include="System\Linq\Skip.uap.cs" />
-    <Compile Include="System\Linq\Take.uap.cs" />
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.uap.cs">
-      <Link>System\Collections\Generic\LargeArrayBuilder.uap.cs</Link>
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'"> <!-- Optimize for size -->
+    <Compile Include="System\Linq\Enumerable.SizeOpt.cs" />
+    <Compile Include="System\Linq\Skip.SizeOpt.cs" />
+    <Compile Include="System\Linq\Take.SizeOpt.cs" />
+    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.SizeOpt.cs">
+      <Link>System\Collections\Generic\LargeArrayBuilder.SizeOpt.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
