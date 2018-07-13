@@ -972,6 +972,7 @@ namespace System.Collections.Generic
             int currentCapacity = _entries == null ? 0 : _entries.Length;
             if (currentCapacity >= capacity)
                 return currentCapacity;
+            _version++;
             if (_buckets == null)
                 return Initialize(capacity);
             int newSize = HashHelpers.GetPrime(capacity);
@@ -1011,6 +1012,7 @@ namespace System.Collections.Generic
                 return;
 
             int oldCount = _count;
+            _version++;
             Initialize(newSize);
             Entry[] entries = _entries;
             int[] buckets = _buckets;
