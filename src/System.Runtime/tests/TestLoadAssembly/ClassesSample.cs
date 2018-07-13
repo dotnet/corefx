@@ -8,7 +8,7 @@ public class PublicClassSample
     public PublicClassSample(int param) { }
 }
 
-private class PrivateClassSample
+class PrivateClassSample
 {
     public PrivateClassSample() { }
     public PrivateClassSample(int param) { }
