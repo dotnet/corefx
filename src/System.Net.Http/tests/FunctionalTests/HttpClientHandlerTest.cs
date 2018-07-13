@@ -168,6 +168,30 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop]
+        [Theory, MemberData(nameof(RedirectStatusCodes))]
+        public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                string credentialString = _credential.UserName + ":" + _credential.Password;
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentialString);
+                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: statusCode,
+                    destinationUri: Configuration.Http.RemoteEchoServer,
+                    hops: 1);
+                _output.WriteLine("Uri: {0}", uri);
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    string responseText = await response.Content.ReadAsStringAsync();
+                    _output.WriteLine(responseText);
+                    Assert.False(TestHelper.JsonMessageContainsKey(responseText, "Authorization"));
+                }
+            }
+        }
+
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsUap))]
         public void Ctor_ExpectedDefaultPropertyValues_UapPlatform()
         {
