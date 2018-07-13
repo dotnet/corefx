@@ -173,7 +173,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> TestingCreateInstanceObjectHandleFullSignatureData()
         {
-            //string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
+            // string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
             yield return new object[] { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };
             yield return new object[] { "assemblyresolvetests", "assemblyresolvetests.publicclasssample", true, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };
             yield return new object[] { "AssemblyResolveTests", "AssemblyResolveTests.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTests.PublicClassSample" };
