@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Condition="'$(TargetGroup)' == 'netfx' OR ('$(TargetsNetStandard)' == 'true' AND '$(NETStandardVersion)' &gt;= 1.1)">
+    <PackageReference Include="System.Memory" Condition="'$(TargetGroup)' == 'netcoreapp2.0' OR '$(TargetsNetfx)' == 'true' OR ('$(TargetsNetStandard)' == 'true' AND '$(NETStandardVersion)' &gt;= 1.1)">
   	  <Version>4.5.1</Version>
     </PackageReference>
   </ItemGroup>
