@@ -401,5 +401,27 @@ namespace System.Collections.Immutable.Tests
 
             Assert.Throws<ArgumentOutOfRangeException> (() => builder.ItemRef(5));
         }
+
+        [Fact]
+        public void ToImmutableSortedSet()
+        {
+            ImmutableSortedSet<int>.Builder builder = ImmutableSortedSet.CreateBuilder<int>();
+            builder.Add(1);
+            builder.Add(5);
+            builder.Add(10);
+
+            var set = builder.ToImmutableSortedSet();
+            Assert.Equal(1, builder[0]);
+            Assert.Equal(5, builder[1]);
+            Assert.Equal(10, builder[2]);
+
+            builder.Remove(10);
+            Assert.False(builder.Contains(10));
+            Assert.True(set.Contains(10));
+
+            builder.Clear();
+            Assert.True(builder.ToImmutableSortedSet().IsEmpty);
+            Assert.False(set.IsEmpty);
+        }
     }
 }
