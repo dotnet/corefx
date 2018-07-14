@@ -15,7 +15,6 @@
     <Compile Include="System\IO\PathTests_Windows_NetFX.cs" />
     <Compile Include="System\IO\PathTests_Windows.cs" />
     <Compile Include="System\OperatingSystemTests.cs" />
-    <Compile Include="System\Runtime\ProfileOptimization.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelperTests.cs" />
     <Compile Include="System\AppDomainTests.cs" />
     <Compile Include="System\Reflection\AssemblyNameProxyTests.cs" />
@@ -31,6 +30,7 @@
     <Compile Include="System\IO\PathTests.netcoreapp.cs" />
     <Compile Include="System\IO\PathTests_Unix.cs" />
     <Compile Include="System\IO\PathTests_Join.netcoreapp.cs" />
+    <Compile Include="System\Runtime\ProfileOptimization.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netstandard'">
     <Compile Include="System\BitConverterSpan.cs" />
