@@ -221,6 +221,17 @@ namespace System.Collections.Tests
             Assert.Equal(17, dictionary.EnsureCapacity(13));
         }
 
+        [Fact]
+        public void EnsureCapacity_Generic_CurrentCapacitySmallerThanRequestedCapacity_UpdatesVersion()
+        {
+            var dictionary = new Dictionary<TKey, TValue>();
+            using (var enumerator = dictionary.GetEnumerator())
+            {
+                dictionary.EnsureCapacity(10);
+                Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            }
+        }
+
         #endregion
 
         #region TrimExcess
@@ -417,6 +428,28 @@ namespace System.Collections.Tests
             Assert.True(dictionary.TryGetValue(chained[1], out val));
         }
 
+        [Fact]
+        public void TrimExcess_WithArgument_CurrentCapacityLargerThanRequestedCapacity_UpdatesVersion()
+        {
+            var dictionary = new Dictionary<int, int>(20);
+            using (var enumerator = dictionary.GetEnumerator())
+            {
+                dictionary.TrimExcess(3);
+                Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            }
+        }
+        
+        [Fact]
+        public void TrimExcess_NoArgument_UpdatesVersion()
+        {
+            var dictionary = new Dictionary<int, int>(20);
+            using (var enumerator = dictionary.GetEnumerator())
+            {
+                dictionary.TrimExcess();
+                Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            }
+        }
+        
         #endregion
     }
 }
