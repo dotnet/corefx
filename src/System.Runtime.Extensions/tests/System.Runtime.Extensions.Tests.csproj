@@ -15,6 +15,7 @@
     <Compile Include="System\IO\PathTests_Windows_NetFX.cs" />
     <Compile Include="System\IO\PathTests_Windows.cs" />
     <Compile Include="System\OperatingSystemTests.cs" />
+    <Compile Include="System\Runtime\ProfileOptimization.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelperTests.cs" />
     <Compile Include="System\AppDomainTests.cs" />
     <Compile Include="System\Reflection\AssemblyNameProxyTests.cs" />
