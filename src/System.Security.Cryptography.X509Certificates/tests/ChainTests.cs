@@ -637,8 +637,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             using (var chain = X509Chain.Create())
             {
-                Assert.Throws<ArgumentException>(() => chain.Build(null));
-                Assert.Throws<ArgumentException>(() => chain.Build(new X509Certificate2()));
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(null));
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(new X509Certificate2()));
             }
         }
 
