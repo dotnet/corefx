@@ -18,7 +18,6 @@ add_compile_options(-Wno-empty-translation-unit)
 add_compile_options(-Wno-cast-align)
 add_compile_options(-Wno-typedef-redefinition)
 add_compile_options(-Wno-c11-extensions)
-add_compile_options(-Wno-incompatible-pointer-types-discards-qualifiers)
 add_compile_options(-fPIC)
 add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
@@ -238,6 +237,7 @@ endfunction()
 include(configure.cmake)
 
 add_subdirectory(System.IO.Compression.Native)
+add_subdirectory(System.IO.Ports.Native)
 
 add_compile_options(-Weverything)
 

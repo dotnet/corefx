@@ -3,12 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_x509.h"
+#include "pal_utilities.h"
+#include <dlfcn.h>
+#include <pthread.h>
 
 static const int32_t kErrOutItemsNull = -3;
 static const int32_t kErrOutItemsEmpty = -2;
-
-typedef const struct OpaqueSecCertificateRef * ConstSecCertificateRef;
-typedef const struct OpaqueSecIdentityRef * ConstSecIdentityRef;
+static pthread_once_t once = PTHREAD_ONCE_INIT;
+static SecKeyRef (*secCertificateCopyKey)(SecCertificateRef);
+static OSStatus (*secCertificateCopyPublicKey)(SecCertificateRef, SecKeyRef*);
 
 int32_t
 AppleCryptoNative_X509DemuxAndRetainHandle(CFTypeRef handle, SecCertificateRef* pCertOut, SecIdentityRef* pIdentityOut)
@@ -22,15 +25,14 @@ AppleCryptoNative_X509DemuxAndRetainHandle(CFTypeRef handle, SecCertificateRef* 
         return kErrorBadInput;
 
     CFTypeID objectType = CFGetTypeID(handle);
-    void* nonConstHandle = handle;
 
     if (objectType == SecIdentityGetTypeID())
     {
-        *pIdentityOut = (ConstSecIdentityRef)nonConstHandle;
+        *pIdentityOut = (SecIdentityRef)CONST_CAST(void *, handle);
     }
     else if (objectType == SecCertificateGetTypeID())
     {
-        *pCertOut = (ConstSecCertificateRef)nonConstHandle;
+        *pCertOut = (SecCertificateRef)CONST_CAST(void *, handle);
     }
     else
     {
@@ -39,6 +41,12 @@ AppleCryptoNative_X509DemuxAndRetainHandle(CFTypeRef handle, SecCertificateRef* 
 
     CFRetain(handle);
     return 1;
+}
+
+static void InitCertificateCopy()
+{
+    secCertificateCopyKey = (SecKeyRef (*)(SecCertificateRef))dlsym(RTLD_DEFAULT, "SecCertificateCopyKey");
+    secCertificateCopyPublicKey = (OSStatus (*)(SecCertificateRef, SecKeyRef*))dlsym(RTLD_DEFAULT, "SecCertificateCopyPublicKey");
 }
 
 int32_t
@@ -50,9 +58,23 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
         *pOSStatusOut = noErr;
 
     if (cert == NULL || pPublicKeyOut == NULL || pOSStatusOut == NULL)
-        return kErrorBadInput;
+        return kErrorUnknownState;
 
-    *pOSStatusOut = SecCertificateCopyPublicKey(cert, pPublicKeyOut);
+    pthread_once (&once, InitCertificateCopy);
+    // SecCertificateCopyPublicKey was deprecated in 10.14, so use SecCertificateCopyKey on the systems that have it (10.14+),
+    // and SecCertificateCopyPublicKey on the systems that don’t.
+    if (secCertificateCopyKey != NULL)
+    {
+        *pPublicKeyOut = (*secCertificateCopyKey)(cert);
+    }
+    else if (secCertificateCopyPublicKey != NULL)
+    {
+        *pOSStatusOut = (*secCertificateCopyPublicKey)(cert, pPublicKeyOut);
+    }
+    else
+    {
+        return kErrorBadInput;
+    }
     return (*pOSStatusOut == noErr);
 }
 
@@ -195,14 +217,14 @@ static int32_t ProcessCertificateTypeReturn(CFArrayRef items, SecCertificateRef*
     if (CFGetTypeID(bestItem) == SecCertificateGetTypeID())
     {
         CFRetain(bestItem);
-        *pCertOut = (ConstSecCertificateRef)bestItem;
+        *pCertOut = (SecCertificateRef)CONST_CAST(void *,bestItem);
         return 1;
     }
 
     if (CFGetTypeID(bestItem) == SecIdentityGetTypeID())
     {
         CFRetain(bestItem);
-        *pIdentityOut = (ConstSecIdentityRef)bestItem;
+        *pIdentityOut = (SecIdentityRef)CONST_CAST(void *,bestItem);
 
         return 1;
     }
@@ -590,8 +612,9 @@ int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
 
     if (status == noErr)
     {
+        const void *constTargetKeychain = targetKeychain;
         searchList = CFArrayCreate(
-            NULL, (void**)(&targetKeychain), 1, &kCFTypeArrayCallBacks);
+            NULL, (const void**)(&constTargetKeychain), 1, &kCFTypeArrayCallBacks);
 
         if (searchList == NULL)
         {
@@ -603,8 +626,9 @@ int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
 
     if (status == noErr)
     {
+        const void *constCert = cert;
         itemMatch = CFArrayCreate(
-            NULL, (void**)(&cert), 1, &kCFTypeArrayCallBacks);
+            NULL, (const void**)(&constCert), 1, &kCFTypeArrayCallBacks);
 
         if (itemMatch == NULL)
         {
@@ -652,7 +676,7 @@ int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
             }
             else
             {
-                SecIdentityRef identity = (ConstSecIdentityRef)result;
+                SecIdentityRef identity = (SecIdentityRef)CONST_CAST(void *, result);
                 CFRetain(identity);
                 *pIdentityOut = identity;
             }
