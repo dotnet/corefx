@@ -11,7 +11,7 @@ namespace System.Runtime.Tests
     public class ProfileOptimizationTest : RemoteExecutorTestBase
     {
         [Fact]
-        public void ProfileOptimization_CheckFile()
+        public void ProfileOptimization_CheckFileExists()
         {
             string tmpProfileFilePath = GetTestFileName();
 
