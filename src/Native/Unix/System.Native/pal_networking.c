@@ -31,6 +31,10 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#if defined (__HAIKU__)
+#include <sys/time.h>
+#include <sys/sockio.h>
+#endif
 #include <sys/un.h>
 #if defined(__APPLE__) && __APPLE__
 #include <sys/socketvar.h>
@@ -49,6 +53,10 @@
 #if !HAVE_IN_PKTINFO
 #include <net/if.h>
 #if HAVE_GETIFADDRS
+#if defined (__HAIKU__)
+// Haiku needs this define for getifaddrs
+#define _BSD_SOURCE
+#endif
 #include <ifaddrs.h>
 #endif
 #endif
@@ -400,7 +408,7 @@ int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
 #endif
 
     return getdomainname((char*)name, namelen);
-#elif HAVE_UNAME
+#elif HAVE_UNAME && !defined (__HAIKU__)
     // On Android, there's no getdomainname but we can use uname to fetch the domain name
     // of the current device
     size_t namelen = (uint32_t)nameLength;
@@ -1870,9 +1878,11 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
             *platformSocketType = SOCK_RAW;
             return true;
 
+#ifdef SOCK_RDM
         case SocketType_SOCK_RDM:
             *platformSocketType = SOCK_RDM;
             return true;
+#endif
 
         case SocketType_SOCK_SEQPACKET:
             *platformSocketType = SOCK_SEQPACKET;

@@ -11,7 +11,7 @@
 #elif HAVE_TCP_H_TCPSTATE_ENUM
 #include <netinet/tcp.h>
 #else
-#error System must have TCP states defined in either tcp.h or tcp_fsm.h.
+#warning System doesn't have TCP states defined in either tcp.h or tcp_fsm.h; falling back to always returning unknown.
 #endif
 
 int32_t SystemNative_MapTcpState(int32_t tcpState)
@@ -64,6 +64,9 @@ int32_t SystemNative_MapTcpState(int32_t tcpState)
             return TcpState_Listen;
         case TCP_CLOSING:
             return TcpState_Closing;
+        default:
+            return TcpState_Unknown;
+#else
         default:
             return TcpState_Unknown;
 #endif
