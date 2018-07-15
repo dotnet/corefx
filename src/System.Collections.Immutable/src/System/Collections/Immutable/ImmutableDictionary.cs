@@ -172,7 +172,12 @@ namespace System.Collections.Immutable
         /// <param name="builder">The builder to create the immutable dictionary from.</param>
         /// <returns>An immutable dictionary.</returns>
         [Pure]
-        public static ImmutableDictionary<TKey, TValue> ToImmutableDictionary<TKey, TValue>(this ImmutableDictionary<TKey, TValue>.Builder builder) => builder.ToImmutable();
+        public static ImmutableDictionary<TKey, TValue> ToImmutableDictionary<TKey, TValue>(this ImmutableDictionary<TKey, TValue>.Builder builder)
+        {
+            Requires.NotNull(builder, nameof(builder));
+
+            return builder.ToImmutable();
+        }
 
         /// <summary>
         /// Constructs an immutable dictionary based on some transformation of a sequence.

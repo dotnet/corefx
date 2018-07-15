@@ -174,6 +174,11 @@ namespace System.Collections.Immutable
         /// <param name="builder">The builder to create the immutable set from.</param>
         /// <returns>An immutable set.</returns>
         [Pure]
-        public static ImmutableSortedSet<TSource> ToImmutableSortedSet<TSource>(this ImmutableSortedSet<TSource>.Builder builder) => builder.ToImmutable();
+        public static ImmutableSortedSet<TSource> ToImmutableSortedSet<TSource>(this ImmutableSortedSet<TSource>.Builder builder)
+        {
+            Requires.NotNull(builder, nameof(builder));
+
+            return builder.ToImmutable();
+        }
     }
 }

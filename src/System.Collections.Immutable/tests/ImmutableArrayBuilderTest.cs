@@ -473,6 +473,9 @@ namespace System.Collections.Immutable.Tests
             builder.Clear();
             Assert.True(builder.ToImmutableArray().IsEmpty);
             Assert.False(array.IsEmpty);
+
+            ImmutableArray<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableArray());
         }
 
         [Fact]

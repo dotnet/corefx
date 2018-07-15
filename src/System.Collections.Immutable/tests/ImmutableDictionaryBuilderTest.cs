@@ -290,6 +290,9 @@ namespace System.Collections.Immutable.Tests
             builder.Clear();
             Assert.True(builder.ToImmutableDictionary().IsEmpty);
             Assert.False(dictionary.IsEmpty);
+
+            ImmutableDictionary<int, int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableDictionary());
         }
 
         protected override IImmutableDictionary<TKey, TValue> GetEmptyImmutableDictionary<TKey, TValue>()

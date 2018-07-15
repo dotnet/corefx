@@ -401,7 +401,12 @@ namespace System.Collections.Immutable
         /// <param name="builder">The builder to create the immutable array from.</param>
         /// <returns>An immutable array.</returns>
         [Pure]
-        public static ImmutableArray<TSource> ToImmutableArray<TSource>(this ImmutableArray<TSource>.Builder builder) => builder.ToImmutable();
+        public static ImmutableArray<TSource> ToImmutableArray<TSource>(this ImmutableArray<TSource>.Builder builder)
+        {
+            Requires.NotNull(builder, nameof(builder));
+
+            return builder.ToImmutable();
+        }
 
         /// <summary>
         /// Searches an entire one-dimensional sorted <see cref="ImmutableArray{T}"/> for a specific element,

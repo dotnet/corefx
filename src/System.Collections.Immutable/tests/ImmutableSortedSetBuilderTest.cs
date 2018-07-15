@@ -422,6 +422,9 @@ namespace System.Collections.Immutable.Tests
             builder.Clear();
             Assert.True(builder.ToImmutableSortedSet().IsEmpty);
             Assert.False(set.IsEmpty);
+
+            ImmutableSortedSet<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableSortedSet());
         }
     }
 }

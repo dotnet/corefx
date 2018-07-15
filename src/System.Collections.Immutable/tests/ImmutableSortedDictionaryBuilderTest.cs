@@ -330,6 +330,9 @@ namespace System.Collections.Immutable.Tests
             builder.Clear();
             Assert.True(builder.ToImmutableSortedDictionary().IsEmpty);
             Assert.False(dictionary.IsEmpty);
+
+            ImmutableSortedDictionary<int, int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableSortedDictionary());
         }
 
         protected override IImmutableDictionary<TKey, TValue> GetEmptyImmutableDictionary<TKey, TValue>()

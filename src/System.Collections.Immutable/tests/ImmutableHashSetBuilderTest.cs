@@ -329,6 +329,9 @@ namespace System.Collections.Immutable.Tests
             builder.Clear();
             Assert.True(builder.ToImmutableHashSet().IsEmpty);
             Assert.False(set.IsEmpty);
+
+            ImmutableHashSet<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableHashSet());
         }
     }
 }

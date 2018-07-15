@@ -162,7 +162,12 @@ namespace System.Collections.Immutable
         /// <param name="builder">The builder to create the immutable set from.</param>
         /// <returns>An immutable set.</returns>
         [Pure]
-        public static ImmutableHashSet<TSource> ToImmutableHashSet<TSource>(this ImmutableHashSet<TSource>.Builder builder) => builder.ToImmutable();
+        public static ImmutableHashSet<TSource> ToImmutableHashSet<TSource>(this ImmutableHashSet<TSource>.Builder builder)
+        {
+            Requires.NotNull(builder, nameof(builder));
+
+            return builder.ToImmutable();
+        }
 
 
         /// <summary>

@@ -410,6 +410,9 @@ namespace System.Collections.Immutable.Tests
             builder.Clear();
             Assert.True(builder.ToImmutableList().IsEmpty);
             Assert.False(list.IsEmpty);
+
+            ImmutableList<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableList());
         }
 
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)
