@@ -63,9 +63,11 @@ namespace System.Buffers.Text.Tests
         {
             if (typeof(T) == typeof(decimal))
             {
-                int[] expectedBits = decimal.GetBits((decimal)(object)expected);
-                int[] actualBits = decimal.GetBits((decimal)(object)actual);
-                if (!expectedBits.SequenceEqual(actualBits))
+                MutableDecimal expectedBits = ((decimal)(object)expected).ToMutableDecimal();
+                MutableDecimal actualBits = ((decimal)(object)actual).ToMutableDecimal();
+                if ((expectedBits.High | actualBits.High | expectedBits.Mid | actualBits.Mid | expectedBits.Low | actualBits.Low) != 0
+                    ? expectedBits.High != actualBits.High || expectedBits.Mid != actualBits.Mid || expectedBits.Low != actualBits.Low || expectedBits.Flags != actualBits.Flags
+                    : (expectedBits.Flags & int.MaxValue) != (actualBits.Flags & int.MaxValue))
                 {
                     // Do not simplify into "return expectedBits.SequenceEqual()". I want to be able to put a breakpoint here.
                     return false;
