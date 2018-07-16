@@ -98,5 +98,52 @@ namespace Microsoft.VisualBasic.Tests
         {
             AssertExtensions.Throws<ArgumentException>("CharCode", () => Strings.ChrW(charCode));
         }
+
+        [Theory]
+        [InlineData("a", -1)]
+        public void Left_Invalid(string str, int length)
+        {
+            AssertExtensions.Throws<ArgumentException>("Length", () => Strings.Left(str, length));
+        }
+
+        [Theory]
+        [InlineData("", 0, "")]
+        [InlineData("", 1, "")]
+        [InlineData("abc", 0, "")]
+        [InlineData("abc", 2, "ab")]
+        [InlineData("abc", int.MaxValue, "abc")]
+        public void Left_Valid(string str, int length, string expected)
+        {
+            Assert.Equal(expected, Strings.Left(str, length));
+        }
+
+        [Theory]
+        [InlineData(null, "")]
+        [InlineData("", "")]
+        [InlineData(" ", "")]
+        [InlineData(" abc ", "abc ")]
+        [InlineData("\u3000\nabc ", "\nabc ")]
+        [InlineData("\nabc ", "\nabc ")]
+        [InlineData("abc ", "abc ")]
+        [InlineData("abc", "abc")]
+        public void LTrim_Valid(string str, string expected)
+        {
+            // Trims only space and \u3000 specifically
+            Assert.Equal(expected, Strings.LTrim(str));
+        }
+        [Theory]
+        [InlineData(null, "")]
+        [InlineData("", "")]
+        [InlineData(" ", "")]
+        [InlineData(" abc ", " abc")]
+        [InlineData(" abc\n\u3000", " abc\n")]
+        [InlineData(" abc\n", " abc\n")]
+        [InlineData(" abc", " abc")]
+        [InlineData("abc", "abc")]
+        public void RTrim_Valid(string str, string expected)
+        {
+            // Trims only space and \u3000 specifically
+            Assert.Equal(expected, Strings.RTrim(str));
+        }
     }
 }
