@@ -1,35 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E0C4E267-B1D6-463B-9C95-8C0D3C335924}</ProjectGuid>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard' AND '$(OSGroup)' == 'AnyOS'">SR.PlatformNotSupported_SystemEvents</GeneratePlatformNotSupportedAssemblyMessage>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>
-    netcoreapp-Windows_NT-Debug;
-    netcoreapp-Windows_NT-Release;
-    </Configurations>
+    <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <Compile Include="System\Security\Cryptography\X509Certificate2UI.cs"/>
-    <Compile Include="System\Security\Cryptography\SafeX509Handles.cs"/>
-    <Compile Include="System\Security\Cryptography\X509Utils.cs"/>
-    <Compile Include="System\Security\CAPI.cs"/>
+    <Compile Include="System\Security\Cryptography\X509Certificate2UI.cs" />
+    <Compile Include="System\Security\Cryptography\SafeX509Handles.cs" />
+    <Compile Include="System\Security\Cryptography\X509Utils.cs" />
+    <Compile Include="System\Security\CAPI.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netcoreapp2.0'">
-    <Reference Include="System.Collections" />
-    <Reference Include="System.ComponentModel.EventBasedAsync" />
-    <Reference Include="System.ComponentModel.Primitives" />
-    <Reference Include="System.ComponentModel.TypeConverter" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Threading" />
-    <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Collections.NonGeneric" />
   </ItemGroup>

@@ -2,14 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Permissions;
 using System.Security.Cryptography.X509Certificates;
-using System.Security;
 
 namespace System.Security.Cryptography
 {
@@ -69,7 +63,7 @@ namespace System.Security.Cryptography
             ViewInfo.nStartPage = 0;
 
             // View the certificate
-            //if (!CAPI.CryptUIDlgViewCertificateW(ViewInfo, IntPtr.Zero))
+            if (!CAPI.CryptUIDlgViewCertificateW(ViewInfo, IntPtr.Zero))
                 dwErrorCode = Marshal.GetLastWin32Error();
 
             // CryptUIDlgViewCertificateW returns ERROR_CANCELLED if the user closes
@@ -130,7 +124,7 @@ namespace System.Security.Cryptography
             csc.rgPropSheetPages = IntPtr.Zero;
             csc.hSelectedCertStore = safeCertStoreHandle.DangerousGetHandle();
 
-            SafeCertContextHandle safeCertContextHandle = null;//CAPI.CryptUIDlgSelectCertificateW(csc);
+            SafeCertContextHandle safeCertContextHandle = CAPI.CryptUIDlgSelectCertificateW(csc);
 
             if (safeCertContextHandle != null && !safeCertContextHandle.IsInvalid)
             {

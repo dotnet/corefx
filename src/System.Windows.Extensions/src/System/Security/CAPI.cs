@@ -2,20 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Security.Permissions;
-using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security
 {
     internal static class CAPI
     {
-        internal const String CRYPT32 = "crypt32.dll";
-        internal const String CRYPTUI = "cryptui.dll";
+        internal const string CRYPT32 = "crypt32.dll";
+        internal const string CRYPTUI = "cryptui.dll";
         internal const int ERROR_SUCCESS = 0;
         internal const int ERROR_CANCELLED = 1223;
         internal const uint CERT_STORE_PROV_MEMORY = 2;
@@ -29,22 +24,22 @@ namespace System.Security
         internal class CRYPTUI_VIEWCERTIFICATE_STRUCTW
         {
             internal uint dwSize;
-            internal IntPtr hwndParent;                         // OPTIONAL
-            internal uint dwFlags;                            // OPTIONAL
-            internal string szTitle;                            // OPTIONAL
+            internal IntPtr hwndParent;
+            internal uint dwFlags;
+            internal string szTitle;
             internal IntPtr pCertContext;
-            internal IntPtr rgszPurposes;                       // OPTIONAL
-            internal uint cPurposes;                          // OPTIONAL
-            internal IntPtr pCryptProviderData;                 // OPTIONAL
-            internal bool fpCryptProviderDataTrustedUsage;    // OPTIONAL
-            internal uint idxSigner;                          // OPTIONAL
-            internal uint idxCert;                            // OPTIONAL
-            internal bool fCounterSigner;                     // OPTIONAL
-            internal uint idxCounterSigner;                   // OPTIONAL
-            internal uint cStores;                            // OPTIONAL
-            internal IntPtr rghStores;                          // OPTIONAL
-            internal uint cPropSheetPages;                    // OPTIONAL
-            internal IntPtr rgPropSheetPages;                   // OPTIONAL
+            internal IntPtr rgszPurposes;
+            internal uint cPurposes;
+            internal IntPtr pCryptProviderData;
+            internal bool fpCryptProviderDataTrustedUsage;
+            internal uint idxSigner;
+            internal uint idxCert;
+            internal bool fCounterSigner;
+            internal uint idxCounterSigner;
+            internal uint cStores;
+            internal IntPtr rghStores;
+            internal uint cPropSheetPages;
+            internal IntPtr rgPropSheetPages;
             internal uint nStartPage;
         }
 
@@ -52,60 +47,39 @@ namespace System.Security
         internal class CRYPTUI_SELECTCERTIFICATE_STRUCTW
         {
             internal uint dwSize;
-            internal IntPtr hwndParent;             // OPTIONAL
-            internal uint dwFlags;                // OPTIONAL
-            internal string szTitle;                // OPTIONAL
-            internal uint dwDontUseColumn;        // OPTIONAL
-            internal string szDisplayString;        // OPTIONAL
-            internal IntPtr pFilterCallback;        // OPTIONAL
-            internal IntPtr pDisplayCallback;       // OPTIONAL
-            internal IntPtr pvCallbackData;         // OPTIONAL
+            internal IntPtr hwndParent;
+            internal uint dwFlags;
+            internal string szTitle;
+            internal uint dwDontUseColumn;
+            internal string szDisplayString;
+            internal IntPtr pFilterCallback;
+            internal IntPtr pDisplayCallback;
+            internal IntPtr pvCallbackData;
             internal uint cDisplayStores;
             internal IntPtr rghDisplayStores;
-            internal uint cStores;                // OPTIONAL
-            internal IntPtr rghStores;              // OPTIONAL
-            internal uint cPropSheetPages;        // OPTIONAL
-            internal IntPtr rgPropSheetPages;       // OPTIONAL
-            internal IntPtr hSelectedCertStore;     // OPTIONAL
+            internal uint cStores;
+            internal IntPtr rghStores;
+            internal uint cPropSheetPages;
+            internal IntPtr rgPropSheetPages;
+            internal IntPtr hSelectedCertStore;
         }
 
-        [DllImport(CRYPT32, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
-        bool CertAddCertificateLinkToStore(
-            [In]     SafeCertStoreHandle hCertStore,
-            [In]     SafeCertContextHandle pCertContext,
-            [In]     uint dwAddDisposition,
-            [In, Out] SafeCertContextHandle ppStoreContext);
-
-        [DllImport(CRYPT32, CharSet = CharSet.Auto, SetLastError = true)]
-        internal static extern
-        SafeCertContextHandle CertDuplicateCertificateContext(
-            [In]     IntPtr pCertContext);
-
-        [DllImport(CRYPT32, CharSet = CharSet.Auto, SetLastError = true)]
-        internal static extern
-        IntPtr CertEnumCertificatesInStore(
-            [In]     SafeCertStoreHandle hCertStore,
-            [In]     IntPtr pPrevCertContext);
+        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
+        internal extern static bool CertAddCertificateLinkToStore(SafeCertStoreHandle hCertStore, SafeCertContextHandle pCertContext, uint dwAddDisposition, [In, Out] SafeCertContextHandle ppStoreContext);
 
         [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern
-        SafeCertStoreHandle CertOpenStore(
-            [In]     IntPtr lpszStoreProvider,
-            [In]     uint dwMsgAndCertEncodingType,
-            [In]     IntPtr hCryptProv,
-            [In]     uint dwFlags,
-            [In]     string pvPara);
+        internal static extern SafeCertContextHandle CertDuplicateCertificateContext(IntPtr pCertContext);
 
-        //[DllImport(CRYPTUI, CharSet = CharSet.Unicode, SetLastError = true)]
-        //internal static extern
-        //bool CryptUIDlgViewCertificateW(
-        //    [In, MarshalAs(UnmanagedType.LPStruct)] CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo,
-        //    [In, Out] IntPtr pfPropertiesChanged);
+        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern IntPtr CertEnumCertificatesInStore(SafeCertStoreHandle hCertStore, IntPtr pPrevCertContext);
 
-        //[DllImport(CRYPTUI, CharSet = CharSet.Unicode, SetLastError = true)]
-        //internal static extern
-        //SafeCertContextHandle CryptUIDlgSelectCertificateW(
-        //    [In, Out, MarshalAs(UnmanagedType.LPStruct)] CRYPTUI_SELECTCERTIFICATE_STRUCTW csc);
+        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern SafeCertStoreHandle CertOpenStore(IntPtr lpszStoreProvider, uint dwMsgAndCertEncodingType, IntPtr hCryptProv, uint dwFlags, string pvPara);
+
+        [DllImport(CRYPTUI, CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern bool CryptUIDlgViewCertificateW([MarshalAs(UnmanagedType.LPStruct)] CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo, IntPtr pfPropertiesChanged);
+
+        [DllImport(CRYPTUI, CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern SafeCertContextHandle CryptUIDlgSelectCertificateW([In, Out, MarshalAs(UnmanagedType.LPStruct)] CRYPTUI_SELECTCERTIFICATE_STRUCTW csc);
     }
 }
