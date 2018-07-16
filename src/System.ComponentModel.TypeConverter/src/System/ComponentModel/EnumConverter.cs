@@ -62,6 +62,16 @@ namespace System.ComponentModel
         /// </summary>
         protected virtual IComparer Comparer => InvariantComparer.Default;
 
+        private bool IsUnsignedUnderlyingType()
+        {
+            var ut = Enum.GetUnderlyingType(EnumType);
+            return
+                ut == typeof(byte) ||
+                ut == typeof(ushort) ||
+                ut == typeof(uint) ||
+                ut == typeof(ulong);
+        }
+
         /// <summary>
         /// Converts the specified value object to an enumeration object.
         /// </summary>
@@ -73,13 +83,25 @@ namespace System.ComponentModel
                 {
                     if (strValue.IndexOf(',') != -1)
                     {
-                        long convertedValue = 0;
                         string[] values = strValue.Split(s_separators);
-                        foreach (string v in values)
+                        if (IsUnsignedUnderlyingType())
                         {
-                            convertedValue |= Convert.ToInt64((Enum)Enum.Parse(EnumType, v, true), culture);
+                            ulong convertedValue = 0;
+                            foreach (string v in values)
+                            {
+                                convertedValue |= Convert.ToUInt64((Enum)Enum.Parse(EnumType, v, true), culture);
+                            }
+                            return Enum.ToObject(EnumType, convertedValue);
                         }
-                        return Enum.ToObject(EnumType, convertedValue);
+                        else
+                        {
+                            long convertedValue = 0;
+                            foreach (string v in values)
+                            {
+                                convertedValue |= Convert.ToInt64((Enum)Enum.Parse(EnumType, v, true), culture);
+                            }
+                            return Enum.ToObject(EnumType, convertedValue);
+                        }
                     }
                     else
                     {
@@ -93,12 +115,24 @@ namespace System.ComponentModel
             }
             else if (value is Enum[])
             {
-                long finalValue = 0;
-                foreach (Enum e in (Enum[])value)
+                if (IsUnsignedUnderlyingType())
                 {
-                    finalValue |= Convert.ToInt64(e, culture);
+                    ulong finalValue = 0;
+                    foreach (Enum e in (Enum[])value)
+                    {
+                        finalValue |= Convert.ToUInt64(e, culture);
+                    }
+                    return Enum.ToObject(EnumType, finalValue);
                 }
-                return Enum.ToObject(EnumType, finalValue);
+                else
+                {
+                    long finalValue = 0;
+                    foreach (Enum e in (Enum[])value)
+                    {
+                        finalValue |= Convert.ToInt64(e, culture);
+                    }
+                    return Enum.ToObject(EnumType, finalValue);
+                }
             }
             return base.ConvertFrom(context, culture, value);
         }
@@ -132,37 +166,76 @@ namespace System.ComponentModel
                     List<Enum> flagValues = new List<Enum>();
 
                     Array objValues = Enum.GetValues(EnumType);
-                    long[] ulValues = new long[objValues.Length];
-                    for (int idx = 0; idx < objValues.Length; idx++)
-                    {
-                        ulValues[idx] = Convert.ToInt64((Enum)objValues.GetValue(idx), culture);
-                    }
 
-                    long longValue = Convert.ToInt64((Enum)value, culture);
-                    bool valueFound = true;
-                    while (valueFound)
+                    if (IsUnsignedUnderlyingType())
                     {
-                        valueFound = false;
-                        foreach (long ul in ulValues)
+                        ulong[] ulValues = new ulong[objValues.Length];
+                        for (int idx = 0; idx < objValues.Length; idx++)
                         {
-                            if ((ul != 0 && (ul & longValue) == ul) || ul == longValue)
+                            ulValues[idx] = Convert.ToUInt64((Enum)objValues.GetValue(idx), culture);
+                        }
+
+                        ulong longValue = Convert.ToUInt64((Enum)value, culture);
+                        bool valueFound = true;
+                        while (valueFound)
+                        {
+                            valueFound = false;
+                            foreach (ulong ul in ulValues)
                             {
-                                flagValues.Add((Enum)Enum.ToObject(EnumType, ul));
-                                valueFound = true;
-                                longValue &= ~ul;
+                                if ((ul != 0 && (ul & longValue) == ul) || ul == longValue)
+                                {
+                                    flagValues.Add((Enum)Enum.ToObject(EnumType, ul));
+                                    valueFound = true;
+                                    longValue &= ~ul;
+                                    break;
+                                }
+                            }
+
+                            if (longValue == 0)
+                            {
                                 break;
                             }
                         }
 
-                        if (longValue == 0)
+                        if (!valueFound && longValue != 0)
                         {
-                            break;
+                            flagValues.Add((Enum)Enum.ToObject(EnumType, longValue));
                         }
                     }
-
-                    if (!valueFound && longValue != 0)
+                    else
                     {
-                        flagValues.Add((Enum)Enum.ToObject(EnumType, longValue));
+                        long[] ulValues = new long[objValues.Length];
+                        for (int idx = 0; idx < objValues.Length; idx++)
+                        {
+                            ulValues[idx] = Convert.ToInt64((Enum)objValues.GetValue(idx), culture);
+                        }
+
+                        long longValue = Convert.ToInt64((Enum)value, culture);
+                        bool valueFound = true;
+                        while (valueFound)
+                        {
+                            valueFound = false;
+                            foreach (long ul in ulValues)
+                            {
+                                if ((ul != 0 && (ul & longValue) == ul) || ul == longValue)
+                                {
+                                    flagValues.Add((Enum)Enum.ToObject(EnumType, ul));
+                                    valueFound = true;
+                                    longValue &= ~ul;
+                                    break;
+                                }
+                            }
+
+                            if (longValue == 0)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (!valueFound && longValue != 0)
+                        {
+                            flagValues.Add((Enum)Enum.ToObject(EnumType, longValue));
+                        }
                     }
 
                     return flagValues.ToArray();
