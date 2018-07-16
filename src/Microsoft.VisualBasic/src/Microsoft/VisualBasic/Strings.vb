@@ -87,7 +87,7 @@ Namespace Global.Microsoft.VisualBasic
         End Function
 
         Public Function Chr(ByVal CharCode As Integer) As Char
-
+            ' Documentation claims that < 0 or > 255 gives an ArgumentException
             If CharCode < -32768 OrElse CharCode > 65535 Then
                 Throw New ArgumentException(SR.Argument_RangeTwoBytes1, NameOf(CharCode))
             End If
