@@ -38,7 +38,7 @@
 #if defined(__APPLE__) && __APPLE__
 #include <sys/socketvar.h>
 #endif
-#if !HAVE_GETDOMAINNAME && HAVE_UNAME
+#if !HAVE_GETDOMAINNAME && HAVE_UTSNAME_DOMAINNAME
 #include <sys/utsname.h>
 #include <stdio.h>
 #endif
@@ -407,7 +407,7 @@ int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
 #endif
 
     return getdomainname((char*)name, namelen);
-#elif HAVE_UNAME && !defined (__HAIKU__)
+#elif HAVE_UTSNAME_DOMAINNAME
     // On Android, there's no getdomainname but we can use uname to fetch the domain name
     // of the current device
     size_t namelen = (uint32_t)nameLength;

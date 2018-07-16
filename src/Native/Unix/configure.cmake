@@ -177,6 +177,12 @@ check_symbol_exists(
     HAVE_TCSANOW)
 
 check_struct_has_member(
+    "struct utsname"
+    domainname
+    "sys/utsname.h"
+    HAVE_UTSNAME_DOMAINNAME)
+
+check_struct_has_member(
     "struct stat"
     st_birthtimespec
     "sys/types.h;sys/stat.h"
