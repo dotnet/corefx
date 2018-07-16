@@ -1382,7 +1382,7 @@ int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length,
         return -1;
     }
 
-#if HAVE_FLOCK64 && !defined (__HAIKU)
+#if HAVE_FLOCK64
     struct flock64 lockArgs;
 #else
     struct flock lockArgs;
