@@ -52,10 +52,6 @@
 #if !HAVE_IN_PKTINFO
 #include <net/if.h>
 #if HAVE_GETIFADDRS
-#if defined (__HAIKU__)
-// Haiku needs this define for getifaddrs
-#define _BSD_SOURCE
-#endif
 #include <ifaddrs.h>
 #endif
 #endif
