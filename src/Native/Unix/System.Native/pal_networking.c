@@ -14,12 +14,12 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <assert.h>
+#include <sys/time.h>
 #if HAVE_EPOLL
 #include <sys/epoll.h>
 #elif HAVE_KQUEUE
 #include <sys/types.h>
 #include <sys/event.h>
-#include <sys/time.h>
 #elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
@@ -31,8 +31,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#if defined (__HAIKU__)
-#include <sys/time.h>
+#if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
 #include <sys/un.h>

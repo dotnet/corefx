@@ -307,6 +307,10 @@ check_function_exists(
     HAVE_FCOPYFILE)
 
 check_include_files(
+     "sys/sockio.h"
+     HAVE_SYS_SOCKIO_H)
+
+check_include_files(
      "sys/poll.h"
      HAVE_SYS_POLL_H)
 
