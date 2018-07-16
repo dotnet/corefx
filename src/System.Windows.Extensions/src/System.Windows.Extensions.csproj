@@ -1,18 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E0C4E267-B1D6-463B-9C95-8C0D3C335924}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>
     netcoreapp-Windows_NT-Debug;
     netcoreapp-Windows_NT-Release;
-    netcoreapp2.0-Windows_NT-Debug;
-    netcoreapp2.0-Windows_NT-Release;
-    netfx-Debug;netfx-Release;
-    netstandard-Debug;
-    netstandard-Release
     </Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="System\Security\Cryptography\X509Certificate2UI.cs"/>
+    <Compile Include="System\Security\Cryptography\SafeX509Handles.cs"/>
+    <Compile Include="System\Security\Cryptography\X509Utils.cs"/>
+    <Compile Include="System\Security\CAPI.cs"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
@@ -31,5 +30,7 @@
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Collections.NonGeneric" />
   </ItemGroup>
 </Project>
