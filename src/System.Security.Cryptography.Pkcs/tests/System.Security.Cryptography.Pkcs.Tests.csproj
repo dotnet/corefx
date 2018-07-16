@@ -63,7 +63,6 @@
     <Compile Include="SignedCms\SignerInfoTests.netcoreapp.cs" />
     <Compile Include="ImportedCollection.cs" />
     <Compile Include="Pkcs8PrivateKeyInfoTests.cs" />
-    <Compile Include="Pkcs9AttributeWindowsFileTimeTests.cs" />
     <Compile Include="PrivateKeyHelpers.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)'=='netcoreapp'">
