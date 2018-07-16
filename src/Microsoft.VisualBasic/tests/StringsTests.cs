@@ -3,12 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Text;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
 {
     public class StringsTests
     {
+        static StringsTests()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         [Fact]
         public void Asc_Char_ReturnsChar()
         {
@@ -29,7 +35,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("")]
         public void Asc_NullOrEmpty_ThrowsArgumentException(string String)
         {
-            AssertExtensions.Throws<ArgumentException>("String", () => Strings.Asc(String));
+            AssertExtensions.Throws<ArgumentException>("String", null, () => Strings.Asc(String));
         }
 
         [Fact]
@@ -52,7 +58,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("")]
         public void AscW_NullOrEmpty_ThrowsArgumentException(string String)
         {
-            AssertExtensions.Throws<ArgumentException>("String", () => Strings.AscW(String));
+            AssertExtensions.Throws<ArgumentException>("String", null, () => Strings.AscW(String));
         }
 
         [Theory]
@@ -69,8 +75,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(256)]
         public void Chr_CharCodeOutOfRange_ThrowsNotSupportedException(int charCode)
         {
-            // Documentation claims that < 0 or > 255 gives an ArgumentException but it doesn't
-            Assert.Throws<NotSupportedException>(() => Strings.Chr(charCode));
+            AssertExtensions.Throws<ArgumentException>(null, () => Strings.Chr(charCode));
         }
 
         [Theory]
@@ -78,7 +83,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(65536)]
         public void Chr_CharCodeOutOfRange_ThrowsArgumentException(int charCode)
         {
-            AssertExtensions.Throws<ArgumentException>("CharCode", () => Strings.Chr(charCode));
+            AssertExtensions.Throws<ArgumentException>("CharCode", null, () => Strings.Chr(charCode));
         }
 
         [Theory]
@@ -96,14 +101,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(65536)]
         public void ChrW_CharCodeOutOfRange_ThrowsArgumentException(int charCode)
         {
-            AssertExtensions.Throws<ArgumentException>("CharCode", () => Strings.ChrW(charCode));
+            AssertExtensions.Throws<ArgumentException>("CharCode", null, () => Strings.ChrW(charCode));
         }
 
         [Theory]
         [InlineData("a", -1)]
         public void Left_Invalid(string str, int length)
         {
-            AssertExtensions.Throws<ArgumentException>("Length", () => Strings.Left(str, length));
+            AssertExtensions.Throws<ArgumentException>("Length", null, () => Strings.Left(str, length));
         }
 
         [Theory]
@@ -121,7 +126,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("a", -1)]
         public void Right_Invalid(string str, int length)
         {
-            AssertExtensions.Throws<ArgumentException>("Length", () => Strings.Right(str, length));
+            AssertExtensions.Throws<ArgumentException>("Length", null, () => Strings.Right(str, length));
         }
 
         [Theory]
@@ -139,7 +144,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("a", -1)]
         public void Mid2_Invalid(string str, int start)
         {
-            AssertExtensions.Throws<ArgumentException>("Start", () => Strings.Mid(str, start));
+            AssertExtensions.Throws<ArgumentException>("Start", null, () => Strings.Mid(str, start));
         }
 
 
@@ -161,7 +166,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("a", -1, 1)]
         public void Mid3_Invalid(string str, int start, int length)
         {
-            AssertExtensions.Throws<ArgumentException>(start < 1 ? "Start" : "Length", () => Strings.Mid(str, start, length));
+            AssertExtensions.Throws<ArgumentException>(start < 1 ? "Start" : "Length", null, () => Strings.Mid(str, start, length));
         }
 
 
