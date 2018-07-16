@@ -368,7 +368,7 @@ int32_t SystemNative_ConvertErrorPalToPlatform(int32_t error)
             return EXDEV;
         case Error_EPFNOSUPPORT:
             return EPFNOSUPPORT;
-#ifdef ESOCKTNOSUPPORT:
+#ifdef ESOCKTNOSUPPORT
         case Error_ESOCKTNOSUPPORT:
             return ESOCKTNOSUPPORT;
 #endif
