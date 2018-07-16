@@ -64,4 +64,7 @@
   <data name="Enum_InvalidValue" xml:space="preserve">
     <value>Enumeration value '{0}' specified in condition mapping is not valid.</value>
   </data>
+  <data name="PlatformNotSupported_X509Certificate2UI" xml:space="preserve">
+    <value>X509Certificate2UI is not supported on this platform.</value>
+  </data>
 </root>

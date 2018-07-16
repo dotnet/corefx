@@ -7,6 +7,12 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
+    public enum X509SelectionFlag
+    {
+        SingleSelection = 0x00,
+        MultiSelection = 0x01
+    }
+
     public static class X509Certificate2UI
     {
         internal const int ERROR_SUCCESS = 0;

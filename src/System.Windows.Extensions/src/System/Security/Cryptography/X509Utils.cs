@@ -7,12 +7,6 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
-    public enum X509SelectionFlag
-    {
-        SingleSelection = 0x00,
-        MultiSelection = 0x01
-    }
-
     internal static class X509Utils
     {
         internal const uint CERT_STORE_ENUM_ARCHIVED_FLAG = 0x00000200;
