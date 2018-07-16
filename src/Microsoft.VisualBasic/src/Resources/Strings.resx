@@ -67,11 +67,20 @@
   <data name="Argument_GEZero1" xml:space="preserve">
     <value>Argument '{0}' must be greater or equal to zero.</value>
   </data>
+  <data name="Argument_GTZero1" xml:space="preserve">
+    <value>Argument '{0}' must be greater than zero.</value>
+  </data>
   <data name="Argument_IComparable2" xml:space="preserve">
     <value>Loop control variable of type '{1}' does not implement the 'System.IComparable' interface.</value>
   </data>
   <data name="Argument_InvalidValue" xml:space="preserve">
     <value>Value was invalid.</value>
+  </data>
+  <data name="Argument_LengthGTZero1" xml:space="preserve">
+    <value>Length of argument '{0}' must be greater than zero.</value>
+  </data>
+  <data name="Argument_RangeTwoBytes1" xml:space="preserve">
+    <value>Argument '{0}' must be within the range of -32768 to 65535.</value>
   </data>
   <data name="ForLoop_CommonType2" xml:space="preserve">
     <value>Cannot convert start value of type '{0}' and step value of type '{1}' to a common numeric type.</value>
