@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <ProjectGuid>{36A0298D-E01E-411D-A19B-19EEC60B9A8A}</ProjectGuid>
+    <Configurations>netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System.Windows.Extensions.cs" />
+  </ItemGroup>
+</Project>
