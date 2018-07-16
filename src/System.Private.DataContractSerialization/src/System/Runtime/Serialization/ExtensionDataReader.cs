@@ -37,7 +37,7 @@ namespace System.Runtime.Serialization
         private int _attributeCount;
         private int _attributeIndex;
 
-        private static object prefixLock = new object();
+        private static object s_prefixLock = new object();
 
 #pragma warning disable 0649
         private XmlNodeReader _xmlNodeReader;
@@ -485,7 +485,7 @@ namespace System.Runtime.Serialization
             string prefix = (string)s_nsToPrefixTable[ns];
             if (prefix == null) 
             {
-                lock (prefixLock)
+                lock (s_prefixLock)
                 {
                     prefix = (string)s_nsToPrefixTable[ns];
                     if (prefix == null) 
