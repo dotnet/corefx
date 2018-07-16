@@ -2,10 +2,11 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{15DB0DCC-68B4-4CFB-8BD2-F26BCCAF5A3F}</ProjectGuid>
-    <IncludePartialFacadeTests>true</IncludePartialFacadeTests>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <IncludePartialFacadeTests Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">true</IncludePartialFacadeTests>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(IncludePartialFacadeTests)' == 'true'">
+    <!-- Tests specific to the fast span -->
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
     <Compile Include="Span\Reflection.cs" />
@@ -230,6 +231,11 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
       <Link>Common\System\MutableDecimal.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Compile Include="$(CommonTestPath)\Tests\System\SpanExtensions.netstandard.cs">
+      <Link>System\SpanExtensions.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
