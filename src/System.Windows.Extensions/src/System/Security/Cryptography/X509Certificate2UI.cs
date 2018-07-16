@@ -12,14 +12,14 @@ namespace System.Security.Cryptography
         public static void DisplayCertificate(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
             DisplayX509Certificate(X509Utils.GetCertContext(certificate), IntPtr.Zero);
         }
 
         public static void DisplayCertificate(X509Certificate2 certificate, IntPtr hwndParent)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
             DisplayX509Certificate(X509Utils.GetCertContext(certificate), hwndParent);
         }
 
@@ -36,8 +36,7 @@ namespace System.Security.Cryptography
         private static void DisplayX509Certificate(SafeCertContextHandle safeCertContext, IntPtr hwndParent)
         {
             if (safeCertContext.IsInvalid)
-                throw new CryptographicException("safeCertContext");
-            //throw new CryptographicException(SR.Get(SRID.Cryptography_InvalidHandle), "safeCertContext");
+                throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHandle, nameof(safeCertContext)));
 
             int dwErrorCode = CAPI.ERROR_SUCCESS;
 
@@ -72,14 +71,12 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(Marshal.GetLastWin32Error());
         }
 
-        [SecuritySafeCritical]
         private static X509Certificate2Collection SelectFromCollectionHelper(X509Certificate2Collection certificates, string title, string message, X509SelectionFlag selectionFlag, IntPtr hwndParent)
         {
             if (certificates == null)
-                throw new ArgumentNullException("certificates");
+                throw new ArgumentNullException(nameof(certificates));
             if (selectionFlag < X509SelectionFlag.SingleSelection || selectionFlag > X509SelectionFlag.MultiSelection)
-                throw new CryptographicException("safeCertContext");
-            //throw new ArgumentException(SR.Get(SRID.Enum_Invalid, selectionFlag), "selectionFlag");
+                throw new ArgumentException(SR.Format(SR.Enum_InvalidValue, nameof(selectionFlag)));
 
             using (SafeCertStoreHandle safeSourceStoreHandle = X509Utils.ExportToMemoryStore(certificates))
             using (SafeCertStoreHandle safeTargetStoreHandle = SelectFromStore(safeSourceStoreHandle, title, message, selectionFlag, hwndParent))
@@ -88,12 +85,10 @@ namespace System.Security.Cryptography
             }
         }
 
-        [SecurityCritical]
         private static unsafe SafeCertStoreHandle SelectFromStore(SafeCertStoreHandle safeSourceStoreHandle, string title, string message, X509SelectionFlag selectionFlags, IntPtr hwndParent)
         {
             int dwErrorCode = CAPI.ERROR_SUCCESS;
 
-            // First, create a memory store
             SafeCertStoreHandle safeCertStoreHandle = CAPI.CertOpenStore((IntPtr)CAPI.CERT_STORE_PROV_MEMORY,
                                                                          CAPI.X509_ASN_ENCODING | CAPI.PKCS_7_ASN_ENCODING,
                                                                          IntPtr.Zero,

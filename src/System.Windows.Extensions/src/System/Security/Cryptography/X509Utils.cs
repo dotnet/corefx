@@ -28,7 +28,6 @@ namespace System.Security.Cryptography
 
             // we always want to use CERT_STORE_ENUM_ARCHIVED_FLAG since we want to preserve the collection in this operation.
             // By default, Archived certificates will not be included.
-
             safeCertStoreHandle = CAPI.CertOpenStore(new IntPtr(CAPI.CERT_STORE_PROV_MEMORY),
                                                      CAPI.X509_ASN_ENCODING | CAPI.PKCS_7_ASN_ENCODING,
                                                      IntPtr.Zero,
@@ -38,11 +37,8 @@ namespace System.Security.Cryptography
             if (safeCertStoreHandle == null || safeCertStoreHandle.IsInvalid)
                 throw new CryptographicException(Marshal.GetLastWin32Error());
 
-            //
             // We use CertAddCertificateLinkToStore to keep a link to the original store, so any property changes get
-            // applied to the original store. This has a limit of 99 links per cert context however.
-            //
-
+            // applied to the original store. This has a limit of 99 links per cert context however.          
             foreach (X509Certificate2 x509 in collection)
             {
                 if (!CAPI.CertAddCertificateLinkToStore(safeCertStoreHandle,
@@ -65,6 +61,7 @@ namespace System.Security.Cryptography
                 collection.Add(certificate);
                 pEnumContext = CAPI.CertEnumCertificatesInStore(safeCertStoreHandle, pEnumContext);
             }
+
             return collection;
         }
     }
