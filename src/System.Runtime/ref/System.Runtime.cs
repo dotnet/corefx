@@ -2217,6 +2217,24 @@ namespace System
     {
         public STAThreadAttribute() { }
     }
+    public sealed partial class Utf8String
+    {
+        public static readonly Utf8String Empty;
+        public Utf8String(ReadOnlySpan<byte> value) { }
+        public Utf8String(ReadOnlySpan<char> value) { }
+        public Utf8String(byte[] value, int startIndex, int length) { }
+        [CLSCompliant(false)]
+        public unsafe Utf8String(byte* value) { }
+        public Utf8String(char[] value, int startIndex, int length) { }
+        [CLSCompliant(false)]
+        public unsafe Utf8String(char* value) { }
+        public Utf8String(string value) { }
+        public int Length => throw null;
+        public ReadOnlySpan<byte> AsSpan() => throw null;
+        public ref readonly byte GetPinnableReference() => throw null;
+        public static bool IsNullOrEmpty(Utf8String value) => throw null;
+        public override string ToString() => throw null;
+    }
     public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string>, System.IConvertible, System.IEquatable<string>
     {
         public static readonly string Empty;
