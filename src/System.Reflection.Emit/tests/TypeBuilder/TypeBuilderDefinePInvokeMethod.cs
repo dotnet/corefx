@@ -137,6 +137,46 @@ namespace System.Reflection.Emit.Tests
             VerifyPInvokeMethod(t, m, p);
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void TestDefinePInvokeMethodExecution_Windows()
+        {
+            const string EnvironmentVariable = "COMPUTERNAME";
+
+            TypeBuilder tb = Helpers.DynamicType(TypeAttributes.Public);
+            MethodBuilder mb = tb.DefinePInvokeMethod(
+                "GetEnvironmentVariableW",
+                "kernel32.dll",
+                MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.PinvokeImpl,
+                CallingConventions.Standard,
+                typeof(int),
+                new Type[] { typeof(string), typeof(StringBuilder), typeof(int) },
+                CallingConvention.StdCall,
+                CharSet.Unicode);
+            mb.SetImplementationFlags(mb.GetMethodImplementationFlags() | MethodImplAttributes.PreserveSig);
+
+            Type t = tb.CreateType();
+            MethodInfo m = t.GetMethod("GetEnvironmentVariableW", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.NotNull(m);
+
+            string expected = Environment.GetEnvironmentVariable(EnvironmentVariable);
+
+            int numCharsRequired = (int)m.Invoke(null, new object[] { EnvironmentVariable, null, 0 });
+            if (numCharsRequired == 0)
+            {
+                // Environment variable is not defined. Make sure we got that result using both techniques.
+                Assert.Null(expected);
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder(numCharsRequired);
+                int numCharsWritten = (int)m.Invoke(null, new object[] { EnvironmentVariable, sb, numCharsRequired });
+                Assert.NotEqual(0, numCharsWritten);
+                string actual = sb.ToString();
+                Assert.Equal(expected, actual);
+            }
+        }
+
         public static void VerifyPInvokeMethod(Type type, MethodInfo method, DpmParams p)
         {
             Assert.Equal(type.AsType(), method.DeclaringType);
