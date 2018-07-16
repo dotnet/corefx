@@ -205,23 +205,98 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
         End Function
 
+        Friend Shared Function BuildException(ByVal Number As Integer, ByVal Description As String, ByRef VBDefinedError As Boolean) As System.Exception
 
-        Private Shared Function BuildException(ByVal number As Integer, ByVal description As String, ByRef vBDefinedError As Boolean) As System.Exception
+            VBDefinedError = True
 
-            vBDefinedError = True
+            Select Case Number
 
-            Select Case number
+                Case vbErrors.None
+
+                Case vbErrors.ReturnWOGoSub, _
+                    vbErrors.ResumeWOErr, _
+                    vbErrors.CantUseNull, _
+                    vbErrors.DoesntImplementICollection
+                    Return New InvalidOperationException(Description)
+
+                Case vbErrors.IllegalFuncCall, _
+                    vbErrors.NamedParamNotFound, _
+                    vbErrors.NamedArgsNotSupported, _
+                    vbErrors.ParameterNotOptional
+                    Return New ArgumentException(Description)
+
+                Case vbErrors.OLENoPropOrMethod
+                    Return New MissingMemberException(Description)
+
+                Case vbErrors.Overflow
+                    Return New OverflowException(Description)
+
+                Case vbErrors.OutOfMemory, vbErrors.OutOfStrSpace
+                    Return New OutOfMemoryException(Description)
+
+                Case vbErrors.OutOfBounds
+                    Return New IndexOutOfRangeException(Description)
+
+                Case vbErrors.DivByZero
+                    Return New DivideByZeroException(Description)
+
+                Case vbErrors.TypeMismatch
+                    Return New InvalidCastException(Description)
+
+                Case vbErrors.OutOfStack
+                    Return New StackOverflowException(Description)
+
+                Case vbErrors.DLLLoadErr
+                    Return New TypeLoadException(Description)
+
+                Case vbErrors.FileNotFound
+                    Return New IO.FileNotFoundException(Description)
+
+                Case vbErrors.EndOfFile
+                    Return New IO.EndOfStreamException(Description)
+
+                Case vbErrors.IOError, _
+                    vbErrors.BadFileNameOrNumber, _
+                    vbErrors.BadFileMode, _
+                    vbErrors.FileAlreadyOpen, _
+                    vbErrors.FileAlreadyExists, _
+                    vbErrors.BadRecordLen, _
+                    vbErrors.DiskFull, _
+                    vbErrors.BadRecordNum, _
+                    vbErrors.TooManyFiles, _
+                    vbErrors.DevUnavailable, _
+                    vbErrors.PermissionDenied, _
+                    vbErrors.DiskNotReady, _
+                    vbErrors.DifferentDrive, _
+                    vbErrors.PathFileAccess
+                    Return New IO.IOException(Description)
+
+                Case vbErrors.PathNotFound, _
+                    vbErrors.OLEFileNotFound
+                    Return New IO.FileNotFoundException(Description)
 
                 Case vbErrors.ObjNotSet
-                    Return New NullReferenceException(description)
+                    Return New NullReferenceException(Description)
+
+                Case vbErrors.PropertyNotFound
+                    Return New MissingFieldException(Description)
+
+                Case vbErrors.CantCreateObject, _
+                    vbErrors.ServerNotFound
+                    Return New Exception(Description)
+
+                Case vbErrors.AccessViolation
+                    Return New AccessViolationException() 'We never want a custom description here.  Use the localized message that comes for free inside the exception
 
                 Case Else
-                    vBDefinedError = False
-                    Return New Exception(description)
+                    'Fall below to default
+                    VBDefinedError = False
+                    Return New Exception(Description)
             End Select
 
-            vBDefinedError = False
-            Return New Exception(description)
+            VBDefinedError = False
+            Return New Exception(Description)
+        
         End Function
 
     End Class
