@@ -9,6 +9,9 @@ namespace System.Security.Cryptography
 {
     public static class X509Certificate2UI
     {
+        internal const int ERROR_SUCCESS = 0;
+        internal const int ERROR_CANCELLED = 1223;
+
         public static void DisplayCertificate(X509Certificate2 certificate)
         {
             if (certificate == null)
@@ -38,10 +41,10 @@ namespace System.Security.Cryptography
             if (safeCertContext.IsInvalid)
                 throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHandle, nameof(safeCertContext)));
 
-            int dwErrorCode = CAPI.ERROR_SUCCESS;
+            int dwErrorCode = ERROR_SUCCESS;
 
             // Initialize view structure.
-            CAPI.CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo = new CAPI.CRYPTUI_VIEWCERTIFICATE_STRUCTW();
+            Interop.CryptUI.CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo = new Interop.CryptUI.CRYPTUI_VIEWCERTIFICATE_STRUCTW();
             ViewInfo.dwSize = (uint)Marshal.SizeOf(ViewInfo);
             ViewInfo.hwndParent = hwndParent;
             ViewInfo.dwFlags = 0;
@@ -62,12 +65,12 @@ namespace System.Security.Cryptography
             ViewInfo.nStartPage = 0;
 
             // View the certificate
-            if (!CAPI.CryptUIDlgViewCertificateW(ViewInfo, IntPtr.Zero))
+            if (!Interop.CryptUI.CryptUIDlgViewCertificateW(ViewInfo, IntPtr.Zero))
                 dwErrorCode = Marshal.GetLastWin32Error();
 
             // CryptUIDlgViewCertificateW returns ERROR_CANCELLED if the user closes
             // the window through the x button or by pressing CANCEL, so ignore this error code
-            if (dwErrorCode != CAPI.ERROR_SUCCESS && dwErrorCode != CAPI.ERROR_CANCELLED)
+            if (dwErrorCode != ERROR_SUCCESS && dwErrorCode != ERROR_CANCELLED)
                 throw new CryptographicException(Marshal.GetLastWin32Error());
         }
 
@@ -87,10 +90,10 @@ namespace System.Security.Cryptography
 
         private static unsafe SafeCertStoreHandle SelectFromStore(SafeCertStoreHandle safeSourceStoreHandle, string title, string message, X509SelectionFlag selectionFlags, IntPtr hwndParent)
         {
-            int dwErrorCode = CAPI.ERROR_SUCCESS;
+            int dwErrorCode = ERROR_SUCCESS;
 
-            SafeCertStoreHandle safeCertStoreHandle = CAPI.CertOpenStore((IntPtr)CAPI.CERT_STORE_PROV_MEMORY,
-                                                                         CAPI.X509_ASN_ENCODING | CAPI.PKCS_7_ASN_ENCODING,
+            SafeCertStoreHandle safeCertStoreHandle = Interop.Crypt32.CertOpenStore((IntPtr)Interop.Crypt32.CERT_STORE_PROV_MEMORY,
+                                                                         Interop.Crypt32.X509_ASN_ENCODING | Interop.Crypt32.PKCS_7_ASN_ENCODING,
                                                                          IntPtr.Zero,
                                                                          0,
                                                                          null);
@@ -98,10 +101,10 @@ namespace System.Security.Cryptography
             if (safeCertStoreHandle == null || safeCertStoreHandle.IsInvalid)
                 throw new CryptographicException(Marshal.GetLastWin32Error());
 
-            CAPI.CRYPTUI_SELECTCERTIFICATE_STRUCTW csc = new CAPI.CRYPTUI_SELECTCERTIFICATE_STRUCTW();
+            Interop.CryptUI.CRYPTUI_SELECTCERTIFICATE_STRUCTW csc = new Interop.CryptUI.CRYPTUI_SELECTCERTIFICATE_STRUCTW();
             // Older versions of CRYPTUI do not check the size correctly,
             // so always force it to the oldest version of the structure.
-            csc.dwSize = (uint)Marshal.OffsetOf(typeof(CAPI.CRYPTUI_SELECTCERTIFICATE_STRUCTW), "hSelectedCertStore");
+            csc.dwSize = (uint)Marshal.OffsetOf(typeof(Interop.CryptUI.CRYPTUI_SELECTCERTIFICATE_STRUCTW), "hSelectedCertStore");
             csc.hwndParent = hwndParent;
             csc.dwFlags = (uint)selectionFlags;
             csc.szTitle = title;
@@ -119,20 +122,20 @@ namespace System.Security.Cryptography
             csc.rgPropSheetPages = IntPtr.Zero;
             csc.hSelectedCertStore = safeCertStoreHandle.DangerousGetHandle();
 
-            SafeCertContextHandle safeCertContextHandle = CAPI.CryptUIDlgSelectCertificateW(csc);
+            SafeCertContextHandle safeCertContextHandle = Interop.CryptUI.CryptUIDlgSelectCertificateW(csc);
 
             if (safeCertContextHandle != null && !safeCertContextHandle.IsInvalid)
             {
                 // Single select, so add it to our hCertStore
                 SafeCertContextHandle ppStoreContext = SafeCertContextHandle.InvalidHandle;
-                if (!CAPI.CertAddCertificateLinkToStore(safeCertStoreHandle,
+                if (!Interop.Crypt32.CertAddCertificateLinkToStore(safeCertStoreHandle,
                                                         safeCertContextHandle,
-                                                        CAPI.CERT_STORE_ADD_ALWAYS,
+                                                        Interop.Crypt32.CERT_STORE_ADD_ALWAYS,
                                                         ppStoreContext))
                     dwErrorCode = Marshal.GetLastWin32Error();
             }
 
-            if (dwErrorCode != CAPI.ERROR_SUCCESS)
+            if (dwErrorCode != ERROR_SUCCESS)
                 throw new CryptographicException(Marshal.GetLastWin32Error());
 
             return safeCertStoreHandle;

@@ -17,7 +17,7 @@ namespace System.Security.Cryptography
 
         internal static SafeCertContextHandle InvalidHandle => new SafeCertContextHandle(IntPtr.Zero);
 
-        [DllImport(CAPI.CRYPT32, SetLastError = true)]
+        [DllImport(Interop.Libraries.Crypt32, SetLastError = true)]
         private static extern bool CertFreeCertificateContext(IntPtr pCertContext);
 
         protected override bool ReleaseHandle() => CertFreeCertificateContext(handle);
@@ -33,7 +33,7 @@ namespace System.Security.Cryptography
 
         internal static SafeCertStoreHandle InvalidHandle => new SafeCertStoreHandle(IntPtr.Zero);
 
-        [DllImport(CAPI.CRYPT32, SetLastError = true)]
+        [DllImport(Interop.Libraries.Crypt32, SetLastError = true)]
         private static extern bool CertCloseStore(IntPtr hCertStore, uint dwFlags);
 
         protected override bool ReleaseHandle() => CertCloseStore(handle, 0);

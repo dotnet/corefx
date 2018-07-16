@@ -1,25 +1,15 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace System.Security
+internal static partial class Interop
 {
-    internal static class CAPI
+    internal static partial class CryptUI
     {
-        internal const string CRYPT32 = "crypt32.dll";
-        internal const string CRYPTUI = "cryptui.dll";
-        internal const int ERROR_SUCCESS = 0;
-        internal const int ERROR_CANCELLED = 1223;
-        internal const uint CERT_STORE_PROV_MEMORY = 2;
-        internal const uint X509_ASN_ENCODING = 0x00000001;
-        internal const uint PKCS_7_ASN_ENCODING = 0x00010000;
-        internal const uint CERT_STORE_ENUM_ARCHIVED_FLAG = 0x00000200;
-        internal const uint CERT_STORE_CREATE_NEW_FLAG = 0x00002000;
-        internal const uint CERT_STORE_ADD_ALWAYS = 4;
-
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal class CRYPTUI_VIEWCERTIFICATE_STRUCTW
         {
@@ -64,22 +54,10 @@ namespace System.Security
             internal IntPtr hSelectedCertStore;
         }
 
-        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal extern static bool CertAddCertificateLinkToStore(SafeCertStoreHandle hCertStore, SafeCertContextHandle pCertContext, uint dwAddDisposition, [In, Out] SafeCertContextHandle ppStoreContext);
-
-        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern SafeCertContextHandle CertDuplicateCertificateContext(IntPtr pCertContext);
-
-        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore(SafeCertStoreHandle hCertStore, IntPtr pPrevCertContext);
-
-        [DllImport(CRYPT32, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern SafeCertStoreHandle CertOpenStore(IntPtr lpszStoreProvider, uint dwMsgAndCertEncodingType, IntPtr hCryptProv, uint dwFlags, string pvPara);
-
-        [DllImport(CRYPTUI, CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport(Interop.Libraries.CryptUI, CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern bool CryptUIDlgViewCertificateW([MarshalAs(UnmanagedType.LPStruct)] CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo, IntPtr pfPropertiesChanged);
 
-        [DllImport(CRYPTUI, CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport(Interop.Libraries.CryptUI, CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern SafeCertContextHandle CryptUIDlgSelectCertificateW([In, Out, MarshalAs(UnmanagedType.LPStruct)] CRYPTUI_SELECTCERTIFICATE_STRUCTW csc);
     }
 }
