@@ -118,6 +118,67 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
+        [InlineData("a", -1)]
+        public void Right_Invalid(string str, int length)
+        {
+            AssertExtensions.Throws<ArgumentException>("Length", () => Strings.Right(str, length));
+        }
+
+        [Theory]
+        [InlineData("", 0, "")]
+        [InlineData("", 1, "")]
+        [InlineData("abc", 0, "")]
+        [InlineData("abc", 2, "bc")]
+        [InlineData("abc", int.MaxValue, "abc")]
+        public void Right_Valid(string str, int length, string expected)
+        {
+            Assert.Equal(expected, Strings.Right(str, length));
+        }
+
+        [Theory]
+        [InlineData("a", -1)]
+        public void Mid2_Invalid(string str, int start)
+        {
+            AssertExtensions.Throws<ArgumentException>("Start", () => Strings.Mid(str, start));
+        }
+
+
+        [Theory]
+        [InlineData("", 1, "")]
+        [InlineData(null, 1, null)]
+        [InlineData("abc", 1000, "")]
+        [InlineData("abcde", 2, "bcde")]
+        [InlineData("abc", 1, "abc")]   // 1-based strings in VB
+        [InlineData("abcd", 2, "bcd")]
+        [InlineData("abcd", 3, "cd")]
+        public void Mid2_Valid(string str, int start, string expected)
+        {
+            Assert.Equal(expected, Strings.Mid(str, start));
+        }
+
+        [Theory]
+        [InlineData("a", 1, -1)]
+        [InlineData("a", -1, 1)]
+        public void Mid3_Invalid(string str, int start, int length)
+        {
+            AssertExtensions.Throws<ArgumentException>(start < 1 ? "Start" : "Length", () => Strings.Mid(str, start, length));
+        }
+
+
+        [Theory]
+        [InlineData("", 1, 0, "")]
+        [InlineData(null, 1, 1, "")]
+        [InlineData("abc", 1000, 1, "")]
+        [InlineData("abcde", 2, 1000, "bcde")]
+        [InlineData("abc", 1, 2, "ab")]   // 1-based strings in VB
+        [InlineData("abcd", 2, 2, "bc")]
+        [InlineData("abcd", 2, 3, "bcd")]
+        public void Mid3_Valid(string str, int start, int length, string expected)
+        {
+            Assert.Equal(expected, Strings.Mid(str, start, length));
+        }
+
+        [Theory]
         [InlineData(null, "")]
         [InlineData("", "")]
         [InlineData(" ", "")]
@@ -131,6 +192,7 @@ namespace Microsoft.VisualBasic.Tests
             // Trims only space and \u3000 specifically
             Assert.Equal(expected, Strings.LTrim(str));
         }
+
         [Theory]
         [InlineData(null, "")]
         [InlineData("", "")]
@@ -144,6 +206,21 @@ namespace Microsoft.VisualBasic.Tests
         {
             // Trims only space and \u3000 specifically
             Assert.Equal(expected, Strings.RTrim(str));
+        }
+
+        [Theory]
+        [InlineData(null, "")]
+        [InlineData("", "")]
+        [InlineData(" ", "")]
+        [InlineData(" abc ", "abc")]
+        [InlineData("abc\n\u3000", "abc\n")]
+        [InlineData("\u3000abc\n\u3000", "abc\n")]
+        [InlineData("abc\n", "abc\n")]
+        [InlineData("abc", "abc")]
+        public void Trim_Valid(string str, string expected)
+        {
+            // Trims only space and \u3000 specifically
+            Assert.Equal(expected, Strings.Trim(str));
         }
     }
 }
