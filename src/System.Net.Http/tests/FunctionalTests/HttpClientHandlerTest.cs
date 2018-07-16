@@ -2263,6 +2263,18 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            if (PlatformDetection.IsFullFramework)
+            {
+                // Skip test on .NET Framework. It will sometimes not throw TaskCanceledException.
+                // Instead it might throw the following top-level and inner exceptions depending
+                // on race conditions.
+                //
+                // System.Net.Http.HttpRequestException : Error while copying content to a stream.
+                // ---- System.IO.IOException : The read operation failed, see inner exception.
+                //-------- System.Net.WebException : The request was aborted: The request was canceled.
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server1, url1) =>
             {
                 await LoopbackServer.CreateServerAsync(async (server2, url2) =>
