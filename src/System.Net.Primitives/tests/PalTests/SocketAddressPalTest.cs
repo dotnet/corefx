@@ -188,5 +188,15 @@ namespace System.Net.Primitives.PalTests
             Assert.Equal(scope, actualScope);
             Assert.Equal(port, SocketAddressPal.GetPort(buffer));
         }
+
+        // This is platform specific test. So far Windows, Linux and OSX use same layout.
+        [Fact]
+        public void Address_to_string()
+        {
+            IPEndPoint ipLocalEndPoint = new IPEndPoint(IPAddress.Loopback, Convert.ToInt32("cafe", 16));
+            SocketAddress socketAddress = ipLocalEndPoint.Serialize();
+
+            Assert.Equal("InterNetwork:16:{202,254,127,0,0,1,0,0,0,0,0,0,0,0}", socketAddress.ToString());
+        }
     }
 }

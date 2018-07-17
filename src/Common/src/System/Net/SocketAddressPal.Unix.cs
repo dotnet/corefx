@@ -12,7 +12,7 @@ namespace System.Net
 {
     internal static class SocketAddressPal
     {
-        public const int DataOffset = 0;
+        public const int DataOffset = 2;
 
         public static readonly int IPv6AddressSize = GetIPv6AddressSize();
         public static readonly int IPv4AddressSize = GetIPv4AddressSize();
