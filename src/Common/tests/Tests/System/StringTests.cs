@@ -4057,12 +4057,12 @@ namespace System.Tests
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.Ordinal));
-                Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(19, s.LastIndexOf(value, StringComparison.OrdinalIgnoreCase));
                 Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
                 Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.Ordinal));
-                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
 
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
