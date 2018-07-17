@@ -5,7 +5,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
-namespace System.Security.Cryptography
+namespace System.Security.Cryptography.X509Certificates
 {
     internal static class X509Utils
     {

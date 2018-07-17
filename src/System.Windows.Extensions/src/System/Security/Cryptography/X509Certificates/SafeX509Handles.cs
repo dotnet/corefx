@@ -5,7 +5,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
-namespace System.Security.Cryptography
+namespace System.Security.Cryptography.X509Certificates
 {
     internal sealed class SafeCertContextHandle : SafeHandleZeroOrMinusOneIsInvalid
     {

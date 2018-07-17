@@ -5,7 +5,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
-namespace System.Security.Cryptography
+namespace System.Security.Cryptography.X509Certificates
 {
     public enum X509SelectionFlag
     {
@@ -13,7 +13,7 @@ namespace System.Security.Cryptography
         MultiSelection = 0x01
     }
 
-    public static class X509Certificate2UI
+    public sealed class X509Certificate2UI
     {
         internal const int ERROR_SUCCESS = 0;
         internal const int ERROR_CANCELLED = 1223;
