@@ -46,7 +46,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Null(Marshal.GetExceptionForHR(errorCode, IntPtr.Zero));
         }
 
-        private void ClearCurrentIErrorInfo()
+        private static void ClearCurrentIErrorInfo()
         {
             // Ensure that if the thread's current IErrorInfo
             // is set during a run that it is thrown away prior
