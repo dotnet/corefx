@@ -2805,6 +2805,22 @@ namespace System.Tests
         {
             bool ignoringCase = comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.CurrentCultureIgnoreCase;
 
+            if (value.Length == 0)
+            {
+                Assert.Equal(0, s.IndexOf(value, comparison));
+                Assert.Equal(startIndex, s.IndexOf(value, startIndex, comparison));
+                Assert.Equal(0, s.AsSpan().IndexOf(value.AsSpan(), comparison));
+                return;
+            }
+
+            if (s.Length == 0)
+            {
+                Assert.Equal(-1, s.IndexOf(value, comparison));
+                Assert.Equal(-1, s.IndexOf(value, startIndex, comparison));
+                Assert.Equal(-1, s.AsSpan().IndexOf(value.AsSpan(), comparison));
+                return;
+            }
+
             // First find the substring.  We should be able to with all comparison types.
             Assert.Equal(startIndex, s.IndexOf(value, comparison)); // in the whole string
             Assert.Equal(startIndex, s.IndexOf(value, startIndex, comparison)); // starting at substring
@@ -2816,8 +2832,8 @@ namespace System.Tests
                 Assert.Equal(startIndex, s.IndexOf(value, startIndex - 1, comparison)); // starting just before substring
                 Assert.Equal(1, s.AsSpan(startIndex - 1).IndexOf(value.AsSpan(), comparison)); // starting just before substring
             }
-            Assert.Equal(-1, s.AsSpan(startIndex + 1).IndexOf(value.AsSpan(), comparison)); // starting just after start of substring
             Assert.Equal(-1, s.IndexOf(value, startIndex + 1, comparison)); // starting just after start of substring
+            Assert.Equal(-1, s.AsSpan(startIndex + 1).IndexOf(value.AsSpan(), comparison)); // starting just after start of substring
 
             // Shouldn't be able to find the substring if the count is less than substring's length
             Assert.Equal(-1, s.IndexOf(value, 0, value.Length - 1, comparison));
@@ -3851,23 +3867,27 @@ namespace System.Tests
                     Assert.Equal(expected, s.LastIndexOf(value));
                     Assert.Equal(expected, s.LastIndexOf(value.ToString()));
                 }
-                Assert.Equal(expectedFromSpan, span.LastIndexOf(value));
+                Assert.Equal(expected, s.LastIndexOf(value, startIndex));
                 Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex));
+
+                Assert.Equal(expectedFromSpan, span.LastIndexOf(value));
             }
             Assert.Equal(expected, s.LastIndexOf(value, startIndex, count));
-            Assert.Equal(expectedFromSpan, span.LastIndexOf(value));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count));
+
+            Assert.Equal(expectedFromSpan, span.LastIndexOf(value));
             Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan));
 
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.CurrentCulture));
-            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.CurrentCulture));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.Ordinal));
-            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.Ordinal));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));
-            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.OrdinalIgnoreCase));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.InvariantCulture));
-            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.InvariantCulture));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.InvariantCultureIgnoreCase));
+
+            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.CurrentCulture));
+            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.Ordinal));
+            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.InvariantCulture));
             Assert.Equal(expectedFromSpan, span.LastIndexOf(valueSpan, StringComparison.InvariantCultureIgnoreCase));
         }
 
@@ -3916,37 +3936,61 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(AllSubstringsAndComparisons), new object[] { "abcde" })]
-        public static void LastIndexOf_AllSubstrings(string s, string value, int startIndex, StringComparison comparisonType)
+        public static void LastIndexOf_AllSubstrings(string s, string value, int startIndex, StringComparison comparison)
         {
-            bool ignoringCase = comparisonType == StringComparison.OrdinalIgnoreCase || comparisonType == StringComparison.CurrentCultureIgnoreCase;
+            bool ignoringCase = comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.CurrentCultureIgnoreCase;
+
+            if (value.Length == 0)
+            {
+                int expectedIndex = s.Length > 0 ? s.Length - 1 : 0;
+                int expectedStartIndex = startIndex == s.Length ? startIndex - 1 : startIndex;
+                if (s.Length == 0 && (startIndex == -1 || startIndex == 0))
+                    expectedStartIndex = (value.Length == 0) ? 0 : -1;
+                Assert.Equal(expectedIndex, s.LastIndexOf(value, comparison));
+                Assert.Equal(expectedStartIndex, s.LastIndexOf(value, startIndex, comparison));
+                Assert.Equal(expectedIndex, s.AsSpan().LastIndexOf(value.AsSpan(), comparison));
+                return;
+            }
+
+            if (s.Length == 0)
+            {
+                Assert.Equal(-1, s.LastIndexOf(value, comparison));
+                Assert.Equal(-1, s.LastIndexOf(value, startIndex, comparison));
+                Assert.Equal(-1, s.AsSpan().LastIndexOf(value.AsSpan(), comparison));
+                return;
+            }
 
             // First find the substring.  We should be able to with all comparison types.
-            Assert.Equal(startIndex, s.LastIndexOf(value, comparisonType)); // in the whole string
-            Assert.Equal(startIndex, s.AsSpan().LastIndexOf(value.AsSpan(), comparisonType)); // in the whole string
-            Assert.Equal(startIndex, s.LastIndexOf(value, startIndex + value.Length - 1, comparisonType)); // starting at end of substring
-            Assert.Equal(startIndex, s.LastIndexOf(value, startIndex + value.Length, comparisonType)); // starting just beyond end of substring
+            Assert.Equal(startIndex, s.LastIndexOf(value, comparison)); // in the whole string
+            Assert.Equal(startIndex, s.LastIndexOf(value, startIndex + value.Length - 1, comparison)); // starting at end of substring
+            Assert.Equal(startIndex, s.LastIndexOf(value, startIndex + value.Length, comparison)); // starting just beyond end of substring
+            Assert.Equal(startIndex, s.AsSpan().LastIndexOf(value.AsSpan(), comparison)); // in the whole string
+            Assert.Equal(0, s.AsSpan(startIndex).LastIndexOf(value.AsSpan(), comparison)); // starting at end of substring
+
             if (startIndex + value.Length < s.Length)
             {
-                Assert.Equal(startIndex, s.LastIndexOf(value, startIndex + value.Length + 1, comparisonType)); // starting a bit more beyond end of substring
+                Assert.Equal(startIndex, s.LastIndexOf(value, startIndex + value.Length + 1, comparison)); // starting a bit more beyond end of substring
+                Assert.Equal(startIndex, s.AsSpan(0, startIndex + value.Length + 1).LastIndexOf(value.AsSpan(), comparison)); // starting a bit more beyond end of substring
             }
             if (startIndex + value.Length > 1)
             {
-                Assert.Equal(-1, s.LastIndexOf(value, startIndex + value.Length - 2, comparisonType)); // starting before end of substring
+                Assert.Equal(-1, s.LastIndexOf(value, startIndex + value.Length - 2, comparison)); // starting before end of substring
+                Assert.Equal(-1, s.AsSpan(0, startIndex + value.Length - 2).LastIndexOf(value.AsSpan(), comparison)); // starting before end of substring
             }
 
             // Shouldn't be able to find the substring if the count is less than substring's length
-            Assert.Equal(-1, s.LastIndexOf(value, s.Length - 1, value.Length - 1, comparisonType));
+            Assert.Equal(-1, s.LastIndexOf(value, s.Length - 1, value.Length - 1, comparison));
 
             // Now double the source.  Make sure we find the second copy of the substring.
             int halfLen = s.Length;
             s += s;
-            Assert.Equal(halfLen + startIndex, s.LastIndexOf(value, comparisonType));
-            Assert.Equal(halfLen + startIndex, s.AsSpan().LastIndexOf(value.AsSpan(), comparisonType));
+            Assert.Equal(halfLen + startIndex, s.LastIndexOf(value, comparison));
+            Assert.Equal(halfLen + startIndex, s.AsSpan().LastIndexOf(value.AsSpan(), comparison));
 
             // Now change the case of a letter.
             s = s.ToUpperInvariant();
-            Assert.Equal(ignoringCase ? halfLen + startIndex : -1, s.LastIndexOf(value, comparisonType));
-            Assert.Equal(ignoringCase ? halfLen + startIndex : -1, s.AsSpan().LastIndexOf(value.AsSpan(), comparisonType));
+            Assert.Equal(ignoringCase ? halfLen + startIndex : -1, s.LastIndexOf(value, comparison));
+            Assert.Equal(ignoringCase ? halfLen + startIndex : -1, s.AsSpan().LastIndexOf(value.AsSpan(), comparison));
         }
 
         [Fact]
@@ -4010,26 +4054,26 @@ namespace System.Tests
                 string value = "\u0130";
 
                 Assert.Equal(19, s.LastIndexOf(value));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.Ordinal));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.Ordinal));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.Ordinal));
                 Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
 
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
-                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.Ordinal));
-                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.Ordinal));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.Ordinal));
                 Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
-                
+
                 return SuccessExitCode;
             }).Dispose();
         }
@@ -4046,16 +4090,16 @@ namespace System.Tests
                 string value = "\u0130";
 
                 Assert.Equal(19, s.LastIndexOf(value));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
 
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
@@ -4074,16 +4118,16 @@ namespace System.Tests
                 string value = "\u0130";
 
                 Assert.Equal(19, s.LastIndexOf(value));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(19, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan()));
+                Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(19, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
 
                 value = "\u0131";
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
-                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(10, span.LastIndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
@@ -6678,20 +6722,25 @@ namespace System.Tests
         {
             var comparisons = new StringComparison[]
             {
-            StringComparison.CurrentCulture,
-            StringComparison.CurrentCultureIgnoreCase,
-            StringComparison.Ordinal,
-            StringComparison.OrdinalIgnoreCase
+                StringComparison.CurrentCulture,
+                StringComparison.CurrentCultureIgnoreCase,
+                StringComparison.Ordinal,
+                StringComparison.OrdinalIgnoreCase
             };
 
             foreach (StringComparison comparison in comparisons)
             {
                 for (int i = 0; i <= source.Length; i++)
                 {
-                    for (int subLen = source.Length - i; subLen > 0; subLen--)
+                    for (int subLen = source.Length - i; subLen >= 0; subLen--)
                     {
                         yield return new object[] { source, source.Substring(i, subLen), i, comparison };
                     }
+                }
+
+                for (int i = 0; i <= source.Length; i++)
+                {
+                    yield return new object[] { "", source.Substring(i), 0, comparison };
                 }
             }
         }
