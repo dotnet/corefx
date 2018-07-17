@@ -2,11 +2,9 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <ProjectGuid>{200739A3-BFCB-4AFD-BB04-2C55F12C7801}</ProjectGuid>
-    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
-    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
-    <Configurations>net461-Debug;net461-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup>
     <Compile Include="AssemblyRef.cs" />
     <Compile Include="System\Drawing\Design\IPropertyValueUIService.cs" />
     <Compile Include="System\Drawing\Design\PaintValueEventArgs.cs" />
@@ -16,21 +14,14 @@
     <Compile Include="System\Drawing\Design\UITypeEditor.cs" />
     <Compile Include="System\Drawing\Design\UITypeEditorEditStyle.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup>
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Drawing.Common" />
     <Reference Include="System.Drawing.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
-    <Reference Include="System.Drawing.Common" />
-    <Reference Include="System.Resources.ResourceManager" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <ProjectGuid>{30FE18A9-59E8-4D03-A0A7-3E1DDB328695}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Design\PropertyValueUIItemTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <SupplementalTestData Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\nature24bits.jpg">
+      <DestinationDir>bitmaps/</DestinationDir>
+    </SupplementalTestData>
+  </ItemGroup>
+</Project>
