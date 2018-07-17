@@ -21,7 +21,7 @@ namespace System.IO.Pipes
             Create(direction, inheritability, bufferSize, null);
         }
 
-        // Creates the anonymous pipe.
+        // Creates the anonymous pipe. This overload is used in Mono to implement public constructors.
         private void Create(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity pipeSecurity)
         {
             Debug.Assert(direction != PipeDirection.InOut, "Anonymous pipe direction shouldn't be InOut");

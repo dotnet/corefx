@@ -28,6 +28,7 @@ namespace System.IO.Pipes
                 outBufferSize, null, inheritability, 0);
         }
 
+        // This overload is used in Mono to implement public constructors.
         private void Create(string pipeName, PipeDirection direction, int maxNumberOfServerInstances,
                 PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize,
                 PipeSecurity pipeSecurity, HandleInheritability inheritability, PipeAccessRights additionalAccessRights)
@@ -47,8 +48,10 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(pipeName), SR.ArgumentOutOfRange_AnonymousReserved);
             }
 
-            if (IsCurrentUserOnly && pipeSecurity == null)
+            if (IsCurrentUserOnly)
             {
+                Debug.Assert(pipeSecurity == null);
+
                 using (WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent())
                 {
                     SecurityIdentifier identifier = currentIdentity.Owner;
