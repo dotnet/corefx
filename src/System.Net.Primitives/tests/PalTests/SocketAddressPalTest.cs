@@ -191,7 +191,7 @@ namespace System.Net.Primitives.PalTests
 
         // This is platform specific test. So far Windows, Linux and OSX use same layout.
         [Fact]
-        public void Address_to_string()
+        public void SocketAddress_To_String()
         {
             IPEndPoint ipLocalEndPoint = new IPEndPoint(IPAddress.Loopback, Convert.ToInt32("cafe", 16));
             SocketAddress socketAddress = ipLocalEndPoint.Serialize();
