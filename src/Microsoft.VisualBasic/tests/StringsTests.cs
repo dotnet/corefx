@@ -147,7 +147,6 @@ namespace Microsoft.VisualBasic.Tests
             AssertExtensions.Throws<ArgumentException>("Start", null, () => Strings.Mid(str, start));
         }
 
-
         [Theory]
         [InlineData("", 1, "")]
         [InlineData(null, 1, null)]
@@ -168,7 +167,6 @@ namespace Microsoft.VisualBasic.Tests
         {
             AssertExtensions.Throws<ArgumentException>(start < 1 ? "Start" : "Length", null, () => Strings.Mid(str, start, length));
         }
-
 
         [Theory]
         [InlineData("", 1, 0, "")]
