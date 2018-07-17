@@ -104,6 +104,60 @@ namespace System.ComponentModel.Tests
             Assert.All(Enum.GetValues(typeof(SomeEnum)).Cast<SomeEnum>(), value => Assert.Contains(value, standardValues));
         }
 
+        [Fact]
+        public static void ConvertFrom_ULongFlagsEnum_String()
+        {
+            var converter = new EnumConverter(typeof(ULongFlagsEnum));
+            var str = $"{ULongFlagsEnum.Option62}, {ULongFlagsEnum.Option63}";
+            var result = (ULongFlagsEnum)converter.ConvertFrom(null, null, str);
+            Assert.Equal(ULongFlagsEnum.Option62 | ULongFlagsEnum.Option63, result);
+        }
+
+        [Fact]
+        public static void ConvertFrom_ULongFlagsEnum_EnumArray()
+        {
+            var converter = new EnumConverter(typeof(ULongFlagsEnum));
+            var arr = new Enum[] {ULongFlagsEnum.Option62, ULongFlagsEnum.Option63};
+            var result = (ULongFlagsEnum)converter.ConvertFrom(null, null, arr);
+            Assert.Equal(ULongFlagsEnum.Option62 | ULongFlagsEnum.Option63, result);
+        }
+
+        [Fact]
+        public static void ConvertTo_ULongFlagsEnum_EnumArray()
+        {
+            var converter = new EnumConverter(typeof(ULongFlagsEnum));
+            var value = ULongFlagsEnum.Option62 | ULongFlagsEnum.Option63;
+            var result = (Enum[])converter.ConvertTo(null, null, value, typeof(Enum[]));
+            Assert.Equal(new Enum[] {ULongFlagsEnum.Option62, ULongFlagsEnum.Option63}, result);
+        }
+
+        [Fact]
+        public static void ConvertFrom_LongFlagsEnum_String()
+        {
+            var converter = new EnumConverter(typeof(LongFlagsEnum));
+            var str = $"{LongFlagsEnum.Option62}, {LongFlagsEnum.Option63}";
+            var result = (LongFlagsEnum)converter.ConvertFrom(null, null, str);
+            Assert.Equal(LongFlagsEnum.Option62 | LongFlagsEnum.Option63, result);
+        }
+
+        [Fact]
+        public static void ConvertFrom_LongFlagsEnum_EnumArray()
+        {
+            var converter = new EnumConverter(typeof(LongFlagsEnum));
+            var arr = new Enum[] {LongFlagsEnum.Option62, LongFlagsEnum.Option63};
+            var result = (LongFlagsEnum)converter.ConvertFrom(null, null, arr);
+            Assert.Equal(LongFlagsEnum.Option62 | LongFlagsEnum.Option63, result);
+        }
+
+        [Fact]
+        public static void ConvertTo_LongFlagsEnum_EnumArray()
+        {
+            var converter = new EnumConverter(typeof(LongFlagsEnum));
+            var value = LongFlagsEnum.Option62 | LongFlagsEnum.Option63;
+            var result = (Enum[])converter.ConvertTo(null, null, value, typeof(Enum[]));
+            Assert.Equal(new Enum[] {LongFlagsEnum.Option62, LongFlagsEnum.Option63}, result);
+        }
+
         private static void VerifyArraysEqual<T>(T[] expected, object actual)
         {
             Assert.NotNull(actual);

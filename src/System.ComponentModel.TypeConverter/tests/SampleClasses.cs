@@ -36,6 +36,20 @@ namespace System.ComponentModel.Tests
         Option3 = 4
     }
 
+    [Flags]
+    public enum ULongFlagsEnum : ulong
+    {
+        Option62 = 1UL << 62,
+        Option63 = 1UL << 63
+    }
+
+    [Flags]
+    public enum LongFlagsEnum : long
+    {
+        Option62 = 1L << 62,
+        Option63 = 1L << 63
+    }
+
     public class FormattableClass : IFormattable
     {
         public string ToString(string format, IFormatProvider formatProvider)
