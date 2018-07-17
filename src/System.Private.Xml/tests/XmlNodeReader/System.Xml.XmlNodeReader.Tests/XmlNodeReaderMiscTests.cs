@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Xunit;
 
 namespace System.Xml.Tests
@@ -12,7 +8,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderCloseWithEmptyXml()
         {
-            XmlNodeReader nodeReader = new XmlNodeReader(new XmlDocument());
+            var nodeReader = new XmlNodeReader(new XmlDocument());
             nodeReader.Close();
             Assert.Equal(ReadState.Closed, nodeReader.ReadState);
         }
@@ -21,9 +17,9 @@ namespace System.Xml.Tests
         public void NodeReaderSkipWithSimpleXml()
         {
             string xml = "<root atri='val'><child /></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             nodeReader.Skip();
             Assert.True(nodeReader.EOF);
@@ -34,8 +30,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderLookupNamespaceWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.Null(nodeReader.LookupNamespace(string.Empty));            
         }
 
@@ -43,9 +39,9 @@ namespace System.Xml.Tests
         public void NodeReaderLookupNamespaceWithSimpleXml()
         {
             string xml = "<root></root>";
-            XmlDocument xmlDoc = new XmlDocument();
+            var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var nodeReader = new XmlNodeReader(xmlDoc);
             nodeReader.Read();
             var namespaceResolver = nodeReader as IXmlNamespaceResolver;
             Assert.Equal(null, namespaceResolver.LookupNamespace("prefix"));
@@ -61,9 +57,9 @@ namespace System.Xml.Tests
                    "<title>Pride And Prejudice</title>" +
                    "<bk:genre>novel</bk:genre>" +
                    "</book>";
-            XmlDocument xmlDocument = new XmlDocument();
+            var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDocument);
+            var nodeReader = new XmlNodeReader(xmlDocument);
             Assert.Equal(string.Empty, nodeReader.LocalName);
             Assert.Equal(string.Empty, nodeReader.Name);
             Assert.Equal(string.Empty, nodeReader.NamespaceURI);

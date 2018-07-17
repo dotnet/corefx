@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace System.Xml.Tests
 {
@@ -12,8 +7,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderGetAttributeWithEmptyXml()
         {
-            XmlDocument xmlDocument = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDocument);
+            var xmlDocument = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDocument);
             Assert.Null(nodeReader.GetAttribute(string.Empty));
             Assert.Null(nodeReader.GetAttribute(string.Empty, string.Empty));
             Assert.ThrowsAny<ArgumentOutOfRangeException>(() =>
@@ -26,9 +21,9 @@ namespace System.Xml.Tests
         public void NodeReaderGetAttributeWithValidXml()
         {
             string xml = "<root attr='val'><child /></root>";
-            XmlDocument xmlDocument = new XmlDocument();
+            var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDocument);
+            var nodeReader = new XmlNodeReader(xmlDocument);
             Assert.True(nodeReader.Read());
             Assert.Equal("val", nodeReader.GetAttribute("attr"));
             Assert.Equal("val", nodeReader.GetAttribute("attr", string.Empty));

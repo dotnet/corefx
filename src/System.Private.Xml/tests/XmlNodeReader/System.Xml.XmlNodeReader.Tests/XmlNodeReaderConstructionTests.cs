@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace System.Xml.Tests
 {
@@ -12,7 +7,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderConstructionWithEmptyDocument()
         {
-            XmlNodeReader nodeReader = new XmlNodeReader(new XmlDocument());
+            var nodeReader = new XmlNodeReader(new XmlDocument());
             Assert.Equal(0, nodeReader.Depth);
             Assert.Equal(ReadState.Initial, nodeReader.ReadState);
             Assert.False(nodeReader.EOF);            
@@ -24,7 +19,7 @@ namespace System.Xml.Tests
         {
             Assert.ThrowsAny<ArgumentNullException>(() =>
             {
-                XmlNodeReader nodeReader = new XmlNodeReader(null);
+                var nodeReader = new XmlNodeReader(null);
             });
         }
     }

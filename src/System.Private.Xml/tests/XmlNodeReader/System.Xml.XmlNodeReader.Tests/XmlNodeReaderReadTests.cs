@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace System.Xml.Tests
 {
@@ -13,7 +8,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadWithEmptyDocument()
         {
-            XmlNodeReader nodeReader = new XmlNodeReader(new XmlDocument());            
+            var nodeReader = new XmlNodeReader(new XmlDocument());            
             Assert.False(nodeReader.Read());
             Assert.Equal(ReadState.Error, nodeReader.ReadState);
             Assert.Equal(XmlNodeType.None, nodeReader.NodeType);
@@ -28,9 +23,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadWithSimpleXml()
         {
             string xml = "<root atri='val'><child /></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read()); //Root Element Read
             Assert.Equal(ReadState.Interactive, nodeReader.ReadState);
             Assert.Equal(XmlNodeType.Element, nodeReader.NodeType);
@@ -58,9 +53,9 @@ namespace System.Xml.Tests
             string fst = "<!ENTITY fst 'Sample String'>]>";            
             string dtd = "<!DOCTYPE root[<!ELEMENT root (#PCDATA)>" + fst;
             string xml = dtd + "<root>&fst;</root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read()); //DTD Read
             Assert.Equal(ReadState.Interactive, nodeReader.ReadState);
             Assert.Equal(XmlNodeType.DocumentType, nodeReader.NodeType);
@@ -80,8 +75,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadAttributeValueWithEmptyXml()
         {
-            XmlDocument document = new XmlDocument();            
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var document = new XmlDocument();            
+            var nodeReader = new XmlNodeReader(document);
             Assert.False(nodeReader.ReadAttributeValue());
             Assert.False(nodeReader.HasValue);
             Assert.Equal(string.Empty, nodeReader.Value);
@@ -91,9 +86,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadAttributeValueWithSimpleXml()
         {
             string xml = "<root><child /></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.ReadAttributeValue());
         }
@@ -102,9 +97,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadAttributeValueWithAttributeXml()
         {
             string xml = "<root attr='val'><child /></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToAttribute("attr"));
             Assert.True(nodeReader.ReadAttributeValue());
@@ -119,8 +114,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadStringWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.ThrowsAny<InvalidOperationException>(() => {
                 nodeReader.ResolveEntity();
             });
@@ -133,9 +128,9 @@ namespace System.Xml.Tests
             string fst = "<!ENTITY fst 'Sample String'>]>";
             string dtd = "<!DOCTYPE root[<!ELEMENT root (#PCDATA)>" + fst;
             string xml = dtd + "<root>&fst;</root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read()); //DTD Read
             Assert.True(nodeReader.Read()); //Root Element Read
             Assert.True(nodeReader.Read()); //EntityReference Read
@@ -149,8 +144,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadContentAsBase64WithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.Equal(0, nodeReader.ReadContentAsBase64(null, 0, 0));
         }
 
@@ -158,9 +153,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadContentAsBase64WithSimpleXml()
         {
             string xml = "<root attr='val'><child /></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToAttribute("attr"));
             Assert.True(nodeReader.CanReadBinaryContent);
@@ -171,8 +166,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadContentAsBinHexWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.Equal(0, nodeReader.ReadContentAsBinHex(null, 0, 0));
         }
 
@@ -180,9 +175,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadContentAsBinHexWithSimpleXml()
         {
             string xml = "<root attr='ff0000'><child /></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToAttribute("attr"));
             Assert.True(nodeReader.CanReadBinaryContent);
@@ -193,8 +188,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadElementContentAsBase64WithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.Equal(0, nodeReader.ReadElementContentAsBase64(null, 0, 0));
         }
 
@@ -202,9 +197,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadElementContentAsBase64WithSimpleXml()
         {
             string xml = "<root attr='val'>val</root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());            
             Assert.True(nodeReader.CanReadBinaryContent);
             Assert.Equal(2, nodeReader.ReadElementContentAsBase64(new byte[33], 10, 10));
@@ -214,8 +209,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadElementContentAsBinHexWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.Equal(0, nodeReader.ReadElementContentAsBinHex(null, 0, 0));
         }
 
@@ -223,9 +218,9 @@ namespace System.Xml.Tests
         public void NodeReaderReadElementContentAsBinHexWithSimpleXml()
         {
             string xml = "<root attr='ff0000'>ff0000</root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());            
             Assert.True(nodeReader.CanReadBinaryContent);
             Assert.Equal(3, nodeReader.ReadElementContentAsBinHex(new byte[33], 10, 10));

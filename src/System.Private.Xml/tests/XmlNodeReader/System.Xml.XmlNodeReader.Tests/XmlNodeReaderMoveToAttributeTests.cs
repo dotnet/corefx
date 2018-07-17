@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace System.Xml.Tests
 {
@@ -12,8 +7,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToFirstAttributeWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.False(nodeReader.MoveToFirstAttribute());
         }
 
@@ -21,9 +16,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToFirstAttributeWithSimpleXml()
         {
             string xml = "<root></root>";
-            XmlDocument xmlDoc = new XmlDocument();
+            var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.MoveToFirstAttribute());
         }
@@ -32,9 +27,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToFirstAttributeWithAttributeXml()
         {
             string xml = "<root attr='cal'><child attr='val'></child></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToFirstAttribute());
 
@@ -45,8 +40,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToNextAttributeWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.False(nodeReader.MoveToNextAttribute());
         }
 
@@ -54,9 +49,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToNextAttributeWithSimpleXml()
         {
             string xml = "<root></root>";
-            XmlDocument xmlDoc = new XmlDocument();
+            var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.MoveToNextAttribute());
         }
@@ -65,9 +60,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToNextAttributeWithAttributeXml()
         {
             string xml = "<root attr='cal' attr2='val'></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToNextAttribute());
 
@@ -78,8 +73,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToAttributeWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.False(nodeReader.MoveToAttribute(string.Empty));
             Assert.False(nodeReader.MoveToAttribute(string.Empty, string.Empty));
             Assert.Throws<ArgumentOutOfRangeException>(() => { nodeReader.MoveToAttribute(0); });
@@ -89,9 +84,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToAttributeWithSimpleXml()
         {
             string xml = "<root></root>";
-            XmlDocument xmlDoc = new XmlDocument();
+            var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.MoveToAttribute(string.Empty));
             Assert.False(nodeReader.MoveToAttribute(string.Empty, null));
@@ -102,9 +97,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToAttributeWithAttributeXml()
         {
             string xml = "<root catr='tal' xmlns:attr='cal' fatr='gal' xmlns:attr2='val'></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToAttribute("catr"));
             Assert.True(nodeReader.MoveToAttribute("attr", "http://www.w3.org/2000/xmlns/"));
@@ -121,8 +116,8 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToElementWithEmptyXml()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlNodeReader nodeReader = new XmlNodeReader(xmlDoc);
+            var xmlDoc = new XmlDocument();
+            var nodeReader = new XmlNodeReader(xmlDoc);
             Assert.False(nodeReader.MoveToElement());
         }
 
@@ -130,9 +125,9 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToElementWithSimpleXml()
         {
             string xml = "<root attr='cal'><child attr='val'><inner attr='val'></inner></child></root>";
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             document.LoadXml(xml);
-            XmlNodeReader nodeReader = new XmlNodeReader(document);
+            var nodeReader = new XmlNodeReader(document);
             Assert.True(nodeReader.Read());
             nodeReader.MoveToFirstAttribute();
             Assert.True(nodeReader.MoveToElement());
