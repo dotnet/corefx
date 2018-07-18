@@ -339,8 +339,21 @@ namespace System.Drawing
                     return;
                 }
 
-                Guid* guids = stackalloc Guid[dimensions];
-                Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(image, image.nativeImage), guids, dimensions));
+                Span<Guid> guids;
+                if (dimensions < 16)
+                {
+                    Guid* g = stackalloc Guid[dimensions];
+                    guids = new Span<Guid>(g, dimensions);
+                }
+                else
+                {
+                    guids = new Span<Guid>(new Guid[dimensions]);
+                }
+
+                fixed (Guid* g = &MemoryMarshal.GetReference(guids))
+                {
+                    Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(image, image.nativeImage), g, dimensions));
+                }
 
                 Guid timeGuid = FrameDimension.Time.Guid;
                 for (int i = 0; i < dimensions; i++)
