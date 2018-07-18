@@ -10,7 +10,7 @@
 def submittedHelixJson = null
 def submitToHelix = (params.TGroup == 'netcoreapp' || params.TGroup == 'netfx')
 
-simpleNode('Windows_NT','latest') {
+simpleNode('windows.10.amd64.clientrs4.devex.open') {
     stage ('Checkout source') {
         checkoutRepo()
     }
