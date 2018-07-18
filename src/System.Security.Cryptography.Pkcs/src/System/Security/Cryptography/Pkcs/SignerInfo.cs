@@ -652,7 +652,7 @@ namespace System.Security.Cryptography.Pkcs
                         hasher.AppendData(setOfTag);
                         hasher.AppendData(writer.EncodeAsSpan().Slice(1));
 #else
-                        byte[] encoded = hasher.Encode();
+                        byte[] encoded = writer.Encode();
                         encoded[0] = 0x31;
                         hasher.AppendData(encoded);
 #endif
