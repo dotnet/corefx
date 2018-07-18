@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography.X509Certificates
 {
@@ -22,14 +21,14 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
-            DisplayX509Certificate(X509Utils.GetCertContext(certificate), IntPtr.Zero);
+            DisplayX509Certificate(X509Utils.GetCertContextSafeHandle(certificate), IntPtr.Zero);
         }
 
         public static void DisplayCertificate(X509Certificate2 certificate, IntPtr hwndParent)
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
-            DisplayX509Certificate(X509Utils.GetCertContext(certificate), hwndParent);
+            DisplayX509Certificate(X509Utils.GetCertContextSafeHandle(certificate), hwndParent);
         }
 
         public static X509Certificate2Collection SelectFromCollection(X509Certificate2Collection certificates, string title, string message, X509SelectionFlag selectionFlag)
@@ -77,7 +76,9 @@ namespace System.Security.Cryptography.X509Certificates
             // CryptUIDlgViewCertificateW returns ERROR_CANCELLED if the user closes
             // the window through the x button or by pressing CANCEL, so ignore this error code
             if (dwErrorCode != ERROR_SUCCESS && dwErrorCode != ERROR_CANCELLED)
-                throw new CryptographicException(Marshal.GetLastWin32Error());
+                throw new CryptographicException(dwErrorCode);
+
+            safeCertContext.Dispose();
         }
 
         private static X509Certificate2Collection SelectFromCollectionHelper(X509Certificate2Collection certificates, string title, string message, X509SelectionFlag selectionFlag, IntPtr hwndParent)
@@ -98,11 +99,12 @@ namespace System.Security.Cryptography.X509Certificates
         {
             int dwErrorCode = ERROR_SUCCESS;
 
-            SafeCertStoreHandle safeCertStoreHandle = Interop.Crypt32.CertOpenStore((IntPtr)Interop.Crypt32.CERT_STORE_PROV_MEMORY,
-                                                                         Interop.Crypt32.X509_ASN_ENCODING | Interop.Crypt32.PKCS_7_ASN_ENCODING,
-                                                                         IntPtr.Zero,
-                                                                         0,
-                                                                         null);
+            SafeCertStoreHandle safeCertStoreHandle = Interop.Crypt32.CertOpenStore(
+                (IntPtr)Interop.Crypt32.CERT_STORE_PROV_MEMORY,
+                Interop.Crypt32.X509_ASN_ENCODING | Interop.Crypt32.PKCS_7_ASN_ENCODING,
+                IntPtr.Zero,
+                0,
+                null);
 
             if (safeCertStoreHandle == null || safeCertStoreHandle.IsInvalid)
                 throw new CryptographicException(Marshal.GetLastWin32Error());
@@ -138,11 +140,13 @@ namespace System.Security.Cryptography.X509Certificates
                                                         safeCertContextHandle,
                                                         Interop.Crypt32.CERT_STORE_ADD_ALWAYS,
                                                         ppStoreContext))
+                {
                     dwErrorCode = Marshal.GetLastWin32Error();
+                }
             }
 
             if (dwErrorCode != ERROR_SUCCESS)
-                throw new CryptographicException(Marshal.GetLastWin32Error());
+                throw new CryptographicException(dwErrorCode);
 
             return safeCertStoreHandle;
         }

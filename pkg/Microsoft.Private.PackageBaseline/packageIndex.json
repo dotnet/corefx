@@ -294,11 +294,9 @@
       }
     },
     "System.Windows.Extensions": {
-      "InboxOn": {
-        "netcoreapp3.0": "4.6.4.0"
-      },
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "4.0.1.0": "4.6.0"
+        "4.0.0.0": "4.6.0"
       }
     },
     "Microsoft.Windows.Compatibility": {

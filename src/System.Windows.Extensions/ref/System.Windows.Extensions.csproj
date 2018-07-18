@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <ProjectGuid>{36A0298D-E01E-411D-A19B-19EEC60B9A8A}</ProjectGuid>
-    <Configurations>netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Windows.Extensions.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
+  <ItemGroup >
+    <Reference Include="System.Runtime" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 </Project>

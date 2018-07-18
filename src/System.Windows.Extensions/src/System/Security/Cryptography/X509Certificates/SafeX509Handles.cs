@@ -15,12 +15,11 @@ namespace System.Security.Cryptography.X509Certificates
             SetHandle(handle);
         }
 
-        internal static SafeCertContextHandle InvalidHandle => new SafeCertContextHandle(IntPtr.Zero);
+        internal static SafeCertContextHandle InvalidHandle =>
+            SafeHandleCache<SafeCertContextHandle>.GetInvalidHandle(
+                () => new SafeCertContextHandle(IntPtr.Zero));
 
-        [DllImport(Interop.Libraries.Crypt32, SetLastError = true)]
-        private static extern bool CertFreeCertificateContext(IntPtr pCertContext);
-
-        protected override bool ReleaseHandle() => CertFreeCertificateContext(handle);
+        protected override bool ReleaseHandle() => Interop.Crypt32.CertFreeCertificateContext(handle);
     }
 
     internal sealed class SafeCertStoreHandle : SafeHandleZeroOrMinusOneIsInvalid
@@ -31,11 +30,10 @@ namespace System.Security.Cryptography.X509Certificates
             SetHandle(handle);
         }
 
-        internal static SafeCertStoreHandle InvalidHandle => new SafeCertStoreHandle(IntPtr.Zero);
+        internal static SafeCertStoreHandle InvalidHandle =>
+            SafeHandleCache<SafeCertStoreHandle>.GetInvalidHandle(
+                () => new SafeCertStoreHandle(IntPtr.Zero));
 
-        [DllImport(Interop.Libraries.Crypt32, SetLastError = true)]
-        private static extern bool CertCloseStore(IntPtr hCertStore, uint dwFlags);
-
-        protected override bool ReleaseHandle() => CertCloseStore(handle, 0);
+        protected override bool ReleaseHandle() => Interop.Crypt32.CertCloseStore(handle, 0);
     }
 }
