@@ -35,11 +35,6 @@ namespace System.Drawing.Design
         }
         
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public UITypeEditor() { }
-        
-        /// <summary>
         /// Determines if drop-down editors should be resizable by the user.
         /// </summary>
         public virtual bool IsDropDownResizable => false;

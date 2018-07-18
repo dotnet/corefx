@@ -735,7 +735,7 @@
   },
   {
     "Name": "System.Drawing.Extensions",
-    "Description": "Provides basic UI types and interfaces.",
+    "Description": "Contains classes that extend design-time user interface (UI) logic and drawing.",
     "CommonTypes": [
       "System.Drawing.Design.IPropertyValueUIService",
       "System.Drawing.Design.PropertyValueUIHandler",

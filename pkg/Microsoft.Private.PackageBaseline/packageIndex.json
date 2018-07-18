@@ -1671,14 +1671,7 @@
       }
     },
     "System.Drawing.Extensions": {
-      "InboxOn": {
-        "monoandroid10": "Any",
-        "monotouch10": "Any",
-        "xamarinios10": "Any",
-        "xamarinmac20": "Any",
-        "xamarintvos10": "Any",
-        "xamarinwatchos10": "Any"
-      },
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"
       }
