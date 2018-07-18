@@ -112,7 +112,7 @@ prepare_native_build()
     __versionSourceFile=$__rootRepo/bin/obj/version.c
     if [ ! -e "${__versionSourceFile}" ]; then
         if [ $__generateversionsource == true ]; then
-            $__rootRepo/Tools/msbuild.sh "$__rootRepo/build.proj" /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /v:minimal
+            $__rootRepo/run.sh build-managed -project:"$__rootRepo/build.proj" -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /v:minimal
         else
             __versionSourceLine="static char sccsid[] __attribute__((used)) = \"@(#)No version information produced\";"
             echo $__versionSourceLine > $__versionSourceFile
@@ -157,7 +157,7 @@ __rootbinpath="$__scriptpath/../../bin"
 # Set the various build properties here so that CMake and MSBuild can pick them up
 __CMakeExtraArgs=""
 __MakeExtraArgs=""
-__generateversionsource=false
+__generateversionsource=true
 __BuildArch=x64
 __BuildType=Debug
 __CMakeArgs=DEBUG
