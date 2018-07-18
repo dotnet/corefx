@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace System.Drawing.Internal
 {
@@ -98,11 +99,20 @@ namespace System.Drawing.Internal
 
         public unsafe void Read(byte* pv, uint cb, uint* pcbRead)
         {
-            Span<byte> buffer = new Span<byte>(pv, checked((int)cb));
             ActualizeVirtualPosition();
-            uint read = (uint)_dataStream.Read(buffer);
+
+            // Stream Span API isn't available in 2.0
+#if netcoreapp20
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+            int read = _dataStream.Read(buffer, 0, checked((int)cb));
+            Marshal.Copy(buffer, 0, (IntPtr)pv, read);
+            ArrayPool<byte>.Shared.Return(buffer);
+#else
+            Span<byte> buffer = new Span<byte>(pv, checked((int)cb));
+            int read = _dataStream.Read(buffer);
+#endif
             if (pcbRead != null)
-                *pcbRead = read;
+                *pcbRead = (uint)read;
         }
 
         public void Revert()
@@ -199,8 +209,18 @@ namespace System.Drawing.Internal
         public unsafe void Write(byte* pv, uint cb, uint* pcbWritten)
         {
             ActualizeVirtualPosition();
+
+            // Stream Span API isn't available in 2.0
+#if netcoreapp20
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+            Marshal.Copy((IntPtr)pv, buffer, 0, (int)cb);
+            _dataStream.Write(buffer, 0, (int)cb);
+            ArrayPool<byte>.Shared.Return(buffer);
+#else
             Span<byte> buffer = new Span<byte>(pv, checked((int)cb));
             _dataStream.Write(buffer);
+#endif
+
             if (pcbWritten != null)
                 *pcbWritten = cb;
         }

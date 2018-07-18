@@ -368,6 +368,7 @@
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Drawing.Primitives" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
