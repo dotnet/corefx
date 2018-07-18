@@ -472,12 +472,10 @@ namespace System.Security.Cryptography.Pkcs
 
         public void CheckHash()
         {
-            if (CheckHash(compatMode: false) || CheckHash(compatMode: true))
+            if (!CheckHash(compatMode: false) && !CheckHash(compatMode: true))
             {
-                return;
+                throw new CryptographicException(SR.Cryptography_BadSignature);
             }
-
-            throw new CryptographicException(SR.Cryptography_BadSignature);
         }
 
         private bool CheckHash(bool compatMode)
