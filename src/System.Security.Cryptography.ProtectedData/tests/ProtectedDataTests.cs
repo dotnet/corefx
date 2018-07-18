@@ -12,10 +12,10 @@ using Xunit;
 
 namespace System.Security.Cryptography.ProtectedDataTests
 {
+    [PlatformSpecific(TestPlatforms.Windows)]
     public static class ProtectedDataTests
     {
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public static void RoundTrip()
         {
             RoundTrip(null);
@@ -39,7 +39,6 @@ namespace System.Security.Cryptography.ProtectedDataTests
         [InlineData(DataProtectionScope.CurrentUser, true)]
         [InlineData(DataProtectionScope.LocalMachine, false)]
         [InlineData(DataProtectionScope.LocalMachine, true)]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public static void ProtectEmptyData(DataProtectionScope scope, bool useEntropy)
         {
             // Use new byte[0] instead of Array.Empty<byte> to prove the implementation
@@ -54,7 +53,6 @@ namespace System.Security.Cryptography.ProtectedDataTests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public static void NullEntropyEquivalence()
         {
             // Passing a zero-length array as entropy is equivalent to passing null as entropy.
@@ -66,7 +64,6 @@ namespace System.Security.Cryptography.ProtectedDataTests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public static void NullEntropyEquivalence2()
         {
             // Passing a zero-length array as entropy is equivalent to passing null as entropy.
@@ -78,7 +75,6 @@ namespace System.Security.Cryptography.ProtectedDataTests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public static void WrongEntropy()
         {
             // Passing a zero-length array as entropy is equivalent to passing null as entropy.
