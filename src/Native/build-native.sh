@@ -18,7 +18,7 @@ usage()
     echo "-staticLibLink - Optional argument to statically link any native library."
     echo "-portable - Optional argument to build native libraries portable over GLIBC based Linux distros."
     echo "-stripSymbols - Optional argument to strip native symbols during the build."
-    echo "-generateversion - Pass this in to get a version on the build output."
+    echo "-skipgenerateversion - Pass this in to skip getting a version on the build output."
     echo "-cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
 }
@@ -286,8 +286,8 @@ while :; do
                 __PortableBuild=1
             fi
             ;;
-        generateversion|-generateversion)
-            __generateversionsource=true
+        skipgenerateversion|-skipgenerateversion)
+            __generateversionsource=false
             ;;
         --clang*)
                 # clangx.y or clang-x.y
