@@ -11,7 +11,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void FreeHGlobal_ValidPointer_Success()
         {
-            IntPtr mem = Marshal.AllocCoTaskMem(10);
+            IntPtr mem = Marshal.AllocHGlobal(10);
             Marshal.FreeHGlobal(mem);
         }
 
