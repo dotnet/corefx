@@ -21,14 +21,14 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
-            DisplayX509Certificate(X509Utils.GetCertContextSafeHandle(certificate), IntPtr.Zero);
+            DisplayX509Certificate(X509Utils.DuplicateCertificateContext(certificate), IntPtr.Zero);
         }
 
         public static void DisplayCertificate(X509Certificate2 certificate, IntPtr hwndParent)
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
-            DisplayX509Certificate(X509Utils.GetCertContextSafeHandle(certificate), hwndParent);
+            DisplayX509Certificate(X509Utils.DuplicateCertificateContext(certificate), hwndParent);
         }
 
         public static X509Certificate2Collection SelectFromCollection(X509Certificate2Collection certificates, string title, string message, X509SelectionFlag selectionFlag)
@@ -43,42 +43,43 @@ namespace System.Security.Cryptography.X509Certificates
 
         private static void DisplayX509Certificate(SafeCertContextHandle safeCertContext, IntPtr hwndParent)
         {
-            if (safeCertContext.IsInvalid)
-                throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHandle, nameof(safeCertContext)));
+            using (safeCertContext)
+            {
+                if (safeCertContext.IsInvalid)
+                    throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHandle, nameof(safeCertContext)));
 
-            int dwErrorCode = ERROR_SUCCESS;
+                int dwErrorCode = ERROR_SUCCESS;
 
-            // Initialize view structure.
-            Interop.CryptUI.CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo = new Interop.CryptUI.CRYPTUI_VIEWCERTIFICATE_STRUCTW();
-            ViewInfo.dwSize = (uint)Marshal.SizeOf(ViewInfo);
-            ViewInfo.hwndParent = hwndParent;
-            ViewInfo.dwFlags = 0;
-            ViewInfo.szTitle = null;
-            ViewInfo.pCertContext = safeCertContext.DangerousGetHandle();
-            ViewInfo.rgszPurposes = IntPtr.Zero;
-            ViewInfo.cPurposes = 0;
-            ViewInfo.pCryptProviderData = IntPtr.Zero;
-            ViewInfo.fpCryptProviderDataTrustedUsage = false;
-            ViewInfo.idxSigner = 0;
-            ViewInfo.idxCert = 0;
-            ViewInfo.fCounterSigner = false;
-            ViewInfo.idxCounterSigner = 0;
-            ViewInfo.cStores = 0;
-            ViewInfo.rghStores = IntPtr.Zero;
-            ViewInfo.cPropSheetPages = 0;
-            ViewInfo.rgPropSheetPages = IntPtr.Zero;
-            ViewInfo.nStartPage = 0;
+                // Initialize view structure.
+                Interop.CryptUI.CRYPTUI_VIEWCERTIFICATE_STRUCTW ViewInfo = new Interop.CryptUI.CRYPTUI_VIEWCERTIFICATE_STRUCTW();
+                ViewInfo.dwSize = (uint)Marshal.SizeOf(ViewInfo);
+                ViewInfo.hwndParent = hwndParent;
+                ViewInfo.dwFlags = 0;
+                ViewInfo.szTitle = null;
+                ViewInfo.pCertContext = safeCertContext.DangerousGetHandle();
+                ViewInfo.rgszPurposes = IntPtr.Zero;
+                ViewInfo.cPurposes = 0;
+                ViewInfo.pCryptProviderData = IntPtr.Zero;
+                ViewInfo.fpCryptProviderDataTrustedUsage = false;
+                ViewInfo.idxSigner = 0;
+                ViewInfo.idxCert = 0;
+                ViewInfo.fCounterSigner = false;
+                ViewInfo.idxCounterSigner = 0;
+                ViewInfo.cStores = 0;
+                ViewInfo.rghStores = IntPtr.Zero;
+                ViewInfo.cPropSheetPages = 0;
+                ViewInfo.rgPropSheetPages = IntPtr.Zero;
+                ViewInfo.nStartPage = 0;
 
-            // View the certificate
-            if (!Interop.CryptUI.CryptUIDlgViewCertificateW(ViewInfo, IntPtr.Zero))
-                dwErrorCode = Marshal.GetLastWin32Error();
+                // View the certificate
+                if (!Interop.CryptUI.CryptUIDlgViewCertificateW(ViewInfo, IntPtr.Zero))
+                    dwErrorCode = Marshal.GetLastWin32Error();
 
-            // CryptUIDlgViewCertificateW returns ERROR_CANCELLED if the user closes
-            // the window through the x button or by pressing CANCEL, so ignore this error code
-            if (dwErrorCode != ERROR_SUCCESS && dwErrorCode != ERROR_CANCELLED)
-                throw new CryptographicException(dwErrorCode);
-
-            safeCertContext.Dispose();
+                // CryptUIDlgViewCertificateW returns ERROR_CANCELLED if the user closes
+                // the window through the x button or by pressing CANCEL, so ignore this error code
+                if (dwErrorCode != ERROR_SUCCESS && dwErrorCode != ERROR_CANCELLED)
+                    throw new CryptographicException(dwErrorCode);
+            }
         }
 
         private static X509Certificate2Collection SelectFromCollectionHelper(X509Certificate2Collection certificates, string title, string message, X509SelectionFlag selectionFlag, IntPtr hwndParent)

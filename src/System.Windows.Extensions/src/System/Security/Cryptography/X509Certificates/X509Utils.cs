@@ -11,7 +11,7 @@ namespace System.Security.Cryptography.X509Certificates
         internal const uint CERT_STORE_ENUM_ARCHIVED_FLAG = 0x00000200;
         internal const uint CERT_STORE_CREATE_NEW_FLAG = 0x00002000;
 
-        internal static SafeCertContextHandle GetCertContextSafeHandle(X509Certificate2 certificate)
+        internal static SafeCertContextHandle DuplicateCertificateContext(X509Certificate2 certificate)
         {
             SafeCertContextHandle safeCertContext = Interop.Crypt32.CertDuplicateCertificateContext(certificate.Handle);
             GC.KeepAlive(certificate);
@@ -38,18 +38,17 @@ namespace System.Security.Cryptography.X509Certificates
             // applied to the original store. This has a limit of 99 links per cert context however.          
             foreach (X509Certificate2 x509 in collection)
             {
-                SafeCertContextHandle handle = GetCertContextSafeHandle(x509);
-
-                if (!Interop.Crypt32.CertAddCertificateLinkToStore(
-                    safeCertStoreHandle,
-                    handle,
-                    Interop.Crypt32.CERT_STORE_ADD_ALWAYS,
-                    SafeCertContextHandle.InvalidHandle))
+                using (SafeCertContextHandle handle = DuplicateCertificateContext(x509))
                 {
-                    throw new CryptographicException(Marshal.GetLastWin32Error());
+                    if (!Interop.Crypt32.CertAddCertificateLinkToStore(
+                        safeCertStoreHandle,
+                        handle,
+                        Interop.Crypt32.CERT_STORE_ADD_ALWAYS,
+                        SafeCertContextHandle.InvalidHandle))
+                    {
+                        throw new CryptographicException(Marshal.GetLastWin32Error());
+                    }
                 }
-
-                handle.Dispose();
             }
 
             return safeCertStoreHandle;
