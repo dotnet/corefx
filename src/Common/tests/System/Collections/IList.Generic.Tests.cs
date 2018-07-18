@@ -42,7 +42,7 @@ namespace System.Collections.Tests
             foreach (var item in base.GetModifyEnumerables(operations))
                 yield return item;
 
-            if (!AddRemoveClear_ThrowsNotSupported && (operations&ModifyOperation.Insert)==ModifyOperation.Insert)
+            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Insert) == ModifyOperation.Insert)
             {
                 yield return (IEnumerable<T> enumerable) =>
                 {

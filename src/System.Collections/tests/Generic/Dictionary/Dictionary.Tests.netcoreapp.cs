@@ -11,9 +11,9 @@ namespace System.Collections.Tests
 {
     public partial class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
     {
-        protected override ModifyOperation ModifyEnumeratorAllowed => ModifyOperation.Remove;
-
         protected override ModifyOperation ModifyEnumeratorThrows => ModifyOperation.Add | ModifyOperation.Insert | ModifyOperation.Clear;
+
+        protected override ModifyOperation ModifyEnumeratorAllowed => ModifyOperation.Remove;
     }
 
 }

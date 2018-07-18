@@ -15,8 +15,8 @@ namespace System.Collections.Tests
 
         public static IEnumerable<object[]> ValidCollectionSizes()
         {
-            //yield return new object[] { 0 };
-            //yield return new object[] { 1 };
+            yield return new object[] { 0 };
+            yield return new object[] { 1 };
             yield return new object[] { 75 };
         }
 
