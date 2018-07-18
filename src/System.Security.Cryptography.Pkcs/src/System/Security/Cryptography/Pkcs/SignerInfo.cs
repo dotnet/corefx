@@ -482,16 +482,17 @@ namespace System.Security.Cryptography.Pkcs
 
         private bool CheckHash(bool compatMode)
         {
-            IncrementalHash hasher = PrepareDigest(compatMode);
-
-            if (hasher == null)
+            using (IncrementalHash hasher = PrepareDigest(compatMode))
             {
-                Debug.Assert(compatMode, $"{nameof(PrepareDigest)} returned null for the primary check");
-                return false;
-            }
+                if (hasher == null)
+                {
+                    Debug.Assert(compatMode, $"{nameof(PrepareDigest)} returned null for the primary check");
+                    return false;
+                }
 
-            byte[] expectedSignature = hasher.GetHashAndReset();
-            return _signature.Span.SequenceEqual(expectedSignature);
+                byte[] expectedSignature = hasher.GetHashAndReset();
+                return _signature.Span.SequenceEqual(expectedSignature);
+            }
         }
 
         private X509Certificate2 FindSignerCertificate()
@@ -746,40 +747,41 @@ namespace System.Security.Cryptography.Pkcs
             X509Certificate2 certificate,
             bool compatMode)
         {
-            IncrementalHash hasher = PrepareDigest(compatMode);
-
-            if (hasher == null)
+            using (IncrementalHash hasher = PrepareDigest(compatMode))
             {
-                Debug.Assert(compatMode, $"{nameof(PrepareDigest)} returned null for the primary check");
-                return false;
-            }
+                if (hasher == null)
+                {
+                    Debug.Assert(compatMode, $"{nameof(PrepareDigest)} returned null for the primary check");
+                    return false;
+                }
 
 #if netcoreapp
-            // SHA-2-512 is the biggest digest type we know about.
-            Span<byte> digestValue = stackalloc byte[512 / 8];
-            ReadOnlySpan<byte> digest = digestValue;
-            ReadOnlyMemory<byte> signature = _signature;
+                // SHA-2-512 is the biggest digest type we know about.
+                Span<byte> digestValue = stackalloc byte[512 / 8];
+                ReadOnlySpan<byte> digest = digestValue;
+                ReadOnlyMemory<byte> signature = _signature;
 
-            if (hasher.TryGetHashAndReset(digestValue, out int bytesWritten))
-            {
-                digest = digestValue.Slice(0, bytesWritten);
-            }
-            else
-            {
-                digest = hasher.GetHashAndReset();
-            }
+                if (hasher.TryGetHashAndReset(digestValue, out int bytesWritten))
+                {
+                    digest = digestValue.Slice(0, bytesWritten);
+                }
+                else
+                {
+                    digest = hasher.GetHashAndReset();
+                }
 #else
-            byte[] digest = hasher.GetHashAndReset();
-            byte[] signature = _signature.ToArray();
+                byte[] digest = hasher.GetHashAndReset();
+                byte[] signature = _signature.ToArray();
 #endif
 
-            return signatureProcessor.VerifySignature(
-                digest,
-                signature,
-                DigestAlgorithm.Value,
-                hasher.AlgorithmName,
-                _signatureAlgorithmParameters,
-                certificate);
+                return signatureProcessor.VerifySignature(
+                    digest,
+                    signature,
+                    DigestAlgorithm.Value,
+                    hasher.AlgorithmName,
+                    _signatureAlgorithmParameters,
+                    certificate);
+            }
         }
 
         private HashAlgorithmName GetDigestAlgorithm()
