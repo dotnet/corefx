@@ -1840,7 +1840,7 @@ namespace System.Data.SqlClient
                                             }
                                             else
                                             {
-                                                TransactionType transactionType = TransactionType.LocalFromTSQL;
+                                                TransactionType transactionType = (TdsEnums.ENV_BEGINTRAN == env[ii].type) ? TransactionType.LocalFromTSQL : TransactionType.Distributed;
                                                 _currentTransaction = new SqlInternalTransaction(_connHandler, transactionType, null, env[ii].newLongValue);
                                             }
                                             if (null != _statistics && !_statisticsIsInTransaction)
