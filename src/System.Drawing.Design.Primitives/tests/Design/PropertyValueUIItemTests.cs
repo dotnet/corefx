@@ -12,18 +12,18 @@ namespace System.Drawing.Design.Tests
     {
         private void Dummy_PropertyValueUIItemInvokeHandler(ITypeDescriptorContext context, PropertyDescriptor propDesc, PropertyValueUIItem invokedItem) { }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Ctor_Throws_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new PropertyValueUIItem(null, Dummy_PropertyValueUIItemInvokeHandler, "toolTip"));
+            AssertExtensions.Throws<ArgumentNullException>("uiItemImage", () => new PropertyValueUIItem(null, Dummy_PropertyValueUIItemInvokeHandler, "toolTip"));
 
             using (Image img = Image.FromFile(Path.Combine("bitmaps", "nature24bits.jpg")))
             {
-                Assert.Throws<ArgumentNullException>(() => new PropertyValueUIItem(img, null, "toolTip"));
+                AssertExtensions.Throws<ArgumentNullException>("handler", () => new PropertyValueUIItem(img, null, "toolTip"));
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Ctor_PropertiesAssignedCorrectly()
         {
             string toolTip = "Custom toolTip";
