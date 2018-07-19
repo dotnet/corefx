@@ -168,7 +168,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         [System.CLSCompliantAttribute(false)]
         public static ushort ToUShort(string Value) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DesignerGeneratedAttribute : System.Attribute
     {
