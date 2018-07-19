@@ -4,7 +4,6 @@
     <BuildConfigurations>
       net461-Windows_NT;
       netfx-Windows_NT;
-      netstandard2.0-Windows_NT;
       netcoreapp2.0-Windows_NT;
       netcoreapp-Windows_NT;
     </BuildConfigurations>
