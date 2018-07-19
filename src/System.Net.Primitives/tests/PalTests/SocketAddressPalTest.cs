@@ -189,9 +189,8 @@ namespace System.Net.Primitives.PalTests
             Assert.Equal(port, SocketAddressPal.GetPort(buffer));
         }
 
-        // This is platform specific test. So far Windows, Linux and OSX use same layout.
         [Fact]
-        public void SocketAddress_To_String()
+        public void ToString_ValidSocketAddress_ExpectedFormat()
         {
             IPEndPoint ipLocalEndPoint = new IPEndPoint(IPAddress.Loopback, Convert.ToInt32("cafe", 16));
             SocketAddress socketAddress = ipLocalEndPoint.Serialize();
