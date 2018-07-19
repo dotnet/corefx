@@ -5,7 +5,11 @@
 using System;
 using System.Text;
 
+#if MS_INTERNAL_IO
+namespace Microsoft.Internal.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     /// <summary>
     /// Provides methods for matching file system names.

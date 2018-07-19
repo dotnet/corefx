@@ -9,7 +9,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if MS_INTERNAL_IO
+using System;
+using System.IO;
+
+namespace Microsoft.Internal.IO
+#else
 namespace System.IO
+#endif
 {
     // Class for creating FileStream objects, and some basic file management
     // routines such as Delete, etc.
@@ -330,9 +337,11 @@ namespace System.IO
                 }
                 else if (fileLength == 0)
                 {
+#if !MS_INTERNAL_IO
                     // Some file systems (e.g. procfs on Linux) return 0 for length even when there's content.
                     // Thus we need to assume 0 doesn't mean empty.
                     return ReadAllBytesUnknownLength(fs);
+#endif
                 }
 
                 int index = 0;
@@ -350,6 +359,7 @@ namespace System.IO
             }
         }
 
+#if !MS_INTERNAL_IO
         private static byte[] ReadAllBytesUnknownLength(FileStream fs)
         {
             byte[] rentedArray = null;
@@ -393,6 +403,7 @@ namespace System.IO
                 }
             }
         }
+#endif
 
         public static void WriteAllBytes(string path, byte[] bytes)
         {
@@ -700,7 +711,11 @@ namespace System.IO
                 StringBuilder sb = new StringBuilder();
                 for (;;)
                 {
+#if MS_INTERNAL_IO
+                    int read = await sr.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+#else
                     int read = await sr.ReadAsync(new Memory<char>(buffer), cancellationToken).ConfigureAwait(false);
+#endif
                     if (read == 0)
                     {
                         return sb.ToString();
@@ -787,7 +802,11 @@ namespace System.IO
                 byte[] bytes = new byte[count];
                 do
                 {
+#if MS_INTERNAL_IO
+                    int n = await fs.ReadAsync(bytes, index, count - index, cancellationToken).ConfigureAwait(false);
+#else
                     int n = await fs.ReadAsync(new Memory<byte>(bytes, index, count - index), cancellationToken).ConfigureAwait(false);
+#endif
                     if (n == 0)
                     {
                         throw Error.GetEndOfFile();
@@ -823,7 +842,11 @@ namespace System.IO
                     }
 
                     Debug.Assert(bytesRead < rentedArray.Length);
+#if MS_INTERNAL_IO
+                    int n = await fs.ReadAsync(rentedArray, bytesRead, rentedArray.Length - bytesRead, cancellationToken).ConfigureAwait(false);
+#else
                     int n = await fs.ReadAsync(rentedArray.AsMemory(bytesRead), cancellationToken).ConfigureAwait(false);
+#endif
                     if (n == 0)
                     {
                         return rentedArray.AsSpan(0, bytesRead).ToArray();
@@ -859,7 +882,11 @@ namespace System.IO
 
             using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
+#if MS_INTERNAL_IO
+                await fs.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
+#else
                 await fs.WriteAsync(new ReadOnlyMemory<byte>(bytes), cancellationToken).ConfigureAwait(false);
+#endif
                 await fs.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -952,7 +979,11 @@ namespace System.IO
                 {
                     int batchSize = Math.Min(DefaultBufferSize, count - index);
                     contents.CopyTo(index, buffer, 0, batchSize);
+#if MS_INTERNAL_IO
+                    await sw.WriteAsync(buffer, 0, batchSize).ConfigureAwait(false);
+#else
                     await sw.WriteAsync(new ReadOnlyMemory<char>(buffer, 0, batchSize), cancellationToken).ConfigureAwait(false);
+#endif
                     index += batchSize;
                 }
 

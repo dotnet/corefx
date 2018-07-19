@@ -5,7 +5,14 @@
 using System.Diagnostics;
 using System.Text;
 
+#if MS_INTERNAL_IO
+using System;
+using System.IO;
+
+namespace Microsoft.Internal.IO
+#else
 namespace System.IO
+#endif
 {
     // Class for creating FileStream objects, and some basic file management
     // routines such as Delete, etc.
@@ -24,7 +31,7 @@ namespace System.IO
             OriginalPath = originalPath ?? throw new ArgumentNullException(nameof(fileName));
 
             fullPath = fullPath ?? originalPath;
-            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath), "should be fully qualified if normalized");
+            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath.AsSpan()), "should be fully qualified if normalized");
 
             FullPath = isNormalized ? fullPath ?? originalPath : Path.GetFullPath(fullPath);
             _name = fileName ?? Path.GetFileName(originalPath);

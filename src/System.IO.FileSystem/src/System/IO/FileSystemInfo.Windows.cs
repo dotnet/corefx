@@ -3,9 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+
+#if MS_INTERNAL_IO
+using System;
+using System.IO;
+using Microsoft.Internal.IO.Enumeration;
+
+namespace Microsoft.Internal.IO
+#else
 using System.IO.Enumeration;
 
 namespace System.IO
+#endif
 {
     partial class FileSystemInfo
     {
@@ -25,10 +34,10 @@ namespace System.IO
         internal static unsafe FileSystemInfo Create(string fullPath, ref FileSystemEntry findData)
         {
             FileSystemInfo info = findData.IsDirectory
-                ? (FileSystemInfo) new DirectoryInfo(fullPath, fileName: new string(findData.FileName), isNormalized: true)
-                : new FileInfo(fullPath, fileName: new string(findData.FileName), isNormalized: true);
+                ? (FileSystemInfo) new DirectoryInfo(fullPath, fileName: findData.FileName.ToString(), isNormalized: true)
+                : new FileInfo(fullPath, fileName: findData.FileName.ToString(), isNormalized: true);
 
-            Debug.Assert(!PathInternal.IsPartiallyQualified(fullPath), $"'{fullPath}' should be fully qualified when constructed from directory enumeration");
+            Debug.Assert(!PathInternal.IsPartiallyQualified(fullPath.AsSpan()), $"'{fullPath}' should be fully qualified when constructed from directory enumeration");
 
             info.Init(findData._info);
             return info;

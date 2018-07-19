@@ -6,7 +6,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 
+#if MS_INTERNAL_IO
+using System;
+
+namespace Microsoft.Internal.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     public unsafe abstract partial class FileSystemEnumerator<TResult> : CriticalFinalizerObject, IEnumerator<TResult>
     {
@@ -48,7 +54,7 @@ namespace System.IO.Enumeration
 
             // Close the handle now that we're done
             CloseDirectoryHandle();
-            OnDirectoryFinished(_currentPath);
+            OnDirectoryFinished(_currentPath.AsSpan());
 
             // Attempt to grab another directory to process
             if (!DequeueNextDirectory())

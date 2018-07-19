@@ -5,7 +5,14 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+#if MS_INTERNAL_IO
+using System;
+using System.IO;
+
+namespace Microsoft.Internal.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     public partial class FileSystemEnumerator<TResult>
     {

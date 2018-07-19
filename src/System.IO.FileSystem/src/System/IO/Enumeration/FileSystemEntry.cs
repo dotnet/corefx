@@ -2,7 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if MS_INTERNAL_IO
+using System;
+using System.IO;
+
+namespace Microsoft.Internal.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     public ref partial struct FileSystemEntry
     {

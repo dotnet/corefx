@@ -6,7 +6,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
+#if MS_INTERNAL_IO
+using System;
+
+namespace Microsoft.Internal.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     /// <summary>
     /// Enumerable that allows utilizing custom filter predicates and tranform delegates.

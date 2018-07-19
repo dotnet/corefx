@@ -4,7 +4,14 @@
 
 using System.Runtime.Serialization;
 
+#if MS_INTERNAL_IO
+using System;
+using System.IO;
+
+namespace Microsoft.Internal.IO
+#else
 namespace System.IO
+#endif
 {
     public abstract partial class FileSystemInfo : MarshalByRefObject, ISerializable
     {
