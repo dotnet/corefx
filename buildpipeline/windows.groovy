@@ -82,8 +82,7 @@ simpleNode('windows.10.amd64.clientrs4.devex.open') {
                     targetHelixQueues = ['Windows.10.Amd64.ClientRS4.Open']
                 }
 
-                def ProgFilesX86 = System.getenv()["ProgramFiles(x86)"];
-                def vswhere = "\"${ProgFilesX86}\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -latest -prerelease -property installationPath";
+                def vswhere = "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -latest -prerelease -property installationPath";
                 def vsInstallPath =  vswhere.execute().in.text.trim();
                 def VsDevCmd = "\"${vsInstallPath}\\Common7\\Tools\\VsDevCmd.bat\"".execute();
 
