@@ -12,7 +12,7 @@ using Microsoft.Internal.IO.Enumeration;
 
 namespace Microsoft.Internal.IO
 #else
-using using System.IO.Enumeration;
+using System.IO.Enumeration;
 
 namespace System.IO
 #endif
