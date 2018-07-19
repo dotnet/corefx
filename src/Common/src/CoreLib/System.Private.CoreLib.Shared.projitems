@@ -116,6 +116,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\DateTimeOffset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DayOfWeek.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DBNull.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Decimal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Decimal.DecCalc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DefaultBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Diagnostics\CodeAnalysis\SuppressMessageAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Diagnostics\ConditionalAttribute.cs" />
@@ -217,6 +219,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\InvalidOperationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\InvalidProgramException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\InvalidTimeZoneException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\IO\BinaryReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\BinaryWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\DirectoryNotFoundException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\EncodingCache.cs" />
@@ -591,6 +594,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\LazyThreadSafetyMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\LockRecursionException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ManualResetEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ManualResetEventSlim.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Mutex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\NativeOverlapped.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ParameterizedThreadStart.cs" />
