@@ -62,6 +62,16 @@ namespace Microsoft.VisualBasic
     {
         public HideModuleNameAttribute() { }
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public sealed partial class MyGroupCollectionAttribute : System.Attribute
+    {
+        public MyGroupCollectionAttribute(string typeToCollect, string createInstanceMethodName, string disposeInstanceMethodName, string defaultInstanceAlias) { }
+        public string CreateMethod { get { throw null; } }
+        public string DefaultInstanceAlias { get { throw null; } }
+        public string DisposeMethod { get { throw null; } }
+        public string MyGroupName { get { throw null; } }
+    }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Strings
     {
