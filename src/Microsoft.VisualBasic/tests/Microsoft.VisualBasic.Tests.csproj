@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Microsoft/VisualBasic/ComClassAttributeTests.cs" />
+    <Compile Include="Microsoft/VisualBasic/HideModuleNameAttributeTests.cs" />
     <Compile Include="ConversionsTests.cs" />
     <Compile Include="OperatorsTests.cs" />
     <Compile Include="UtilsTests.cs" />
