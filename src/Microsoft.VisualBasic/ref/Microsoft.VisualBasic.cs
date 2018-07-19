@@ -248,7 +248,7 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         public OptionCompareAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionTextAttribute : System.Attribute
     {
