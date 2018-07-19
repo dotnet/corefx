@@ -120,10 +120,10 @@ namespace System.Net
             {
                 return WebExceptionStatus.UnknownError;
             }
-
             WebExceptionStatus status;
             switch (socketEx.SocketErrorCode)
             {
+                case SocketError.NoData:
                 case SocketError.HostNotFound:
                     status = WebExceptionStatus.NameResolutionFailure;
                     break;
