@@ -105,6 +105,27 @@ namespace Microsoft.VisualBasic
         public int Length { get { throw null; } }
     }
 }
+namespace Microsoft.VisualBasic.ApplicationServices
+{
+    public partial class StartupEventArgs : System.ComponentModel.CancelEventArgs
+    {
+        public StartupEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args) { }
+        public System.Collections.ObjectModel.ReadOnlyCollection<string> CommandLine { get { throw null; } }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public partial class StartupNextInstanceEventArgs : System.EventArgs
+    {
+        public StartupNextInstanceEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args, bool bringToForegroundFlag) { }
+        public bool BringToForeground { get { throw null; } set { } }
+        public System.Collections.ObjectModel.ReadOnlyCollection<string> CommandLine { get { throw null; } }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public partial class UnhandledExceptionEventArgs : System.Threading.ThreadExceptionEventArgs
+    {
+        public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
+        public bool ExitApplication { get { throw null; } set { } }
+    }
+}
 namespace Microsoft.VisualBasic.CompilerServices
 {
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -279,5 +300,13 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         internal Utils() { }
         public static System.Array CopyArray(System.Array arySrc, System.Array aryDest) { throw null; }
+    }
+}
+namespace Microsoft.VisualBasic.Devices
+{
+    public partial class NetworkAvailableEventArgs : System.EventArgs
+    {
+        public NetworkAvailableEventArgs(bool networkAvailable) { }
+        public bool IsNetworkAvailable { get { throw null; } }
     }
 }
