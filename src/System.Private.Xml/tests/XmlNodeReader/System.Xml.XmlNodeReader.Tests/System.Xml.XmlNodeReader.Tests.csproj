@@ -6,6 +6,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="NodeReaderTestHelper.cs" />
     <Compile Include="XmlNodeReaderConstructionTests.cs" />
     <Compile Include="XmlNodeReaderGetAttributeTests.cs" />
     <Compile Include="XmlNodeReaderMiscTests.cs" />

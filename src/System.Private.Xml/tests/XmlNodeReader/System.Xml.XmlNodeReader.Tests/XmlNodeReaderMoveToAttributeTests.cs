@@ -15,10 +15,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToFirstAttributeWithSimpleXml()
         {
-            string xml = "<root></root>";
-            var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(xmlDoc);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader("<root></root>");
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.MoveToFirstAttribute());
         }
@@ -27,9 +24,7 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToFirstAttributeWithAttributeXml()
         {
             string xml = "<root attr='cal'><child attr='val'></child></root>";
-            var document = new XmlDocument();
-            document.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(document);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToFirstAttribute());
 
@@ -48,10 +43,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToNextAttributeWithSimpleXml()
         {
-            string xml = "<root></root>";
-            var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(xmlDoc);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader("<root></root>");
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.MoveToNextAttribute());
         }
@@ -60,9 +52,7 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToNextAttributeWithAttributeXml()
         {
             string xml = "<root attr='cal' attr2='val'></root>";
-            var document = new XmlDocument();
-            document.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(document);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToNextAttribute());
 
@@ -83,10 +73,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderMoveToAttributeWithSimpleXml()
         {
-            string xml = "<root></root>";
-            var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(xmlDoc);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader("<root></root>");
             Assert.True(nodeReader.Read());
             Assert.False(nodeReader.MoveToAttribute(string.Empty));
             Assert.False(nodeReader.MoveToAttribute(string.Empty, null));
@@ -97,9 +84,7 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToAttributeWithAttributeXml()
         {
             string xml = "<root catr='tal' xmlns:attr='cal' fatr='gal' xmlns:attr2='val'></root>";
-            var document = new XmlDocument();
-            document.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(document);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());
             Assert.True(nodeReader.MoveToAttribute("catr"));
             Assert.True(nodeReader.MoveToAttribute("attr", "http://www.w3.org/2000/xmlns/"));
@@ -125,9 +110,7 @@ namespace System.Xml.Tests
         public void NodeReaderMoveToElementWithSimpleXml()
         {
             string xml = "<root attr='cal'><child attr='val'><inner attr='val'></inner></child></root>";
-            var document = new XmlDocument();
-            document.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(document);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());
             nodeReader.MoveToFirstAttribute();
             Assert.True(nodeReader.MoveToElement());

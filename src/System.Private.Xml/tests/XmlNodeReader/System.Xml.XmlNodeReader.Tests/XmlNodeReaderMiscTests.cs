@@ -16,10 +16,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderSkipWithSimpleXml()
         {
-            string xml = "<root atri='val'><child /></root>";
-            var document = new XmlDocument();
-            document.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(document);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader("<root atri='val'><child /></root>");
             Assert.True(nodeReader.Read());
             nodeReader.Skip();
             Assert.True(nodeReader.EOF);
@@ -38,10 +35,7 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderLookupNamespaceWithSimpleXml()
         {
-            string xml = "<root></root>";
-            var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(xmlDoc);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader("<root></root>");
             nodeReader.Read();
             var namespaceResolver = nodeReader as IXmlNamespaceResolver;
             Assert.Equal(null, namespaceResolver.LookupNamespace("prefix"));
@@ -57,9 +51,7 @@ namespace System.Xml.Tests
                    "<title>Pride And Prejudice</title>" +
                    "<bk:genre>novel</bk:genre>" +
                    "</book>";
-            var xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(xml);
-            var nodeReader = new XmlNodeReader(xmlDocument);
+            XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.Equal(string.Empty, nodeReader.LocalName);
             Assert.Equal(string.Empty, nodeReader.Name);
             Assert.Equal(string.Empty, nodeReader.NamespaceURI);
