@@ -90,6 +90,14 @@ namespace Microsoft.VisualBasic
         public static string RTrim(string str) { throw null; }
         public static string Trim(string str) { throw null; }
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    public sealed partial class VBFixedArrayAttribute : System.Attribute
+    {
+        public VBFixedArrayAttribute(int UpperBound1) { }
+        public VBFixedArrayAttribute(int UpperBound1, int UpperBound2) { }
+        public int[] Bounds { get { throw null; } }
+        public int Length { get { throw null; } }
+    }
 }
 namespace Microsoft.VisualBasic.CompilerServices
 {

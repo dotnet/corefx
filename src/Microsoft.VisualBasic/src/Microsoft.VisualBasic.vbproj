@@ -47,6 +47,7 @@
     <Compile Include="Microsoft\VisualBasic\Interaction.vb" />
     <Compile Include="Microsoft\VisualBasic\MyGroupCollectionAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\Strings.vb" />
+    <Compile Include="Microsoft\VisualBasic\VBFixedArrayAttribute.vb" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3'">
     <Reference Include="System.Runtime" />
