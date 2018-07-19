@@ -21,14 +21,14 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
-            DisplayX509Certificate(X509Utils.DuplicateCertificateContext(certificate), IntPtr.Zero);
+            DisplayX509Certificate(certificate, IntPtr.Zero);
         }
 
         public static void DisplayCertificate(X509Certificate2 certificate, IntPtr hwndParent)
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
-            DisplayX509Certificate(X509Utils.DuplicateCertificateContext(certificate), hwndParent);
+            DisplayX509Certificate(certificate, hwndParent);
         }
 
         public static X509Certificate2Collection SelectFromCollection(X509Certificate2Collection certificates, string title, string message, X509SelectionFlag selectionFlag)
@@ -41,9 +41,9 @@ namespace System.Security.Cryptography.X509Certificates
             return SelectFromCollectionHelper(certificates, title, message, selectionFlag, hwndParent);
         }
 
-        private static void DisplayX509Certificate(SafeCertContextHandle safeCertContext, IntPtr hwndParent)
+        private static void DisplayX509Certificate(X509Certificate2 certificate, IntPtr hwndParent)
         {
-            using (safeCertContext)
+            using (SafeCertContextHandle safeCertContext = X509Utils.DuplicateCertificateContext(certificate))
             {
                 if (safeCertContext.IsInvalid)
                     throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHandle, nameof(safeCertContext)));
