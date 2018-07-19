@@ -7663,6 +7663,59 @@ namespace System.Text
         public override string ToString() { throw null; }
         public string ToString(int startIndex, int length) { throw null; }
     }
+    public readonly partial struct UnicodeScalar : IComparable<UnicodeScalar>, IEquatable<UnicodeScalar>
+    {
+        public UnicodeScalar(char ch) { }
+        public UnicodeScalar(int scalarValue) { }
+        [CLSCompliant(false)]
+        public UnicodeScalar(uint scalarValue) => throw null;
+        public static bool operator ==(UnicodeScalar a, UnicodeScalar b) => throw null;
+        public static bool operator !=(UnicodeScalar a, UnicodeScalar b) => throw null;
+        public static bool operator <(UnicodeScalar a, UnicodeScalar b) => throw null;
+        public static bool operator <=(UnicodeScalar a, UnicodeScalar b) => throw null;
+        public static bool operator >(UnicodeScalar a, UnicodeScalar b) => throw null;
+        public static bool operator >=(UnicodeScalar a, UnicodeScalar b) => throw null;
+        public bool IsAscii { get => throw null; }
+        public bool IsBmp { get => throw null; }
+        public int Plane { get => throw null; }
+        public static UnicodeScalar ReplacementChar { get => throw null; }
+        public int Utf16SequenceLength { get => throw null; }
+        public int Utf8SequenceLength { get => throw null; }
+        [CLSCompliant(false)]
+        public uint Value { get => throw null; }
+        public int CompareTo(UnicodeScalar other) => throw null;
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [CLSCompliant(false)]
+        public static UnicodeScalar DangerousCreateWithoutValidation(uint scalarValue) => throw null;
+        public override bool Equals(object obj) => throw null;
+        public bool Equals(UnicodeScalar other) => throw null;
+        public override int GetHashCode() => throw null;
+        public static bool IsValid(int value) => throw null;
+        public override string ToString() => throw null;
+        public int ToUtf16(Span<char> output) => throw null;
+        public int ToUtf8(Span<byte> output) => throw null;
+        public Utf8String ToUtf8String() => throw null;
+        public static bool TryCreate(int value, out UnicodeScalar result) => throw null;
+        [CLSCompliant(false)]
+        public static bool TryCreate(uint value, out UnicodeScalar result) => throw null;
+        public static double GetNumericValue(UnicodeScalar s) => throw null;
+        public static System.Globalization.UnicodeCategory GetUnicodeCategory(UnicodeScalar s) => throw null;
+        public static bool IsControl(UnicodeScalar s) => throw null;
+        public static bool IsDigit(UnicodeScalar s) => throw null;
+        public static bool IsLetter(UnicodeScalar s) => throw null;
+        public static bool IsLetterOrDigit(UnicodeScalar s) => throw null;
+        public static bool IsLower(UnicodeScalar s) => throw null;
+        public static bool IsNumber(UnicodeScalar s) => throw null;
+        public static bool IsPunctuation(UnicodeScalar s) => throw null;
+        public static bool IsSeparator(UnicodeScalar s) => throw null;
+        public static bool IsSymbol(UnicodeScalar s) => throw null;
+        public static bool IsUpper(UnicodeScalar s) => throw null;
+        public static bool IsWhiteSpace(UnicodeScalar s) => throw null;
+        public static UnicodeScalar ToLower(UnicodeScalar s, System.Globalization.CultureInfo culture) => throw null;
+        public static UnicodeScalar ToLowerInvariant(UnicodeScalar s) => throw null;
+        public static UnicodeScalar ToUpper(UnicodeScalar s, System.Globalization.CultureInfo culture) => throw null;
+        public static UnicodeScalar ToUpperInvariant(UnicodeScalar s) => throw null;
+    }
 }
 namespace System.Threading
 {
