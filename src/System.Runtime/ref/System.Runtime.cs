@@ -2217,7 +2217,7 @@ namespace System
     {
         public STAThreadAttribute() { }
     }
-    public sealed partial class Utf8String
+    public sealed partial class Utf8String : IEquatable<Utf8String>
     {
         public static readonly Utf8String Empty;
         public Utf8String(ReadOnlySpan<byte> value) { }
@@ -2230,7 +2230,12 @@ namespace System
         public unsafe Utf8String(char* value) { }
         public Utf8String(string value) { }
         public int Length => throw null;
+        public static bool operator ==(Utf8String a, Utf8String b) => throw null;
+        public static bool operator !=(Utf8String a, Utf8String b) => throw null;
         public ReadOnlySpan<byte> AsSpan() => throw null;
+        public override bool Equals(object obj) => throw null;
+        public bool Equals(Utf8String value) => throw null;
+        public override int GetHashCode() => throw null;
         public ref readonly byte GetPinnableReference() => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public override string ToString() => throw null;
