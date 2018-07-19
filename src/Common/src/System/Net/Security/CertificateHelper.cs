@@ -40,7 +40,7 @@ namespace System.Net.Security
                 {
                     if (NetEventSource.IsEnabled)
                     {
-                        NetEventSource.Info(candidateCerts, $"Skipping current X509Certificate2 {cert.GetHashCode()} since it doesn't have private key.");
+                        NetEventSource.Info(candidateCerts, $"Skipping current X509Certificate2 {cert.GetHashCode()} since it doesn't have private key. Certificate Subject: {cert.Subject}, Thumbprint: {cert.Thumbprint}.");
                     }
                     continue;
                 }
@@ -49,7 +49,7 @@ namespace System.Net.Security
                 {
                     if (NetEventSource.IsEnabled)
                     {
-                        NetEventSource.Info(candidateCerts, $"Choosing X509Certificate2 {cert.GetHashCode()} as the Client Certificate.");
+                        NetEventSource.Info(candidateCerts, $"Choosing X509Certificate2 {cert.GetHashCode()} as the Client Certificate. Certificate Subject: {cert.Subject}, Thumbprint: {cert.Thumbprint}.");
                     }
                     return cert;
                 }
@@ -70,7 +70,7 @@ namespace System.Net.Security
                 {
                     if (NetEventSource.IsEnabled)
                     {
-                        NetEventSource.Info(cert, $"Current X509EnhancedKeyUsageExtension {eku.GetHashCode()} is not valid for Client Authentication.");
+                        NetEventSource.Info(cert, $"For Certificate {cert.GetHashCode()} - current X509EnhancedKeyUsageExtension {eku.GetHashCode()} is not valid for Client Authentication.");
                     }
                     return false;
                 }
@@ -78,7 +78,7 @@ namespace System.Net.Security
                 {
                     if (NetEventSource.IsEnabled)
                     {
-                        NetEventSource.Info(cert, $"Current X509KeyUsageExtension {ku.GetHashCode()} is not valid for Digital Signature.");
+                        NetEventSource.Info(cert, $"For Certificate {cert.GetHashCode()} - current X509KeyUsageExtension {ku.GetHashCode()} is not valid for Digital Signature.");
                     }
                     return false;
                 }
