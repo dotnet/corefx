@@ -48,7 +48,6 @@ namespace System.Runtime.InteropServices.Tests
                         Assert.Equal(expectedParameterlessString, Marshal.PtrToStringAnsi(ptr));
                         Assert.Equal(expectedFullString, Marshal.PtrToStringAnsi(ptr, s.Length));
                     }
-				
                 }
                 finally
                 {
