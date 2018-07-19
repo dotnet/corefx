@@ -13,34 +13,18 @@ namespace System.Runtime.InteropServices.Tests
 {
     public class GetDelegateForFunctionPointerTests
     {
-        [Fact]
-        public void GetDelegateForFunctionPointer_NonGeneric_ReturnsExpected()
-        {
-            MethodInfo targetMethod = typeof(GetDelegateForFunctionPointerTests).GetMethod(nameof(Method));
-            Delegate d = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
-            IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
-
-            Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, typeof(NonGenericDelegate));
-            Assert.NotNull(functionDelegate);
-            Assert.IsType<NonGenericDelegate>(functionDelegate);
-            Assert.Equal(targetMethod, functionDelegate.Method);
-            Assert.Null(functionDelegate.Target);
-        }
-
         [Theory]
+        [InlineData(typeof(NonGenericDelegate))]
         [InlineData(typeof(MulticastDelegate))]
         [InlineData(typeof(OtherNonGenericDelegate))]
-        public void GetDelegateForFunctionPointer_InvalidType_ReturnsExpected(Type type)
+        public void GetDelegateForFunctionPointer_NonGeneric_ReturnsExpected(Type t)
         {
             MethodInfo targetMethod = typeof(GetDelegateForFunctionPointerTests).GetMethod(nameof(Method));
             Delegate d = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
-            Delegate functionDelegate = Assert.IsType<NonGenericDelegate>(Marshal.GetDelegateForFunctionPointer(ptr, type));
-            Assert.NotNull(functionDelegate);
-            Assert.IsType<NonGenericDelegate>(functionDelegate);
-            Assert.Equal(targetMethod, functionDelegate.Method);
-            Assert.Null(functionDelegate.Target);
+            Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, t);
+            VerifyDelegate(functionDelegate, targetMethod);
         }
 
         [Fact]
@@ -62,10 +46,7 @@ namespace System.Runtime.InteropServices.Tests
             Type type = typeBuilder.CreateType();
 
             Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, type);
-            Assert.NotNull(functionDelegate);
-            Assert.IsType<NonGenericDelegate>(functionDelegate);
-            Assert.Equal(targetMethod, functionDelegate.Method);
-            Assert.Null(functionDelegate.Target);
+            VerifyDelegate(functionDelegate, targetMethod);
         }
 
         [Fact]
@@ -75,11 +56,8 @@ namespace System.Runtime.InteropServices.Tests
             Delegate d = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
-            Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, typeof(NonGenericDelegate));
-            Assert.NotNull(functionDelegate);
-            Assert.IsType<NonGenericDelegate>(functionDelegate);
-            Assert.Equal(targetMethod, functionDelegate.Method);
-            Assert.Null(functionDelegate.Target);
+            Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer<NonGenericDelegate>(ptr);
+            VerifyDelegate(functionDelegate, targetMethod);
         }
 
         [Fact]
@@ -89,11 +67,15 @@ namespace System.Runtime.InteropServices.Tests
             Delegate d = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
-            Delegate functionDelegate = Assert.IsType<NonGenericDelegate>(Marshal.GetDelegateForFunctionPointer<MulticastDelegate>(ptr));
-            Assert.NotNull(functionDelegate);
-            Assert.IsType<NonGenericDelegate>(functionDelegate);
-            Assert.Equal(targetMethod, functionDelegate.Method);
-            Assert.Null(functionDelegate.Target);
+            Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer<MulticastDelegate>(ptr);
+            VerifyDelegate(functionDelegate, targetMethod);
+        }
+
+        private static void VerifyDelegate(Delegate d, MethodInfo expectedMethod)
+        {
+            Assert.IsType<NonGenericDelegate>(d);
+            Assert.Equal(expectedMethod, d.Method);
+            Assert.Null(d.Target);
         }
 
         [Fact]
