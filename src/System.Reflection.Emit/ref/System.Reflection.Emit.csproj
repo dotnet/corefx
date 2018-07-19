@@ -15,7 +15,6 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uap10.0.16299'">
     <Reference Include="netstandard" />
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Reflection.Primitives" />
   </ItemGroup>
   <ItemGroup>
