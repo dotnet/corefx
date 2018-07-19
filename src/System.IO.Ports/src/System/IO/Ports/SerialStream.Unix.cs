@@ -221,11 +221,11 @@ namespace System.IO.Ports
 
                 if (value != _handshake)
                 {
-                    _handshake = value;
                     if (Interop.Termios.TermiosReset(_handle, _baudRate, _dataBits, _stopBits, _parity, _handshake) != 0)
                     {
                         throw new ArgumentException();
                     }
+                    _handshake = value;
                 }
             }
         }
@@ -311,7 +311,7 @@ namespace System.IO.Ports
 
         internal void SetBufferSizes(int readBufferSize, int writeBufferSize)
         {
-            if (_handle == null) throw new IOException();
+            if (_handle == null) throw new ObjectDisposedException(SR.Port_not_open);
 
             // Ignore for now.
         }
@@ -346,8 +346,7 @@ namespace System.IO.Ports
 
         internal unsafe int ReadByte(int timeout)
         {
-            if (_handle == null)  throw new IOException();
-
+            if (_handle == null) throw new ObjectDisposedException(SR.Port_not_open);
             if (timeout > 0)
             {
                 Interop.Sys.Poll(_handle, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLERR, timeout, out Interop.Sys.PollEvents events);
@@ -390,10 +389,9 @@ namespace System.IO.Ports
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             if (count == 0) return 0; // return immediately if no bytes requested; no need for overhead.
 
-            Interop.Sys.PollEvents events = Interop.Sys.PollEvents.POLLNONE;
-
             if (timeout > 0)
             {
+                Interop.Sys.PollEvents events = Interop.Sys.PollEvents.POLLNONE;
                 Interop.Sys.Poll(_handle, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLERR, timeout,out events);
 
                 if ((events & (Interop.Sys.PollEvents.POLLERR | Interop.Sys.PollEvents.POLLNVAL)) != 0)
@@ -446,9 +444,9 @@ namespace System.IO.Ports
 
             while (count > 0)
             {
-                Interop.Sys.PollEvents events = Interop.Sys.PollEvents.POLLNONE;
                 if (timeout > 0)
                 {
+                    Interop.Sys.PollEvents events = Interop.Sys.PollEvents.POLLNONE;
                     Interop.Sys.Poll(_handle, Interop.Sys.PollEvents.POLLOUT | Interop.Sys.PollEvents.POLLERR, timeout,out events);
 
                     if ((events & (Interop.Sys.PollEvents.POLLERR | Interop.Sys.PollEvents.POLLNVAL)) != 0)

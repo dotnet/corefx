@@ -22,7 +22,7 @@
     <Compile Include="System\IO\Ports\SerialPinChange.cs" />
     <Compile Include="System\IO\Ports\SerialPinChangedEventArgs.cs" />
     <Compile Include="System\IO\Ports\SerialPinChangedEventHandler.cs" />
-    <Compile Include="System\IO\Ports\SerialPort.cs" />
+    <Compile Include="System\IO\Ports\SerialPort.Windows.cs" />
     <Compile Include="System\IO\Ports\StopBits.cs" />
   </ItemGroup>  
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'">
