@@ -4,6 +4,7 @@
 
 namespace System
 {
+    [Serializable]
     public class Random
     {
         //
