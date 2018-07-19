@@ -489,7 +489,7 @@ namespace System.Tests
 
             // AllowDecimalPoint
             NumberFormatInfo decimalFormat = new NumberFormatInfo() { NumberDecimalSeparator = "." };
-            yield return new object[] { "67.9", NumberStyles.AllowDecimalPoint, null, typeof(OverflowException) };
+            yield return new object[] { "67.9", NumberStyles.AllowDecimalPoint, decimalFormat, typeof(OverflowException) };
 
             // Parsing integers doesn't allow NaN, PositiveInfinity or NegativeInfinity
             NumberFormatInfo doubleFormat = new NumberFormatInfo()
