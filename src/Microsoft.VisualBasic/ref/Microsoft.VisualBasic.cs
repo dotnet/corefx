@@ -15,6 +15,18 @@ namespace Microsoft.VisualBasic
         Method = 1,
         Set = 8,
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    public sealed partial class ComClassAttribute : System.Attribute
+    {
+        public ComClassAttribute() { }
+        public ComClassAttribute(string _ClassID) { }
+        public ComClassAttribute(string _ClassID, string _InterfaceID) { }
+        public ComClassAttribute(string _ClassID, string _InterfaceID, string _EventId) { }
+        public string ClassID { get { throw null; } }
+        public string EventID { get { throw null; } }
+        public string InterfaceID { get { throw null; } }
+        public bool InterfaceShadows { get { throw null; } set { } }
+    }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Constants
     {

@@ -40,6 +40,7 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Symbols.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.LateBinder.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.vb" />
+    <Compile Include="Microsoft\VisualBasic\ComClassAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\Constants.vb" />
     <Compile Include="Microsoft\VisualBasic\ControlChars.vb" />
     <Compile Include="Microsoft\VisualBasic\HideModuleNameAttribute.vb" />
