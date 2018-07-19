@@ -98,6 +98,12 @@ namespace Microsoft.VisualBasic
         public int[] Bounds { get { throw null; } }
         public int Length { get { throw null; } }
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    public sealed partial class VBFixedStringAttribute : System.Attribute
+    {
+        public VBFixedStringAttribute(int Length) { }
+        public int Length { get { throw null; } }
+    }
 }
 namespace Microsoft.VisualBasic.CompilerServices
 {
