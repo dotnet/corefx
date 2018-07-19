@@ -262,7 +262,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class StandardModuleAttribute : System.Attribute
     {
