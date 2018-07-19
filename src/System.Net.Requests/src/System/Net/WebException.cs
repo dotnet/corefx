@@ -120,6 +120,7 @@ namespace System.Net
             {
                 return WebExceptionStatus.UnknownError;
             }
+
             WebExceptionStatus status;
             switch (socketEx.SocketErrorCode)
             {
