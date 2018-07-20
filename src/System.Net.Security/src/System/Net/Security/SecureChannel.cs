@@ -764,9 +764,8 @@ namespace System.Net.Security
         --*/
         private SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
-#if TRACE_VERBOSE
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"_refreshCredentialNeeded = {_refreshCredentialNeeded}");
-#endif
+
             if (offset < 0 || offset > (input == null ? 0 : input.Length))
             {
                 NetEventSource.Fail(this, "Argument 'offset' out of range.");
@@ -876,12 +875,12 @@ namespace System.Net.Security
 
             byte[] alpnResult = SslStreamPal.GetNegotiatedApplicationProtocol(_securityContext);
             _negotiatedApplicationProtocol = alpnResult == null ? default : new SslApplicationProtocol(alpnResult, false);
-#if TRACE_VERBOSE
+
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Exit(this);
             }
-#endif
+
             return status;
         }
 
