@@ -876,11 +876,12 @@ namespace System.Net.Security
 
             byte[] alpnResult = SslStreamPal.GetNegotiatedApplicationProtocol(_securityContext);
             _negotiatedApplicationProtocol = alpnResult == null ? default : new SslApplicationProtocol(alpnResult, false);
-
+#if TRACE_VERBOSE
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Exit(this);
             }
+#endif
             return status;
         }
 
