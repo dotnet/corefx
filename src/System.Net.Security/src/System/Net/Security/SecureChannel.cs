@@ -739,7 +739,7 @@ namespace System.Net.Security
             {
                 if (token.Failed)
                 {
-                    NetEventSource.Info(this, $"Authentication failed. Status: {status.ToString()}, Exception message: {token.GetException().Message}");
+                    NetEventSource.Error(this, $"Authentication failed. Status: {status.ToString()}, Exception message: {token.GetException().Message}");
                 }
 
                 NetEventSource.Exit(this, token);
