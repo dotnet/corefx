@@ -11,9 +11,6 @@ namespace System.IO.Tests
 {
     public class FileInfo_GetSetTimes : InfoGetSetTimes<FileInfo>
     {
-        private static bool isHFS => new DriveInfo(Path.GetTempPath()).DriveFormat.Equals(HFS, StringComparison.InvariantCultureIgnoreCase);
-        private static bool isNotHFS => !isHFS;
-
         public override FileInfo GetExistingItem()
         {
             string path = GetTestFilePath();
