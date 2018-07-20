@@ -228,7 +228,7 @@ namespace System.Net.Http
             {
                 host = value.Substring(0, separatorIndex);
                 int endIndex = separatorIndex + 1;
-                // Strip any trailing characters after port num,ber.
+                // Strip any trailing characters after port number.
                 while (endIndex < value.Length)
                 {
                     if (!char.IsDigit(value[endIndex]))
@@ -237,6 +237,7 @@ namespace System.Net.Http
                     }
                     endIndex += 1;
                 }
+
                 if (!ushort.TryParse(value.AsSpan(separatorIndex + 1, endIndex - separatorIndex - 1), out port))
                 {
                     return null;
