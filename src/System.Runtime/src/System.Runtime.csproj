@@ -17,9 +17,6 @@
     <Compile Include="System\Reflection\RuntimeReflectionExtensions.cs" />
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttribute.cs" />
     <Compile Include="System\Runtime\NgenServicingAttributes.cs" />
-    <Compile Include="System\Text\UnicodeDebug.cs" />
-    <Compile Include="System\Text\UnicodeHelpers.cs" />
-    <Compile Include="System\Text\UnicodeScalar.cs" />
     <Compile Include="System\Threading\WaitHandleExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

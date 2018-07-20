@@ -2233,6 +2233,8 @@ namespace System
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
         public ReadOnlySpan<byte> AsSpan() => throw null;
+        public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
+        public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public override int GetHashCode() => throw null;
@@ -7558,6 +7560,18 @@ namespace System.Text
         public virtual System.Text.Encoding GetEncoding(int codepage, System.Text.EncoderFallback encoderFallback, System.Text.DecoderFallback decoderFallback) { throw null; }
         public abstract System.Text.Encoding GetEncoding(string name);
         public virtual System.Text.Encoding GetEncoding(string name, System.Text.EncoderFallback encoderFallback, System.Text.DecoderFallback decoderFallback) { throw null; }
+    }
+    public enum InvalidSequenceBehavior
+    {
+        Fail = 0,
+        ReplaceInvalidSequence = 1,
+        LeaveUnchanged = 2,
+    }
+    public enum SequenceValidity
+    {
+        Valid = 0,
+        Invalid = 1,
+        Incomplete = 2
     }
     public enum NormalizationForm
     {
