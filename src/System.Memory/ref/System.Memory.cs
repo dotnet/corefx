@@ -538,6 +538,8 @@ namespace System.Runtime.InteropServices
         public static bool TryRead<T>(System.ReadOnlySpan<byte> source, out T value) where T : struct { throw null; }
         public static bool TryWrite<T>(System.Span<byte> destination, ref T value) where T : struct { throw null; }
         public static void Write<T>(System.Span<byte> destination, ref T value) where T : struct { }
+        public static ref T AsRef<T>(Span<byte> span) where T : struct { throw null; }
+        public static ref readonly T AsRef<T>(ReadOnlySpan<byte> span) where T : struct { throw null; }
     }
     public static partial class SequenceMarshal
     {

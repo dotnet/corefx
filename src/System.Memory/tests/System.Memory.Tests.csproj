@@ -9,6 +9,8 @@
     <!-- Tests specific to the fast span -->
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
+    <Compile Include="MemoryMarshal\AsRef.cs" />
+    <Compile Include="MemoryMarshal\AsReadOnlyRef.cs" />
     <Compile Include="Span\Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
