@@ -734,8 +734,16 @@ namespace System.Net.Security
             }
 
             ProtocolToken token = new ProtocolToken(nextmsg, status);
+
             if (NetEventSource.IsEnabled)
+            {
+                if (token.Failed)
+                {
+                    NetEventSource.Info(this, $"Authentication failed. Status: {status.ToString()}, Exception message: {token.GetException().Message}");
+                }
+
                 NetEventSource.Exit(this, token);
+            }
             return token;
         }
 
@@ -869,6 +877,10 @@ namespace System.Net.Security
             byte[] alpnResult = SslStreamPal.GetNegotiatedApplicationProtocol(_securityContext);
             _negotiatedApplicationProtocol = alpnResult == null ? default : new SslApplicationProtocol(alpnResult, false);
 
+            if (NetEventSource.IsEnabled)
+            {
+                NetEventSource.Exit(this);
+            }
             return status;
         }
 
