@@ -1,4 +1,8 @@
-﻿using Xunit;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Xunit;
 
 namespace System.Xml.Tests
 {
@@ -11,7 +15,7 @@ namespace System.Xml.Tests
             var nodeReader = new XmlNodeReader(xmlDocument);
             Assert.Null(nodeReader.GetAttribute(string.Empty));
             Assert.Null(nodeReader.GetAttribute(string.Empty, string.Empty));
-            Assert.ThrowsAny<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 nodeReader.GetAttribute(2);
             });
