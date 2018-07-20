@@ -21,7 +21,7 @@ namespace System.Drawing.Internal
             {
                 // Copy to a memory stream so we can seek
                 MemoryStream memoryStream = new MemoryStream();
-                _dataStream.CopyTo(memoryStream);
+                stream.CopyTo(memoryStream);
                 _dataStream = memoryStream;
             }
             else
