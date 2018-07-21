@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
 using Xunit;
 
 namespace System.Xml.Tests
@@ -153,14 +154,18 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadContentAsBase64WithSimpleXml()
         {
-            string xml = "<root attr='aGVsbG8gd29ybGQ='><child /></root>"; //hello world encoded
+            byte[] byteData = Encoding.ASCII.GetBytes("hello world");            
+            string xml = $"<root attr='{Convert.ToBase64String(byteData)}'><child /></root>"; //hello world encoded
             XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());
             Assert.Equal("root", nodeReader.Name);
             Assert.True(nodeReader.MoveToAttribute("attr"));
             Assert.True(nodeReader.CanReadBinaryContent);
-            Assert.Equal(10, nodeReader.ReadContentAsBase64(new byte[33], 10, 10));
-            Assert.Equal(1, nodeReader.ReadContentAsBase64(new byte[33], 10, 10));
+            var resultArr = new byte[byteData.Length];            
+            Assert.Equal(byteData.Length, nodeReader.ReadContentAsBase64(resultArr, 0, byteData.Length));
+            Assert.Equal(byteData, resultArr);
+            Assert.Equal("hello world", Encoding.ASCII.GetString(resultArr));
+            Assert.Equal(0, nodeReader.ReadContentAsBase64(new byte[33], 10, 10));
         }
 
         [Fact]
@@ -175,13 +180,17 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadContentAsBinHexWithSimpleXml()
         {
-            string xml = "<root attr='ff0000'><child /></root>";
+            byte[] byteData = Encoding.ASCII.GetBytes("hello world");            
+            string xml = $"<root attr='{BitConverter.ToString(byteData).Replace("-", "")}'><child /></root>";
             XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());
             Assert.Equal("root", nodeReader.Name);
             Assert.True(nodeReader.MoveToAttribute("attr"));
             Assert.True(nodeReader.CanReadBinaryContent);
-            Assert.Equal(3, nodeReader.ReadContentAsBinHex(new byte[33], 10, 10));
+            var resultArr = new byte[byteData.Length];
+            Assert.Equal(byteData.Length, nodeReader.ReadContentAsBinHex(resultArr, 0, byteData.Length));
+            Assert.Equal(byteData, resultArr);
+            Assert.Equal("hello world", Encoding.ASCII.GetString(resultArr));
             Assert.Equal(0, nodeReader.ReadContentAsBinHex(new byte[33], 10, 10));
         }
 
@@ -197,12 +206,16 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadElementContentAsBase64WithSimpleXml()
         {
-            string xml = "<root attr='val'>aGVsbG8gd29ybGQ=</root>"; //hello world encoded
+            byte[] byteData = Encoding.ASCII.GetBytes("hello world");
+            string xml = $"<root attr='val'>{Convert.ToBase64String(byteData)}</root>"; //hello world encoded
             XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());            
             Assert.True(nodeReader.CanReadBinaryContent);
-            Assert.Equal(10, nodeReader.ReadElementContentAsBase64(new byte[33], 10, 10));
-            Assert.Equal(1, nodeReader.ReadElementContentAsBase64(new byte[33], 10, 10));
+            var resultArr = new byte[byteData.Length];
+            Assert.Equal(byteData.Length, nodeReader.ReadElementContentAsBase64(resultArr, 0, byteData.Length));
+            Assert.Equal(byteData, resultArr);
+            Assert.Equal("hello world", Encoding.ASCII.GetString(resultArr));
+            Assert.Equal(0, nodeReader.ReadElementContentAsBase64(new byte[33], 10, 10));
         }
 
         [Fact]
@@ -217,11 +230,15 @@ namespace System.Xml.Tests
         [Fact]
         public void NodeReaderReadElementContentAsBinHexWithSimpleXml()
         {
-            string xml = "<root attr='ff0000'>ff0000</root>";
+            byte[] byteData = Encoding.ASCII.GetBytes("hello world");
+            string xml = $"<root attr='val'>{BitConverter.ToString(byteData).Replace("-", "")}</root>";
             XmlNodeReader nodeReader = NodeReaderTestHelper.CreateNodeReader(xml);
             Assert.True(nodeReader.Read());            
             Assert.True(nodeReader.CanReadBinaryContent);
-            Assert.Equal(3, nodeReader.ReadElementContentAsBinHex(new byte[33], 10, 10));
+            var resultArr = new byte[byteData.Length];
+            Assert.Equal(byteData.Length, nodeReader.ReadElementContentAsBinHex(resultArr, 0, byteData.Length));
+            Assert.Equal(byteData, resultArr);
+            Assert.Equal("hello world", Encoding.ASCII.GetString(resultArr));
             Assert.Equal(0, nodeReader.ReadElementContentAsBinHex(new byte[33], 10, 10));
         }    
     }
