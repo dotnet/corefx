@@ -42,7 +42,7 @@ namespace System.Runtime.InteropServices.Tests
                 Assert.Contains(nameof(Marshal.ThrowExceptionForHR), ex.TargetSite.Name);
             }
 
-            Assert.True(calledCatch);
+            Assert.True(calledCatch, "Expected an exception to be thrown.");
         }
 
         public static IEnumerable<object[]> ThrowExceptionForHR_ErrorInfo_TestData()
@@ -85,7 +85,7 @@ namespace System.Runtime.InteropServices.Tests
                 Assert.Contains(nameof(Marshal.ThrowExceptionForHR), ex.TargetSite.Name);
             }
 
-            Assert.True(calledCatch);
+            Assert.True(calledCatch, "Expected an exception to be thrown.");
         }
 
         [Theory]
