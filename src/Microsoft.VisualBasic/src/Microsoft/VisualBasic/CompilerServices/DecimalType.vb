@@ -1,8 +1,9 @@
-' Copyright (c) Microsoft Corporation.  All rights reserved.
+' Licensed to the .NET Foundation under one or more agreements.
+' The .NET Foundation licenses this file to you under the MIT license.
+' See the LICENSE file in the project root for more information.
 
 Imports System
 Imports System.Globalization
-
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 
@@ -50,7 +51,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Catch e1 As OverflowException
                 Throw VbMakeException(vbErrors.Overflow)
             Catch e2 As FormatException
-                Throw New InvalidCastException(GetResourceString(ResId.InvalidCast_FromStringTo, Left(Value, 32), "Decimal"))
+                Throw New InvalidCastException(SR.Format(SR.InvalidCast_FromStringTo, Left(Value, 32), "Decimal"))
             End Try
         End Function
 
@@ -64,43 +65,43 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Return 0D
             End If
 
-            Dim ValueInterface As IConvertible
-            Dim ValueTypeCode As TypeCode
+            Dim valueInterface As IConvertible
+            Dim valueTypeCode As TypeCode
 
-            ValueInterface = TryCast(Value, IConvertible)
+            valueInterface = TryCast(Value, IConvertible)
 
-            If Not ValueInterface Is Nothing Then
+            If Not valueInterface Is Nothing Then
 
-                ValueTypeCode = ValueInterface.GetTypeCode()
+                valueTypeCode = valueInterface.GetTypeCode()
 
-                Select Case ValueTypeCode
+                Select Case valueTypeCode
 
                     Case TypeCode.Boolean
-                        Return DecimalType.FromBoolean(ValueInterface.ToBoolean(Nothing))
+                        Return DecimalType.FromBoolean(valueInterface.ToBoolean(Nothing))
 
                     Case TypeCode.Byte
-                        Return CDec(ValueInterface.ToByte(Nothing))
+                        Return CDec(valueInterface.ToByte(Nothing))
 
                     Case TypeCode.Int16
-                        Return CDec(ValueInterface.ToInt16(Nothing))
+                        Return CDec(valueInterface.ToInt16(Nothing))
 
                     Case TypeCode.Int32
-                        Return CDec(ValueInterface.ToInt32(Nothing))
+                        Return CDec(valueInterface.ToInt32(Nothing))
 
                     Case TypeCode.Int64
-                        Return CDec(ValueInterface.ToInt64(Nothing))
+                        Return CDec(valueInterface.ToInt64(Nothing))
 
                     Case TypeCode.Single
-                        Return CDec(ValueInterface.ToSingle(Nothing))
+                        Return CDec(valueInterface.ToSingle(Nothing))
 
                     Case TypeCode.Double
-                        Return CDec(ValueInterface.ToDouble(Nothing))
+                        Return CDec(valueInterface.ToDouble(Nothing))
 
                     Case TypeCode.Decimal
-                        Return ValueInterface.ToDecimal(Nothing)
+                        Return valueInterface.ToDecimal(Nothing)
 
                     Case TypeCode.String
-                        Return DecimalType.FromString(ValueInterface.ToString(Nothing), NumberFormat)
+                        Return DecimalType.FromString(valueInterface.ToString(Nothing), NumberFormat)
 
                     Case TypeCode.Char,
                          TypeCode.DateTime
@@ -110,11 +111,11 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 End Select
             End If
 
-            Throw New InvalidCastException(GetResourceString(ResId.InvalidCast_FromTo, VBFriendlyName(Value), "Decimal"))
+            Throw New InvalidCastException(SR.Format(SR.InvalidCast_FromTo, VBFriendlyName(Value), "Decimal"))
         End Function
 
         Public Shared Function Parse(ByVal Value As String, ByVal NumberFormat As NumberFormatInfo) As Decimal
-            Dim NormalizedNumberFormat As NumberFormatInfo
+            Dim normalizedNumberFormat As NumberFormatInfo
             Dim culture As CultureInfo = GetCultureInfo()
 
             If NumberFormat Is Nothing Then
@@ -123,7 +124,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             ' Normalize number format settings to enable us to first use the numeric settings for both currency and number parsing
             ' compatible with VB6
-            NormalizedNumberFormat = GetNormalizedNumberFormat(NumberFormat)
+            normalizedNumberFormat = GetNormalizedNumberFormat(NumberFormat)
 
             Const flags As NumberStyles =
                     NumberStyles.AllowDecimalPoint Or
@@ -140,8 +141,8 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             Try
                 ' Use numeric settings to parse
-                Return System.Decimal.Parse(Value, flags, NormalizedNumberFormat)
-            Catch FormatEx As FormatException When Not (NumberFormat Is NormalizedNumberFormat)
+                Return System.Decimal.Parse(Value, flags, normalizedNumberFormat)
+            Catch FormatEx As FormatException When Not (NumberFormat Is normalizedNumberFormat)
                 ' Use currency settings to parse
                 Return System.Decimal.Parse(Value, flags, NumberFormat)
             Catch Ex As Exception
@@ -155,7 +156,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         '  Return - Normalized NumberFormat
         Friend Shared Function GetNormalizedNumberFormat(ByVal InNumberFormat As NumberFormatInfo) As NumberFormatInfo
 
-            Dim OutNumberFormat As NumberFormatInfo
+            Dim outNumberFormat As NumberFormatInfo
 
             With InNumberFormat
                 If (Not .CurrencyDecimalSeparator Is Nothing) AndAlso
@@ -197,16 +198,16 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
 MisMatch:
 
-            OutNumberFormat = DirectCast(InNumberFormat.Clone, NumberFormatInfo)
+            outNumberFormat = DirectCast(InNumberFormat.Clone, NumberFormatInfo)
 
             ' Set the Currency Settings to be the Same as the Numeric Settings
-            With OutNumberFormat
+            With outNumberFormat
                 .CurrencyDecimalSeparator = .NumberDecimalSeparator
                 .CurrencyGroupSeparator = .NumberGroupSeparator
                 .CurrencyDecimalDigits = .NumberDecimalDigits
             End With
 
-            Return OutNumberFormat
+            Return outNumberFormat
         End Function
 
     End Class

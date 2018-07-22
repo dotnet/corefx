@@ -1,22 +1,19 @@
-' Copyright (c) Microsoft Corporation.  All rights reserved.
+' Licensed to the .NET Foundation under one or more agreements.
+' The .NET Foundation licenses this file to you under the MIT license.
+' See the LICENSE file in the project root for more information.
 
 Imports System
 Imports System.Globalization
 Imports System.Security
 Imports System.Security.Permissions
-
 Imports Microsoft.VisualBasic.CompilerServices
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
-
-<Assembly: System.Reflection.AssemblyInformationalVersion("5.0301.0.0")>
-<Assembly: System.Reflection.AssemblyFileVersion("5.0301.0.0")>
 
 Namespace Microsoft.VisualBasic
 
     Public Module Information
 
-#If Not TELESTO Then
         'QBColorTable below consists of :
         '&H0I,       '   0 - black
         '&H800000I,  '   1 - blue
@@ -40,40 +37,7 @@ Namespace Microsoft.VisualBasic
                                                         &HFF00I, &HFFFF00I, &HFFI,
                                                         &HFF00FFI, &HFFFFI, &HFFFFFFI}
         Friend Const COMObjectName As String = "__ComObject"
-#End If
 
-        '============================================================================
-        ' Error functions.
-        '============================================================================
-        Public Function Err() As ErrObject
-
-            Dim oProj As ProjectData
-            oProj = ProjectData.GetProjectData()
-
-            If oProj.m_Err Is Nothing Then
-                oProj.m_Err = New ErrObject
-            End If
-            Err = oProj.m_Err
-
-        End Function
-
-#If Not TELESTO Then
-        ' UNDONE This should be hidden
-        <System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)>
-        Public Function Erl() As Integer
-#Else
-        '<System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)> _
-        Public Function Erl() As Integer
-#End If
-            'UNDONE: THREADING REVIEW
-            Dim oProj As ProjectData
-            oProj = ProjectData.GetProjectData()
-            Erl = oProj.m_Err.Erl
-        End Function
-
-        '============================================================================
-        ' Is... functions.
-        '============================================================================
         Public Function IsArray(ByVal VarName As Object) As Boolean
 
             If VarName Is Nothing Then
@@ -95,12 +59,12 @@ Namespace Microsoft.VisualBasic
                 Return True
 
             Else
-                Dim StringExpression As String = TryCast(Expression, String)
+                Dim stringExpression As String = TryCast(Expression, String)
 
-                If StringExpression IsNot Nothing Then
-                    Dim ConvertedDate As DateTime
+                If stringExpression IsNot Nothing Then
+                    Dim convertedDate As DateTime
 
-                    Return Conversions.TryParseDate(StringExpression, ConvertedDate)
+                    Return Conversions.TryParseDate(stringExpression, convertedDate)
                 End If
             End If
 
@@ -148,10 +112,10 @@ Namespace Microsoft.VisualBasic
         Public Function LBound(ByVal Array As System.Array, Optional ByVal Rank As Integer = 1) As Integer
 
             If (Array Is Nothing) Then
-                Throw VbMakeException(New ArgumentNullException(GetResourceString(ResId.Argument_InvalidNullValue1, "Array")), vbErrors.OutOfBounds)
+                Throw VbMakeException(New ArgumentNullException(NameOf(Array)), vbErrors.OutOfBounds)
 
             ElseIf (Rank < 1) OrElse (Rank > Array.Rank) Then
-                Throw New RankException(GetResourceString(ResId.Argument_InvalidRank1, "Rank"))
+                Throw New RankException(SR.Format(SR.Argument_InvalidRank1, NameOf(Rank)))
 
             End If
 
@@ -162,10 +126,10 @@ Namespace Microsoft.VisualBasic
         Public Function UBound(ByVal Array As System.Array, Optional ByVal Rank As Integer = 1) As Integer
 
             If (Array Is Nothing) Then
-                Throw VbMakeException(New ArgumentNullException(GetResourceString(ResId.Argument_InvalidNullValue1, "Array")), vbErrors.OutOfBounds)
+                Throw VbMakeException(New ArgumentNullException(NameOf(Array)), vbErrors.OutOfBounds)
 
             ElseIf (Rank < 1) OrElse (Rank > Array.Rank) Then
-                Throw New RankException(GetResourceString(ResId.Argument_InvalidRank1, "Rank"))
+                Throw New RankException(SR.Format(SR.Argument_InvalidRank1, NameOf(Rank)))
 
             End If
 
@@ -173,106 +137,22 @@ Namespace Microsoft.VisualBasic
 
         End Function
 
-#If Not TELESTO Then
-        '============================================================================
-        ' Object type functions.
-        '============================================================================
-        <SecuritySafeCritical()>
-        Friend Function TypeNameOfCOMObject(ByVal VarName As Object, ByVal bThrowException As Boolean) As String
 
-            Dim Result As String = COMObjectName
-
-            Try
-                Call (New SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Demand()
-            Catch ex As StackOverflowException
-                Throw ex
-            Catch ex As OutOfMemoryException
-                Throw ex
-            Catch ex As System.Threading.ThreadAbortException
-                Throw ex
-            Catch e As Exception
-                If bThrowException Then
-                    Throw e
-                Else
-                    GoTo CleanupTypeName
-                End If
-            End Try
-
-            Dim pTypeInfo As UnsafeNativeMethods.ITypeInfo = Nothing
-            Dim hr As Integer
-            Dim ClassName As String = Nothing
-            Dim DocString As String = Nothing
-            Dim HelpContext As Integer
-            Dim HelpFile As String = Nothing
-
-
-            Do
-                Dim pProvideClassInfo As UnsafeNativeMethods.IProvideClassInfo = TryCast(VarName, UnsafeNativeMethods.IProvideClassInfo)
-
-                If pProvideClassInfo IsNot Nothing Then
-                    Try
-                        pTypeInfo = pProvideClassInfo.GetClassInfo()
-                        hr = pTypeInfo.GetDocumentation(-1, ClassName, DocString, HelpContext, HelpFile)
-                        If hr >= 0 Then
-                            Result = ClassName
-                            Exit Do
-                        End If
-                        pTypeInfo = Nothing
-                    Catch ex As StackOverflowException
-                        Throw ex
-                    Catch ex As OutOfMemoryException
-                        Throw ex
-                    Catch ex As System.Threading.ThreadAbortException
-                        Throw ex
-                    Catch
-                        'Ignore the error
-                    End Try
-                End If
-
-                Dim pDispatch As UnsafeNativeMethods.IDispatch = TryCast(VarName, UnsafeNativeMethods.IDispatch)
-
-                If pDispatch IsNot Nothing Then
-                    ' Try using IDispatch 
-                    hr = pDispatch.GetTypeInfo(0, UnsafeNativeMethods.LCID_US_ENGLISH, pTypeInfo)
-                    If hr >= 0 Then
-                        hr = pTypeInfo.GetDocumentation(-1, ClassName, DocString, HelpContext, HelpFile)
-                        If hr >= 0 Then
-                            Result = ClassName
-                            Exit Do
-                        End If
-                    End If
-                End If
-
-            Loop While (False)
-
-
-CleanupTypeName:
-
-            If Result.Chars(0) = "_"c Then
-                Result = Result.Substring(1)
-            End If
-
-            Return Result
-        End Function
-
-        '============================================================================
-        ' Color functions.
-        '============================================================================
         Public Function QBColor(ByVal Color As Integer) As Integer
             If (Color And &HFFF0I) <> 0 Then
-                Throw New ArgumentException(GetResourceString(ResId.Argument_InvalidValue1, "Color"))
+                Throw New ArgumentException(SR.Format(SR.Argument_InvalidValue1, NameOf(Color)), NameOf(Color))
             End If
 
-            QBColor = QBColorTable(Color)
+            Return QBColorTable(Color)
         End Function
 
         Public Function RGB(ByVal Red As Integer, ByVal Green As Integer, ByVal Blue As Integer) As Integer
             If (Red And &H80000000I) <> 0 Then
-                Throw New ArgumentException(GetResourceString(ResId.Argument_InvalidValue1, "Red"))
+                Throw New ArgumentException(SR.Format(SR.Argument_InvalidValue1, NameOf(Red)), NameOf(Red))
             ElseIf (Green And &H80000000I) <> 0 Then
-                Throw New ArgumentException(GetResourceString(ResId.Argument_InvalidValue1, "Green"))
+                Throw New ArgumentException(SR.Format(SR.Argument_InvalidValue1, NameOf(Green)), NameOf(Green))
             ElseIf (Blue And &H80000000I) <> 0 Then
-                Throw New ArgumentException(GetResourceString(ResId.Argument_InvalidValue1, "Blue"))
+                Throw New ArgumentException(SR.Format(SR.Argument_InvalidValue1, NameOf(Blue)), NameOf(Blue))
             End If
 
             ' VB2 treats any value > 255 as 255
@@ -291,7 +171,6 @@ CleanupTypeName:
 
             Return ((Blue * &H10000I) + (Green * &H100I) + Red)
         End Function
-#End If 'NOT TELESTO
 
         Public Function VarType(ByVal VarName As Object) As VariantType
             If VarName Is Nothing Then
@@ -313,12 +192,12 @@ CleanupTypeName:
                     Return CType(VariantType.Array Or VariantType.Object, VariantType)
                 End If
 
-                Dim Result As VariantType = VarTypeFromComType(typ)
-                If (Result And VariantType.Array) <> 0 Then
+                Dim result As VariantType = VarTypeFromComType(typ)
+                If (result And VariantType.Array) <> 0 Then
                     'Element type is also an array, so just return "array of objects"
                     Return CType(VariantType.Array Or VariantType.Object, VariantType)
                 End If
-                Return CType(Result Or VariantType.Array, VariantType)
+                Return CType(result Or VariantType.Array, VariantType)
 
             ElseIf typ.IsEnum() Then
                 typ = System.Enum.GetUnderlyingType(typ)
@@ -369,7 +248,6 @@ CleanupTypeName:
 
         End Function
 
-#If Not TELESTO Then
 #Region " BACKWARDS COMPATIBILITY.  These functions (IsNumeric, TypeName, SystemTypeName, VbTypeName) have been superceded by the versions in Versioned.vb "
 
         'WARNING WARNING WARNING WARNING WARNING
@@ -400,43 +278,36 @@ CleanupTypeName:
 
         End Function
 
-        '*
-        '*  IsNumeric -
-        '* 
-        '* 
-        '* NOTE: Code changes here MUST BE PERFORMANCE TESTED
-        '* 
         Public Function IsNumeric(ByVal Expression As Object) As Boolean
 
-            Dim ValueInterface As IConvertible
-            Dim ValueTypeCode As TypeCode
+            Dim valueInterface As IConvertible
+            Dim valueTypeCode As TypeCode
 
-            ValueInterface = TryCast(Expression, IConvertible)
+            valueInterface = TryCast(Expression, IConvertible)
 
-            If ValueInterface Is Nothing Then
-                Dim CharArray As Char() = TryCast(Expression, Char())
+            If valueInterface Is Nothing Then
+                Dim charArray As Char() = TryCast(Expression, Char())
 
-                If CharArray IsNot Nothing Then
-                    Expression = CStr(CharArray)
+                If charArray IsNot Nothing Then
+                    Expression = CStr(charArray)
                 Else
                     Return False
                 End If
             End If
 
-            ValueTypeCode = ValueInterface.GetTypeCode()
+            valueTypeCode = valueInterface.GetTypeCode()
 
-            If (ValueTypeCode = TypeCode.String) OrElse (ValueTypeCode = TypeCode.Char) Then
+            If (valueTypeCode = TypeCode.String) OrElse (valueTypeCode = TypeCode.Char) Then
 
                 'Convert to double, exception thrown if not a number
                 Dim dbl As Double
-
                 Dim i64Value As Int64
-                Dim Value As String
+                Dim value As String
 
-                Value = ValueInterface.ToString(Nothing)
+                value = valueInterface.ToString(Nothing)
 
                 Try
-                    If IsHexOrOctValue(Value, i64Value) Then
+                    If IsHexOrOctValue(value, i64Value) Then
                         Return True
                     End If
                 Catch ex As StackOverflowException
@@ -449,122 +320,12 @@ CleanupTypeName:
                     Return False
                 End Try
 
-                Return DoubleType.TryParse(Value, dbl)
+                Return DoubleType.TryParse(value, dbl)
 
             End If
 
-            Return IsOldNumericTypeCode(ValueTypeCode)
+            Return IsOldNumericTypeCode(valueTypeCode)
 
-        End Function
-
-        Friend Function OldVBFriendlyNameOfTypeName(ByVal typename As String) As String
-            Dim ArraySuffix As String = Nothing
-            Dim Name As String
-            Dim LastChar As Integer = typename.Length - 1
-
-            If typename.Chars(LastChar) = "]"c Then
-                Dim pos As Integer
-                pos = typename.IndexOf("["c)
-                If pos + 1 = LastChar Then
-                    ArraySuffix = "()"
-                Else
-                    ArraySuffix = typename.Substring(pos, LastChar - pos + 1).Replace("["c, "("c).Replace("]"c, ")"c)
-                End If
-                typename = typename.Substring(0, pos)
-            End If
-
-            Name = OldVbTypeName(typename)
-            If Name Is Nothing Then
-                Name = typename
-            End If
-
-            If ArraySuffix Is Nothing Then
-                Return Name
-            End If
-            Return Name & AdjustArraySuffix(ArraySuffix)
-
-        End Function
-
-        Public Function TypeName(ByVal VarName As Object) As String
-
-            Dim Result As String
-            Dim bIsArray As Boolean
-            Dim typ As System.Type
-            Dim ArrayType As System.Type
-
-            If VarName Is Nothing Then
-                Return "Nothing"
-            End If
-
-            typ = VarName.GetType()
-
-            If typ.IsArray Then
-                bIsArray = True
-                ArrayType = typ
-                typ = ArrayType.GetElementType()
-            End If
-
-            If typ.IsEnum() Then
-
-                Result = typ.Name
-                GoTo UnmangleName
-
-            Else
-                Dim tc As TypeCode
-
-                tc = Type.GetTypeCode(typ)
-
-                Select Case tc
-
-                    Case TypeCode.DBNull : Result = "DBNull"
-                    Case TypeCode.Int16 : Result = "Short"
-                    Case TypeCode.Int32 : Result = "Integer"
-                    Case TypeCode.Single : Result = "Single"
-                    Case TypeCode.Double : Result = "Double"
-                    Case TypeCode.DateTime : Result = "Date"
-                    Case TypeCode.String : Result = "String"
-                    Case TypeCode.Boolean : Result = "Boolean"
-                    Case TypeCode.Decimal : Result = "Decimal"
-                    Case TypeCode.Byte : Result = "Byte"
-                    Case TypeCode.Char : Result = "Char"
-                    Case TypeCode.Int64 : Result = "Long"
-
-                    Case Else
-
-                        Result = typ.Name
-
-                        If (typ.IsCOMObject AndAlso (System.String.CompareOrdinal(Result, COMObjectName) = 0)) Then
-                            Result = LegacyTypeNameOfCOMObject(VarName, True)
-                        End If
-
-UnmangleName:
-                        'REVIEW: Will managled names go away for Beta2?
-                        ' They don't seem to be as of 11/6/2000
-                        Dim i As Integer
-                        i = Result.IndexOf("+"c)
-                        If i >= 0 Then
-                            Result = Result.Substring(i + 1)
-                        End If
-
-                End Select
-
-            End If
-
-            If bIsArray Then
-
-                Dim ary As Array
-                ary = CType(VarName, Array)
-                If ary.Rank = 1 Then
-                    Result = Result & "[]"
-                Else
-                    Result = Result & "[" & (New String(","c, ary.Rank - 1)) & "]"
-                End If
-
-                Result = OldVBFriendlyNameOfTypeName(Result)
-
-            End If
-
-            Return Result
         End Function
 
         Public Function SystemTypeName(ByVal VbName As String) As String
@@ -617,63 +378,7 @@ UnmangleName:
 
         End Function
 
-        '============================================================================
-        ' Object type functions.
-        '============================================================================
-        <SecuritySafeCritical()>
-        Friend Function LegacyTypeNameOfCOMObject(ByVal VarName As Object, ByVal bThrowException As Boolean) As String
-
-            Dim Result As String = COMObjectName
-
-            Try
-                Call (New SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Demand()
-            Catch ex As StackOverflowException
-                Throw ex
-            Catch ex As OutOfMemoryException
-                Throw ex
-            Catch ex As System.Threading.ThreadAbortException
-                Throw ex
-            Catch e As Exception
-                If bThrowException Then
-                    Throw e
-                Else
-                    GoTo CleanupTypeName
-                End If
-            End Try
-
-            Dim pTypeInfo As UnsafeNativeMethods.ITypeInfo = Nothing
-            Dim hr As Integer
-            Dim ClassName As String = Nothing
-            Dim DocString As String = Nothing
-            Dim HelpContext As Integer
-            Dim HelpFile As String = Nothing
-
-            Dim pDispatch As UnsafeNativeMethods.IDispatch = TryCast(VarName, UnsafeNativeMethods.IDispatch)
-
-            If pDispatch IsNot Nothing Then
-                hr = pDispatch.GetTypeInfo(0, UnsafeNativeMethods.LCID_US_ENGLISH, pTypeInfo)
-                If hr >= 0 Then
-                    hr = pTypeInfo.GetDocumentation(-1, ClassName, DocString, HelpContext, HelpFile)
-                    If hr >= 0 Then
-                        Result = ClassName
-                    End If
-                End If
-            End If
-
-CleanupTypeName:
-
-            If Result.Chars(0) = "_"c Then
-                Result = Result.Substring(1)
-            End If
-
-            Return Result
-        End Function
-
 #End Region
-#End If 'Not TELESTO
-
     End Module
 
 End Namespace
-
-
