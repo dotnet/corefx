@@ -13,20 +13,14 @@ Namespace Global.Microsoft.VisualBasic
     Public NotInheritable Class VBFixedStringAttribute
         Inherits Attribute
 
-        Private m_Length As Integer ' Do not rename - the runtime relies on this name.
-
         Public ReadOnly Property Length() As Integer
-            Get
-                Return m_Length
-            End Get
-        End Property
 
         Public Sub New(ByVal Length As Integer)
             If (Length < 1 OrElse Length > Short.MaxValue) Then
                 Throw New ArgumentException(SR.Invalid_VBFixedString)
             End If
 
-            m_Length = Length
+            Me.Length = Length
         End Sub
     End Class
 End Namespace

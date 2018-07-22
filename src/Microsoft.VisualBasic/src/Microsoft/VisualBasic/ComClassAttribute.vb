@@ -13,54 +13,30 @@ Namespace Microsoft.VisualBasic
     Public NotInheritable Class ComClassAttribute
         Inherits Attribute
 
-        Private m_ClassID As String ' Do not rename - the runtime relies on this name.
-        Private m_InterfaceID As String ' Do not rename - the runtime relies on this name.
-        Private m_EventID As String ' Do not rename - the runtime relies on this name.
-        Private m_InterfaceShadows As Boolean = False ' Do not rename - the runtime relies on this name.
-
         Public Sub New()
         End Sub
 
         Public Sub New(ByVal _ClassID As String)
-            m_ClassID = _ClassID
+            ClassID = _ClassID
         End Sub
 
         Public Sub New(ByVal _ClassID As String, ByVal _InterfaceID As String)
-            m_ClassID = _ClassID
-            m_InterfaceID = _InterfaceID
+            ClassID = _ClassID
+            InterfaceID = _InterfaceID
         End Sub
 
         Public Sub New(ByVal _ClassID As String, ByVal _InterfaceID As String, ByVal _EventId As String)
-            m_ClassID = _ClassID
-            m_InterfaceID = _InterfaceID
-            m_EventID = _EventId
+            ClassID = _ClassID
+            InterfaceID = _InterfaceID
+            EventID = _EventId
         End Sub
 
         Public ReadOnly Property ClassID() As String
-            Get
-                Return m_ClassID
-            End Get
-        End Property
 
         Public ReadOnly Property InterfaceID() As String
-            Get
-                Return m_InterfaceID
-            End Get
-        End Property
 
         Public ReadOnly Property EventID() As String
-            Get
-                Return m_EventID
-            End Get
-        End Property
 
         Public Property InterfaceShadows() As Boolean
-            Get
-                Return m_InterfaceShadows
-            End Get
-            Set(ByVal Value As Boolean)
-                m_InterfaceShadows = Value
-            End Set
-        End Property
     End Class
 End Namespace

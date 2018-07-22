@@ -21,11 +21,6 @@ Namespace Microsoft.VisualBasic
     <EditorBrowsable(EditorBrowsableState.Advanced)> _
     Public NotInheritable Class MyGroupCollectionAttribute : Inherits Attribute
 
-        Private m_NameOfBaseTypeToCollect As String ' Do not rename - the runtime relies on this name.
-        Private m_NameOfCreateMethod As String ' Do not rename - the runtime relies on this name.
-        Private m_NameOfDisposeMethod As String ' Do not rename - the runtime relies on this name.
-        Private m_DefaultInstanceAlias As String ' Do not rename - the runtime relies on this name.
-
         ''' <summary>
         ''' </summary>
         ''' <param name="TypeToCollect">Compiler will generate accessors for classes that derived from this type</param>
@@ -35,10 +30,10 @@ Namespace Microsoft.VisualBasic
         Public Sub New(ByVal typeToCollect As String, ByVal createInstanceMethodName As String, _
                                 ByVal disposeInstanceMethodName As String, ByVal defaultInstanceAlias As String)
 
-            m_NameOfBaseTypeToCollect = typeToCollect
-            m_NameOfCreateMethod = createInstanceMethodName
-            m_NameOfDisposeMethod = disposeInstanceMethodName
-            m_DefaultInstanceAlias = defaultInstanceAlias
+            MyGroupName = typeToCollect
+            CreateMethod = createInstanceMethodName
+            DisposeMethod = disposeInstanceMethodName
+            Me.DefaultInstanceAlias = defaultInstanceAlias
 
         End Sub
 
@@ -46,36 +41,20 @@ Namespace Microsoft.VisualBasic
         ''' The name of the base type we are trying to collect
         ''' </summary>
         Public ReadOnly Property MyGroupName() As String
-            Get
-                Return m_NameOfBaseTypeToCollect
-            End Get
-        End Property
 
         ''' <summary>
         ''' Name of the factory method to create the instances
         ''' </summary>
         Public ReadOnly Property CreateMethod() As String
-            Get
-                Return m_NameOfCreateMethod
-            End Get
-        End Property
 
         ''' <summary>
         ''' Name of the method that will dispose of the instances
         ''' </summary>
         Public ReadOnly Property DisposeMethod() As String
-            Get
-                Return m_NameOfDisposeMethod
-            End Get
-        End Property
 
         ''' <summary>
         ''' Provides the name of the My.* methods to call to get the 'default instance' 
         ''' </summary>
         Public ReadOnly Property DefaultInstanceAlias() As String
-            Get
-                Return m_DefaultInstanceAlias
-            End Get
-        End Property
     End Class
 End Namespace
