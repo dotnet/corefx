@@ -13,6 +13,7 @@ namespace System.Collections.Tests
         protected override bool DefaultValueAllowed => true;
         protected override bool DuplicateValuesAllowed => true;
         protected override bool IsReadOnly => true;
+
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
 
         protected override ICollection<string> GenericICollectionFactory()
@@ -64,7 +65,7 @@ namespace System.Collections.Tests
         protected override bool IsReadOnly => true;
         protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
-        protected override bool SupportsSerialization => true;
+        protected override bool SupportsSerialization => false;
 
         protected override ICollection NonGenericICollectionFactory()
         {
