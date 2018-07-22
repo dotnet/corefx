@@ -48,6 +48,7 @@ namespace System.Security.Cryptography.Pkcs
         public AlgorithmIdentifier(System.Security.Cryptography.Oid oid, int keyLength) { }
         public int KeyLength { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Security.Cryptography.Oid Oid { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public byte[] Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public sealed partial class CmsRecipient
     {
@@ -88,14 +89,12 @@ namespace System.Security.Cryptography.Pkcs
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public CmsSigner(CspParameters parameters) => throw null;
         public CmsSigner(SubjectIdentifierType signerIdentifierType, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
-        public CmsSigner(SubjectIdentifierType signerIdentifierType, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, System.Security.Cryptography.AsymmetricAlgorithm privateKey) => throw null;
         public SubjectIdentifierType SignerIdentifierType { get => throw null; set => throw null; }
         public System.Security.Cryptography.X509Certificates.X509Certificate2 Certificate { get => throw null; set => throw null; }
-        public System.Security.Cryptography.AsymmetricAlgorithm PrivateKey { get => throw null; set => throw null; }
         public Oid DigestAlgorithm { get => throw null; set => throw null; }
-        public CryptographicAttributeObjectCollection SignedAttributes { get => throw null; set => throw null; }
-        public CryptographicAttributeObjectCollection UnsignedAttributes { get => throw null; set => throw null; }
-        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection Certificates { get => throw null; set => throw null; }
+        public CryptographicAttributeObjectCollection SignedAttributes { get => throw null; }
+        public CryptographicAttributeObjectCollection UnsignedAttributes { get => throw null; }
+        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection Certificates { get => throw null; }
         public System.Security.Cryptography.X509Certificates.X509IncludeOption IncludeOption { get => throw null; set => throw null; }
     }
     public sealed partial class ContentInfo
@@ -122,7 +121,6 @@ namespace System.Security.Cryptography.Pkcs
         public void Decrypt(System.Security.Cryptography.Pkcs.RecipientInfo recipientInfo) { }
         public void Decrypt(System.Security.Cryptography.Pkcs.RecipientInfo recipientInfo, System.Security.Cryptography.X509Certificates.X509Certificate2Collection extraStore) { }
         public void Decrypt(System.Security.Cryptography.X509Certificates.X509Certificate2Collection extraStore) { }
-        public void Decrypt(System.Security.Cryptography.Pkcs.RecipientInfo recipientInfo, System.Security.Cryptography.AsymmetricAlgorithm privateKey) { }
         public byte[] Encode() { throw null; }
         public void Encrypt(System.Security.Cryptography.Pkcs.CmsRecipient recipient) { }
         public void Encrypt(System.Security.Cryptography.Pkcs.CmsRecipientCollection recipients) { }
@@ -256,8 +254,6 @@ namespace System.Security.Cryptography.Pkcs
         public void CheckSignature(bool verifySignatureOnly) => throw null;
         public void CheckSignature(System.Security.Cryptography.X509Certificates.X509Certificate2Collection extraStore, bool verifySignatureOnly) => throw null;
         public void CheckHash() => throw null;
-        public void AddCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
-        public void RemoveCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
     }
     public sealed partial class SignerInfo
     {
@@ -268,8 +264,6 @@ namespace System.Security.Cryptography.Pkcs
         public Oid DigestAlgorithm => throw null;
         public CryptographicAttributeObjectCollection SignedAttributes => throw null;
         public CryptographicAttributeObjectCollection UnsignedAttributes => throw null;
-        public void AddUnsignedAttribute(System.Security.Cryptography.AsnEncodedData asnEncodedData) => throw null;
-        public void RemoveUnsignedAttribute(System.Security.Cryptography.AsnEncodedData asnEncodedData) => throw null;
         public SignerInfoCollection CounterSignerInfos => throw null;
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public void ComputeCounterSignature() => throw null;
@@ -305,7 +299,6 @@ namespace System.Security.Cryptography.Pkcs
         internal SubjectIdentifier() { }
         public System.Security.Cryptography.Pkcs.SubjectIdentifierType Type { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public object Value { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public bool MatchesCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { throw null; }
     }
     public sealed partial class SubjectIdentifierOrKey
     {

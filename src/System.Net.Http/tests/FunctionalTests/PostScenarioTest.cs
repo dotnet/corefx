@@ -41,6 +41,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(30057, TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework disposes request content after send")]
         [OuterLoop("Uses external servers")]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostRewindableStreamContentMultipleTimes_StreamContentFullySent(Uri serverUri)
@@ -54,7 +55,7 @@ namespace System.Net.Http.Functional.Tests
 
                 for (int i = 1; i <= 3; i++)
                 {
-                    HttpResponseMessage response = await client.PutAsync(serverUri, content);
+                    HttpResponseMessage response = await client.PostAsync(serverUri, content);
                     Assert.Equal(requestBody.Length, ms.Position); // Stream left at end after send.
 
                     string responseBody = await response.Content.ReadAsStringAsync();

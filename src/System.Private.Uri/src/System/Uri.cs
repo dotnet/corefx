@@ -114,7 +114,6 @@ namespace System
             FragmentIriCanonical = 0x40000000000,
             IriCanonical = 0x78000000000,
             UnixPath = 0x100000000000,
-            IPv6LinkLocalAddress = 0x200000000000
         }
 
         private Flags _flags;
@@ -417,7 +416,7 @@ namespace System
 
             uriString = serializationInfo.GetString("RelativeUri");  // Do not rename (binary serialization)
             if ((object)uriString == null)
-                throw new ArgumentNullException("uriString");
+                throw new ArgumentNullException(nameof(uriString));
 
             CreateThis(uriString, false, UriKind.Relative);
         }
@@ -1194,9 +1193,7 @@ namespace System
                 if (HostType == Flags.IPv6HostType)
                 {
                     ret = ret.Substring(1, ret.Length - 2);
-
-                    //To avoid duplicated ScopeId on Ipv6 local link address
-                    if ((object)_info.ScopeId != null && (_flags & Flags.IPv6LinkLocalAddress) == 0)
+                    if ((object)_info.ScopeId != null)
                     {
                         ret += _info.ScopeId;
                     }
@@ -1742,7 +1739,7 @@ namespace System
                         }
                     }
                 }
-                else if (string.Compare(_string, obj._string, StringComparison.OrdinalIgnoreCase) == 0)
+                else if (string.Equals(_string, obj._string, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
@@ -2568,7 +2565,6 @@ namespace System
         private static string CreateHostStringHelper(string str, ushort idx, ushort end, ref Flags flags, ref string scopeId)
         {
             bool loopback = false;
-            bool linkLocalAddress = false;
             string host;
             switch (flags & Flags.HostTypeMask)
             {
@@ -2578,7 +2574,7 @@ namespace System
 
                 case Flags.IPv6HostType:
                     // The helper will return [...] string that is not suited for Dns.Resolve()
-                    host = IPv6AddressHelper.ParseCanonicalName(str, idx, ref loopback, ref linkLocalAddress, ref scopeId);
+                    host = IPv6AddressHelper.ParseCanonicalName(str, idx, ref loopback, ref scopeId);
                     break;
 
                 case Flags.IPv4HostType:
@@ -2620,12 +2616,6 @@ namespace System
             {
                 flags |= Flags.LoopbackHost;
             }
-
-            if (linkLocalAddress)
-            {
-                flags |= Flags.IPv6LinkLocalAddress;
-            }
-
             return host;
         }
 
@@ -5377,7 +5367,7 @@ namespace System
             // Same path except that path1 ended with a file name and path2 didn't
             if (relPath.Length == 0 && path2.Length - 1 == si)
                 return "./"; // Truncate the file name
-            return relPath.ToString() + path2.Substring(si + 1);
+            return relPath.Append(path2.AsSpan(si + 1)).ToString();
         }
 
         //

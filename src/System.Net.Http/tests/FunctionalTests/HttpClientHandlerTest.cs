@@ -39,22 +39,6 @@ namespace System.Net.Http.Functional.Tests
         public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
         public static readonly object[][] VerifyUploadServers = Configuration.Http.VerifyUploadServers;
         public static readonly object[][] CompressedServers = Configuration.Http.CompressedServers;
-        public static readonly object[][] HeaderValueAndUris = {
-            new object[] { "X-CustomHeader", "x-value", Configuration.Http.RemoteEchoServer },
-            new object[] { "X-CustomHeader", "x-value", Configuration.Http.RedirectUriForDestinationUri(
-                secure:false,
-                statusCode:302,
-                destinationUri:Configuration.Http.RemoteEchoServer,
-                hops:1) },
-        };
-        public static readonly object[][] HeaderWithEmptyValueAndUris = {
-            new object[] { "X-Cust-Header-NoValue", "" , Configuration.Http.RemoteEchoServer },
-            new object[] { "X-Cust-Header-NoValue", "" , Configuration.Http.RedirectUriForDestinationUri(
-                secure:false,
-                statusCode:302,
-                destinationUri:Configuration.Http.RemoteEchoServer,
-                hops:1) },
-        };
         public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
         public static readonly object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
 
@@ -63,7 +47,8 @@ namespace System.Net.Http.Functional.Tests
             new object[] { 301 },
             new object[] { 302 },
             new object[] { 303 },
-            new object[] { 307 }
+            new object[] { 307 },
+            new object[] { 308 }
         };
 
         public static readonly object[][] RedirectStatusCodesOldMethodsNewMethods = {
@@ -86,6 +71,10 @@ namespace System.Net.Http.Functional.Tests
             new object[] { 307, "GET", "GET" },
             new object[] { 307, "POST", "POST" },
             new object[] { 307, "HEAD", "HEAD" },
+
+            new object[] { 308, "GET", "GET" },
+            new object[] { 308, "POST", "POST" },
+            new object[] { 308, "HEAD", "HEAD" },
         };
 
         // Standard HTTP methods defined in RFC7231: http://tools.ietf.org/html/rfc7231#section-4.3
@@ -256,6 +245,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {
@@ -281,7 +276,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                IDictionary<String, object> dict = handler.Properties;
+                IDictionary<string, object> dict = handler.Properties;
                 Assert.Same(dict, handler.Properties);
                 Assert.Equal(0, dict.Count);
             }
@@ -292,9 +287,9 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                IDictionary<String, object> dict = handler.Properties;
+                IDictionary<string, object> dict = handler.Properties;
 
-                var item = new Object();
+                var item = new object();
                 dict.Add("item", item);
 
                 object value;
@@ -811,6 +806,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectFalse_RedirectFromHttpToHttp_StatusCodeRedirect(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = false;
             using (var client = new HttpClient(handler))
@@ -838,6 +839,12 @@ namespace System.Net.Http.Functional.Tests
                 // Known behavior: curl does not change method to "GET"
                 // https://github.com/dotnet/corefx/issues/26434
                 newMethod = "POST";
+            }
+
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
             }
 
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -959,6 +966,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttp_StatusCodeOK(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
             using (var client = new HttpClient(handler))
@@ -1312,6 +1325,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
             Uri redirectUri = Configuration.Http.RedirectUriForCreds(
                 secure: false,
@@ -1346,14 +1365,16 @@ namespace System.Net.Http.Functional.Tests
         [OuterLoop("Uses external server")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [Theory]
-        [MemberData(nameof(HeaderWithEmptyValueAndUris))]
-        public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(string name, string value, Uri uri)
+        [MemberData(nameof(HeaderEchoUrisMemberData))]
+        public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(Uri uri)
         {
             if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1709OrGreater)
             {
                 return;
             }
 
+            string name = "X-Cust-Header-NoValue";
+            string value = "";
             using (HttpClient client = CreateHttpClient())
             {
                 _output.WriteLine($"name={name}, value={value}");
@@ -1385,6 +1406,74 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
+
+        [OuterLoop("Uses external server")]
+        [Theory, MemberData(nameof(HeaderEchoUrisMemberData))]
+        public async Task GetAsync_LargeRequestHeader_HeadersAndValuesSent(Uri uri)
+        {
+            // Unfortunately, our remote servers seem to have pretty strict limits (around 16K?)
+            // on the total size of the request header.
+            // TODO: Figure out how to reconfigure remote endpoints to allow larger request headers,
+            // and then increase the limits in this test.
+
+            string headerValue = new string('a', 2048);
+            const int headerCount = 6;
+
+            using (HttpClient client = CreateHttpClient())
+            {
+                for (int i = 0; i < headerCount; i++)
+                {
+                    client.DefaultRequestHeaders.Add($"Header-{i}", headerValue);
+                }
+
+                using (HttpResponseMessage httpResponse = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+                    string responseText = await httpResponse.Content.ReadAsStringAsync();
+
+                    for (int i = 0; i < headerCount; i++)
+                    {
+                        Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, $"Header-{i}", headerValue));
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> HeaderValueAndUris()
+        {
+            foreach (Uri uri in HeaderEchoUris())
+            {
+                yield return new object[] { "X-CustomHeader", "x-value", uri };
+                yield return new object[] { "MyHeader", "1, 2, 3", uri };
+
+                // Construct a header value with every valid character (except space)
+                string allchars = "";
+                for (int i = 0x21; i <= 0x7E; i++)
+                {
+                    allchars = allchars + (char)i;
+                }
+
+                // Put a space in the middle so it's not interpreted as insignificant leading/trailing whitespace
+                allchars = allchars + " " + allchars;
+
+                yield return new object[] { "All-Valid-Chars-Header", allchars, uri };
+            }
+        }
+
+        public static IEnumerable<Uri> HeaderEchoUris()
+        {
+            foreach (Uri uri in Configuration.Http.EchoServerList)
+            {
+                yield return uri;
+                yield return Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: 302,
+                    destinationUri: uri,
+                    hops: 1);
+            }
+        }
+
+        public static IEnumerable<object[]> HeaderEchoUrisMemberData() => HeaderEchoUris().Select(uri => new object[] { uri });
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP ignores invalid headers")]
         [Theory]
@@ -2228,6 +2317,18 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            if (PlatformDetection.IsFullFramework)
+            {
+                // Skip test on .NET Framework. It will sometimes not throw TaskCanceledException.
+                // Instead it might throw the following top-level and inner exceptions depending
+                // on race conditions.
+                //
+                // System.Net.Http.HttpRequestException : Error while copying content to a stream.
+                // ---- System.IO.IOException : The read operation failed, see inner exception.
+                //-------- System.Net.WebException : The request was aborted: The request was canceled.
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server1, url1) =>
             {
                 await LoopbackServer.CreateServerAsync(async (server2, url2) =>
@@ -2329,7 +2430,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        #region Post Methods Tests
+#region Post Methods Tests
 
         [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(VerifyUploadServers))]
@@ -2600,17 +2701,27 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_ExpectContinueTrue_NoContent_StillSendsHeader()
         {
+            const string ExpectedContent = "Hello, expecting and continuing world.";
+            var clientCompleted = new TaskCompletionSource<bool>();
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (var client = CreateHttpClient())
                 {
                     client.DefaultRequestHeaders.ExpectContinue = true;
-                    await client.GetStringAsync(uri);
+                    Assert.Equal(ExpectedContent, await client.GetStringAsync(uri));
+                    clientCompleted.SetResult(true);
                 }
             }, async server =>
             {
-                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync();
-                Assert.Contains("Expect: 100-continue", headers);
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAsync();
+                    Assert.Contains("Expect: 100-continue", headers);
+
+                    await connection.Writer.WriteAsync("HTTP/1.1 100 Continue\r\n\r\n");
+                    await connection.SendResponseAsync(content: ExpectedContent);
+                    await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
+                });
             });
         }
 
@@ -2618,6 +2729,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/28882", TargetFrameworkMonikers.NetFramework)]
         public async Task PostAsync_ThrowFromContentCopy_RequestFails(bool syncFailure)
         {
             await LoopbackServer.CreateServerAsync(async (server, uri) =>
@@ -2715,7 +2827,9 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(EchoServers))] // NOTE: will not work for in-box System.Net.Http.dll due to disposal of request content
+        [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework disposes request content after send")]
+        [ActiveIssue(31104, TestPlatforms.AnyUnix)]
         public async Task PostAsync_ReuseRequestContent_Success(Uri remoteServer)
         {
             const string ContentString = "This is the content string.";
@@ -2752,9 +2866,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region Various HTTP Method Tests
+#region Various HTTP Method Tests
 
         [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(HttpMethods))]
@@ -2904,9 +3018,9 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region Version tests
+#region Version tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not allow HTTP/1.0 requests.")]
         [OuterLoop("Uses external server")]
         [Fact]
@@ -3084,238 +3198,9 @@ namespace System.Net.Http.Functional.Tests
 
             return receivedRequestVersion;
         }
-        #endregion
+#endregion
 
-        #region Proxy tests
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop("Uses external server")]
-        [Theory]
-        [MemberData(nameof(CredentialsForProxyRfcCompliant))]
-        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_RfcCompliant(ICredentials creds, bool wrapCredsInCache)
-        {
-            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop("Uses external server")]
-        [Theory]
-        [MemberData(nameof(CredentialsForProxyNonRfcCompliant))]
-        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_NonRfcCompliant(ICredentials creds, bool wrapCredsInCache)
-        {
-            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
-        }
-
-        private async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(ICredentials creds, bool wrapCredsInCache)
-        {
-            int port;
-            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
-                out port,
-                requireAuth: creds != null && creds != CredentialCache.DefaultCredentials,
-                expectCreds: true);
-            Uri proxyUrl = new Uri($"http://localhost:{port}");
-
-            const string BasicAuth = "Basic";
-            if (wrapCredsInCache)
-            {
-                Assert.IsAssignableFrom<NetworkCredential>(creds);
-                var cache = new CredentialCache();
-                cache.Add(proxyUrl, BasicAuth, (NetworkCredential)creds);
-                creds = cache;
-            }
-
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
-            {
-                handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, creds);
-
-                Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
-                Task<string> responseStringTask = responseTask.ContinueWith(t => t.Result.Content.ReadAsStringAsync(), TaskScheduler.Default).Unwrap();
-                await TestHelper.WhenAllCompletedOrAnyFailed(proxyTask, responseTask, responseStringTask);
-
-                using (responseTask.Result)
-                {
-                    TestHelper.VerifyResponseBody(responseStringTask.Result, responseTask.Result.Content.Headers.ContentMD5, false, null);
-                    Assert.Equal(Encoding.ASCII.GetString(proxyTask.Result.ResponseContent), responseStringTask.Result);
-
-                    NetworkCredential nc = creds?.GetCredential(proxyUrl, BasicAuth);
-                    string expectedAuth =
-                        nc == null || nc == CredentialCache.DefaultCredentials ? null :
-                        string.IsNullOrEmpty(nc.Domain) ? $"{nc.UserName}:{nc.Password}" :
-                        $"{nc.Domain}\\{nc.UserName}:{nc.Password}";
-                    Assert.Equal(expectedAuth, proxyTask.Result.AuthenticationHeaderValue);
-                }
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop("Uses external server")]
-        [Theory]
-        [MemberData(nameof(BypassedProxies))]
-        public async Task Proxy_BypassTrue_GetRequestDoesntGoesThroughCustomProxy(IWebProxy proxy)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Proxy = proxy;
-            using (var client = new HttpClient(handler))
-            using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
-            {
-                TestHelper.VerifyResponseBody(
-                    await response.Content.ReadAsStringAsync(),
-                    response.Content.Headers.ContentMD5,
-                    false,
-                    null);
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task Proxy_HaveNoCredsAndUseAuthenticatedCustomProxy_ProxyAuthenticationRequiredStatusCode()
-        {
-            int port;
-            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
-                out port,
-                requireAuth: true,
-                expectCreds: false);
-            Uri proxyUrl = new Uri($"http://localhost:{port}");
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, null);
-            using (var client = new HttpClient(handler))
-            {
-                Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
-                await (new Task[] { proxyTask, responseTask }).WhenAllOrAnyFailed();
-                using (responseTask.Result)
-                {
-                    Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);
-                }
-            }
-        }
-
-        [Fact]
-        public async Task Proxy_SslProxyUnsupported_Throws()
-        {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
-            {
-                handler.Proxy = new WebProxy("https://" + Guid.NewGuid().ToString("N"));
-
-                Type expectedType = IsNetfxHandler || UseSocketsHttpHandler ?
-                    typeof(NotSupportedException) :
-                    typeof(HttpRequestException);
-
-                await Assert.ThrowsAsync(expectedType, () => client.GetAsync("http://" + Guid.NewGuid().ToString("N")));
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task Proxy_SendSecureRequestThruProxy_ConnectTunnelUsed()
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            var ep = (IPEndPoint)listener.Server.LocalEndPoint;
-            Uri proxyUrl = new Uri($"http://{ep.Address}:{ep.Port}/");
-            _output.WriteLine($"proxy uri = {proxyUrl.ToString()}");
-            // TODO : refactor once LoopbackGetRequestHttpProxy is merged with LoopbackServer
-            Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask =
-                LoopbackGetRequestHttpProxy.StartAsync(listener, false, false);
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl);
-            using (var client = new HttpClient(handler))
-            {
-                // The current LoopbackGetRequestHttpProxy test server doesn't stop CONNECT tunneling unless
-                // the connections get closed by either side. So, we force that by adding Connection: close
-                // to the outbound request.
-                client.DefaultRequestHeaders.Connection.Add("close");
-
-                using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                    await proxyTask.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
-                    LoopbackGetRequestHttpProxy.ProxyResult proxyResult = proxyTask.Result;
-                    _output.WriteLine($"Proxy request line: {proxyResult.RequestLine}");
-                    Assert.Contains("CONNECT", proxyResult.RequestLine);
-                }
-            }
-        }
-
-        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public async Task ProxyAuth_Digest_Succeeds()
-        {
-            if (IsCurlHandler)
-            {
-                // Issue #27870 curl HttpHandler can only do basic auth to proxy
-                return;
-            }
-
-            const string expectedUsername = "testusername";
-            const string expectedPassword = "testpassword";
-            const string authHeader = "Proxy-Authenticate: Digest realm=\"NetCore\", nonce=\"PwOnWgAAAAAAjnbW438AAJSQi1kAAAAA\", qop=\"auth\", stale=false\r\n";
-            LoopbackServer.Options options = new LoopbackServer.Options { IsProxy = true, Username = expectedUsername, Password = expectedPassword };
-            var proxyCreds = new NetworkCredential(expectedUsername, expectedPassword);
-
-            await LoopbackServer.CreateServerAsync(async (proxyServer, proxyUrl) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
-                {
-                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, proxyCreds);
-
-                    // URL does not matter. We will get response from "proxy" code below.
-                    Task<HttpResponseMessage> clientTask = client.GetAsync($"http://notarealserver.com/");
-
-                    //  Send Digest challenge.
-                    Task<List<string>> serverTask = proxyServer.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.ProxyAuthenticationRequired, authHeader);
-                    if (clientTask == await Task.WhenAny(clientTask, serverTask).TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds))
-                    {
-                        // Client task shouldn't have completed successfully; propagate failure.
-                        Assert.NotEqual(TaskStatus.RanToCompletion, clientTask.Status);
-                        await clientTask;
-                    }
-
-                    // Verify user & password.
-                    serverTask = proxyServer.AcceptConnectionPerformAuthenticationAndCloseAsync("");
-                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { clientTask, serverTask }, TestHelper.PassingTestTimeoutMilliseconds);
-
-                    Assert.Equal(HttpStatusCode.OK, clientTask.Result.StatusCode);
-                }
-            }, options);
-
-        }
-
-        private static IEnumerable<object[]> BypassedProxies()
-        {
-            yield return new object[] { null };
-            yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
-        }
-
-        private static IEnumerable<object[]> CredentialsForProxyRfcCompliant()
-        {
-            foreach (bool wrapCredsInCache in new[] { true, false })
-            {
-                yield return new object[] { new NetworkCredential("username", "password"), wrapCredsInCache };
-                yield return new object[] { new NetworkCredential("username", "password", "domain"), wrapCredsInCache };
-            }
-        }
-
-        private static IEnumerable<object[]> CredentialsForProxyNonRfcCompliant()
-        {
-            yield return new object[] { null, false };
-            foreach (bool wrapCredsInCache in new[] { true, false })
-            {
-                yield return new object[] { new NetworkCredential("user:name", "password"), wrapCredsInCache };
-                yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
-            }
-        }
-
-        #endregion
-
-        #region Uri wire transmission encoding tests
+#region Uri wire transmission encoding tests
         [Fact]
         public async Task SendRequest_UriPathHasReservedChars_ServerReceivedExpectedPath()
         {
@@ -3341,6 +3226,6 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
-        #endregion
+#endregion
     }
 }

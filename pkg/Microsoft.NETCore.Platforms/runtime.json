@@ -632,6 +632,155 @@
         "fedora-x64-corert"
       ]
     },
+    "fedora.29": {
+      "#import": [
+        "fedora"
+      ]
+    },
+    "fedora.29-corert": {
+      "#import": [
+        "fedora.29",
+        "fedora-corert"
+      ]
+    },
+    "fedora.29-x64": {
+      "#import": [
+        "fedora.29",
+        "fedora-x64"
+      ]
+    },
+    "fedora.29-x64-corert": {
+      "#import": [
+        "fedora.29-corert",
+        "fedora.29-x64",
+        "fedora.29",
+        "fedora-x64-corert"
+      ]
+    },
+    "freebsd": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "freebsd-corert": {
+      "#import": [
+        "freebsd",
+        "unix-corert"
+      ]
+    },
+    "freebsd-x64": {
+      "#import": [
+        "freebsd",
+        "unix-x64"
+      ]
+    },
+    "freebsd-x64-corert": {
+      "#import": [
+        "freebsd-corert",
+        "freebsd-x64",
+        "unix-x64-corert"
+      ]
+    },
+    "freebsd.11": {
+      "#import": [
+        "freebsd"
+      ]
+    },
+    "freebsd.11-corert": {
+      "#import": [
+        "freebsd.11",
+        "freebsd-corert"
+      ]
+    },
+    "freebsd.11-x64": {
+      "#import": [
+        "freebsd.11",
+        "freebsd-x64"
+      ]
+    },
+    "freebsd.11-x64-corert": {
+      "#import": [
+        "freebsd.11-corert",
+        "freebsd.11-x64",
+        "freebsd.11",
+        "freebsd-x64-corert"
+      ]
+    },
+    "freebsd.11.0": {
+      "#import": [
+        "freebsd.11"
+      ]
+    },
+    "freebsd.11.0-corert": {
+      "#import": [
+        "freebsd.11.0",
+        "freebsd.11-corert"
+      ]
+    },
+    "freebsd.11.0-x64": {
+      "#import": [
+        "freebsd.11.0",
+        "freebsd.11-x64"
+      ]
+    },
+    "freebsd.11.0-x64-corert": {
+      "#import": [
+        "freebsd.11.0-corert",
+        "freebsd.11.0-x64",
+        "freebsd.11.0",
+        "freebsd.11-x64-corert"
+      ]
+    },
+    "freebsd.11.1": {
+      "#import": [
+        "freebsd.11.0"
+      ]
+    },
+    "freebsd.11.1-corert": {
+      "#import": [
+        "freebsd.11.1",
+        "freebsd.11.0-corert"
+      ]
+    },
+    "freebsd.11.1-x64": {
+      "#import": [
+        "freebsd.11.1",
+        "freebsd.11.0-x64"
+      ]
+    },
+    "freebsd.11.1-x64-corert": {
+      "#import": [
+        "freebsd.11.1-corert",
+        "freebsd.11.1-x64",
+        "freebsd.11.1",
+        "freebsd.11.0-x64-corert"
+      ]
+    },
+    "freebsd.11.2": {
+      "#import": [
+        "freebsd.11.1"
+      ]
+    },
+    "freebsd.11.2-corert": {
+      "#import": [
+        "freebsd.11.2",
+        "freebsd.11.1-corert"
+      ]
+    },
+    "freebsd.11.2-x64": {
+      "#import": [
+        "freebsd.11.2",
+        "freebsd.11.1-x64"
+      ]
+    },
+    "freebsd.11.2-x64-corert": {
+      "#import": [
+        "freebsd.11.2-corert",
+        "freebsd.11.2-x64",
+        "freebsd.11.2",
+        "freebsd.11.1-x64-corert"
+      ]
+    },
     "gentoo": {
       "#import": [
         "linux"
@@ -1222,6 +1371,62 @@
         "ol.7.3-x64-corert"
       ]
     },
+    "ol.7.5": {
+      "#import": [
+        "ol.7.4",
+        "rhel.7.5"
+      ]
+    },
+    "ol.7.5-corert": {
+      "#import": [
+        "ol.7.5",
+        "ol.7.4-corert",
+        "rhel.7.5-corert"
+      ]
+    },
+    "ol.7.5-x64": {
+      "#import": [
+        "ol.7.5",
+        "ol.7.4-x64",
+        "rhel.7.5-x64"
+      ]
+    },
+    "ol.7.5-x64-corert": {
+      "#import": [
+        "ol.7.5-corert",
+        "ol.7.5-x64",
+        "ol.7.5",
+        "ol.7.4-x64-corert"
+      ]
+    },
+    "ol.7.6": {
+      "#import": [
+        "ol.7.5",
+        "rhel.7.6"
+      ]
+    },
+    "ol.7.6-corert": {
+      "#import": [
+        "ol.7.6",
+        "ol.7.5-corert",
+        "rhel.7.6-corert"
+      ]
+    },
+    "ol.7.6-x64": {
+      "#import": [
+        "ol.7.6",
+        "ol.7.5-x64",
+        "rhel.7.6-x64"
+      ]
+    },
+    "ol.7.6-x64-corert": {
+      "#import": [
+        "ol.7.6-corert",
+        "ol.7.6-x64",
+        "ol.7.6",
+        "ol.7.5-x64-corert"
+      ]
+    },
     "opensuse": {
       "#import": [
         "linux"
@@ -1667,6 +1872,56 @@
         "rhel.7.4-x64",
         "rhel.7.4",
         "rhel.7.3-x64-corert"
+      ]
+    },
+    "rhel.7.5": {
+      "#import": [
+        "rhel.7.4"
+      ]
+    },
+    "rhel.7.5-corert": {
+      "#import": [
+        "rhel.7.5",
+        "rhel.7.4-corert"
+      ]
+    },
+    "rhel.7.5-x64": {
+      "#import": [
+        "rhel.7.5",
+        "rhel.7.4-x64"
+      ]
+    },
+    "rhel.7.5-x64-corert": {
+      "#import": [
+        "rhel.7.5-corert",
+        "rhel.7.5-x64",
+        "rhel.7.5",
+        "rhel.7.4-x64-corert"
+      ]
+    },
+    "rhel.7.6": {
+      "#import": [
+        "rhel.7.5"
+      ]
+    },
+    "rhel.7.6-corert": {
+      "#import": [
+        "rhel.7.6",
+        "rhel.7.5-corert"
+      ]
+    },
+    "rhel.7.6-x64": {
+      "#import": [
+        "rhel.7.6",
+        "rhel.7.5-x64"
+      ]
+    },
+    "rhel.7.6-x64-corert": {
+      "#import": [
+        "rhel.7.6-corert",
+        "rhel.7.6-x64",
+        "rhel.7.6",
+        "rhel.7.5-x64-corert"
       ]
     },
     "sles": {

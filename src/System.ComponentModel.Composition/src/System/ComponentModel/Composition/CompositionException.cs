@@ -8,7 +8,6 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Internal;
 using Microsoft.Internal.Collections;
@@ -94,8 +93,8 @@ namespace System.ComponentModel.Composition
         internal CompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
                     : base(message, innerException)
         {
-            Requires.NullOrNotNullElements(errors, "errors");
-            _errors = new ReadOnlyCollection<CompositionError>(errors == null ? new CompositionError[0] : errors.ToArray<CompositionError>());
+            Requires.NullOrNotNullElements(errors, nameof(errors));
+            _errors = new ReadOnlyCollection<CompositionError>(errors == null ? Array.Empty<CompositionError>() : errors.ToArray<CompositionError>());
         }
 
         /// <summary>
@@ -193,8 +192,10 @@ namespace System.ComponentModel.Composition
             }
             else
             {
-                Assumes.IsTrue(errorsCount == 1);
-                Assumes.IsTrue(pathCount == 1);
+                if(errorsCount != 1 || pathCount != 1)
+                {
+                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                }
 
                 // The composition produced a single composition error. The root cause is provided below.
                 writer.AppendFormat(

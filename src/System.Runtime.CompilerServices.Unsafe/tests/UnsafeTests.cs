@@ -382,8 +382,8 @@ namespace System.Runtime.CompilerServices
         public static void DangerousAs()
         {
             // Verify that As does not perform type checks
-            object o = new Object();
-            Assert.IsType(typeof(Object), Unsafe.As<string>(o));
+            object o = new object();
+            Assert.IsType(typeof(object), Unsafe.As<string>(o));
         }
 
         [Fact]
@@ -622,8 +622,8 @@ namespace System.Runtime.CompilerServices
 
             Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(1)), ref Unsafe.AsRef<byte>((void*)(-1))));
             Assert.True(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(-1)), ref Unsafe.AsRef<byte>((void*)(1))));
-            Assert.True(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(Int32.MinValue)), ref Unsafe.AsRef<byte>((void*)(Int32.MaxValue))));
-            Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(Int32.MaxValue)), ref Unsafe.AsRef<byte>((void*)(Int32.MinValue))));
+            Assert.True(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(int.MinValue)), ref Unsafe.AsRef<byte>((void*)(int.MaxValue))));
+            Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(int.MaxValue)), ref Unsafe.AsRef<byte>((void*)(int.MinValue))));
             Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>(null), ref Unsafe.AsRef<byte>(null)));
         }
 
@@ -641,8 +641,8 @@ namespace System.Runtime.CompilerServices
 
             Assert.True(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(1)), ref Unsafe.AsRef<byte>((void*)(-1))));
             Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(-1)), ref Unsafe.AsRef<byte>((void*)(1))));
-            Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(Int32.MinValue)), ref Unsafe.AsRef<byte>((void*)(Int32.MaxValue))));
-            Assert.True(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(Int32.MaxValue)), ref Unsafe.AsRef<byte>((void*)(Int32.MinValue))));
+            Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(int.MinValue)), ref Unsafe.AsRef<byte>((void*)(int.MaxValue))));
+            Assert.True(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(int.MaxValue)), ref Unsafe.AsRef<byte>((void*)(int.MinValue))));
             Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>(null), ref Unsafe.AsRef<byte>(null)));
         }
 
@@ -792,6 +792,42 @@ namespace System.Runtime.CompilerServices
             Int32Double actual = Int32Double.Aligned(unaligned);
             Assert.Equal(123456789, actual.Int32);
             Assert.Equal(3.42, actual.Double);
+        }
+
+        [Fact]
+        public static void Unbox_Int32()
+        {
+            object box = 42;
+
+            Assert.True(Unsafe.AreSame(ref Unsafe.Unbox<int>(box), ref Unsafe.Unbox<int>(box)));
+
+            Assert.Equal(42, (int)box);
+            Assert.Equal(42, Unsafe.Unbox<int>(box));
+
+            ref int value = ref Unsafe.Unbox<int>(box);
+            value = 84;
+            Assert.Equal(84, (int)box);
+            Assert.Equal(84, Unsafe.Unbox<int>(box));
+
+            Assert.Throws<InvalidCastException>(() => Unsafe.Unbox<Byte4>(box));
+        }
+
+        [Fact]
+        public static void Unbox_CustomValueType()
+        {
+            object box = new Int32Double();
+
+            Assert.Equal(0, ((Int32Double)box).Double);
+            Assert.Equal(0, ((Int32Double)box).Int32);
+
+            ref Int32Double value = ref Unsafe.Unbox<Int32Double>(box);
+            value.Double = 42;
+            value.Int32 = 84;
+
+            Assert.Equal(42, ((Int32Double)box).Double);
+            Assert.Equal(84, ((Int32Double)box).Int32);
+
+            Assert.Throws<InvalidCastException>(() => Unsafe.Unbox<bool>(box));
         }
     }
 

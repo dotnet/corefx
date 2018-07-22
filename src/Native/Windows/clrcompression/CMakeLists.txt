@@ -23,6 +23,7 @@ if($ENV{__BuildArch} STREQUAL x86 OR $ENV{__BuildArch} STREQUAL x64)
         zlib/inffast.c
         zlib/inflate.c
         zlib/inftrees.c
+        ../../AnyOS/zlib/pal_zlib.c
 )
 elseif($ENV{__BuildArch} STREQUAL arm OR $ENV{__BuildArch} STREQUAL arm64)
     set(NATIVECOMPRESSION_SOURCES
@@ -35,6 +36,7 @@ elseif($ENV{__BuildArch} STREQUAL arm OR $ENV{__BuildArch} STREQUAL arm64)
         zlib/inftrees.c
         zlib/trees.c
         zlib/zutil.c
+        ../../AnyOS/zlib/pal_zlib.c
     )
 endif()
 
@@ -48,6 +50,7 @@ else()
         ${NATIVECOMPRESSION_SOURCES}
         clrcompression.def
         ../../AnyOS/brotli/common/dictionary.c
+        ../../AnyOS/brotli/common/transform.c
         ../../AnyOS/brotli/dec/bit_reader.c
         ../../AnyOS/brotli/dec/decode.c
         ../../AnyOS/brotli/dec/huffman.c
@@ -62,6 +65,7 @@ else()
         ../../AnyOS/brotli/enc/compress_fragment_two_pass.c
         ../../AnyOS/brotli/enc/dictionary_hash.c
         ../../AnyOS/brotli/enc/encode.c
+        ../../AnyOS/brotli/enc/encoder_dict.c
         ../../AnyOS/brotli/enc/entropy_encode.c
         ../../AnyOS/brotli/enc/histogram.c
         ../../AnyOS/brotli/enc/literal_cost.c
@@ -75,13 +79,6 @@ endif()
 if ($ENV{__VSVersion} STREQUAL vs2015)
     add_definitions(-DHAVE_VSNPRINTF)
 endif ()
-
-if(__LinkCustomCRT STREQUAL true)
-    set(NATIVECOMPRESSION_SOURCES
-        ${NATIVECOMPRESSION_SOURCES}
-        crt.cpp
-    )
-endif()
 
 # Include 'bin/obj' dir since it contains _version.h
 include_directories("${CMAKE_BINARY_DIR}/../../")

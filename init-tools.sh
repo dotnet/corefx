@@ -102,6 +102,12 @@ if [ ! -e "$__DOTNET_PATH" ]; then
                         __PKG_RID=rhel.6
                     fi
                 fi
+                OSArch=$(uname -m)
+                if [ $OSArch == 'armv7l' ];then
+                    __PKG_ARCH=arm
+                elif [ $OSArch == 'aarch64' ]; then
+                    __PKG_ARCH=arm64
+                fi
 
                 ;;
 
@@ -111,8 +117,8 @@ if [ ! -e "$__DOTNET_PATH" ]; then
                 __PKG_RID=linux
                 ;;
         esac
-
-        __DOTNET_PKG=dotnet-sdk-${__DOTNET_TOOLS_VERSION}-$__PKG_RID-$__PKG_ARCH
+        __PKG_RID=$__PKG_RID-$__PKG_ARCH
+        __DOTNET_PKG=dotnet-sdk-${__DOTNET_TOOLS_VERSION}-$__PKG_RID
     fi
     mkdir -p "$__DOTNET_PATH"
 
@@ -152,7 +158,7 @@ if [ ! -e "$__BUILD_TOOLS_PATH" ]; then
 fi
 
 if [ -z "${__ILASM_RID-}" ]; then
-    __ILASM_RID=$__PKG_RID-$__PKG_ARCH
+    __ILASM_RID=$__PKG_RID
 fi
 
 echo "Using RID $__ILASM_RID for BuildTools native tools"
@@ -182,7 +188,7 @@ echo "Making all .sh files executable under Tools."
 ls "$__scriptpath/Tools/"*.sh | xargs chmod +x
 ls "$__scriptpath/Tools/scripts/docker/"*.sh | xargs chmod +x
 
-"$__scriptpath/Tools/crossgen.sh" "$__scriptpath/Tools"
+"$__scriptpath/Tools/crossgen.sh" "$__scriptpath/Tools" $__PKG_RID
 
 mkdir -p "$(dirname "$__BUILD_TOOLS_SEMAPHORE")" && touch "$__BUILD_TOOLS_SEMAPHORE"
 

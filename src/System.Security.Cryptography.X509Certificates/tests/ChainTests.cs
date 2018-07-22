@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -632,6 +633,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void BuildChainInvalidValues()
+        {
+            using (var chain = X509Chain.Create())
+            {
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(null));
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(new X509Certificate2()));
+            }
+        }
+
+        [Fact]
         public static void InvalidSelfSignedSignature()
         {
             X509ChainStatusFlags expectedFlags;
@@ -688,6 +699,26 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
 
                 Assert.Equal(expectedFlags, allFlags);
+            }
+        }
+
+        [Fact]
+        public static void ChainWithEmptySubject()
+        {
+            using (var cert = new X509Certificate2(TestData.EmptySubjectCertificate))
+            using (var issuer = new X509Certificate2(TestData.EmptySubjectIssuerCertificate))
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.ExtraStore.Add(issuer);
+
+                Assert.True(chain.Build(cert), "chain.Build(cert)");
+                Assert.Equal(2, chain.ChainElements.Count);
+                Assert.Equal(string.Empty, cert.Subject);
+                Assert.Equal(cert.RawData, chain.ChainElements[0].Certificate.RawData);
+                Assert.Equal(issuer.RawData, chain.ChainElements[1].Certificate.RawData);
             }
         }
     }

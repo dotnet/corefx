@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
@@ -37,7 +39,7 @@ namespace System.Drawing
         [Localizable(false)]
         [DefaultValue(null)]
 #if !NETCORE
-        [BindableAttribute(true)]     
+        [BindableAttribute(true)]
         [TypeConverter(typeof(StringConverter))]
 #endif
         public object Tag
@@ -89,8 +91,8 @@ namespace System.Drawing
                 float width;
                 float height;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageDimension(new HandleRef(this, nativeImage), out width, out height);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageDimension(new HandleRef(this, nativeImage), out width, out height);
+                Gdip.CheckStatus(status);
 
                 return new SizeF(width, height);
             }
@@ -113,8 +115,8 @@ namespace System.Drawing
             {
                 int width;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageWidth(new HandleRef(this, nativeImage), out width);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageWidth(new HandleRef(this, nativeImage), out width);
+                Gdip.CheckStatus(status);
 
                 return width;
             }
@@ -132,8 +134,8 @@ namespace System.Drawing
             {
                 int height;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageHeight(new HandleRef(this, nativeImage), out height);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageHeight(new HandleRef(this, nativeImage), out height);
+                Gdip.CheckStatus(status);
 
                 return height;
             }
@@ -148,8 +150,8 @@ namespace System.Drawing
             {
                 float horzRes;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageHorizontalResolution(new HandleRef(this, nativeImage), out horzRes);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageHorizontalResolution(new HandleRef(this, nativeImage), out horzRes);
+                Gdip.CheckStatus(status);
 
                 return horzRes;
             }
@@ -164,8 +166,8 @@ namespace System.Drawing
             {
                 float vertRes;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageVerticalResolution(new HandleRef(this, nativeImage), out vertRes);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageVerticalResolution(new HandleRef(this, nativeImage), out vertRes);
+                Gdip.CheckStatus(status);
 
                 return vertRes;
             }
@@ -181,8 +183,8 @@ namespace System.Drawing
             {
                 int flags;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageFlags(new HandleRef(this, nativeImage), out flags);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageFlags(new HandleRef(this, nativeImage), out flags);
+                Gdip.CheckStatus(status);
 
                 return flags;
             }
@@ -197,8 +199,8 @@ namespace System.Drawing
             {
                 Guid guid = new Guid();
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageRawFormat(new HandleRef(this, nativeImage), ref guid);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetImageRawFormat(new HandleRef(this, nativeImage), ref guid);
+                Gdip.CheckStatus(status);
 
                 return new ImageFormat(guid);
             }
@@ -211,14 +213,8 @@ namespace System.Drawing
         {
             get
             {
-                int format;
-
-                int status = SafeNativeMethods.Gdip.GdipGetImagePixelFormat(new HandleRef(this, nativeImage), out format);
-
-                if (status != SafeNativeMethods.Gdip.Ok)
-                    return PixelFormat.Undefined;
-                else
-                    return (PixelFormat)format;
+                int status = Gdip.GdipGetImagePixelFormat(new HandleRef(this, nativeImage), out PixelFormat format);
+                return (status != Gdip.Ok) ? PixelFormat.Undefined : format;
             }
         }
 
@@ -227,13 +223,9 @@ namespace System.Drawing
         /// </summary>
         public int GetFrameCount(FrameDimension dimension)
         {
-            int[] count = new int[] { 0 };
-
             Guid dimensionID = dimension.Guid;
-            int status = SafeNativeMethods.Gdip.GdipImageGetFrameCount(new HandleRef(this, nativeImage), ref dimensionID, count);
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
-            return count[0];
+            Gdip.CheckStatus(Gdip.GdipImageGetFrameCount(new HandleRef(this, nativeImage), ref dimensionID, out int count));
+            return count;
         }
 
         /// <summary>
@@ -241,19 +233,15 @@ namespace System.Drawing
         /// </summary>
         public int SelectActiveFrame(FrameDimension dimension, int frameIndex)
         {
-            int[] count = new int[] { 0 };
-
             Guid dimensionID = dimension.Guid;
-            int status = SafeNativeMethods.Gdip.GdipImageSelectActiveFrame(new HandleRef(this, nativeImage), ref dimensionID, frameIndex);
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
-            return count[0];
+            Gdip.CheckStatus(Gdip.GdipImageSelectActiveFrame(new HandleRef(this, nativeImage), ref dimensionID, frameIndex));
+            return 0;
         }
 
         public void RotateFlip(RotateFlipType rotateFlipType)
         {
-            int status = SafeNativeMethods.Gdip.GdipImageRotateFlip(new HandleRef(this, nativeImage), unchecked((int)rotateFlipType));
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipImageRotateFlip(new HandleRef(this, nativeImage), unchecked((int)rotateFlipType));
+            Gdip.CheckStatus(status);
         }
 
         /// <summary>
@@ -261,8 +249,8 @@ namespace System.Drawing
         /// </summary>
         public void RemovePropertyItem(int propid)
         {
-            int status = SafeNativeMethods.Gdip.GdipRemovePropertyItem(new HandleRef(this, nativeImage), propid);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipRemovePropertyItem(new HandleRef(this, nativeImage), propid);
+            Gdip.CheckStatus(status);
         }
 
         /// <summary>
@@ -276,8 +264,8 @@ namespace System.Drawing
         public static Bitmap FromHbitmap(IntPtr hbitmap, IntPtr hpalette)
         {
             IntPtr bitmap = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromHBITMAP(new HandleRef(null, hbitmap), new HandleRef(null, hpalette), out bitmap);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipCreateBitmapFromHBITMAP(new HandleRef(null, hbitmap), new HandleRef(null, hpalette), out bitmap);
+            Gdip.CheckStatus(status);
 
             return new Bitmap(bitmap);
         }
@@ -290,46 +278,92 @@ namespace System.Drawing
             return (pixfmt & PixelFormat.Extended) != 0;
         }
 
-        /*
-         * Determine if the pixel format is canonical format:
-         *   PixelFormat32bppARGB
-         *   PixelFormat32bppPARGB
-         *   PixelFormat64bppARGB
-         *   PixelFormat64bppPARGB
-         */
         /// <summary>
         /// Returns a value indicating whether the pixel format is canonical.
         /// </summary>
         public static bool IsCanonicalPixelFormat(PixelFormat pixfmt)
         {
+            // Canonical formats:
+            //
+            //  PixelFormat32bppARGB
+            //  PixelFormat32bppPARGB
+            //  PixelFormat64bppARGB
+            //  PixelFormat64bppPARGB
+
             return (pixfmt & PixelFormat.Canonical) != 0;
         }
 
         internal void SetNativeImage(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
-                throw new ArgumentException(SR.Format(SR.NativeHandle0), "handle");
+                throw new ArgumentException(SR.Format(SR.NativeHandle0), nameof(handle));
 
             nativeImage = handle;
         }
 
-        internal static void EnsureSave(Image image, string filename, Stream dataStream)
+        // Multi-frame support
+
+        /// <summary>
+        /// Gets an array of GUIDs that represent the dimensions of frames within this <see cref='Image'/>.
+        /// </summary>
+        [Browsable(false)]
+        public unsafe Guid[] FrameDimensionsList
+        {
+            get
+            {
+                Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(this, nativeImage), out int count));
+
+                Debug.Assert(count >= 0, "FrameDimensionsList returns bad count");
+                if (count <= 0)
+                    return Array.Empty<Guid>();
+
+                Guid[] guids = new Guid[count];
+                fixed (Guid* g = guids)
+                {
+                    Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(this, nativeImage), g, count));
+                }
+
+                return guids;
+            }
+        }
+
+        internal unsafe static void EnsureSave(Image image, string filename, Stream dataStream)
         {
             if (image.RawFormat.Equals(ImageFormat.Gif))
             {
                 bool animatedGif = false;
 
-                Guid[] dimensions = image.FrameDimensionsList;
-                foreach (Guid guid in dimensions)
+                Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(image, image.nativeImage), out int dimensions));
+                if (dimensions <= 0)
                 {
-                    FrameDimension dimension = new FrameDimension(guid);
-                    if (dimension.Equals(FrameDimension.Time))
+                    return;
+                }
+
+                Span<Guid> guids;
+                if (dimensions < 16)
+                {
+                    Guid* g = stackalloc Guid[dimensions];
+                    guids = new Span<Guid>(g, dimensions);
+                }
+                else
+                {
+                    guids = new Span<Guid>(new Guid[dimensions]);
+                }
+
+                fixed (Guid* g = &MemoryMarshal.GetReference(guids))
+                {
+                    Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(image, image.nativeImage), g, dimensions));
+                }
+
+                Guid timeGuid = FrameDimension.Time.Guid;
+                for (int i = 0; i < dimensions; i++)
+                {
+                    if (timeGuid == guids[i])
                     {
                         animatedGif = image.GetFrameCount(FrameDimension.Time) > 1;
                         break;
                     }
                 }
-
 
                 if (animatedGif)
                 {

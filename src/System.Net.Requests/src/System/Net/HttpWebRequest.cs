@@ -187,7 +187,7 @@ namespace System.Net
             }
         }
 
-        public override String ContentType
+        public override string ContentType
         {
             get
             {
@@ -858,7 +858,7 @@ namespace System.Net
                 // Handle the case where their object tries to change
                 //  name, value pairs after they call set, so therefore,
                 //  we need to clone their headers.
-                foreach (String headerName in webHeaders.AllKeys)
+                foreach (string headerName in webHeaders.AllKeys)
                 {
                     newWebHeaders[headerName] = webHeaders[headerName];
                 }
@@ -1051,7 +1051,7 @@ namespace System.Net
             return GetRequestStream();
         }
 
-        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, Object state)
+        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
             CheckAbort();
 
@@ -1133,11 +1133,22 @@ namespace System.Net
 
                 Debug.Assert(handler.UseProxy); // Default of handler.UseProxy is true.
                 Debug.Assert(handler.Proxy == null); // Default of handler.Proxy is null.
+
+                // HttpClientHandler default is to use a proxy which is the system proxy.
+                // This is indicated by the properties 'UseProxy == true' and 'Proxy == null'.
+                //
+                // However, HttpWebRequest doesn't have a separate 'UseProxy' property. Instead,
+                // the default of the 'Proxy' property is a non-null IWebProxy object which is the
+                // system default proxy object. If the 'Proxy' property were actually null, then
+                // that means don't use any proxy. 
+                //
+                // So, we need to map the desired HttpWebRequest proxy settings to equivalent
+                // HttpClientHandler settings.
                 if (_proxy == null)
                 {
                     handler.UseProxy = false;
                 }
-                else
+                else if (!object.ReferenceEquals(_proxy, WebRequest.GetSystemWebProxy()))
                 {
                     handler.Proxy = _proxy;
                 }
@@ -1373,7 +1384,7 @@ namespace System.Net
             }
             else
             {
-                if (String.Compare(curRange.Substring(0, curRange.IndexOf('=')), rangeSpecifier, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!string.Equals(curRange.Substring(0, curRange.IndexOf('=')), rangeSpecifier, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }

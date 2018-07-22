@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Text
 {
-    internal ref struct ValueStringBuilder
+    internal ref partial struct ValueStringBuilder
     {
         private char[] _arrayToReturnToPool;
         private Span<char> _chars;
@@ -19,6 +19,13 @@ namespace System.Text
         {
             _arrayToReturnToPool = null;
             _chars = initialBuffer;
+            _pos = 0;
+        }
+
+        public ValueStringBuilder(int initialCapacity)
+        {
+            _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
+            _chars = _arrayToReturnToPool;
             _pos = 0;
         }
 
@@ -125,7 +132,7 @@ namespace System.Text
         public void Append(char c)
         {
             int pos = _pos;
-            if (pos < _chars.Length)
+            if ((uint)pos < (uint)_chars.Length)
             {
                 _chars[pos] = c;
                 _pos = pos + 1;
@@ -140,7 +147,7 @@ namespace System.Text
         public void Append(string s)
         {
             int pos = _pos;
-            if (s.Length == 1 && pos < _chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
+            if (s.Length == 1 && (uint)pos < (uint)_chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
             {
                 _chars[pos] = s[0];
                 _pos = pos + 1;

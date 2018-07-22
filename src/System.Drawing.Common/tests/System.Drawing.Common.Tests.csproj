@@ -1,14 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4B93E684-0630-45F4-8F63-6C7788C9892F}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="BitmapTests.cs" />
     <Compile Include="BrushTests.cs" />
@@ -23,10 +18,12 @@
     <Compile Include="Drawing2D\GraphicsPathIteratorTests.cs" />
     <Compile Include="Drawing2D\GraphicsPathTests.cs" />
     <Compile Include="Drawing2D\PathGradientBrushTests.cs" />
+    <Compile Include="DrawingTest.cs" />
     <Compile Include="FontTests.cs" />
     <Compile Include="FontFamilyTests.cs" />
     <Compile Include="GraphicsTests.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="Graphics_DrawBezierTests.cs" />
+    <Compile Include="Graphics_DrawLineTests.cs" />
     <Compile Include="IconTests.cs" />
     <Compile Include="ImageTests.cs" />
     <Compile Include="Imaging\ImageAttributesTests.cs" />
@@ -76,6 +73,9 @@
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
+      <Link>Common\System\Drawing\Helpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
       <Link>Common\System\ThreadCultureChange.cs</Link>
     </Compile>
@@ -112,5 +112,4 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

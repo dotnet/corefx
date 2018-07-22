@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Drawing.Internal;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Drawing2D
 {
@@ -14,10 +14,10 @@ namespace System.Drawing.Drawing2D
         public GraphicsPathIterator(GraphicsPath path)
         {
             IntPtr nativeIter = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreatePathIter(out nativeIter, new HandleRef(path, (path == null) ? IntPtr.Zero : path.nativePath));
+            int status = Gdip.GdipCreatePathIter(out nativeIter, new HandleRef(path, (path == null) ? IntPtr.Zero : path._nativePath));
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
 
             this.nativeIter = nativeIter;
         }
@@ -37,9 +37,9 @@ namespace System.Drawing.Drawing2D
 #if DEBUG
                     int status =
 #endif
-                    SafeNativeMethods.Gdip.GdipDeletePathIter(new HandleRef(this, nativeIter));
+                    Gdip.GdipDeletePathIter(new HandleRef(this, nativeIter));
 #if DEBUG
-                    Debug.Assert(status == SafeNativeMethods.Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
+                    Debug.Assert(status == Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
 #endif        
                 }
                 catch (Exception ex)
@@ -62,11 +62,11 @@ namespace System.Drawing.Drawing2D
 
         public int NextSubpath(out int startIndex, out int endIndex, out bool isClosed)
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterNextSubpath(new HandleRef(this, nativeIter), out int resultCount,
+            int status = Gdip.GdipPathIterNextSubpath(new HandleRef(this, nativeIter), out int resultCount,
                         out int tempStart, out int tempEnd, out isClosed);
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
             else
             {
                 startIndex = tempStart;
@@ -78,44 +78,44 @@ namespace System.Drawing.Drawing2D
 
         public int NextSubpath(GraphicsPath path, out bool isClosed)
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterNextSubpathPath(new HandleRef(this, nativeIter), out int resultCount,
-                        new HandleRef(path, (path == null) ? IntPtr.Zero : path.nativePath), out isClosed);
+            int status = Gdip.GdipPathIterNextSubpathPath(new HandleRef(this, nativeIter), out int resultCount,
+                        new HandleRef(path, (path == null) ? IntPtr.Zero : path._nativePath), out isClosed);
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
 
             return resultCount;
         }
 
         public int NextPathType(out byte pathType, out int startIndex, out int endIndex)
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterNextPathType(new HandleRef(this, nativeIter), out int resultCount,
+            int status = Gdip.GdipPathIterNextPathType(new HandleRef(this, nativeIter), out int resultCount,
                         out pathType, out startIndex, out endIndex);
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
 
             return resultCount;
         }
 
         public int NextMarker(out int startIndex, out int endIndex)
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterNextMarker(new HandleRef(this, nativeIter), out int resultCount,
+            int status = Gdip.GdipPathIterNextMarker(new HandleRef(this, nativeIter), out int resultCount,
                         out startIndex, out endIndex);
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
 
             return resultCount;
         }
 
         public int NextMarker(GraphicsPath path)
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterNextMarkerPath(new HandleRef(this, nativeIter), out int resultCount,
-                        new HandleRef(path, (path == null) ? IntPtr.Zero : path.nativePath));
+            int status = Gdip.GdipPathIterNextMarkerPath(new HandleRef(this, nativeIter), out int resultCount,
+                        new HandleRef(path, (path == null) ? IntPtr.Zero : path._nativePath));
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
 
             return resultCount;
         }
@@ -124,10 +124,10 @@ namespace System.Drawing.Drawing2D
         {
             get
             {
-                int status = SafeNativeMethods.Gdip.GdipPathIterGetCount(new HandleRef(this, nativeIter), out int resultCount);
+                int status = Gdip.GdipPathIterGetCount(new HandleRef(this, nativeIter), out int resultCount);
 
-                if (status != SafeNativeMethods.Gdip.Ok)
-                    throw SafeNativeMethods.Gdip.StatusException(status);
+                if (status != Gdip.Ok)
+                    throw Gdip.StatusException(status);
 
                 return resultCount;
             }
@@ -137,10 +137,10 @@ namespace System.Drawing.Drawing2D
         {
             get
             {
-                int status = SafeNativeMethods.Gdip.GdipPathIterGetSubpathCount(new HandleRef(this, nativeIter), out int resultCount);
+                int status = Gdip.GdipPathIterGetSubpathCount(new HandleRef(this, nativeIter), out int resultCount);
 
-                if (status != SafeNativeMethods.Gdip.Ok)
-                    throw SafeNativeMethods.Gdip.StatusException(status);
+                if (status != Gdip.Ok)
+                    throw Gdip.StatusException(status);
 
                 return resultCount;
             }
@@ -148,94 +148,72 @@ namespace System.Drawing.Drawing2D
 
         public bool HasCurve()
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterHasCurve(new HandleRef(this, nativeIter), out bool hasCurve);
+            int status = Gdip.GdipPathIterHasCurve(new HandleRef(this, nativeIter), out bool hasCurve);
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
 
             return hasCurve;
         }
 
         public void Rewind()
         {
-            int status = SafeNativeMethods.Gdip.GdipPathIterRewind(new HandleRef(this, nativeIter));
+            int status = Gdip.GdipPathIterRewind(new HandleRef(this, nativeIter));
 
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            if (status != Gdip.Ok)
+                throw Gdip.StatusException(status);
         }
 
         public unsafe int Enumerate(ref PointF[] points, ref byte[] types)
         {
             if (points.Length != types.Length)
-                throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.InvalidParameter);
+                throw Gdip.StatusException(Gdip.InvalidParameter);
 
-            int resultCount = 0;
-            int size = Marshal.SizeOf(typeof(GPPOINTF));
-            int count = points.Length;
-            byte[] typesLocal = new byte[count];
+            if (points.Length == 0)
+                return 0;
 
-            IntPtr memoryPts = Marshal.AllocHGlobal(checked(count * size));
-            try
+            fixed (PointF* p = points)
+            fixed (byte* t = types)
             {
-                int status = SafeNativeMethods.Gdip.GdipPathIterEnumerate(new HandleRef(this, nativeIter), out resultCount,
-                                memoryPts, typesLocal, count);
+                int status = Gdip.GdipPathIterEnumerate(
+                    new HandleRef(this, nativeIter),
+                    out int resultCount,
+                    p,
+                    t,
+                    points.Length);
 
-                if (status != SafeNativeMethods.Gdip.Ok)
+                if (status != Gdip.Ok)
                 {
-                    throw SafeNativeMethods.Gdip.StatusException(status);
+                    throw Gdip.StatusException(status);
                 }
 
-                if (resultCount < count)
-                {
-                    SafeNativeMethods.ZeroMemory((byte*)(checked((long)memoryPts + resultCount * size)), (ulong)((count - resultCount) * size));
-                }
-
-                points = SafeNativeMethods.Gdip.ConvertGPPOINTFArrayF(memoryPts, count);
-                typesLocal.CopyTo(types, 0);
+                return resultCount;
             }
-            finally
-            {
-                Marshal.FreeHGlobal(memoryPts);
-            }
-
-            return resultCount;
         }
 
         public unsafe int CopyData(ref PointF[] points, ref byte[] types, int startIndex, int endIndex)
         {
             if ((points.Length != types.Length) || (endIndex - startIndex + 1 > points.Length))
-                throw SafeNativeMethods.Gdip.StatusException(SafeNativeMethods.Gdip.InvalidParameter);
+                throw Gdip.StatusException(Gdip.InvalidParameter);
 
-            int resultCount = 0;
-            int size = Marshal.SizeOf(typeof(GPPOINTF));
-            int count = points.Length;
-            byte[] typesLocal = new byte[count];
-
-            IntPtr memoryPts = Marshal.AllocHGlobal(checked(count * size));
-            try
+            fixed (PointF* p = points)
+            fixed (byte* t = types)
             {
-                int status = SafeNativeMethods.Gdip.GdipPathIterCopyData(new HandleRef(this, nativeIter), out resultCount,
-                                memoryPts, typesLocal, startIndex, endIndex);
+                int status = Gdip.GdipPathIterCopyData(
+                    new HandleRef(this, nativeIter),
+                    out int resultCount,
+                    p,
+                    t,
+                    startIndex,
+                    endIndex);
 
-                if (status != SafeNativeMethods.Gdip.Ok)
+                if (status != Gdip.Ok)
                 {
-                    throw SafeNativeMethods.Gdip.StatusException(status);
+                    throw Gdip.StatusException(status);
                 }
 
-                if (resultCount < count)
-                {
-                    SafeNativeMethods.ZeroMemory((byte*)(checked((long)memoryPts + resultCount * size)), (ulong)((count - resultCount) * size));
-                }
-
-                points = SafeNativeMethods.Gdip.ConvertGPPOINTFArrayF(memoryPts, count);
-                typesLocal.CopyTo(types, 0);
+                return resultCount;
             }
-            finally
-            {
-                Marshal.FreeHGlobal(memoryPts);
-            }
-
-            return resultCount;
         }
 
         // handle to native path iterator object

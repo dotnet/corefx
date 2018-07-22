@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// This file isn't built into the .csproj in corefx but is consumed by Mono.
+
 namespace System.Drawing.Design {
     using System.Configuration.Assemblies;
     using System.Runtime.InteropServices;
@@ -64,8 +66,6 @@ namespace System.Drawing.Design {
         /// <devdoc>
         ///    Initializes a new instance of the ToolboxItem class using the specified type.
         /// </devdoc>
-        [ResourceExposure(ResourceScope.Process)]
-        [ResourceConsumption(ResourceScope.Process)]
         public ToolboxItem(Type toolType) : this() {
             Initialize(toolType);
         }
@@ -279,7 +279,7 @@ namespace System.Drawing.Design {
                 if (this.AssemblyName != null) {
                     return this.AssemblyName.Version.ToString();
                 }
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -526,7 +526,7 @@ namespace System.Drawing.Design {
                     break;
 
                 case "Filter":
-                    if (value == null) value = new ToolboxItemFilterAttribute[0];
+                    if (value == null) value = Array.Empty<ToolboxItemFilterAttribute>();
 
                     break;
 
@@ -556,14 +556,12 @@ namespace System.Drawing.Design {
         ///     to the designer host's set of references.
         /// </devdoc>        
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods")]
-        [ResourceExposure(ResourceScope.None)]
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         protected virtual Type GetType(IDesignerHost host, AssemblyName assemblyName, string typeName, bool reference) {
             ITypeResolutionService ts = null;
             Type type = null;
             
             if (typeName == null) {
-                throw new ArgumentNullException("typeName");
+                throw new ArgumentNullException(nameof(typeName));
             }
             
             if (host != null) {
@@ -603,7 +601,7 @@ namespace System.Drawing.Design {
                 }
             }
             else {
-                if (!String.IsNullOrEmpty(typeName)) {
+                if (!string.IsNullOrEmpty(typeName)) {
                     if (assemblyName != null) {
                         Assembly a = null;
                         try {
@@ -691,8 +689,6 @@ namespace System.Drawing.Design {
         /// <devdoc>
         ///     Initializes a toolbox item with a given type.  A locked toolbox item cannot be initialized.
         /// </devdoc>
-        [ResourceExposure(ResourceScope.Process | ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Process | ResourceScope.Machine)]
         public virtual void Initialize(Type type) {
             CheckUnlocked();
             
@@ -851,12 +847,12 @@ namespace System.Drawing.Design {
         protected void ValidatePropertyType(string propertyName, object value, Type expectedType, bool allowNull) {
             if (value == null) {
                 if (!allowNull) {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
             }
             else {
                 if (!expectedType.IsInstanceOfType(value)) {
-                    throw new ArgumentException(SR.Format(SR.ToolboxItemInvalidPropertyType, propertyName, expectedType.FullName), "value");
+                    throw new ArgumentException(SR.Format(SR.ToolboxItemInvalidPropertyType, propertyName, expectedType.FullName), nameof(value));
                 }
             }
         }
@@ -1006,13 +1002,13 @@ namespace System.Drawing.Design {
         
             private string GetPropertyName(object key) {
                 if (key == null) {
-                    throw new ArgumentNullException("key");
+                    throw new ArgumentNullException(nameof(key));
                 }
         
                 string propertyName = key as string;
         
                 if (propertyName == null || propertyName.Length == 0) {
-                    throw new ArgumentException(SR.Format(SR.ToolboxItemInvalidKey), "key");
+                    throw new ArgumentException(SR.Format(SR.ToolboxItemInvalidKey), nameof(key));
                 }
         
                 return propertyName;

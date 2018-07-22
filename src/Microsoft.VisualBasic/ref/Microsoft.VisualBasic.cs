@@ -31,6 +31,19 @@ namespace Microsoft.VisualBasic
         public const string vbTab = "\t";
         public const string vbVerticalTab = "\v";
     }
+    public sealed class ControlChars
+    {
+        public const string CrLf = "\r\n";
+        public const string NewLine = "\r\n";
+        public const char Cr = '\r';
+        public const char Lf = '\n';
+        public const char Back = '\b';
+        public const char FormFeed = '\f';
+        public const char Tab = '\t';
+        public const char VerticalTab = '\v';
+        public const char NullChar = '\0';
+        public const char Quote = '"';
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     public sealed partial class HideModuleNameAttribute : System.Attribute
     {
@@ -40,9 +53,19 @@ namespace Microsoft.VisualBasic
     public sealed partial class Strings
     {
         internal Strings() { }
+        public static int Asc(char String) { throw null; }
+        public static int Asc(string String) { throw null; }
         public static int AscW(char String) { throw null; }
         public static int AscW(string String) { throw null; }
+        public static char Chr(int CharCode) { throw null; }
         public static char ChrW(int CharCode) { throw null; }
+        public static string Left(string str, int Length) { throw null; }
+        public static string LTrim(string str) { throw null; }
+        public static string Mid(string str, int Start) { throw null; }
+        public static string Mid(string str, int Start, int Length) { throw null; }
+        public static string Right(string str, int Length) { throw null; }
+        public static string RTrim(string str) { throw null; }
+        public static string Trim(string str) { throw null; }
     }
 }
 namespace Microsoft.VisualBasic.CompilerServices

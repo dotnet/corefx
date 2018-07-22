@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.Test.Common;
+using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -22,11 +23,80 @@ namespace System.Net.Http.Functional.Tests
     public sealed class SocketsHttpHandler_HttpClientHandler_Asynchrony_Test : HttpClientHandler_Asynchrony_Test
     {
         protected override bool UseSocketsHttpHandler => true;
+
+        [OuterLoop("Relies on finalization")]
+        [Fact]
+        public async Task ExecutionContext_HttpConnectionLifetimeDoesntKeepContextAlive()
+        {
+            var clientCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                try
+                {
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        (Task completedWhenFinalized, Task getRequest) = MakeHttpRequestWithTcsSetOnFinalizationInAsyncLocal(client, uri);
+                        await getRequest;
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                        }
+
+                        await completedWhenFinalized.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
+                    }
+                }
+                finally
+                {
+                    clientCompleted.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    await connection.ReadRequestHeaderAndSendResponseAsync();
+                    await clientCompleted.Task;
+                });
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid JIT extending lifetime of the finalizable object
+        private static (Task completedOnFinalized, Task getRequest) MakeHttpRequestWithTcsSetOnFinalizationInAsyncLocal(HttpClient client, Uri uri)
+        {
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Put something in ExecutionContext, start the HTTP request, then undo the EC change.
+            var al = new AsyncLocal<object>() { Value = new SetOnFinalized() { _completedWhenFinalized = tcs } };
+            Task t = client.GetStringAsync(uri);
+            al.Value = null;
+
+            // Return a task that will complete when the SetOnFinalized is finalized,
+            // as well as a task to wait on for the get request; for the get request,
+            // we return a continuation to avoid any test-altering issues related to
+            // the state machine holding onto stuff.
+            t = t.ContinueWith(p => p.GetAwaiter().GetResult());
+            return (tcs.Task, t);
+        }
+
+        private sealed class SetOnFinalized
+        {
+            internal TaskCompletionSource<bool> _completedWhenFinalized;
+            ~SetOnFinalized() => _completedWhenFinalized.SetResult(true);
+        }
     }
 
     public sealed class SocketsHttpHandler_HttpProtocolTests : HttpProtocolTests
     {
         protected override bool UseSocketsHttpHandler => true;
+
+        [Theory]
+        [InlineData("delete", "DELETE")]
+        [InlineData("options", "OPTIONS")]
+        [InlineData("trace", "TRACE")]
+        [InlineData("patch", "PATCH")]
+        public Task CustomMethod_SentUppercasedIfKnown_Additional(string specifiedMethod, string expectedMethod) =>
+            CustomMethod_SentUppercasedIfKnown(specifiedMethod, expectedMethod);
     }
 
     public sealed class SocketsHttpHandler_HttpProtocolTests_Dribble : HttpProtocolTests_Dribble
@@ -386,6 +456,12 @@ namespace System.Net.Http.Functional.Tests
 
     public sealed class SocketsHttpHandler_HttpClientHandler_SslProtocols_Test : HttpClientHandler_SslProtocols_Test
     {
+        protected override bool UseSocketsHttpHandler => true;
+    }
+
+    public sealed class SocketsHttpHandler_HttpClientHandler_Proxy_Test : HttpClientHandler_Proxy_Test
+    {
+        public SocketsHttpHandler_HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
         protected override bool UseSocketsHttpHandler => true;
     }
 
@@ -1057,6 +1133,43 @@ namespace System.Net.Http.Functional.Tests
                 new LoopbackServer.Options { UseSsl = bool.Parse(secureString) });
                 return SuccessExitCode;
             }, secure.ToString()).Dispose();
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
+        [Fact]
+        public async Task ProxyAuth_SameConnection_Succeeds()
+        {
+            Task serverTask = LoopbackServer.CreateServerAsync(async (proxyServer, proxyUrl) =>
+            {
+                string responseBody =
+                        "HTTP/1.1 407 Proxy Auth Required\r\n" +
+                        $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                        "Proxy-Authenticate: Basic\r\n" +
+                        "Content-Length: 0\r\n" +
+                        "\r\n";
+
+                using  (var handler = new HttpClientHandler())
+                {
+                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, new NetworkCredential("abc", "def"));
+
+                    using (var client = new HttpClient(handler))
+                    {
+                        Task<string> request = client.GetStringAsync($"http://notarealserver.com/");
+
+                        await proxyServer.AcceptConnectionAsync(async connection =>
+                        {
+                            // Get first request, no body for GET.
+                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(responseBody).ConfigureAwait(false);
+                            // Client should send another request after being rejected with 407.
+                            await connection.ReadRequestHeaderAndSendResponseAsync(content:"OK").ConfigureAwait(false);
+                        });
+
+                        string response = await request;
+                        Assert.Equal("OK", response);
+                    }
+                }
+            });
+            await serverTask.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
         }
     }
 

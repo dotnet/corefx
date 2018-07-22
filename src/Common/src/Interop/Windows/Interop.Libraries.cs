@@ -10,6 +10,7 @@ internal static partial class Interop
         internal const string BCrypt = "BCrypt.dll";
         internal const string CoreComm_L1_1_1 = "api-ms-win-core-comm-l1-1-1.dll";
         internal const string Crypt32 = "crypt32.dll";
+        internal const string CryptUI = "cryptui.dll";
         internal const string Error_L1 = "api-ms-win-core-winrt-error-l1-1-0.dll";
         internal const string HttpApi = "httpapi.dll";
         internal const string IpHlpApi = "iphlpapi.dll";
@@ -19,6 +20,7 @@ internal static partial class Interop
         internal const string NCrypt = "ncrypt.dll";
         internal const string NtDll = "ntdll.dll";
         internal const string Odbc32 = "odbc32.dll";
+        internal const string Ole32 = "ole32.dll";
         internal const string OleAut32 = "oleaut32.dll";
         internal const string PerfCounter = "perfcounter.dll";
         internal const string RoBuffer = "api-ms-win-core-winrt-robuffer-l1-1-0.dll";
@@ -32,5 +34,6 @@ internal static partial class Interop
         internal const string Ws2_32 = "ws2_32.dll";
         internal const string Wtsapi32 = "wtsapi32.dll";
         internal const string CompressionNative = "clrcompression.dll";
+        internal const string CoreWinRT = "api-ms-win-core-winrt-l1-1-0.dll";
     }
 }

@@ -268,7 +268,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f -name *.log -exec cp {} --target-directory=/docker_logs ;",
+        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f ( -iname *.log -o -iname MSBUILD_*.failure.txt ) -exec cp {} --target-directory=/docker_logs ;",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -321,6 +321,7 @@
       "continueOnError": true,
       "displayName": "run end.sh",
       "timeoutInMinutes": 0,
+      "condition": "always()",
       "alwaysRun": true,
       "task": {
         "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
@@ -399,7 +400,7 @@
       "value": "Release"
     },
     "PB_DockerCommonRunArgs": {
-      "value": "--rm --name $(PB_DockerContainerName) -v \"$(PB_DockerContainerName):$(PB_DockerVolumeName)\" -w=\"$(PB_DockerVolumeName)\" -e \"PACKAGEVERSIONPROPSURL=$(PB_PackageVersionPropsUrl)\" $(PB_DockerImageName)"
+      "value": "--rm --name $(PB_DockerContainerName) -v \"$(PB_DockerContainerName):$(PB_DockerVolumeName)\" -w=\"$(PB_DockerVolumeName)\" -e \"PACKAGEVERSIONPROPSURL=$(PB_PackageVersionPropsUrl)\" -e \"MSBUILDDEBUGCOMM=1\" -e \"MSBUILDDEBUGPATH=$(PB_DockerVolumeName)\" $(PB_DockerImageName)"
     },
     "PB_DockerContainerName": {
       "value": "corefx-cross-$(Build.BuildId)"

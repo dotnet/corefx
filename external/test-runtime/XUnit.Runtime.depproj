@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
     <!-- Given that xunit packages bring with them part of the framework, we need to specify a runtime in order to get the assets
          The only asset that we copy which is RID-specific is sni.dll which is only used in windows, which is why we default to Windows as the RID -->
@@ -15,6 +15,9 @@
     <NuGetTargetMonikerShort Condition="'$(TargetGroup)' == 'uapaot'">netstandard2.0</NuGetTargetMonikerShort>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'uap'">.NETStandard,Version=v2.0</NuGetTargetMoniker>
     <NuGetTargetMonikerShort Condition="'$(TargetGroup)' == 'uap'">netstandard2.0</NuGetTargetMonikerShort>
+    <!-- Coverlet related properties -->
+    <CoverletPackageId>coverlet.msbuild</CoverletPackageId>
+    <CoverletPackageVersion>2.1.1</CoverletPackageVersion>
     <!-- Don't warn if some dependencies were rolled forward -->
     <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
@@ -64,6 +67,9 @@
     </PackageReference>
     <PackageReference Include="OpenCover">
       <Version>4.6.519</Version>
+    </PackageReference>
+    <PackageReference Include="$(CoverletPackageId)">
+      <Version>$(CoverletPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="ReportGenerator">
       <Version>3.0.1</Version>
@@ -152,7 +158,7 @@
     <PackageToInclude Include="CommandLineParser" />
   </ItemGroup>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 
   <!-- Retrieve the UAP Tools to the TestHost folder -->
   <Target Name="CopyUAPToolsToTestHost"
@@ -229,5 +235,21 @@
         <NuGetPackageVersion>$(XUnitPackageVersion)</NuGetPackageVersion>
       </ReferenceCopyLocalPaths>
     </ItemGroup>
-</Target>
+  </Target>
+
+  <Target Name="AddCoverletDependencies" BeforeTargets="ResolveReferences" >
+    <Error Condition="!Exists('$(PackagesDir)$(CoverletPackageId)/$(CoverletPackageVersion)/build/netstandard2.0/coverlet.tracker.dll')"
+            Text="Error: looks the package $(PackagesDir)$(CoverletPackageId)/$(CoverletPackageVersion) not restored or missing coverlet.tracker.dll."
+    />
+    <ItemGroup>
+      <ReferenceCopyLocalPaths
+        Include="$(PackagesDir)$(CoverletPackageId)/$(CoverletPackageVersion)/build/netstandard2.0/coverlet.tracker.dll"
+      >
+        <Private>false</Private>
+        <NuGetPackageId>$(CoverletPackageId)</NuGetPackageId>
+        <NuGetPackageVersion>$(CoverletPackageVersion)</NuGetPackageVersion>
+      </ReferenceCopyLocalPaths>
+    </ItemGroup>
+  </Target>
+
 </Project>

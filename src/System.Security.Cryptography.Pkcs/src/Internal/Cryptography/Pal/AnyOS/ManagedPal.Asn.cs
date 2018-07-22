@@ -81,23 +81,31 @@ namespace Internal.Cryptography.Pal.AnyOS
 
         public override byte[] EncodeUtcTime(DateTime utcTime)
         {
+            const int minLegalYear = 1950;
             // Write using DER to support the most readers.
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                // Sending the DateTime through ToLocalTime here will cause the right normalization
-                // of DateTimeKind.Unknown.
-                //
-                // Unknown => Local (adjust) => UTC (adjust "back", add Z marker; matches Windows)
-                if (utcTime.Kind == DateTimeKind.Unspecified)
+                try 
                 {
-                    writer.WriteUtcTime(utcTime.ToLocalTime());
-                }
-                else
-                {
-                    writer.WriteUtcTime(utcTime);
-                }
+                    // Sending the DateTime through ToLocalTime here will cause the right normalization
+                    // of DateTimeKind.Unknown.
+                    //
+                    // Unknown => Local (adjust) => UTC (adjust "back", add Z marker; matches Windows)
+                    if (utcTime.Kind == DateTimeKind.Unspecified)
+                    {
+                        writer.WriteUtcTime(utcTime.ToLocalTime(), minLegalYear);
+                    }
+                    else
+                    {
+                        writer.WriteUtcTime(utcTime, minLegalYear);
+                    }
 
-                return writer.Encode();
+                    return writer.Encode();
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new CryptographicException(ex.Message, ex);
+                }
             }
         }
 
@@ -143,7 +151,18 @@ namespace Internal.Cryptography.Pal.AnyOS
                 reader.GetEncodedValue(),
                 AsnEncodingRules.BER);
 
-            return new Oid(contentInfo.ContentType);
+            switch (contentInfo.ContentType)
+            {
+                case Oids.Pkcs7Data:
+                case Oids.Pkcs7Signed:
+                case Oids.Pkcs7Enveloped:
+                case Oids.Pkcs7SignedEnveloped:
+                case Oids.Pkcs7Hashed:
+                case Oids.Pkcs7Encrypted:
+                    return new Oid(contentInfo.ContentType);
+            }
+
+            throw new CryptographicException(SR.Cryptography_Cms_InvalidMessageType);
         }
     }
 }
