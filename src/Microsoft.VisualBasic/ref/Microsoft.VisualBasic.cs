@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace Microsoft.VisualBasic
 {
     public enum CallType
@@ -24,25 +23,26 @@ namespace Microsoft.VisualBasic
         public const string vbCrLf = "\r\n";
         public const string vbFormFeed = "\f";
         public const string vbLf = "\n";
-        [System.Obsolete("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
+        [System.ObsoleteAttribute("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
         public const string vbNewLine = "\r\n";
         public const string vbNullChar = "\0";
         public const string vbNullString = null;
         public const string vbTab = "\t";
         public const string vbVerticalTab = "\v";
     }
-    public sealed class ControlChars
+    public sealed partial class ControlChars
     {
-        public const string CrLf = "\r\n";
-        public const string NewLine = "\r\n";
-        public const char Cr = '\r';
-        public const char Lf = '\n';
         public const char Back = '\b';
+        public const char Cr = '\r';
+        public const string CrLf = "\r\n";
         public const char FormFeed = '\f';
-        public const char Tab = '\t';
-        public const char VerticalTab = '\v';
+        public const char Lf = '\n';
+        public const string NewLine = "\r\n";
         public const char NullChar = '\0';
         public const char Quote = '"';
+        public const char Tab = '\t';
+        public const char VerticalTab = '\v';
+        public ControlChars() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     public sealed partial class HideModuleNameAttribute : System.Attribute
@@ -107,7 +107,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static string ToString(byte Value) { throw null; }
         public static string ToString(char Value) { throw null; }
         public static string ToString(System.DateTime Value) { throw null; }
-        public static string ToString(decimal Value) { throw null; }
+        public static string ToString(decimal value) { throw null; }
         public static string ToString(double Value) { throw null; }
         public static string ToString(short Value) { throw null; }
         public static string ToString(int Value) { throw null; }
