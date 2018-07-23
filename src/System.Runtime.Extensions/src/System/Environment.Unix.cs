@@ -317,7 +317,7 @@ namespace System
 
             // Get the uname's utsname.release.  Then parse it for the first four numbers found.
             // This isn't perfect, but Version already doesn't map exactly to all possible release
-            // formats, e.g. 
+            // formats, e.g. 2.6.19-1.2895.fc6
             string release = Interop.Sys.GetUnixRelease();
             if (release != null)
             {
@@ -356,6 +356,13 @@ namespace System
                 }
                 else break;
             }
+
+            // Integer overflow can occur for example with:
+            //     Linux nelknet 4.15.0-24201807041620-generic
+            // To form a valid Version, num must be positive.
+            if (num < 0)
+                num = int.MaxValue;
+
             return num;
         }
 
