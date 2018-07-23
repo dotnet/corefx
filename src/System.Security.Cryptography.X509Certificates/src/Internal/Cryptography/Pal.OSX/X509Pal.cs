@@ -23,7 +23,7 @@ namespace Internal.Cryptography.Pal
             public AsymmetricAlgorithm DecodePublicKey(Oid oid, byte[] encodedKeyValue, byte[] encodedParameters,
                 ICertificatePal certificatePal)
             {
-                const int errSecUnsupportedKeyFormat = -67734;
+                const int errSecInvalidKeyRef = -67712;
                 const int errSecUnsupportedKeySize = -67735;
                 AppleCertificatePal applePal = certificatePal as AppleCertificatePal;
 
@@ -49,7 +49,7 @@ namespace Internal.Cryptography.Pal
                             // algorithm in the test suite (as of macOS Mojave Developer Preview 4).
                             if (key.IsInvalid)
                             {
-                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeyFormat);
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecInvalidKeyRef);
                             }
                             // EccGetKeySizeInBits can fail for two reasons. First, the Apple implementation has changed
                             // and we receive values from API that were not previously handled. In that case the CoreFX
