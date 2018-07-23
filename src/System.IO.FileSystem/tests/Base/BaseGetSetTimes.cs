@@ -76,7 +76,7 @@ namespace System.IO.Tests
             ValidateSetTimes(item, beforeTime, afterTime);
         }
 
-        [ConditionalFact(nameof(isNotHFS))] // Windows tested below, and OSX HFS driver format does not support millisec granularity
+        [ConditionalFact(nameof(isNotHFS))] // OSX HFS driver format does not support millisec granularity
         public void TimesIncludeMillisecondPart_Unix()
         {
             T item = GetExistingItem();
