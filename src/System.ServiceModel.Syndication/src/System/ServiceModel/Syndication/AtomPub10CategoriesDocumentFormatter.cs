@@ -118,7 +118,7 @@ namespace System.ServiceModel.Syndication
             }
             if (this.Document == null)
             {
-                throw new InvalidOperationException(SR.Format(SR.DocumentFormatterDoesNotHaveDocument));
+                throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
             }
             TraceCategoriesDocumentWriteBegin();
 

@@ -257,7 +257,7 @@ namespace System.ServiceModel.Syndication
         {
             if (string.IsNullOrEmpty(extensionName))
             {
-                throw new ArgumentException(SR.Format(SR.ExtensionNameNotSpecified));
+                throw new ArgumentException(SR.ExtensionNameNotSpecified);
             }
 
             Debug.Assert((dcSerializer == null) != (xmlSerializer == null), "exactly one serializer should be supplied");
