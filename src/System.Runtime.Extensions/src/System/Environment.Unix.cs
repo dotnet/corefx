@@ -351,19 +351,19 @@ namespace System
             for (; pos < text.Length; pos++)
             {
                 char c = text[pos];
-                if ('0' <= c && c <= '9')
-                {
-                    num = (num * 10) + (c - '0');
-                }
-                else break;
+                if ('0' > c || c > '9')
+                    break;
 
+                try
+                {
+                    num = checked((num * 10) + (c - '0'));
+                }
                 // Integer overflow can occur for example with:
                 //     Linux nelknet 4.15.0-24201807041620-generic
                 // To form a valid Version, num must be positive.
-                if (num < 0)
+                catch (OverflowException)
                 {
-                    num = int.MaxValue;
-                    break;
+                    return int.MaxValue;
                 }
             }
 
