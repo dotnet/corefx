@@ -36,7 +36,6 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
     public static void BufferHeight_SetUnix_ThrowsPlatformNotSupportedException()
     {
-        Assert.Throws<PlatformNotSupportedException>(() => Console.BufferWidth = 1);
         Assert.Throws<PlatformNotSupportedException>(() => Console.BufferHeight = 1);
     }
 
