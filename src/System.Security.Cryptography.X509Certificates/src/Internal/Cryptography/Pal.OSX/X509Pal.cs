@@ -22,6 +22,8 @@ namespace Internal.Cryptography.Pal
             public AsymmetricAlgorithm DecodePublicKey(Oid oid, byte[] encodedKeyValue, byte[] encodedParameters,
                 ICertificatePal certificatePal)
             {
+                const int errSecUnsupportedKeyFormat = -67734;
+                const int errSecUnsupportedKeySize = -67735;
                 AppleCertificatePal applePal = certificatePal as AppleCertificatePal;
 
                 if (applePal != null)
@@ -31,15 +33,27 @@ namespace Internal.Cryptography.Pal
                     switch (oid.Value)
                     {
                         case Oids.RsaRsa:
+                            if (key.IsInvalid)
+                            {
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeyFormat);
+                            }
                             return new RSAImplementation.RSASecurityTransforms(key);
                         case Oids.DsaDsa:
-                            if (key.IsInvalid) 
+                            if (key.IsInvalid)
                             {
                                 // SecCertificateCopyKey returns null for DSA, so fall back to manually building it.
                                 return DecodeDsaPublicKey(encodedKeyValue, encodedParameters);
                             } 
                             return new DSAImplementation.DSASecurityTransforms(key);
                         case Oids.Ecc:
+                            if (key.IsInvalid)
+                            {
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeyFormat);
+                            }
+                            else if (Interop.AppleCrypto.EccGetKeySizeInBits(key) == 0)
+                            {
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeySize);
+                            }
                             return new ECDsaImplementation.ECDsaSecurityTransforms(key);
                     }
 

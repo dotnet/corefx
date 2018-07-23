@@ -84,6 +84,9 @@ uint64_t AppleCryptoNative_EccGetKeySizeInBits(SecKeyRef publicKey)
     // Word of caution: While seeking meaning in these numbers I ran across a snippet of code
     // which suggests that on iOS (vs macOS) they use a different set of reasoning and produce
     // different numbers (they used (8 + 2*thisValue) on iOS for "signature length").
+    //
+    // Starting with macOS Mojave and the new SecCertificateCopyKey API the values
+    // are the actual key size in bytes.
     switch (blockSize)
     {
         case 72:
@@ -91,6 +94,16 @@ uint64_t AppleCryptoNative_EccGetKeySizeInBits(SecKeyRef publicKey)
         case 104:
             return 384;
         case 141:
+            return 521;
+
+        case 28:
+            // Not fully supported as of macOS Mojave Developer Preview 4
+            return 0;
+        case 32:
+            return 256;
+        case 48:
+            return 384;
+        case 66:
             return 521;
     }
 

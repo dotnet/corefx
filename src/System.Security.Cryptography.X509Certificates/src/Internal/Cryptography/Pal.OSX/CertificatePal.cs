@@ -381,6 +381,12 @@ namespace Internal.Cryptography.Pal
             SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.X509GetPublicKey(_certHandle);
             SafeSecKeyRefHandle privateKey = Interop.AppleCrypto.X509GetPrivateKeyFromIdentity(_identityHandle);
 
+            if (publicKey.IsInvalid)
+            {
+                // SecCertificateCopyKey returns null for DSA, so fall back to manually building it.
+                publicKey = Interop.AppleCrypto.ImportEphemeralKey(_certData.SubjectPublicKeyInfo, false);
+            }
+
             return new DSAImplementation.DSASecurityTransforms(publicKey, privateKey);
         }
 
