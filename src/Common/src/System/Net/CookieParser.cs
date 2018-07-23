@@ -662,9 +662,17 @@ namespace System.Net
                                     {
                                         expiresSet = true;
 
-                                        if (HttpDateParser.TryStringToDate(CheckQuoted(_tokenizer.Value), out DateTimeOffset expires))
+                                        if (DateTime.TryParse(CheckQuoted(_tokenizer.Value),
+                                            CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTime expires))
                                         {
-                                            cookie.Expires = expires.UtcDateTime;
+                                            cookie.Expires = expires;
+                                        }
+                                        else if (HttpDateParser.TryStringToDate(CheckQuoted(_tokenizer.Value), out DateTimeOffset expiresUtc))
+                                        {
+                                            // RFC2616 states that the timezone MUST be stated as "GMT",
+                                            // however using a timezone of "UTC" is accepted by all major
+                                            // browsers, so accept "UTC" here as well.
+                                            cookie.Expires = expiresUtc.DateTime;
                                         }
                                         else
                                         {

@@ -371,7 +371,7 @@ namespace System.Net.Primitives.Unit.Tests
             Cookie cookie = cookiesCollection[0];
             Assert.Equal(expectedCookie.Name, cookie.Name);
             Assert.Equal(expectedCookie.Value, cookie.Value);
-            Assert.Equal(expectedCookie.Expires, cookie.Expires.ToUniversalTime());
+            Assert.Equal(expectedCookie.Expires, cookie.Expires);
         }
 
         [Fact]

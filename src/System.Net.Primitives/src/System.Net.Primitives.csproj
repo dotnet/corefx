@@ -21,9 +21,6 @@
     <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\Common\src\System\Net\HttpDateParser.cs">
-      <Link>Common\System\Net\HttpDateParser.cs</Link>
-    </Compile>
     <Compile Include="System\Net\AuthenticationSchemes.cs" />
     <Compile Include="System\Net\Cookie.cs" />
     <Compile Include="System\Net\CookieContainer.cs" />
@@ -74,6 +71,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs">
       <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\src\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
