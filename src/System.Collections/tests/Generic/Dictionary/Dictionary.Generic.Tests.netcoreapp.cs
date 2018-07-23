@@ -90,25 +90,15 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void EnsureCapacity_Generic_RequestingLargerCapacity_DoesNotInvalidateEnumeration(int count)
+        public void EnsureCapacity_Generic_RequestingLargerCapacity_DoesInvalidateEnumeration(int count)
         {
             var dictionary = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(count));
             var capacity = dictionary.EnsureCapacity(0);
-            IEnumerator keysEnum = dictionary.Keys.GetEnumerator();
-            IEnumerator valuesEnum = dictionary.Values.GetEnumerator();
-            IEnumerator keysListEnum = new List<TKey>(dictionary.Keys).GetEnumerator();
-            IEnumerator valuesListEnum = new List<TValue>(dictionary.Values).GetEnumerator();
+            var enumerator = dictionary.GetEnumerator();
 
-            dictionary.EnsureCapacity(capacity + 1); // Verify EnsureCapacity does not invalidate enumeration
+            dictionary.EnsureCapacity(capacity + 1); // Verify EnsureCapacity does invalidate enumeration
 
-            while(keysEnum.MoveNext())
-            {
-                valuesEnum.MoveNext();
-                keysListEnum.MoveNext();
-                valuesListEnum.MoveNext();
-                Assert.Equal(keysListEnum.Current, keysEnum.Current);
-                Assert.Equal(valuesListEnum.Current, valuesEnum.Current);
-            }
+            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
         }
 
         [Fact]
@@ -219,17 +209,6 @@ namespace System.Collections.Tests
 
             dictionary = new Dictionary<TKey, TValue>();
             Assert.Equal(17, dictionary.EnsureCapacity(13));
-        }
-
-        [Fact]
-        public void EnsureCapacity_Generic_CurrentCapacitySmallerThanRequestedCapacity_UpdatesVersion()
-        {
-            var dictionary = new Dictionary<TKey, TValue>();
-            using (var enumerator = dictionary.GetEnumerator())
-            {
-                dictionary.EnsureCapacity(10);
-                Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
-            }
         }
 
         #endregion
@@ -429,25 +408,14 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void TrimExcess_WithArgument_CurrentCapacityLargerThanRequestedCapacity_UpdatesVersion()
+        public void TrimExcess_Generic_DoesInvalidateEnumeration()
         {
-            var dictionary = new Dictionary<int, int>(20);
-            using (var enumerator = dictionary.GetEnumerator())
-            {
-                dictionary.TrimExcess(3);
-                Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
-            }
-        }
-        
-        [Fact]
-        public void TrimExcess_NoArgument_UpdatesVersion()
-        {
-            var dictionary = new Dictionary<int, int>(20);
-            using (var enumerator = dictionary.GetEnumerator())
-            {
-                dictionary.TrimExcess();
-                Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
-            }
+            var dictionary = new Dictionary<TKey, TValue>(20);
+            var enumerator = dictionary.GetEnumerator();
+
+            dictionary.TrimExcess(7); // Verify TrimExcess does invalidate enumeration
+
+            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
         }
         
         #endregion
