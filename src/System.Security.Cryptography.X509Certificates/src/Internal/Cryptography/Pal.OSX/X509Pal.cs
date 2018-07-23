@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
 using System.Security.Cryptography.X509Certificates;
@@ -33,10 +34,7 @@ namespace Internal.Cryptography.Pal
                     switch (oid.Value)
                     {
                         case Oids.RsaRsa:
-                            if (key.IsInvalid)
-                            {
-                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeyFormat);
-                            }
+                            Debug.Assert(!key.IsInvalid);
                             return new RSAImplementation.RSASecurityTransforms(key);
                         case Oids.DsaDsa:
                             if (key.IsInvalid)
@@ -46,12 +44,21 @@ namespace Internal.Cryptography.Pal
                             } 
                             return new DSAImplementation.DSASecurityTransforms(key);
                         case Oids.Ecc:
+                            // If X509GetPublicKey uses the new SecCertificateCopyKey API it can return an invalid
+                            // key reference for unsupported algorithms. This currently happens for the BrainpoolP160r1
+                            // algorithm in the test suite (as of macOS Mojave Developer Preview 4).
                             if (key.IsInvalid)
                             {
                                 throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeyFormat);
                             }
-                            else if (Interop.AppleCrypto.EccGetKeySizeInBits(key) == 0)
+                            // EccGetKeySizeInBits can fail for two reasons. First, the Apple implementation has changed
+                            // and we receive values from API that were not previously handled. In that case the CoreFX
+                            // implementation will need to be adjusted to handle these values. Second, we deliberately
+                            // return 0 from the native code to prevent hitting buggy API implementations in Apple code
+                            // later.
+                            if (Interop.AppleCrypto.EccGetKeySizeInBits(key) == 0)
                             {
+                                key.Dispose();
                                 throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeySize);
                             }
                             return new ECDsaImplementation.ECDsaSecurityTransforms(key);

@@ -97,7 +97,19 @@ uint64_t AppleCryptoNative_EccGetKeySizeInBits(SecKeyRef publicKey)
             return 521;
 
         case 28:
-            // Not fully supported as of macOS Mojave Developer Preview 4
+            // Not fully supported as of macOS Mojave Developer Preview 4 and could later
+            // result in internal library errors when consumed by other APIs:
+            //
+            // "Internal error #ffff9d28 at VerifyTransform_block_invoke /BuildRoot/Library/
+            // Caches/com.apple.xbs/Sources/Security/Security-58286.200.178/OSX/
+            // libsecurity_transform/lib/SecSignVerifyTransform.c:540" UserInfo={NSDescription=
+            // Internal error #ffff9d28 at VerifyTransform_block_invoke /BuildRoot/Library/
+            // Caches/com.apple.xbs/Sources/Security/Security-58286.200.178/OSX/
+            // libsecurity_transform/lib/SecSignVerifyTransform.c:540, Originating Transform
+            // =CoreFoundationObject}))
+            //
+            // Thus 0 is returned instead of 224 and the managed code treats it as
+            // unsupported key size.
             return 0;
         case 32:
             return 256;
