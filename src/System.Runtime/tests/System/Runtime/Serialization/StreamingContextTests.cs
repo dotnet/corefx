@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using Xunit;
 
 namespace System.Runtime.Serialization.Tests
@@ -39,15 +38,15 @@ namespace System.Runtime.Serialization.Tests
             Assert.Equal(additional, context.Context);
         }
 
-        public static IEnumerable<object[]> Equals_TestData()
+        public static TheoryData<StreamingContext, object, bool> Equals_TestData => new TheoryData<StreamingContext, object, bool>
         {
-            yield return new object[] { new StreamingContext(StreamingContextStates.All, null), new StreamingContext(StreamingContextStates.All, null), true };
-            yield return new object[] { new StreamingContext(StreamingContextStates.All, null), new StreamingContext(StreamingContextStates.Clone, null), false };
-            yield return new object[] { new StreamingContext(StreamingContextStates.All, null), new StreamingContext(StreamingContextStates.All, "additional"), false };
+            { new StreamingContext(StreamingContextStates.All, null), new StreamingContext(StreamingContextStates.All, null), true },
+            { new StreamingContext(StreamingContextStates.All, null), new StreamingContext(StreamingContextStates.Clone, null), false },
+            { new StreamingContext(StreamingContextStates.All, null), new StreamingContext(StreamingContextStates.All, "additional"), false },
 
-            yield return new object[] { new StreamingContext(StreamingContextStates.All, null), new object(), false };
-            yield return new object[] { new StreamingContext(StreamingContextStates.All, null), null, false };
-        }
+            { new StreamingContext(StreamingContextStates.All, null), new object(), false },
+            { new StreamingContext(StreamingContextStates.All, null), null, false }
+        };
 
         [Theory]
         [MemberData(nameof(Equals_TestData))]

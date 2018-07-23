@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Xunit;
 
@@ -35,10 +36,15 @@ namespace System.Runtime.Serialization.Tests
             Assert.True(attribute.IsReferenceSetExplicitly);
         }
 
+        public static TheoryData<string> StringValue_TestData => new TheoryData<string>()
+        {
+            { null },
+            { "" },
+            { "value" }
+        };
+
         [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("value")]
+        [MemberData(nameof(StringValue_TestData))]
         public void ItemName_Set_GetReturnsExpected(string value)
         {
             var attribute = new CollectionDataContractAttribute() { ItemName = value };
@@ -47,9 +53,7 @@ namespace System.Runtime.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("value")]
+        [MemberData(nameof(StringValue_TestData))]
         public void Name_Set_GetReturnsExpected(string value)
         {
             var attribute = new CollectionDataContractAttribute() { Name = value };
@@ -58,9 +62,7 @@ namespace System.Runtime.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("value")]
+        [MemberData(nameof(StringValue_TestData))]
         public void Namespace_Set_GetReturnsExpected(string value)
         {
             var attribute = new CollectionDataContractAttribute() { Namespace = value };
@@ -69,9 +71,7 @@ namespace System.Runtime.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("value")]
+        [MemberData(nameof(StringValue_TestData))]
         public void KeyName_Set_GetReturnsExpected(string value)
         {
             var attribute = new CollectionDataContractAttribute() { KeyName = value };
@@ -80,9 +80,7 @@ namespace System.Runtime.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("value")]
+        [MemberData(nameof(StringValue_TestData))]
         public void ValueName_Set_GetReturnsExpected(string value)
         {
             var attribute = new CollectionDataContractAttribute() { ValueName = value };
