@@ -13,18 +13,26 @@ namespace System.SpanTests
         [Fact]
         public static void AsRef()
         {
-            Span<byte> span = new Span<byte>(new byte[] { 0x11, 0x22, 0x22, 0x11 });
+            Span<byte> span = new byte[] { 0x11, 0x22, 0x22, 0x11 };
             ref int asInt = ref MemoryMarshal.AsRef<int>(span);
 
             Assert.Equal(asInt, 0x11222211);
             Assert.True(Unsafe.AreSame<byte>(ref Unsafe.As<int, byte>(ref asInt), ref MemoryMarshal.GetReference(span)));
+
+            var array = new byte[100];
+            Array.Fill<byte>(array, 0x42);
+            ref TestHelpers.TestStructExplicit asStruct = ref MemoryMarshal.AsRef<TestHelpers.TestStructExplicit>(new Span<byte>(array));
+
+            Assert.Equal(asStruct.UI1, (uint)0x42424242);
         }
 
         [Fact]
         public static void AsRefFail()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => MemoryMarshal.AsRef<uint>(new Span<byte>(new byte[] { 1 })));
-            Assert.Throws<ArgumentException>(() => MemoryMarshal.AsRef<ArraySegment<string>>(new Span<byte>(new byte[100])));
+            Assert.Throws<ArgumentOutOfRangeException>(() => MemoryMarshal.AsRef<TestHelpers.TestStructExplicit>(new Span<byte>(new byte[] { 1 })));
+
+            Assert.Throws<ArgumentException>(() => MemoryMarshal.AsRef<TestHelpers.StructWithReferences>(new Span<byte>(new byte[100])));
         }
     }
 }
