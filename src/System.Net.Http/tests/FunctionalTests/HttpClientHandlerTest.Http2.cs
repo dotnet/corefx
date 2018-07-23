@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -31,11 +32,23 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Http2_ConnectPrefix_Sent()
         {
-            Http2LoopbackServer server = new Http2LoopbackServer(new Http2Options());
-            HttpClientHandler handler = CreateHttpClientHandler();
+            Http2LoopbackServer server = new Http2LoopbackServer(new Http2LoopbackServer.Http2Options());
+            SocketsHttpHandler handler = new SocketsHttpHandler();
+            handler.MaxHttpVersion = HttpVersion.Version20;
+
             using (var client = new HttpClient(handler))
             {
-                await client.GetAsync(server.CreateServer())
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, server.CreateServer());
+                request.ProtocolVersion = HttpVersion.Version20;
+                Task sendTask = client.SendAsync(request);
+
+                await server.AcceptConnectionAsync().ConfigureAwait(false);
+
+                await server.SendConnectionPrefaceAsync().ConfigureAwait(false);
+
+                List<string> lines = await server.ReadInitialRequestHeadersAsync();
+
+                Assert.True(lines.Contains("Connection: Upgrade, HTTP2-Settings\r\n"));
             }
         }
     }
