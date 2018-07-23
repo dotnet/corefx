@@ -71,7 +71,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void LBound_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("Array", () => Information.LBound(null));
+            Assert.Throws<ArgumentNullException>(() => Information.LBound(null));
             Assert.Throws<RankException>(() => Information.LBound(new int[0], 0));
             Assert.Throws<RankException>(() => Information.LBound(new int[0], 2));
         }
@@ -88,7 +88,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void UBound_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("Array", () => Information.UBound(null));
+            Assert.Throws<ArgumentNullException>(() => Information.UBound(null));
             Assert.Throws<RankException>(() => Information.UBound(new int[0], 0));
             Assert.Throws<RankException>(() => Information.UBound(new int[0], 2));
         }
@@ -105,7 +105,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void QBColor_Invalid()
         {
-            Assert.Throws<ArgumentException>("Color", () => Information.QBColor(-1));
+            Assert.Throws<ArgumentException>(() => Information.QBColor(-1));
         }
 
         [Theory]
@@ -120,9 +120,9 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void RGB_Invalid()
         {
-            Assert.Throws<ArgumentException>("Red", () => Information.RGB(-1, -1, -1));
-            Assert.Throws<ArgumentException>("Green", () => Information.RGB(1, -1, -1));
-            Assert.Throws<ArgumentException>("Blue", () => Information.RGB(1, 1, -1));
+            Assert.Throws<ArgumentException>(() => Information.RGB(-1, -1, -1));
+            Assert.Throws<ArgumentException>(() => Information.RGB(1, -1, -1));
+            Assert.Throws<ArgumentException>(() => Information.RGB(1, 1, -1));
         }
 
         [Theory]

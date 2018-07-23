@@ -70,7 +70,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void Parse_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("s", () => DecimalType.Parse(null, null));
+            Assert.Throws<ArgumentNullException>(() => DecimalType.Parse(null, null));
             Assert.Throws<FormatException>(() => DecimalType.Parse("abc", CultureInfo.InvariantCulture.NumberFormat));
         }
     }
