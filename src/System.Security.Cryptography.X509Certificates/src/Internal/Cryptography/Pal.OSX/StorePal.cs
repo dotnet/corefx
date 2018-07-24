@@ -85,7 +85,7 @@ namespace Internal.Cryptography.Pal
             return FromBlob(fileBytes, password, keyStorageFlags);
         }
 
-        public static IExportPal FromCertificate(ICertificatePal cert)
+        public static IExportPal FromCertificate(ICertificateLegacyPal cert)
         {
             return new AppleCertificateExporter(cert);
         }

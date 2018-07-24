@@ -15,9 +15,9 @@ namespace Internal.Cryptography.Pal
         private sealed class AppleCertificateExporter : IExportPal
         {
             private X509Certificate2Collection _certs;
-            private ICertificatePal _singleCertPal;
+            private ICertificateLegacyPal _singleCertPal;
 
-            public AppleCertificateExporter(ICertificatePal cert)
+            public AppleCertificateExporter(ICertificateLegacyPal cert)
             {
                 _singleCertPal = cert;
             }

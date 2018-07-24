@@ -14,7 +14,7 @@ using Internal.Cryptography.Pal.Native;
 
 namespace Internal.Cryptography.Pal
 {
-    internal sealed partial class CertificatePal : IDisposable, ICertificatePal
+    internal sealed partial class CertificatePal
     {
         public static ICertificatePal FromBlob(byte[] rawData, SafePasswordHandle password, X509KeyStorageFlags keyStorageFlags)
         {

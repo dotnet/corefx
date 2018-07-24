@@ -129,7 +129,7 @@ namespace Internal.Cryptography.Pal
             throw openSslException;
         }
 
-        public static IExportPal FromCertificate(ICertificatePal cert)
+        public static IExportPal FromCertificate(ICertificateLegacyPal cert)
         {
             return new ExportProvider(cert);
         }

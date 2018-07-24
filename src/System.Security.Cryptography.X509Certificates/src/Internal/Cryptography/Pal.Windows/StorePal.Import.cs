@@ -100,7 +100,7 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        public static IExportPal FromCertificate(ICertificatePal cert)
+        public static IExportPal FromCertificate(ICertificateLegacyPal cert)
         {
             CertificatePal certificatePal = (CertificatePal)cert;
 

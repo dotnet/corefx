@@ -14,10 +14,10 @@ namespace Internal.Cryptography.Pal
     {
         private static readonly SafeEvpPKeyHandle InvalidPKeyHandle = new SafeEvpPKeyHandle(IntPtr.Zero, false);
 
-        private ICertificatePal _singleCertPal;
+        private ICertificateLegacyPal _singleCertPal;
         private X509Certificate2Collection _certs;
 
-        internal ExportProvider(ICertificatePal singleCertPal)
+        internal ExportProvider(ICertificateLegacyPal singleCertPal)
         {
             _singleCertPal = singleCertPal;
         }
