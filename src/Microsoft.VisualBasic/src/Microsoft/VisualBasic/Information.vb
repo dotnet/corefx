@@ -248,15 +248,6 @@ Namespace Microsoft.VisualBasic
 
         End Function
 
-#Region " BACKWARDS COMPATIBILITY.  These functions (IsNumeric, TypeName, SystemTypeName, VbTypeName) have been superceded by the versions in Versioned.vb "
-
-        'WARNING WARNING WARNING WARNING WARNING
-        'This code exists to support Everett compiled applications.  Make sure you understand
-        'the backwards compatibility ramifications of any edit you make in this region.
-        'The compiler loads references to these functions (see CompilerHost::PrepareRemappingTable()) so
-        'they need to exist.  The Orcas compiler will be made not to die if they are missing
-        'WARNING WARNING WARNING WARNING WARNING
-
         Friend Function IsOldNumericTypeCode(ByVal TypCode As System.TypeCode) As Boolean
 
             Select Case TypCode
@@ -378,7 +369,6 @@ Namespace Microsoft.VisualBasic
 
         End Function
 
-#End Region
     End Module
 
 End Namespace

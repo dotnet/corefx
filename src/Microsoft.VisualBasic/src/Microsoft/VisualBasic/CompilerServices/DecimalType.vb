@@ -9,13 +9,6 @@ Imports Microsoft.VisualBasic.CompilerServices.Utils
 
 Namespace Microsoft.VisualBasic.CompilerServices
 
-#Region " BACKWARDS COMPATIBILITY "
-
-    'WARNING WARNING WARNING WARNING WARNING
-    'This code exists to support Everett compiled applications.  Make sure you understand
-    'the backwards compatibility ramifications of any edit you make in this region.
-    'WARNING WARNING WARNING WARNING WARNING
-
     <System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)>
     Public NotInheritable Class DecimalType
         ' Prevent creation.
@@ -211,7 +204,5 @@ MisMatch:
         End Function
 
     End Class
-
-#End Region
 
 End Namespace
