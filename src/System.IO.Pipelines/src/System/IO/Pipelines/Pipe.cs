@@ -336,7 +336,7 @@ namespace System.IO.Pipelines
                 // AttachToken before completing reader awaiter in case cancellationToken is already completed
                 cancellationTokenRegistration = _writerAwaitable.AttachToken(cancellationToken, s_signalWriterAwaitable, this);
 
-                // If the writer is completed (which it will be most of the time) the return a completed ValueTask
+                // If the writer is completed (which it will be most of the time) then return a completed ValueTask
                 if (_writerAwaitable.IsCompleted)
                 {
                     var flushResult = new FlushResult();
