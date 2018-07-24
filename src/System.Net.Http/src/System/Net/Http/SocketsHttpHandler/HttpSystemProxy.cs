@@ -70,7 +70,7 @@ namespace System.Net.Http
                 ParseProxyConfig(proxyHelper.Proxy, out _insecureProxyUri, out _secureProxyUri);
                 if (_insecureProxyUri == null && _secureProxyUri == null)
                 {
-                    // If advance parsing by protocol fails, fall-back to simplified parsing.
+                    // If advanced parsing by protocol fails, fall-back to simplified parsing.
                     _insecureProxyUri = _secureProxyUri = GetUriFromString(proxyHelper.Proxy);
                 }
 

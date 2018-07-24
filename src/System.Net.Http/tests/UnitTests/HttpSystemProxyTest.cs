@@ -65,11 +65,11 @@ namespace System.Net.Http.Tests
         }
 
         [Theory]
-        [InlineData("localhost:1234")]
-        [InlineData("123.123.123.123")]
-        public void HttpProxy_SystemProxy_Loaded(string rawProxyString)
+        [InlineData("localhost:1234", "http://localhost:1234/")]
+        [InlineData("123.123.123.123", "http://123.123.123.123/")]
+        public void HttpProxy_SystemProxy_Loaded(string rawProxyString, string expectedUri)
         {
-            RemoteInvoke((proxyString) =>
+            RemoteInvoke((proxyString, expectedString) =>
             {
                 IWebProxy p;
 
@@ -80,9 +80,11 @@ namespace System.Net.Http.Tests
 
                 Assert.True(HttpSystemProxy.TryCreate(out p));
                 Assert.NotNull(p);
+                Assert.Equal(expectedString, p.GetProxy(new Uri(fooHttp)).ToString());
+                Assert.Equal(expectedString, p.GetProxy(new Uri(fooHttps)).ToString());
 
                 return SuccessExitCode;
-            }, rawProxyString).Dispose();
+            }, rawProxyString, expectedUri).Dispose();
         }
 
         [Theory]
