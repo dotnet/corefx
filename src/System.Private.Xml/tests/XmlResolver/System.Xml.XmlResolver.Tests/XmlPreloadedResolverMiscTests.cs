@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Resolvers;
 using Xunit;
 using System.Net;
@@ -18,7 +16,7 @@ namespace System.Xml.XmlResolver.Tests
         {
             var xmlResolver = new XmlPreloadedResolver(new XmlPreloadedResolver());
             NetworkCredential credential = new NetworkCredential();
-            xmlResolver.Credentials = credential;            
+            xmlResolver.Credentials = credential;                        
         }
 
         [Fact]
@@ -49,8 +47,7 @@ namespace System.Xml.XmlResolver.Tests
             Assert.False(result);
 
             xmlResolver = new XmlPreloadedResolver(new XmlPreloadedResolver(), XmlKnownDtds.Xhtml10);
-            result = xmlResolver.SupportsType(uri, typeof(Stream));
-            Assert.True(result);
+            Assert.True(xmlResolver.SupportsType(uri, typeof(Stream)));
 
             xmlResolver.Add(uri, "String Value");
             result = xmlResolver.SupportsType(uri, typeof(TextReader));

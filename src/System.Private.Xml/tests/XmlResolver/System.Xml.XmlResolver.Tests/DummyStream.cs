@@ -10,5 +10,10 @@ namespace System.Xml.XmlResolver.Tests
     {
         internal DummyStream(byte[] data) : base(data) { }        
         public override bool CanSeek => false;
+
+        public override long Seek(long offset, SeekOrigin loc)
+        {
+            throw new NotSupportedException("Seek operation is not supported for Dummy Stream");
+        }
     }
 }

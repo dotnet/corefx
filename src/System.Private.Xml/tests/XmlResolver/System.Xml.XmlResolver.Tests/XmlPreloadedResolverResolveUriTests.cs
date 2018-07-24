@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Linq;
 using System.Xml.Resolvers;
 using Xunit;
 
@@ -46,7 +45,5 @@ namespace System.Xml.XmlResolver.Tests
             result = resolver.ResolveUri(new Uri("https://JustAUri"), "-//Invalid//Uri");
             Assert.Equal("https://justauri/-//Invalid//Uri", result.OriginalString);
         }
-
-
     }
 }

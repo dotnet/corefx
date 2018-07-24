@@ -2,19 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Linq;
 using System.Xml.Resolvers;
 using System.IO;
 using System.Text;
-using System.Xml;
 using Xunit;
 using System.Threading.Tasks;
 
 namespace System.Xml.XmlResolver.Tests
 {
     public class XmlPreloadedResolverGetEntity
-    {
-        
+    {        
         private XmlPreloadedResolver GetResolverWithStringData(XmlKnownDtds dtd, string data, Uri uri)
         {
             var xmlResolver = new XmlPreloadedResolver(dtd);

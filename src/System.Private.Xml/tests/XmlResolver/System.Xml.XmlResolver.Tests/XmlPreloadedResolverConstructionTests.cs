@@ -18,49 +18,52 @@ namespace System.Xml.XmlResolver.Tests
         }
 
         [Fact]
-        public void XmlResolverWithKnownDtdsConstructor()
+        public void XmlResolverWithKnownDtdsXhtml10Constructor()
         {
             var resolver = new XmlPreloadedResolver(XmlKnownDtds.Xhtml10);
-            Assert.Equal(12, resolver.PreloadedUris.Count());
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Strict//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Transitional//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Frameset//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Latin 1 for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Symbols for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Special for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent")));
+            string[] expectedUris = { "-//W3C//DTD XHTML 1.0 Strict//EN" , "-//W3C//DTD XHTML 1.0 Transitional//EN" ,
+            "-//W3C//ENTITIES Symbols for XHTML//EN", "-//W3C//ENTITIES Latin 1 for XHTML//EN", "-//W3C//ENTITIES Symbols for XHTML//EN",
+            "-//W3C//ENTITIES Special for XHTML//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent", "http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent"};
 
-            resolver = new XmlPreloadedResolver(XmlKnownDtds.Rss091);
-            Assert.Equal(2, resolver.PreloadedUris.Count());
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//Netscape Communications//DTD RSS 0.91//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://my.netscape.com/publish/formats/rss-0.91.dtd")));
+            Assert.Equal(expectedUris.Length, resolver.PreloadedUris.Count());
+            foreach (string uriString in expectedUris)
+            {
+                Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals(uriString)));
+            }
+        }
+
+        [Fact]
+        public void XmlResolverWithKnownDtdsRss091Constructor()
+        {
+            var resolver = new XmlPreloadedResolver(XmlKnownDtds.Rss091);
+            string[] expectedUris = { "-//Netscape Communications//DTD RSS 0.91//EN", "http://my.netscape.com/publish/formats/rss-0.91.dtd" };
+            Assert.Equal(expectedUris.Length, resolver.PreloadedUris.Count());
+            foreach (string uriString in expectedUris)
+            {
+                Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals(uriString)));
+            }
         }
 
         [Fact]
         public void XmlResolverWithFallbackResolverConstructor()
         {
             var fallbackResolver = new XmlPreloadedResolver(XmlKnownDtds.None);
-            var resolver = new XmlPreloadedResolver(fallbackResolver);
-            Assert.Equal(14, resolver.PreloadedUris.Count());
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Strict//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Transitional//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Frameset//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Latin 1 for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Symbols for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Special for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//Netscape Communications//DTD RSS 0.91//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://my.netscape.com/publish/formats/rss-0.91.dtd")));
+            var resolver = new XmlPreloadedResolver(fallbackResolver);            
+            string[] expectedUris = { "-//W3C//DTD XHTML 1.0 Strict//EN" , "-//W3C//DTD XHTML 1.0 Transitional//EN" ,
+            "-//W3C//ENTITIES Symbols for XHTML//EN", "-//W3C//ENTITIES Latin 1 for XHTML//EN", "-//W3C//ENTITIES Symbols for XHTML//EN",
+            "-//W3C//ENTITIES Special for XHTML//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent", "http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent", "-//Netscape Communications//DTD RSS 0.91//EN",
+                "http://my.netscape.com/publish/formats/rss-0.91.dtd" };
+            Assert.Equal(expectedUris.Length, resolver.PreloadedUris.Count());            
+            foreach (string uriString in expectedUris)
+            {
+                Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals(uriString)));
+            }
         }
 
         [Fact]
@@ -68,9 +71,12 @@ namespace System.Xml.XmlResolver.Tests
         {
             var fallbackResolver = new XmlPreloadedResolver();
             var resolver = new XmlPreloadedResolver(fallbackResolver, XmlKnownDtds.Rss091);
-            Assert.Equal(2, resolver.PreloadedUris.Count());
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//Netscape Communications//DTD RSS 0.91//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://my.netscape.com/publish/formats/rss-0.91.dtd")));
+            string[] expectedUris = { "-//Netscape Communications//DTD RSS 0.91//EN", "http://my.netscape.com/publish/formats/rss-0.91.dtd" };
+            Assert.Equal(expectedUris.Length, resolver.PreloadedUris.Count());
+            foreach (string uriString in expectedUris)
+            {
+                Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals(uriString)));
+            }
         }
 
         [Fact]
@@ -78,19 +84,18 @@ namespace System.Xml.XmlResolver.Tests
         {
             var fallbackResolver = new XmlPreloadedResolver();
             var resolver = new XmlPreloadedResolver(fallbackResolver, XmlKnownDtds.Xhtml10, null);
-            Assert.Equal(12, resolver.PreloadedUris.Count());
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Strict//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Transitional//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//DTD XHTML 1.0 Frameset//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Latin 1 for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Symbols for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("-//W3C//ENTITIES Special for XHTML//EN")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent")));
-            Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals("http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent")));
+            string[] expectedUris = { "-//W3C//DTD XHTML 1.0 Strict//EN" , "-//W3C//DTD XHTML 1.0 Transitional//EN" ,
+            "-//W3C//ENTITIES Symbols for XHTML//EN", "-//W3C//ENTITIES Latin 1 for XHTML//EN", "-//W3C//ENTITIES Symbols for XHTML//EN",
+            "-//W3C//ENTITIES Special for XHTML//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent", "http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent",
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent"};
+
+            Assert.Equal(expectedUris.Length, resolver.PreloadedUris.Count());
+            foreach (string uriString in expectedUris)
+            {
+                Assert.True(resolver.PreloadedUris.Any(u => u.OriginalString.Equals(uriString)));
+            }
         }
     }
 }
