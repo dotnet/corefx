@@ -4,15 +4,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#Dispose(System.Boolean)")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#Peek():System.Int32")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#Read():System.Int32")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#Read(System.Char[],System.Int32,System.Int32):System.Int32")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#ReadBlock(System.Char[],System.Int32,System.Int32):System.Int32")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#ReadLine():System.String")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#ReadToEnd():System.String")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#ReadKey(System.Boolean&):System.ConsoleKeyInfo")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.IO.SyncTextReader.#get_KeyAvailable():System.Boolean")]
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#ResetColor()")]
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#GetCursorPosition(System.Int32&,System.Int32&)")]
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#RefreshColors(System.ConsoleColor&,System.ConsoleColor)")]

@@ -6,6 +6,7 @@ using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -45,10 +46,10 @@ namespace System
             get { return GetConsoleEncoding(); }
         }
 
-        private static SyncTextReader s_stdInReader;
+        private static StdInReader s_stdInReader;
         private const int DefaultBufferSize = 255;
 
-        private static SyncTextReader StdInReader
+        private static StdInReader StdInReader
         {
             get
             {
@@ -56,10 +57,9 @@ namespace System
 
                 return Console.EnsureInitialized(
                         ref s_stdInReader,
-                        () => SyncTextReader.GetSynchronizedTextReader(
-                            new StdInReader(
-                                encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
-                                bufferSize: DefaultBufferSize)));
+                        () => new StdInReader(
+                            encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
+                            bufferSize: DefaultBufferSize));
             }
         }
 
@@ -69,7 +69,7 @@ namespace System
             if (Console.IsInputRedirected)
             {
                 Stream inputStream = OpenStandardInput();
-                return SyncTextReader.GetSynchronizedTextReader(
+                return TextReader.Synchronized(
                     inputStream == Stream.Null ?
                     StreamReader.Null :
                     new StreamReader(
@@ -82,12 +82,23 @@ namespace System
             }
             else
             {
-                return StdInReader;
+                return TextReader.Synchronized(StdInReader);
             }
         }
 
-        public static bool KeyAvailable { get { return StdInReader.KeyAvailable; } }
+        [SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity")]
+        public static bool KeyAvailable
+        {
+            get
+            {
+                lock (Console.In)
+                {
+                    return StdInReader.IsUnprocessedBufferEmpty() || StdInReader.StdinReady;
+                }
+            }
+        }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity")]
         public static ConsoleKeyInfo ReadKey(bool intercept)
         {
             if (Console.IsInputRedirected)
@@ -98,7 +109,12 @@ namespace System
             }
 
             bool previouslyProcessed;
-            ConsoleKeyInfo keyInfo = StdInReader.ReadKey(out previouslyProcessed);
+            ConsoleKeyInfo keyInfo = default;
+
+            lock (Console.In)
+            {
+                keyInfo = StdInReader.ReadKey(out previouslyProcessed);
+            }
 
             // Replace the '\n' char for Enter by '\r' to match Windows behavior.
             if (keyInfo.Key == ConsoleKey.Enter && keyInfo.KeyChar == '\n')
@@ -109,7 +125,9 @@ namespace System
                 keyInfo = new ConsoleKeyInfo('\r', keyInfo.Key, shift, alt, control);
             }
 
-            if (!intercept && !previouslyProcessed) Console.Write(keyInfo.KeyChar);
+            if (!intercept && !previouslyProcessed)
+                Console.Write(keyInfo.KeyChar);
+
             return keyInfo;
         }
 
@@ -396,7 +414,7 @@ namespace System
                     // over to the StdInReader's extra buffer.  From there until the end, we buffer
                     // everything into readBytes for subsequent parsing.
                     const byte Esc = 0x1B;
-                    StdInReader r = StdInReader.Inner;
+                    StdInReader r = StdInReader;
                     int escPos, bracketPos, semiPos, rPos;
                     if (!AppendToStdInReaderUntil(Esc, r, readBytes, ref readBytesPos, out escPos) ||
                         !BufferUntil((byte)'[', r, ref readBytes, ref readBytesPos, out bracketPos) ||

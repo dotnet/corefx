@@ -173,7 +173,7 @@ namespace System
         internal static TextReader GetOrCreateReader()
         {
             Stream inputStream = OpenStandardInput();
-            return SyncTextReader.GetSynchronizedTextReader(inputStream == Stream.Null ?
+            return TextReader.Synchronized(inputStream == Stream.Null ?
                 StreamReader.Null :
                 new StreamReader(
                     stream: inputStream,
