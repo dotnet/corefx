@@ -887,13 +887,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
         Public Shared Function PlusObject(ByVal Operand As Object) As Object
 
-            If Operand Is Nothing Then
-                Return Boxed_ZeroInteger
-            End If
-
             Dim typ As TypeCode = GetTypeCode(Operand)
-
-
             Select Case typ
 
                 Case TypeCode.Empty
@@ -955,13 +949,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Shared Function NegateObject(ByVal Operand As Object) As Object
 
             Dim tc As TypeCode = GetTypeCode(Operand)
-
-            If Operand Is Nothing Then
-                tc = TypeCode.Empty
-            Else
-                tc = Operand.GetType.GetTypeCode
-            End If
-
             Select Case tc
 
                 Case TypeCode.Empty
@@ -1123,13 +1110,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
 
         Private Shared Function NegateDecimal(ByVal operand As Decimal) As Object
-            'Using try/catch instead of check with MinValue since the overflow case should be very rare
-            'and a compare would be a big cost for the normal case.
-            Try
-                Return -operand
-            Catch ex As OverflowException
-                Return -CDbl(operand)
-            End Try
+            Return -operand
         End Function
 
         Private Shared Function NegateSingle(ByVal operand As Single) As Object
@@ -4610,13 +4591,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
 
         Private Shared Function ModInt16(ByVal left As Int16, ByVal right As Int16) As Object
-            Dim result As Integer = CInt(left) Mod CInt(right)
-
-            If result < Int16.MinValue OrElse result > Int16.MaxValue Then
-                Return result
-            Else
-                Return CShort(result)
-            End If
+            Return left Mod right
         End Function
 
         Private Shared Function ModUInt16(ByVal left As UInt16, ByVal right As UInt16) As Object
@@ -4624,13 +4599,10 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
 
         Private Shared Function ModInt32(ByVal left As Integer, ByVal right As Integer) As Object
-            'Do operation with Int64 to avoid OverflowException with Int32.MinValue and -1
-            Dim result As Long = CLng(left) Mod CLng(right)
-
-            If result < Int32.MinValue OrElse result > Int32.MaxValue Then
-                Return result
+            If left = Integer.MinValue AndAlso right = -1 Then
+                Return 0
             Else
-                Return CInt(result)
+                Return left Mod right
             End If
         End Function
 
