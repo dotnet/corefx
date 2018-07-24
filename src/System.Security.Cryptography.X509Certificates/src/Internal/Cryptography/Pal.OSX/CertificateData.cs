@@ -472,7 +472,7 @@ namespace Internal.Cryptography.Pal
                             value = tavReader.ReadUtf8String();
                             break;
                         case DerSequenceReader.DerTag.T61String:
-                            value = tavReader.ReadT61String ();
+                            value = tavReader.ReadT61String();
                             break;
 
                         // Ignore anything we don't know how to read.
