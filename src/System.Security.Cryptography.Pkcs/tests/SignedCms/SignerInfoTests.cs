@@ -562,6 +562,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not supported by crypt32")]
         public static void AddCounterSignerToUnsortedAttributeSignature()
         {
             SignedCms cms = new SignedCms();
