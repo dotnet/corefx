@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Microsoft.VisualBasic.CompilerServices.Tests
 {
-    public class OperatorsTests
+    public partial class OperatorsTests
     {
         public static IEnumerable<object[]> AddObject_Idempotent_TestData()
         {
@@ -156,8 +156,14 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             // string + primitives
             yield return new object[] { "1", "2", "12" };
             yield return new object[] { "2", '2', "22" };
+            yield return new object[] { "2", new char[] { '2' }, "22" };
             yield return new object[] { "3", true, (double)2 };
             yield return new object[] { "5", null, "5" };
+
+            // chars + primitives.
+            yield return new object[] { new char[] { '1' }, "2", "12" };
+            yield return new object[] { new char[] { '2' }, new char[] { '2' }, "22" };
+            yield return new object[] { new char[] { '5' }, null, "5" };
 
             // bool + primitives
             yield return new object[] { true, "2", (double)1 };
@@ -245,6 +251,11 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { 1, '2' };
             yield return new object[] { 2, DBNull.Value };
             yield return new object[] { '3', new object() };
+
+            yield return new object[] { new char[] { '8' }, 10 };
+            yield return new object[] { 10, new char[] { '8' } };
+            yield return new object[] { new char[] { '8' }, new object() };
+            yield return new object[] { new object(), new char[] { '8' } };
         }
 
         [Theory]
@@ -869,6 +880,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (byte)10, (double)2, "102" };
             yield return new object[] { (byte)10, (decimal)2, "102" };
             yield return new object[] { (byte)10, "2", "102" };
+            yield return new object[] { (byte)10, new char[] { '2' }, "102" };
             yield return new object[] { (byte)10, true, "10True" };
             yield return new object[] { (byte)10, null, "10" };
 
@@ -885,6 +897,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (sbyte)10, (double)2, "102" };
             yield return new object[] { (sbyte)10, (decimal)2, "102" };
             yield return new object[] { (sbyte)10, "2", "102" };
+            yield return new object[] { (sbyte)10, new char[] { '2' }, "102" };
             yield return new object[] { (sbyte)10, true, "10True" };
             yield return new object[] { (sbyte)10, null, "10" };
 
@@ -901,6 +914,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ushort)10, (double)2, "102" };
             yield return new object[] { (ushort)10, (decimal)2, "102" };
             yield return new object[] { (ushort)10, "2", "102" };
+            yield return new object[] { (ushort)10, new char[] { '2' }, "102" };
             yield return new object[] { (ushort)10, true, "10True" };
             yield return new object[] { (ushort)10, null, "10" };
 
@@ -917,6 +931,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (short)10, (double)2, "102" };
             yield return new object[] { (short)10, (decimal)2, "102" };
             yield return new object[] { (short)10, "2", "102" };
+            yield return new object[] { (short)10, new char[] { '2' }, "102" };
             yield return new object[] { (short)10, true, "10True" };
             yield return new object[] { (short)10, null, "10" };
 
@@ -933,6 +948,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (uint)10, (double)2, "102" };
             yield return new object[] { (uint)10, (decimal)2, "102" };
             yield return new object[] { (uint)10, "2", "102" };
+            yield return new object[] { (uint)10, new char[] { '2' }, "102" };
             yield return new object[] { (uint)10, true, "10True" };
             yield return new object[] { (uint)10, null, "10" };
 
@@ -949,6 +965,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { 10, (double)2, "102" };
             yield return new object[] { 10, (decimal)2, "102" };
             yield return new object[] { 10, "2", "102" };
+            yield return new object[] { 10, new char[] { '2' }, "102" };
             yield return new object[] { 10, true, "10True" };
             yield return new object[] { 10, null, "10" };
 
@@ -965,6 +982,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)10, (double)2, "102" };
             yield return new object[] { (ulong)10, (decimal)2, "102" };
             yield return new object[] { (ulong)10, "2", "102" };
+            yield return new object[] { (ulong)10, new char[] { '2' }, "102" };
             yield return new object[] { (ulong)10, true, "10True" };
             yield return new object[] { (ulong)10, null, "10" };
 
@@ -981,6 +999,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (long)10, (double)2, "102" };
             yield return new object[] { (long)10, (decimal)2, "102" };
             yield return new object[] { (long)10, "2", "102" };
+            yield return new object[] { (long)10, new char[] { '2' }, "102" };
             yield return new object[] { (long)10, true, "10True" };
             yield return new object[] { (long)10, null, "10" };
 
@@ -997,6 +1016,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (float)10, (double)2, "102" };
             yield return new object[] { (float)10, (decimal)2, "102" };
             yield return new object[] { (float)10, "2", "102" };
+            yield return new object[] { (float)10, new char[] { '2' }, "102" };
             yield return new object[] { (float)10, true, "10True" };
             yield return new object[] { (float)10, null, "10" };
 
@@ -1013,6 +1033,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (double)10, (double)2, "102" };
             yield return new object[] { (double)10, (decimal)2, "102" };
             yield return new object[] { (double)10, "2", "102" };
+            yield return new object[] { (double)10, new char[] { '2' }, "102" };
             yield return new object[] { (double)10, true, "10True" };
             yield return new object[] { (double)10, null, "10" };
 
@@ -1029,6 +1050,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)10, (double)2, "102" };
             yield return new object[] { (decimal)10, (decimal)2, "102" };
             yield return new object[] { (decimal)10, "2", "102" };
+            yield return new object[] { (decimal)10, new char[] { '2' }, "102" };
             yield return new object[] { (decimal)10, true, "10True" };
             yield return new object[] { (decimal)10, null, "10" };
 
@@ -1045,8 +1067,26 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { "10", (double)2, "102" };
             yield return new object[] { "10", (decimal)2, "102" };
             yield return new object[] { "10", "2", "102" };
+            yield return new object[] { "10", new char[] { '2' }, "102" };
             yield return new object[] { "10", true, "10True" };
             yield return new object[] { "10", null, "10" };
+
+            // chars.
+            yield return new object[] { new char[] { '1', '0' }, (byte)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (sbyte)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (ushort)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (short)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (uint)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, 2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (ulong)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (long)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (float)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (double)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, (decimal)2, "102" };
+            yield return new object[] { new char[] { '1', '0' }, "2", "102" };
+            yield return new object[] { new char[] { '1', '0' }, new char[] { '2' }, "102" };
+            yield return new object[] { new char[] { '1', '0' }, true, "10True" };
+            yield return new object[] { new char[] { '1', '0' }, null, "10" };
 
             // bool.
             yield return new object[] { true, (byte)2, "True2" };
@@ -1061,6 +1101,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { true, (double)2, "True2" };
             yield return new object[] { true, (decimal)2, "True2" };
             yield return new object[] { true, "2", "True2" };
+            yield return new object[] { true, new char[] { '2' }, "True2" };
             yield return new object[] { true, true, "TrueTrue" };
             yield return new object[] { true, null, "True" };
 
@@ -1077,6 +1118,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { null, (double)2, "2" };
             yield return new object[] { null, (decimal)2, "2" };
             yield return new object[] { null, "2", "2" };
+            yield return new object[] { null, new char[] { '2' }, "2" };
             yield return new object[] { null, true, "True" };
             yield return new object[] { null, null, "" };
 
@@ -1098,6 +1140,9 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         {
             yield return new object[] { 2, DBNull.Value };
             yield return new object[] { '3', new object() };
+
+            yield return new object[] { new char[] { '8' }, new object() };
+            yield return new object[] { new object(), new char[] { '8' } };
         }
 
         [Theory]
