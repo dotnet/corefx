@@ -67,6 +67,11 @@ namespace System.Net.Http
             if (proxyHelper.ManualSettingsOnly)
             {
                 ParseProxyConfig(proxyHelper.Proxy, out _insecureProxyUri, out _secureProxyUri);
+                if (_insecureProxyUri == null && _secureProxyUri == null)
+                {
+                    // If advanced parsing by protocol fails, fall-back to simplified string.
+                    _insecureProxyUri = _secureProxyUri = GetUriFromString(proxyHelper.Proxy);
+                }
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
