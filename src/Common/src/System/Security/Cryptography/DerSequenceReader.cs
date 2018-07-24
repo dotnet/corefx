@@ -435,7 +435,9 @@ namespace System.Security.Cryptography
 
         internal DateTime ReadUtcTime()
         {
-            return ReadTime(DerTag.UTCTime, "yyMMddHHmmss'Z'");
+            // Although RFC 5280 does not allow times without seconds, both OpenSSL and
+            // Apple's Secure Transport are less strict and read these just fine.
+            return ReadTime(DerTag.UTCTime, "yyMMddHHmmss'Z'", "yyMMddHHmm'Z'", "yyMMddHHmmsszzz");
         }
 
         internal DateTime ReadGeneralizedTime()
@@ -443,7 +445,7 @@ namespace System.Security.Cryptography
             // Currently only supports reading times with no fractional seconds or time differentials
             // as RFC 2630 doesn't allow these. In case this is done, the format string has to be parsed
             // to follow rules on X.680 and X.690.
-            return ReadTime(DerTag.GeneralizedTime, "yyyyMMddHHmmss'Z'");
+            return ReadTime(DerTag.GeneralizedTime, "yyyyMMddHHmmss'Z'", "yyyyMMddHHmm'Z'", "yyyyMMddHHmmsszzz");
         }
 
         internal string ReadBMPString()
@@ -482,7 +484,7 @@ namespace System.Security.Cryptography
             return value;
         }
 
-        private DateTime ReadTime(DerTag timeTag, string formatString)
+        private DateTime ReadTime(DerTag timeTag, params string[] formatStrings)
         {
             EatTag(timeTag);
             int contentLength = EatLength();
@@ -508,12 +510,12 @@ namespace System.Security.Cryptography
 
             if (!DateTime.TryParseExact(
                     decodedTime,
-                    formatString,
+                    formatStrings,
                     fi,
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
                     out time))
             {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                throw new CryptographicException (SR.Cryptography_Der_Invalid_Encoding);
             }
 
             return time;
