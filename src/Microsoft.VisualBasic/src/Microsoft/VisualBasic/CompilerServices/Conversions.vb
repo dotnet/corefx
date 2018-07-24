@@ -855,8 +855,8 @@ MisMatch:
                 Return Value.ToString("G")
             End If
         End Function
-        Public Shared Shadows Function ToString(value As Decimal) As String
-            Return value.ToString("G")
+        Public Shared Shadows Function ToString(Value As Decimal) As String
+            Return Value.ToString("G")
         End Function
         Public Shared Shadows Function ToString(Value As Object) As String
             If Value Is Nothing Then

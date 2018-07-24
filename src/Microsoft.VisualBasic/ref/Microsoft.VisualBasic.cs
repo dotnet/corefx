@@ -107,7 +107,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static string ToString(byte Value) { throw null; }
         public static string ToString(char Value) { throw null; }
         public static string ToString(System.DateTime Value) { throw null; }
-        public static string ToString(decimal value) { throw null; }
+        public static string ToString(decimal Value) { throw null; }
         public static string ToString(double Value) { throw null; }
         public static string ToString(short Value) { throw null; }
         public static string ToString(int Value) { throw null; }
