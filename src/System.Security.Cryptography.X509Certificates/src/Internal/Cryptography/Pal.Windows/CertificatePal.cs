@@ -22,7 +22,7 @@ using static Interop.Crypt32;
 
 namespace Internal.Cryptography.Pal
 {
-    internal sealed partial class CertificatePal : ICertificatePal
+    internal sealed partial class CertificatePal : IDisposable, ICertificatePal
     {
         private SafeCertContextHandle _certContext;
 
