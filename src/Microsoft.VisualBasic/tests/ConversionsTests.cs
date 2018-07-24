@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
+using System.Reflection.Emit;
 using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 
@@ -12,76 +14,3192 @@ namespace Microsoft.VisualBasic.Tests
 {
     public class ConversionsTests
     {
-        public static IEnumerable<object[]> ToBoolean_String_ReturnsExpected_TestData()
+        public static IEnumerable<object[]> ToByte_String_TestData()
         {
-            yield return new object[] { 5.5.ToString(CultureInfo.CurrentCulture), true };
-            yield return new object[] { 0.0.ToString(CultureInfo.CurrentCulture), false };
+            yield return new object[] { null, byte.MinValue };
+            yield return new object[] { "0", byte.MinValue };
+            yield return new object[] { "1", (byte)1 };
+            yield return new object[] { "&h5", (byte)5 };
+            yield return new object[] { "&h0", byte.MinValue };
+            yield return new object[] { "&o5", (byte)5 };
+            yield return new object[] { " &o5", (byte)5 };
+            yield return new object[] { "&o0", byte.MinValue };
+            yield return new object[] { 1.1.ToString(), (byte)1 };
         }
 
         [Theory]
-        [InlineData("true", true)]
-        [InlineData("false", false)]
-        [InlineData("5", true)]
-        [InlineData("0", false)]
-        [InlineData("&h5", true)]
-        [InlineData("&h0", false)]
-        [InlineData("&o5", true)]
-        [InlineData("&o0", false)]
-        [MemberData(nameof(ToBoolean_String_ReturnsExpected_TestData))]
-        public void ToBoolean_String_ReturnsExpected(string str, bool expected)
+        [MemberData(nameof(ToByte_String_TestData))]
+        public void ToByte_String_ReturnsExpected(string value, byte expected)
         {
-            Assert.Equal(expected, Conversions.ToBoolean(str));
+            AssertEqual(expected, Conversions.ToByte(value));
+        }
+
+        public static IEnumerable<object[]> ToByte_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("yes")]
-        [InlineData("contoso")]
-        public void ToBoolean_String_ThrowsOnInvalidFormat(string str)
+        [MemberData(nameof(ToByte_InvalidString_TestData))]
+        public void ToByte_InvalidString_ThrowsInvalidCastException(string value)
         {
-            Assert.Throws<InvalidCastException>(() => Conversions.ToBoolean(str));
+            Assert.Throws<InvalidCastException>(() => Conversions.ToByte(value));
         }
 
-        public static IEnumerable<object[]> ToBoolean_Object_ReturnsExpected_TestData()
+        public static IEnumerable<object[]> ToByte_OverflowString_TestData()
         {
-            yield return new object[] { null, false };
-            yield return new object[] { false, false };
-            yield return new object[] { true, true };
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToByte_OverflowString_TestData))]
+        public void ToByte_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToByte(value));
+        }
+
+        public static IEnumerable<object[]> ToByte_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, byte.MinValue };
+            yield return new object[] { (byte)1, (byte)1 };
+            yield return new object[] { byte.MaxValue, byte.MaxValue };
+            yield return new object[] { byte.MinValue, byte.MinValue };
+            yield return new object[] { ByteEnum.Value, (byte)1 };
+            yield return new object[] { byte.MaxValue, byte.MaxValue };
+
+            // sbyte.
+            yield return new object[] { (sbyte)0, byte.MinValue };
+            yield return new object[] { (sbyte)1, (byte)1 };
+            yield return new object[] { (sbyte)1, (byte)1 };
+            yield return new object[] { sbyte.MaxValue, (byte)127 };
+            yield return new object[] { (sbyte)0, byte.MinValue };
+            yield return new object[] { SByteEnum.Value, (byte)1 };
+            yield return new object[] { SByteEnum.Value, (byte)1 };
+            yield return new object[] { sbyte.MaxValue, (byte)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, byte.MinValue };
+            yield return new object[] { (ushort)1, (byte)1 };
+            yield return new object[] { ushort.MinValue, byte.MinValue };
+            yield return new object[] { UShortEnum.Value, (byte)1 };
+
+            // short.
+            yield return new object[] { (short)0, byte.MinValue };
+            yield return new object[] { (short)1, (byte)1 };
+            yield return new object[] { (short)0, byte.MinValue };
+            yield return new object[] { ShortEnum.Value, (byte)1 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, byte.MinValue };
+            yield return new object[] { (uint)1, (byte)1 };
+            yield return new object[] { uint.MinValue, byte.MinValue };
+            yield return new object[] { UIntEnum.Value, (byte)1 };
+
+            // int.
+            yield return new object[] { 0, byte.MinValue };
+            yield return new object[] { 1, (byte)1 };
+            yield return new object[] { 0, byte.MinValue };
+            yield return new object[] { IntEnum.Value, (byte)1 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, byte.MinValue };
+            yield return new object[] { (ulong)1, (byte)1 };
+            yield return new object[] { ulong.MinValue, byte.MinValue };
+            yield return new object[] { ULongEnum.Value, (byte)1 };
+
+            // long.
+            yield return new object[] { 0, byte.MinValue };
+            yield return new object[] { 1, (byte)1 };
+            yield return new object[] { 0, byte.MinValue };
+            yield return new object[] { LongEnum.Value, (byte)1 };
+
+            // float.
+            yield return new object[] { (float)0, byte.MinValue };
+            yield return new object[] { (float)1, (byte)1 };
+
+            // double.
+            yield return new object[] { (double)0, byte.MinValue };
+            yield return new object[] { (double)1, (byte)1 };
+
+            // decimal.
+            yield return new object[] { (decimal)0, byte.MinValue };
+            yield return new object[] { (decimal)1, (byte)1 };
+
+            // bool.
+            yield return new object[] { true, byte.MaxValue };
+            yield return new object[] { false, byte.MinValue };
+
+            // null.
+            yield return new object[] { null, byte.MinValue };
+
+            // string.
+            yield return new object[] { "0", byte.MinValue };
+            yield return new object[] { "1", (byte)1 };
+            yield return new object[] { "&h5", (byte)5 };
+            yield return new object[] { "&h0", byte.MinValue };
+            yield return new object[] { "&o5", (byte)5 };
+            yield return new object[] { " &o5", (byte)5 };
+            yield return new object[] { "&o0", byte.MinValue };
+            yield return new object[] { 1.1.ToString(), (byte)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToByte_Object_TestData))]
+        public void ToByte_Object_ReturnsExpected(object value, byte expected)
+        {
+            AssertEqual(expected, Conversions.ToByte(value));
+        }
+
+        public static IEnumerable<object[]> ToByte_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToByte_InvalidObject_TestData))]
+        public void ToByte_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToByte(value));
+        }
+        public static IEnumerable<object[]> ToByte_OverflowObject_TestData()
+        {
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { short.MaxValue };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { short.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { (float)-1 };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { (double)-1 };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { (decimal)-1 };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToByte_OverflowObject_TestData))]
+        public void ToByte_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToByte(value));
+        }
+
+        public static IEnumerable<object[]> ToSByte_String_TestData()
+        {
+            yield return new object[] { null, (sbyte)0 };
+            yield return new object[] { "-1", (sbyte)-1 };
+            yield return new object[] { "0", (sbyte)0 };
+            yield return new object[] { "1", (sbyte)1 };
+            yield return new object[] { "&h5", (sbyte)5 };
+            yield return new object[] { "&h0", (sbyte)0 };
+            yield return new object[] { "&o5", (sbyte)5 };
+            yield return new object[] { " &o5", (sbyte)5 };
+            yield return new object[] { "&o0", (sbyte)0 };
+            yield return new object[] { 1.1.ToString(), (sbyte)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSByte_String_TestData))]
+        public void ToSByte_String_ReturnsExpected(string value, sbyte expected)
+        {
+            AssertEqual(expected, Conversions.ToSByte(value));
+        }
+
+        public static IEnumerable<object[]> ToSByte_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSByte_InvalidString_TestData))]
+        public void ToSByte_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToSByte(value));
+        }
+
+        public static IEnumerable<object[]> ToSByte_OverflowString_TestData()
+        {
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSByte_OverflowString_TestData))]
+        public void ToSByte_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToSByte(value));
+        }
+
+        public static IEnumerable<object[]> ToSByte_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, (sbyte)0 };
+            yield return new object[] { (byte)1, (sbyte)1 };
+            yield return new object[] { byte.MinValue, (sbyte)0 };
+            yield return new object[] { ByteEnum.Value, (sbyte)1 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, sbyte.MinValue };
+            yield return new object[] { (sbyte)-1, (sbyte)-1 };
+            yield return new object[] { (sbyte)0, (sbyte)0 };
+            yield return new object[] { (sbyte)1, (sbyte)1 };
+            yield return new object[] { (sbyte)1, (sbyte)1 };
+            yield return new object[] { sbyte.MaxValue, sbyte.MaxValue };
+            yield return new object[] { sbyte.MinValue, sbyte.MinValue };
+            yield return new object[] { (sbyte)-1, (sbyte)-1 };
+            yield return new object[] { (sbyte)0, (sbyte)0 };
+            yield return new object[] { SByteEnum.Value, (sbyte)1 };
+            yield return new object[] { SByteEnum.Value, (sbyte)1 };
+            yield return new object[] { sbyte.MaxValue, sbyte.MaxValue };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, (sbyte)0 };
+            yield return new object[] { (ushort)1, (sbyte)1 };
+            yield return new object[] { ushort.MinValue, (sbyte)0 };
+            yield return new object[] { UShortEnum.Value, (sbyte)1 };
+
+            // short.
+            yield return new object[] { (short)-1, (sbyte)-1 };
+            yield return new object[] { (short)0, (sbyte)0 };
+            yield return new object[] { (short)1, (sbyte)1 };
+            yield return new object[] { (short)-1, (sbyte)-1 };
+            yield return new object[] { (short)0, (sbyte)0 };
+            yield return new object[] { ShortEnum.Value, (sbyte)1 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, (sbyte)0 };
+            yield return new object[] { (uint)1, (sbyte)1 };
+            yield return new object[] { uint.MinValue, (sbyte)0 };
+            yield return new object[] { UIntEnum.Value, (sbyte)1 };
+
+            // int.
+            yield return new object[] { -1, (sbyte)-1 };
+            yield return new object[] { 0, (sbyte)0 };
+            yield return new object[] { 1, (sbyte)1 };
+            yield return new object[] { -1, (sbyte)-1 };
+            yield return new object[] { 0, (sbyte)0 };
+            yield return new object[] { IntEnum.Value, (sbyte)1 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, (sbyte)0 };
+            yield return new object[] { (ulong)1, (sbyte)1 };
+            yield return new object[] { ulong.MinValue, (sbyte)0 };
+            yield return new object[] { ULongEnum.Value, (sbyte)1 };
+
+            // long.
+            yield return new object[] { -1, (sbyte)-1 };
+            yield return new object[] { 0, (sbyte)0 };
+            yield return new object[] { 1, (sbyte)1 };
+            yield return new object[] { -1, (sbyte)-1 };
+            yield return new object[] { 0, (sbyte)0 };
+            yield return new object[] { LongEnum.Value, (sbyte)1 };
+
+            // float.
+            yield return new object[] { (float)-1, (sbyte)-1 };
+            yield return new object[] { (float)0, (sbyte)0 };
+            yield return new object[] { (float)1, (sbyte)1 };
+
+            // double.
+            yield return new object[] { (double)-1, (sbyte)-1 };
+            yield return new object[] { (double)0, (sbyte)0 };
+            yield return new object[] { (double)1, (sbyte)1 };
+
+            // decimal.
+            yield return new object[] { (decimal)-1, (sbyte)-1 };
+            yield return new object[] { (decimal)0, (sbyte)0 };
+            yield return new object[] { (decimal)1, (sbyte)1 };
+
+            // bool.
+            yield return new object[] { true, (sbyte)-1 };
+            yield return new object[] { false, (sbyte)0 };
+
+            // null.
+            yield return new object[] { null, (sbyte)0 };
+
+            // string.
+            yield return new object[] { "-1", (sbyte)-1 };
+            yield return new object[] { "0", (sbyte)0 };
+            yield return new object[] { "1", (sbyte)1 };
+            yield return new object[] { "&h5", (sbyte)5 };
+            yield return new object[] { "&h0", (sbyte)0 };
+            yield return new object[] { "&o5", (sbyte)5 };
+            yield return new object[] { " &o5", (sbyte)5 };
+            yield return new object[] { "&o0", (sbyte)0 };
+            yield return new object[] { 1.1.ToString(), (sbyte)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSByte_Object_TestData))]
+        public void ToSByte_Object_ReturnsExpected(object value, sbyte expected)
+        {
+            AssertEqual(expected, Conversions.ToSByte(value));
+        }
+
+        public static IEnumerable<object[]> ToSByte_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSByte_InvalidObject_TestData))]
+        public void ToSByte_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToSByte(value));
+        }
+        public static IEnumerable<object[]> ToSByte_OverflowObject_TestData()
+        {
+            yield return new object[] { byte.MaxValue };
+            yield return new object[] { byte.MaxValue };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { short.MaxValue };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { short.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSByte_OverflowObject_TestData))]
+        public void ToSByte_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToSByte(value));
+        }
+
+        public static IEnumerable<object[]> ToUShort_String_TestData()
+        {
+            yield return new object[] { null, ushort.MinValue };
+            yield return new object[] { "0", ushort.MinValue };
+            yield return new object[] { "1", (ushort)1 };
+            yield return new object[] { "&h5", (ushort)5 };
+            yield return new object[] { "&h0", ushort.MinValue };
+            yield return new object[] { "&o5", (ushort)5 };
+            yield return new object[] { " &o5", (ushort)5 };
+            yield return new object[] { "&o0", ushort.MinValue };
+            yield return new object[] { 1.1.ToString(), (ushort)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUShort_String_TestData))]
+        public void ToUShort_String_ReturnsExpected(string value, ushort expected)
+        {
+            AssertEqual(expected, Conversions.ToUShort(value));
+        }
+
+        public static IEnumerable<object[]> ToUShort_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUShort_InvalidString_TestData))]
+        public void ToUShort_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToUShort(value));
+        }
+
+        public static IEnumerable<object[]> ToUShort_OverflowString_TestData()
+        {
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUShort_OverflowString_TestData))]
+        public void ToUShort_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToUShort(value));
+        }
+
+        public static IEnumerable<object[]> ToUShort_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, ushort.MinValue };
+            yield return new object[] { (byte)1, (ushort)1 };
+            yield return new object[] { byte.MaxValue, (ushort)255 };
+            yield return new object[] { byte.MinValue, ushort.MinValue };
+            yield return new object[] { ByteEnum.Value, (ushort)1 };
+            yield return new object[] { byte.MaxValue, (ushort)255 };
+
+            // sbyte.
+            yield return new object[] { (sbyte)0, ushort.MinValue };
+            yield return new object[] { (sbyte)1, (ushort)1 };
+            yield return new object[] { (sbyte)1, (ushort)1 };
+            yield return new object[] { sbyte.MaxValue, (ushort)127 };
+            yield return new object[] { (sbyte)0, ushort.MinValue };
+            yield return new object[] { SByteEnum.Value, (ushort)1 };
+            yield return new object[] { SByteEnum.Value, (ushort)1 };
+            yield return new object[] { sbyte.MaxValue, (ushort)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, ushort.MinValue };
+            yield return new object[] { (ushort)1, (ushort)1 };
+            yield return new object[] { ushort.MaxValue, ushort.MaxValue };
+            yield return new object[] { ushort.MinValue, ushort.MinValue };
+            yield return new object[] { UShortEnum.Value, (ushort)1 };
+            yield return new object[] { ushort.MaxValue, ushort.MaxValue };
+
+            // short.
+            yield return new object[] { (short)0, ushort.MinValue };
+            yield return new object[] { (short)1, (ushort)1 };
+            yield return new object[] { short.MaxValue, (ushort)32767 };
+            yield return new object[] { (short)0, ushort.MinValue };
+            yield return new object[] { ShortEnum.Value, (ushort)1 };
+            yield return new object[] { short.MaxValue, (ushort)32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, ushort.MinValue };
+            yield return new object[] { (uint)1, (ushort)1 };
+            yield return new object[] { uint.MinValue, ushort.MinValue };
+            yield return new object[] { UIntEnum.Value, (ushort)1 };
+
+            // int.
+            yield return new object[] { 0, ushort.MinValue };
+            yield return new object[] { 1, (ushort)1 };
+            yield return new object[] { 0, ushort.MinValue };
+            yield return new object[] { IntEnum.Value, (ushort)1 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, ushort.MinValue };
+            yield return new object[] { (ulong)1, (ushort)1 };
+            yield return new object[] { ulong.MinValue, ushort.MinValue };
+            yield return new object[] { ULongEnum.Value, (ushort)1 };
+
+            // long.
+            yield return new object[] { 0, ushort.MinValue };
+            yield return new object[] { 1, (ushort)1 };
+            yield return new object[] { 0, ushort.MinValue };
+            yield return new object[] { LongEnum.Value, (ushort)1 };
+
+            // float.
+            yield return new object[] { (float)0, ushort.MinValue };
+            yield return new object[] { (float)1, (ushort)1 };
+
+            // double.
+            yield return new object[] { (double)0, ushort.MinValue };
+            yield return new object[] { (double)1, (ushort)1 };
+
+            // decimal.
+            yield return new object[] { (decimal)0, ushort.MinValue };
+            yield return new object[] { (decimal)1, (ushort)1 };
+
+            // bool.
+            yield return new object[] { true, ushort.MaxValue };
+            yield return new object[] { false, ushort.MinValue };
+
+            // null.
+            yield return new object[] { null, ushort.MinValue };
+
+            // string.
+            yield return new object[] { "0", ushort.MinValue };
+            yield return new object[] { "1", (ushort)1 };
+            yield return new object[] { "&h5", (ushort)5 };
+            yield return new object[] { "&h0", ushort.MinValue };
+            yield return new object[] { "&o5", (ushort)5 };
+            yield return new object[] { " &o5", (ushort)5 };
+            yield return new object[] { "&o0", ushort.MinValue };
+            yield return new object[] { 1.1.ToString(), (ushort)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUShort_Object_TestData))]
+        public void ToUShort_Object_ReturnsExpected(object value, ushort expected)
+        {
+            AssertEqual(expected, Conversions.ToUShort(value));
+        }
+
+        public static IEnumerable<object[]> ToUShort_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUShort_InvalidObject_TestData))]
+        public void ToUShort_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToUShort(value));
+        }
+        public static IEnumerable<object[]> ToUShort_OverflowObject_TestData()
+        {
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { (float)-1 };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { (double)-1 };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { (decimal)-1 };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUShort_OverflowObject_TestData))]
+        public void ToUShort_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToUShort(value));
+        }
+
+        public static IEnumerable<object[]> ToShort_String_TestData()
+        {
+            yield return new object[] { null, (short)0 };
+            yield return new object[] { "-1", (short)-1 };
+            yield return new object[] { "0", (short)0 };
+            yield return new object[] { "1", (short)1 };
+            yield return new object[] { "&h5", (short)5 };
+            yield return new object[] { "&h0", (short)0 };
+            yield return new object[] { "&o5", (short)5 };
+            yield return new object[] { " &o5", (short)5 };
+            yield return new object[] { "&o0", (short)0 };
+            yield return new object[] { 1.1.ToString(), (short)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToShort_String_TestData))]
+        public void ToShort_String_ReturnsExpected(string value, short expected)
+        {
+            AssertEqual(expected, Conversions.ToShort(value));
+        }
+
+        public static IEnumerable<object[]> ToShort_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToShort_InvalidString_TestData))]
+        public void ToShort_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToShort(value));
+        }
+
+        public static IEnumerable<object[]> ToShort_OverflowString_TestData()
+        {
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToShort_OverflowString_TestData))]
+        public void ToShort_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToShort(value));
+        }
+
+        public static IEnumerable<object[]> ToShort_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, (short)0 };
+            yield return new object[] { (byte)1, (short)1 };
+            yield return new object[] { byte.MaxValue, (short)255 };
+            yield return new object[] { byte.MinValue, (short)0 };
+            yield return new object[] { ByteEnum.Value, (short)1 };
+            yield return new object[] { byte.MaxValue, (short)255 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, (short)-128 };
+            yield return new object[] { (sbyte)-1, (short)-1 };
+            yield return new object[] { (sbyte)0, (short)0 };
+            yield return new object[] { (sbyte)1, (short)1 };
+            yield return new object[] { (sbyte)1, (short)1 };
+            yield return new object[] { sbyte.MaxValue, (short)127 };
+            yield return new object[] { sbyte.MinValue, (short)-128 };
+            yield return new object[] { (sbyte)-1, (short)-1 };
+            yield return new object[] { (sbyte)0, (short)0 };
+            yield return new object[] { SByteEnum.Value, (short)1 };
+            yield return new object[] { SByteEnum.Value, (short)1 };
+            yield return new object[] { sbyte.MaxValue, (short)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, (short)0 };
+            yield return new object[] { (ushort)1, (short)1 };
+            yield return new object[] { ushort.MinValue, (short)0 };
+            yield return new object[] { UShortEnum.Value, (short)1 };
+
+            // short.
+            yield return new object[] { short.MinValue, short.MinValue };
+            yield return new object[] { (short)-1, (short)-1 };
+            yield return new object[] { (short)0, (short)0 };
+            yield return new object[] { (short)1, (short)1 };
+            yield return new object[] { short.MaxValue, short.MaxValue };
+            yield return new object[] { short.MinValue, short.MinValue };
+            yield return new object[] { (short)-1, (short)-1 };
+            yield return new object[] { (short)0, (short)0 };
+            yield return new object[] { ShortEnum.Value, (short)1 };
+            yield return new object[] { short.MaxValue, short.MaxValue };
+
+            // uint.
+            yield return new object[] { uint.MinValue, (short)0 };
+            yield return new object[] { (uint)1, (short)1 };
+            yield return new object[] { uint.MinValue, (short)0 };
+            yield return new object[] { UIntEnum.Value, (short)1 };
+
+            // int.
+            yield return new object[] { -1, (short)-1 };
+            yield return new object[] { 0, (short)0 };
+            yield return new object[] { 1, (short)1 };
+            yield return new object[] { -1, (short)-1 };
+            yield return new object[] { 0, (short)0 };
+            yield return new object[] { IntEnum.Value, (short)1 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, (short)0 };
+            yield return new object[] { (ulong)1, (short)1 };
+            yield return new object[] { ulong.MinValue, (short)0 };
+            yield return new object[] { ULongEnum.Value, (short)1 };
+
+            // long.
+            yield return new object[] { -1, (short)-1 };
+            yield return new object[] { 0, (short)0 };
+            yield return new object[] { 1, (short)1 };
+            yield return new object[] { -1, (short)-1 };
+            yield return new object[] { 0, (short)0 };
+            yield return new object[] { LongEnum.Value, (short)1 };
+
+            // float.
+            yield return new object[] { (float)-1, (short)-1 };
+            yield return new object[] { (float)0, (short)0 };
+            yield return new object[] { (float)1, (short)1 };
+
+            // double.
+            yield return new object[] { (double)-1, (short)-1 };
+            yield return new object[] { (double)0, (short)0 };
+            yield return new object[] { (double)1, (short)1 };
+
+            // decimal.
+            yield return new object[] { (decimal)-1, (short)-1 };
+            yield return new object[] { (decimal)0, (short)0 };
+            yield return new object[] { (decimal)1, (short)1 };
+
+            // bool.
+            yield return new object[] { true, (short)-1 };
+            yield return new object[] { false, (short)0 };
+
+            // null.
+            yield return new object[] { null, (short)0 };
+
+            // string.
+            yield return new object[] { "-1", (short)-1 };
+            yield return new object[] { "0", (short)0 };
+            yield return new object[] { "1", (short)1 };
+            yield return new object[] { "&h5", (short)5 };
+            yield return new object[] { "&h0", (short)0 };
+            yield return new object[] { "&o5", (short)5 };
+            yield return new object[] { " &o5", (short)5 };
+            yield return new object[] { "&o0", (short)0 };
+            yield return new object[] { 1.1.ToString(), (short)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToShort_Object_TestData))]
+        public void ToShort_Object_ReturnsExpected(object value, short expected)
+        {
+            AssertEqual(expected, Conversions.ToShort(value));
+        }
+
+        public static IEnumerable<object[]> ToShort_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToShort_InvalidObject_TestData))]
+        public void ToShort_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToShort(value));
+        }
+        public static IEnumerable<object[]> ToShort_OverflowObject_TestData()
+        {
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToShort_OverflowObject_TestData))]
+        public void ToShort_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToShort(value));
+        }
+
+        public static IEnumerable<object[]> ToUInteger_String_TestData()
+        {
+            yield return new object[] { null, uint.MinValue };
+            yield return new object[] { "0", uint.MinValue };
+            yield return new object[] { "1", (uint)1 };
+            yield return new object[] { "&h5", (uint)5 };
+            yield return new object[] { "&h0", uint.MinValue };
+            yield return new object[] { "&o5", (uint)5 };
+            yield return new object[] { " &o5", (uint)5 };
+            yield return new object[] { "&o0", uint.MinValue };
+            yield return new object[] { 1.1.ToString(), (uint)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUInteger_String_TestData))]
+        public void ToUInteger_String_ReturnsExpected(string value, uint expected)
+        {
+            AssertEqual(expected, Conversions.ToUInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToUInteger_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUInteger_InvalidString_TestData))]
+        public void ToUInteger_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToUInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToUInteger_OverflowString_TestData()
+        {
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        public void ToUInteger_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToUInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToUInteger_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, uint.MinValue };
+            yield return new object[] { (byte)1, (uint)1 };
+            yield return new object[] { byte.MaxValue, (uint)255 };
+            yield return new object[] { byte.MinValue, uint.MinValue };
+            yield return new object[] { ByteEnum.Value, (uint)1 };
+            yield return new object[] { byte.MaxValue, (uint)255 };
+
+            // sbyte.
+            yield return new object[] { (sbyte)0, uint.MinValue };
+            yield return new object[] { (sbyte)1, (uint)1 };
+            yield return new object[] { (sbyte)1, (uint)1 };
+            yield return new object[] { sbyte.MaxValue, (uint)127 };
+            yield return new object[] { (sbyte)0, uint.MinValue };
+            yield return new object[] { SByteEnum.Value, (uint)1 };
+            yield return new object[] { SByteEnum.Value, (uint)1 };
+            yield return new object[] { sbyte.MaxValue, (uint)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, uint.MinValue };
+            yield return new object[] { (ushort)1, (uint)1 };
+            yield return new object[] { ushort.MaxValue, (uint)65535 };
+            yield return new object[] { ushort.MinValue, uint.MinValue };
+            yield return new object[] { UShortEnum.Value, (uint)1 };
+            yield return new object[] { ushort.MaxValue, (uint)65535 };
+
+            // short.
+            yield return new object[] { (short)0, uint.MinValue };
+            yield return new object[] { (short)1, (uint)1 };
+            yield return new object[] { short.MaxValue, (uint)32767 };
+            yield return new object[] { (short)0, uint.MinValue };
+            yield return new object[] { ShortEnum.Value, (uint)1 };
+            yield return new object[] { short.MaxValue, (uint)32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, uint.MinValue };
+            yield return new object[] { (uint)1, (uint)1 };
+            yield return new object[] { uint.MaxValue, uint.MaxValue };
+            yield return new object[] { uint.MinValue, uint.MinValue };
+            yield return new object[] { UIntEnum.Value, (uint)1 };
+            yield return new object[] { uint.MaxValue, uint.MaxValue };
+
+            // int.
+            yield return new object[] { 0, uint.MinValue };
+            yield return new object[] { 1, (uint)1 };
+            yield return new object[] { int.MaxValue, (uint)2147483647 };
+            yield return new object[] { 0, uint.MinValue };
+            yield return new object[] { IntEnum.Value, (uint)1 };
+            yield return new object[] { int.MaxValue, (uint)2147483647 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, uint.MinValue };
+            yield return new object[] { (ulong)1, (uint)1 };
+            yield return new object[] { ulong.MinValue, uint.MinValue };
+            yield return new object[] { ULongEnum.Value, (uint)1 };
+
+            // long.
+            yield return new object[] { 0, uint.MinValue };
+            yield return new object[] { 1, (uint)1 };
+            yield return new object[] { 0, uint.MinValue };
+            yield return new object[] { LongEnum.Value, (uint)1 };
+
+            // float.
+            yield return new object[] { (float)0, uint.MinValue };
+            yield return new object[] { (float)1, (uint)1 };
+
+            // double.
+            yield return new object[] { (double)0, uint.MinValue };
+            yield return new object[] { (double)1, (uint)1 };
+
+            // decimal.
+            yield return new object[] { (decimal)0, uint.MinValue };
+            yield return new object[] { (decimal)1, (uint)1 };
+
+            // bool.
+            yield return new object[] { true, uint.MaxValue };
+            yield return new object[] { false, uint.MinValue };
+
+            // null.
+            yield return new object[] { null, uint.MinValue };
+
+            // string.
+            yield return new object[] { "0", uint.MinValue };
+            yield return new object[] { "1", (uint)1 };
+            yield return new object[] { "&h5", (uint)5 };
+            yield return new object[] { "&h0", uint.MinValue };
+            yield return new object[] { "&o5", (uint)5 };
+            yield return new object[] { " &o5", (uint)5 };
+            yield return new object[] { "&o0", uint.MinValue };
+            yield return new object[] { 1.1.ToString(), (uint)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUInteger_Object_TestData))]
+        public void ToUInteger_Object_ReturnsExpected(object value, uint expected)
+        {
+            AssertEqual(expected, Conversions.ToUInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToUInteger_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUInteger_InvalidObject_TestData))]
+        public void ToUInteger_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToUInteger(value));
+        }
+        public static IEnumerable<object[]> ToUInteger_OverflowObject_TestData()
+        {
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { (float)-1 };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { (double)-1 };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { (decimal)-1 };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUInteger_OverflowObject_TestData))]
+        public void ToUInteger_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToUInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToInteger_String_TestData()
+        {
+            yield return new object[] { null, 0 };
+            yield return new object[] { "-1", -1 };
+            yield return new object[] { "0", 0 };
+            yield return new object[] { "1", 1 };
+            yield return new object[] { "&h5", 5 };
+            yield return new object[] { "&h0", 0 };
+            yield return new object[] { "&o5", 5 };
+            yield return new object[] { " &o5", 5 };
+            yield return new object[] { "&o0", 0 };
+            yield return new object[] { 1.1.ToString(), 1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToInteger_String_TestData))]
+        public void ToInteger_String_ReturnsExpected(string value, int expected)
+        {
+            AssertEqual(expected, Conversions.ToInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToInteger_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToInteger_InvalidString_TestData))]
+        public void ToInteger_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToInteger_OverflowString_TestData()
+        {
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        public void ToInteger_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToInteger_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, 0 };
+            yield return new object[] { (byte)1, 1 };
+            yield return new object[] { byte.MaxValue, 255 };
+            yield return new object[] { byte.MinValue, 0 };
+            yield return new object[] { ByteEnum.Value, 1 };
+            yield return new object[] { byte.MaxValue, 255 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, -128 };
+            yield return new object[] { (sbyte)-1, -1 };
+            yield return new object[] { (sbyte)0, 0 };
+            yield return new object[] { (sbyte)1, 1 };
+            yield return new object[] { (sbyte)1, 1 };
+            yield return new object[] { sbyte.MaxValue, 127 };
+            yield return new object[] { sbyte.MinValue, -128 };
+            yield return new object[] { (sbyte)-1, -1 };
+            yield return new object[] { (sbyte)0, 0 };
+            yield return new object[] { SByteEnum.Value, 1 };
+            yield return new object[] { SByteEnum.Value, 1 };
+            yield return new object[] { sbyte.MaxValue, 127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, 0 };
+            yield return new object[] { (ushort)1, 1 };
+            yield return new object[] { ushort.MaxValue, 65535 };
+            yield return new object[] { ushort.MinValue, 0 };
+            yield return new object[] { UShortEnum.Value, 1 };
+            yield return new object[] { ushort.MaxValue, 65535 };
+
+            // short.
+            yield return new object[] { short.MinValue, -32768 };
+            yield return new object[] { (short)-1, -1 };
+            yield return new object[] { (short)0, 0 };
+            yield return new object[] { (short)1, 1 };
+            yield return new object[] { short.MaxValue, 32767 };
+            yield return new object[] { short.MinValue, -32768 };
+            yield return new object[] { (short)-1, -1 };
+            yield return new object[] { (short)0, 0 };
+            yield return new object[] { ShortEnum.Value, 1 };
+            yield return new object[] { short.MaxValue, 32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, 0 };
+            yield return new object[] { (uint)1, 1 };
+            yield return new object[] { uint.MinValue, 0 };
+            yield return new object[] { UIntEnum.Value, 1 };
+
+            // int.
+            yield return new object[] { int.MinValue, int.MinValue };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { 1, 1 };
+            yield return new object[] { int.MaxValue, int.MaxValue };
+            yield return new object[] { int.MinValue, int.MinValue };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { IntEnum.Value, 1 };
+            yield return new object[] { int.MaxValue, int.MaxValue };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, 0 };
+            yield return new object[] { (ulong)1, 1 };
+            yield return new object[] { ulong.MinValue, 0 };
+            yield return new object[] { ULongEnum.Value, 1 };
+
+            // long.
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { 1, 1 };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { LongEnum.Value, 1 };
+
+            // float.
+            yield return new object[] { (float)-1, -1 };
+            yield return new object[] { (float)0, 0 };
+            yield return new object[] { (float)1, 1 };
+
+            // double.
+            yield return new object[] { (double)-1, -1 };
+            yield return new object[] { (double)0, 0 };
+            yield return new object[] { (double)1, 1 };
+
+            // decimal.
+            yield return new object[] { (decimal)-1, -1 };
+            yield return new object[] { (decimal)0, 0 };
+            yield return new object[] { (decimal)1, 1 };
+
+            // bool.
+            yield return new object[] { true, -1 };
+            yield return new object[] { false, 0 };
+
+            // null.
+            yield return new object[] { null, 0 };
+
+            // string.
+            yield return new object[] { "-1", -1 };
+            yield return new object[] { "0", 0 };
+            yield return new object[] { "1", 1 };
+            yield return new object[] { "&h5", 5 };
+            yield return new object[] { "&h0", 0 };
+            yield return new object[] { "&o5", 5 };
+            yield return new object[] { " &o5", 5 };
+            yield return new object[] { "&o0", 0 };
+            yield return new object[] { 1.1.ToString(), 1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToInteger_Object_TestData))]
+        public void ToInteger_Object_ReturnsExpected(object value, int expected)
+        {
+            AssertEqual(expected, Conversions.ToInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToInteger_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToInteger_InvalidObject_TestData))]
+        public void ToInteger_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToInteger(value));
+        }
+        public static IEnumerable<object[]> ToInteger_OverflowObject_TestData()
+        {
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToInteger_OverflowObject_TestData))]
+        public void ToInteger_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToInteger(value));
+        }
+
+        public static IEnumerable<object[]> ToULong_String_TestData()
+        {
+            yield return new object[] { null, ulong.MinValue };
+            yield return new object[] { "0", ulong.MinValue };
+            yield return new object[] { "1", (ulong)1 };
+            yield return new object[] { "&h5", (ulong)5 };
+            yield return new object[] { "&h0", ulong.MinValue };
+            yield return new object[] { "&o5", (ulong)5 };
+            yield return new object[] { " &o5", (ulong)5 };
+            yield return new object[] { "&o0", ulong.MinValue };
+            yield return new object[] { 1.1.ToString(), (ulong)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToULong_String_TestData))]
+        public void ToULong_String_ReturnsExpected(string value, ulong expected)
+        {
+            AssertEqual(expected, Conversions.ToULong(value));
+        }
+
+        public static IEnumerable<object[]> ToULong_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToULong_InvalidString_TestData))]
+        public void ToULong_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToULong(value));
+        }
+
+        public static IEnumerable<object[]> ToULong_OverflowString_TestData()
+        {
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
+        public void ToULong_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToULong(value));
+        }
+
+        public static IEnumerable<object[]> ToULong_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, ulong.MinValue };
+            yield return new object[] { (byte)1, (ulong)1 };
+            yield return new object[] { byte.MaxValue, (ulong)255 };
+            yield return new object[] { byte.MinValue, ulong.MinValue };
+            yield return new object[] { ByteEnum.Value, (ulong)1 };
+            yield return new object[] { byte.MaxValue, (ulong)255 };
+
+            // sbyte.
+            yield return new object[] { (sbyte)0, ulong.MinValue };
+            yield return new object[] { (sbyte)1, (ulong)1 };
+            yield return new object[] { (sbyte)1, (ulong)1 };
+            yield return new object[] { sbyte.MaxValue, (ulong)127 };
+            yield return new object[] { (sbyte)0, ulong.MinValue };
+            yield return new object[] { SByteEnum.Value, (ulong)1 };
+            yield return new object[] { SByteEnum.Value, (ulong)1 };
+            yield return new object[] { sbyte.MaxValue, (ulong)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, ulong.MinValue };
+            yield return new object[] { (ushort)1, (ulong)1 };
+            yield return new object[] { ushort.MaxValue, (ulong)65535 };
+            yield return new object[] { ushort.MinValue, ulong.MinValue };
+            yield return new object[] { UShortEnum.Value, (ulong)1 };
+            yield return new object[] { ushort.MaxValue, (ulong)65535 };
+
+            // short.
+            yield return new object[] { (short)0, ulong.MinValue };
+            yield return new object[] { (short)1, (ulong)1 };
+            yield return new object[] { short.MaxValue, (ulong)32767 };
+            yield return new object[] { (short)0, ulong.MinValue };
+            yield return new object[] { ShortEnum.Value, (ulong)1 };
+            yield return new object[] { short.MaxValue, (ulong)32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, ulong.MinValue };
+            yield return new object[] { (uint)1, (ulong)1 };
+            yield return new object[] { uint.MaxValue, (ulong)4294967295 };
+            yield return new object[] { uint.MinValue, ulong.MinValue };
+            yield return new object[] { UIntEnum.Value, (ulong)1 };
+            yield return new object[] { uint.MaxValue, (ulong)4294967295 };
+
+            // int.
+            yield return new object[] { 0, ulong.MinValue };
+            yield return new object[] { 1, (ulong)1 };
+            yield return new object[] { int.MaxValue, (ulong)2147483647 };
+            yield return new object[] { 0, ulong.MinValue };
+            yield return new object[] { IntEnum.Value, (ulong)1 };
+            yield return new object[] { int.MaxValue, (ulong)2147483647 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, ulong.MinValue };
+            yield return new object[] { (ulong)1, (ulong)1 };
+            yield return new object[] { ulong.MaxValue, ulong.MaxValue };
+            yield return new object[] { ulong.MinValue, ulong.MinValue };
+            yield return new object[] { ULongEnum.Value, (ulong)1 };
+            yield return new object[] { ulong.MaxValue, ulong.MaxValue };
+
+            // long.
+            yield return new object[] { 0, ulong.MinValue };
+            yield return new object[] { 1, (ulong)1 };
+            yield return new object[] { long.MaxValue, (ulong)9223372036854775807 };
+            yield return new object[] { 0, ulong.MinValue };
+            yield return new object[] { LongEnum.Value, (ulong)1 };
+            yield return new object[] { long.MaxValue, (ulong)9223372036854775807 };
+
+            // float.
+            yield return new object[] { (float)0, ulong.MinValue };
+            yield return new object[] { (float)1, (ulong)1 };
+
+            // double.
+            yield return new object[] { (double)0, ulong.MinValue };
+            yield return new object[] { (double)1, (ulong)1 };
+
+            // decimal.
+            yield return new object[] { (decimal)0, ulong.MinValue };
+            yield return new object[] { (decimal)1, (ulong)1 };
+
+            // bool.
+            yield return new object[] { true, ulong.MaxValue };
+            yield return new object[] { false, ulong.MinValue };
+
+            // null.
+            yield return new object[] { null, ulong.MinValue };
+
+            // string.
+            yield return new object[] { "0", ulong.MinValue };
+            yield return new object[] { "1", (ulong)1 };
+            yield return new object[] { "&h5", (ulong)5 };
+            yield return new object[] { "&h0", ulong.MinValue };
+            yield return new object[] { "&o5", (ulong)5 };
+            yield return new object[] { " &o5", (ulong)5 };
+            yield return new object[] { "&o0", ulong.MinValue };
+            yield return new object[] { 1.1.ToString(), (ulong)1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToULong_Object_TestData))]
+        public void ToULong_Object_ReturnsExpected(object value, ulong expected)
+        {
+            AssertEqual(expected, Conversions.ToULong(value));
+        }
+
+        public static IEnumerable<object[]> ToULong_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToULong_InvalidObject_TestData))]
+        public void ToULong_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToULong(value));
+        }
+        public static IEnumerable<object[]> ToULong_OverflowObject_TestData()
+        {
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { (float)-1 };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { (double)-1 };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { (decimal)-1 };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "-1" };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToULong_OverflowObject_TestData))]
+        public void ToULong_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToULong(value));
+        }
+
+        public static IEnumerable<object[]> ToLong_String_TestData()
+        {
+            yield return new object[] { null, 0 };
+            yield return new object[] { "-1", -1 };
+            yield return new object[] { "0", 0 };
+            yield return new object[] { "1", 1 };
+            yield return new object[] { "&h5", 5 };
+            yield return new object[] { "&h0", 0 };
+            yield return new object[] { "&o5", 5 };
+            yield return new object[] { " &o5", 5 };
+            yield return new object[] { "&o0", 0 };
+            yield return new object[] { 1.1.ToString(), 1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToLong_String_TestData))]
+        public void ToLong_String_ReturnsExpected(string value, long expected)
+        {
+            AssertEqual(expected, Conversions.ToLong(value));
+        }
+
+        public static IEnumerable<object[]> ToLong_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToLong_InvalidString_TestData))]
+        public void ToLong_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToLong(value));
+        }
+
+        public static IEnumerable<object[]> ToLong_OverflowString_TestData()
+        {
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
+        public void ToLong_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToLong(value));
+        }
+
+        public static IEnumerable<object[]> ToLong_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, 0 };
+            yield return new object[] { (byte)1, 1 };
+            yield return new object[] { byte.MaxValue, 255 };
+            yield return new object[] { byte.MinValue, 0 };
+            yield return new object[] { ByteEnum.Value, 1 };
+            yield return new object[] { byte.MaxValue, 255 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, -128 };
+            yield return new object[] { (sbyte)-1, -1 };
+            yield return new object[] { (sbyte)0, 0 };
+            yield return new object[] { (sbyte)1, 1 };
+            yield return new object[] { (sbyte)1, 1 };
+            yield return new object[] { sbyte.MaxValue, 127 };
+            yield return new object[] { sbyte.MinValue, -128 };
+            yield return new object[] { (sbyte)-1, -1 };
+            yield return new object[] { (sbyte)0, 0 };
+            yield return new object[] { SByteEnum.Value, 1 };
+            yield return new object[] { SByteEnum.Value, 1 };
+            yield return new object[] { sbyte.MaxValue, 127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, 0 };
+            yield return new object[] { (ushort)1, 1 };
+            yield return new object[] { ushort.MaxValue, 65535 };
+            yield return new object[] { ushort.MinValue, 0 };
+            yield return new object[] { UShortEnum.Value, 1 };
+            yield return new object[] { ushort.MaxValue, 65535 };
+
+            // short.
+            yield return new object[] { short.MinValue, -32768 };
+            yield return new object[] { (short)-1, -1 };
+            yield return new object[] { (short)0, 0 };
+            yield return new object[] { (short)1, 1 };
+            yield return new object[] { short.MaxValue, 32767 };
+            yield return new object[] { short.MinValue, -32768 };
+            yield return new object[] { (short)-1, -1 };
+            yield return new object[] { (short)0, 0 };
+            yield return new object[] { ShortEnum.Value, 1 };
+            yield return new object[] { short.MaxValue, 32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, 0 };
+            yield return new object[] { (uint)1, 1 };
+            yield return new object[] { uint.MaxValue, 4294967295 };
+            yield return new object[] { uint.MinValue, 0 };
+            yield return new object[] { UIntEnum.Value, 1 };
+            yield return new object[] { uint.MaxValue, 4294967295 };
+
+            // int.
+            yield return new object[] { int.MinValue, -2147483648 };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { 1, 1 };
+            yield return new object[] { int.MaxValue, 2147483647 };
+            yield return new object[] { int.MinValue, -2147483648 };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { IntEnum.Value, 1 };
+            yield return new object[] { int.MaxValue, 2147483647 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, 0 };
+            yield return new object[] { (ulong)1, 1 };
+            yield return new object[] { ulong.MinValue, 0 };
+            yield return new object[] { ULongEnum.Value, 1 };
+
+            // long.
+            yield return new object[] { long.MinValue, long.MinValue };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { 1, 1 };
+            yield return new object[] { long.MaxValue, long.MaxValue };
+            yield return new object[] { long.MinValue, long.MinValue };
+            yield return new object[] { -1, -1 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { LongEnum.Value, 1 };
+            yield return new object[] { long.MaxValue, long.MaxValue };
+
+            // float.
+            yield return new object[] { (float)-1, -1 };
+            yield return new object[] { (float)0, 0 };
+            yield return new object[] { (float)1, 1 };
+
+            // double.
+            yield return new object[] { (double)-1, -1 };
+            yield return new object[] { (double)0, 0 };
+            yield return new object[] { (double)1, 1 };
+
+            // decimal.
+            yield return new object[] { (decimal)-1, -1 };
+            yield return new object[] { (decimal)0, 0 };
+            yield return new object[] { (decimal)1, 1 };
+
+            // bool.
+            yield return new object[] { true, -1 };
+            yield return new object[] { false, 0 };
+
+            // null.
+            yield return new object[] { null, 0 };
+
+            // string.
+            yield return new object[] { "-1", -1 };
+            yield return new object[] { "0", 0 };
+            yield return new object[] { "1", 1 };
+            yield return new object[] { "&h5", 5 };
+            yield return new object[] { "&h0", 0 };
+            yield return new object[] { "&o5", 5 };
+            yield return new object[] { " &o5", 5 };
+            yield return new object[] { "&o0", 0 };
+            yield return new object[] { 1.1.ToString(), 1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToLong_Object_TestData))]
+        public void ToLong_Object_ReturnsExpected(object value, long expected)
+        {
+            AssertEqual(expected, Conversions.ToLong(value));
+        }
+
+        public static IEnumerable<object[]> ToLong_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToLong_InvalidObject_TestData))]
+        public void ToLong_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToLong(value));
+        }
+        public static IEnumerable<object[]> ToLong_OverflowObject_TestData()
+        {
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { "18446744073709551616" };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToLong_OverflowObject_TestData))]
+        public void ToLong_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToLong(value));
+        }
+
+        public static IEnumerable<object[]> ToSingle_String_TestData()
+        {
+            yield return new object[] { null, (float)0 };
+            yield return new object[] { "-1", (float)-1 };
+            yield return new object[] { "0", (float)0 };
+            yield return new object[] { "1", (float)1 };
+            yield return new object[] { "&h5", (float)5 };
+            yield return new object[] { "&h0", (float)0 };
+            yield return new object[] { "&o5", (float)5 };
+            yield return new object[] { " &o5", (float)5 };
+            yield return new object[] { "&o0", (float)0 };
+            yield return new object[] { 1.1.ToString(), (float)1.1 };
+            yield return new object[] { "18446744073709551616", (float)1.844674E+19 };
+            yield return new object[] { double.PositiveInfinity.ToString(), float.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity.ToString(), float.NegativeInfinity };
+            yield return new object[] { double.NaN.ToString(), float.NaN };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSingle_String_TestData))]
+        public void ToSingle_String_ReturnsExpected(string value, float expected)
+        {
+            AssertEqual(expected, Conversions.ToSingle(value));
+        }
+
+        public static IEnumerable<object[]> ToSingle_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSingle_InvalidString_TestData))]
+        public void ToSingle_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToSingle(value));
+        }
+
+        public static IEnumerable<object[]> ToSingle_OverflowString_TestData()
+        {
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSingle_OverflowString_TestData))]
+        public void ToSingle_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToSingle(value));
+        }
+
+        public static IEnumerable<object[]> ToSingle_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, (float)0 };
+            yield return new object[] { (byte)1, (float)1 };
+            yield return new object[] { byte.MaxValue, (float)255 };
+            yield return new object[] { byte.MinValue, (float)0 };
+            yield return new object[] { ByteEnum.Value, (float)1 };
+            yield return new object[] { byte.MaxValue, (float)255 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, (float)-128 };
+            yield return new object[] { (sbyte)-1, (float)-1 };
+            yield return new object[] { (sbyte)0, (float)0 };
+            yield return new object[] { (sbyte)1, (float)1 };
+            yield return new object[] { (sbyte)1, (float)1 };
+            yield return new object[] { sbyte.MaxValue, (float)127 };
+            yield return new object[] { sbyte.MinValue, (float)-128 };
+            yield return new object[] { (sbyte)-1, (float)-1 };
+            yield return new object[] { (sbyte)0, (float)0 };
+            yield return new object[] { SByteEnum.Value, (float)1 };
+            yield return new object[] { SByteEnum.Value, (float)1 };
+            yield return new object[] { sbyte.MaxValue, (float)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, (float)0 };
+            yield return new object[] { (ushort)1, (float)1 };
+            yield return new object[] { ushort.MaxValue, (float)65535 };
+            yield return new object[] { ushort.MinValue, (float)0 };
+            yield return new object[] { UShortEnum.Value, (float)1 };
+            yield return new object[] { ushort.MaxValue, (float)65535 };
+
+            // short.
+            yield return new object[] { short.MinValue, (float)-32768 };
+            yield return new object[] { (short)-1, (float)-1 };
+            yield return new object[] { (short)0, (float)0 };
+            yield return new object[] { (short)1, (float)1 };
+            yield return new object[] { short.MaxValue, (float)32767 };
+            yield return new object[] { short.MinValue, (float)-32768 };
+            yield return new object[] { (short)-1, (float)-1 };
+            yield return new object[] { (short)0, (float)0 };
+            yield return new object[] { ShortEnum.Value, (float)1 };
+            yield return new object[] { short.MaxValue, (float)32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, (float)0 };
+            yield return new object[] { (uint)1, (float)1 };
+            yield return new object[] { uint.MaxValue, (float)4.294967E+09 };
+            yield return new object[] { uint.MinValue, (float)0 };
+            yield return new object[] { UIntEnum.Value, (float)1 };
+            yield return new object[] { uint.MaxValue, (float)4.294967E+09 };
+
+            // int.
+            yield return new object[] { int.MinValue, (float)-2.147484E+09 };
+            yield return new object[] { -1, (float)-1 };
+            yield return new object[] { 0, (float)0 };
+            yield return new object[] { 1, (float)1 };
+            yield return new object[] { int.MaxValue, (float)2.147484E+09 };
+            yield return new object[] { int.MinValue, (float)-2.147484E+09 };
+            yield return new object[] { -1, (float)-1 };
+            yield return new object[] { 0, (float)0 };
+            yield return new object[] { IntEnum.Value, (float)1 };
+            yield return new object[] { int.MaxValue, (float)2.147484E+09 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, (float)0 };
+            yield return new object[] { (ulong)1, (float)1 };
+            yield return new object[] { ulong.MaxValue, (float)1.844674E+19 };
+            yield return new object[] { ulong.MinValue, (float)0 };
+            yield return new object[] { ULongEnum.Value, (float)1 };
+            yield return new object[] { ulong.MaxValue, (float)1.844674E+19 };
+
+            // long.
+            yield return new object[] { long.MinValue, (float)-9.223372E+18 };
+            yield return new object[] { -1, (float)-1 };
+            yield return new object[] { 0, (float)0 };
+            yield return new object[] { 1, (float)1 };
+            yield return new object[] { long.MaxValue, (float)9.223372E+18 };
+            yield return new object[] { long.MinValue, (float)-9.223372E+18 };
+            yield return new object[] { -1, (float)-1 };
+            yield return new object[] { 0, (float)0 };
+            yield return new object[] { LongEnum.Value, (float)1 };
+            yield return new object[] { long.MaxValue, (float)9.223372E+18 };
+
+            // float.
+            yield return new object[] { float.MinValue, float.MinValue };
+            yield return new object[] { (float)-1, (float)-1 };
+            yield return new object[] { (float)0, (float)0 };
+            yield return new object[] { (float)1, (float)1 };
+            yield return new object[] { float.MaxValue, float.MaxValue };
+            yield return new object[] { float.PositiveInfinity, float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity, float.NegativeInfinity };
+            yield return new object[] { float.NaN, float.NaN };
+
+            // double.
+            yield return new object[] { double.MinValue, float.NegativeInfinity };
+            yield return new object[] { (double)-1, (float)-1 };
+            yield return new object[] { (double)0, (float)0 };
+            yield return new object[] { (double)1, (float)1 };
+            yield return new object[] { double.MaxValue, float.PositiveInfinity };
+            yield return new object[] { double.PositiveInfinity, float.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity, float.NegativeInfinity };
+            yield return new object[] { double.NaN, float.NaN };
+
+            // decimal.
+            yield return new object[] { decimal.MinValue, (float)-7.922816E+28 };
+            yield return new object[] { (decimal)-1, (float)-1 };
+            yield return new object[] { (decimal)0, (float)0 };
+            yield return new object[] { (decimal)1, (float)1 };
+            yield return new object[] { decimal.MaxValue, (float)7.922816E+28 };
+
+            // bool.
+            yield return new object[] { true, (float)-1 };
+            yield return new object[] { false, (float)0 };
+
+            // null.
+            yield return new object[] { null, (float)0 };
+
+            // string.
+            yield return new object[] { "-1", (float)-1 };
+            yield return new object[] { "0", (float)0 };
+            yield return new object[] { "1", (float)1 };
+            yield return new object[] { "&h5", (float)5 };
+            yield return new object[] { "&h0", (float)0 };
+            yield return new object[] { "&o5", (float)5 };
+            yield return new object[] { " &o5", (float)5 };
+            yield return new object[] { "&o0", (float)0 };
+            yield return new object[] { 1.1.ToString(), (float)1.1 };
+            yield return new object[] { "18446744073709551616", (float)1.844674E+19 };
+            yield return new object[] { double.PositiveInfinity.ToString(), float.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity.ToString(), float.NegativeInfinity };
+            yield return new object[] { double.NaN.ToString(), float.NaN };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSingle_Object_TestData))]
+        public void ToSingle_Object_ReturnsExpected(object value, float expected)
+        {
+            AssertEqual(expected, Conversions.ToSingle(value));
+        }
+
+        public static IEnumerable<object[]> ToSingle_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSingle_InvalidObject_TestData))]
+        public void ToSingle_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToSingle(value));
+        }
+        public static IEnumerable<object[]> ToSingle_OverflowObject_TestData()
+        {
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSingle_OverflowObject_TestData))]
+        public void ToSingle_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToSingle(value));
+        }
+
+        public static IEnumerable<object[]> ToDouble_String_TestData()
+        {
+            yield return new object[] { null, (double)0 };
+            yield return new object[] { "-1", (double)-1 };
+            yield return new object[] { "0", (double)0 };
+            yield return new object[] { "1", (double)1 };
+            yield return new object[] { "&h5", (double)5 };
+            yield return new object[] { "&h0", (double)0 };
+            yield return new object[] { "&o5", (double)5 };
+            yield return new object[] { " &o5", (double)5 };
+            yield return new object[] { "&o0", (double)0 };
+            yield return new object[] { 1.1.ToString(), (double)1.1 };
+            yield return new object[] { "18446744073709551616", (double)1.84467440737096E+19 };
+            yield return new object[] { "1844674407370955161618446744073709551616", (double)1.84467440737096E+39 };
+            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity };
+            yield return new object[] { double.NaN.ToString(), double.NaN };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDouble_String_TestData))]
+        public void ToDouble_String_ReturnsExpected(string value, double expected)
+        {
+            AssertEqual(expected, Conversions.ToDouble(value));
+        }
+
+        public static IEnumerable<object[]> ToDouble_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDouble_InvalidString_TestData))]
+        public void ToDouble_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToDouble(value));
+        }
+
+        public static IEnumerable<object[]> ToDouble_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, (double)0 };
+            yield return new object[] { (byte)1, (double)1 };
+            yield return new object[] { byte.MaxValue, (double)255 };
+            yield return new object[] { byte.MinValue, (double)0 };
+            yield return new object[] { ByteEnum.Value, (double)1 };
+            yield return new object[] { byte.MaxValue, (double)255 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, (double)-128 };
+            yield return new object[] { (sbyte)-1, (double)-1 };
+            yield return new object[] { (sbyte)0, (double)0 };
+            yield return new object[] { (sbyte)1, (double)1 };
+            yield return new object[] { (sbyte)1, (double)1 };
+            yield return new object[] { sbyte.MaxValue, (double)127 };
+            yield return new object[] { sbyte.MinValue, (double)-128 };
+            yield return new object[] { (sbyte)-1, (double)-1 };
+            yield return new object[] { (sbyte)0, (double)0 };
+            yield return new object[] { SByteEnum.Value, (double)1 };
+            yield return new object[] { SByteEnum.Value, (double)1 };
+            yield return new object[] { sbyte.MaxValue, (double)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, (double)0 };
+            yield return new object[] { (ushort)1, (double)1 };
+            yield return new object[] { ushort.MaxValue, (double)65535 };
+            yield return new object[] { ushort.MinValue, (double)0 };
+            yield return new object[] { UShortEnum.Value, (double)1 };
+            yield return new object[] { ushort.MaxValue, (double)65535 };
+
+            // short.
+            yield return new object[] { short.MinValue, (double)-32768 };
+            yield return new object[] { (short)-1, (double)-1 };
+            yield return new object[] { (short)0, (double)0 };
+            yield return new object[] { (short)1, (double)1 };
+            yield return new object[] { short.MaxValue, (double)32767 };
+            yield return new object[] { short.MinValue, (double)-32768 };
+            yield return new object[] { (short)-1, (double)-1 };
+            yield return new object[] { (short)0, (double)0 };
+            yield return new object[] { ShortEnum.Value, (double)1 };
+            yield return new object[] { short.MaxValue, (double)32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, (double)0 };
+            yield return new object[] { (uint)1, (double)1 };
+            yield return new object[] { uint.MaxValue, (double)4294967295 };
+            yield return new object[] { uint.MinValue, (double)0 };
+            yield return new object[] { UIntEnum.Value, (double)1 };
+            yield return new object[] { uint.MaxValue, (double)4294967295 };
+
+            // int.
+            yield return new object[] { int.MinValue, (double)-2147483648 };
+            yield return new object[] { -1, (double)-1 };
+            yield return new object[] { 0, (double)0 };
+            yield return new object[] { 1, (double)1 };
+            yield return new object[] { int.MaxValue, (double)2147483647 };
+            yield return new object[] { int.MinValue, (double)-2147483648 };
+            yield return new object[] { -1, (double)-1 };
+            yield return new object[] { 0, (double)0 };
+            yield return new object[] { IntEnum.Value, (double)1 };
+            yield return new object[] { int.MaxValue, (double)2147483647 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, (double)0 };
+            yield return new object[] { (ulong)1, (double)1 };
+            yield return new object[] { ulong.MaxValue, (double)1.84467440737096E+19 };
+            yield return new object[] { ulong.MinValue, (double)0 };
+            yield return new object[] { ULongEnum.Value, (double)1 };
+            yield return new object[] { ulong.MaxValue, (double)1.84467440737096E+19 };
+
+            // long.
+            yield return new object[] { long.MinValue, (double)-9.22337203685478E+18 };
+            yield return new object[] { -1, (double)-1 };
+            yield return new object[] { 0, (double)0 };
+            yield return new object[] { 1, (double)1 };
+            yield return new object[] { long.MaxValue, (double)9.22337203685478E+18 };
+            yield return new object[] { long.MinValue, (double)-9.22337203685478E+18 };
+            yield return new object[] { -1, (double)-1 };
+            yield return new object[] { 0, (double)0 };
+            yield return new object[] { LongEnum.Value, (double)1 };
+            yield return new object[] { long.MaxValue, (double)9.22337203685478E+18 };
+
+            // float.
+            yield return new object[] { float.MinValue, (double)-3.40282346638529E+38 };
+            yield return new object[] { (float)-1, (double)-1 };
+            yield return new object[] { (float)0, (double)0 };
+            yield return new object[] { (float)1, (double)1 };
+            yield return new object[] { float.MaxValue, (double)3.40282346638529E+38 };
+            yield return new object[] { float.PositiveInfinity, double.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity, double.NegativeInfinity };
+            yield return new object[] { float.NaN, double.NaN };
+
+            // double.
+            yield return new object[] { double.MinValue, double.MinValue };
+            yield return new object[] { (double)-1, (double)-1 };
+            yield return new object[] { (double)0, (double)0 };
+            yield return new object[] { (double)1, (double)1 };
+            yield return new object[] { double.MaxValue, double.MaxValue };
+            yield return new object[] { double.PositiveInfinity, double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity, double.NegativeInfinity };
+            yield return new object[] { double.NaN, double.NaN };
+
+            // decimal.
+            yield return new object[] { decimal.MinValue, (double)-7.92281625142643E+28 };
+            yield return new object[] { (decimal)-1, (double)-1 };
+            yield return new object[] { (decimal)0, (double)0 };
+            yield return new object[] { (decimal)1, (double)1 };
+            yield return new object[] { decimal.MaxValue, (double)7.92281625142643E+28 };
+
+            // bool.
+            yield return new object[] { true, (double)-1 };
+            yield return new object[] { false, (double)0 };
+
+            // null.
+            yield return new object[] { null, (double)0 };
+
+            // string.
+            yield return new object[] { "-1", (double)-1 };
+            yield return new object[] { "0", (double)0 };
+            yield return new object[] { "1", (double)1 };
+            yield return new object[] { "&h5", (double)5 };
+            yield return new object[] { "&h0", (double)0 };
+            yield return new object[] { "&o5", (double)5 };
+            yield return new object[] { " &o5", (double)5 };
+            yield return new object[] { "&o0", (double)0 };
+            yield return new object[] { 1.1.ToString(), (double)1.1 };
+            yield return new object[] { "18446744073709551616", (double)1.84467440737096E+19 };
+            yield return new object[] { "1844674407370955161618446744073709551616", (double)1.84467440737096E+39 };
+            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity };
+            yield return new object[] { double.NaN.ToString(), double.NaN };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDouble_Object_TestData))]
+        public void ToDouble_Object_ReturnsExpected(object value, double expected)
+        {
+            AssertEqual(expected, Conversions.ToDouble(value));
+        }
+
+        public static IEnumerable<object[]> ToDouble_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDouble_InvalidObject_TestData))]
+        public void ToDouble_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToDouble(value));
+        }
+
+        public static IEnumerable<object[]> ToDecimal_String_TestData()
+        {
+            yield return new object[] { null, (decimal)0 };
+            yield return new object[] { "-1", (decimal)-1 };
+            yield return new object[] { "0", (decimal)0 };
+            yield return new object[] { "1", (decimal)1 };
+            yield return new object[] { "&h5", (decimal)5 };
+            yield return new object[] { "&h0", (decimal)0 };
+            yield return new object[] { "&o5", (decimal)5 };
+            yield return new object[] { " &o5", (decimal)5 };
+            yield return new object[] { "&o0", (decimal)0 };
+            yield return new object[] { 1.1.ToString(), (decimal)1.1 };
+            yield return new object[] { "18446744073709551616", decimal.Parse("18446744073709551616") };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDecimal_String_TestData))]
+        public void ToDecimal_String_ReturnsExpected(string value, decimal expected)
+        {
+            AssertEqual(expected, Conversions.ToDecimal(value));
+        }
+
+        public static IEnumerable<object[]> ToDecimal_InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDecimal_InvalidString_TestData))]
+        public void ToDecimal_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToDecimal(value));
+        }
+
+        public static IEnumerable<object[]> ToDecimal_OverflowString_TestData()
+        {
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDecimal_OverflowString_TestData))]
+        public void ToDecimal_OverflowString_ThrowsOverflowException(string value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToDecimal(value));
+        }
+
+        public static IEnumerable<object[]> ToDecimal_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, (decimal)0 };
+            yield return new object[] { (byte)1, (decimal)1 };
+            yield return new object[] { byte.MaxValue, (decimal)255 };
+            yield return new object[] { byte.MinValue, (decimal)0 };
+            yield return new object[] { ByteEnum.Value, (decimal)1 };
+            yield return new object[] { byte.MaxValue, (decimal)255 };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, (decimal)-128 };
+            yield return new object[] { (sbyte)-1, (decimal)-1 };
+            yield return new object[] { (sbyte)0, (decimal)0 };
+            yield return new object[] { (sbyte)1, (decimal)1 };
+            yield return new object[] { (sbyte)1, (decimal)1 };
+            yield return new object[] { sbyte.MaxValue, (decimal)127 };
+            yield return new object[] { sbyte.MinValue, (decimal)-128 };
+            yield return new object[] { (sbyte)-1, (decimal)-1 };
+            yield return new object[] { (sbyte)0, (decimal)0 };
+            yield return new object[] { SByteEnum.Value, (decimal)1 };
+            yield return new object[] { SByteEnum.Value, (decimal)1 };
+            yield return new object[] { sbyte.MaxValue, (decimal)127 };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, (decimal)0 };
+            yield return new object[] { (ushort)1, (decimal)1 };
+            yield return new object[] { ushort.MaxValue, (decimal)65535 };
+            yield return new object[] { ushort.MinValue, (decimal)0 };
+            yield return new object[] { UShortEnum.Value, (decimal)1 };
+            yield return new object[] { ushort.MaxValue, (decimal)65535 };
+
+            // short.
+            yield return new object[] { short.MinValue, (decimal)-32768 };
+            yield return new object[] { (short)-1, (decimal)-1 };
+            yield return new object[] { (short)0, (decimal)0 };
+            yield return new object[] { (short)1, (decimal)1 };
+            yield return new object[] { short.MaxValue, (decimal)32767 };
+            yield return new object[] { short.MinValue, (decimal)-32768 };
+            yield return new object[] { (short)-1, (decimal)-1 };
+            yield return new object[] { (short)0, (decimal)0 };
+            yield return new object[] { ShortEnum.Value, (decimal)1 };
+            yield return new object[] { short.MaxValue, (decimal)32767 };
+
+            // uint.
+            yield return new object[] { uint.MinValue, (decimal)0 };
+            yield return new object[] { (uint)1, (decimal)1 };
+            yield return new object[] { uint.MaxValue, (decimal)4294967295 };
+            yield return new object[] { uint.MinValue, (decimal)0 };
+            yield return new object[] { UIntEnum.Value, (decimal)1 };
+            yield return new object[] { uint.MaxValue, (decimal)4294967295 };
+
+            // int.
+            yield return new object[] { int.MinValue, (decimal)-2147483648 };
+            yield return new object[] { -1, (decimal)-1 };
+            yield return new object[] { 0, (decimal)0 };
+            yield return new object[] { 1, (decimal)1 };
+            yield return new object[] { int.MaxValue, (decimal)2147483647 };
+            yield return new object[] { int.MinValue, (decimal)-2147483648 };
+            yield return new object[] { -1, (decimal)-1 };
+            yield return new object[] { 0, (decimal)0 };
+            yield return new object[] { IntEnum.Value, (decimal)1 };
+            yield return new object[] { int.MaxValue, (decimal)2147483647 };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, (decimal)0 };
+            yield return new object[] { (ulong)1, (decimal)1 };
+            yield return new object[] { ulong.MaxValue, decimal.Parse("18446744073709551615") };
+            yield return new object[] { ulong.MinValue, (decimal)0 };
+            yield return new object[] { ULongEnum.Value, (decimal)1 };
+            yield return new object[] { ulong.MaxValue, decimal.Parse("18446744073709551615") };
+
+            // long.
+            yield return new object[] { long.MinValue, (decimal)-9223372036854775808 };
+            yield return new object[] { -1, (decimal)-1 };
+            yield return new object[] { 0, (decimal)0 };
+            yield return new object[] { 1, (decimal)1 };
+            yield return new object[] { long.MaxValue, (decimal)9223372036854775807 };
+            yield return new object[] { long.MinValue, (decimal)-9223372036854775808 };
+            yield return new object[] { -1, (decimal)-1 };
+            yield return new object[] { 0, (decimal)0 };
+            yield return new object[] { LongEnum.Value, (decimal)1 };
+            yield return new object[] { long.MaxValue, (decimal)9223372036854775807 };
+
+            // float.
+            yield return new object[] { (float)-1, (decimal)-1 };
+            yield return new object[] { (float)0, (decimal)0 };
+            yield return new object[] { (float)1, (decimal)1 };
+
+            // double.
+            yield return new object[] { (double)-1, (decimal)-1 };
+            yield return new object[] { (double)0, (decimal)0 };
+            yield return new object[] { (double)1, (decimal)1 };
+
+            // decimal.
+            yield return new object[] { decimal.MinValue, decimal.MinValue };
+            yield return new object[] { (decimal)-1, (decimal)-1 };
+            yield return new object[] { (decimal)0, (decimal)0 };
+            yield return new object[] { (decimal)1, (decimal)1 };
+            yield return new object[] { decimal.MaxValue, decimal.MaxValue };
+
+            // bool.
+            yield return new object[] { true, (decimal)-1 };
+            yield return new object[] { false, (decimal)0 };
+
+            // null.
+            yield return new object[] { null, (decimal)0 };
+
+            // string.
+            yield return new object[] { "-1", (decimal)-1 };
+            yield return new object[] { "0", (decimal)0 };
+            yield return new object[] { "1", (decimal)1 };
+            yield return new object[] { "&h5", (decimal)5 };
+            yield return new object[] { "&h0", (decimal)0 };
+            yield return new object[] { "&o5", (decimal)5 };
+            yield return new object[] { " &o5", (decimal)5 };
+            yield return new object[] { "&o0", (decimal)0 };
+            yield return new object[] { 1.1.ToString(), (decimal)1.1 };
+            yield return new object[] { "18446744073709551616", decimal.Parse("18446744073709551616") };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDecimal_Object_TestData))]
+        public void ToDecimal_Object_ReturnsExpected(object value, decimal expected)
+        {
+            AssertEqual(expected, Conversions.ToDecimal(value));
+        }
+
+        public static IEnumerable<object[]> ToDecimal_InvalidObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { double.PositiveInfinity.ToString() };
+            yield return new object[] { double.NegativeInfinity.ToString() };
+            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDecimal_InvalidObject_TestData))]
+        public void ToDecimal_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToDecimal(value));
+        }
+        public static IEnumerable<object[]> ToDecimal_OverflowObject_TestData()
+        {
+            yield return new object[] { float.MinValue };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { "1844674407370955161618446744073709551616" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToDecimal_OverflowObject_TestData))]
+        public void ToDecimal_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Conversions.ToDecimal(value));
+        }
+
+        public static IEnumerable<object[]> ToBoolean_String_TestData()
+        {
+            yield return new object[] { "-1", true };
+            yield return new object[] { "0", false };
+            yield return new object[] { "1", true };
+            yield return new object[] { "&h5", true };
+            yield return new object[] { "&h0", false };
+            yield return new object[] { "&o5", true };
+            yield return new object[] { " &o5", true };
+            yield return new object[] { "&o0", false };
+            yield return new object[] { 1.1.ToString(), true };
+            yield return new object[] { "true", true };
+            yield return new object[] { "false", false };
+            yield return new object[] { "18446744073709551616", true };
+            yield return new object[] { "1844674407370955161618446744073709551616", true };
+            yield return new object[] { double.PositiveInfinity.ToString(), true };
+            yield return new object[] { double.NegativeInfinity.ToString(), true };
+            yield return new object[] { double.NaN.ToString(), true };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToBoolean_String_TestData))]
+        public void ToBoolean_String_ReturnsExpected(string value, bool expected)
+        {
+            AssertEqual(expected, Conversions.ToBoolean(value));
+        }
+
+        public static IEnumerable<object[]> ToBoolean_InvalidString_TestData()
+        {
+            yield return new object[] { null };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "invalid" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToBoolean_InvalidString_TestData))]
+        public void ToBoolean_InvalidString_ThrowsInvalidCastException(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToBoolean(value));
+        }
+
+        public static IEnumerable<object[]> ToBoolean_Object_TestData()
+        {
+            // byte.
+            yield return new object[] { byte.MinValue, false };
+            yield return new object[] { (byte)1, true };
+            yield return new object[] { byte.MaxValue, true };
+            yield return new object[] { byte.MinValue, false };
+            yield return new object[] { ByteEnum.Value, true };
+            yield return new object[] { byte.MaxValue, true };
+
+            // sbyte.
+            yield return new object[] { sbyte.MinValue, true };
+            yield return new object[] { (sbyte)-1, true };
             yield return new object[] { (sbyte)0, false };
-            yield return new object[] { (sbyte)42, true };
-            yield return new object[] { (byte)0, false };
-            yield return new object[] { (byte)42, true };
+            yield return new object[] { (sbyte)1, true };
+            yield return new object[] { (sbyte)1, true };
+            yield return new object[] { sbyte.MaxValue, true };
+            yield return new object[] { sbyte.MinValue, true };
+            yield return new object[] { (sbyte)-1, true };
+            yield return new object[] { (sbyte)0, false };
+            yield return new object[] { SByteEnum.Value, true };
+            yield return new object[] { SByteEnum.Value, true };
+            yield return new object[] { sbyte.MaxValue, true };
+
+            // ushort.
+            yield return new object[] { ushort.MinValue, false };
+            yield return new object[] { (ushort)1, true };
+            yield return new object[] { ushort.MaxValue, true };
+            yield return new object[] { ushort.MinValue, false };
+            yield return new object[] { UShortEnum.Value, true };
+            yield return new object[] { ushort.MaxValue, true };
+
+            // short.
+            yield return new object[] { short.MinValue, true };
+            yield return new object[] { (short)-1, true };
             yield return new object[] { (short)0, false };
-            yield return new object[] { (short)42, true };
-            yield return new object[] { (ushort)0, false };
-            yield return new object[] { (ushort)42, true };
-            yield return new object[] { (int)0, false };
-            yield return new object[] { (int)42, true };
-            yield return new object[] { (uint)0, false };
-            yield return new object[] { (uint)42, true };
-            yield return new object[] { (long)0, false };
-            yield return new object[] { (long)42, true };
-            yield return new object[] { (ulong)0, false };
-            yield return new object[] { (ulong)42, true };
-            yield return new object[] { 0.0m, false };
-            yield return new object[] { 0.42m, true };
-            yield return new object[] { (float)0.0, false };
-            yield return new object[] { (float)0.42, true };
-            yield return new object[] { (double)0.0, false };
-            yield return new object[] { (double)0.42, true };
+            yield return new object[] { (short)1, true };
+            yield return new object[] { short.MaxValue, true };
+            yield return new object[] { short.MinValue, true };
+            yield return new object[] { (short)-1, true };
+            yield return new object[] { (short)0, false };
+            yield return new object[] { ShortEnum.Value, true };
+            yield return new object[] { short.MaxValue, true };
+
+            // uint.
+            yield return new object[] { uint.MinValue, false };
+            yield return new object[] { (uint)1, true };
+            yield return new object[] { uint.MaxValue, true };
+            yield return new object[] { uint.MinValue, false };
+            yield return new object[] { UIntEnum.Value, true };
+            yield return new object[] { uint.MaxValue, true };
+
+            // int.
+            yield return new object[] { int.MinValue, true };
+            yield return new object[] { -1, true };
+            yield return new object[] { 0, false };
+            yield return new object[] { 1, true };
+            yield return new object[] { int.MaxValue, true };
+            yield return new object[] { int.MinValue, true };
+            yield return new object[] { -1, true };
+            yield return new object[] { 0, false };
+            yield return new object[] { IntEnum.Value, true };
+            yield return new object[] { int.MaxValue, true };
+
+            // ulong.
+            yield return new object[] { ulong.MinValue, false };
+            yield return new object[] { (ulong)1, true };
+            yield return new object[] { ulong.MaxValue, true };
+            yield return new object[] { ulong.MinValue, false };
+            yield return new object[] { ULongEnum.Value, true };
+            yield return new object[] { ulong.MaxValue, true };
+
+            // long.
+            yield return new object[] { long.MinValue, true };
+            yield return new object[] { -1, true };
+            yield return new object[] { 0, false };
+            yield return new object[] { 1, true };
+            yield return new object[] { long.MaxValue, true };
+            yield return new object[] { long.MinValue, true };
+            yield return new object[] { -1, true };
+            yield return new object[] { 0, false };
+            yield return new object[] { LongEnum.Value, true };
+            yield return new object[] { long.MaxValue, true };
+
+            // float.
+            yield return new object[] { float.MinValue, true };
+            yield return new object[] { (float)-1, true };
+            yield return new object[] { (float)0, false };
+            yield return new object[] { (float)1, true };
+            yield return new object[] { float.MaxValue, true };
+            yield return new object[] { float.PositiveInfinity, true };
+            yield return new object[] { float.NegativeInfinity, true };
+            yield return new object[] { float.NaN, true };
+
+            // double.
+            yield return new object[] { double.MinValue, true };
+            yield return new object[] { (double)-1, true };
+            yield return new object[] { (double)0, false };
+            yield return new object[] { (double)1, true };
+            yield return new object[] { double.MaxValue, true };
+            yield return new object[] { double.PositiveInfinity, true };
+            yield return new object[] { double.NegativeInfinity, true };
+            yield return new object[] { double.NaN, true };
+
+            // decimal.
+            yield return new object[] { decimal.MinValue, true };
+            yield return new object[] { (decimal)-1, true };
+            yield return new object[] { (decimal)0, false };
+            yield return new object[] { (decimal)1, true };
+            yield return new object[] { decimal.MaxValue, true };
+
+            // bool.
+            yield return new object[] { true, true };
+            yield return new object[] { false, false };
+
+            // null.
+            yield return new object[] { null, false };
+
+            // string.
+            yield return new object[] { "-1", true };
+            yield return new object[] { "0", false };
+            yield return new object[] { "1", true };
+            yield return new object[] { "&h5", true };
+            yield return new object[] { "&h0", false };
+            yield return new object[] { "&o5", true };
+            yield return new object[] { " &o5", true };
+            yield return new object[] { "&o0", false };
+            yield return new object[] { 1.1.ToString(), true };
+            yield return new object[] { "true", true };
+            yield return new object[] { "false", false };
+            yield return new object[] { "18446744073709551616", true };
+            yield return new object[] { "1844674407370955161618446744073709551616", true };
+            yield return new object[] { double.PositiveInfinity.ToString(), true };
+            yield return new object[] { double.NegativeInfinity.ToString(), true };
+            yield return new object[] { double.NaN.ToString(), true };
         }
 
         [Theory]
-        [MemberData(nameof(ToBoolean_Object_ReturnsExpected_TestData))]
-        public void ToBoolean_Object_ReturnsExpected(object obj, bool expected)
+        [MemberData(nameof(ToBoolean_Object_TestData))]
+        public void ToBoolean_Object_ReturnsExpected(object value, bool expected)
         {
-            Assert.Equal(expected, Conversions.ToBoolean(obj));
+            AssertEqual(expected, Conversions.ToBoolean(value));
         }
-        
-        [Fact]
-        public void ToBoolean_Object_ThrowsOn_List()
+
+        public static IEnumerable<object[]> ToBoolean_InvalidObject_TestData()
         {
-            Assert.Throws<InvalidCastException>(() => Conversions.ToBoolean(new List<string>()));
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "invalid" };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
         }
+
+        [Theory]
+        [MemberData(nameof(ToBoolean_InvalidObject_TestData))]
+        public void ToBoolean_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToBoolean(value));
+        }
+
+        public static IEnumerable<object[]> ToChar_String_TestData()
+        {
+            yield return new object[] { null, char.MinValue };
+            yield return new object[] { "", char.MinValue };
+            yield return new object[] { "-1", (char)45 };
+            yield return new object[] { "0", '0' };
+            yield return new object[] { "1", '1' };
+            yield return new object[] { "&h5", (char)38 };
+            yield return new object[] { "&h0", (char)38 };
+            yield return new object[] { "&o5", (char)38 };
+            yield return new object[] { " &o5", (char)32 };
+            yield return new object[] { "&o0", (char)38 };
+            yield return new object[] { "&", (char)38 };
+            yield return new object[] { "&a", (char)38 };
+            yield return new object[] { "&a0", (char)38 };
+            yield return new object[] { 1.1.ToString(), '1' };
+            yield return new object[] { "true", 't' };
+            yield return new object[] { "false", 'f' };
+            yield return new object[] { "invalid", 'i' };
+            yield return new object[] { "18446744073709551616", '1' };
+            yield return new object[] { "1844674407370955161618446744073709551616", '1' };
+            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity.ToString()[0] };
+            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity.ToString()[0] };
+            yield return new object[] { double.NaN.ToString(), 'N' };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToChar_String_TestData))]
+        public void ToChar_String_ReturnsExpected(string value, char expected)
+        {
+            AssertEqual(expected, Conversions.ToChar(value));
+        }
+
+
+        public static IEnumerable<object[]> ToChar_Object_TestData()
+        {
+
+            // char.
+            yield return new object[] { char.MinValue, char.MinValue };
+            yield return new object[] { (char)1, (char)1 };
+            yield return new object[] { char.MaxValue, char.MaxValue };
+
+            // null.
+            yield return new object[] { null, char.MinValue };
+
+            // string.
+            yield return new object[] { "", char.MinValue };
+            yield return new object[] { "-1", (char)45 };
+            yield return new object[] { "0", '0' };
+            yield return new object[] { "1", '1' };
+            yield return new object[] { "&h5", (char)38 };
+            yield return new object[] { "&h0", (char)38 };
+            yield return new object[] { "&o5", (char)38 };
+            yield return new object[] { " &o5", (char)32 };
+            yield return new object[] { "&o0", (char)38 };
+            yield return new object[] { "&", (char)38 };
+            yield return new object[] { "&a", (char)38 };
+            yield return new object[] { "&a0", (char)38 };
+            yield return new object[] { 1.1.ToString(), '1' };
+            yield return new object[] { "true", 't' };
+            yield return new object[] { "false", 'f' };
+            yield return new object[] { "invalid", 'i' };
+            yield return new object[] { "18446744073709551616", '1' };
+            yield return new object[] { "1844674407370955161618446744073709551616", '1' };
+            yield return new object[] { double.PositiveInfinity.ToString(), (char)8734 };
+            yield return new object[] { double.NegativeInfinity.ToString(), (char)45 };
+            yield return new object[] { double.NaN.ToString(), 'N' };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToChar_Object_TestData))]
+        public void ToChar_Object_ReturnsExpected(object value, char expected)
+        {
+            AssertEqual(expected, Conversions.ToChar(value));
+        }
+
+        public static IEnumerable<object[]> ToChar_InvalidObject_TestData()
+        {
+            yield return new object[] { byte.MinValue };
+            yield return new object[] { (byte)1 };
+            yield return new object[] { byte.MaxValue };
+            yield return new object[] { byte.MinValue };
+            yield return new object[] { ByteEnum.Value };
+            yield return new object[] { byte.MaxValue };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { (sbyte)0 };
+            yield return new object[] { (sbyte)1 };
+            yield return new object[] { (sbyte)1 };
+            yield return new object[] { sbyte.MaxValue };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)-1 };
+            yield return new object[] { (sbyte)0 };
+            yield return new object[] { SByteEnum.Value };
+            yield return new object[] { SByteEnum.Value };
+            yield return new object[] { sbyte.MaxValue };
+            yield return new object[] { ushort.MinValue };
+            yield return new object[] { (ushort)1 };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { ushort.MinValue };
+            yield return new object[] { UShortEnum.Value };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { (short)0 };
+            yield return new object[] { (short)1 };
+            yield return new object[] { short.MaxValue };
+            yield return new object[] { short.MinValue };
+            yield return new object[] { (short)-1 };
+            yield return new object[] { (short)0 };
+            yield return new object[] { ShortEnum.Value };
+            yield return new object[] { short.MaxValue };
+            yield return new object[] { uint.MinValue };
+            yield return new object[] { (uint)1 };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { uint.MinValue };
+            yield return new object[] { UIntEnum.Value };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { 0 };
+            yield return new object[] { 1 };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { int.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { 0 };
+            yield return new object[] { IntEnum.Value };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { ulong.MinValue };
+            yield return new object[] { (ulong)1 };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { ulong.MinValue };
+            yield return new object[] { ULongEnum.Value };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { 0 };
+            yield return new object[] { 1 };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { long.MinValue };
+            yield return new object[] { -1 };
+            yield return new object[] { 0 };
+            yield return new object[] { LongEnum.Value };
+            yield return new object[] { long.MaxValue };
+            yield return new object[] { float.MinValue };
+            yield return new object[] { (float)-1 };
+            yield return new object[] { (float)0 };
+            yield return new object[] { (float)1 };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { float.PositiveInfinity };
+            yield return new object[] { float.NegativeInfinity };
+            yield return new object[] { float.NaN };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { (double)-1 };
+            yield return new object[] { (double)0 };
+            yield return new object[] { (double)1 };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { double.PositiveInfinity };
+            yield return new object[] { double.NegativeInfinity };
+            yield return new object[] { double.NaN };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { (decimal)-1 };
+            yield return new object[] { (decimal)0 };
+            yield return new object[] { (decimal)1 };
+            yield return new object[] { decimal.MaxValue };
+            yield return new object[] { true };
+            yield return new object[] { false };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { new object() };
+
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                yield return new object[] { FloatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToChar_InvalidObject_TestData))]
+        public void ToChar_InvalidObject_ThrowsInvalidCastException(object value)
+        {
+            Assert.Throws<InvalidCastException>(() => Conversions.ToChar(value));
+        }
+
+        private static object s_floatEnum;
+
+        public static object FloatEnum
+        {
+            get
+            {
+                if (s_floatEnum == null)
+                {
+                    AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
+                    ModuleBuilder module = assembly.DefineDynamicModule("Name");
+
+                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(float));
+                    eb.DefineLiteral("A", 1.0f);
+                    eb.DefineLiteral("B", 2.0f);
+                    eb.DefineLiteral("C", 3.0f);
+
+                    s_floatEnum = Activator.CreateInstance(eb.CreateTypeInfo());
+                }
+
+                return s_floatEnum;
+            }
+        }
+
+        private static object s_doubleEnum;
+
+        public static object DoubleEnum
+        {
+            get
+            {
+                if (s_doubleEnum == null)
+                {
+                    AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
+                    ModuleBuilder module = assembly.DefineDynamicModule("Name");
+
+                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(double));
+                    eb.DefineLiteral("A", 1.0);
+                    eb.DefineLiteral("B", 2.0);
+                    eb.DefineLiteral("C", 3.0);
+
+                    s_doubleEnum = Activator.CreateInstance(eb.CreateTypeInfo());
+                }
+
+                return s_doubleEnum;
+            }
+        }
+
+        private static object s_boolEnum;
+
+        public static object BoolEnum
+        {
+            get
+            {
+                if (s_boolEnum == null)
+                {
+                    AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
+                    ModuleBuilder module = assembly.DefineDynamicModule("Name");
+
+                    EnumBuilder eb = module.DefineEnum("BoolEnumType", TypeAttributes.Public, typeof(bool));
+                    eb.DefineLiteral("False", false);
+                    eb.DefineLiteral("True", true);
+
+                    s_boolEnum = Activator.CreateInstance(eb.CreateTypeInfo());
+                }
+
+                return s_boolEnum;
+            }
+        }
+
+        private static object s_charEnum;
+
+        public static object CharEnum
+        {
+            get
+            {
+                if (s_charEnum == null)
+                {
+                    AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
+                    ModuleBuilder module = assembly.DefineDynamicModule("Name");
+
+                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(char));
+                    eb.DefineLiteral("A", 'A');
+                    eb.DefineLiteral("B", 'B');
+                    eb.DefineLiteral("C", 'C');
+
+                    s_charEnum = Activator.CreateInstance(eb.CreateTypeInfo());
+                }
+
+                return s_charEnum;
+            }
+        }
+
+        private static object s_intPtrEnum;
+
+        public static object IntPtrEnum
+        {
+            get
+            {
+                if (s_intPtrEnum == null)
+                {
+                    AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
+                    ModuleBuilder module = assembly.DefineDynamicModule("Name");
+
+                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(IntPtr));
+
+                    s_intPtrEnum = Activator.CreateInstance(eb.CreateTypeInfo());
+                }
+
+                return s_intPtrEnum;
+            }
+        }
+
+        private static object s_uintPtrEnum;
+
+        public static object UIntPtrEnum
+        {
+            get
+            {
+                if (s_uintPtrEnum == null)
+                {
+                    AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
+                    ModuleBuilder module = assembly.DefineDynamicModule("Name");
+
+                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(UIntPtr));
+
+                    s_uintPtrEnum = Activator.CreateInstance(eb.CreateTypeInfo());
+                }
+
+                return s_uintPtrEnum;
+            }
+        }
+        private static void AssertEqual(object expected, object actual)
+        {
+            if (expected is double expectedDouble && actual is double actualDouble)
+            {
+                Assert.Equal(expected.ToString(), actual.ToString());
+            }
+            else  if (expected is float expectedFloat && actual is float actualFloat)
+            {
+                Assert.Equal(expected.ToString(), actual.ToString());
+            }
+            else
+            {
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        public enum ByteEnum : byte { Value = 1 }
+
+        public enum SByteEnum : sbyte { Value = 1 }
+
+        public enum UShortEnum : ushort { Value = 1 }
+
+        public enum ShortEnum : short { Value = 1 }
+
+        public enum UIntEnum : uint { Value = 1 }
+
+        public enum IntEnum : int { Value = 1 }
+
+        public enum ULongEnum : ulong { Value = 1 }
+
+        public enum LongEnum : long { Value = 1 }
     }
 }
