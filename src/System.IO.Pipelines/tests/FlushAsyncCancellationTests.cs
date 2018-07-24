@@ -332,7 +332,7 @@ namespace System.IO.Pipelines.Tests
             // This test tries to get pipe into a state where ReadAsync is being awaited
             // and FlushAsync is cancelled while the method is running
             Pipe = new Pipe();
-            var autoResetEvent = new ManualResetEvent(false);
+            var resetEvent = new ManualResetEvent(false);
 
             var cancellationTokenSource = new CancellationTokenSource();
             var writer = Task.Run(async () =>
@@ -343,7 +343,7 @@ namespace System.IO.Pipelines.Tests
                     try
                     {
                         // We want reader to be awaiting
-                        autoResetEvent.WaitOne();
+                        resetEvent.WaitOne();
                         Pipe.Writer.WriteEmpty(1);
 
                         // We want the token to be cancelled during FlushAsync call
@@ -355,7 +355,6 @@ namespace System.IO.Pipelines.Tests
                         }
 
                         await Pipe.Writer.FlushAsync(cancellationTokenSource.Token);
-                        autoResetEvent.Reset();
                     }
                     catch (OperationCanceledException)
                     {
@@ -376,10 +375,11 @@ namespace System.IO.Pipelines.Tests
                     // Signal writer to initiate a flush
                     if (!readTask.IsCompleted)
                     {
-                        autoResetEvent.Set();
+                        resetEvent.Set();
                     }
 
                     var result = await readTask;
+                    resetEvent.Reset();
 
                     if (result.Buffer.IsEmpty)
                     {
