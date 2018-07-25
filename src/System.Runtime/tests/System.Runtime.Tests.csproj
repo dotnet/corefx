@@ -176,8 +176,8 @@
     <Compile Include="System\Security\SecurityAttributeTests.cs" />
     <Compile Include="System\Text\StringBuilderTests.cs" />
     <Compile Include="System\Threading\WaitHandleTests.cs" />
-    <Compile Include="System\Type\TypeTests.cs" />
     <Compile Include="System\Type\TypePropertyTests.cs" />
+    <Compile Include="System\Type\TypeTests.cs" />
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
       <Link>Common\System\RandomDataGenerator.cs</Link>
     </Compile>
@@ -229,6 +229,7 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
     <Compile Include="System\Runtime\ExceptionServices\ExceptionDispatchInfoTests.netcoreapp.cs" />
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
+    <Compile Include="System\Type\TypePropertyTests.netcoreapp.cs" />
     <Compile Include="System\Type\TypeTests.netcoreapp.cs" />
     <Compile Include="System\DoubleTests.netcoreapp.cs" />
     <Compile Include="System\SingleTests.netcoreapp.cs" />

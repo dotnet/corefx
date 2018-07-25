@@ -7,10 +7,10 @@ using Xunit;
 
 namespace System.Tests.Types
 {
-    public abstract class TypePropertyTestBase
+    public abstract partial class TypePropertyTestBase
     {
         public abstract Type CreateType();
-        
+
         public abstract TypeAttributes Attributes { get; }
 
         public virtual Type BaseType => typeof(object);
@@ -81,11 +81,67 @@ namespace System.Tests.Types
 
         public virtual Type UnderlyingSystemType => CreateType();
 
+        [Fact]
+        public void Attributes_Get_ReturnsExpected()
+        {
+            Type t = CreateType();
+            Assert.Equal(Attributes, t.Attributes);
+
+            Assert.Equal((Attributes & TypeAttributes.Abstract) != 0, t.IsAbstract);
+            Assert.Equal((Attributes & TypeAttributes.Import) != 0, t.IsImport);
+            Assert.Equal((Attributes & TypeAttributes.Sealed) != 0, t.IsSealed);
+            Assert.Equal((Attributes & TypeAttributes.SpecialName) != 0, t.IsSpecialName);
+            Assert.Equal((Attributes & TypeAttributes.Serializable) != 0 || t.IsEnum, t.IsSerializable);
+
+            Assert.Equal((Attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Class && !t.IsValueType, t.IsClass);
+            Assert.Equal((Attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Interface, t.IsInterface);
+
+            Assert.Equal((Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.AnsiClass, t.IsAnsiClass);
+            Assert.Equal((Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.AutoClass, t.IsAutoClass);
+            Assert.Equal((Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.UnicodeClass, t.IsUnicodeClass);
+
+            Assert.Equal((Attributes & TypeAttributes.LayoutMask) == TypeAttributes.AutoLayout, t.IsAutoLayout);
+            Assert.Equal((Attributes & TypeAttributes.LayoutMask) == TypeAttributes.ExplicitLayout, t.IsExplicitLayout);
+            Assert.Equal((Attributes & TypeAttributes.LayoutMask) == TypeAttributes.SequentialLayout, t.IsLayoutSequential);
+
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedAssembly, t.IsNestedAssembly);
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedFamANDAssem, t.IsNestedFamANDAssem);
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedFamily, t.IsNestedFamily);
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedFamORAssem, t.IsNestedFamORAssem);
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedPrivate, t.IsNestedPrivate);
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NotPublic, t.IsNotPublic);
+            Assert.Equal((Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public, t.IsPublic);
+        }
+
+        [Fact]
+        public void BaseType_Get_ReturnsExpected()
+        {
+            Assert.Equal(BaseType, CreateType().BaseType);
+        }
+
+        [Fact]
+        public void ContainsGenericParameters_Get_ReturnsExpected()
+        {
+            Assert.Equal(ContainsGenericParameters, CreateType().ContainsGenericParameters);
+        }
 
         [Fact]
         public void DeclaringType_Get_ReturnsExpected()
         {
             Assert.Equal(DeclaringType, CreateType().DeclaringType);
+        }
+
+        [Fact]
+        public void DeclaringMethod_Get_ReturnsExpected()
+        {
+            if (IsGenericParameter)
+            {
+                Assert.Equal(DeclaringMethod, CreateType().DeclaringMethod);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => CreateType().DeclaringMethod);
+            }
         }
 
         [Fact]
@@ -150,9 +206,27 @@ namespace System.Tests.Types
         }
 
         [Fact]
+        public void IsCOMObject_Get_ReturnsExpected()
+        {
+            Assert.Equal(IsCOMObject, CreateType().IsCOMObject);
+        }
+
+        [Fact]
         public void IsConstructedGenericType_Get_ReturnsExpected()
         {
             Assert.Equal(IsConstructedGenericType, CreateType().IsConstructedGenericType);
+        }
+
+        [Fact]
+        public void IsContextful_Get_ReturnsExpected()
+        {
+            Assert.Equal(IsContextful, CreateType().IsContextful);
+        }
+
+        [Fact]
+        public void IsEnum_Get_ReturnsExpected()
+        {
+            Assert.Equal(BaseType == typeof(Enum), CreateType().IsEnum);
         }
 
         [Fact]
@@ -162,27 +236,27 @@ namespace System.Tests.Types
         }
 
         [Fact]
-        public void IsGenericMethodParameter_Get_ReturnsExpected()
-        {
-            Assert.Equal(IsGenericMethodParameter, CreateType().IsGenericMethodParameter);
-        }
-
-        [Fact]
         public void IsGenericTypeDefinition_Get_ReturnsExpected()
         {
             Assert.Equal(IsGenericTypeDefinition, CreateType().IsGenericTypeDefinition);
         }
 
         [Fact]
-        public void IsGenericTypeParameter_Get_ReturnsExpected()
-        {
-            Assert.Equal(IsGenericTypeParameter, CreateType().IsGenericTypeParameter);
-        }
-
-        [Fact]
         public void IsGenericType_Get_ReturnsExpected()
         {
             Assert.Equal(IsGenericType, CreateType().IsGenericType);
+        }
+
+        [Fact]
+        public void IsMarshalByRef_Get_ReturnsExpected()
+        {
+            Assert.Equal(IsMarshalByRef, CreateType().IsMarshalByRef);
+        }
+
+        [Fact]
+        public void IsNested_Get_ReturnsExpected()
+        {
+            Assert.Equal(IsNested, CreateType().IsNested);
         }
 
         [Fact]
@@ -197,27 +271,45 @@ namespace System.Tests.Types
         }
 
         [Fact]
-        public void IsNested_Get_ReturnsExpected()
+        public void IsPrimitive_Get_ReturnsExpected()
         {
-            Assert.Equal(DeclaringType != null, CreateType().IsNested);
+            Assert.Equal(IsPrimitive, CreateType().IsPrimitive);
         }
 
         [Fact]
-        public void IsSecurityCritical_Get_ReturnsTrue()
+        public void IsSecurityCritical_Get_ReturnsExpected()
         {
-            Assert.True(CreateType().IsSecurityCritical);
+            Assert.Equal(IsSecurityCritical, CreateType().IsSecurityCritical);
         }
 
         [Fact]
-        public void IsSecuritySafeCritical_Get_ReturnsFalse()
+        public void IsSecuritySafeCritical_Get_ReturnsExpected()
         {
-            Assert.False(CreateType().IsSecuritySafeCritical);
+            Assert.Equal(IsSecuritySafeCritical, CreateType().IsSecuritySafeCritical);
         }
 
         [Fact]
-        public void IsSecurityTransparent_Get_ReturnsFalse()
+        public void IsSecurityTransparent_Get_ReturnsExpected()
         {
-            Assert.False(CreateType().IsSecurityTransparent);
+            Assert.Equal(IsSecurityTransparent, CreateType().IsSecurityTransparent);
+        }
+
+        [Fact]
+        public void IsValueType_Get_ReturnsExpected()
+        {
+            Assert.Equal(IsValueType, CreateType().IsValueType);
+        }
+
+        [Fact]
+        public void ReflectedType_Get_ReturnsExpected()
+        {
+            Assert.Equal(DeclaringType, CreateType().ReflectedType);
+        }
+
+        [Fact]
+        public void UnderlyingSystemType_Get_ReturnsExpected()
+        {
+            Assert.Equal(UnderlyingSystemType, CreateType().UnderlyingSystemType);
         }
     }
 
@@ -227,7 +319,15 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Serializable;
 
+        public override Type BaseType => typeof(Array);
+
         public override bool HasElementType => true;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
     }
 
     public abstract class ClassTypeTestBase : TypePropertyTestBase
@@ -238,21 +338,193 @@ namespace System.Tests.Types
     public abstract class StructTypeTestBase : TypePropertyTestBase
     {
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit;
+
+        public override Type BaseType => typeof(ValueType);
     }
 
     public abstract class InterfaceTypeTestBase : TypePropertyTestBase
     {
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.ClassSemanticsMask | TypeAttributes.Abstract;
+
+        public override Type BaseType => null;
     }
 
     public abstract class PrimitiveTypeTestBase : StructTypeTestBase
     {
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit;
+
+        public override bool IsPrimitive => true;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+    }
+
+    public abstract class EnumTypeTestBase : StructTypeTestBase
+    {
+        public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;
+
+        public override Type BaseType => typeof(Enum);
+
+    }
+
+    public class ByteTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(byte);
+    }
+
+    public class ByteEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(ByteEnum);
+    }
+
+    public class SByteTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(sbyte);
+    }
+
+    public class SByteEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(SByteEnum);
+    }
+
+    public class UShortTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(ushort);
+    }
+
+    public class UShortEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(UShortEnum);
+    }
+
+    public class ShortTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(short);
+    }
+
+    public class ShortEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(ShortEnum);
+    }
+
+    public class UIntTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(uint);
+    }
+
+    public class UIntEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(UIntEnum);
     }
 
     public class IntTests : PrimitiveTypeTestBase
     {
         public override Type CreateType() => typeof(int);
+    }
+
+    public class IntEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(IntEnum);
+    }
+
+    public class ULongTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(ulong);
+    }
+
+    public class ULongEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(ULongEnum);
+    }
+
+    public class LongTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(long);
+    }
+
+    public class LongEnumTests : EnumTypeTestBase
+    {
+        public override Type CreateType() => typeof(LongEnum);
+    }
+
+    public class DoubleTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(double);
+    }
+
+    public class FloatTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(float);
+    }
+
+    public class BoolTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(bool);
+    }
+
+    public class CharTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(char);
+    }
+
+    public class IntPtrTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(IntPtr);
+    }
+
+    public class UIntPtrTests : PrimitiveTypeTestBase
+    {
+        public override Type CreateType() => typeof(UIntPtr);
+    }
+
+    public class ObjectTests : ClassTypeTestBase
+    {
+        public override Type CreateType() => typeof(object);
+
+        public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit;
+
+        public override Type BaseType => null;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+    }
+
+    public class ValueTypeTests : ClassTypeTestBase
+    {
+        public override Type CreateType() => typeof(ValueType);
+
+        public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+    }
+
+    public class EnumTypeTests : ClassTypeTestBase
+    {
+        public override Type CreateType() => typeof(Enum);
+
+        public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit;
+
+        public override Type BaseType => typeof(ValueType);
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+    }
+
+    public class VoidTests : StructTypeTestBase
+    {
+        public override Type CreateType() => typeof(void);
+
+        public override TypeAttributes Attributes =>
+            PlatformDetection.IsNetCore ? base.Attributes : base.Attributes | TypeAttributes.Serializable;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
     }
 
     public class IntRefTests : TypePropertyTestBase
@@ -261,7 +533,15 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.Class;
 
+        public override Type BaseType => null;
+
         public override bool IsByRef => true;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override bool HasElementType => true;
 
@@ -274,11 +554,19 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.Class;
 
+        public override Type BaseType => null;
+
         public override bool IsPointer => true;
+
+        public override bool IsTypeDefinition => false;
 
         public override bool HasElementType => true;
 
         public override Type ElementType => typeof(int);
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
     }
 
     public class IntArrayTests : ArrayTypeTestBase
@@ -286,6 +574,8 @@ namespace System.Tests.Types
         public override Type CreateType() => typeof(int[]);
 
         public override Type ElementType => typeof(int);
+
+        public override bool IsSZArray => true;
     }
 
     public class MultidimensionalIntArrayTests : ArrayTypeTestBase
@@ -293,13 +583,17 @@ namespace System.Tests.Types
         public override Type CreateType() => typeof(int[,]);
 
         public override Type ElementType => typeof(int);
+
+        public override bool IsVariableBoundArray => true;
     }
 
     public class ArrayOfArrayTests : ArrayTypeTestBase
     {
         public override Type CreateType() => typeof(int[][]);
-        
+
         public override Type ElementType => typeof(int[]);
+
+        public override bool IsSZArray => true;
     }
 
     public class NestedArrayTests : ArrayTypeTestBase
@@ -307,6 +601,8 @@ namespace System.Tests.Types
         public override Type CreateType() => typeof(Outside.Inside[]);
 
         public override Type ElementType => typeof(Outside.Inside);
+
+        public override bool IsSZArray => true;
     }
 
     public class GenericNestedArrayTests : ArrayTypeTestBase
@@ -314,6 +610,8 @@ namespace System.Tests.Types
         public override Type CreateType() => typeof(Outside<int>.Inside<double>[]);
 
         public override Type ElementType => typeof(Outside<int>.Inside<double>);
+
+        public override bool IsSZArray => true;
     }
 
     public class ArrayTypeTests : ClassTypeTestBase
@@ -321,6 +619,10 @@ namespace System.Tests.Types
         public override Type CreateType() => typeof(Array);
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
     }
 
     public class NonGenericClassTests : ClassTypeTestBase
@@ -331,11 +633,17 @@ namespace System.Tests.Types
     public class NonGenericSubClassOfNonGenericTests : ClassTypeTestBase
     {
         public override Type CreateType() => typeof(NonGenericSubClassOfNonGeneric);
+
+        public override Type BaseType => typeof(NonGenericClass);
     }
 
     public class TypedReferenceTypeTests : StructTypeTestBase
     {
         public override Type CreateType() => typeof(TypedReference);
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
     }
 
     public class GenericClass1Tests : ClassTypeTestBase
@@ -345,6 +653,8 @@ namespace System.Tests.Types
         public override bool IsGenericType => true;
 
         public override bool IsConstructedGenericType => true;
+
+        public override bool IsTypeDefinition => false;
 
         public override Type[] GenericTypeArguments => new Type[] { typeof(string) };
     }
@@ -357,12 +667,16 @@ namespace System.Tests.Types
 
         public override bool IsConstructedGenericType => true;
 
+        public override bool IsTypeDefinition => false;
+
         public override Type[] GenericTypeArguments => new Type[] { typeof(int), typeof(string) };
     }
 
     public class OpenGenericClassTests : ClassTypeTestBase
     {
         public override Type CreateType() => typeof(GenericClass<>);
+
+        public override bool ContainsGenericParameters => true;
 
         public override bool IsGenericType => true;
 
@@ -372,6 +686,8 @@ namespace System.Tests.Types
     public class NonGenericSubClassOfGenericTests : ClassTypeTestBase
     {
         public override Type CreateType() => typeof(NonGenericSubClassOfGeneric);
+
+        public override Type BaseType => typeof(GenericClass<string>);
     }
 
     public class NonGenericStructTests : StructTypeTestBase
@@ -392,6 +708,8 @@ namespace System.Tests.Types
 
         public override bool IsConstructedGenericType => true;
 
+        public override bool IsTypeDefinition => false;
+
         public override Type[] GenericTypeArguments => new Type[] { typeof(string) };
     }
 
@@ -402,6 +720,8 @@ namespace System.Tests.Types
         public override bool IsGenericType => true;
 
         public override bool IsConstructedGenericType => true;
+
+        public override bool IsTypeDefinition => false;
 
         public override Type[] GenericTypeArguments => new Type[] { typeof(int), typeof(string) };
     }
@@ -419,6 +739,8 @@ namespace System.Tests.Types
 
         public override bool IsConstructedGenericType => true;
 
+        public override bool IsTypeDefinition => false;
+
         public override Type[] GenericTypeArguments => new Type[] { typeof(string) };
     }
 
@@ -430,12 +752,16 @@ namespace System.Tests.Types
 
         public override bool IsConstructedGenericType => true;
 
+        public override bool IsTypeDefinition => false;
+
         public override Type[] GenericTypeArguments => new Type[] { typeof(int), typeof(string) };
     }
 
     public class OpenGenericInterfaceTests : InterfaceTypeTestBase
     {
         public override Type CreateType() => typeof(GenericInterface<>);
+
+        public override bool ContainsGenericParameters => true;
 
         public override bool IsGenericType => true;
 
@@ -463,6 +789,8 @@ namespace System.Tests.Types
 
         public override bool IsConstructedGenericType => true;
 
+        public override bool IsTypeDefinition => false;
+
         public override Type[] GenericTypeArguments => new Type[] { typeof(int), typeof(double) };
     }
 
@@ -471,6 +799,8 @@ namespace System.Tests.Types
         public override Type CreateType() => typeof(Outside<>.Inside<>);
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.NestedPublic | TypeAttributes.BeforeFieldInit;
+
+        public override bool ContainsGenericParameters => true;
 
         public override Type DeclaringType => typeof(Outside<>);
 
@@ -485,11 +815,19 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
         public override Type DeclaringType => typeof(Outside<>);
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericTypeParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 0;
     }
@@ -500,11 +838,19 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
         public override Type DeclaringType => typeof(GenericClass<,>);
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericTypeParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 0;
     }
@@ -515,11 +861,19 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
         public override Type DeclaringType => typeof(GenericClass<,>);
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericTypeParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 1;
     }
@@ -530,11 +884,19 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
+
         public override Type DeclaringType => typeof(Outside<>.Inside<>);
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericTypeParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 0;
     }
@@ -545,11 +907,19 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
         public override Type DeclaringType => typeof(Outside<>.Inside<>);
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericTypeParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 1;
     }
@@ -560,11 +930,21 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
+        public override MethodBase DeclaringMethod => typeof(Outside<>).GetMethod(nameof(Outside<string>.TwoGenericMethod));
+
         public override Type DeclaringType => typeof(Outside<>);
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericMethodParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 0;
     }
@@ -575,12 +955,38 @@ namespace System.Tests.Types
 
         public override TypeAttributes Attributes => TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public;
 
+        public override bool ContainsGenericParameters => true;
+
+        public override MethodBase DeclaringMethod => typeof(Outside<>).GetMethod(nameof(Outside<string>.TwoGenericMethod));
+
         public override Type DeclaringType => typeof(Outside<>);
+
+        public override GenericParameterAttributes? GenericParameterAttributes => Reflection.GenericParameterAttributes.None;
 
         public override bool IsGenericParameter => true;
 
-        public override bool IsGenericMethodParameter => true;
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
+
+        public override bool IsTypeDefinition => false;
 
         public override int? GenericParameterPosition => 1;
     }
+
+    public enum ByteEnum : byte { }
+
+    public enum SByteEnum : sbyte { }
+
+    public enum UShortEnum : ushort { }
+
+    public enum ShortEnum : short { }
+
+    public enum UIntEnum : uint { }
+
+    public enum IntEnum : int { }
+
+    public enum ULongEnum : ulong { }
+
+    public enum LongEnum : long { }
 }
