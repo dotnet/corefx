@@ -502,5 +502,13 @@ namespace Internal.Cryptography.Pal
 
             throw new CryptographicException();
         }
+
+        public byte[] Export(X509ContentType contentType, SafePasswordHandle password)
+        {
+            using (IExportPal storePal = StorePal.FromCertificate(this))
+            {
+                return storePal.Export (contentType, password);
+            }
+        }
     }
 }
