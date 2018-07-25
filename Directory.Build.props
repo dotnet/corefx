@@ -45,7 +45,7 @@
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
-    <RootBaseIntermediateOutputPath Condition="'$(RootBaseIntermediateOutputPath)'==''">$(BinDir)obj/</RootBaseIntermediateOutputPath>
+    <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
     
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'=='' and '$(NonShippingPackage)' == 'true'">$(BinDir)packages_noship/</PackageOutputRoot>
@@ -265,7 +265,7 @@
     <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
 
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(RootBaseIntermediateOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(BaseIntermediateOutputPath)$(TargetOutputRelPath)</IntermediateOutputPath>
 
     <RuntimePath Condition="'$(RuntimePath)' == ''">$(BinDir)runtime/$(BuildConfiguration)/</RuntimePath>
