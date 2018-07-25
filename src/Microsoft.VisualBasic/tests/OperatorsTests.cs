@@ -2670,13 +2670,21 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         {
             // byte.
             yield return new object[] { (byte)20, (byte)3, (byte)2 };
+            yield return new object[] { (byte)20, (ByteEnum)3, (byte)2 };
             yield return new object[] { (byte)20, (sbyte)3, (short)2 };
+            yield return new object[] { (byte)20, (SByteEnum)3, (short)2 };
             yield return new object[] { (byte)20, (ushort)3, (ushort)2 };
+            yield return new object[] { (byte)20, (UShortEnum)3, (ushort)2 };
             yield return new object[] { (byte)20, (short)3, (short)2 };
+            yield return new object[] { (byte)20, (ShortEnum)3, (short)2 };
             yield return new object[] { (byte)20, (uint)3, (uint)2 };
+            yield return new object[] { (byte)20, (UIntEnum)3, (uint)2 };
             yield return new object[] { (byte)20, 3, 2 };
+            yield return new object[] { (byte)20, (IntEnum)3, 2 };
             yield return new object[] { (byte)20, (ulong)3, (ulong)2 };
+            yield return new object[] { (byte)20, (ULongEnum)3, (ulong)2 };
             yield return new object[] { (byte)20, (long)3, (long)2 };
+            yield return new object[] { (byte)20, (LongEnum)3, (long)2 };
             yield return new object[] { (byte)20, (float)3, (float)2 };
             yield return new object[] { (byte)20, (double)3, (double)2 };
             yield return new object[] { (byte)20, (decimal)3, (decimal)2 };
@@ -2685,29 +2693,55 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
             // sbyte.
             yield return new object[] { (sbyte)20, (byte)3, (short)2 };
+            yield return new object[] { (sbyte)20, (ByteEnum)3, (short)2 };
             yield return new object[] { (sbyte)20, (sbyte)3, (sbyte)2 };
+            yield return new object[] { (sbyte)20, (SByteEnum)3, (sbyte)2 };
             yield return new object[] { (sbyte)20, (ushort)3, 2 };
+            yield return new object[] { (sbyte)20, (UShortEnum)3, 2 };
             yield return new object[] { (sbyte)20, (short)3, (short)2 };
+            yield return new object[] { (sbyte)20, (ShortEnum)3, (short)2 };
             yield return new object[] { (sbyte)20, (uint)3, (long)2 };
+            yield return new object[] { (sbyte)20, (UIntEnum)3, (long)2 };
             yield return new object[] { (sbyte)20, 3, 2 };
+            yield return new object[] { (sbyte)20, (IntEnum)3, 2 };
             yield return new object[] { (sbyte)20, (ulong)3, (decimal)2 };
+            yield return new object[] { (sbyte)20, (ULongEnum)3, (decimal)2 };
             yield return new object[] { (sbyte)20, (long)3, (long)2 };
+            yield return new object[] { (sbyte)20, (LongEnum)3, (long)2 };
             yield return new object[] { (sbyte)20, (float)3, (float)2 };
             yield return new object[] { (sbyte)20, (double)3, (double)2 };
             yield return new object[] { (sbyte)20, (decimal)3, (decimal)2 };
             yield return new object[] { (sbyte)20, "3", (double)2 };
             yield return new object[] { (sbyte)20, true, (sbyte)0 };
+            yield return new object[] { (sbyte)20, (sbyte)(-1), (sbyte)0 };
+            yield return new object[] { (sbyte)0, (sbyte)1, (sbyte)0 };
+            yield return new object[] { (sbyte)0, (sbyte)(-1), (sbyte)0 };
+            yield return new object[] { (sbyte)(-20), (sbyte)1, (sbyte)0 };
+            yield return new object[] { (sbyte)(-20), (sbyte)(-1), (sbyte)0 };
+            yield return new object[] { sbyte.MaxValue, sbyte.MinValue, sbyte.MaxValue };
+            yield return new object[] { sbyte.MaxValue, sbyte.MinValue, sbyte.MaxValue };
+            yield return new object[] { sbyte.MaxValue, (sbyte)(-1), (sbyte)0 };
+            yield return new object[] { sbyte.MinValue, sbyte.MinValue, (sbyte)0 };
+            yield return new object[] { sbyte.MinValue, sbyte.MinValue, (sbyte)0 };
             yield return new object[] { sbyte.MinValue, (sbyte)(-1), (sbyte)0 };
 
             // ushort.
             yield return new object[] { (ushort)20, (byte)3, (ushort)2 };
+            yield return new object[] { (ushort)20, (ByteEnum)3, (ushort)2 };
             yield return new object[] { (ushort)20, (sbyte)3, 2 };
+            yield return new object[] { (ushort)20, (SByteEnum)3, 2 };
             yield return new object[] { (ushort)20, (ushort)3, (ushort)2 };
+            yield return new object[] { (ushort)20, (UShortEnum)3, (ushort)2 };
             yield return new object[] { (ushort)20, (short)3, 2 };
+            yield return new object[] { (ushort)20, (ShortEnum)3, 2 };
             yield return new object[] { (ushort)20, (uint)3, (uint)2 };
+            yield return new object[] { (ushort)20, (UIntEnum)3, (uint)2 };
             yield return new object[] { (ushort)20, 3, 2 };
+            yield return new object[] { (ushort)20, (IntEnum)3, 2 };
             yield return new object[] { (ushort)20, (ulong)3, (ulong)2 };
+            yield return new object[] { (ushort)20, (ULongEnum)3, (ulong)2 };
             yield return new object[] { (ushort)20, (long)3, (long)2 };
+            yield return new object[] { (ushort)20, (LongEnum)3, (long)2 };
             yield return new object[] { (ushort)20, (float)3, (float)2 };
             yield return new object[] { (ushort)20, (double)3, (double)2 };
             yield return new object[] { (ushort)20, (decimal)3, (decimal)2 };
@@ -2716,29 +2750,55 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
             // short.
             yield return new object[] { (short)20, (byte)3, (short)2 };
+            yield return new object[] { (short)20, (ByteEnum)3, (short)2 };
             yield return new object[] { (short)20, (sbyte)3, (short)2 };
+            yield return new object[] { (short)20, (SByteEnum)3, (short)2 };
             yield return new object[] { (short)20, (ushort)3, 2 };
+            yield return new object[] { (short)20, (UShortEnum)3, 2 };
             yield return new object[] { (short)20, (short)3, (short)2 };
+            yield return new object[] { (short)20, (ShortEnum)3, (short)2 };
             yield return new object[] { (short)20, (uint)3, (long)2 };
+            yield return new object[] { (short)20, (UIntEnum)3, (long)2 };
             yield return new object[] { (short)20, 3, 2 };
+            yield return new object[] { (short)20, (IntEnum)3, 2 };
             yield return new object[] { (short)20, (ulong)3, (decimal)2 };
+            yield return new object[] { (short)20, (ULongEnum)3, (decimal)2 };
             yield return new object[] { (short)20, (long)3, (long)2 };
+            yield return new object[] { (short)20, (LongEnum)3, (long)2 };
             yield return new object[] { (short)20, (float)3, (float)2 };
             yield return new object[] { (short)20, (double)3, (double)2 };
             yield return new object[] { (short)20, (decimal)3, (decimal)2 };
             yield return new object[] { (short)20, "3", (double)2 };
             yield return new object[] { (short)20, true, (short)0 };
+            yield return new object[] { (short)20, (short)(-1), (short)0 };
+            yield return new object[] { (short)0, (short)1, (short)0 };
+            yield return new object[] { (short)0, (short)(-1), (short)0 };
+            yield return new object[] { (short)(-20), (short)1, (short)0 };
+            yield return new object[] { (short)(-20), (short)(-1), (short)0 };
+            yield return new object[] { short.MaxValue, short.MinValue, short.MaxValue };
+            yield return new object[] { short.MaxValue, short.MinValue, short.MaxValue };
+            yield return new object[] { short.MaxValue, (short)(-1), (short)0 };
+            yield return new object[] { short.MinValue, short.MinValue, (short)0 };
+            yield return new object[] { short.MinValue, short.MinValue, (short)0 };
             yield return new object[] { short.MinValue, (short)(-1), (short)0 };
 
             // uint.
             yield return new object[] { (uint)20, (byte)3, (uint)2 };
+            yield return new object[] { (uint)20, (ByteEnum)3, (uint)2 };
             yield return new object[] { (uint)20, (sbyte)3, (long)2 };
+            yield return new object[] { (uint)20, (SByteEnum)3, (long)2 };
             yield return new object[] { (uint)20, (ushort)3, (uint)2 };
+            yield return new object[] { (uint)20, (UShortEnum)3, (uint)2 };
             yield return new object[] { (uint)20, (short)3, (long)2 };
+            yield return new object[] { (uint)20, (ShortEnum)3, (long)2 };
             yield return new object[] { (uint)20, (uint)3, (uint)2 };
+            yield return new object[] { (uint)20, (UIntEnum)3, (uint)2 };
             yield return new object[] { (uint)20, 3, (long)2 };
+            yield return new object[] { (uint)20, (IntEnum)3, (long)2 };
             yield return new object[] { (uint)20, (ulong)3, (ulong)2 };
+            yield return new object[] { (uint)20, (ULongEnum)3, (ulong)2 };
             yield return new object[] { (uint)20, (long)3, (long)2 };
+            yield return new object[] { (uint)20, (LongEnum)3, (long)2 };
             yield return new object[] { (uint)20, (float)3, (float)2 };
             yield return new object[] { (uint)20, (double)3, (double)2 };
             yield return new object[] { (uint)20, (decimal)3, (decimal)2 };
@@ -2747,29 +2807,55 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
             // int.
             yield return new object[] { 20, (byte)3, 2 };
+            yield return new object[] { 20, (ByteEnum)3, 2 };
             yield return new object[] { 20, (sbyte)3, 2 };
+            yield return new object[] { 20, (SByteEnum)3, 2 };
             yield return new object[] { 20, (ushort)3, 2 };
+            yield return new object[] { 20, (UShortEnum)3, 2 };
             yield return new object[] { 20, (short)3, 2 };
+            yield return new object[] { 20, (ShortEnum)3, 2 };
             yield return new object[] { 20, (uint)3, (long)2 };
+            yield return new object[] { 20, (UIntEnum)3, (long)2 };
             yield return new object[] { 20, 3, 2 };
+            yield return new object[] { 20, (IntEnum)3, 2 };
             yield return new object[] { 20, (ulong)3, (decimal)2 };
+            yield return new object[] { 20, (ULongEnum)3, (decimal)2 };
             yield return new object[] { 20, (long)3, (long)2 };
+            yield return new object[] { 20, (LongEnum)3, (long)2 };
             yield return new object[] { 20, (float)3, (float)2 };
             yield return new object[] { 20, (double)3, (double)2 };
             yield return new object[] { 20, (decimal)3, (decimal)2 };
             yield return new object[] { 20, "3", (double)2 };
             yield return new object[] { 20, true, 0 };
+            yield return new object[] { 20, -1, 0 };
+            yield return new object[] { 0, 1, 0 };
+            yield return new object[] { 0, -1, 0 };
+            yield return new object[] { -20, 1, 0 };
+            yield return new object[] { -20, -1, 0 };
+            yield return new object[] { int.MaxValue, int.MinValue, int.MaxValue };
+            yield return new object[] { int.MaxValue, int.MinValue, int.MaxValue };
+            yield return new object[] { int.MaxValue, -1, 0 };
+            yield return new object[] { int.MinValue, int.MinValue, 0 };
+            yield return new object[] { int.MinValue, int.MinValue, 0 };
             yield return new object[] { int.MinValue, -1, 0 };
 
             // ulong.
             yield return new object[] { (ulong)20, (byte)3, (ulong)2 };
+            yield return new object[] { (ulong)20, (ByteEnum)3, (ulong)2 };
             yield return new object[] { (ulong)20, (sbyte)3, (decimal)2 };
+            yield return new object[] { (ulong)20, (SByteEnum)3, (decimal)2 };
             yield return new object[] { (ulong)20, (ushort)3, (ulong)2 };
+            yield return new object[] { (ulong)20, (UShortEnum)3, (ulong)2 };
             yield return new object[] { (ulong)20, (short)3, (decimal)2 };
+            yield return new object[] { (ulong)20, (ShortEnum)3, (decimal)2 };
             yield return new object[] { (ulong)20, (uint)3, (ulong)2 };
+            yield return new object[] { (ulong)20, (UIntEnum)3, (ulong)2 };
             yield return new object[] { (ulong)20, 3, (decimal)2 };
+            yield return new object[] { (ulong)20, (IntEnum)3, (decimal)2 };
             yield return new object[] { (ulong)20, (ulong)3, (ulong)2 };
+            yield return new object[] { (ulong)20, (ULongEnum)3, (ulong)2 };
             yield return new object[] { (ulong)20, (long)3, (decimal)2 };
+            yield return new object[] { (ulong)20, (LongEnum)3, (decimal)2 };
             yield return new object[] { (ulong)20, (float)3, (float)2 };
             yield return new object[] { (ulong)20, (double)3, (double)2 };
             yield return new object[] { (ulong)20, (decimal)3, (decimal)2 };
@@ -2778,107 +2864,219 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
             // long.
             yield return new object[] { (long)20, (byte)3, (long)2 };
+            yield return new object[] { (long)20, (ByteEnum)3, (long)2 };
             yield return new object[] { (long)20, (sbyte)3, (long)2 };
+            yield return new object[] { (long)20, (SByteEnum)3, (long)2 };
             yield return new object[] { (long)20, (ushort)3, (long)2 };
+            yield return new object[] { (long)20, (UShortEnum)3, (long)2 };
             yield return new object[] { (long)20, (short)3, (long)2 };
+            yield return new object[] { (long)20, (ShortEnum)3, (long)2 };
             yield return new object[] { (long)20, (uint)3, (long)2 };
+            yield return new object[] { (long)20, (UIntEnum)3, (long)2 };
             yield return new object[] { (long)20, 3, (long)2 };
+            yield return new object[] { (long)20, (IntEnum)3, (long)2 };
             yield return new object[] { (long)20, (ulong)3, (decimal)2 };
+            yield return new object[] { (long)20, (ULongEnum)3, (decimal)2 };
             yield return new object[] { (long)20, (long)3, (long)2 };
+            yield return new object[] { (long)20, (LongEnum)3, (long)2 };
             yield return new object[] { (long)20, (float)3, (float)2 };
             yield return new object[] { (long)20, (double)3, (double)2 };
             yield return new object[] { (long)20, (decimal)3, (decimal)2 };
             yield return new object[] { (long)20, "3", (double)2 };
             yield return new object[] { (long)20, true, (long)0 };
+            yield return new object[] { (long)20, (long)(-1), (long)0 };
+            yield return new object[] { (long)0, (long)1, (long)0 };
+            yield return new object[] { (long)0, (long)(-1), (long)0 };
+            yield return new object[] { (long)(-20), (long)1, (long)0 };
+            yield return new object[] { (long)(-20), (long)(-1), (long)0 };
+            yield return new object[] { long.MaxValue, long.MinValue, long.MaxValue };
+            yield return new object[] { long.MaxValue, long.MinValue, long.MaxValue };
+            yield return new object[] { long.MaxValue, (long)(-1), (long)0 };
+            yield return new object[] { long.MinValue, long.MinValue, (long)0 };
+            yield return new object[] { long.MinValue, long.MinValue, (long)0 };
             yield return new object[] { long.MinValue, (long)(-1), (long)0 };
 
             // float.
             yield return new object[] { (float)20, (byte)3, (float)2 };
+            yield return new object[] { (float)20, (ByteEnum)3, (float)2 };
             yield return new object[] { (float)20, (sbyte)3, (float)2 };
+            yield return new object[] { (float)20, (SByteEnum)3, (float)2 };
             yield return new object[] { (float)20, (ushort)3, (float)2 };
+            yield return new object[] { (float)20, (UShortEnum)3, (float)2 };
             yield return new object[] { (float)20, (short)3, (float)2 };
+            yield return new object[] { (float)20, (ShortEnum)3, (float)2 };
             yield return new object[] { (float)20, (uint)3, (float)2 };
+            yield return new object[] { (float)20, (UIntEnum)3, (float)2 };
             yield return new object[] { (float)20, 3, (float)2 };
+            yield return new object[] { (float)20, (IntEnum)3, (float)2 };
             yield return new object[] { (float)20, (ulong)3, (float)2 };
+            yield return new object[] { (float)20, (ULongEnum)3, (float)2 };
             yield return new object[] { (float)20, (long)3, (float)2 };
+            yield return new object[] { (float)20, (LongEnum)3, (float)2 };
             yield return new object[] { (float)20, (float)3, (float)2 };
             yield return new object[] { (float)20, (double)3, (double)2 };
             yield return new object[] { (float)20, (decimal)3, (float)2 };
             yield return new object[] { (float)20, "3", (double)2 };
             yield return new object[] { (float)20, true, (float)0 };
+            yield return new object[] { (float)20, false, float.NaN };
             yield return new object[] { (float)20, null, float.NaN };
+            yield return new object[] { (float)20, (float)0, float.NaN };
+            yield return new object[] { (float)20, (float)(-1), (float)0 };
+            yield return new object[] { (float)0, (float)1, (float)0 };
+            yield return new object[] { (float)0, (float)0, float.NaN };
+            yield return new object[] { (float)0, (float)(-1), (float)0 };
+            yield return new object[] { (float)(-20), (float)1, (float)0 };
+            yield return new object[] { (float)(-20), (float)0, float.NaN };
+            yield return new object[] { (float)(-20), (float)(-1), (float)0 };
+            yield return new object[] { float.MaxValue, float.MinValue, (float)0 };
+            yield return new object[] { float.MaxValue, float.MinValue, (float)0 };
+            yield return new object[] { float.MaxValue, (float)0, float.NaN };
+            yield return new object[] { float.MaxValue, (float)(-1), (float)0 };
+            yield return new object[] { float.MinValue, float.MinValue, (float)0 };
+            yield return new object[] { float.MinValue, float.MinValue, (float)0 };
+            yield return new object[] { float.MinValue, (float)0, float.NaN };
+            yield return new object[] { float.MinValue, (float)(-1), (float)0 };
 
             // double.
             yield return new object[] { (double)20, (byte)3, (double)2 };
+            yield return new object[] { (double)20, (ByteEnum)3, (double)2 };
             yield return new object[] { (double)20, (sbyte)3, (double)2 };
+            yield return new object[] { (double)20, (SByteEnum)3, (double)2 };
             yield return new object[] { (double)20, (ushort)3, (double)2 };
+            yield return new object[] { (double)20, (UShortEnum)3, (double)2 };
             yield return new object[] { (double)20, (short)3, (double)2 };
+            yield return new object[] { (double)20, (ShortEnum)3, (double)2 };
             yield return new object[] { (double)20, (uint)3, (double)2 };
+            yield return new object[] { (double)20, (UIntEnum)3, (double)2 };
             yield return new object[] { (double)20, 3, (double)2 };
+            yield return new object[] { (double)20, (IntEnum)3, (double)2 };
             yield return new object[] { (double)20, (ulong)3, (double)2 };
+            yield return new object[] { (double)20, (ULongEnum)3, (double)2 };
             yield return new object[] { (double)20, (long)3, (double)2 };
+            yield return new object[] { (double)20, (LongEnum)3, (double)2 };
             yield return new object[] { (double)20, (float)3, (double)2 };
             yield return new object[] { (double)20, (double)3, (double)2 };
             yield return new object[] { (double)20, (decimal)3, (double)2 };
             yield return new object[] { (double)20, "3", (double)2 };
             yield return new object[] { (double)20, true, (double)0 };
+            yield return new object[] { (double)20, false, double.NaN };
             yield return new object[] { (double)20, null, double.NaN };
+            yield return new object[] { (double)20, (double)0, double.NaN };
+            yield return new object[] { (double)20, (double)(-1), (double)0 };
+            yield return new object[] { (double)0, (double)1, (double)0 };
+            yield return new object[] { (double)0, (double)0, double.NaN };
+            yield return new object[] { (double)0, (double)(-1), (double)0 };
+            yield return new object[] { (double)(-20), (double)1, (double)0 };
+            yield return new object[] { (double)(-20), (double)0, double.NaN };
+            yield return new object[] { (double)(-20), (double)(-1), (double)0 };
+            yield return new object[] { double.MaxValue, double.MinValue, (double)0 };
+            yield return new object[] { double.MaxValue, double.MinValue, (double)0 };
+            yield return new object[] { double.MaxValue, (double)0, double.NaN };
+            yield return new object[] { double.MaxValue, (double)(-1), (double)0 };
+            yield return new object[] { double.MinValue, double.MinValue, (double)0 };
+            yield return new object[] { double.MinValue, double.MinValue, (double)0 };
+            yield return new object[] { double.MinValue, (double)0, double.NaN };
+            yield return new object[] { double.MinValue, (double)(-1), (double)0 };
 
             // decimal.
             yield return new object[] { (decimal)20, (byte)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (ByteEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (sbyte)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (SByteEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (ushort)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (UShortEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (short)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (ShortEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (uint)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (UIntEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, 3, (decimal)2 };
+            yield return new object[] { (decimal)20, (IntEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (ulong)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (ULongEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (long)3, (decimal)2 };
+            yield return new object[] { (decimal)20, (LongEnum)3, (decimal)2 };
             yield return new object[] { (decimal)20, (float)3, (float)2 };
             yield return new object[] { (decimal)20, (double)3, (double)2 };
             yield return new object[] { (decimal)20, (decimal)3, (decimal)2 };
             yield return new object[] { (decimal)20, "3", (double)2 };
             yield return new object[] { (decimal)20, true, (decimal)0 };
+            yield return new object[] { (decimal)20, (decimal)(-1), (decimal)0 };
+            yield return new object[] { (decimal)0, (decimal)1, (decimal)0 };
+            yield return new object[] { (decimal)0, (decimal)(-1), (decimal)0 };
+            yield return new object[] { (decimal)(-20), (decimal)1, (decimal)0 };
+            yield return new object[] { (decimal)(-20), (decimal)(-1), (decimal)0 };
+            yield return new object[] { decimal.MaxValue, decimal.MinValue, (decimal)0 };
+            yield return new object[] { decimal.MaxValue, decimal.MinValue, (decimal)0 };
+            yield return new object[] { decimal.MaxValue, (decimal)(-1), (decimal)0 };
+            yield return new object[] { decimal.MinValue, decimal.MinValue, (decimal)0 };
+            yield return new object[] { decimal.MinValue, decimal.MinValue, (decimal)0 };
+            yield return new object[] { decimal.MinValue, (decimal)(-1), (decimal)0 };
 
             // string.
             yield return new object[] { "20", (byte)3, (double)2 };
+            yield return new object[] { "20", (ByteEnum)3, (double)2 };
             yield return new object[] { "20", (sbyte)3, (double)2 };
+            yield return new object[] { "20", (SByteEnum)3, (double)2 };
             yield return new object[] { "20", (ushort)3, (double)2 };
+            yield return new object[] { "20", (UShortEnum)3, (double)2 };
             yield return new object[] { "20", (short)3, (double)2 };
+            yield return new object[] { "20", (ShortEnum)3, (double)2 };
             yield return new object[] { "20", (uint)3, (double)2 };
+            yield return new object[] { "20", (UIntEnum)3, (double)2 };
             yield return new object[] { "20", 3, (double)2 };
+            yield return new object[] { "20", (IntEnum)3, (double)2 };
             yield return new object[] { "20", (ulong)3, (double)2 };
+            yield return new object[] { "20", (ULongEnum)3, (double)2 };
             yield return new object[] { "20", (long)3, (double)2 };
+            yield return new object[] { "20", (LongEnum)3, (double)2 };
             yield return new object[] { "20", (float)3, (double)2 };
             yield return new object[] { "20", (double)3, (double)2 };
             yield return new object[] { "20", (decimal)3, (double)2 };
             yield return new object[] { "20", "3", (double)2 };
             yield return new object[] { "20", true, (double)0 };
+            yield return new object[] { "20", false, double.NaN };
             yield return new object[] { "20", null, double.NaN };
 
             // bool.
-            yield return new object[] { true, (byte)3, (short)-1 };
-            yield return new object[] { true, (sbyte)3, (sbyte)-1 };
+            yield return new object[] { true, (byte)3, (short)(-1) };
+            yield return new object[] { true, (ByteEnum)3, (short)(-1) };
+            yield return new object[] { true, (sbyte)3, (sbyte)(-1) };
+            yield return new object[] { true, (SByteEnum)3, (sbyte)(-1) };
             yield return new object[] { true, (ushort)3, -1 };
-            yield return new object[] { true, (short)3, (short)-1 };
-            yield return new object[] { true, (uint)3, (long)-1 };
+            yield return new object[] { true, (UShortEnum)3, -1 };
+            yield return new object[] { true, (short)3, (short)(-1) };
+            yield return new object[] { true, (ShortEnum)3, (short)(-1) };
+            yield return new object[] { true, (uint)3, (long)(-1) };
+            yield return new object[] { true, (UIntEnum)3, (long)(-1) };
             yield return new object[] { true, 3, -1 };
-            yield return new object[] { true, (ulong)3, (decimal)-1 };
-            yield return new object[] { true, (long)3, (long)-1 };
-            yield return new object[] { true, (float)3, (float)-1 };
-            yield return new object[] { true, (double)3, (double)-1 };
-            yield return new object[] { true, (decimal)3, (decimal)-1 };
-            yield return new object[] { true, "3", (double)-1 };
+            yield return new object[] { true, (IntEnum)3, -1 };
+            yield return new object[] { true, (ulong)3, (decimal)(-1) };
+            yield return new object[] { true, (ULongEnum)3, (decimal)(-1) };
+            yield return new object[] { true, (long)3, (long)(-1) };
+            yield return new object[] { true, (LongEnum)3, (long)(-1) };
+            yield return new object[] { true, (float)3, (float)(-1) };
+            yield return new object[] { true, (double)3, (double)(-1) };
+            yield return new object[] { true, (decimal)3, (decimal)(-1) };
+            yield return new object[] { true, "3", (double)(-1) };
             yield return new object[] { true, true, (short)0 };
 
             // null.
-            yield return new object[] { null, (byte)3, (byte)0 };
+            yield return new object[] { null, (byte)3, byte.MinValue };
+            yield return new object[] { null, (ByteEnum)3, byte.MinValue };
             yield return new object[] { null, (sbyte)3, (sbyte)0 };
-            yield return new object[] { null, (ushort)3, (ushort)0 };
+            yield return new object[] { null, (SByteEnum)3, (sbyte)0 };
+            yield return new object[] { null, (ushort)3, ushort.MinValue };
+            yield return new object[] { null, (UShortEnum)3, ushort.MinValue };
             yield return new object[] { null, (short)3, (short)0 };
-            yield return new object[] { null, (uint)3, (uint)0 };
+            yield return new object[] { null, (ShortEnum)3, (short)0 };
+            yield return new object[] { null, (uint)3, uint.MinValue };
+            yield return new object[] { null, (UIntEnum)3, uint.MinValue };
             yield return new object[] { null, 3, 0 };
-            yield return new object[] { null, (ulong)3, (ulong)0 };
+            yield return new object[] { null, (IntEnum)3, 0 };
+            yield return new object[] { null, (ulong)3, ulong.MinValue };
+            yield return new object[] { null, (ULongEnum)3, ulong.MinValue };
             yield return new object[] { null, (long)3, (long)0 };
+            yield return new object[] { null, (LongEnum)3, (long)0 };
             yield return new object[] { null, (float)3, (float)0 };
             yield return new object[] { null, (double)3, (double)0 };
             yield return new object[] { null, (decimal)3, (decimal)0 };
@@ -2896,46 +3094,224 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(ModObject_TestData))]
         public void ModObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.ModObject(left, right));
+             AssertEqual(expected, Operators.ModObject(left, right));
         }
 
-        public static IEnumerable<object[]> ModObject_DivideByZero_TestData()
+        public static IEnumerable<object[]> ModObject_InvalidObject_TestData()
         {
-            yield return new object[] { (byte)10 };
-            yield return new object[] { (sbyte)10 };
-            yield return new object[] { (ushort)10 };
-            yield return new object[] { (short)10 };
-            yield return new object[] { (uint)10 };
-            yield return new object[] { 10 };
-            yield return new object[] { (ulong)10 };
-            yield return new object[] { (long)10 };
-            yield return new object[] { (decimal)10 };
-            yield return new object[] { true };
-            yield return new object[] { null };
+            yield return new object[] { (byte)20, new char[] { '3' } };
+            yield return new object[] { (byte)20, '3' };
+            yield return new object[] { (byte)20, new DateTime(3) };
+            yield return new object[] { (sbyte)20, new char[] { '3' } };
+            yield return new object[] { (sbyte)20, '3' };
+            yield return new object[] { (sbyte)20, new DateTime(3) };
+            yield return new object[] { (ushort)20, new char[] { '3' } };
+            yield return new object[] { (ushort)20, '3' };
+            yield return new object[] { (ushort)20, new DateTime(3) };
+            yield return new object[] { (short)20, new char[] { '3' } };
+            yield return new object[] { (short)20, '3' };
+            yield return new object[] { (short)20, new DateTime(3) };
+            yield return new object[] { (uint)20, new char[] { '3' } };
+            yield return new object[] { (uint)20, '3' };
+            yield return new object[] { (uint)20, new DateTime(3) };
+            yield return new object[] { 20, new char[] { '3' } };
+            yield return new object[] { 20, '3' };
+            yield return new object[] { 20, new DateTime(3) };
+            yield return new object[] { (ulong)20, new char[] { '3' } };
+            yield return new object[] { (ulong)20, '3' };
+            yield return new object[] { (ulong)20, new DateTime(3) };
+            yield return new object[] { (long)20, new char[] { '3' } };
+            yield return new object[] { (long)20, '3' };
+            yield return new object[] { (long)20, new DateTime(3) };
+            yield return new object[] { (float)20, new char[] { '3' } };
+            yield return new object[] { (float)20, '3' };
+            yield return new object[] { (float)20, new DateTime(3) };
+            yield return new object[] { (double)20, new char[] { '3' } };
+            yield return new object[] { (double)20, '3' };
+            yield return new object[] { (double)20, new DateTime(3) };
+            yield return new object[] { (decimal)20, new char[] { '3' } };
+            yield return new object[] { (decimal)20, '3' };
+            yield return new object[] { (decimal)20, new DateTime(3) };
+            yield return new object[] { "20", new char[] { '3' } };
+            yield return new object[] { "20", '3' };
+            yield return new object[] { "20", new DateTime(3) };
+            yield return new object[] { new char[] { '2', '0' }, (byte)3 };
+            yield return new object[] { new char[] { '2', '0' }, (ByteEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (sbyte)3 };
+            yield return new object[] { new char[] { '2', '0' }, (SByteEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (ushort)3 };
+            yield return new object[] { new char[] { '2', '0' }, (UShortEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (short)3 };
+            yield return new object[] { new char[] { '2', '0' }, (ShortEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (uint)3 };
+            yield return new object[] { new char[] { '2', '0' }, (UIntEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, 3 };
+            yield return new object[] { new char[] { '2', '0' }, (IntEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (ulong)3 };
+            yield return new object[] { new char[] { '2', '0' }, (ULongEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (long)3 };
+            yield return new object[] { new char[] { '2', '0' }, (LongEnum)3 };
+            yield return new object[] { new char[] { '2', '0' }, (float)3 };
+            yield return new object[] { new char[] { '2', '0' }, (double)3 };
+            yield return new object[] { new char[] { '2', '0' }, (decimal)3 };
+            yield return new object[] { new char[] { '2', '0' }, "3" };
+            yield return new object[] { new char[] { '2', '0' }, new char[] { '3' } };
+            yield return new object[] { new char[] { '2', '0' }, true };
+            yield return new object[] { new char[] { '2', '0' }, false };
+            yield return new object[] { new char[] { '2', '0' }, '3' };
+            yield return new object[] { new char[] { '2', '0' }, new DateTime(3) };
+            yield return new object[] { new char[] { '2', '0' }, null };
+            yield return new object[] { true, new char[] { '3' } };
+            yield return new object[] { true, '3' };
+            yield return new object[] { true, new DateTime(3) };
+            yield return new object[] { new DateTime(20), (byte)3 };
+            yield return new object[] { new DateTime(20), (ByteEnum)3 };
+            yield return new object[] { new DateTime(20), (sbyte)3 };
+            yield return new object[] { new DateTime(20), (SByteEnum)3 };
+            yield return new object[] { new DateTime(20), (ushort)3 };
+            yield return new object[] { new DateTime(20), (UShortEnum)3 };
+            yield return new object[] { new DateTime(20), (short)3 };
+            yield return new object[] { new DateTime(20), (ShortEnum)3 };
+            yield return new object[] { new DateTime(20), (uint)3 };
+            yield return new object[] { new DateTime(20), (UIntEnum)3 };
+            yield return new object[] { new DateTime(20), 3 };
+            yield return new object[] { new DateTime(20), (IntEnum)3 };
+            yield return new object[] { new DateTime(20), (ulong)3 };
+            yield return new object[] { new DateTime(20), (ULongEnum)3 };
+            yield return new object[] { new DateTime(20), (long)3 };
+            yield return new object[] { new DateTime(20), (LongEnum)3 };
+            yield return new object[] { new DateTime(20), (float)3 };
+            yield return new object[] { new DateTime(20), (double)3 };
+            yield return new object[] { new DateTime(20), (decimal)3 };
+            yield return new object[] { new DateTime(20), "3" };
+            yield return new object[] { new DateTime(20), new char[] { '3' } };
+            yield return new object[] { new DateTime(20), true };
+            yield return new object[] { new DateTime(20), false };
+            yield return new object[] { new DateTime(20), '3' };
+            yield return new object[] { new DateTime(20), new DateTime(3) };
+            yield return new object[] { new DateTime(20), null };
+            yield return new object[] { null, new char[] { '3' } };
+            yield return new object[] { null, '3' };
+            yield return new object[] { null, new DateTime(3) };
         }
 
         [Theory]
-        [MemberData(nameof(ModObject_DivideByZero_TestData))]
-        public void ModObject_NullRight_ThrowsDivideByZeroException(object left)
+        [MemberData(nameof(ModObject_InvalidObject_TestData))]
+        public void ModObject_InvalidObject_ThrowsInvalidCastException(object left, object right)
         {
-            Assert.Throws<DivideByZeroException>(() => Operators.ModObject(left, null));
-            Assert.Throws<DivideByZeroException>(() => Operators.ModObject(left, false));
-            Assert.Throws<DivideByZeroException>(() => Operators.ModObject(left, 0));
+            Assert.Throws<InvalidCastException>(() => Operators.ModObject(left, right));
+        }
+
+        public static IEnumerable<object[]> ModObject_DivideByZeroObject_TestData()
+        {
+            yield return new object[] { (byte)20, false };
+            yield return new object[] { (byte)20, null };
+            yield return new object[] { (byte)20, byte.MinValue };
+            yield return new object[] { byte.MinValue, byte.MinValue };
+            yield return new object[] { byte.MaxValue, byte.MinValue };
+            yield return new object[] { byte.MaxValue, byte.MinValue };
+            yield return new object[] { byte.MaxValue, byte.MinValue };
+            yield return new object[] { byte.MinValue, byte.MinValue };
+            yield return new object[] { byte.MinValue, byte.MinValue };
+            yield return new object[] { byte.MinValue, byte.MinValue };
+            yield return new object[] { (sbyte)20, false };
+            yield return new object[] { (sbyte)20, null };
+            yield return new object[] { (sbyte)20, (sbyte)0 };
+            yield return new object[] { (sbyte)0, (sbyte)0 };
+            yield return new object[] { (sbyte)(-20), (sbyte)0 };
+            yield return new object[] { sbyte.MaxValue, (sbyte)0 };
+            yield return new object[] { sbyte.MinValue, (sbyte)0 };
+            yield return new object[] { (ushort)20, false };
+            yield return new object[] { (ushort)20, null };
+            yield return new object[] { (ushort)20, ushort.MinValue };
+            yield return new object[] { ushort.MinValue, ushort.MinValue };
+            yield return new object[] { ushort.MaxValue, ushort.MinValue };
+            yield return new object[] { ushort.MaxValue, ushort.MinValue };
+            yield return new object[] { ushort.MaxValue, ushort.MinValue };
+            yield return new object[] { ushort.MinValue, ushort.MinValue };
+            yield return new object[] { ushort.MinValue, ushort.MinValue };
+            yield return new object[] { ushort.MinValue, ushort.MinValue };
+            yield return new object[] { (short)20, false };
+            yield return new object[] { (short)20, null };
+            yield return new object[] { (short)20, (short)0 };
+            yield return new object[] { (short)0, (short)0 };
+            yield return new object[] { (short)(-20), (short)0 };
+            yield return new object[] { short.MaxValue, (short)0 };
+            yield return new object[] { short.MinValue, (short)0 };
+            yield return new object[] { (uint)20, false };
+            yield return new object[] { (uint)20, null };
+            yield return new object[] { (uint)20, uint.MinValue };
+            yield return new object[] { uint.MinValue, uint.MinValue };
+            yield return new object[] { uint.MaxValue, uint.MinValue };
+            yield return new object[] { uint.MaxValue, uint.MinValue };
+            yield return new object[] { uint.MaxValue, uint.MinValue };
+            yield return new object[] { uint.MinValue, uint.MinValue };
+            yield return new object[] { uint.MinValue, uint.MinValue };
+            yield return new object[] { uint.MinValue, uint.MinValue };
+            yield return new object[] { 20, false };
+            yield return new object[] { 20, null };
+            yield return new object[] { 20, 0 };
+            yield return new object[] { 0, 0 };
+            yield return new object[] { -20, 0 };
+            yield return new object[] { int.MaxValue, 0 };
+            yield return new object[] { int.MinValue, 0 };
+            yield return new object[] { (ulong)20, false };
+            yield return new object[] { (ulong)20, null };
+            yield return new object[] { (ulong)20, ulong.MinValue };
+            yield return new object[] { ulong.MinValue, ulong.MinValue };
+            yield return new object[] { ulong.MaxValue, ulong.MinValue };
+            yield return new object[] { ulong.MaxValue, ulong.MinValue };
+            yield return new object[] { ulong.MaxValue, ulong.MinValue };
+            yield return new object[] { ulong.MinValue, ulong.MinValue };
+            yield return new object[] { ulong.MinValue, ulong.MinValue };
+            yield return new object[] { ulong.MinValue, ulong.MinValue };
+            yield return new object[] { (long)20, false };
+            yield return new object[] { (long)20, null };
+            yield return new object[] { (long)20, (long)0 };
+            yield return new object[] { (long)0, (long)0 };
+            yield return new object[] { (long)(-20), (long)0 };
+            yield return new object[] { long.MaxValue, (long)0 };
+            yield return new object[] { long.MinValue, (long)0 };
+            yield return new object[] { (decimal)20, false };
+            yield return new object[] { (decimal)20, null };
+            yield return new object[] { (decimal)20, (decimal)0 };
+            yield return new object[] { (decimal)0, (decimal)0 };
+            yield return new object[] { (decimal)(-20), (decimal)0 };
+            yield return new object[] { decimal.MaxValue, (decimal)0 };
+            yield return new object[] { decimal.MinValue, (decimal)0 };
+            yield return new object[] { true, false };
+            yield return new object[] { true, null };
+            yield return new object[] { null, false };
+            yield return new object[] { null, null };
+        }
+
+        [Theory]
+        [MemberData(nameof(ModObject_DivideByZeroObject_TestData))]
+        public void ModObject_DivideByZeroObject_ThrowsDivideByZeroException(object left, object right)
+        {
+            Assert.Throws<DivideByZeroException>(() => Operators.ModObject(left, right));
         }
 
         public static IEnumerable<object[]> ModObject_InvalidObjects_TestData()
         {
             yield return new object[] { 1, '2' };
+            yield return new object[] { '2', 1 };
             yield return new object[] { 2, DBNull.Value };
+            yield return new object[] { DBNull.Value, 2 };
             yield return new object[] { '3', new object() };
+            yield return new object[] { new object(), '3' };
+
+            yield return new object[] { new char[] { '8' }, 10 };
+            yield return new object[] { 10, new char[] { '8' } };
+            yield return new object[] { new char[] { '8' }, new object() };
+            yield return new object[] { new object(), new char[] { '8' } };
         }
 
         [Theory]
-        [MemberData(nameof(IntDivideObject_InvalidObjects_TestData))]
+        [MemberData(nameof(ModObject_InvalidObjects_TestData))]
         public void ModObject_InvalidObjects_ThrowsInvalidCastException(object left, object right)
         {
             Assert.Throws<InvalidCastException>(() => Operators.ModObject(left, right));
-            Assert.Throws<InvalidCastException>(() => Operators.ModObject(right, left));
         }
 
         public static IEnumerable<object[]> ModObject_MismatchingObjects_TestData()
@@ -2955,77 +3331,90 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
         public class ModObject
         {
-            public static string operator %(ModObject left, int right) => "custom";
-            public static string operator %(int left, ModObject right) => "motsuc";
+             [SpecialName]
+             public static string op_Modulus(ModObject left, int right) => "custom";
 
-            public static string operator %(ModObject left, OperatorsTests right) => "customobject";
-            public static string operator %(OperatorsTests left, ModObject right) => "tcejbomotsuc";
+             [SpecialName]
+             public static string op_Modulus(int left, ModObject right) => "motsuc";
+
+             [SpecialName]
+             public static string op_Modulus(ModObject left, OperatorsTests right) => "customobject";
+
+             [SpecialName]
+             public static string op_Modulus(OperatorsTests left, ModObject right) => "tcejbomotsuc";
         }
 
         public static IEnumerable<object[]> NegateObject_TestData()
         {
             // byte.
-            yield return new object[] { (byte)1, (short)(-1) };
-            yield return new object[] { (ByteEnum)1, (short)(-1) };
+            yield return new object[] { (byte)9, (short)(-9) };
+            yield return new object[] { (ByteEnum)9, (short)(-9) };
+            yield return new object[] { byte.MinValue, (short)0 };
+            yield return new object[] { byte.MaxValue, (short)(-255) };
 
             // sbyte.
-            yield return new object[] { (sbyte)1, (sbyte)(-1) };
-            yield return new object[] { (sbyte)(-1), (sbyte)1 };
-            yield return new object[] { (SByteEnum)(-1), (sbyte)1 };
+            yield return new object[] { (sbyte)9, (sbyte)(-9) };
+            yield return new object[] { (SByteEnum)9, (sbyte)(-9) };
             yield return new object[] { sbyte.MinValue, (short)128 };
+            yield return new object[] { sbyte.MaxValue, (sbyte)(-127) };
 
             // ushort.
-            yield return new object[] { (ushort)3, -3 };
-            yield return new object[] { (UShortEnum)3, -3 };
+            yield return new object[] { (ushort)9, -9 };
+            yield return new object[] { (UShortEnum)9, -9 };
+            yield return new object[] { ushort.MinValue, 0 };
+            yield return new object[] { ushort.MaxValue, -65535 };
 
             // short.
-            yield return new object[] { (short)4, (short)(-4) };
-            yield return new object[] { (short)(-4), (short)4 };
-            yield return new object[] { (ShortEnum)(-4), (short)4 };
+            yield return new object[] { (short)9, (short)(-9) };
+            yield return new object[] { (ShortEnum)9, (short)(-9) };
             yield return new object[] { short.MinValue, 32768 };
+            yield return new object[] { short.MaxValue, (short)(-32767) };
 
             // uint.
-            yield return new object[] { (uint)4, (long)(-4) };
-            yield return new object[] { (UIntEnum)4, (long)(-4) };
+            yield return new object[] { (uint)9, (long)(-9) };
+            yield return new object[] { (UIntEnum)9, (long)(-9) };
+            yield return new object[] { uint.MinValue, (long)0 };
+            yield return new object[] { uint.MaxValue, (long)(-4294967295) };
 
             // int.
-            yield return new object[] { 6, -6 };
-            yield return new object[] { -6, 6 };
-            yield return new object[] { (IntEnum)(-6), 6 };
+            yield return new object[] { 9, -9 };
+            yield return new object[] { (IntEnum)9, -9 };
             yield return new object[] { int.MinValue, (long)2147483648 };
+            yield return new object[] { int.MaxValue, -2147483647 };
 
             // ulong.
-            yield return new object[] { (ulong)7, (decimal)(-7) };
-            yield return new object[] { (ULongEnum)7, (decimal)(-7) };
+            yield return new object[] { (ulong)9, (decimal)(-9) };
+            yield return new object[] { (ULongEnum)9, (decimal)(-9) };
+            yield return new object[] { ulong.MinValue, (decimal)0 };
+            yield return new object[] { ulong.MaxValue, decimal.Parse("-18446744073709551615") };
 
             // long.
-            yield return new object[] { (long)8, (long)(-8) };
-            yield return new object[] { (long)(-8), (long)8 };
-            yield return new object[] { (LongEnum)(-8), (long)8 };
-            yield return new object[] { long.MinValue, (decimal)9223372036854775808 };
+            yield return new object[] { (long)9, (long)(-9) };
+            yield return new object[] { (LongEnum)9, (long)(-9) };
+            yield return new object[] { long.MinValue, decimal.Parse("9223372036854775808") };
+            yield return new object[] { long.MaxValue, (long)(-9223372036854775807) };
 
             // float.
             yield return new object[] { (float)9, (float)(-9) };
-            yield return new object[] { (float)(-9), (float)9 };
             yield return new object[] { float.MinValue, float.MaxValue };
+            yield return new object[] { float.MaxValue, float.MinValue };
 
             // double.
-            yield return new object[] { (double)10, (double)(-10) };
-            yield return new object[] { (double)(-10), (double)10 };
+            yield return new object[] { (double)9, (double)(-9) };
             yield return new object[] { double.MinValue, double.MaxValue };
+            yield return new object[] { double.MaxValue, double.MinValue };
 
             // decimal.
-            yield return new object[] { (decimal)11, (decimal)(-11) };
-            yield return new object[] { (decimal)(-11), (decimal)11 };
-            yield return new object[] { decimal.MinValue, decimal.Parse("79228162514264337593543950335") };
+            yield return new object[] { (decimal)9, (decimal)(-9) };
+            yield return new object[] { decimal.MinValue, decimal.MaxValue };
+            yield return new object[] { decimal.MaxValue, decimal.MinValue };
+
+            // string.
+            yield return new object[] { "9", (double)(-9) };
 
             // bool.
             yield return new object[] { true, (short)1 };
             yield return new object[] { false, (short)0 };
-
-            // string.
-            yield return new object[] { "1", (double)(-1) };
-            yield return new object[] { "-1", (double)1 };
 
             // null.
             yield return new object[] { null, 0 };
@@ -3038,17 +3427,15 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(NegateObject_TestData))]
         public void NegateObject_Invoke_ReturnsExpected(object value, object expected)
         {
-            Assert.Equal(expected, Operators.NegateObject(value));
+             AssertEqual(expected, Operators.NegateObject(value));
         }
 
         public static IEnumerable<object[]> NegateObject_InvalidObject_TestData()
         {
             yield return new object[] { "a" };
-            yield return new object[] { 'a' };
-            yield return new object[] { '1' };
-            yield return new object[] { DBNull.Value };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
+            yield return new object[] { new char[] { '9' } };
+            yield return new object[] { '9' };
+            yield return new object[] { new DateTime(2018, 7, 20) };
         }
 
         [Theory]
@@ -3060,58 +3447,75 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
         public class NegateObject
         {
-            public static string operator -(NegateObject o) => "custom";
+             [SpecialName]
+             public static string op_UnaryNegation(NegateObject value) => "custom";
         }
 
         public static IEnumerable<object[]> NotObject_TestData()
         {
             // byte.
-            yield return new object[] { (byte)1, (byte)254 };
-            yield return new object[] { (ByteEnum)1, (ByteEnum)254 };
+            yield return new object[] { (byte)9, (byte)246 };
+            yield return new object[] { (ByteEnum)9, (ByteEnum)246 };
+            yield return new object[] { byte.MinValue, byte.MaxValue };
+            yield return new object[] { byte.MaxValue, byte.MinValue };
 
             // sbyte.
-            yield return new object[] { (sbyte)2, (sbyte)(-3) };
-            yield return new object[] { (SByteEnum)2, (SByteEnum)(-3) };
+            yield return new object[] { (sbyte)9, (sbyte)(-10) };
+            yield return new object[] { (SByteEnum)9, (SByteEnum)(-10) };
+            yield return new object[] { sbyte.MinValue, sbyte.MaxValue };
+            yield return new object[] { sbyte.MaxValue, sbyte.MinValue };
 
             // ushort.
-            yield return new object[] { (ushort)3, (ushort)65532 };
-            yield return new object[] { (UShortEnum)3, (UShortEnum)65532 };
+            yield return new object[] { (ushort)9, (ushort)65526 };
+            yield return new object[] { (UShortEnum)9, (UShortEnum)65526 };
+            yield return new object[] { ushort.MinValue, ushort.MaxValue };
+            yield return new object[] { ushort.MaxValue, ushort.MinValue };
 
             // short.
-            yield return new object[] { (short)4, (short)(-5) };
-            yield return new object[] { (ShortEnum)4, (ShortEnum)(-5) };
+            yield return new object[] { (short)9, (short)(-10) };
+            yield return new object[] { (ShortEnum)9, (ShortEnum)(-10) };
+            yield return new object[] { short.MinValue, short.MaxValue };
+            yield return new object[] { short.MaxValue, short.MinValue };
 
             // uint.
-            yield return new object[] { (uint)5, (uint)4294967290 };
-            yield return new object[] { (UIntEnum)5, (UIntEnum)4294967290 };
+            yield return new object[] { (uint)9, (uint)4294967286 };
+            yield return new object[] { (UIntEnum)9, (UIntEnum)4294967286 };
+            yield return new object[] { uint.MinValue, uint.MaxValue };
+            yield return new object[] { uint.MaxValue, uint.MinValue };
 
             // int.
-            yield return new object[] { 6, -7 };
-            yield return new object[] { (IntEnum)6, (IntEnum)(-7) };
+            yield return new object[] { 9, -10 };
+            yield return new object[] { (IntEnum)9, (IntEnum)(-10) };
+            yield return new object[] { int.MinValue, int.MaxValue };
+            yield return new object[] { int.MaxValue, int.MinValue };
 
             // ulong.
-            yield return new object[] { (ulong)7, (ulong)18446744073709551608 };
-            yield return new object[] { (ULongEnum)7, (ULongEnum)18446744073709551608 };
+            yield return new object[] { (ulong)9, (ulong)18446744073709551606 };
+            yield return new object[] { (ULongEnum)9, (ULongEnum)18446744073709551606 };
+            yield return new object[] { ulong.MinValue, ulong.MaxValue };
+            yield return new object[] { ulong.MaxValue, ulong.MinValue };
 
             // long.
-            yield return new object[] { (long)8, (long)(-9) };
-            yield return new object[] { (LongEnum)8, (LongEnum)(-9) };
+            yield return new object[] { (long)9, (long)(-10) };
+            yield return new object[] { (LongEnum)9, (LongEnum)(-10) };
+            yield return new object[] { long.MinValue, long.MaxValue };
+            yield return new object[] { long.MaxValue, long.MinValue };
 
             // float.
             yield return new object[] { (float)9, (long)(-10) };
 
             // double.
-            yield return new object[] { (double)10, (long)(-11) };
+            yield return new object[] { (double)9, (long)(-10) };
 
             // decimal.
-            yield return new object[] { (decimal)11, (long)(-12) };
+            yield return new object[] { (decimal)9, (long)(-10) };
+
+            // string.
+            yield return new object[] { "9", (long)(-10) };
 
             // bool.
             yield return new object[] { true, false };
             yield return new object[] { false, true };
-
-            // string.
-            yield return new object[] { "1", (long)(-2) };
 
             // null.
             yield return new object[] { null, -1 };
@@ -3124,17 +3528,15 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(NotObject_TestData))]
         public void NotObject_Invoke_ReturnsExpected(object value, object expected)
         {
-            Assert.Equal(expected, Operators.NotObject(value));
+             AssertEqual(expected, Operators.NotObject(value));
         }
 
         public static IEnumerable<object[]> NotObject_InvalidObject_TestData()
         {
             yield return new object[] { "a" };
-            yield return new object[] { 'a' };
-            yield return new object[] { '1' };
-            yield return new object[] { DBNull.Value };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
+            yield return new object[] { new char[] { '9' } };
+            yield return new object[] { '9' };
+            yield return new object[] { new DateTime(2018, 7, 20) };
         }
 
         [Theory]
@@ -3144,9 +3546,27 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             Assert.Throws<InvalidCastException>(() => Operators.NotObject(value));
         }
 
+        public static IEnumerable<object[]> NotObject_OverflowObject_TestData()
+        {
+            yield return new object[] { float.MinValue };
+            yield return new object[] { float.MaxValue };
+            yield return new object[] { double.MinValue };
+            yield return new object[] { double.MaxValue };
+            yield return new object[] { decimal.MinValue };
+            yield return new object[] { decimal.MaxValue };
+        }
+
+        [Theory]
+        [MemberData(nameof(NotObject_OverflowObject_TestData))]
+        public void NotObject_OverflowObject_ThrowsOverflowException(object value)
+        {
+            Assert.Throws<OverflowException>(() => Operators.NotObject(value));
+        }
+
         public class NotObject
         {
-            public static string operator ~(NotObject o) => "custom";
+             [SpecialName]
+             public static string op_OnesComplement(NotObject value) => "custom";
         }
 
         public static IEnumerable<object[]> OrObject_TestData()
