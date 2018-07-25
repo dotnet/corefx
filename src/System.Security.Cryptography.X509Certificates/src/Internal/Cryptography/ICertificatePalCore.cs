@@ -11,7 +11,7 @@ using System.Text;
 namespace Internal.Cryptography
 {
     /// <summary>Provides specific implementation for X509Certificate.</summary>
-    internal interface ICertificateLegacyPal : IDisposable
+    internal interface ICertificatePalCore : IDisposable
     {
         bool HasPrivateKey { get; }
         IntPtr Handle { get; }

@@ -11,7 +11,7 @@ using System.Text;
 namespace Internal.Cryptography
 {
     /// <summary>Provides specific implementation for X509Certificate2.</summary>
-    internal interface ICertificatePal : ICertificateLegacyPal
+    internal interface ICertificatePal : ICertificatePalCore
     {
         int Version { get; }
         bool Archived { get; set; }

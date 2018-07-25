@@ -36,7 +36,7 @@ namespace System.Security.Cryptography.X509Certificates
             _lazyNotBefore = DateTime.MinValue;
             _lazyNotAfter = DateTime.MinValue;
 
-            ICertificateLegacyPal pal = Pal;
+            ICertificatePalCore pal = Pal;
             Pal = null;
             if (pal != null)
                 pal.Dispose();
@@ -101,7 +101,7 @@ namespace System.Security.Cryptography.X509Certificates
             Pal = CertificatePal.FromHandle(handle);
         }
 
-        internal X509Certificate(ICertificateLegacyPal pal)
+        internal X509Certificate(ICertificatePalCore pal)
         {
             Debug.Assert(pal != null);
             Pal = pal;
@@ -561,7 +561,7 @@ namespace System.Security.Cryptography.X509Certificates
             throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
-        internal ICertificateLegacyPal Pal { get; private set; }
+        internal ICertificatePalCore Pal { get; private set; }
 
         internal DateTime GetNotAfter()
         {
