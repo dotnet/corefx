@@ -99,26 +99,6 @@ namespace System.Net.Test.Common
             return true;
         }
 
-        public async Task<List<string>> ReadInitialRequestAsync()
-        {
-            StreamReader reader = new StreamReader(_connectionStream, Encoding.ASCII);
-            List<string> lines = new List<string>();
-
-            string line;
-            while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
-            {
-                lines.Add(line);
-                Console.WriteLine(line);
-            }
-
-            if (line == null)
-            {
-                throw new Exception("Unexpected EOF trying to read request header");
-            }
-
-            return lines;
-        }
-
         public void Dispose()
         {
             if (_listenSocket != null)
