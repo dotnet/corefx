@@ -2134,7 +2134,7 @@
   },
   {
     "Name": "System.Windows.Extensions",
-    "Description": "Provides the functionality to display the X509Certificate2",
+    "Description": "Provides miscellaneous Windows-specific types",
     "CommonTypes":[
       "System.Security.Cryptography.X509Certificates.X509Certificate2UI",
       "System.Security.Cryptography.X509Certificates.X509SelectionFlag"

@@ -12,6 +12,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     {
         public static bool ManualTestsEnabled => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"));
 
+        // Take action as decsribed in the title of the dialog box window.
         [ConditionalTheory(nameof(ManualTestsEnabled))]
         [InlineData(0)]
         [InlineData(1)]
@@ -51,21 +52,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
     internal class EccTestData
     {
-        internal const string Secp256r1OidValue = "1.2.840.10045.3.1.7";
-        internal const string Secp256r1OidHexValue = "06082A8648CE3D030107";
         internal ECParameters KeyParameters { get; private set; }
-        internal string CurveOid { get; private set; }
-        internal string CurveEncodedOidHex { get; private set; }
-        internal string Name { get; private set; }
 
         internal static readonly EccTestData Secp256r1Data = new EccTestData
         {
-            Name = nameof(Secp256r1Data),
-            CurveOid = Secp256r1OidValue,
-            CurveEncodedOidHex = Secp256r1OidHexValue,
-
-            // Suite B Implementers Guide to FIPS 186-3,
-            // D.1 Example ECDSA Signature for P-256
             KeyParameters = new ECParameters
             {
                 Curve = ECCurve.NamedCurves.nistP256,
