@@ -17,21 +17,21 @@ namespace System.IO.Pipelines
         private const int InitialCallbacksSize = 1;
 
         private bool _isCompleted;
-        private ExceptionDispatchInfo _exception;
+        private ExceptionDispatchInfo _exceptionInfo;
 
         private PipeCompletionCallback[] _callbacks;
         private int _callbackCount;
 
         public bool IsCompleted => _isCompleted;
 
-        public bool IsFaulted => IsCompleted && _exception != null;
+        public bool IsFaulted => _exceptionInfo != null;
 
         public PipeCompletionCallbacks TryComplete(Exception exception = null)
         {
             _isCompleted = true;
             if (exception != null)
             {
-                _exception = ExceptionDispatchInfo.Capture(exception);
+                _exceptionInfo = ExceptionDispatchInfo.Capture(exception);
             }
             return GetCallbacks();
         }
@@ -73,7 +73,7 @@ namespace System.IO.Pipelines
                 return false;
             }
 
-            if (_exception != null)
+            if (_exceptionInfo != null)
             {
                 ThrowLatchedException();
             }
@@ -91,7 +91,7 @@ namespace System.IO.Pipelines
 
             var callbacks = new PipeCompletionCallbacks(s_completionCallbackPool,
                 _callbackCount,
-                _exception?.SourceException,
+                _exceptionInfo?.SourceException,
                 _callbacks);
 
             _callbacks = null;
@@ -104,13 +104,13 @@ namespace System.IO.Pipelines
             Debug.Assert(IsCompleted);
             Debug.Assert(_callbacks == null);
             _isCompleted = false;
-            _exception = null;
+            _exceptionInfo = null;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowLatchedException()
         {
-            _exception.Throw();
+            _exceptionInfo.Throw();
         }
 
         public override string ToString()
