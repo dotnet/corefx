@@ -823,7 +823,7 @@ MisMatch:
                 Global.System.Globalization.DateTimeStyles.AllowWhiteSpaces Or
                 Global.System.Globalization.DateTimeStyles.NoCurrentDateDefault
             Dim culture As Global.System.Globalization.CultureInfo = GetCultureInfo()
-            Dim result As Boolean = Global.System.DateTime.TryParse(ToHalfwidthNumbers(value, culture), culture, parseStyle, parsedDate)
+            Dim result As Boolean = Global.System.DateTime.TryParse(ToHalfwidthNumbers(Value, culture), culture, parseStyle, parsedDate)
             If result Then
                 Return parsedDate
             Else
