@@ -30,25 +30,44 @@ namespace System.Net.Http.Functional.Tests
     public abstract class HttpClientHandler_Http2_Test : HttpClientTestBase
     {
         [Fact]
-        public async Task Http2_ConnectPrefix_Sent()
+        public async Task Http2_ClientConnectPreface_Sent()
         {
-            Http2LoopbackServer server = new Http2LoopbackServer(new Http2LoopbackServer.Http2Options());
-            SocketsHttpHandler handler = new SocketsHttpHandler();
-            handler.MaxHttpVersion = HttpVersion.Version20;
+            Http2LoopbackServer server = new Http2LoopbackServer(new Http2Options());
+
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
             using (var client = new HttpClient(handler))
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, server.CreateServer());
-                request.ProtocolVersion = HttpVersion.Version20;
-                Task sendTask = client.SendAsync(request);
+                Task sendTask = client.GetAsync(server.CreateServer());
 
-                await server.AcceptConnectionAsync().ConfigureAwait(false);
+                string connectionPreface = await server.AcceptConnectionAsync();
 
-                await server.SendConnectionPrefaceAsync().ConfigureAwait(false);
+                Assert.Equal(connectionPreface, "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n");
+            }
+        }
 
-                List<string> lines = await server.ReadInitialRequestHeadersAsync();
+        [Fact]
+        public async Task DataFrame_NoStream_Throws()
+        {
+            Http2LoopbackServer server = new Http2LoopbackServer(new Http2Options());
 
-                Assert.True(lines.Contains("Connection: Upgrade, HTTP2-Settings\r\n"));
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+
+            using (var client = new HttpClient(handler))
+            {
+                Task sendTask = client.GetAsync(server.CreateServer());
+
+                await server.AcceptConnectionAsync();
+
+                await server.SendConnectionPrefaceAsync();
+
+                DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, 0);
+
+                await server.WriteBytesAsync(invalidFrame);
+
+                await Assert.ThrowsAsync<Exception>(async () => await sendTask);
             }
         }
     }

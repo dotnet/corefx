@@ -69,7 +69,7 @@ namespace System.Net.Http
             _proxyUri = proxyUri;
             _maxConnections = maxConnections;
 
-            _http2Enabled = (_poolManager.Settings._maxHttpVersion == HttpVersion.Version20);
+            _http2Enabled = (true);
 
             switch (kind)
             {

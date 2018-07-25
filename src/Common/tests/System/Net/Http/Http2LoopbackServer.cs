@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -17,7 +19,7 @@ namespace System.Net.Test.Common
     public class Http2LoopbackServer : IDisposable
     {
         private Socket _listenSocket;
-        private NetworkStream _connectionStream;
+        private Stream _connectionStream;
         private Http2Options _options;
         private Uri _uri;
 
@@ -46,23 +48,65 @@ namespace System.Net.Test.Common
 
         public async Task SendConnectionPrefaceAsync()
         {
-            FrameHeader emptySettings = new FrameHeader(0, FrameType.Settings, FrameFlags.None, 0);
-            await WriteFrameHeaderAsync(emptySettings).ConfigureAwait(false);
+            Frame emptySettings = new Frame(0, FrameType.Settings, FrameFlags.None, 0);
+            await WriteFrameAsync(emptySettings).ConfigureAwait(false);
         }
 
-        public async Task WriteFrameHeaderAsync(FrameHeader frameHeader)
+        public async Task WriteFrameAsync(Frame frame)
         {
-            byte[] writeBuffer = new byte[FrameHeader.Size];
-            frameHeader.WriteTo(writeBuffer);
+            byte[] writeBuffer = new byte[Frame.Size];
+            frame.WriteTo(writeBuffer);
             await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
         }
 
-        public async Task AcceptConnectionAsync()
+        public async Task WriteBytesAsync(Frame frame)
         {
-            _connectionStream = new NetworkStream(await _listenSocket.AcceptAsync().ConfigureAwait(false), true);
+            byte[] writeBuffer = new byte[Frame.Size + frame.Length];
+            frame.WriteTo(writeBuffer);
+            await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
         }
 
-        public async Task<List<string>> ReadInitialRequestHeadersAsync()
+        // Returns the first 24 bytes read, which should be the connection preface.
+        public async Task<string> AcceptConnectionAsync()
+        {
+            _connectionStream = new NetworkStream(await _listenSocket.AcceptAsync().ConfigureAwait(false), true);
+
+            if (_options.UseSsl)
+            {
+                var sslStream = new SslStream(_connectionStream, false, delegate
+                { return true; });
+                using (var cert = Configuration.Certificates.GetServerCertificate())
+                {
+                    SslServerAuthenticationOptions options = new SslServerAuthenticationOptions();
+
+                    options.EnabledSslProtocols = _options.SslProtocols;
+
+                    var protocols = new List<SslApplicationProtocol>();
+                    protocols.Add(SslApplicationProtocol.Http2);
+                    protocols.Add(SslApplicationProtocol.Http11);
+                    options.ApplicationProtocols = protocols;
+
+                    options.ServerCertificate = cert;
+
+                    options.ClientCertificateRequired = false;
+
+                    await sslStream.AuthenticateAsServerAsync(options, CancellationToken.None).ConfigureAwait(false);
+                }
+                _connectionStream = sslStream;
+            }
+
+            StreamReader reader = new StreamReader(_connectionStream, Encoding.ASCII);
+            char[] prefix = new char[24];
+            await reader.ReadBlockAsync(prefix, 0, prefix.Length);
+            return new string(prefix);
+        }
+
+        public static bool ValidateServerCertificate(object sender,X509Certificate certificate,X509Chain chain,SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
+
+        public async Task<List<string>> ReadInitialRequestAsync()
         {
             StreamReader reader = new StreamReader(_connectionStream, Encoding.ASCII);
             List<string> lines = new List<string>();
@@ -71,6 +115,7 @@ namespace System.Net.Test.Common
             while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
             {
                 lines.Add(line);
+                Console.WriteLine(line);
             }
 
             if (line == null)
@@ -89,110 +134,13 @@ namespace System.Net.Test.Common
                 _listenSocket = null;
             }
         }
+    }
 
-        public class Http2Options
-        {
-            public IPAddress Address { get; set; } = IPAddress.Loopback;
-            public int ListenBacklog { get; set; } = 1;
-            public bool UseSsl { get; set; } = false;
-            public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls12;
-            public Func<Stream, Stream> StreamWrapper { get; set; }
-            public string Username { get; set; }
-            public string Domain { get; set; }
-            public string Password { get; set; }
-        }
-
-        public struct FrameHeader
-        {
-            public int Length;
-            public FrameType Type;
-            public FrameFlags Flags;
-            public int StreamId;
-
-
-            public const int Size = 9;
-            public const int MaxLength = 16384;
-
-            public const int PriorityInfoLength = 5;       // for both PRIORITY frame and priority info within HEADERS
-            public const int PingLength = 8;
-            public const int WindowUpdateLength = 4;
-            public const int RstStreamLength = 4;
-            public const int GoAwayMinLength = 8;
-
-
-            public FrameHeader(int length, FrameType type, FrameFlags flags, int streamId)
-            {
-                Length = length;
-                Type = type;
-                Flags = flags;
-                StreamId = streamId;
-            }
-
-
-            public bool PaddedFlag => (Flags & FrameFlags.Padded) != 0;
-            public bool AckFlag => (Flags & FrameFlags.Ack) != 0;
-            public bool EndHeadersFlag => (Flags & FrameFlags.EndHeaders) != 0;
-            public bool EndStreamFlag => (Flags & FrameFlags.EndStream) != 0;
-            public bool PriorityFlag => (Flags & FrameFlags.Priority) != 0;
-
-
-            public static FrameHeader ReadFrom(ReadOnlySpan<byte> buffer)
-            {
-                return new FrameHeader(
-                    (buffer[0] << 16) | (buffer[1] << 8) | buffer[2],
-                    (FrameType)buffer[3],
-                    (FrameFlags)buffer[4],
-                    (int)((uint)((buffer[5] << 24) | (buffer[6] << 16) | (buffer[7] << 8) | buffer[8]) & 0x7FFFFFFF));
-            }
-
-
-            public void WriteTo(Span<byte> buffer)
-            {
-                buffer[0] = (byte)((Length & 0x00FF0000) >> 16);
-                buffer[1] = (byte)((Length & 0x0000FF00) >> 8);
-                buffer[2] = (byte)(Length & 0x000000FF);
-
-                buffer[3] = (byte)Type;
-                buffer[4] = (byte)Flags;
-
-                buffer[5] = (byte)((StreamId & 0xFF000000) >> 24);
-                buffer[6] = (byte)((StreamId & 0x00FF0000) >> 16);
-                buffer[7] = (byte)((StreamId & 0x0000FF00) >> 8);
-                buffer[8] = (byte)(StreamId & 0x000000FF);
-            }
-        }
-
-        public enum FrameType : byte
-        {
-            Data = 0,
-            Headers = 1,
-            Priority = 2,
-            RstStream = 3,
-            Settings = 4,
-            PushPromise = 5,
-            Ping = 6,
-            GoAway = 7,
-            WindowUpdate = 8,
-            Continuation = 9,
-
-            Last = 9
-        }
-
-        [Flags]
-        public enum FrameFlags : byte
-        {
-            None = 0,
-            
-            // Some frame types define bits differently.  Define them all here for simplicity.
-
-            EndStream =     0b00000001,
-            Ack =           0b00000001,
-            EndHeaders =    0b00000100,
-            Padded =        0b00001000,
-            Priority =      0b00100000,
-
-
-            ValidBits =     0b00101101
-        }
+    public class Http2Options
+    {
+        public IPAddress Address { get; set; } = IPAddress.Loopback;
+        public int ListenBacklog { get; set; } = 1;
+        public bool UseSsl { get; set; } = true;
+        public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls12;
     }
 }
