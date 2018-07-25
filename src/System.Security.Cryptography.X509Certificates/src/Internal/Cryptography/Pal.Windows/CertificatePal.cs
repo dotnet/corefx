@@ -16,6 +16,7 @@ using FILETIME = Internal.Cryptography.Pal.Native.FILETIME;
 
 using System.Security.Cryptography;
 using SafeX509ChainHandle = Microsoft.Win32.SafeHandles.SafeX509ChainHandle;
+using SafePasswordHandle = Microsoft.Win32.SafeHandles.SafePasswordHandle;
 using System.Security.Cryptography.X509Certificates;
 
 using static Interop.Crypt32;
