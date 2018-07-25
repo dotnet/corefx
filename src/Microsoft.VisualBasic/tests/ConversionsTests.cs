@@ -14,6 +14,40 @@ namespace Microsoft.VisualBasic.Tests
 {
     public class ConversionsTests
     {
+        public static IEnumerable<object[]> InvalidString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "&" };
+            yield return new object[] { "&a" };
+            yield return new object[] { "&a0" };
+            yield return new object[] { "true" };
+            yield return new object[] { "false" };
+            yield return new object[] { "invalid" };
+        }
+
+        public static IEnumerable<object[]> InvalidBool_TestData()
+        {
+            if (PlatformDetection.IsReflectionEmitSupported)
+            {
+                object floatEnum = null;
+                try
+                {
+                    floatEnum = FloatEnum;
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    yield break;
+                }
+
+                yield return new object[] { floatEnum };
+                yield return new object[] { DoubleEnum };
+                yield return new object[] { BoolEnum };
+                yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
+            }
+        }
+
         public static IEnumerable<object[]> ToByte_String_TestData()
         {
             yield return new object[] { null, byte.MinValue };
@@ -34,19 +68,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToByte(value));
         }
 
-        public static IEnumerable<object[]> ToByte_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToByte_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToByte_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToByte(value));
@@ -162,35 +185,19 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToByte(value));
         }
 
-
         public static IEnumerable<object[]> ToByte_InvalidObject_TestData()
         {
             yield return new object[] { char.MinValue };
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToByte_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToByte_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToByte(value));
@@ -277,19 +284,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToSByte(value));
         }
 
-        public static IEnumerable<object[]> ToSByte_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToSByte_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToSByte_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToSByte(value));
@@ -422,28 +418,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToSByte_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToSByte_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToSByte(value));
@@ -517,19 +498,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToUShort(value));
         }
 
-        public static IEnumerable<object[]> ToUShort_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToUShort_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToUShort_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToUShort(value));
@@ -655,28 +625,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToUShort_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToUShort_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToUShort(value));
@@ -759,19 +714,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToShort(value));
         }
 
-        public static IEnumerable<object[]> ToShort_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToShort_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToShort_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToShort(value));
@@ -910,28 +854,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToShort_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToShort_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToShort(value));
@@ -999,19 +928,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToUInteger(value));
         }
 
-        public static IEnumerable<object[]> ToUInteger_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToUInteger_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToUInteger_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToUInteger(value));
@@ -1142,28 +1060,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToUInteger_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToUInteger_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToUInteger(value));
@@ -1242,19 +1145,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToInteger(value));
         }
 
-        public static IEnumerable<object[]> ToInteger_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToInteger_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToInteger_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToInteger(value));
@@ -1399,28 +1291,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToInteger_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToInteger_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToInteger(value));
@@ -1484,13 +1361,6 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToULong_InvalidString_TestData()
         {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
@@ -1498,6 +1368,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(ToULong_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToULong_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToULong(value));
@@ -1628,31 +1499,16 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToULong_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToULong_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToULong(value));
@@ -1726,13 +1582,6 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToLong_InvalidString_TestData()
         {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
@@ -1740,6 +1589,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(ToLong_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToLong_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToLong(value));
@@ -1887,31 +1737,16 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToLong_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToLong_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToLong(value));
@@ -1969,19 +1804,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToSingle(value));
         }
 
-        public static IEnumerable<object[]> ToSingle_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToSingle_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToSingle_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToSingle(value));
@@ -2146,28 +1970,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToSingle_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToSingle_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToSingle(value));
@@ -2211,19 +2020,8 @@ namespace Microsoft.VisualBasic.Tests
             AssertEqual(expected, Conversions.ToDouble(value));
         }
 
-        public static IEnumerable<object[]> ToDouble_InvalidString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
-        }
-
         [Theory]
-        [MemberData(nameof(ToDouble_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToDouble_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToDouble(value));
@@ -2377,28 +2175,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToDouble_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToDouble_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToDouble(value));
@@ -2428,13 +2211,6 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToDecimal_InvalidString_TestData()
         {
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
@@ -2442,6 +2218,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(ToDecimal_InvalidString_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
         public void ToDecimal_InvalidString_ThrowsInvalidCastException(string value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToDecimal(value));
@@ -2593,31 +2370,16 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (char)1 };
             yield return new object[] { char.MaxValue };
             yield return new object[] { new DateTime(10) };
-            yield return new object[] { "" };
-            yield return new object[] { "&" };
-            yield return new object[] { "&a" };
-            yield return new object[] { "&a0" };
-            yield return new object[] { "true" };
-            yield return new object[] { "false" };
-            yield return new object[] { "invalid" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToDecimal_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidString_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToDecimal_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToDecimal(value));
@@ -2845,20 +2607,11 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { "&a0" };
             yield return new object[] { "invalid" };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToBoolean_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToBoolean_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToBoolean(value));
@@ -2885,9 +2638,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { "invalid", 'i' };
             yield return new object[] { "18446744073709551616", '1' };
             yield return new object[] { "1844674407370955161618446744073709551616", '1' };
-            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity.ToString()[0] };
-            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity.ToString()[0] };
-            yield return new object[] { double.NaN.ToString(), 'N' };
         }
 
         [Theory]
@@ -3031,20 +2781,11 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { false };
             yield return new object[] { new DateTime(10) };
             yield return new object[] { new object() };
-
-            if (PlatformDetection.IsReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { BoolEnum };
-                yield return new object[] { CharEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
         }
 
         [Theory]
         [MemberData(nameof(ToChar_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidBool_TestData))]
         public void ToChar_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToChar(value));
