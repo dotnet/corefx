@@ -363,6 +363,43 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
+        public static void X509Certificate2WithT61String()
+        {
+            string certSubject = @"E=mabaul@microsoft.com, OU=Engineering, O=Xamarin, S=Massachusetts, C=US, CN=test-server.local";
+
+            using (var cert = new X509Certificate2(TestData.T61StringCertificate))
+            {
+                Assert.Equal(certSubject, cert.Subject);
+                Assert.Equal(certSubject, cert.Issuer);
+
+                int snlen = cert.GetSerialNumber().Length;
+                Assert.Equal(9, snlen);
+
+                byte[] serialNumber = new byte[snlen];
+                Buffer.BlockCopy(cert.GetSerialNumber(), 0, serialNumber, 0, snlen);
+
+                Assert.Equal(0x9e, serialNumber[0]);
+                Assert.Equal(0x7a, serialNumber[1]);
+                Assert.Equal(0x5c, serialNumber[2]);
+                Assert.Equal(0xcc, serialNumber[3]);
+                Assert.Equal("1.2.840.113549.1.1.1", cert.GetKeyAlgorithm());
+
+                int pklen = cert.GetPublicKey().Length;
+                Assert.Equal(74, pklen);
+
+                byte[] publicKey = new byte[pklen];
+                Buffer.BlockCopy(cert.GetPublicKey(), 0, publicKey, 0, pklen);
+
+                Assert.Equal(0x30, publicKey[0]);
+                Assert.Equal(0x13, publicKey[9]);
+                Assert.Equal(1, publicKey[pklen - 1]);
+
+                Assert.Equal("test-server.local", cert.GetNameInfo(X509NameType.SimpleName, false));
+                Assert.Equal("mabaul@microsoft.com", cert.GetNameInfo(X509NameType.EmailName, false));
+            }
+        }
+
         public static IEnumerable<object> StorageFlags => CollectionImportTests.StorageFlags;
     }
 }
