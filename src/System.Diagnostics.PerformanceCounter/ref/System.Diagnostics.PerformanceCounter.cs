@@ -216,4 +216,77 @@ namespace System.Diagnostics.PerformanceData
         public void IncrementBy(Int64 value) { throw null; }
         public Int64 RawValue { get { throw null; } set { } }
     }
+    public class CounterSet : IDisposable
+    {
+        public CounterSet(Guid providerGuid, Guid counterSetGuid, CounterSetInstanceType instanceType) { }
+        public void Dispose() { throw null; }
+        protected virtual void Dispose(bool disposing) { throw null; }
+        ~CounterSet() { throw null; }
+        public void AddCounter(Int32 counterId, CounterType counterType) { throw null; }
+        public void AddCounter(Int32 counterId, CounterType counterType, String counterName) { throw null; }
+        public CounterSetInstance CreateCounterSetInstance(String instanceName) { throw null; }
+    }
+    public sealed class CounterSetInstance : IDisposable
+    {
+        internal CounterSetInstance(CounterSet counterSetDefined, String instanceName) { }
+        public void Dispose() { throw null; }
+        ~CounterSetInstance() { throw null; }
+        public CounterSetInstanceCounterDataSet Counters { get { throw null; } }
+    }
+    public sealed class CounterSetInstanceCounterDataSet : IDisposable
+    {
+        internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst) { }
+        public void Dispose() { throw null; }
+        ~CounterSetInstanceCounterDataSet() { throw null; }
+        public CounterData this[Int32 counterId] { get { throw null; } }
+        public CounterData this[String counterName] { get { throw null; } }
+    }
+    public enum CounterType
+    {
+        QueueLength = 0x00450400,
+        LargeQueueLength = 0x00450500,
+        QueueLength100Ns = 0x00550500,
+        QueueLengthObjectTime = 0x00650500,
+        RawData32 = 0x00010000,
+        RawData64 = 0x00010100,
+        RawDataHex32 = 0x00000000,
+        RawDataHex64 = 0x00000100,
+        RateOfCountPerSecond32 = 0x10410400,
+        RateOfCountPerSecond64 = 0x10410500,
+        RawFraction32 = 0x20020400,
+        RawFraction64 = 0x20020500,
+        RawBase32 = 0x40030403,
+        RawBase64 = 0x40030500,
+        SampleFraction = 0x20C20400,
+        SampleCounter = 0x00410400,
+        SampleBase = 0x40030401,
+        AverageTimer32 = 0x30020400,
+        AverageBase = 0x40030402,
+        AverageCount64 = 0x40020500,
+        PercentageActive = 0x20410500,
+        PercentageNotActive = 0x21410500,
+        PercentageActive100Ns = 0x20510500,
+        PercentageNotActive100Ns = 0x21510500,
+        ElapsedTime = 0x30240500,
+        MultiTimerPercentageActive = 0x22410500,
+        MultiTimerPercentageNotActive = 0x23410500,
+        MultiTimerPercentageActive100Ns = 0x22510500,
+        MultiTimerPercentageNotActive100Ns = 0x23510500,
+        MultiTimerBase = 0x42030500,
+        Delta32 = 0x00400400,
+        Delta64 = 0x00400500,
+        ObjectSpecificTimer = 0x20610500,
+        PrecisionSystemTimer = 0x20470500,
+        PrecisionTimer100Ns = 0x20570500,
+        PrecisionObjectSpecificTimer = 0x20670500
+    }
+    public enum CounterSetInstanceType
+    {
+        Single = 0,
+        Multiple = 0x00000002,
+        GlobalAggregate = 0x00000004,
+        GlobalAggregateWithHistory = 0x0000000B,
+        MultipleAggregate = 0x00000006,
+        InstanceAggregate = 0x00000016
+    }
 }
