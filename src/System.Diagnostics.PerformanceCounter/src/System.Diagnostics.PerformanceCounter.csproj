@@ -36,6 +36,12 @@
     <Compile Include="System\Diagnostics\SystemDiagnosticsSection.cs" />
     <Compile Include="System\Diagnostics\TraceInternal.cs" />
     <Compile Include="misc\EnvironmentHelpers.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSet.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSetInstance.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSetInstanceCounterDataSet.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSetInstanceType.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterType.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\PerfProviderCollection.cs" />
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
@@ -132,11 +138,17 @@
     <Compile Include="$(CommonPath)\Interop\Windows\perfcounter\Interop.FormatFromRawValue.cs">
       <Link>Common\Interop\Windows\perfcounter\Interop.FormatFromRawValue.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\perfcounter\UnsafeNativeMethods.cs">
+      <Link>Common\Interop\Windows\perfcounter\UnsafeNativeMethods.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalMemHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalMemHandle.cs</Link>
+    </Compile>
+  <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafePerfProviderHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafePerfProviderHandle.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">

@@ -205,3 +205,15 @@ namespace System.Diagnostics
         Timer100NsInverse = 558957824,
     }
 }
+namespace System.Diagnostics.PerformanceData
+{
+    public sealed class CounterData
+    {
+        internal CounterData() { }
+        public Int64 Value { get { throw null; } set { } }
+        public void Increment() { throw null; }
+        public void Decrement() { throw null; }
+        public void IncrementBy(Int64 value) { throw null; }
+        public Int64 RawValue { get { throw null; } set { } }
+    }
+}
