@@ -32,11 +32,10 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Http2_ClientConnectPreface_Sent()
         {
-            Http2LoopbackServer server = new Http2LoopbackServer(new Http2Options());
-
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
+            using (var server = new Http2LoopbackServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.CreateServer());
@@ -50,11 +49,10 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DataFrame_NoStream_Throws()
         {
-            Http2LoopbackServer server = new Http2LoopbackServer(new Http2Options());
-
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
+            using (var server = new Http2LoopbackServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.CreateServer());
@@ -65,7 +63,7 @@ namespace System.Net.Http.Functional.Tests
 
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, 0);
 
-                await server.WriteBytesAsync(invalidFrame);
+                await server.WriteFrameAsync(invalidFrame);
 
                 await Assert.ThrowsAsync<Exception>(async () => await sendTask);
             }

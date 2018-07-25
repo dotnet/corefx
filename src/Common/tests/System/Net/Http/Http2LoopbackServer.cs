@@ -54,13 +54,6 @@ namespace System.Net.Test.Common
 
         public async Task WriteFrameAsync(Frame frame)
         {
-            byte[] writeBuffer = new byte[Frame.Size];
-            frame.WriteTo(writeBuffer);
-            await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
-        }
-
-        public async Task WriteBytesAsync(Frame frame)
-        {
             byte[] writeBuffer = new byte[Frame.Size + frame.Length];
             frame.WriteTo(writeBuffer);
             await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
