@@ -1375,14 +1375,20 @@ namespace System.Net.Sockets.Tests
                         {
                             client.Receive(buffer);
                         }
-                        catch (SocketException) { };
+                        catch (SocketException) { }
+                        catch (ObjectDisposedException) { }
                     });
                     clientThread.IsBackground = true;
                     clientThread.Start();
                     Socket s = server.Accept();
+                    // Try to receive something so we know client thread is running.
                     s.Receive(buffer, 1, SocketFlags.None);
-                    // Close client socket from parent thread.
+                    // There is however race condition that if the Receive() is not started yet, this will simply
+                    // finish without hitting the test scenario.
+                    Thread.Sleep(500);
+
                     // clientThread should be now blocked on Receive()
+                    // Close client socket from parent thread.
                     client.Close();
                     clientThread.Join();
                 }
@@ -1408,9 +1414,9 @@ namespace System.Net.Sockets.Tests
                     byte[] buffer = new byte[1];
                     buffer[0] = Convert.ToByte('a');
                     server.BindToAnonymousPort(listenAt);
+                    server.Listen(1);
                     Thread clientThread = new Thread(() =>
                     {
-                        server.Listen(1);
                         try
                         {
                             // Each round will block until new connection is accepted.
