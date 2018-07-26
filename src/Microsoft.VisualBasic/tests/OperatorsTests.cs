@@ -114,7 +114,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)12, "2", (double)14 };
             yield return new object[] { (ulong)13, true, (decimal)12 };
             yield return new object[] { (ulong)14, null, (ulong)14 };
-            yield return new object[] { (ulong)15, ulong.MaxValue, decimal.Parse("18446744073709551630") };
+            yield return new object[] { (ulong)15, ulong.MaxValue, decimal.Parse("18446744073709551630", CultureInfo.InvariantCulture) };
 
             // long + primitives.
             yield return new object[] { (long)8, (long)2, (long)10 };
@@ -124,7 +124,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (long)12, "2", (double)14 };
             yield return new object[] { (long)13, true, (long)12 };
             yield return new object[] { (long)14, null, (long)14 };
-            yield return new object[] { (long)15, long.MaxValue, decimal.Parse("9223372036854775822") };
+            yield return new object[] { (long)15, long.MaxValue, decimal.Parse("9223372036854775822", CultureInfo.InvariantCulture) };
 
             // float + primitives
             yield return new object[] { (float)9, (float)2, (float)11 };
@@ -1416,7 +1416,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)44, (decimal)2, (decimal)22 };
             yield return new object[] { (decimal)48, "2", (double)24 };
             yield return new object[] { (decimal)52, true, (decimal)(-52) };
-            yield return new object[] { decimal.MaxValue, (decimal)0.5, float.Parse("1.584563E+29", NumberStyles.Any) };
+            yield return new object[] { decimal.MaxValue, (decimal)0.5, float.Parse("1.584563E+29", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // string + primitives
             yield return new object[] { "4", (byte)2, (double)2 };
@@ -2514,8 +2514,8 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)12, "2", (double)24 };
             yield return new object[] { (ulong)13, true, (decimal)(-13) };
             yield return new object[] { (ulong)14, null, (ulong)0 };
-            yield return new object[] { (ulong)15, ulong.MaxValue, decimal.Parse("276701161105643274225") };
-            yield return new object[] { ulong.MaxValue, ulong.MaxValue, double.Parse("3.40282366920938E+38", NumberStyles.Any) };
+            yield return new object[] { (ulong)15, ulong.MaxValue, decimal.Parse("276701161105643274225", CultureInfo.InvariantCulture) };
+            yield return new object[] { ulong.MaxValue, ulong.MaxValue, double.Parse("3.40282366920938E+38", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // long + primitives.
             yield return new object[] { (long)1, (byte)2, (long)2 };
@@ -2532,8 +2532,8 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (long)12, "2", (double)24 };
             yield return new object[] { (long)13, true, (long)(-13) };
             yield return new object[] { (long)14, null, (long)0 };
-            yield return new object[] { (long)15, long.MaxValue, decimal.Parse("138350580552821637105") };
-            yield return new object[] { long.MaxValue, long.MaxValue, double.Parse("8.50705917302346E+37", NumberStyles.Any) };
+            yield return new object[] { (long)15, long.MaxValue, decimal.Parse("138350580552821637105", CultureInfo.InvariantCulture) };
+            yield return new object[] { long.MaxValue, long.MaxValue, double.Parse("8.50705917302346E+37", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // float + primitives
             yield return new object[] { (float)1, (byte)2, (float)2 };
@@ -2550,8 +2550,8 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (float)12, "2", (double)24 };
             yield return new object[] { (float)13, true, (float)(-13) };
             yield return new object[] { (float)14, null, (float)0 };
-            yield return new object[] { (float)15, float.MaxValue, double.Parse("5.10423519957793E+39", NumberStyles.Any) };
-            yield return new object[] { float.MaxValue, float.MaxValue, double.Parse("1.15792075433824E+77", NumberStyles.Any) };
+            yield return new object[] { (float)15, float.MaxValue, double.Parse("5.10423519957793E+39", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { float.MaxValue, float.MaxValue, double.Parse("1.15792075433824E+77", NumberStyles.Any, CultureInfo.InvariantCulture) };
             yield return new object[] { (float)15, float.PositiveInfinity, float.PositiveInfinity };
             yield return new object[] { (float)15, float.NegativeInfinity, float.NegativeInfinity };
             yield return new object[] { (float)15, float.NaN, double.NaN };
@@ -2598,7 +2598,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)12, "2", (double)24 };
             yield return new object[] { (decimal)13, true, (decimal)(-13) };
             yield return new object[] { (decimal)14, null, (decimal)0 };
-            yield return new object[] { (decimal)15, decimal.MaxValue, double.Parse("1.18842243771397E+30", NumberStyles.Any) };
+            yield return new object[] { (decimal)15, decimal.MaxValue, double.Parse("1.18842243771397E+30", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // string + primitives
             yield return new object[] { "1", (byte)2, (double)2 };
@@ -3431,12 +3431,12 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)9, (decimal)(-9) };
             yield return new object[] { (ULongEnum)9, (decimal)(-9) };
             yield return new object[] { ulong.MinValue, (decimal)0 };
-            yield return new object[] { ulong.MaxValue, decimal.Parse("-18446744073709551615") };
+            yield return new object[] { ulong.MaxValue, decimal.Parse("-18446744073709551615", CultureInfo.InvariantCulture) };
 
             // long.
             yield return new object[] { (long)9, (long)(-9) };
             yield return new object[] { (LongEnum)9, (long)(-9) };
-            yield return new object[] { long.MinValue, decimal.Parse("9223372036854775808") };
+            yield return new object[] { long.MinValue, decimal.Parse("9223372036854775808", CultureInfo.InvariantCulture) };
             yield return new object[] { long.MaxValue, (long)(-9223372036854775807) };
 
             // float.
@@ -4687,7 +4687,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)13, "2", (double)11 };
             yield return new object[] { (ulong)14, true, (decimal)15 };
             yield return new object[] { (ulong)15, null, (ulong)15 };
-            yield return new object[] { (ulong)16, ulong.MaxValue, decimal.Parse("-18446744073709551599") };
+            yield return new object[] { (ulong)16, ulong.MaxValue, decimal.Parse("-18446744073709551599", CultureInfo.InvariantCulture) };
 
             // long.
             yield return new object[] { (long)2, (byte)2, (long)0 };
@@ -4704,7 +4704,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (long)13, "2", (double)11 };
             yield return new object[] { (long)14, true, (long)15 };
             yield return new object[] { (long)15, null, (long)15 };
-            yield return new object[] { (long)(-2), long.MaxValue, decimal.Parse("-9223372036854775809") };
+            yield return new object[] { (long)(-2), long.MaxValue, decimal.Parse("-9223372036854775809", CultureInfo.InvariantCulture) };
 
             // float.
             yield return new object[] { (float)2, (byte)2, (float)0 };
@@ -4767,7 +4767,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)13, "2", (double)11 };
             yield return new object[] { (decimal)14, true, (decimal)15 };
             yield return new object[] { (decimal)15, null, (decimal)15 };
-            yield return new object[] { decimal.MinValue, decimal.MaxValue, double.Parse("-1.58456325028529E+29", NumberStyles.Any) };
+            yield return new object[] { decimal.MinValue, decimal.MaxValue, double.Parse("-1.58456325028529E+29", NumberStyles.Any, CultureInfo.InvariantCulture) };
         
             // string.
             yield return new object[] { "2", (byte)2, (double)0 };
