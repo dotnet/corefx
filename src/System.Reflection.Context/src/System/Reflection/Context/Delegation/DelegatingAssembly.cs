@@ -98,8 +98,7 @@ namespace System.Reflection.Context.Delegation
         {
             return UnderlyingAssembly.GetExportedTypes();
         }
-
-        [SecurityCritical]
+        
         public override FileStream GetFile(string name)
         {
             return UnderlyingAssembly.GetFile(name);
@@ -109,8 +108,7 @@ namespace System.Reflection.Context.Delegation
         {
             return UnderlyingAssembly.GetFiles();
         }
-
-        [SecurityCritical]
+        
         public override FileStream[] GetFiles(bool getResourceModules)
         {
             return UnderlyingAssembly.GetFiles(getResourceModules);
@@ -150,14 +148,12 @@ namespace System.Reflection.Context.Delegation
         {
             return UnderlyingAssembly.GetModules(getResourceModules);
         }
-
-        [SecurityCritical]
+        
         public override AssemblyName GetName()
         {
             return UnderlyingAssembly.GetName();
         }
-
-        [SecurityCritical]
+        
         public override AssemblyName GetName(bool copiedName)
         {
             return UnderlyingAssembly.GetName(copiedName);
