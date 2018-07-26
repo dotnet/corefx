@@ -98,7 +98,7 @@ namespace System.Reflection.Context.Delegation
         {
             return UnderlyingAssembly.GetExportedTypes();
         }
-        
+
         public override FileStream GetFile(string name)
         {
             return UnderlyingAssembly.GetFile(name);
@@ -108,7 +108,7 @@ namespace System.Reflection.Context.Delegation
         {
             return UnderlyingAssembly.GetFiles();
         }
-        
+
         public override FileStream[] GetFiles(bool getResourceModules)
         {
             return UnderlyingAssembly.GetFiles(getResourceModules);
@@ -148,12 +148,12 @@ namespace System.Reflection.Context.Delegation
         {
             return UnderlyingAssembly.GetModules(getResourceModules);
         }
-        
+
         public override AssemblyName GetName()
         {
             return UnderlyingAssembly.GetName();
         }
-        
+
         public override AssemblyName GetName(bool copiedName)
         {
             return UnderlyingAssembly.GetName(copiedName);
