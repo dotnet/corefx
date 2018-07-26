@@ -17,7 +17,8 @@
         "1.0.0",
         "1.0.1",
         "1.0.2",
-        "1.1.0"
+        "1.1.0",
+        "1.1.1"
       ],
       "BaselineVersion": "1.1.0"
     },
@@ -28,7 +29,8 @@
         "1.0.2",
         "1.1.0",
         "1.1.1",
-        "1.1.2"
+        "1.1.2",
+        "1.1.3"
       ],
       "BaselineVersion": "1.1.0"
     },
@@ -327,7 +329,8 @@
     "runtime.debian.8-x64.runtime.native.System": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -335,21 +338,24 @@
       "StableVersions": [
         "1.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.debian.8-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.debian.8-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -359,18 +365,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.debian.9-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.debian.9-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -378,17 +378,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.debian.9-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.debian.9-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.debian.9-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -398,18 +409,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.23-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.fedora.23-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -417,17 +422,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.fedora.23-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.fedora.23-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.23-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -437,14 +453,16 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.native.System": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -459,21 +477,24 @@
       "StableVersions": [
         "4.1.0",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.native.System.Net.Http": {
       "StableVersions": [
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.native.System.Net.Security": {
       "StableVersions": [
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -483,18 +504,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.13.2-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.opensuse.13.2-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -502,17 +517,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.opensuse.13.2-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.opensuse.13.2-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.opensuse.13.2-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -522,18 +548,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.osx.10.10-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.osx.10.10-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -541,17 +561,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.osx.10.10-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.osx.10.10-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.osx.10.10-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -561,18 +592,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.rhel.7-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.rhel.7-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -580,17 +605,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.rhel.7-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.rhel.7-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.rhel.7-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -600,18 +636,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.14.04-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.14.04-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -619,17 +649,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.ubuntu.14.04-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.ubuntu.14.04-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.ubuntu.14.04-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -639,18 +680,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.16.04-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.16.04-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -658,17 +693,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.ubuntu.16.04-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.ubuntu.16.04-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.ubuntu.16.04-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -678,18 +724,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.ubuntu.18.04-x64.runtime.native.System": {
-      "StableVersions": [
-        "1.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.18.04-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "1.0.1",
         "4.3.0",
@@ -697,17 +737,28 @@
       ],
       "BaselineVersion": "4.3.0"
     },
+    "runtime.ubuntu.18.04-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
     "runtime.ubuntu.18.04-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.ubuntu.18.04-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -717,7 +768,8 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -725,7 +777,8 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -852,7 +905,8 @@
       "StableVersions": [
         "4.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -866,7 +920,8 @@
       "StableVersions": [
         "4.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -882,7 +937,8 @@
       "StableVersions": [
         "4.0.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2672,7 +2728,8 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2680,7 +2737,8 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2688,7 +2746,8 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2696,32 +2755,37 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.24-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.24-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.24-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.24-x64.runtime.native.System": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2730,7 +2794,8 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2738,32 +2803,37 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.27-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.27-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.27-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.27-x64.runtime.native.System": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2772,7 +2842,8 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2780,32 +2851,37 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.28-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.28-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.28-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.28-x64.runtime.native.System": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2814,7 +2890,8 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2822,7 +2899,8 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2830,32 +2908,37 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Net.Http": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Net.Security": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2864,44 +2947,12 @@
         "4.3.0",
         "4.3.1",
         "4.3.2",
-        "4.3.3"
+        "4.3.3",
+        "4.3.4"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
-      "StableVersions": [
-        "4.3.0",
-        "4.3.1",
-        "4.3.2"
-      ],
-      "BaselineVersion": "4.3.2"
-    },
-    "runtime.opensuse.42.3-x64.runtime.native.System.IO.Compression": {
-      "StableVersions": [
-        "4.3.0",
-        "4.3.1"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.opensuse.42.3-x64.runtime.native.System.Net.Http": {
-      "StableVersions": [
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.opensuse.42.3-x64.runtime.native.System.Net.Security": {
-      "StableVersions": [
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.opensuse.42.3-x64.runtime.native.System": {
-      "StableVersions": [
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.opensuse.42.3-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "4.3.0",
         "4.3.1",
@@ -2910,11 +2961,51 @@
       ],
       "BaselineVersion": "4.3.2"
     },
-    "runtime.opensuse.42.3-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+    "runtime.opensuse.42.3-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
         "4.3.1",
         "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.opensuse.42.3-x64.runtime.native.System.Net.Http": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.opensuse.42.3-x64.runtime.native.System.Net.Security": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.opensuse.42.3-x64.runtime.native.System": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.opensuse.42.3-x64.runtime.native.System.Security.Cryptography": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3",
+        "4.3.4"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
+    "runtime.opensuse.42.3-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -2929,60 +3020,12 @@
       "StableVersions": [
         "4.3.0",
         "4.3.1",
-        "4.3.2"
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
     "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
-      "StableVersions": [
-        "4.3.0",
-        "4.3.1",
-        "4.3.2"
-      ],
-      "BaselineVersion": "4.3.2"
-    },
-    "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
-      "StableVersions": [
-        "4.3.0",
-        "4.3.1",
-        "4.3.2"
-      ],
-      "BaselineVersion": "4.3.2"
-    },
-    "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
-      "StableVersions": [
-        "4.3.0",
-        "4.3.1",
-        "4.3.2"
-      ],
-      "BaselineVersion": "4.3.2"
-    },
-    "runtime.ubuntu.16.10-x64.runtime.native.System.IO.Compression": {
-      "StableVersions": [
-        "4.3.0",
-        "4.3.1"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.16.10-x64.runtime.native.System.Net.Http": {
-      "StableVersions": [
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.16.10-x64.runtime.native.System.Net.Security": {
-      "StableVersions": [
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.16.10-x64.runtime.native.System": {
-      "StableVersions": [
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0"
-    },
-    "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "4.3.0",
         "4.3.1",
@@ -2991,11 +3034,69 @@
       ],
       "BaselineVersion": "4.3.2"
     },
-    "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+    "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
+    "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
+    "runtime.ubuntu.16.10-x64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
         "4.3.1",
         "4.3.2"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.ubuntu.16.10-x64.runtime.native.System.Net.Http": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.ubuntu.16.10-x64.runtime.native.System.Net.Security": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.ubuntu.16.10-x64.runtime.native.System": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3",
+        "4.3.4"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
+    "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3"
       ],
       "BaselineVersion": "4.3.2"
     },
@@ -3005,7 +3106,8 @@
     "runtime.win10-arm64.runtime.native.System.IO.Compression": {
       "StableVersions": [
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0"
     }
