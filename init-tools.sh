@@ -52,6 +52,10 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
                             [ "$__DISTRO_NAME" == 'opensuse.13.2' ] ||
                             [ "$__DISTRO_NAME" == 'opensuse.42.1' ]; then
                             __PKG_RID=$__DISTRO_NAME
+                        elif [ "$__DISTRO_NAME" == 'ubuntu.14.04' ]; then
+                            __PKG_RID='ubuntu'
+                        elif [ "$(echo "$__DISTRO_NAME" | grep -cim1 centos)" -eq 1 ]; then
+                            __PKG_RID='centos'
                         fi
                     fi
                     
