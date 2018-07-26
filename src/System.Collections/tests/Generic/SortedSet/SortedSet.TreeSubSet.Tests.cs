@@ -34,12 +34,15 @@ namespace System.Collections.Tests
 
         public override void ICollection_Generic_Remove_DefaultValueContainedInCollection(int count)
         {
+            throw new ApplicationException ("where is this method called from");
+/*
             if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DefaultValueAllowed && !Enumerable.Contains(InvalidValues, default(string)))
             {
                 int seed = count * 21;
                 ICollection<string> collection = GenericICollectionFactory(count);
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("item", () => collection.Remove(default(string)));
             }
+*/
         }
 
         public override void ICollection_Generic_Contains_DefaultValueOnCollectionContainingDefaultValue(int count)
