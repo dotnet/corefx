@@ -474,5 +474,61 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             ext = new X509SubjectKeyIdentifierExtension(new AsnEncodedData(rawData), critical);
             Assert.Equal(expectedIdentifier, ext.SubjectKeyIdentifier);
         }
+
+        [Fact]
+        public static void PublicKeyIsReusable ()
+        {
+            using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.DefaultKeySet))
+            {
+                var src = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+                var padding = RSAEncryptionPadding.Pkcs1;
+
+                byte[] encrypted;
+                using (var rsa = cert.GetRSAPublicKey())
+                {
+                    Assert.NotNull(rsa);
+                    encrypted = rsa.Encrypt(src, padding);
+                }
+                using (var rsa = cert.GetRSAPublicKey())
+                {
+                    Assert.NotNull (rsa);
+                    rsa.Encrypt (src, padding);
+                }
+
+                using (var rsa = cert.PublicKey.Key as RSA)
+                {
+                    Assert.NotNull(rsa);
+                    encrypted = rsa.Encrypt(src, padding);
+                }
+                using (var rsa = cert.PublicKey.Key as RSA)
+                {
+                    Assert.NotNull(rsa);
+                    rsa.Encrypt(src, padding);
+                }
+
+                using (var rsa = cert.GetRSAPrivateKey())
+                {
+                    Assert.NotNull(rsa);
+                    rsa.Decrypt(encrypted, padding);
+                }
+                using (var rsa = cert.GetRSAPrivateKey()) {
+                    Assert.NotNull(rsa);
+                    rsa.Decrypt(encrypted, padding);
+                }
+
+                using (var rsa = cert.PrivateKey as RSA)
+                {
+                    Assert.NotNull(rsa);
+                    rsa.Decrypt(encrypted, padding);
+                }
+                using (var rsa = cert.PrivateKey as RSA)
+                {
+                    Assert.NotNull(rsa);
+                    // FIXME: Should this throw `ObjectDisposedException`?
+                    // on OS X, the exception thrown is `Interop.AppleCrypto.AppleCFErrorCryptographicException`.
+                    Assert.ThrowsAny<Exception>(() => rsa.Decrypt(encrypted, padding));
+                }
+            }
+        }
     }
 }
