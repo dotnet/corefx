@@ -2479,7 +2479,8 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Case TypeCode.Empty * s_TCMAX + TypeCode.Decimal,
                      TypeCode.Empty * s_TCMAX + TypeCode.Single,
                      TypeCode.Empty * s_TCMAX + TypeCode.Double,
-                     TypeCode.Empty * s_TCMAX + TypeCode.String
+                     TypeCode.Empty * s_TCMAX + TypeCode.String,
+                     TypeCode.DBNull * s_TCMAX + TypeCode.String
 
                     Return Right
 
@@ -2741,7 +2742,8 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Case TypeCode.Decimal * s_TCMAX + TypeCode.Empty,
                      TypeCode.Single * s_TCMAX + TypeCode.Empty,
                      TypeCode.Double * s_TCMAX + TypeCode.Empty,
-                     TypeCode.String * s_TCMAX + TypeCode.Empty
+                     TypeCode.String * s_TCMAX + TypeCode.Empty,
+                     TypeCode.String * s_TCMAX + TypeCode.DBNull
 
                     Return Left
 
@@ -5103,9 +5105,30 @@ Namespace Microsoft.VisualBasic.CompilerServices
 #Region " Operator Concatenate & "
 
         Public Shared Function ConcatenateObject(ByVal Left As Object, ByVal Right As Object) As Object
+            Dim conv1, conv2 As IConvertible
+            Dim tc1, tc2 As TypeCode
 
-            Dim tc1 As TypeCode = GetTypeCode(Left)
-            Dim tc2 As TypeCode = GetTypeCode(Right)
+            conv1 = TryCast(Left, IConvertible)
+            If conv1 Is Nothing Then
+                If Left Is Nothing Then
+                    tc1 = TypeCode.Empty
+                Else
+                    tc1 = TypeCode.Object
+                End If
+            Else
+                tc1 = conv1.GetTypeCode()
+            End If
+
+            conv2 = TryCast(Right, IConvertible)
+            If conv2 Is Nothing Then
+                If Right Is Nothing Then
+                    tc2 = TypeCode.Empty
+                Else
+                    tc2 = TypeCode.Object
+                End If
+            Else
+                tc2 = conv2.GetTypeCode()
+            End If
 
             'Special cases for Char()
             If (tc1 = TypeCode.Object) AndAlso (TypeOf Left Is Char()) Then
@@ -5118,6 +5141,17 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             If tc1 = TypeCode.Object OrElse tc2 = TypeCode.Object Then
                 Return InvokeUserDefinedOperator(UserDefinedOperator.Concatenate, Left, Right)
+            End If
+
+            Dim LeftIsNull As Boolean = (tc1 = TypeCode.DBNull)
+            Dim RightIsNull As Boolean = (tc2 = TypeCode.DBNull)
+
+            If LeftIsNull And RightIsNull Then
+                Return Left
+            ElseIf LeftIsNull And Not RightIsNull Then
+                Left = ""
+            ElseIf RightIsNull And Not LeftIsNull Then
+                Right = ""
             End If
 
             Return CStr(Left) & CStr(Right)

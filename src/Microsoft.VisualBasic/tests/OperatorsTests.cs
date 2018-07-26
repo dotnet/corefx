@@ -158,6 +158,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { "2", '2', "22" };
             yield return new object[] { "2", new char[] { '2' }, "22" };
             yield return new object[] { "3", true, (double)2 };
+            yield return new object[] { "5", DBNull.Value, "5" };
             yield return new object[] { "5", null, "5" };
 
             // chars + primitives.
@@ -174,6 +175,9 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             // char + primitives
             yield return new object[] { 'a', null, "a\0" };
             yield return new object[] { 'a', 'b', "ab" };
+
+            // DBNull.
+            yield return new object[] { DBNull.Value, "1", "1" };
 
             // null + null
             yield return new object[] { null, null, 0 };
@@ -249,11 +253,20 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         public static IEnumerable<object[]> AddObject_InvalidObjects_TestData()
         {
             yield return new object[] { 1, '2' };
-            yield return new object[] { 2, DBNull.Value };
+            yield return new object[] { '2', 1 };
             yield return new object[] { '3', new object() };
+            yield return new object[] { new object(), '3' };
+
+            yield return new object[] { 2, DBNull.Value };
+            yield return new object[] { DBNull.Value, 2 };
+            yield return new object[] { null, DBNull.Value };
+            yield return new object[] { DBNull.Value, null };
+            yield return new object[] { DBNull.Value, DBNull.Value };
 
             yield return new object[] { new char[] { '8' }, 10 };
             yield return new object[] { 10, new char[] { '8' } };
+            yield return new object[] { new char[] { '8' }, DBNull.Value };
+            yield return new object[] { DBNull.Value, new char[] { '8' } };
             yield return new object[] { new char[] { '8' }, new object() };
             yield return new object[] { new object(), new char[] { '8' } };
         }
@@ -882,6 +895,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (byte)10, "2", "102" };
             yield return new object[] { (byte)10, new char[] { '2' }, "102" };
             yield return new object[] { (byte)10, true, "10True" };
+            yield return new object[] { (byte)10, DBNull.Value, "10" };
             yield return new object[] { (byte)10, null, "10" };
 
             // sbyte.
@@ -899,6 +913,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (sbyte)10, "2", "102" };
             yield return new object[] { (sbyte)10, new char[] { '2' }, "102" };
             yield return new object[] { (sbyte)10, true, "10True" };
+            yield return new object[] { (sbyte)10, DBNull.Value, "10" };
             yield return new object[] { (sbyte)10, null, "10" };
 
             // ushort.
@@ -916,6 +931,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ushort)10, "2", "102" };
             yield return new object[] { (ushort)10, new char[] { '2' }, "102" };
             yield return new object[] { (ushort)10, true, "10True" };
+            yield return new object[] { (ushort)10, DBNull.Value, "10" };
             yield return new object[] { (ushort)10, null, "10" };
 
             // short.
@@ -933,6 +949,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (short)10, "2", "102" };
             yield return new object[] { (short)10, new char[] { '2' }, "102" };
             yield return new object[] { (short)10, true, "10True" };
+            yield return new object[] { (short)10, DBNull.Value, "10" };
             yield return new object[] { (short)10, null, "10" };
 
             // uint.
@@ -950,6 +967,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (uint)10, "2", "102" };
             yield return new object[] { (uint)10, new char[] { '2' }, "102" };
             yield return new object[] { (uint)10, true, "10True" };
+            yield return new object[] { (uint)10, DBNull.Value, "10" };
             yield return new object[] { (uint)10, null, "10" };
 
             // int.
@@ -967,6 +985,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { 10, "2", "102" };
             yield return new object[] { 10, new char[] { '2' }, "102" };
             yield return new object[] { 10, true, "10True" };
+            yield return new object[] { 10, DBNull.Value, "10" };
             yield return new object[] { 10, null, "10" };
 
             // ulong.
@@ -984,6 +1003,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)10, "2", "102" };
             yield return new object[] { (ulong)10, new char[] { '2' }, "102" };
             yield return new object[] { (ulong)10, true, "10True" };
+            yield return new object[] { (ulong)10, DBNull.Value, "10" };
             yield return new object[] { (ulong)10, null, "10" };
 
             // long.
@@ -1001,6 +1021,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (long)10, "2", "102" };
             yield return new object[] { (long)10, new char[] { '2' }, "102" };
             yield return new object[] { (long)10, true, "10True" };
+            yield return new object[] { (long)10, DBNull.Value, "10" };
             yield return new object[] { (long)10, null, "10" };
 
             // float.
@@ -1018,6 +1039,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (float)10, "2", "102" };
             yield return new object[] { (float)10, new char[] { '2' }, "102" };
             yield return new object[] { (float)10, true, "10True" };
+            yield return new object[] { (float)10, DBNull.Value, "10" };
             yield return new object[] { (float)10, null, "10" };
 
             // double.
@@ -1035,6 +1057,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (double)10, "2", "102" };
             yield return new object[] { (double)10, new char[] { '2' }, "102" };
             yield return new object[] { (double)10, true, "10True" };
+            yield return new object[] { (double)10, DBNull.Value, "10" };
             yield return new object[] { (double)10, null, "10" };
 
             // decimal.
@@ -1052,6 +1075,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)10, "2", "102" };
             yield return new object[] { (decimal)10, new char[] { '2' }, "102" };
             yield return new object[] { (decimal)10, true, "10True" };
+            yield return new object[] { (decimal)10, DBNull.Value, "10" };
             yield return new object[] { (decimal)10, null, "10" };
 
             // string.
@@ -1069,6 +1093,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { "10", "2", "102" };
             yield return new object[] { "10", new char[] { '2' }, "102" };
             yield return new object[] { "10", true, "10True" };
+            yield return new object[] { "10", DBNull.Value, "10" };
             yield return new object[] { "10", null, "10" };
 
             // chars.
@@ -1086,6 +1111,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { new char[] { '1', '0' }, "2", "102" };
             yield return new object[] { new char[] { '1', '0' }, new char[] { '2' }, "102" };
             yield return new object[] { new char[] { '1', '0' }, true, "10True" };
+            yield return new object[] { new char[] { '1', '0' }, DBNull.Value, "10" };
             yield return new object[] { new char[] { '1', '0' }, null, "10" };
 
             // bool.
@@ -1103,7 +1129,26 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { true, "2", "True2" };
             yield return new object[] { true, new char[] { '2' }, "True2" };
             yield return new object[] { true, true, "TrueTrue" };
+            yield return new object[] { true, DBNull.Value, "True" };
             yield return new object[] { true, null, "True" };
+
+            // DBNull.Value.
+            yield return new object[] { DBNull.Value, (byte)2, "2" };
+            yield return new object[] { DBNull.Value, (sbyte)2, "2" };
+            yield return new object[] { DBNull.Value, (ushort)2, "2" };
+            yield return new object[] { DBNull.Value, (short)2, "2" };
+            yield return new object[] { DBNull.Value, (uint)2, "2" };
+            yield return new object[] { DBNull.Value, 2, "2" };
+            yield return new object[] { DBNull.Value, (ulong)2, "2" };
+            yield return new object[] { DBNull.Value, (long)2, "2" };
+            yield return new object[] { DBNull.Value, (float)2, "2" };
+            yield return new object[] { DBNull.Value, (double)2, "2" };
+            yield return new object[] { DBNull.Value, (decimal)2, "2" };
+            yield return new object[] { DBNull.Value, "2", "2" };
+            yield return new object[] { DBNull.Value, new char[] { '2' }, "2" };
+            yield return new object[] { DBNull.Value, true, "True" };
+            yield return new object[] { DBNull.Value, DBNull.Value, DBNull.Value };
+            yield return new object[] { DBNull.Value, null, "" };
 
             // null.
             yield return new object[] { null, (byte)2, "2" };
@@ -1120,6 +1165,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { null, "2", "2" };
             yield return new object[] { null, new char[] { '2' }, "2" };
             yield return new object[] { null, true, "True" };
+            yield return new object[] { null, DBNull.Value, "" };
             yield return new object[] { null, null, "" };
 
             // object.
@@ -1138,7 +1184,6 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
         public static IEnumerable<object[]> ConcatenateObject_InvalidObjects_TestData()
         {
-            yield return new object[] { 2, DBNull.Value };
             yield return new object[] { '3', new object() };
 
             yield return new object[] { new char[] { '8' }, new object() };
