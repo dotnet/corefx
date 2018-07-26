@@ -97,7 +97,6 @@ namespace System.Diagnostics.PerformanceData
                 }
             }
         }
-
     }
 
     /// <summary>

@@ -71,7 +71,6 @@ namespace Microsoft.Win32
             [Out] out SafePerfProviderHandle phProvider
         );
 
-
         [DllImport(ADVAPI32, SetLastError = true, ExactSpelling = true, EntryPoint = "PerfCreateInstance", CharSet = CharSet.Unicode)]        
         internal static extern unsafe PerfCounterSetInstanceStruct* PerfCreateInstance(
         [In] SafePerfProviderHandle hProvider,
