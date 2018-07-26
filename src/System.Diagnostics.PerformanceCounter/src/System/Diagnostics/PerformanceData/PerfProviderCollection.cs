@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Security;
 using System.Threading;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -15,11 +14,9 @@ namespace System.Diagnostics.PerformanceData
     internal sealed class PerfProvider
     {
         internal Guid m_providerGuid;
-        internal int m_counterSet;
-        [SecurityCritical]
+        internal int m_counterSet;        
         internal SafePerfProviderHandle m_hProvider;
-
-        [System.Security.SecurityCritical]
+        
         internal PerfProvider(Guid providerGuid)
         {
             m_providerGuid = providerGuid;
@@ -54,8 +51,7 @@ namespace System.Diagnostics.PerformanceData
                 return s_hiddenInternalSyncObject;
             }
         }
-
-        [System.Security.SecurityCritical]
+        
         internal static PerfProvider QueryProvider(Guid providerGuid)
         {
             // Most of the cases should be that the application contains 1 provider that supports several CounterSets;
@@ -75,8 +71,7 @@ namespace System.Diagnostics.PerformanceData
                 return NewProvider;
             }
         }
-
-        [System.Security.SecurityCritical]
+        
         internal static void RemoveProvider(Guid providerGuid)
         {
             lock (s_lockObject)

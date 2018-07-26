@@ -5,7 +5,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Threading;
 using Microsoft.Win32;
 
@@ -19,11 +18,9 @@ namespace System.Diagnostics.PerformanceData
         internal CounterSet m_counterSet;
         internal string m_instName;
         private int m_active;
-        private CounterSetInstanceCounterDataSet m_counters;
-        [SecurityCritical]
+        private CounterSetInstanceCounterDataSet m_counters;        
         unsafe internal UnsafeNativeMethods.PerfCounterSetInstanceStruct* m_nativeInst;
-
-        [System.Security.SecurityCritical]
+        
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         internal CounterSetInstance(CounterSet counterSetDefined, string instanceName)
         {
@@ -84,21 +81,18 @@ namespace System.Diagnostics.PerformanceData
 
             m_active = 1;
         }
-
-        [System.Security.SecurityCritical]
+        
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        [System.Security.SecurityCritical]
+        
         ~CounterSetInstance()
         {
             Dispose(false);
         }
-
-        [System.Security.SecurityCritical]
+        
         private void Dispose(bool disposing)
         {
             if (disposing)

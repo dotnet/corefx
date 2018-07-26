@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Threading;
 using Microsoft.Win32;
 
@@ -17,16 +16,14 @@ namespace System.Diagnostics.PerformanceData
     /// CounterSetInstanceCounterDataSet, which is part of CounterSetInstance.
     /// </summary>    
     public sealed class CounterData
-    {
-        [SecurityCritical]
+    {        
         unsafe private long* m_offset;
 
         /// <summary>
         /// CounterData constructor
         /// </summary>
         /// <param name="counterId"> counterId would come from CounterSet::AddCounter() parameter </param>
-        /// <param name="pCounterData"> The memory location to store raw counter data </param>
-        [System.Security.SecurityCritical]
+        /// <param name="pCounterData"> The memory location to store raw counter data </param>        
         unsafe internal CounterData(long* pCounterData)
         {
             m_offset = pCounterData;
@@ -37,16 +34,14 @@ namespace System.Diagnostics.PerformanceData
         /// Value property it used to query/update actual raw counter data.
         /// </summary>
         public long Value
-        {
-            [System.Security.SecurityCritical]
+        {            
             get
             {
                 unsafe
                 {
                     return Interlocked.Read(ref (*m_offset));
                 }
-            }
-            [System.Security.SecurityCritical]
+            }            
             set
             {
                 unsafe
@@ -55,8 +50,7 @@ namespace System.Diagnostics.PerformanceData
                 }
             }
         }
-
-        [System.Security.SecurityCritical]
+        
         public void Increment()
         {
             unsafe
@@ -64,8 +58,7 @@ namespace System.Diagnostics.PerformanceData
                 Interlocked.Increment(ref (*m_offset));
             }
         }
-
-        [System.Security.SecurityCritical]
+        
         public void Decrement()
         {
             unsafe
@@ -73,8 +66,7 @@ namespace System.Diagnostics.PerformanceData
                 Interlocked.Decrement(ref (*m_offset));
             }
         }
-
-        [System.Security.SecurityCritical]
+       
         public void IncrementBy(long value)
         {
             unsafe
@@ -89,16 +81,14 @@ namespace System.Diagnostics.PerformanceData
         /// for performance-critical single-threaded access.
         /// </summary>
         public long RawValue
-        {
-            [System.Security.SecurityCritical]
+        {            
             get
             {
                 unsafe
                 {
                     return (*m_offset);
                 }
-            }
-            [System.Security.SecurityCritical]
+            }            
             set
             {
                 unsafe
@@ -118,11 +108,9 @@ namespace System.Diagnostics.PerformanceData
     {
         internal CounterSetInstance m_instance;
         private Dictionary<int, CounterData> m_counters;
-        private int m_disposed;
-        [SecurityCritical]
+        private int m_disposed;        
         unsafe internal byte* m_dataBlock;
-
-        [System.Security.SecurityCritical]
+        
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst)
         {
@@ -179,21 +167,18 @@ namespace System.Diagnostics.PerformanceData
                 }
             }
         }
-
-        [System.Security.SecurityCritical]
+        
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        [System.Security.SecurityCritical]
+        
         ~CounterSetInstanceCounterDataSet()
         {
             Dispose(false);
         }
-
-        [System.Security.SecurityCritical]
+        
         private void Dispose(bool disposing)
         {
             if (Interlocked.Exchange(ref m_disposed, 1) == 0)

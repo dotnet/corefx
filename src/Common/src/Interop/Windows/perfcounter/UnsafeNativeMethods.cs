@@ -23,9 +23,6 @@ namespace Microsoft.Win32
             [In] IntPtr hProvider
         );
 
-#pragma warning disable 618
-        [SecurityCritical(SecurityCriticalScope.Everything)]
-#pragma warning restore 618
         internal unsafe delegate uint PERFLIBREQUEST(
             [In] uint RequestCode,
             [In] void* Buffer,
@@ -67,8 +64,7 @@ namespace Microsoft.Win32
             [FieldOffset(28)] internal uint InstanceNameSize;
         }
 
-        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfStartProvider", CharSet = CharSet.Unicode)]
-        [SecurityCritical]
+        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfStartProvider", CharSet = CharSet.Unicode)]        
         internal static extern unsafe uint PerfStartProvider(
             [In]  ref Guid ProviderGuid,
             [In]  PERFLIBREQUEST ControlCallback,
@@ -76,8 +72,7 @@ namespace Microsoft.Win32
         );
 
 
-        [DllImport(ADVAPI32, SetLastError = true, ExactSpelling = true, EntryPoint = "PerfCreateInstance", CharSet = CharSet.Unicode)]
-        [SecurityCritical]
+        [DllImport(ADVAPI32, SetLastError = true, ExactSpelling = true, EntryPoint = "PerfCreateInstance", CharSet = CharSet.Unicode)]        
         internal static extern unsafe PerfCounterSetInstanceStruct* PerfCreateInstance(
         [In] SafePerfProviderHandle hProvider,
         [In] ref Guid CounterSetGuid,
@@ -85,23 +80,20 @@ namespace Microsoft.Win32
         [In] uint dwInstance
         );
 
-        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfSetCounterSetInfo", CharSet = CharSet.Unicode)]
-        [SecurityCritical]
+        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfSetCounterSetInfo", CharSet = CharSet.Unicode)]        
         internal static extern unsafe uint PerfSetCounterSetInfo(
          [In]      SafePerfProviderHandle hProvider,
          [In][Out] PerfCounterSetInfoStruct* pTemplate,
          [In]      uint dwTemplateSize
         );
 
-        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfDeleteInstance", CharSet = CharSet.Unicode)]
-        [SecurityCritical]
+        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfDeleteInstance", CharSet = CharSet.Unicode)]        
         internal static extern unsafe uint PerfDeleteInstance(
             [In] SafePerfProviderHandle hProvider,
             [In] PerfCounterSetInstanceStruct* InstanceBlock
         );
 
-        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfSetCounterRefValue", CharSet = CharSet.Unicode)]
-        [SecurityCritical]
+        [DllImport(ADVAPI32, ExactSpelling = true, EntryPoint = "PerfSetCounterRefValue", CharSet = CharSet.Unicode)]        
         internal static extern unsafe uint PerfSetCounterRefValue(
            [In] SafePerfProviderHandle hProvider,
            [In] PerfCounterSetInstanceStruct* pInstance,
