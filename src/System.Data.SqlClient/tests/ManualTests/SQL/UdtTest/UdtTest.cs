@@ -6,6 +6,8 @@ using System.Data.SqlTypes;
 using Microsoft.Samples.SqlServer;
 using Xunit;
 
+using Utf8StringSample = Microsoft.Samples.SqlServer.Utf8String;
+
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class UdtTest
@@ -32,12 +34,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                 SqlDataReader reader = com.ExecuteReader();
 
-                Utf8String[] expectedValues =
+                Utf8StringSample[] expectedValues =
                     {
-                        new Utf8String("a"),
-                        new Utf8String("is"),
-                        new Utf8String("test"),
-                        new Utf8String("this")
+                        new Utf8StringSample("a"),
+                        new Utf8StringSample("is"),
+                        new Utf8StringSample("test"),
+                        new Utf8StringSample("this")
                     };
                 int currentValue = 0;
                 do
@@ -70,7 +72,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     CommandText = "select * from TestTable"
                 };
 
-                DataTestUtility.AssertEqualsWithDescription(new Utf8String("a"), com.ExecuteScalar(), "Unexpected value.");
+                DataTestUtility.AssertEqualsWithDescription(new Utf8StringSample("a"), com.ExecuteScalar(), "Unexpected value.");
             }
         }
 
@@ -89,20 +91,20 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 };
                 SqlParameter p = com.Parameters.Add("@p", SqlDbType.Udt);
                 p.UdtTypeName = "Utf8String";
-                p.Value = new Utf8String("this is an input param test");
+                p.Value = new Utf8StringSample("this is an input param test");
 
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     com.Transaction = trans;
                     SqlDataReader reader = com.ExecuteReader();
 
-                    Utf8String[] expectedValues =
+                    Utf8StringSample[] expectedValues =
                     {
-                        new Utf8String("a"),
-                        new Utf8String("is"),
-                        new Utf8String("test"),
-                        new Utf8String("this"),
-                        new Utf8String("this is an input param test")
+                        new Utf8StringSample("a"),
+                        new Utf8StringSample("is"),
+                        new Utf8StringSample("test"),
+                        new Utf8StringSample("this"),
+                        new Utf8StringSample("this is an input param test")
                     };
 
                     int currentValue = 0;
@@ -154,7 +156,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                 reader.Close();
 
-                DataTestUtility.AssertEqualsWithDescription(new Utf8String("this is an outparam test"), p.Value, "Unexpected parameter value.");
+                DataTestUtility.AssertEqualsWithDescription(new Utf8StringSample("this is an outparam test"), p.Value, "Unexpected parameter value.");
             }
         }
 
@@ -169,12 +171,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 SqlDataAdapter adapter = new SqlDataAdapter("select * from TestTable", conn);
                 adapter.Fill(ds);
 
-                Utf8String[] expectedValues =
+                Utf8StringSample[] expectedValues =
                 {
-                    new Utf8String("a"),
-                    new Utf8String("is"),
-                    new Utf8String("test"),
-                    new Utf8String("this")
+                    new Utf8StringSample("a"),
+                    new Utf8StringSample("is"),
+                    new Utf8StringSample("test"),
+                    new Utf8StringSample("this")
                 };
                 VerifyDataSet(ds, expectedValues);
             }
@@ -196,7 +198,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                     adapter.Fill(ds);
 
-                    ds.Tables[0].Rows[0][0] = new Utf8String("updated");
+                    ds.Tables[0].Rows[0][0] = new Utf8StringSample("updated");
 
                     adapter.Update(ds);
 
@@ -205,12 +207,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     adapter.Fill(ds);
                 }
 
-                Utf8String[] expectedValues =
+                Utf8StringSample[] expectedValues =
                 {
-                    new Utf8String("is"),
-                    new Utf8String("test"),
-                    new Utf8String("this"),
-                    new Utf8String("updated")
+                    new Utf8StringSample("is"),
+                    new Utf8StringSample("test"),
+                    new Utf8StringSample("this"),
+                    new Utf8StringSample("updated")
                 };
                 VerifyDataSet(ds, expectedValues);
             }
@@ -238,12 +240,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     com.Transaction = trans;
                     SqlDataReader reader = com.ExecuteReader();
 
-                    Utf8String[] expectedValues =
+                    Utf8StringSample[] expectedValues =
                         {
-                            new Utf8String("this"),
-                            new Utf8String("is"),
-                            new Utf8String("a"),
-                            new Utf8String("test")
+                            new Utf8StringSample("this"),
+                            new Utf8StringSample("is"),
+                            new Utf8StringSample("a"),
+                            new Utf8StringSample("test")
                         };
 
                     int currentValue = 0;
@@ -261,7 +263,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             {
                                 DataTestUtility.AssertEqualsWithDescription(DBNull.Value, reader.GetValue(0), "Unexpected Value.");
 
-                                Utf8String sqlValue = (Utf8String)reader.GetSqlValue(0);
+                                Utf8StringSample sqlValue = (Utf8StringSample)reader.GetSqlValue(0);
                                 INullable iface = sqlValue as INullable;
                                 Assert.True(iface != null, "Expected interface cast to return a non-null value.");
                                 Assert.True(iface.IsNull, "Expected interface cast to have IsNull==true.");
@@ -279,7 +281,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        private void VerifyDataSet(DataSet ds, Utf8String[] expectedValues)
+        private void VerifyDataSet(DataSet ds, Utf8StringSample[] expectedValues)
         {
             DataTestUtility.AssertEqualsWithDescription(1, ds.Tables.Count, "Unexpected tables count.");
             DataTestUtility.AssertEqualsWithDescription(ds.Tables[0].Rows.Count, expectedValues.Length, "Unexpected rows count.");
