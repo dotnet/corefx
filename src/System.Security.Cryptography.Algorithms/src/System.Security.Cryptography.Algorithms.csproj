@@ -598,6 +598,8 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\SecKeyPair.cs">
       <Link>Common\System\Security\Cryptography\SecKeyPair.cs</Link>
     </Compile>
+    <Compile Include="System\Security\Cryptography\AesGcm.OSX.cs" />
+    <Compile Include="System\Security\Cryptography\AesCcm.OSX.cs" />
     <Compile Include="Internal\Cryptography\AesImplementation.OSX.cs" />
     <Compile Include="Internal\Cryptography\AppleCCCryptor.cs" />
     <Compile Include="Internal\Cryptography\DesImplementation.OSX.cs" />
