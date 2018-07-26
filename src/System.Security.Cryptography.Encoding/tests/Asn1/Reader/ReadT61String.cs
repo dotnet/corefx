@@ -49,6 +49,13 @@ namespace System.Security.Cryptography.Tests.Asn1
                     "1402C2A2",
                     "\u00a2",
                 },
+                // Valid UTF-8 string is interpreted as UTF-8 (multi-segment)
+                new object[]
+                {
+                    PublicEncodingRules.BER,
+                    "34800401C20401A20000",
+                    "\u00a2",
+                },
                 // Invalid UTF-8 string with valid UTF-8 sequence is interpreted as ISO 8859-1
                 new object[]
                 {

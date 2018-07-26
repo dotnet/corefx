@@ -817,7 +817,10 @@ namespace System.Security.Cryptography.Asn1
 
         public override int GetMaxCharCount(int byteCount)
         {
-            return s_utf8Encoding.GetMaxCharCount(byteCount);
+            // Latin-1 is single byte encoding, so byteCount == charCount
+            // UTF-8 is multi-byte encoding, so byteCount <= charCount
+            // We want to return the maximum of those two, which happens to be byteCount.
+            return byteCount;
         }
     }
 
