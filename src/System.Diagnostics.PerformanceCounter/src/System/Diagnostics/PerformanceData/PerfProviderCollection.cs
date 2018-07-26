@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Threading;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
+using System.Threading;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
@@ -17,7 +15,7 @@ namespace System.Diagnostics.PerformanceData
     internal sealed class PerfProvider
     {
         internal Guid m_providerGuid;
-        internal Int32 m_counterSet;
+        internal int m_counterSet;
         [SecurityCritical]
         internal SafePerfProviderHandle m_hProvider;
 
@@ -37,20 +35,20 @@ namespace System.Diagnostics.PerformanceData
     internal static class PerfProviderCollection
     {
         // Internal global PERFLIB V2 provider collection that contains a collection of PerfProvider objects.
-        // Use mutex to serialize collection initialization/update.        
-        private static Object s_hiddenInternalSyncObject;
+        // Use mutex to serialize collection initialization/update.
+        private static object s_hiddenInternalSyncObject;
         private static List<PerfProvider> s_providerList = new List<PerfProvider>();
-        private static Dictionary<Object, Int32> s_counterSetList = new Dictionary<Object, Int32>();
+        private static Dictionary<object, int> s_counterSetList = new Dictionary<object, int>();
         private static CounterType[] s_counterTypes = (CounterType[])Enum.GetValues(typeof(CounterType));
         private static CounterSetInstanceType[] s_counterSetInstanceTypes = (CounterSetInstanceType[])Enum.GetValues(typeof(CounterSetInstanceType));
 
-        private static Object s_lockObject
+        private static object s_lockObject
         {
             get
             {
                 if (s_hiddenInternalSyncObject == null)
                 {
-                    Object o = new Object();
+                    object o = new object();
                     Interlocked.CompareExchange(ref s_hiddenInternalSyncObject, o, null);
                 }
                 return s_hiddenInternalSyncObject;

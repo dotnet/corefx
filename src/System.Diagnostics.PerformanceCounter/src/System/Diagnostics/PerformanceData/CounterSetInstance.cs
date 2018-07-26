@@ -2,32 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Threading;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 using Microsoft.Win32;
 
 namespace System.Diagnostics.PerformanceData
 {
     /// <summary>
     /// CounterSetInstance class maps to "Instace" in native performance counter implementation.
-    /// </summary>    
+    /// </summary>
     public sealed class CounterSetInstance : IDisposable
     {
         internal CounterSet m_counterSet;
-        internal String m_instName;
-        private Int32 m_active;
+        internal string m_instName;
+        private int m_active;
         private CounterSetInstanceCounterDataSet m_counters;
         [SecurityCritical]
         unsafe internal UnsafeNativeMethods.PerfCounterSetInstanceStruct* m_nativeInst;
 
         [System.Security.SecurityCritical]
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        internal CounterSetInstance(CounterSet counterSetDefined, String instanceName)
+        internal CounterSetInstance(CounterSet counterSetDefined, string instanceName)
         {
             if (counterSetDefined == null)
             {
@@ -93,11 +91,13 @@ namespace System.Diagnostics.PerformanceData
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         [System.Security.SecurityCritical]
         ~CounterSetInstance()
         {
             Dispose(false);
         }
+
         [System.Security.SecurityCritical]
         private void Dispose(bool disposing)
         {

@@ -1,15 +1,13 @@
-﻿/// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 using Microsoft.Win32;
 
 namespace System.Diagnostics.PerformanceData
@@ -21,7 +19,7 @@ namespace System.Diagnostics.PerformanceData
     public sealed class CounterData
     {
         [SecurityCritical]
-        unsafe private Int64* m_offset;
+        unsafe private long* m_offset;
 
         /// <summary>
         /// CounterData constructor
@@ -29,7 +27,7 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="counterId"> counterId would come from CounterSet::AddCounter() parameter </param>
         /// <param name="pCounterData"> The memory location to store raw counter data </param>
         [System.Security.SecurityCritical]
-        unsafe internal CounterData(Int64* pCounterData)
+        unsafe internal CounterData(long* pCounterData)
         {
             m_offset = pCounterData;
             *m_offset = 0;
@@ -38,7 +36,7 @@ namespace System.Diagnostics.PerformanceData
         /// <summary>
         /// Value property it used to query/update actual raw counter data.
         /// </summary>
-        public Int64 Value
+        public long Value
         {
             [System.Security.SecurityCritical]
             get
@@ -77,7 +75,7 @@ namespace System.Diagnostics.PerformanceData
         }
 
         [System.Security.SecurityCritical]
-        public void IncrementBy(Int64 value)
+        public void IncrementBy(long value)
         {
             unsafe
             {
@@ -90,7 +88,7 @@ namespace System.Diagnostics.PerformanceData
         /// This property is not thread-safe and should only be used 
         /// for performance-critical single-threaded access.
         /// </summary>
-        public Int64 RawValue
+        public long RawValue
         {
             [System.Security.SecurityCritical]
             get
@@ -119,8 +117,8 @@ namespace System.Diagnostics.PerformanceData
     public sealed class CounterSetInstanceCounterDataSet : IDisposable
     {
         internal CounterSetInstance m_instance;
-        private Dictionary<Int32, CounterData> m_counters;
-        private Int32 m_disposed;
+        private Dictionary<int, CounterData> m_counters;
+        private int m_disposed;
         [SecurityCritical]
         unsafe internal byte* m_dataBlock;
 
@@ -129,7 +127,7 @@ namespace System.Diagnostics.PerformanceData
         internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst)
         {
             m_instance = thisInst;
-            m_counters = new Dictionary<Int32, CounterData>();
+            m_counters = new Dictionary<int, CounterData>();
 
             unsafe
             {
@@ -142,27 +140,27 @@ namespace System.Diagnostics.PerformanceData
                     throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, m_instance.m_counterSet.m_providerGuid));
                 }
 
-                m_dataBlock = (byte*)Marshal.AllocHGlobal(m_instance.m_counterSet.m_idToCounter.Count * sizeof(Int64));
+                m_dataBlock = (byte*)Marshal.AllocHGlobal(m_instance.m_counterSet.m_idToCounter.Count * sizeof(long));
                 if (m_dataBlock == null)
                 {
                     throw new InsufficientMemoryException(SR.Format(SR.Perflib_InsufficientMemory_InstanceCounterBlock, m_instance.m_counterSet.m_counterSet, m_instance.m_instName));
                 }
 
-                Int32 CounterOffset = 0;
+                int CounterOffset = 0;
 
-                foreach (KeyValuePair<Int32, CounterType> CounterDef in m_instance.m_counterSet.m_idToCounter)
+                foreach (KeyValuePair<int, CounterType> CounterDef in m_instance.m_counterSet.m_idToCounter)
                 {
-                    CounterData thisCounterData = new CounterData((Int64*)(m_dataBlock + CounterOffset * sizeof(Int64)));
+                    CounterData thisCounterData = new CounterData((long*)(m_dataBlock + CounterOffset * sizeof(long)));
 
                     m_counters.Add(CounterDef.Key, thisCounterData);
+
                     // ArgumentNullException - CounterName is NULL
                     // ArgumentException - CounterName already exists.
-
                     uint Status = UnsafeNativeMethods.PerfSetCounterRefValue(
                                     m_instance.m_counterSet.m_provider.m_hProvider,
                                     m_instance.m_nativeInst,
                                     (uint)CounterDef.Key,
-                                    (void*)(m_dataBlock + CounterOffset * sizeof(Int64)));
+                                    (void*)(m_dataBlock + CounterOffset * sizeof(long)));
                     if (Status != (uint)UnsafeNativeMethods.ERROR_SUCCESS)
                     {
                         Dispose(true);
@@ -188,11 +186,13 @@ namespace System.Diagnostics.PerformanceData
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         [System.Security.SecurityCritical]
         ~CounterSetInstanceCounterDataSet()
         {
             Dispose(false);
         }
+
         [System.Security.SecurityCritical]
         private void Dispose(bool disposing)
         {
@@ -215,7 +215,7 @@ namespace System.Diagnostics.PerformanceData
         /// </summary>
         /// <param name="counterId">CounterId that matches one CounterSet::AddCounter()call</param>
         /// <returns>CounterData object with matched counterId</returns>
-        public CounterData this[Int32 counterId]
+        public CounterData this[int counterId]
         {
             get
             {
@@ -245,7 +245,7 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="counterName">CounterName that matches one CounterSet::AddCounter() call</param>
         /// <returns>CounterData object with matched counterName</returns>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        public CounterData this[String counterName]
+        public CounterData this[string counterName]
         {
             get
             {
@@ -264,7 +264,7 @@ namespace System.Diagnostics.PerformanceData
 
                 try
                 {
-                    Int32 CounterId = m_instance.m_counterSet.m_stringToId[counterName];
+                    int CounterId = m_instance.m_counterSet.m_stringToId[counterName];
                     try
                     {
                         return m_counters[CounterId];

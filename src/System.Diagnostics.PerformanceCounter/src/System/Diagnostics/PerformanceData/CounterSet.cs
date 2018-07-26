@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Permissions;
 using System.Security;
+using System.Threading;
 using Microsoft.Win32;
 
 namespace System.Diagnostics.PerformanceData
@@ -29,10 +25,10 @@ namespace System.Diagnostics.PerformanceData
         internal Guid m_providerGuid;
         internal Guid m_counterSet;
         internal CounterSetInstanceType m_instType;
-        private readonly Object m_lockObject;
+        private readonly object m_lockObject;
         private bool m_instanceCreated;
-        internal Dictionary<String, Int32> m_stringToId;
-        internal Dictionary<Int32, CounterType> m_idToCounter;
+        internal Dictionary<string, int> m_stringToId;
+        internal Dictionary<int, CounterType> m_idToCounter;
 
         /// <summary>
         /// CounterSet constructor.
@@ -40,7 +36,7 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="providerGuid">ProviderGuid identifies the provider application. A provider identified by ProviderGuid could publish several CounterSets defined by different CounterSetGuids</param>
         /// <param name="counterSetGuid">CounterSetGuid identifies the specific CounterSet. CounterSetGuid should be unique.</param>
         /// <param name="instanceType">One of defined CounterSetInstanceType values</param>
-        [SecuritySafeCritical]        
+        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "guid", Justification = "Approved")]
         public CounterSet(Guid providerGuid, Guid counterSetGuid, CounterSetInstanceType instanceType)
         {
@@ -59,9 +55,9 @@ namespace System.Diagnostics.PerformanceData
             m_instType = instanceType;
             PerfProviderCollection.RegisterCounterSet(m_counterSet);
             m_provider = PerfProviderCollection.QueryProvider(m_providerGuid);
-            m_lockObject = new Object();
-            m_stringToId = new Dictionary<String, Int32>();
-            m_idToCounter = new Dictionary<Int32, CounterType>();
+            m_lockObject = new object();
+            m_stringToId = new Dictionary<string, int>();
+            m_idToCounter = new Dictionary<int, CounterType>();
         }
 
         public void Dispose()
@@ -69,10 +65,12 @@ namespace System.Diagnostics.PerformanceData
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         ~CounterSet()
         {
             Dispose(false);
         }
+
         [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
@@ -106,7 +104,7 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="counterId">CounterId uniquely identifies the counter within CounterSet</param>
         /// <param name="counterType">One of defined CounterType values</param>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        public void AddCounter(Int32 counterId, CounterType counterType)
+        public void AddCounter(int counterId, CounterType counterType)
         {
             if (m_provider == null)
             {
@@ -143,7 +141,7 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="counterType">One of defined CounterType values</param>
         /// <param name="counterName">This is friendly name to help provider developers as indexer. and it might not match what is displayed in counter consumption applications lie perfmon.</param>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        public void AddCounter(Int32 counterId, CounterType counterType, String counterName)
+        public void AddCounter(int counterId, CounterType counterType, String counterName)
         {
             if (counterName == null)
             {
@@ -191,9 +189,9 @@ namespace System.Diagnostics.PerformanceData
         /// </summary>
         /// <param name="instanceName">Friendly name identifies the instance. InstanceName would be shown in counter consumption applications like perfmon.</param>
         /// <returns>CounterSetInstance object</returns>
-        [SecuritySafeCritical]        
+        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        public CounterSetInstance CreateCounterSetInstance(String instanceName)
+        public CounterSetInstance CreateCounterSetInstance(string instanceName)
         {
             if (instanceName == null)
             {
@@ -252,7 +250,7 @@ namespace System.Diagnostics.PerformanceData
                             CounterSetInfo->NumCounters = (uint)m_idToCounter.Count;
                             CounterSetInfo->InstanceType = (uint)m_instType;
 
-                            foreach (KeyValuePair<Int32, CounterType> CounterDef in m_idToCounter)
+                            foreach (KeyValuePair<int, CounterType> CounterDef in m_idToCounter)
                             {
                                 CounterSetInfoUsed = (uint)sizeof(UnsafeNativeMethods.PerfCounterSetInfoStruct)
                                                 + (uint)CurrentCounter * (uint)sizeof(UnsafeNativeMethods.PerfCounterInfoStruct);
@@ -272,6 +270,7 @@ namespace System.Diagnostics.PerformanceData
                                 CurrentCounter++;
                             }
                             Status = UnsafeNativeMethods.PerfSetCounterSetInfo(m_provider.m_hProvider, CounterSetInfo, CounterSetInfoSize);
+
                             // ERROR_INVALID_PARAMETER, ERROR_ALREADY_EXISTS, ERROR_NOT_ENOUGH_MEMORY, ERROR_OUTOFMEMORY
                             if (Status != (uint)UnsafeNativeMethods.ERROR_SUCCESS)
                             {

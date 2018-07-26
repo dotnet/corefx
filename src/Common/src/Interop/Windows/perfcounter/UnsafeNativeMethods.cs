@@ -23,7 +23,7 @@ namespace Microsoft.Win32
             [In] IntPtr hProvider
         );
 
-#pragma warning disable 618 // Ssytem.Core still uses SecurityRuleSet.Level1
+#pragma warning disable 618
         [SecurityCritical(SecurityCriticalScope.Everything)]
 #pragma warning restore 618
         internal unsafe delegate uint PERFLIBREQUEST(
@@ -49,7 +49,7 @@ namespace Microsoft.Win32
             // PERF_COUNTER_INFO structure defined in perflib.h
             [FieldOffset(0)] internal uint CounterId;
             [FieldOffset(4)] internal uint CounterType;
-            [FieldOffset(8)] internal Int64 Attrib;
+            [FieldOffset(8)] internal long Attrib;
             [FieldOffset(16)] internal uint Size;
             [FieldOffset(20)] internal uint DetailLevel;
             [FieldOffset(24)] internal uint Scale;
@@ -58,7 +58,8 @@ namespace Microsoft.Win32
 
         [StructLayout(LayoutKind.Explicit, Size = 32)]
         internal struct PerfCounterSetInstanceStruct
-        { // PERF_COUNTERSET_INSTANCE structure defined in perflib.h
+        { 
+            // PERF_COUNTERSET_INSTANCE structure defined in perflib.h
             [FieldOffset(0)] internal Guid CounterSetGuid;
             [FieldOffset(16)] internal uint dwSize;
             [FieldOffset(20)] internal uint InstanceId;
@@ -80,7 +81,7 @@ namespace Microsoft.Win32
         internal static extern unsafe PerfCounterSetInstanceStruct* PerfCreateInstance(
         [In] SafePerfProviderHandle hProvider,
         [In] ref Guid CounterSetGuid,
-        [In] String szInstanceName,
+        [In] string szInstanceName,
         [In] uint dwInstance
         );
 

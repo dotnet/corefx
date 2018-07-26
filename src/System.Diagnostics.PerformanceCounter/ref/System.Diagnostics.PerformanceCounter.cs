@@ -209,37 +209,37 @@ namespace System.Diagnostics.PerformanceData
 {
     public sealed class CounterData
     {
-        internal CounterData() { }
-        public Int64 Value { get { throw null; } set { } }
-        public void Increment() { throw null; }
+        unsafe internal CounterData(long* pCounterData) { }
         public void Decrement() { throw null; }
-        public void IncrementBy(Int64 value) { throw null; }
-        public Int64 RawValue { get { throw null; } set { } }
+        public void Increment() { throw null; }
+        public void IncrementBy(long value) { throw null; }
+        public long RawValue { get { throw null; } set { } }
+        public long Value { get { throw null; } set { } }
     }
     public class CounterSet : IDisposable
     {
+        ~CounterSet() { throw null; }
+        public void AddCounter(int counterId, CounterType counterType) { throw null; }
+        public void AddCounter(int counterId, CounterType counterType, string counterName) { throw null; }
         public CounterSet(Guid providerGuid, Guid counterSetGuid, CounterSetInstanceType instanceType) { }
+        public CounterSetInstance CreateCounterSetInstance(string instanceName) { throw null; }
         public void Dispose() { throw null; }
         protected virtual void Dispose(bool disposing) { throw null; }
-        ~CounterSet() { throw null; }
-        public void AddCounter(Int32 counterId, CounterType counterType) { throw null; }
-        public void AddCounter(Int32 counterId, CounterType counterType, String counterName) { throw null; }
-        public CounterSetInstance CreateCounterSetInstance(String instanceName) { throw null; }
     }
     public sealed class CounterSetInstance : IDisposable
     {
-        internal CounterSetInstance(CounterSet counterSetDefined, String instanceName) { }
-        public void Dispose() { throw null; }
         ~CounterSetInstance() { throw null; }
+        internal CounterSetInstance(CounterSet counterSetDefined, string instanceName) { }
+        public void Dispose() { throw null; }
         public CounterSetInstanceCounterDataSet Counters { get { throw null; } }
     }
     public sealed class CounterSetInstanceCounterDataSet : IDisposable
     {
+        ~CounterSetInstanceCounterDataSet() { throw null; }
         internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst) { }
         public void Dispose() { throw null; }
-        ~CounterSetInstanceCounterDataSet() { throw null; }
-        public CounterData this[Int32 counterId] { get { throw null; } }
-        public CounterData this[String counterName] { get { throw null; } }
+        public CounterData this[int counterId] { get { throw null; } }
+        public CounterData this[string counterName] { get { throw null; } }
     }
     public enum CounterType
     {
