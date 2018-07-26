@@ -47,6 +47,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [ActiveIssue(0)]
         public async Task DataFrame_NoStream_Throws()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -66,6 +67,29 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(invalidFrame);
 
                 await Assert.ThrowsAsync<Exception>(async () => await sendTask);
+            }
+        }
+
+        [Fact]
+        public async Task DataFrame_PaddingOnly_Throws()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+
+            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var client = new HttpClient(handler))
+            {
+                Task sendTask = client.GetAsync(server.CreateServer());
+
+                await server.AcceptConnectionAsync();
+
+                await server.SendConnectionPrefaceAsync();
+
+                DataFrame invalidFrame = new DataFrame(new byte[0], FrameFlags.Padded, 10, 1);
+
+                await server.WriteFrameAsync(invalidFrame);
+
+                // TODO: Validate the expected failure here.
             }
         }
     }
