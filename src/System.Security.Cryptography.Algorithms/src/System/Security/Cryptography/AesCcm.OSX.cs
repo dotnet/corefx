@@ -8,6 +8,8 @@ namespace System.Security.Cryptography
 {
     partial class AesCcm
     {
+        public static KeySizes TagByteSizes { get; } => throw new PlatformNotSupportedException();
+
         public AesCcm(ReadOnlySpan<byte> key)
         {
             throw new PlatformNotSupportedException();
