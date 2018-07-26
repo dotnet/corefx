@@ -13,6 +13,11 @@
     <HarvestIncludePaths Include="ref/netcore50" />
     <HarvestIncludePaths Include="ref/netstandard1.0" />
     <HarvestIncludePaths Include="ref/netstandard1.2" />
+
+    <File Include="$(PackagesDir)\System.Runtime.WindowsRuntime\4.3.0\runtimes\win8\lib\netstandard1.3\System.Runtime.WindowsRuntime.dll">
+      <TargetPath>runtimes/win/lib/netcoreapp1.0</TargetPath>
+    </File>
+    
     <HarvestIncludePaths Include="runtimes/win8/lib/netstandard1.3">
       <TargetPath>runtimes/win/lib/netcore50</TargetPath>
     </HarvestIncludePaths>
