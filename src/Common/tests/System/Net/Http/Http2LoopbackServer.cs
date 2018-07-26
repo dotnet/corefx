@@ -54,9 +54,41 @@ namespace System.Net.Test.Common
 
         public async Task WriteFrameAsync(Frame frame)
         {
-            byte[] writeBuffer = new byte[Frame.Size + frame.Length];
+            byte[] writeBuffer = new byte[Frame.MinFrameSize + frame.Length];
             frame.WriteTo(writeBuffer);
             await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
+        }
+
+        public async Task<Frame> ReadFrameAsync()
+        {
+            // First read the frame headers, which should tell us how long the rest of the frame is.
+            byte[] headerBytes = new byte[Frame.MinFrameSize];
+
+            int readBytes = 0;
+            while(readBytes < Frame.MinFrameSize)
+            {
+                readBytes += await _connectionStream.ReadAsync(headerBytes, readBytes, Frame.MinFrameSize - readBytes);
+            }
+
+            Frame header = Frame.ReadFrom(headerBytes);
+
+            // Read the data segment of the frame, if it is present.
+            byte[] data = new byte[header.Length];
+
+            readBytes = 0;
+            while(readBytes < header.Length)
+            {
+                readBytes += await _connectionStream.ReadAsync(data, readBytes, header.Length - readBytes);
+            }
+
+            // Construct the correct frame type and return it.
+            switch (header.Type)
+            {
+                case FrameType.Data:
+                    return DataFrame.ReadFrom(header, data);
+                default:
+                    return header;
+            }
         }
 
         // Returns the first 24 bytes read, which should be the connection preface.
@@ -92,11 +124,6 @@ namespace System.Net.Test.Common
             char[] prefix = new char[24];
             await reader.ReadBlockAsync(prefix, 0, prefix.Length);
             return new string(prefix);
-        }
-
-        public static bool ValidateServerCertificate(object sender,X509Certificate certificate,X509Chain chain,SslPolicyErrors sslPolicyErrors)
-        {
-            return true;
         }
 
         public void Dispose()

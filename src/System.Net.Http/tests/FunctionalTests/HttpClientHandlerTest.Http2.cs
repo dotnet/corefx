@@ -2,19 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Net.Test.Common;
-using System.Runtime.InteropServices;
-using System.Security.Authentication;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,7 +39,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        [ActiveIssue(0)]
+        [ActiveIssue(31394)]
         public async Task DataFrame_NoStream_Throws()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -59,19 +51,25 @@ namespace System.Net.Http.Functional.Tests
                 Task sendTask = client.GetAsync(server.CreateServer());
 
                 await server.AcceptConnectionAsync();
-
                 await server.SendConnectionPrefaceAsync();
+                await server.WriteFrameAsync(new Frame(0, FrameType.Settings, FrameFlags.Ack, 0));
 
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, 0);
-
                 await server.WriteFrameAsync(invalidFrame);
+
+                Frame receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine(receivedFrame);
+
+                receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine(receivedFrame);
+                Assert.Equal(FrameType.RstStream, receivedFrame.Type);
 
                 await Assert.ThrowsAsync<Exception>(async () => await sendTask);
             }
         }
 
         [Fact]
-        public async Task DataFrame_PaddingOnly_Throws()
+        public async Task DataFrame_PaddingOnly_ResetsStream()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
@@ -82,14 +80,16 @@ namespace System.Net.Http.Functional.Tests
                 Task sendTask = client.GetAsync(server.CreateServer());
 
                 await server.AcceptConnectionAsync();
-
                 await server.SendConnectionPrefaceAsync();
+                await server.WriteFrameAsync(new Frame(0, FrameType.Settings, FrameFlags.Ack, 0));
+
+                Frame receivedFrame = await server.ReadFrameAsync();
 
                 DataFrame invalidFrame = new DataFrame(new byte[0], FrameFlags.Padded, 10, 1);
-
                 await server.WriteFrameAsync(invalidFrame);
 
-                // TODO: Validate the expected failure here.
+                receivedFrame = await server.ReadFrameAsync();
+                Assert.Equal(FrameType.RstStream, receivedFrame.Type);
             }
         }
     }

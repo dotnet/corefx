@@ -16,61 +16,7 @@ using Xunit;
 
 namespace System.Net.Test.Common
 {
-    public class Frame
-    {
-        public int Length;
-        public FrameType Type;
-        public FrameFlags Flags;
-        public int StreamId;
-
-        public const int Size = 9;
-        public const int MaxLength = 16384;
-
-        public const int PriorityInfoLength = 5;       // for both PRIORITY frame and priority info within HEADERS
-        public const int PingLength = 8;
-        public const int WindowUpdateLength = 4;
-        public const int RstStreamLength = 4;
-        public const int GoAwayMinLength = 8;
-
-        public Frame(int length, FrameType type, FrameFlags flags, int streamId)
-        {
-            Length = length;
-            Type = type;
-            Flags = flags;
-            StreamId = streamId;
-        }
-
-        public bool PaddedFlag => (Flags & FrameFlags.Padded) != 0;
-        public bool AckFlag => (Flags & FrameFlags.Ack) != 0;
-        public bool EndHeadersFlag => (Flags & FrameFlags.EndHeaders) != 0;
-        public bool EndStreamFlag => (Flags & FrameFlags.EndStream) != 0;
-        public bool PriorityFlag => (Flags & FrameFlags.Priority) != 0;
-
-        public static Frame ReadFrom(ReadOnlySpan<byte> buffer)
-        {
-            return new Frame(
-                (buffer[0] << 16) | (buffer[1] << 8) | buffer[2],
-                (FrameType)buffer[3],
-                (FrameFlags)buffer[4],
-                (int)((uint)((buffer[5] << 24) | (buffer[6] << 16) | (buffer[7] << 8) | buffer[8]) & 0x7FFFFFFF));
-        }
-
-        public virtual void WriteTo(Span<byte> buffer)
-        {
-            buffer[0] = (byte)((Length & 0x00FF0000) >> 16);
-            buffer[1] = (byte)((Length & 0x0000FF00) >> 8);
-            buffer[2] = (byte)(Length & 0x000000FF);
-
-            buffer[3] = (byte)Type;
-            buffer[4] = (byte)Flags;
-
-            buffer[5] = (byte)((StreamId & 0xFF000000) >> 24);
-            buffer[6] = (byte)((StreamId & 0x00FF0000) >> 16);
-            buffer[7] = (byte)((StreamId & 0x0000FF00) >> 8);
-            buffer[8] = (byte)(StreamId & 0x000000FF);
-        }
-    }
-
+    
     public enum FrameType : byte
     {
         Data = 0,
@@ -103,14 +49,81 @@ namespace System.Net.Test.Common
         ValidBits =     0b00101101
     }
 
+    public class Frame
+    {
+        public int Length;
+        public FrameType Type;
+        public FrameFlags Flags;
+        public int StreamId;
+
+        public const int MinFrameSize = 9;
+        public const int MaxFrameSize = 16384;
+
+        public Frame(int length, FrameType type, FrameFlags flags, int streamId)
+        {
+            Length = length;
+            Type = type;
+            Flags = flags;
+            StreamId = streamId;
+        }
+
+        // Used only by derived classes that need to initialize 
+        internal Frame()
+        {
+            Length = 0;
+            Type = 0;
+            Flags = 0;
+            StreamId = 0;
+        }
+
+        public bool PaddedFlag => (Flags & FrameFlags.Padded) != 0;
+        public bool AckFlag => (Flags & FrameFlags.Ack) != 0;
+        public bool EndHeadersFlag => (Flags & FrameFlags.EndHeaders) != 0;
+        public bool EndStreamFlag => (Flags & FrameFlags.EndStream) != 0;
+        public bool PriorityFlag => (Flags & FrameFlags.Priority) != 0;
+
+        public static Frame ReadFrom(ReadOnlySpan<byte> buffer)
+        {
+            return new Frame(
+                (buffer[0] << 16) | (buffer[1] << 8) | buffer[2],
+                (FrameType)buffer[3],
+                (FrameFlags)buffer[4],
+                (int)((uint)((buffer[5] << 24) | (buffer[6] << 16) | (buffer[7] << 8) | buffer[8]) & 0x7FFFFFFF));
+        }
+
+        public virtual void WriteTo(Span<byte> buffer)
+        {
+            buffer[0] = (byte)((Length & 0x00FF0000) >> 16);
+            buffer[1] = (byte)((Length & 0x0000FF00) >> 8);
+            buffer[2] = (byte)(Length & 0x000000FF);
+
+            buffer[3] = (byte)Type;
+            buffer[4] = (byte)Flags;
+
+            buffer[5] = (byte)((StreamId & 0xFF000000) >> 24);
+            buffer[6] = (byte)((StreamId & 0x00FF0000) >> 16);
+            buffer[7] = (byte)((StreamId & 0x0000FF00) >> 8);
+            buffer[8] = (byte)(StreamId & 0x000000FF);
+        }
+
+        public override string ToString()
+        {
+            return $"Length: {Length}\nType: {Type}\nFlags: {Flags}\nStreamId: {StreamId}";
+        }
+    }
+
     public class DataFrame : Frame
     {
         private byte _padLength = 0;
         private byte[] _data;
 
         public DataFrame(byte[] data, FrameFlags flags, byte padLength, int streamId)
-            : base((flags & FrameFlags.Padded) == 0 ? data.Length : data.Length + padLength + 1, FrameType.Data, flags, streamId)
         {
+            Length = (flags & FrameFlags.Padded) == 0 ? data.Length : data.Length + padLength + 1;
+            Type = FrameType.Data;
+            Flags = flags;
+            StreamId = streamId;
+
             _data = data;
             _padLength = padLength;
         }
@@ -123,12 +136,10 @@ namespace System.Net.Test.Common
             }
         }
 
-        public new static DataFrame ReadFrom(ReadOnlySpan<byte> buffer)
+        public static DataFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
         {
-            Frame header = Frame.ReadFrom(buffer);
-
-            byte padLength = (byte)(header.PaddedFlag ? buffer[Frame.Size] : 0);
-            byte[] data = buffer.Slice(header.PaddedFlag ? Frame.Size + 1 : Frame.Size, buffer.Length).ToArray();
+            byte padLength = (byte)(header.PaddedFlag ? buffer[Frame.MinFrameSize] : 0);
+            byte[] data = buffer.Slice(header.PaddedFlag ? Frame.MinFrameSize + 1 : Frame.MinFrameSize, buffer.Length).ToArray();
 
             return new DataFrame(data, header.Flags, padLength, header.StreamId);
         }
@@ -140,13 +151,77 @@ namespace System.Net.Test.Common
             if (PaddedFlag)
             {
                 buffer[9] = _padLength;
-                _data.CopyTo(buffer.Slice(Frame.Size + 1));
+                _data.CopyTo(buffer.Slice(Frame.MinFrameSize + 1));
             }
             else
             {
-                _data.CopyTo(buffer.Slice(Frame.Size));
+                _data.CopyTo(buffer.Slice(Frame.MinFrameSize));
             }
         }
     }
 
+    public class HeadersFrame : Frame
+    {
+        private byte _padLength = 0;
+        private int _streamDependency = 0;
+        private int _weight = 0;
+        private byte[] _data;
+
+        public HeadersFrame(byte[] data, FrameFlags flags, byte padLength, int streamDependency, byte weight, int streamId)
+        {
+            Length = data.Length +
+                     ((flags & FrameFlags.Padded) == 0 ? 0 : padLength + 1) +
+                     ((flags & FrameFlags.Priority) == 0 ? 0 : 40);
+
+            Type = FrameType.Headers;
+            Flags = flags;
+            StreamId = streamId;
+
+            _data = data;
+            _padLength = padLength;
+            _streamDependency = streamDependency;
+            _weight = weight;
+        }
+
+        public byte[] Data
+        {
+            get
+            {
+                return _data;
+            }
+        }
+
+        public static HeadersFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
+        {
+            int idx = Frame.MinFrameSize; // Since we have multiple optional fields in the header, it is easiest to parse using an index.
+
+            byte padLength = (byte)(header.PaddedFlag ? buffer[idx++] : 0);
+
+            int streamDependency = header.PriorityFlag ? (int)((uint)((buffer[idx++] << 24) |
+                                                                      (buffer[idx++] << 16) |
+                                                                      (buffer[idx++] << 8) |
+                                                                      (buffer[idx++])) & 0x7FFFFFFF) : 0;
+
+            byte weight = (byte)(header.PaddedFlag ? buffer[idx++] : 0);
+
+            byte[] data = buffer.Slice(idx, buffer.Length).ToArray();
+
+            return new HeadersFrame(data, header.Flags, padLength, streamDependency, weight, header.StreamId);
+        }
+
+        public override void WriteTo(Span<byte> buffer)
+        {
+            base.WriteTo(buffer);
+
+            if (PaddedFlag)
+            {
+                buffer[9] = _padLength;
+                _data.CopyTo(buffer.Slice(Frame.MinFrameSize + 1));
+            }
+            else
+            {
+                _data.CopyTo(buffer.Slice(Frame.MinFrameSize));
+            }
+        }
+    }
 }
