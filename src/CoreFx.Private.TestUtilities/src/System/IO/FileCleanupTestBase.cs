@@ -14,7 +14,7 @@ namespace System.IO
     {
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
 
-        private string fallbackGuid = Guid.NewGuid().ToString("N");
+        private string fallbackGuid = Guid.NewGuid().ToString("N").Substring(0, 10);
 
         protected static bool IsProcessElevated => s_isElevated.Value;
 
