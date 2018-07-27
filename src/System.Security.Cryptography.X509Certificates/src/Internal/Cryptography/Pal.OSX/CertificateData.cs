@@ -95,9 +95,9 @@ namespace Internal.Cryptography.Pal
 
             Extensions = new List<X509Extension>();
 
-            if (Version >= 2 && tbsCertificate.Extensions.HasValue)
+            if (Version >= 2 && tbsCertificate.Extensions != null)
             {
-                foreach (X509ExtensionAsn rawExtension in tbsCertificate.Extensions.Value.Extensions)
+                foreach (X509ExtensionAsn rawExtension in tbsCertificate.Extensions)
                 {
                     X509Extension extension = new X509Extension(
                         rawExtension.ExtnId,

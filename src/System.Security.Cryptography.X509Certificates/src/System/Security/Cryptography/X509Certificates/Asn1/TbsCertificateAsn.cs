@@ -53,13 +53,13 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
         [BitString]
         public ReadOnlyMemory<byte>? IssuerUniqueId;
 
-        [ExpectedTag(2, ExplicitTag = true)]
+        [ExpectedTag(2)]
         [OptionalValue]
         [BitString]
         public ReadOnlyMemory<byte>? SubjectUniqueId;
 
-        [ExpectedTag(3)]
+        [ExpectedTag(3, ExplicitTag = true)]
         [OptionalValue]
-        public ExtensionsAsn? Extensions;
+        public X509ExtensionAsn[] Extensions;
     }
 }

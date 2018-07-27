@@ -571,7 +571,9 @@ namespace System.Security.Cryptography.X509Certificates
                 foreach (X509Extension extension in CertificateExtensions)
                 {
                     if (extension == null)
+                    {
                         continue;
+                    }
 
                     if (!usedOids.Add(extension.Oid.Value))
                     {
@@ -582,7 +584,7 @@ namespace System.Security.Cryptography.X509Certificates
                     extensionAsns.Add(new X509ExtensionAsn(extension, false));
                 }
 
-                tbsCertificate.Extensions = new ExtensionsAsn { Extensions = extensionAsns.ToArray() };
+                tbsCertificate.Extensions = extensionAsns.ToArray();
             }
 
             using (AsnWriter writer = AsnSerializer.Serialize(tbsCertificate, AsnEncodingRules.DER))

@@ -112,7 +112,6 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\TimeAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\ValidityAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\TbsCertificateAsn.cs" />
-    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\ExtensionsAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\X509ExtensionAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificateAsn.cs" />
   </ItemGroup>
