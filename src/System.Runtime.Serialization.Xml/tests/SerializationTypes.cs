@@ -1243,11 +1243,3 @@ public class TypeWithMismatchBetweenAttributeAndPropertyType
         }
     }
 }
-
-public enum TestEnum { Off, On, Both }
-public class EnumTestBase { }
-public class EnumTestDerived : EnumTestBase
-{
-    [XmlText]
-    public TestEnum Test { get; set; }
-}
