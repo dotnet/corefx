@@ -677,27 +677,32 @@ namespace System.Xml.Serialization
 
     internal class TempAssemblyCache
     {
-        private Dictionary<TempAssemblyCacheKey, TempAssembly> _cache = new Dictionary<TempAssemblyCacheKey, TempAssembly>();
+        private Hashtable _cache = new Hashtable();
 
         internal TempAssembly this[string ns, object o]
         {
             get
             {
-                TempAssembly tempAssembly;
-                _cache.TryGetValue(new TempAssemblyCacheKey(ns, o), out tempAssembly);
-                return tempAssembly;
+                return (TempAssembly)_cache[new TempAssemblyCacheKey(ns, o)];
             }
         }
 
         internal void Add(string ns, object o, TempAssembly assembly)
         {
             TempAssemblyCacheKey key = new TempAssemblyCacheKey(ns, o);
+
             lock (this)
             {
-                TempAssembly tempAssembly;
-                if (_cache.TryGetValue(key, out tempAssembly) && tempAssembly == assembly)
+                if (_cache[key] == assembly)
+                {
                     return;
-                _cache = new Dictionary<TempAssemblyCacheKey, TempAssembly>(_cache); // clone
+                }
+                Hashtable _copy = new Hashtable();
+                foreach (object k in _cache.Keys)
+                {
+                    _copy.Add(k, _cache[k]);
+                }
+                _cache = _copy;
                 _cache[key] = assembly;
             }
         }
