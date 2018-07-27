@@ -6,6 +6,8 @@
 // ------------------------------------------------------------------------------
 
 
+using System.Runtime.Serialization;
+
 namespace System.ComponentModel
 {
     public partial interface ISynchronizeInvoke
@@ -183,6 +185,13 @@ namespace System.ComponentModel
     {
         public InitializationEventAttribute(string eventName) { }
         public string EventName { get; }
+    }
+    public partial class InvalidAsynchronousStateException : System.ArgumentException
+    {
+        public InvalidAsynchronousStateException() { }
+        public InvalidAsynchronousStateException(string message) { }
+        public InvalidAsynchronousStateException(string message, System.Exception innerException) { }
+        protected InvalidAsynchronousStateException(SerializationInfo info, StreamingContext context) { }
     }
     public partial class InvalidEnumArgumentException : System.ArgumentException
     {
