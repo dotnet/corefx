@@ -114,7 +114,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [InlineData(new string[] { }, "a", new string[] { }, new string[] { })]
-        public void NoElements(string[] source, string match, string[] includeExpected, string[] excludeExpected)
+        public void Filter_NoElements(string[] source, string match, string[] includeExpected, string[] excludeExpected)
         {
             Assert.Equal(includeExpected, Strings.Filter(source, match, Include: true));
             Assert.Equal(excludeExpected, Strings.Filter(source, match, Include: false));
@@ -174,10 +174,173 @@ namespace Microsoft.VisualBasic.Tests
         [Theory]
         [InlineData(new object[] { 42 }, "42", new string[] { "42" }, new string[] { })]
         [InlineData(new object[] { true }, "True", new string[] { "True" }, new string[] { })]
-        public void Objects(object[] source, string match, string[] includeExpected, string[] excludeExpected)
+        public void Filter_Objects(object[] source, string match, string[] includeExpected, string[] excludeExpected)
         {
             Assert.Equal(includeExpected, Strings.Filter(source, match, Include: true));
             Assert.Equal(excludeExpected, Strings.Filter(source, match, Include: false));
+        }
+
+        [Theory]
+        [InlineData(null, null, 0)]
+        [InlineData(null, "", 0)]
+        [InlineData("", null, 0)]
+        [InlineData("", "", 0)]
+        [InlineData(null, "a", 0)]
+        [InlineData("a", null, 1)]
+        [InlineData("a", "a", 1)]
+        [InlineData("aa", "a", 1)]
+        [InlineData("ab", "a", 1)]
+        [InlineData("ba", "a", 2)]
+        [InlineData("b", "a", 0)]
+        [InlineData("a", "ab", 0)]
+        [InlineData("ab", "ab", 1)]
+        public void InStr_FromBegin(string string1, string string2, int expected)
+        {
+            Assert.Equal(expected, Strings.InStr(string1, string2));
+            Assert.Equal(expected, Strings.InStr(1, string1, string2));
+        }
+
+        [Theory]
+        [InlineData(null, null, 0)]
+        [InlineData(null, "", 0)]
+        [InlineData("", null, 0)]
+        [InlineData("", "", 0)]
+        [InlineData(null, "a", 0)]
+        [InlineData("aa", null, 2)]
+        [InlineData("aa", "a", 2)]
+        [InlineData("aab", "a", 2)]
+        [InlineData("aba", "a", 3)]
+        [InlineData("ab", "a", 0)]
+        [InlineData("aa", "ab", 0)]
+        [InlineData("abab", "ab", 3)]
+        public void InStr_FromWithin(string string1, string string2, int expected)
+        {
+            var startPos = 2;
+            Assert.Equal(expected, Strings.InStr(startPos, string1, string2));
+        }
+
+        [Theory]
+        [InlineData("A", "a", 0)]
+        [InlineData("Aa", "a", 2)]
+        public void InStr_BinaryCompare(string string1, string string2, int expected)
+        {
+            Assert.Equal(expected, Strings.InStr(string1, string2, CompareMethod.Binary));
+            Assert.Equal(expected, Strings.InStr(1, string1, string2, CompareMethod.Binary));
+        }
+
+        [Theory]
+        [InlineData("A", "a", 1)]
+        [InlineData("Aa", "a", 1)]
+        public void InStr_TextCompare(string string1, string string2, int expected)
+        {
+            Assert.Equal(expected, Strings.InStr(string1, string2, CompareMethod.Text));
+            Assert.Equal(expected, Strings.InStr(1, string1, string2, CompareMethod.Text));
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void InStr_WhenStartGreatherThanLength_ReturnsZero(int start)
+        {
+            var string1 = "a";
+            var string2 = "a";
+            var expected = 0;
+            Assert.Equal(expected, Strings.InStr(start, string1, string2));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void InStr_WhenStartZeroOrLess_ThrowsArgumentException(int start)
+        {
+            var string1 = "a";
+            var string2 = "a";
+            AssertExtensions.Throws<ArgumentException>("Start", null, () => Strings.InStr(start, string1, string2));
+        }
+
+        [Theory]
+        [InlineData(null, null, 0)]
+        [InlineData(null, "", 0)]
+        [InlineData("", null, 0)]
+        [InlineData("", "", 0)]
+        [InlineData(null, "a", 0)]
+        [InlineData("a", null, 1)]
+        [InlineData("a", "a", 1)]
+        [InlineData("aa", "a", 2)]
+        [InlineData("ba", "a", 2)]
+        [InlineData("ab", "a", 1)]
+        [InlineData("b", "a", 0)]
+        [InlineData("a", "ab", 0)]
+        [InlineData("ab", "ab", 1)]
+        public void InStrRev_FromEnd(string stringCheck, string stringMatch, int expected)
+        {
+            Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch));
+        }
+
+        [Theory]
+        [InlineData(null, null, 1, 0)]
+        [InlineData(null, "", 1, 0)]
+        [InlineData("", null, 1, 0)]
+        [InlineData("", "", 1, 0)]
+        [InlineData(null, "a", 1, 0)]
+        [InlineData("aa", null, 1, 1)]
+        [InlineData("aa", "a", 1, 1)]
+        [InlineData("baa", "a", 2, 2)]
+        [InlineData("aba", "a", 2, 1)]
+        [InlineData("ba", "a", 1, 0)]
+        [InlineData("aa", "ab", 1, 0)]
+        [InlineData("abab", "ab", 3, 1)]
+        public void InStrRev_FromWithin(string stringCheck, string stringMatch, int start, int expected)
+        {
+            Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start));
+        }
+
+        [Theory]
+        [InlineData("A", "a", 1, 0)]
+        [InlineData("aA", "a", 2, 1)]
+        public void InStrRev_BinaryCompare(string stringCheck, string stringMatch, int start, int expected)
+        {
+            Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start, CompareMethod.Binary));
+        }
+
+        [Theory]
+        [InlineData("A", "a", 1, 1)]
+        [InlineData("aA", "a", 2, 2)]
+        public void InStrRev_TextCompare(string stringCheck, string stringMatch, int start, int expected)
+        {
+            Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start, CompareMethod.Text));
+        }
+
+        [Fact]
+        public void InStrRev_WhenStartMinusOne_SearchesFromEnd()
+        {
+            var stringCheck = "aa";
+            var stringMatch = "a";
+            var start = -1;
+            var expected = 2;
+            Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start));
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void InStrRev_WhenStartGreatherThanLength_ReturnsZero(int start)
+        {
+            var stringCheck = "a";
+            var stringMatch = "a";
+            var expected = 0;
+            Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-2)]
+        [InlineData(-3)]
+        public void InStrRev_WhenStartZeroOrMinusTwoOrLess_ThrowsArgumentException(int start)
+        {
+            var stringCheck = "a";
+            var stringMatch = "a";
+            AssertExtensions.Throws<ArgumentException>("Start", null, () => Strings.InStrRev(stringCheck, stringMatch, start));
         }
 
         [Theory]
