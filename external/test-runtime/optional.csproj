@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
-    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <!-- $(RestoreSources) is set in the root Directory.Build.props and will override any sources specified
          in the generated NuGet.config file. Blank it out here so the NuGet.config sources are used.
      -->
