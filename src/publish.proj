@@ -5,17 +5,21 @@
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
 
+  <!-- Set up publish patterns for "final" package publish - that is, the pipeline packages we download & publish to myget during official builds -->
   <PropertyGroup>
-    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)**\*.nupkg</PublishPattern>
-  </PropertyGroup>
-
-   <PropertyGroup>
      <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
      <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
      <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
      <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- If we're re-publishing signed final packages, use the location of the downloaded pipeline packages -->
+    <PublishPattern Condition="'$(PublishPattern)' == '' and '$(RepublishSignedFinalPackages)' == 'true'">$(FinalPublishPattern)</PublishPattern>
+    <!-- Otherwise, publish the packages built locally -->
+    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)**\*.nupkg</PublishPattern>
   </PropertyGroup>
 
   <ItemGroup>
