@@ -14,6 +14,7 @@
     <HarvestIncludePaths Include="ref/netstandard1.0" />
     <HarvestIncludePaths Include="ref/netstandard1.2" />
 
+    <!-- We can't harvest an assert to more than one path -->
     <File Include="$(PackagesDir)\System.Runtime.WindowsRuntime\4.3.0\runtimes\win8\lib\netstandard1.3\System.Runtime.WindowsRuntime.dll">
       <TargetPath>runtimes/win/lib/netcoreapp1.0</TargetPath>
     </File>
