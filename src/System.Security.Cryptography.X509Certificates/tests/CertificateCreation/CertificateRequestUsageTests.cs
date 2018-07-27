@@ -522,7 +522,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 #if netcoreapp
             if (CultureInfo.CurrentCulture.Name == "en-US")
             {
-                Assert.Contains("ASN1", exception.Message);
+                Assert.Contains("ASN1", exception.Message, StringComparison.OrdinalIgnoreCase);
             }
 #endif
         }

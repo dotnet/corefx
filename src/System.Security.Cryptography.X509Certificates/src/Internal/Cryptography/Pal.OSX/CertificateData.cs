@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.X509Certificates.Asn1;
 using System.Text;
 
 namespace Internal.Cryptography.Pal
@@ -59,126 +61,57 @@ namespace Internal.Cryptography.Pal
         try
         {
 #endif
-            DerSequenceReader reader = new DerSequenceReader(rawData);
+            CertificateAsn certificate = AsnSerializer.Deserialize<CertificateAsn>(rawData, AsnEncodingRules.DER);
+            TbsCertificateAsn tbsCertificate = certificate.TbsCertificate;
 
-            DerSequenceReader tbsCertificate = reader.ReadSequence();
-
-            if (tbsCertificate.PeekTag() == DerSequenceReader.ContextSpecificConstructedTag0)
-            {
-                DerSequenceReader version = tbsCertificate.ReadSequence();
-                Version = version.ReadInteger();
-            }
-            else if (tbsCertificate.PeekTag() != (byte)DerSequenceReader.DerTag.Integer)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-            else
-            {
-                Version = 0;
-            }
-
+            Version = tbsCertificate.Version;
             if (Version < 0 || Version > 2)
                 throw new CryptographicException();
 
-            SerialNumber = tbsCertificate.ReadIntegerBytes();
+            SerialNumber = tbsCertificate.SerialNumber.ToArray();
 
-            DerSequenceReader tbsSignature = tbsCertificate.ReadSequence();
-            TbsSignature.AlgorithmId = tbsSignature.ReadOidAsString();
-            TbsSignature.Parameters = tbsSignature.HasData ? tbsSignature.ReadNextEncodedValue() : Array.Empty<byte>();
+            TbsSignature.AlgorithmId = tbsCertificate.SignatureAlgorithm.Algorithm.Value;
+            TbsSignature.Parameters = tbsCertificate.SignatureAlgorithm.Parameters?.ToArray() ?? Array.Empty<byte>();
 
-            if (tbsSignature.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            Issuer = new X500DistinguishedName(tbsCertificate.Issuer.ToArray());
 
-            Issuer = new X500DistinguishedName(tbsCertificate.ReadNextEncodedValue());
+            NotBefore = tbsCertificate.Validity.NotBefore.GetValue().UtcDateTime;
+            NotAfter = tbsCertificate.Validity.NotAfter.GetValue().UtcDateTime;
 
-            DerSequenceReader validity = tbsCertificate.ReadSequence();
-            NotBefore = validity.ReadX509Date();
-            NotAfter = validity.ReadX509Date();
+            Subject = new X500DistinguishedName(tbsCertificate.Subject.ToArray());
 
-            if (validity.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-
-            Subject = new X500DistinguishedName(tbsCertificate.ReadNextEncodedValue());
-
-            SubjectPublicKeyInfo = tbsCertificate.ReadNextEncodedValue();
-            DerSequenceReader subjectPublicKeyInfo = new DerSequenceReader(SubjectPublicKeyInfo);
-            DerSequenceReader subjectKeyAlgorithm = subjectPublicKeyInfo.ReadSequence();
-            PublicKeyAlgorithm.AlgorithmId = subjectKeyAlgorithm.ReadOidAsString();
-            PublicKeyAlgorithm.Parameters = subjectKeyAlgorithm.HasData ? subjectKeyAlgorithm.ReadNextEncodedValue() : Array.Empty<byte>();
-
-            if (subjectKeyAlgorithm.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-
-            PublicKey = subjectPublicKeyInfo.ReadBitString();
-
-            if (subjectPublicKeyInfo.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-
-            if (Version > 0 &&
-                tbsCertificate.HasData &&
-                tbsCertificate.PeekTag() == DerSequenceReader.ContextSpecificConstructedTag1)
+            using (AsnWriter writer = AsnSerializer.Serialize(tbsCertificate.SubjectPublicKeyInfo, AsnEncodingRules.DER))
             {
-                IssuerUniqueId = tbsCertificate.ReadBitString();
-            }
-            else
-            {
-                IssuerUniqueId = null;
+                SubjectPublicKeyInfo = writer.Encode();
             }
 
-            if (Version > 0 &&
-                tbsCertificate.HasData &&
-                tbsCertificate.PeekTag() == DerSequenceReader.ContextSpecificConstructedTag2)
-            {
-                SubjectUniqueId = tbsCertificate.ReadBitString();
-            }
-            else
-            {
-                SubjectUniqueId = null;
-            }
+            PublicKeyAlgorithm.AlgorithmId = tbsCertificate.SubjectPublicKeyInfo.Algorithm.Algorithm.Value;
+            PublicKeyAlgorithm.Parameters = tbsCertificate.SubjectPublicKeyInfo.Algorithm.Parameters?.ToArray() ?? Array.Empty<byte>();
+
+            PublicKey = tbsCertificate.SubjectPublicKeyInfo.SubjectPublicKey.ToArray();
+
+            IssuerUniqueId = Version >= 1 ? tbsCertificate.IssuerUniqueId?.ToArray() : null;
+            SubjectUniqueId = Version >= 1 ? tbsCertificate.SubjectUniqueId?.ToArray() : null;
 
             Extensions = new List<X509Extension>();
 
-            if (Version > 1 &&
-                tbsCertificate.HasData &&
-                tbsCertificate.PeekTag() == DerSequenceReader.ContextSpecificConstructedTag3)
+            if (Version >= 2 && tbsCertificate.Extensions.HasValue)
             {
-                DerSequenceReader extensions = tbsCertificate.ReadSequence();
-                extensions = extensions.ReadSequence();
-
-                while (extensions.HasData)
+                foreach (X509ExtensionAsn rawExtension in tbsCertificate.Extensions.Value.Extensions)
                 {
-                    DerSequenceReader extensionReader = extensions.ReadSequence();
-                    string oid = extensionReader.ReadOidAsString();
-                    bool critical = false;
+                    X509Extension extension = new X509Extension(
+                        rawExtension.ExtnId,
+                        rawExtension.ExtnValue.ToArray(),
+                        rawExtension.Critical);
 
-                    if (extensionReader.PeekTag() == (byte)DerSequenceReader.DerTag.Boolean)
-                    {
-                        critical = extensionReader.ReadBoolean();
-                    }
-
-                    byte[] extensionData = extensionReader.ReadOctetString();
-
-                    Extensions.Add(new X509Extension(oid, extensionData, critical));
-
-                    if (extensionReader.HasData)
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    Extensions.Add(extension);
                 }
             }
 
-            if (tbsCertificate.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            SignatureAlgorithm.AlgorithmId = certificate.SignatureAlgorithm.Algorithm.Value;
+            SignatureAlgorithm.Parameters = certificate.SignatureAlgorithm.Parameters?.ToArray() ?? Array.Empty<byte>();
 
-            DerSequenceReader signatureAlgorithm = reader.ReadSequence();
-            SignatureAlgorithm.AlgorithmId = signatureAlgorithm.ReadOidAsString();
-            SignatureAlgorithm.Parameters = signatureAlgorithm.HasData ? signatureAlgorithm.ReadNextEncodedValue() : Array.Empty<byte>();
-
-            if (signatureAlgorithm.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-
-            SignatureValue = reader.ReadBitString();
-
-            if (reader.HasData)
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            SignatureValue = certificate.SignatureValue.ToArray();
 
             RawData = rawData;
 #if DEBUG
