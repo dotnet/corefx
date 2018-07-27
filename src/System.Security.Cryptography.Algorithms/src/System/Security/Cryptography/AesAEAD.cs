@@ -1,5 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// ThF:\src\corefx\src\System.Security.Cryptography.Algorithms\src\System\Security\Cryptography\AesAEAD.Windows.cse .NET Foundation licenses this file to you under the MIT license.
+// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using Internal.Cryptography;
@@ -24,7 +24,7 @@ namespace System.Security.Cryptography
             return ((size - keySizes.MinSize) % keySizes.SkipSize) == 0;
         }
 
-        public static void CheckArguments(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plaintext, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag)
+        public static void CheckArgumentsForNull(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plaintext, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag)
         {
             if (nonce == null)
                 throw new ArgumentNullException(nameof(nonce));
@@ -37,9 +37,6 @@ namespace System.Security.Cryptography
 
             if (tag == null)
                 throw new ArgumentNullException(nameof(tag));
-
-            if (plaintext.Length != ciphertext.Length)
-                throw new CryptographicException(SR.Cryptography_PlaintextCiphertextLengthMismatch);
         }
     }
 }

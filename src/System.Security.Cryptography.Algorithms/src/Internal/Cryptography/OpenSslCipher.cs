@@ -71,9 +71,9 @@ namespace Internal.Cryptography
             byte[] output = new byte[count];
             int outputBytes = CipherUpdate(input, inputOffset, count, output, 0);
 
-            Span<byte> outputSpan = new Span<byte>(output).Slice(outputBytes);
+            Span<byte> outputSpan = output.AsSpan(outputBytes);
             int bytesWritten;
-            CheckBoolReturn(Interop.Crypto.EvpCipherFinalEx(_ctx, ref MemoryMarshal.GetReference(outputSpan), out bytesWritten));
+            CheckBoolReturn(Interop.Crypto.EvpCipherFinalEx(_ctx, outputSpan, out bytesWritten));
             outputBytes += bytesWritten;
 
             if (outputBytes == output.Length)
@@ -93,20 +93,17 @@ namespace Internal.Cryptography
 
         private int CipherUpdate(byte[] input, int inputOffset, int count, byte[] output, int outputOffset)
         {
-            bool status;
             int bytesWritten;
 
-            ReadOnlySpan<byte> inputSpan = new ReadOnlySpan<byte>(input).Slice(inputOffset);
-            Span<byte> outputSpan = new Span<byte>(output).Slice(outputOffset);
+            ReadOnlySpan<byte> inputSpan = input.AsSpan(inputOffset, count);
+            Span<byte> outputSpan = output.AsSpan(outputOffset);
 
-            status = Interop.Crypto.EvpCipherUpdate(
+            Interop.Crypto.EvpCipherUpdate(
                 _ctx,
-                ref MemoryMarshal.GetReference(outputSpan),
+                outputSpan,
                 out bytesWritten,
-                ref MemoryMarshal.GetReference(inputSpan),
-                count);
+                inputSpan);
 
-            CheckBoolReturn(status);
             return bytesWritten;
         }
 
@@ -114,10 +111,10 @@ namespace Internal.Cryptography
         {
             _ctx = Interop.Crypto.EvpCipherCreate(
                 algorithm,
-                ref MemoryMarshal.GetReference(new ReadOnlySpan<byte>(key)),
+                ref MemoryMarshal.GetReference(key.AsSpan()),
                 key.Length * 8,
                 effectiveKeyLength,
-                ref MemoryMarshal.GetReference(new ReadOnlySpan<byte>(IV)),
+                ref MemoryMarshal.GetReference(IV.AsSpan()),
                 _encrypting ? 1 : 0);
 
             Interop.Crypto.CheckValidOpenSslHandle(_ctx);

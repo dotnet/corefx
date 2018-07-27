@@ -69,7 +69,7 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
 }
 
 EVP_CIPHER_CTX*
-CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type, int32_t keyLength, int32_t effectiveKeyLength)
+CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type)
 {
     EVP_CIPHER_CTX* ctx = (EVP_CIPHER_CTX*)malloc(sizeof(EVP_CIPHER_CTX));
     if (ctx == NULL)
@@ -88,28 +88,6 @@ CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type, int32_t keyLength, i
         return NULL;
     }
 
-    if (keyLength > 0)
-    {
-        // Necessary when the default key size is different than current
-        ret = EVP_CIPHER_CTX_set_key_length(ctx, keyLength / 8);
-        if (!ret)
-        {
-            free(ctx);
-            return NULL;
-        }
-    }
-
-    if (effectiveKeyLength > 0)
-    {
-        // Necessary for RC2
-        ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_SET_RC2_KEY_BITS, effectiveKeyLength, NULL);
-        if (ret <= 0)
-        {
-            free(ctx);
-            return NULL;
-        }
-    }
-
     return ctx;
 }
 
@@ -119,12 +97,12 @@ int32_t CryptoNative_EvpCipherSetKeyAndIV(EVP_CIPHER_CTX* ctx, uint8_t* key, uns
     return EVP_CipherInit_ex(ctx, NULL, NULL, key, iv, enc);
 }
 
-int32_t CryptoNative_EvpAesGcmSetNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength)
+int32_t CryptoNative_EvpCipherSetGcmNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivLength, NULL);
 }
 
-int32_t CryptoNative_EvpAesCcmSetNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength)
+int32_t CryptoNative_EvpCipherSetCcmNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_CCM_SET_IVLEN, ivLength, NULL);
 }
@@ -182,22 +160,32 @@ int32_t CryptoNative_EvpCipherFinalEx(EVP_CIPHER_CTX* ctx, uint8_t* outm, int32_
     return ret;
 }
 
-int32_t CryptoNative_EvpAesGcmGetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength)
+int32_t CryptoNative_EvpCipherGcmAvailable(void)
+{
+    return API_EXISTS(EVP_aes_128_gcm);
+}
+
+int32_t CryptoNative_EvpCipherCcmAvailable(void)
+{
+    return API_EXISTS(EVP_aes_128_ccm);
+}
+
+int32_t CryptoNative_EvpCipherGetGcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, tagLength, tag);
 }
 
-int32_t CryptoNative_EvpAesGcmSetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength)
+int32_t CryptoNative_EvpCipherSetGcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, tagLength, tag);
 }
 
-int32_t CryptoNative_EvpAesCcmGetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength)
+int32_t CryptoNative_EvpCipherGetCcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_CCM_GET_TAG, tagLength, tag);
 }
 
-int32_t CryptoNative_EvpAesCcmSetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength)
+int32_t CryptoNative_EvpCipherSetCcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_CCM_SET_TAG, tagLength, tag);
 }

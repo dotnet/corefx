@@ -13,7 +13,7 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.Aes Create() { throw null; }
         public static new System.Security.Cryptography.Aes Create(string algorithmName) { throw null; }
     }
-    public class AesGcm : IDisposable
+    public sealed class AesGcm : IDisposable
     {
         public AesGcm(ReadOnlySpan<byte> key) { }
         public AesGcm(byte[] key) { }
@@ -25,7 +25,7 @@ namespace System.Security.Cryptography
         public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[] associatedData = default) => throw null;
         public void Dispose() { }
     }
-    public class AesCcm : IDisposable
+    public sealed class AesCcm : IDisposable
     {
         public AesCcm(ReadOnlySpan<byte> key) { }
         public AesCcm(byte[] key) { }

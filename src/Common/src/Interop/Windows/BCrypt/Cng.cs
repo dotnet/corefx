@@ -93,7 +93,7 @@ namespace Internal.NativeCrypto
                     pBlob->cbKeyData = (uint)keySize;
                 }
 
-                key.CopyTo(blob.AsSpan().Slice(sizeof(BCRYPT_KEY_DATA_BLOB_HEADER)));
+                key.CopyTo(blob.AsSpan(sizeof(BCRYPT_KEY_DATA_BLOB_HEADER)));
                 SafeKeyHandle hKey;
                 NTSTATUS ntStatus = Interop.BCryptImportKey(hAlg, IntPtr.Zero, BCRYPT_KEY_DATA_BLOB, out hKey, IntPtr.Zero, 0, blob, blobSize, 0);
                 if (ntStatus != NTSTATUS.STATUS_SUCCESS)

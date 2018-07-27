@@ -23,11 +23,15 @@ DLLEXPORT EVP_CIPHER_CTX*
 CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyLength, int32_t effectiveKeyLength, unsigned char* iv, int32_t enc);
 
 DLLEXPORT EVP_CIPHER_CTX*
-CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type, int32_t keyLength, int32_t effectiveKeyLength);
+CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type);
 
 DLLEXPORT int32_t CryptoNative_EvpCipherSetKeyAndIV(EVP_CIPHER_CTX* ctx, uint8_t* key, unsigned char* iv, int32_t enc);
-DLLEXPORT int32_t CryptoNative_EvpAesGcmSetNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength);
-DLLEXPORT int32_t CryptoNative_EvpAesCcmSetNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength);
+
+DLLEXPORT int32_t CryptoNative_EvpCipherGcmAvailable(void);
+DLLEXPORT int32_t CryptoNative_EvpCipherCcmAvailable(void);
+
+DLLEXPORT int32_t CryptoNative_EvpCipherSetGcmNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength);
+DLLEXPORT int32_t CryptoNative_EvpCipherSetCcmNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength);
 
 /*
 Cleans up and deletes an EVP_CIPHER_CTX instance created by EvpCipherCreate.
@@ -81,7 +85,7 @@ EvpAesGcmGetTag
 
 Retrieves tag for authenticated encryption
 */
-DLLEXPORT int32_t CryptoNative_EvpAesGcmGetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength);
+DLLEXPORT int32_t CryptoNative_EvpCipherGetGcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength);
 
 /*
 Function:
@@ -89,7 +93,7 @@ EvpAesGcmSetTag
 
 Sets tag for authenticated decryption
 */
-DLLEXPORT int32_t CryptoNative_EvpAesGcmSetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength);
+DLLEXPORT int32_t CryptoNative_EvpCipherSetGcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength);
 
 /*
 Function:
@@ -97,7 +101,7 @@ EvpAesCcmGetTag
 
 Retrieves tag for authenticated encryption
 */
-DLLEXPORT int32_t CryptoNative_EvpAesCcmGetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength);
+DLLEXPORT int32_t CryptoNative_EvpCipherGetCcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength);
 
 /*
 Function:
@@ -105,8 +109,7 @@ EvpAesCcmSetTag
 
 Sets tag for authenticated decryption
 */
-DLLEXPORT int32_t CryptoNative_EvpAesCcmSetTag(EVP_CIPHER_CTX* ctx, void* tag, int32_t tagLength);
-
+DLLEXPORT int32_t CryptoNative_EvpCipherSetCcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength);
 
 /*
 Function:

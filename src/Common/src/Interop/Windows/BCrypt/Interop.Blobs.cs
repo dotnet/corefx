@@ -284,14 +284,6 @@ internal partial class Interop
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct BCRYPT_AUTH_TAG_LENGTHS_STRUCT
-        {
-            internal int MinLength;
-            internal int MaxLength;
-            internal int Increment;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO
         {
             int cbSize;

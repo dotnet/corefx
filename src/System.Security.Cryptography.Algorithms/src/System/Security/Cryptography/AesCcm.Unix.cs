@@ -14,179 +14,109 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
-    partial class AesCcm
+    public sealed partial class AesCcm
     {
-        public static KeySizes TagByteSizes { get; } = new KeySizes(4, 16, 2);
-        private SafeKeyHandle _keyHandle;
+        private byte[] _key;
 
-        public unsafe AesCcm(ReadOnlySpan<byte> key)
+        private void ImportKey(ReadOnlySpan<byte> key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            if (!Interop.Crypto.EvpCipherCcmAvailable())
+                throw new PlatformNotSupportedException();
 
-            AesAEAD.CheckKeySize(key.Length * 8);
-
-            // openssl does not allow setting nonce length after setting the key
+            // OpenSSL does not allow setting nonce length after setting the key
             // we need to store it as bytes instead
-            _keyHandle = new SafeKeyHandle(key);
+            _key = new byte[key.Length];
+            key.CopyTo(_key);
         }
 
-        public void Encrypt(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, Span<byte> tag, ReadOnlySpan<byte> associatedData = default)
+        private void EncryptInternal(
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> plaintext,
+            Span<byte> ciphertext,
+            Span<byte> tag,
+            ReadOnlySpan<byte> associatedData = default)
         {
-            AesAEAD.CheckArguments(nonce, plaintext, ciphertext, tag);
-            CheckParameters(nonce.Length, tag.Length);
-
             ref byte nullRef = ref MemoryMarshal.GetReference(Span<byte>.Empty);
 
-            int keyLength = _keyHandle.Key.Length * 8;
-            using (SafeEvpCipherCtxHandle ctx = Interop.Crypto.EvpCipherCreatePartial(
-                    GetCipher(keyLength),
-                    keyLength,
-                    0))
+            using (SafeEvpCipherCtxHandle ctx = Interop.Crypto.EvpCipherCreatePartial(GetCipher(_key.Length * 8)))
             {
                 Interop.Crypto.CheckValidOpenSslHandle(ctx);
-
-                if (!Interop.Crypto.EvpAesCcmSetTag(ctx, ref nullRef, tag.Length))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
-
-                if (!Interop.Crypto.EvpAesCcmSetNonceLength(ctx, nonce.Length))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
-
-                if (!Interop.Crypto.EvpCipherSetKeyAndIV(ctx, ref MemoryMarshal.GetReference(_keyHandle.Key), ref MemoryMarshal.GetReference(nonce), 1 /* encrypting */))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
+                Interop.Crypto.EvpCipherSetGcmTagLength(ctx, tag.Length);
+                Interop.Crypto.EvpCipherSetGcmNonceLength(ctx, nonce.Length);
+                Interop.Crypto.EvpCipherSetKeyAndIV(ctx, _key, nonce, Interop.Crypto.EvpCipherDirection.Encrypt);
 
                 if (associatedData.Length != 0)
                 {
-                    // pass length of the plaintext
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref nullRef, out _, ref nullRef, plaintext.Length))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
+                    // length needs to be known ahead of time in CCM mode
+                    Interop.Crypto.EvpCipherSetInputLength(ctx, plaintext.Length);
 
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref nullRef, out _, ref MemoryMarshal.GetReference(associatedData), associatedData.Length))
+                    if (!Interop.Crypto.EvpCipherUpdate(ctx, Span<byte>.Empty, out _, associatedData))
                     {
                         throw Interop.Crypto.CreateOpenSslCryptographicException();
                     }
                 }
 
-                int ciphertextBytesWritten;
-                if (plaintext.Length != 0)
+                if (!Interop.Crypto.EvpCipherUpdate(ctx, ciphertext, out int ciphertextBytesWritten, plaintext))
                 {
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref MemoryMarshal.GetReference(ciphertext), out ciphertextBytesWritten, ref MemoryMarshal.GetReference(plaintext), plaintext.Length))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
-
-                    if (!Interop.Crypto.EvpCipherFinalEx(ctx, ref MemoryMarshal.GetReference(ciphertext.Slice(ciphertextBytesWritten)), out int bytesWritten))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
-
-                    ciphertextBytesWritten += bytesWritten;
-                }
-                else
-                {
-                    byte nonEmptyArray = 123;
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref nonEmptyArray, out ciphertextBytesWritten, ref nonEmptyArray, plaintext.Length))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
-
-                    if (!Interop.Crypto.EvpCipherFinalEx(ctx, ref nonEmptyArray, out int bytesWritten))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
-
-                    // Should be 0 but let's still validate it
-                    ciphertextBytesWritten += bytesWritten;
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
 
-                if (ciphertextBytesWritten != plaintext.Length)
+                if (!Interop.Crypto.EvpCipherFinalEx(ctx, ciphertext.Slice(ciphertextBytesWritten), out int bytesWritten))
                 {
-                    // this shouldn't happen
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
+                }
+
+                ciphertextBytesWritten += bytesWritten;
+
+                if (ciphertextBytesWritten != ciphertext.Length)
+                {
+                    Debug.Fail($"CCM encrypt wrote {ciphertextBytesWritten} of {ciphertext.Length} bytes.");
                     throw new CryptographicException();
                 }
 
-                if (!Interop.Crypto.EvpAesCcmGetTag(ctx, ref MemoryMarshal.GetReference(tag), tag.Length))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
+                Interop.Crypto.EvpCipherGetCcmTag(ctx, tag);
             }
         }
 
-        public void Decrypt(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag, Span<byte> plaintext, ReadOnlySpan<byte> associatedData)
+        private void DecryptInternal(
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> ciphertext,
+            ReadOnlySpan<byte> tag,
+            Span<byte> plaintext,
+            ReadOnlySpan<byte> associatedData)
         {
-            AesAEAD.CheckArguments(nonce, plaintext, ciphertext, tag);
-            CheckParameters(nonce.Length, tag.Length);
-
-            ref byte nullRef = ref MemoryMarshal.GetReference(Span<byte>.Empty);
-
-            int keyLength = _keyHandle.Key.Length * 8;
-            using (SafeEvpCipherCtxHandle ctx = Interop.Crypto.EvpCipherCreatePartial(
-                    GetCipher(keyLength),
-                    keyLength,
-                    0))
+            using (SafeEvpCipherCtxHandle ctx = Interop.Crypto.EvpCipherCreatePartial(GetCipher(_key.Length * 8)))
             {
                 Interop.Crypto.CheckValidOpenSslHandle(ctx);
+                Interop.Crypto.EvpCipherSetCcmNonceLength(ctx, nonce.Length);
+                Interop.Crypto.EvpCipherSetCcmTag(ctx, tag);
 
-                if (!Interop.Crypto.EvpAesCcmSetNonceLength(ctx, nonce.Length))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
-
-                if (!Interop.Crypto.EvpAesCcmSetTag(ctx, ref MemoryMarshal.GetReference(tag), tag.Length))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
-
-                if (!Interop.Crypto.EvpCipherSetKeyAndIV(ctx, ref MemoryMarshal.GetReference(_keyHandle.Key), ref MemoryMarshal.GetReference(nonce), 0 /*decrypting*/))
-                {
-                    throw Interop.Crypto.CreateOpenSslCryptographicException();
-                }
+                Interop.Crypto.EvpCipherSetKeyAndIV(ctx, _key, nonce, Interop.Crypto.EvpCipherDirection.Decrypt);
 
                 if (associatedData.Length != 0)
                 {
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref nullRef, out _, ref nullRef, ciphertext.Length))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
+                    // length needs to be known ahead of time in CCM mode
+                    Interop.Crypto.EvpCipherSetInputLength(ctx, ciphertext.Length);
 
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref nullRef, out _, ref MemoryMarshal.GetReference(associatedData), associatedData.Length))
+                    if (!Interop.Crypto.EvpCipherUpdate(ctx, Span<byte>.Empty, out _, associatedData))
                     {
                         throw Interop.Crypto.CreateOpenSslCryptographicException();
                     }
                 }
 
-                int plaintextBytesWritten;
-                if (ciphertext.Length != 0)
+                if (!Interop.Crypto.EvpCipherUpdate(ctx, plaintext, out int plaintextBytesWritten, ciphertext))
                 {
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref MemoryMarshal.GetReference(plaintext), out plaintextBytesWritten, ref MemoryMarshal.GetReference(ciphertext), ciphertext.Length))
-                    {
-                        throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
-                    }
-                }
-                else
-                {
-                    byte nonEmptyArray = 123;
-                    if (!Interop.Crypto.EvpCipherUpdate(ctx, ref nonEmptyArray, out plaintextBytesWritten, ref nonEmptyArray, ciphertext.Length))
-                    {
-                        throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
-                    }
+                    throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
                 }
 
                 if (plaintextBytesWritten != plaintext.Length)
                 {
-                    // this shouldn't happen
+                    Debug.Fail($"CCM decrypt wrote {plaintextBytesWritten} of {plaintext.Length} bytes.");
                     throw new CryptographicException();
                 }
 
-                // note: no call to EvpCipherFinalEx - it will always fail
+                // The OpenSSL documentation says not to call EvpCipherFinalEx for CCM decryption, and calling it will report failure.
+                // https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption#Authenticated_Decryption_using_CCM_mode
             }
         }
 
@@ -198,14 +128,14 @@ namespace System.Security.Cryptography
                 case 192: return Interop.Crypto.EvpAes192Ccm();
                 case 256: return Interop.Crypto.EvpAes256Ccm();
                 default:
-                    Debug.Assert(false, "Key size should already be validated");
+                    Debug.Fail("Key size should already be validated");
                     return IntPtr.Zero;
             }
         }
 
         public void Dispose()
         {
-            _keyHandle.Dispose();
+            CryptographicOperations.ZeroMemory(_key);
         }
     }
 }

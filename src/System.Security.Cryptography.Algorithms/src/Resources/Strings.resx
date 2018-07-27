@@ -170,7 +170,7 @@
     <value>Cannot pop the requested tag as it is not currently in progress.</value>
   </data>
   <data name="Cryptography_AuthTagMismatch" xml:space="preserve">
-    <value>The authentication tag does not match the expected value.</value>
+    <value>The computed authentication tag did not match the input authentication tag.</value>
   </data>
   <data name="Cryptography_TlsRequiresLabelAndSeed" xml:space="preserve">
     <value>The TLS key derivation function requires both the label and seed properties to be set.</value>
