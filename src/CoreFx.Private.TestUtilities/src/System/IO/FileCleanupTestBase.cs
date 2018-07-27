@@ -14,6 +14,8 @@ namespace System.IO
     {
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
 
+        private string fallbackGuid = Guid.NewGuid().ToString("N");
+
         protected static bool IsProcessElevated => s_isElevated.Value;
 
         /// <summary>Initialize the test class base.  This creates the associated test directory.</summary>
@@ -90,7 +92,9 @@ namespace System.IO
             string testFileName = GenerateTestFileName(index, memberName, lineNumber);
             string testFilePath = Path.Combine(TestDirectory, testFileName);
 
-            int excessLength = testFilePath.Length - 255;
+            const int maxLength = 260 - 5; // Windows MAX_PATH minus a bit
+
+            int excessLength = testFilePath.Length - maxLength;
 
             if (excessLength > 0)
             {
@@ -106,11 +110,11 @@ namespace System.IO
                 }
                 else
                 {
-                    throw new IOException($"Test method name '{memberName}' is too long to make a reasonable test directory path; use a shorter name");
+                    return fallbackGuid;
                 }
             }
 
-            Debug.Assert(testFilePath.Length <= 255 + "...".Length);
+            Debug.Assert(testFilePath.Length <= maxLength + "...".Length);
 
             return testFileName;
         }
