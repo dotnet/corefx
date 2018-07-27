@@ -57,6 +57,10 @@ namespace System.Net.Http
             _nextStream = 1;
         }
 
+        public bool UseCookie => _pool.Settings._useCookies;
+
+        public CookieContainer GetCookieContainer => _pool.Settings._cookieContainer;
+
         public async Task SetupAsync()
         {
             // Send connection preface

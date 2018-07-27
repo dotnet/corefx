@@ -2938,6 +2938,63 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(31424)]
+        [OuterLoop("Uses external server")]
+        [Fact]
+        public async Task SendAsync_Http2RemoteServerWithCookie_Success()
+        {
+            var expectedVersion = new Version(2,0);
+            var uri = Configuration.Http.Http2RemoteEchoServer;
+
+            using (HttpClient client = CreateHttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, uri)
+                {
+                    Version = expectedVersion,
+                };
+
+                // Make remote server send SetCookie header.
+                request.Headers.Add("X-SetCookie", "name=value");
+                request.Headers.Add("X-SetCookie", "name1=value1");
+                request.Headers.Add("X-SetCookie", "name2=value2");
+
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    Assert.Equal(expectedVersion, response.Version);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    // Verify server sends back SetCookie header.
+                    Assert.Contains("Set-Cookie: name=value, name1=value1, name2=value2", response.Headers.ToString());
+
+                    // Server does not have any cookies yet.
+                    Assert.Contains("\"Cookies\": {}", await response.Content.ReadAsStringAsync());
+                }
+
+                // Send next request to see if the cookie has been wrote to the header.
+                var newRequest = new HttpRequestMessage(HttpMethod.Get, uri)
+                {
+                    Version = expectedVersion,
+                };
+
+                // Send additional cookie (along with the ones from CookieContainer).
+                newRequest.Headers.Add("Cookie", "cookie=c1");
+
+                using (HttpResponseMessage response = await client.SendAsync(newRequest))
+                {
+                    Assert.Equal(expectedVersion, response.Version);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    // Verify server received all cookies.
+                    string body = await response.Content.ReadAsStringAsync();
+                    Assert.Contains("\"Cookies\": ", body);
+                    Assert.Contains("\"name\": \"value\"", body);
+                    Assert.Contains("\"name1\": \"value1\"", body);
+                    Assert.Contains("\"name2\": \"value2\"", body);
+                    Assert.Contains("\"cookie\": \"c1\"", body);
+                }
+            }
+        }
+
         [ActiveIssue(30057, TargetFrameworkMonikers.Uap)]
         [OuterLoop("Uses external server")]
         [Theory]

@@ -121,7 +121,7 @@ namespace System.Net.Http
                 }
             }
 
-            private void WriteHeaders(ref HeaderEncodingState state, HttpHeaders headers)
+            private void WriteHeaders(ref HeaderEncodingState state, HttpHeaders headers, string cookiesFromContainer)
             {
                 foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
                 {
@@ -131,17 +131,30 @@ namespace System.Net.Http
                     }
 
                     Debug.Assert(header.Value.Length > 0, "No values for header??");
+
+                    // Write cookies from CookieContainer first.
+                    if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
+                    {
+                        WriteHeader(ref state, HttpKnownHeaderNames.Cookie, cookiesFromContainer);
+
+                        cookiesFromContainer = null;
+                    }
+
                     for (int i = 0; i < header.Value.Length; i++)
                     {
                         WriteHeader(ref state, header.Key.Name, header.Value[i]);
                     }
+                }
+
+                if (cookiesFromContainer != null)
+                {
+                    WriteHeader(ref state, HttpKnownHeaderNames.Cookie, cookiesFromContainer);
                 }
             }
 
             private void WriteHeaders(HttpRequestMessage request)
             {
                 // TODO: ISSUE 31305: Disallow sending Connection: and Transfer-Encoding: chunked
-                // TODO: ISSUE 31306: Handle container cookies
 
                 HeaderEncodingState state = new HeaderEncodingState() { IsFirstFrame = true, IsEmptyResponse = (request.Content == null), CurrentFrameOffset = 0 };
 
@@ -178,9 +191,21 @@ namespace System.Net.Http
                 WriteHeader(ref state, ":authority", authority);
                 WriteHeader(ref state, ":path", request.RequestUri.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.UriEscaped));
 
-                if (request.HasHeaders)
+                // Determine cookies to send.
+                string cookiesFromContainer = null;
+                if (_connection.UseCookie)
                 {
-                    WriteHeaders(ref state, request.Headers);
+                    cookiesFromContainer = _connection.GetCookieContainer.GetCookieHeader(request.RequestUri);
+                    if (cookiesFromContainer == "")
+                    {
+                        cookiesFromContainer = null;
+                    }
+                }
+
+                // Write request headers.
+                if (request.HasHeaders || cookiesFromContainer != null)
+                {
+                    WriteHeaders(ref state, request.Headers, cookiesFromContainer);
                 }
 
                 if (request.Content == null)
@@ -195,7 +220,7 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    WriteHeaders(ref state, request.Content.Headers);
+                    WriteHeaders(ref state, request.Content.Headers, cookiesFromContainer: null);
                 }
 
                 // Update the last frame header and write it to the buffer.
@@ -258,6 +283,12 @@ namespace System.Net.Http
                 else
                 {
                     responseContent.SetStream(new Http2ReadStream(this));
+                }
+
+                // Process Set-Cookie headers.
+                if (_connection.UseCookie)
+                {
+                    CookieHelper.ProcessReceivedCookies(_response, _connection.GetCookieContainer);
                 }
 
                 return _response;
