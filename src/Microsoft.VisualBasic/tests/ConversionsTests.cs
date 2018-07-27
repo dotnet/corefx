@@ -2676,8 +2676,8 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { "invalid", 'i' };
             yield return new object[] { "18446744073709551616", '1' };
             yield return new object[] { "1844674407370955161618446744073709551616", '1' };
-            yield return new object[] { double.PositiveInfinity.ToString(), (char)8734 };
-            yield return new object[] { double.NegativeInfinity.ToString(), (char)45 };
+            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity.ToString()[0] };
+            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity.ToString()[0] };
             yield return new object[] { double.NaN.ToString(), 'N' };
         }
 
