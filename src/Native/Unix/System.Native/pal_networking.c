@@ -151,11 +151,11 @@ typedef struct xsocket xsocket;
 typedef struct linger linger;
 
 // We require that IOVector have the same layout as iovec.
-c_static_assert(sizeof(IOVector) == sizeof(struct iovec));
+c_static_assert(sizeof(IOVector) == sizeof(iovec));
 c_static_assert(sizeof_member(IOVector, Base) == sizeof_member(iovec, iov_base));
-c_static_assert(offsetof(IOVector, Base) == offsetof(struct iovec, iov_base));
+c_static_assert(offsetof(IOVector, Base) == offsetof(iovec, iov_base));
 c_static_assert(sizeof_member(IOVector, Count) == sizeof_member(iovec, iov_len));
-c_static_assert(offsetof(IOVector, Count) == offsetof(struct iovec, iov_len));
+c_static_assert(offsetof(IOVector, Count) == offsetof(iovec, iov_len));
 
 #define Min(left,right) (((left) < (right)) ? (left) : (right))
 
