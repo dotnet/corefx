@@ -37,7 +37,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             vt = VarTypeFromComType(typ)
 
             If vt <> VariantType.UserDefinedType OrElse typ.IsPrimitive Then
-                Throw New ArgumentException(GetResourceString(ResID.Argument_InvalidValue1, "oStruct"))
+                Throw New ArgumentException(SR.Format(SR.Argument_InvalidValue1, "oStruct"))
             End If
 
             fi = typ.GetFields(BindingFlags.Instance Or BindingFlags.Public)
@@ -51,7 +51,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
                 If VarTypeFromComType(FieldType) = VariantType.UserDefinedType Then
                     If FieldType.IsPrimitive Then
-                        Throw VbMakeException(New ArgumentException(GetResourceString(ResID.Argument_UnsupportedFieldType2, FieldInfo.Name, FieldType.Name)), vbErrors.IllegalFuncCall)
+                        Throw VbMakeException(New ArgumentException(SR.Format(SR.Argument_UnsupportedFieldType2, FieldInfo.Name, FieldType.Name)), vbErrors.IllegalFuncCall)
                     Else
                         Call EnumerateUDT(CType(obj, ValueType), intfRecEnum, fGet)
                     End If
@@ -121,7 +121,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 FieldType = field_info.FieldType
 
                 If FieldType Is Nothing Then
-                    Throw VbMakeException(New ArgumentException(GetResourceString(ResID.Argument_UnsupportedFieldType2, field_info.Name, "Empty")), vbErrors.IllegalFuncCall)
+                    Throw VbMakeException(New ArgumentException(SR.Format(SR.Argument_UnsupportedFieldType2, field_info.Name, "Empty")), vbErrors.IllegalFuncCall)
                 End If
 
                 If FieldType.IsArray() Then
@@ -241,18 +241,18 @@ Namespace Microsoft.VisualBasic.CompilerServices
                         size = 2
 
                     Case TypeCode.DBNull
-                        Throw VbMakeException(New ArgumentException(GetResourceString(ResID.Argument_UnsupportedFieldType2, field_info.Name, "DBNull")), vbErrors.IllegalFuncCall)
+                        Throw VbMakeException(New ArgumentException(SR.Format(SR.Argument_UnsupportedFieldType2, field_info.Name, "DBNull")), vbErrors.IllegalFuncCall)
                 End Select
 
                 If FieldType Is GetType(System.Exception) Then
-                    Throw VbMakeException(New ArgumentException(GetResourceString(ResID.Argument_UnsupportedFieldType2, field_info.Name, "Exception")), vbErrors.IllegalFuncCall)
+                    Throw VbMakeException(New ArgumentException(SR.Format(SR.Argument_UnsupportedFieldType2, field_info.Name, "Exception")), vbErrors.IllegalFuncCall)
                 ElseIf FieldType Is GetType(System.Reflection.Missing) Then
-                    Throw VbMakeException(New ArgumentException(GetResourceString(ResID.Argument_UnsupportedFieldType2, field_info.Name, "Missing")), vbErrors.IllegalFuncCall)
+                    Throw VbMakeException(New ArgumentException(SR.Format(SR.Argument_UnsupportedFieldType2, field_info.Name, "Missing")), vbErrors.IllegalFuncCall)
 
                     'If type defined for the Field is Object, then throw an exception
                     'NOTE: THIS IS NOT THE SAME AS "TypeOf FieldType Is Object"
                 ElseIf FieldType Is GetType(Object) Then
-                    Throw VbMakeException(New ArgumentException(GetResourceString(ResID.Argument_UnsupportedFieldType2, field_info.Name, "Object")), vbErrors.IllegalFuncCall)
+                    Throw VbMakeException(New ArgumentException(SR.Format(SR.Argument_UnsupportedFieldType2, field_info.Name, "Object")), vbErrors.IllegalFuncCall)
                 End If
             End Sub
         End Class
