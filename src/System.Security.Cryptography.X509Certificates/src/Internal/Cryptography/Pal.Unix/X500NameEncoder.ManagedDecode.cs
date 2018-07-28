@@ -140,7 +140,12 @@ namespace Internal.Cryptography.Pal
 
         private static string ReadString(AsnReader tavReader)
         {
-            var tag = tavReader.PeekTag();
+            Asn1Tag tag = tavReader.PeekTag();
+
+            if (tag.TagClass != TagClass.Universal)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
 
             switch ((UniversalTagNumber)tag.TagValue)
             {
