@@ -32,7 +32,7 @@ namespace Internal.Cryptography.Pal
 
         public virtual void DecodeX509KeyUsageExtension(byte[] encoded, out X509KeyUsageFlags keyUsages)
         {
-            AsnReader reader = new AsnReader(encoded, AsnEncodingRules.DER);
+            AsnReader reader = new AsnReader(encoded, AsnEncodingRules.BER);
             KeyUsageFlagsAsn keyUsagesAsn = reader.GetNamedBitListValue<KeyUsageFlagsAsn>();
             reader.ThrowIfNotEmpty();
 
