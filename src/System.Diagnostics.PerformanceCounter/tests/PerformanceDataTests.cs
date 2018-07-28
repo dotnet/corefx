@@ -70,11 +70,11 @@ namespace System.Diagnostics.Tests
                 typingCounterSet = new CounterSet(providerId, typingCounterSetId, CounterSetInstanceType.Single);
 
                 // Add the counters to the counter set definition.
-                typingCounterSet.AddCounter(1, CounterType.RawData32, "Total Word Count");
+                typingCounterSet.AddCounter(1, CounterType.RawData32, "Total Words Typed");
                 typingCounterSet.AddCounter(2, CounterType.Delta32, "Words Typed In Interval");
-                typingCounterSet.AddCounter(3, CounterType.RawData32, "A Key Pressed");
+                typingCounterSet.AddCounter(3, CounterType.RawData32, "Letter A Pressed");
                 typingCounterSet.AddCounter(4, CounterType.RawData32, "Words Containing A");
-                typingCounterSet.AddCounter(5, CounterType.SampleFraction, "Percent of Words Containg A");
+                typingCounterSet.AddCounter(5, CounterType.SampleFraction, "Percent of Words Containing A");
                 typingCounterSet.AddCounter(6, CounterType.SampleBase, "Percent Base");
 
                 // Create an instance of the counter set (contains the counter data).
@@ -85,9 +85,13 @@ namespace System.Diagnostics.Tests
                 typingCsInstance.Counters[4].Value = 0;
                 typingCsInstance.Counters[5].Value = 0;
                 typingCsInstance.Counters[6].Value = 0;
-
+                
                 //Instance counters reader
-                PerformanceCounter totalWordCount = new PerformanceCounter("Typing", "Total Word Count");
+                PerformanceCounter totalWordsTyped = new PerformanceCounter("Typing", "Total Words Typed");
+                PerformanceCounter wordsTypedInInterval = new PerformanceCounter("Typing", "Words Typed In Interval");
+                PerformanceCounter aKeyPressed = new PerformanceCounter("Typing", "Letter A Pressed");
+                PerformanceCounter wordsContainingA = new PerformanceCounter("Typing", "Words Containing A");
+                PerformanceCounter percentofWordsContaingA = new PerformanceCounter("Typing", "Percent of Words Containing A");                
 
             }
             finally
