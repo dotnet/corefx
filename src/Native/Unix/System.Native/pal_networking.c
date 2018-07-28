@@ -446,8 +446,11 @@ int32_t SystemNative_GetHostName(uint8_t* name, int32_t nameLength)
     return gethostname((char*)name, unsignedSize);
 }
 
-static bool IsInBounds(const uint8_t* baseAddr, size_t len, const uint8_t* valueAddr, size_t valueSize)
+static bool IsInBounds(const void* void_baseAddr, size_t len, const void* value_valueAddr, size_t valueSize)
 {
+    const uint8_t* baseAddr = (const uint8_t*)void_baseAddr;
+    const uint8_t* valueAddr = (const uint8_t*)void_valueAddr;
+
     return valueAddr >= baseAddr && (valueAddr + valueSize) <= (baseAddr + len);
 }
 
@@ -527,7 +530,7 @@ int32_t SystemNative_GetAddressFamily(const uint8_t* socketAddress, int32_t sock
     }
 
     const struct sockaddr* sockAddr = (const struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -544,7 +547,7 @@ int32_t SystemNative_SetAddressFamily(uint8_t* socketAddress, int32_t socketAddr
 {
     struct sockaddr* sockAddr = (struct sockaddr*)socketAddress;
     if (sockAddr == NULL || socketAddressLen < 0 ||
-        !IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+        !IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -565,7 +568,7 @@ int32_t SystemNative_GetPort(const uint8_t* socketAddress, int32_t socketAddress
     }
 
     const struct sockaddr* sockAddr = (const struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -607,7 +610,7 @@ int32_t SystemNative_SetPort(uint8_t* socketAddress, int32_t socketAddressLen, u
     }
 
     const struct sockaddr* sockAddr = (const struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -650,7 +653,7 @@ int32_t SystemNative_GetIPv4Address(const uint8_t* socketAddress, int32_t socket
     }
 
     const struct sockaddr* sockAddr = (const struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -672,7 +675,7 @@ int32_t SystemNative_SetIPv4Address(uint8_t* socketAddress, int32_t socketAddres
     }
 
     struct sockaddr* sockAddr = (struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -699,7 +702,7 @@ int32_t SystemNative_GetIPv6Address(
     }
 
     const struct sockaddr* sockAddr = (const struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
@@ -726,7 +729,7 @@ SystemNative_SetIPv6Address(uint8_t* socketAddress, int32_t socketAddressLen, ui
     }
 
     struct sockaddr* sockAddr = (struct sockaddr*)socketAddress;
-    if (!IsInBounds((const uint8_t*)sockAddr, (size_t)socketAddressLen, (const uint8_t*)&sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
+    if (!IsInBounds(sockAddr, (size_t)socketAddressLen, &sockAddr->sa_family, sizeof_member(sockaddr, sa_family)))
     {
         return Error_EFAULT;
     }
