@@ -86,7 +86,7 @@ namespace System.Diagnostics.Tests
                 typingCsInstance.Counters[5].Value = 0;
                 typingCsInstance.Counters[6].Value = 0;
                 
-                //Instance counters reader
+                // Instance counters readers
                 PerformanceCounter totalWordsTyped = new PerformanceCounter("Typing", "Total Words Typed");
                 PerformanceCounter wordsTypedInInterval = new PerformanceCounter("Typing", "Words Typed In Interval");
                 PerformanceCounter aKeyPressed = new PerformanceCounter("Typing", "Letter A Pressed");
