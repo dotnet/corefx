@@ -446,7 +446,7 @@ int32_t SystemNative_GetHostName(uint8_t* name, int32_t nameLength)
     return gethostname((char*)name, unsignedSize);
 }
 
-static bool IsInBounds(const void* void_baseAddr, size_t len, const void* value_valueAddr, size_t valueSize)
+static bool IsInBounds(const void* void_baseAddr, size_t len, const void* void_valueAddr, size_t valueSize)
 {
     const uint8_t* baseAddr = (const uint8_t*)void_baseAddr;
     const uint8_t* valueAddr = (const uint8_t*)void_valueAddr;
