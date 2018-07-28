@@ -296,8 +296,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             }
         }
 
-        [Fact]
-        public static void SerialNumber_AlwaysPositive()
+        [Theory]
+        [InlineData("80")]
+        [InlineData("0080")]
+        [InlineData("00000080")]
+        public static void SerialNumber_AlwaysPositive(string desiredSerial)
         {
             using (ECDsa ecdsa = ECDsa.Create(EccTestData.Secp521r1_DiminishedPublic_Data.KeyParameters))
             {
@@ -308,8 +311,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                     generator.PublicKey,
                     HashAlgorithmName.SHA512);
 
-                byte[] desiredSerial = { 0x80 };
-
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
                 X509Certificate2 cert = request.Create(
@@ -317,7 +318,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                     generator,
                     now,
                     now.AddDays(1),
-                    desiredSerial);
+                    desiredSerial.HexToByteArray());
 
                 using (cert)
                 {

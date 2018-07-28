@@ -608,6 +608,7 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (serialNumber[0] >= 0x80)
             {
+                // Keep the serial number unsigned by prepending a zero.
                 var newSerialNumber = new byte[serialNumber.Length + 1];
                 newSerialNumber[0] = 0;
                 serialNumber.CopyTo(newSerialNumber, 1);
@@ -615,8 +616,9 @@ namespace System.Security.Cryptography.X509Certificates
             }
             else
             {
+                // Strip any unnecessary zeros from the beginning.
                 int leadingZeros = 0;
-                while (leadingZeros < serialNumber.Length - 1 && serialNumber[leadingZeros] == 0)
+                while (leadingZeros < serialNumber.Length - 1 && serialNumber[leadingZeros] == 0 && serialNumber[leadingZeros + 1] < 0x80)
                 {
                     leadingZeros++;
                 }
