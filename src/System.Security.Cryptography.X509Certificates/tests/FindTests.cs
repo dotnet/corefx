@@ -14,6 +14,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public static class FindTests
     {
+        private const string _leftToRightMark = "\u200E";
+
         private static void RunTest(Action<X509Certificate2Collection> test)
         {
             RunTest((msCer, pfxCer, col1) => test(col1));
@@ -174,6 +176,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         col1,
                         X509FindType.FindByThumbprint,
                         pfxCer.Thumbprint);
+                });
+        }
+
+        [Fact]
+        public static void FindByThumbprintWithLrm()
+        {
+            RunTest(
+                (msCer, pfxCer, col1) =>
+                {
+                    EvaluateSingleMatch(
+                        pfxCer,
+                        col1,
+                        X509FindType.FindByThumbprint,
+                        _leftToRightMark + pfxCer.Thumbprint);
                 });
         }
 
@@ -657,6 +673,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void TestBySerialNumber_WithSpaces()
+        {
+            // Hex string is also an allowed input format and case-blind
+            RunSingleMatchTest_PfxCer(
+                X509FindType.FindBySerialNumber,
+                "d5 b5 bc 1c 45 8a 55 88 45 bf f5 1c b4 df f3 1c");
+        }
+
+        [Fact]
+        public static void TestBySerialNumber_WithLRM()
+        {
+            // Hex string is also an allowed input format and case-blind
+            RunSingleMatchTest_PfxCer(
+                X509FindType.FindBySerialNumber,
+                _leftToRightMark + "d5 b5 bc 1c 45 8a 55 88 45 bf f5 1c b4 df f3 1c");
+        }
+
+        [Fact]
         public static void TestBySerialNumber_NoMatch()
         {
             RunZeroMatchTest(
@@ -731,7 +765,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         // Non-symmetric whitespace is allowed
         [InlineData("    5971A65   A334DDA980780FF84  1EBE87F97           23241F   2")]
         // Should ignore Left-to-right mark \u200E
-        [InlineData("\u200E59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2")]
+        [InlineData(_leftToRightMark + "59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2")]
         public static void TestBySubjectKeyIdentifier_ExtensionPresent(string subjectKeyIdentifier)
         {
             RunSingleMatchTest_MsCer(X509FindType.FindBySubjectKeyIdentifier, subjectKeyIdentifier);
