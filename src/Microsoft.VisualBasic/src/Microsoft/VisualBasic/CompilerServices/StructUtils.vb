@@ -164,6 +164,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     End If
 
                     SetAlignment(align)
+                    ' BUG? Multiplication instead of addition?
                     m_StructLength += (ElementCount * ElementSize)
 
                     Return False
@@ -199,6 +200,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                             If length = 0 Then
                                 length = -1
                             End If
+                            ' BUG? Missing alignment?
                             size = length
                         End If
 
