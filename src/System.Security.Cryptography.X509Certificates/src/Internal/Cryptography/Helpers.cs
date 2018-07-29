@@ -52,7 +52,7 @@ namespace Internal.Cryptography
             bool byteInProgress = false;
             int index = 0;
 
-            for (int i = 0; i < s.Length; i++)
+            for (int i = s.Length != 0 && s[0] == '\u200E' ? 1 : 0; i < s.Length; i++)
             {
                 char c = s[i];
 
