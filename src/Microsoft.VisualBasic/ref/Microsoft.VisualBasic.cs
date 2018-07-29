@@ -486,6 +486,12 @@ namespace Microsoft.VisualBasic.CompilerServices
         public short State;
         public StaticLocalInitFlag() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public class StructUtils
+    {
+        internal StructUtils() { throw null; }
+        public static int GetRecordLength(Object o, int PackSize = -1) { throw null; }
+    }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class Utils
     {
