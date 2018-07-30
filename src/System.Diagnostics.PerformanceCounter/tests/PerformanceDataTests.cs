@@ -128,7 +128,7 @@ namespace System.Diagnostics.Tests
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
             {
-                Assert.Throws<ArgumentException>("CounterSetGuid", () => new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single));
+                Assert.Throws<ArgumentException>("counterSetGuid", () => new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single));
             }
         }
 

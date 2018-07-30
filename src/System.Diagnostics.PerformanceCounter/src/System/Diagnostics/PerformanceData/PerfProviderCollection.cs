@@ -101,7 +101,7 @@ namespace System.Diagnostics.PerformanceData
             {
                 if (s_counterSetList.ContainsKey(counterSetGuid))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterSetAlreadyRegister, counterSetGuid), "CounterSetGuid");
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterSetAlreadyRegister, counterSetGuid), nameof(counterSetGuid));
                 }
                 s_counterSetList.Add(counterSetGuid, 0);
             }
