@@ -205,6 +205,15 @@ internal static partial class Interop
             }
         }
 
+        internal static void EvpCipherSetCcmTagLength(SafeEvpCipherCtxHandle ctx, int tagLength)
+        {
+            ref byte nullRef = ref MemoryMarshal.GetReference(Span<byte>.Empty);
+            if (!EvpCipherSetCcmTag(ctx, ref nullRef, tagLength))
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+        }
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpAes128Ecb")]
         internal static extern IntPtr EvpAes128Ecb();
 
