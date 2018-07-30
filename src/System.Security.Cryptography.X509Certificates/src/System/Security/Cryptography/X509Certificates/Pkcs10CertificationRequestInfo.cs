@@ -59,7 +59,7 @@ namespace System.Security.Cryptography.X509Certificates
                 Version = 0,
                 Subject = this.Subject.RawData,
                 SubjectPublicKeyInfo = spki,
-                Attributes = Attributes.Select(e => new X501AttributeAsn(e)).ToArray()
+                Attributes = Attributes.Select(e => new X501AttributeAsn(e)).ToArray(),
             };
 
             using (AsnWriter writer = AsnSerializer.Serialize(requestInfo, AsnEncodingRules.DER))
@@ -69,7 +69,7 @@ namespace System.Security.Cryptography.X509Certificates
                 {
                     CertificationRequestInfo = requestInfo,
                     SignatureAlgorithm = signatureAlgorithmAsn,
-                    SignatureValue = signatureGenerator.SignData(encodedRequestInfo, hashAlgorithm)
+                    SignatureValue = signatureGenerator.SignData(encodedRequestInfo, hashAlgorithm),
                 };
 
                 using (AsnWriter signedWriter = AsnSerializer.Serialize(certificationRequest, AsnEncodingRules.DER))

@@ -551,9 +551,9 @@ namespace System.Security.Cryptography.X509Certificates
                     Algorithm = new AlgorithmIdentifierAsn
                     {
                         Algorithm = PublicKey.Oid,
-                        Parameters = PublicKey.EncodedParameters.RawData
+                        Parameters = PublicKey.EncodedParameters.RawData,
                     },
-                    SubjectPublicKey = PublicKey.EncodedKeyValue.RawData
+                    SubjectPublicKey = PublicKey.EncodedKeyValue.RawData,
                 },
                 Validity = new ValidityAsn(notBefore, notAfter),
                 Subject = SubjectName.RawData,
@@ -589,12 +589,12 @@ namespace System.Security.Cryptography.X509Certificates
 
             using (AsnWriter writer = AsnSerializer.Serialize(tbsCertificate, AsnEncodingRules.DER))
             {
-                byte[] encodedTbsCertificate = writer.Encode();                
+                byte[] encodedTbsCertificate = writer.Encode();
                 CertificateAsn certificate = new CertificateAsn
                 {
                     TbsCertificate = tbsCertificate,
                     SignatureAlgorithm = signatureAlgorithmAsn,
-                    SignatureValue = generator.SignData(encodedTbsCertificate, HashAlgorithm)
+                    SignatureValue = generator.SignData(encodedTbsCertificate, HashAlgorithm),
                 };
 
                 using (AsnWriter signedWriter = AsnSerializer.Serialize(certificate, AsnEncodingRules.DER))
