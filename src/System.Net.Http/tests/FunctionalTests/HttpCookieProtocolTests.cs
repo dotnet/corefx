@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -15,6 +16,15 @@ namespace System.Net.Http.Functional.Tests
 
     public abstract class HttpCookieProtocolTests : HttpClientTestBase
     {
+        public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
+
+        // Windows - Schannel supports alpn from win8.1/2012 R2 and higher.
+        // Linux - OpenSsl supports alpn from openssl 1.0.2 and higher.
+        // OSX - SecureTransport doesn't expose alpn APIs.
+        private static bool BackendSupportsAlpn => (PlatformDetection.IsWindows && !PlatformDetection.IsWindows7) ||
+            (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
+            (PlatformDetection.OpenSslVersion.Major >= 1 && (PlatformDetection.OpenSslVersion.Minor >= 1 || PlatformDetection.OpenSslVersion.Build >= 2)));
+
         private const string s_cookieName = "ABC";
         private const string s_cookieValue = "123";
         private const string s_expectedCookieHeaderValue = "ABC=123";
@@ -153,17 +163,26 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ActiveIssue(31424)]
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SendAsync_Http2RemoteServerWithCookie_Success()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "HTTP/2 is not supported on NetFX, and manually added Cookie header will be ignored if sent with container cookies")]
+        //[OuterLoop("Uses external server")]
+        [Theory, MemberData(nameof(EchoServers))]
+        public async Task SendAsync_RemoteServersWithCookies_Success(Uri remoteServer)
         {
-            var expectedVersion = new Version(2,0);
-            var uri = Configuration.Http.Http2RemoteEchoServer;
+            // CurlHandler: cookies from container are not sent if a Cookie header is manually added #26983.
+            if (IsCurlHandler) return;
 
-            using (HttpClient client = CreateHttpClient())
+            var expectedVersion = new Version(1,1);
+            HttpClientHandler handler = CreateHttpClientHandler();
+
+            if (remoteServer.Host == Configuration.Http.Http2Host && BackendSupportsAlpn)
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, uri)
+                expectedVersion = new Version(2,0);
+                TestHelper.EnsureHttp2Feature(handler);
+            }
+
+            using (HttpClient client = new HttpClient(handler))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, remoteServer)
                 {
                     Version = expectedVersion,
                 };
@@ -186,7 +205,7 @@ namespace System.Net.Http.Functional.Tests
                 }
 
                 // Send next request to see if the cookie has been wrote to the header.
-                var newRequest = new HttpRequestMessage(HttpMethod.Get, uri)
+                var newRequest = new HttpRequestMessage(HttpMethod.Get, remoteServer)
                 {
                     Version = expectedVersion,
                 };
