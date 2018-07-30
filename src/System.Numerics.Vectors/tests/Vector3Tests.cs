@@ -884,6 +884,7 @@ namespace System.Numerics.Tests
 
         // A test for Equals (object)
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/19197", TargetFrameworkMonikers.Netcoreapp)]
         public void Vector3EqualsTest()
         {
             Vector3 a = new Vector3(1.0f, 2.0f, 3.0f);
