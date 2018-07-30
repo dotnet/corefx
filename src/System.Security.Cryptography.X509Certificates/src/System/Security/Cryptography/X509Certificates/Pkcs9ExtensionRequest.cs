@@ -22,10 +22,16 @@ namespace System.Security.Cryptography.X509Certificates
             if (extensions == null)
                 throw new ArgumentNullException(nameof(extensions));
 
-            X509ExtensionAsn[] extensionsAsn = extensions.Where(e => e != null).Select(e => new X509ExtensionAsn(e)).ToArray();
-
-            using (AsnWriter writer = AsnSerializer.Serialize(extensionsAsn, AsnEncodingRules.DER))
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
+                writer.PushSequence();
+
+                foreach (X509Extension e in extensions)
+                {
+                    AsnSerializer.Serialize(new X509ExtensionAsn(e), writer);
+                }
+
+                writer.PopSequence();
                 return writer.Encode();
             }
         }
