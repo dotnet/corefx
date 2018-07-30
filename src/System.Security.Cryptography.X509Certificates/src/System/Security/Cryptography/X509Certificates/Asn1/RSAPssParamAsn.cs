@@ -19,25 +19,15 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     // mgf1SHA1Identifier  AlgorithmIdentifier  ::= { id-mgf1, sha1Identifier }
     // sha1Identifier  AlgorithmIdentifier  ::=  { id-sha1, NULL }
     // (and similar for SHA256/384/512)
-    //
-    // RFC 5754 says that the NULL for SHA2 (256/384/512) MUST be omitted
-    // (https://tools.ietf.org/html/rfc5754#section-2) (and that you MUST
-    // be able to read it even if someone wrote it down)
-    //
-    // Since we
-    //  * don't support SHA-1 in this class
-    //  * only support MGF-1
-    //  * don't support the MGF PRF being different than hashAlgorithm
-    //  * use saltLength==hashLength
-    //  * don't allow custom trailer
-    // we don't have to worry about any of the DEFAULTs. (specify, specify, specify, omit).
     [StructLayout(LayoutKind.Sequential)]
     internal struct RSAPssParamAsn
     {
         [ExpectedTag(0, ExplicitTag = true)]
+        [DefaultValue(0x30, 0x07, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A)]
         internal AlgorithmIdentifierAsn HashAlgorithm;
 
         [ExpectedTag(1, ExplicitTag = true)]
+        [DefaultValue(0x30, 0x14, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x08, 0x30, 0x07, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A)]
         internal AlgorithmIdentifierAsn MaskGenAlgorithm;
 
         [ExpectedTag(2, ExplicitTag = true)]

@@ -21,7 +21,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     //                          -- If present, version MUST be v2 or v3
     //     subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
     //                          -- If present, version MUST be v2 or v3
-    //      extensions      [3]  Extensions OPTIONAL
+    //     extensions      [3]  Extensions OPTIONAL
     //                          -- If present, version MUST be v3 --
     // }
     [StructLayout(LayoutKind.Sequential)]

@@ -51,11 +51,9 @@ namespace Internal.Cryptography.Pal
         internal List<X509Extension> Extensions;
 
         internal int Version => certificate.TbsCertificate.Version;
-        
+
         internal byte[] SerialNumber => certificate.TbsCertificate.SerialNumber.ToArray();
-        
-        internal AlgorithmIdentifier TbsSignature => new AlgorithmIdentifier(certificate.TbsCertificate.SignatureAlgorithm);
-        
+
         internal DateTime NotBefore => certificate.TbsCertificate.Validity.NotBefore.GetValue().UtcDateTime;
 
         internal DateTime NotAfter => certificate.TbsCertificate.Validity.NotAfter.GetValue().UtcDateTime;

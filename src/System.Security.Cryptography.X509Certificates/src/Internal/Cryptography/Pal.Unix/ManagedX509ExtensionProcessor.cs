@@ -25,7 +25,7 @@ namespace Internal.Cryptography.Pal
             // The expected output of this method isn't the SEQUENCE value, but just the payload bytes.
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                writer.WriteNamedBitList<KeyUsageFlagsAsn>(keyUsagesAsn);
+                writer.WriteNamedBitList(keyUsagesAsn);
                 return writer.Encode();
             }
         }
@@ -179,6 +179,7 @@ namespace Internal.Cryptography.Pal
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
+            reader.ThrowIfNotEmpty();
             return contents.ToArray();
         }
 
