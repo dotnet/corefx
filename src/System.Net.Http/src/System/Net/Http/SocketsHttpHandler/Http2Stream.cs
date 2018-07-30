@@ -136,7 +136,6 @@ namespace System.Net.Http
                     if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
                     {
                         WriteHeader(ref state, HttpKnownHeaderNames.Cookie, cookiesFromContainer);
-
                         cookiesFromContainer = null;
                     }
 
@@ -193,9 +192,9 @@ namespace System.Net.Http
 
                 // Determine cookies to send.
                 string cookiesFromContainer = null;
-                if (_connection.UseCookie)
+                if (_connection.UseCookies)
                 {
-                    cookiesFromContainer = _connection.GetCookieContainer.GetCookieHeader(request.RequestUri);
+                    cookiesFromContainer = _connection.CookieContainer.GetCookieHeader(request.RequestUri);
                     if (cookiesFromContainer == "")
                     {
                         cookiesFromContainer = null;
@@ -286,9 +285,9 @@ namespace System.Net.Http
                 }
 
                 // Process Set-Cookie headers.
-                if (_connection.UseCookie)
+                if (_connection.UseCookies)
                 {
-                    CookieHelper.ProcessReceivedCookies(_response, _connection.GetCookieContainer);
+                    CookieHelper.ProcessReceivedCookies(_response, _connection.CookieContainer);
                 }
 
                 return _response;
