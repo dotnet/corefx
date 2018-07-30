@@ -29,37 +29,62 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     {
         [ExpectedTag(0, ExplicitTag = true)]
         [DefaultValue(0xA0, 0x03, 0x02, 0x01, 0x00)]
-        public byte Version;
+        internal byte Version;
 
         [Integer]
-        public ReadOnlyMemory<byte> SerialNumber;
+        internal ReadOnlyMemory<byte> SerialNumber;
 
-        public AlgorithmIdentifierAsn SignatureAlgorithm;
-
-        [AnyValue]
-        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.SequenceOf)]
-        public ReadOnlyMemory<byte> Issuer;
-
-        public ValidityAsn Validity;
+        internal AlgorithmIdentifierAsn SignatureAlgorithm;
 
         [AnyValue]
         [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.SequenceOf)]
-        public ReadOnlyMemory<byte> Subject;
+        internal ReadOnlyMemory<byte> Issuer;
 
-        public SubjectPublicKeyInfoAsn SubjectPublicKeyInfo;
+        internal ValidityAsn Validity;
+
+        [AnyValue]
+        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.SequenceOf)]
+        internal ReadOnlyMemory<byte> Subject;
+
+        internal SubjectPublicKeyInfoAsn SubjectPublicKeyInfo;
 
         [ExpectedTag(1)]
         [OptionalValue]
         [BitString]
-        public ReadOnlyMemory<byte>? IssuerUniqueId;
+        internal ReadOnlyMemory<byte>? IssuerUniqueId;
 
         [ExpectedTag(2)]
         [OptionalValue]
         [BitString]
-        public ReadOnlyMemory<byte>? SubjectUniqueId;
+        internal ReadOnlyMemory<byte>? SubjectUniqueId;
 
         [ExpectedTag(3, ExplicitTag = true)]
         [OptionalValue]
-        public X509ExtensionAsn[] Extensions;
+        internal X509ExtensionAsn[] Extensions;
+
+        /// <summary>
+        /// Validate semantics by the specified version.
+        /// </summary>
+        public void ValidateVersion()
+        {
+            if (Version < 0 || Version > 2)
+            {
+                throw new CryptographicException();
+            }
+            if (Version < 1)
+            {
+                if (IssuerUniqueId.HasValue || SubjectUniqueId.HasValue)
+                {
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
+            }
+            if (Version < 2)
+            {
+                if (Extensions != null)
+                {
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
+            }
+        }
     }
 }

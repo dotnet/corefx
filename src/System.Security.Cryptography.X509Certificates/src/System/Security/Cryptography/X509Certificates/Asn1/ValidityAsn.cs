@@ -14,13 +14,13 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal struct ValidityAsn
     {
+        internal TimeAsn NotBefore;
+        internal TimeAsn NotAfter;
+
         public ValidityAsn(DateTimeOffset notBefore, DateTimeOffset notAfter)
         {
             NotBefore = new TimeAsn(notBefore);
             NotAfter = new TimeAsn(notAfter);
         }
-
-        public TimeAsn NotBefore;
-        public TimeAsn NotAfter;
     }
 }

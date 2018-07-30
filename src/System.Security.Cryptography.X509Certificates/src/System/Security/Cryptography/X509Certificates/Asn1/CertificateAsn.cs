@@ -17,9 +17,9 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal sealed class CertificateAsn
     {
-        public TbsCertificateAsn TbsCertificate;
+        internal TbsCertificateAsn TbsCertificate;
 
-        public AlgorithmIdentifierAsn SignatureAlgorithm;
+        internal AlgorithmIdentifierAsn SignatureAlgorithm;
 
         [BitString]
         internal ReadOnlyMemory<byte> SignatureValue;

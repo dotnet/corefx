@@ -13,13 +13,13 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     internal struct X509ExtensionAsn
     {
         [ObjectIdentifier]
-        public string ExtnId;
+        internal string ExtnId;
 
         [DefaultValue(0x01, 0x01, 0x00)]
-        public bool Critical;
+        internal bool Critical;
 
         [OctetString]
-        public ReadOnlyMemory<byte> ExtnValue;
+        internal ReadOnlyMemory<byte> ExtnValue;
 
         public X509ExtensionAsn(X509Extension extension, bool copyValue=true)
         {

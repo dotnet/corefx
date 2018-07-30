@@ -33,27 +33,44 @@ namespace Internal.Cryptography.Pal
     {
         internal struct AlgorithmIdentifier
         {
+            public AlgorithmIdentifier(AlgorithmIdentifierAsn algorithmIdentifier)
+            {
+                AlgorithmId = algorithmIdentifier.Algorithm.Value;
+                Parameters = algorithmIdentifier.Parameters?.ToArray() ?? Array.Empty<byte>();
+            }
+
             internal string AlgorithmId;
             internal byte[] Parameters;
         }
 
+        private CertificateAsn certificate;
         internal byte[] RawData;
         internal byte[] SubjectPublicKeyInfo;
-
-        internal int Version;
-        internal byte[] SerialNumber;
-        internal AlgorithmIdentifier TbsSignature;
         internal X500DistinguishedName Issuer;
-        internal DateTime NotBefore;
-        internal DateTime NotAfter;
         internal X500DistinguishedName Subject;
-        internal AlgorithmIdentifier PublicKeyAlgorithm;
-        internal byte[] PublicKey;
-        internal byte[] IssuerUniqueId;
-        internal byte[] SubjectUniqueId;
         internal List<X509Extension> Extensions;
-        internal AlgorithmIdentifier SignatureAlgorithm;
-        internal byte[] SignatureValue;
+
+        internal int Version => certificate.TbsCertificate.Version;
+        
+        internal byte[] SerialNumber => certificate.TbsCertificate.SerialNumber.ToArray();
+        
+        internal AlgorithmIdentifier TbsSignature => new AlgorithmIdentifier(certificate.TbsCertificate.SignatureAlgorithm);
+        
+        internal DateTime NotBefore => certificate.TbsCertificate.Validity.NotBefore.GetValue().UtcDateTime;
+
+        internal DateTime NotAfter => certificate.TbsCertificate.Validity.NotAfter.GetValue().UtcDateTime;
+
+        internal AlgorithmIdentifier PublicKeyAlgorithm => new AlgorithmIdentifier(certificate.TbsCertificate.SubjectPublicKeyInfo.Algorithm);
+
+        internal byte[] PublicKey => certificate.TbsCertificate.SubjectPublicKeyInfo.SubjectPublicKey.ToArray();
+
+        internal byte[] IssuerUniqueId => certificate.TbsCertificate.IssuerUniqueId?.ToArray();
+
+        internal byte[] SubjectUniqueId => certificate.TbsCertificate.SubjectUniqueId?.ToArray();
+
+        internal AlgorithmIdentifier SignatureAlgorithm => new AlgorithmIdentifier(certificate.SignatureAlgorithm);
+
+        internal byte[] SignatureValue => certificate.SignatureValue.ToArray();
 
         internal CertificateData(byte[] rawData)
         {
@@ -61,43 +78,21 @@ namespace Internal.Cryptography.Pal
         try
         {
 #endif
-            CertificateAsn certificate = AsnSerializer.Deserialize<CertificateAsn>(rawData, AsnEncodingRules.DER);
-            TbsCertificateAsn tbsCertificate = certificate.TbsCertificate;
+            RawData = rawData;
+            certificate = AsnSerializer.Deserialize<CertificateAsn>(rawData, AsnEncodingRules.DER);
+            certificate.TbsCertificate.ValidateVersion();
+            Issuer = new X500DistinguishedName(certificate.TbsCertificate.Issuer.ToArray());
+            Subject = new X500DistinguishedName(certificate.TbsCertificate.Subject.ToArray());
 
-            Version = tbsCertificate.Version;
-            if (Version < 0 || Version > 2)
-                throw new CryptographicException();
-
-            SerialNumber = tbsCertificate.SerialNumber.ToArray();
-
-            TbsSignature.AlgorithmId = tbsCertificate.SignatureAlgorithm.Algorithm.Value;
-            TbsSignature.Parameters = tbsCertificate.SignatureAlgorithm.Parameters?.ToArray() ?? Array.Empty<byte>();
-
-            Issuer = new X500DistinguishedName(tbsCertificate.Issuer.ToArray());
-
-            NotBefore = tbsCertificate.Validity.NotBefore.GetValue().UtcDateTime;
-            NotAfter = tbsCertificate.Validity.NotAfter.GetValue().UtcDateTime;
-
-            Subject = new X500DistinguishedName(tbsCertificate.Subject.ToArray());
-
-            using (AsnWriter writer = AsnSerializer.Serialize(tbsCertificate.SubjectPublicKeyInfo, AsnEncodingRules.DER))
+            using (AsnWriter writer = AsnSerializer.Serialize(certificate.TbsCertificate.SubjectPublicKeyInfo, AsnEncodingRules.DER))
             {
                 SubjectPublicKeyInfo = writer.Encode();
             }
 
-            PublicKeyAlgorithm.AlgorithmId = tbsCertificate.SubjectPublicKeyInfo.Algorithm.Algorithm.Value;
-            PublicKeyAlgorithm.Parameters = tbsCertificate.SubjectPublicKeyInfo.Algorithm.Parameters?.ToArray() ?? Array.Empty<byte>();
-
-            PublicKey = tbsCertificate.SubjectPublicKeyInfo.SubjectPublicKey.ToArray();
-
-            IssuerUniqueId = Version >= 1 ? tbsCertificate.IssuerUniqueId?.ToArray() : null;
-            SubjectUniqueId = Version >= 1 ? tbsCertificate.SubjectUniqueId?.ToArray() : null;
-
             Extensions = new List<X509Extension>();
-
-            if (Version >= 2 && tbsCertificate.Extensions != null)
+            if (certificate.TbsCertificate.Extensions != null)
             {
-                foreach (X509ExtensionAsn rawExtension in tbsCertificate.Extensions)
+                foreach (X509ExtensionAsn rawExtension in certificate.TbsCertificate.Extensions)
                 {
                     X509Extension extension = new X509Extension(
                         rawExtension.ExtnId,
@@ -107,13 +102,6 @@ namespace Internal.Cryptography.Pal
                     Extensions.Add(extension);
                 }
             }
-
-            SignatureAlgorithm.AlgorithmId = certificate.SignatureAlgorithm.Algorithm.Value;
-            SignatureAlgorithm.Parameters = certificate.SignatureAlgorithm.Parameters?.ToArray() ?? Array.Empty<byte>();
-
-            SignatureValue = certificate.SignatureValue.ToArray();
-
-            RawData = rawData;
 #if DEBUG
         }
         catch (Exception e)

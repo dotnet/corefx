@@ -14,6 +14,11 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     [Choice]
     internal struct TimeAsn
     {
+        [UtcTime]
+        internal DateTimeOffset? UtcTime;
+        [GeneralizedTime]
+        internal DateTimeOffset? GeneralTime;
+
         public TimeAsn(DateTimeOffset dateTimeOffset)
         {
             DateTime utcValue = dateTimeOffset.UtcDateTime;
@@ -34,10 +39,5 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
         }
 
         public DateTimeOffset GetValue() => (UtcTime ?? GeneralTime).GetValueOrDefault();
-
-        [UtcTime]
-        public DateTimeOffset? UtcTime;
-        [GeneralizedTime]
-        public DateTimeOffset? GeneralTime;
     }
 }
