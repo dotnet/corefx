@@ -26,6 +26,5 @@
     <IsRuntimeAssembly>true</IsRuntimeAssembly>
     <HasMatchingContract>true</HasMatchingContract>
     <ContractAssemblyPath>$(NetFxRefPath)$(MSBuildProjectName).dll</ContractAssemblyPath>
-    <DefineConstants Condition="'$(TargetsNetCoreApp)' == 'true'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
 </Project>

@@ -9,7 +9,10 @@
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
+<<<<<<< HEAD
     <DefineConstants Condition="'$(TargetsAOT)'=='true'">$(DefineConstants);uapaot</DefineConstants>
+=======
+>>>>>>> Move uap, uapaot, netfx and netcoreapp constant definitions to top-level build file.
     <!-- We do not want to block reflection for this assembly -->
     <BlockReflectionAttribute Condition="'$(TargetsAOT)'=='true'">false</BlockReflectionAttribute>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
