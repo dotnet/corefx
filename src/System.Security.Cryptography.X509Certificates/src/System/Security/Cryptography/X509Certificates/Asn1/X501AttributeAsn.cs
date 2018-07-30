@@ -9,6 +9,12 @@ using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates.Asn1
 {
+    // https://tools.ietf.org/html/rfc2986#section-4.1
+    //
+    // Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
+    //     type   ATTRIBUTE.&id({IOSet}),
+    //     values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
+    // }
     [StructLayout(LayoutKind.Sequential)]
     internal struct X501AttributeAsn
     {
