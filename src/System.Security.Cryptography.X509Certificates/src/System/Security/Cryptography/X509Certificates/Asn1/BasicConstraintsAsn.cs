@@ -17,9 +17,9 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     internal struct BasicConstraintsAsn
     {
         [DefaultValue(0x01, 0x01, 0x00)]
-        public bool CA;
+        internal bool CA;
 
         [OptionalValue]
-        public int? PathLengthConstraint;
+        internal int? PathLengthConstraint;
     }
 }

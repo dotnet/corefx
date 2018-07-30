@@ -536,8 +536,8 @@ namespace System.Security.Cryptography.X509Certificates
 
             byte[] signatureAlgorithm = generator.GetSignatureAlgorithmIdentifier(HashAlgorithm);
             AlgorithmIdentifierAsn signatureAlgorithmAsn;
-            
-            // Deserialization also does validation of the value
+
+            // Deserialization also does validation of the value.
             signatureAlgorithmAsn = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(signatureAlgorithm, AsnEncodingRules.DER);
 
             TbsCertificateAsn tbsCertificate = new TbsCertificateAsn
