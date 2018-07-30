@@ -102,7 +102,11 @@ internal static partial class Interop
             ref byte @in,
             int inl);
 
-        internal static bool EvpCipherUpdate(SafeEvpCipherCtxHandle ctx, Span<byte> output, out int bytesWritten, ReadOnlySpan<byte> input)
+        internal static bool EvpCipherUpdate(
+            SafeEvpCipherCtxHandle ctx,
+            Span<byte> output,
+            out int bytesWritten,
+            ReadOnlySpan<byte> input)
         {
             return EvpCipherUpdate(
                 ctx,

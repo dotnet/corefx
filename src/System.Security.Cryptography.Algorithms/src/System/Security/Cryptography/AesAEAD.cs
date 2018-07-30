@@ -24,7 +24,11 @@ namespace System.Security.Cryptography
             return ((size - keySizes.MinSize) % keySizes.SkipSize) == 0;
         }
 
-        public static void CheckArgumentsForNull(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plaintext, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag)
+        public static void CheckArgumentsForNull(
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> plaintext,
+            ReadOnlySpan<byte> ciphertext,
+            ReadOnlySpan<byte> tag)
         {
             if (nonce == null)
                 throw new ArgumentNullException(nameof(nonce));

@@ -10,7 +10,14 @@ namespace System.Security.Cryptography
 {
     internal partial class AesAEAD
     {
-        public static unsafe void Encrypt(SafeAlgorithmHandle algorithm, SafeKeyHandle keyHandle, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, Span<byte> tag)
+        public static unsafe void Encrypt(
+            SafeAlgorithmHandle algorithm,
+            SafeKeyHandle keyHandle,
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> associatedData,
+            ReadOnlySpan<byte> plaintext,
+            Span<byte> ciphertext,
+            Span<byte> tag)
         {
             fixed (byte* plaintextBytes = plaintext)
             fixed (byte* nonceBytes = nonce)
@@ -26,7 +33,17 @@ namespace System.Security.Cryptography
                 authInfo.pbAuthData = associatedDataBytes;
                 authInfo.cbAuthData = associatedData.Length;
 
-                NTSTATUS ntStatus = Cng.Interop.BCryptEncrypt(keyHandle, plaintextBytes, plaintext.Length, new IntPtr(&authInfo), null, 0, ciphertextBytes, ciphertext.Length, out int ciphertextBytesWritten, 0);
+                NTSTATUS ntStatus = Cng.Interop.BCryptEncrypt(
+                    keyHandle,
+                    plaintextBytes,
+                    plaintext.Length,
+                    new IntPtr(&authInfo),
+                    null,
+                    0,
+                    ciphertextBytes,
+                    ciphertext.Length,
+                    out int ciphertextBytesWritten,
+                    0);
 
                 if (ntStatus != NTSTATUS.STATUS_SUCCESS)
                 {
@@ -35,7 +52,14 @@ namespace System.Security.Cryptography
             }
         }
 
-        public static unsafe void Decrypt(SafeAlgorithmHandle algorithm, SafeKeyHandle keyHandle, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> associatedData, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag, Span<byte> plaintext)
+        public static unsafe void Decrypt(
+            SafeAlgorithmHandle algorithm,
+            SafeKeyHandle keyHandle,
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> associatedData,
+            ReadOnlySpan<byte> ciphertext,
+            ReadOnlySpan<byte> tag,
+            Span<byte> plaintext)
         {
             fixed (byte* plaintextBytes = plaintext)
             fixed (byte* nonceBytes = nonce)
@@ -51,7 +75,17 @@ namespace System.Security.Cryptography
                 authInfo.pbAuthData = associatedDataBytes;
                 authInfo.cbAuthData = associatedData.Length;
 
-                NTSTATUS ntStatus = Cng.Interop.BCryptDecrypt(keyHandle, ciphertextBytes, ciphertext.Length, new IntPtr(&authInfo), null, 0, plaintextBytes, plaintext.Length, out int plaintextBytesWritten, 0);
+                NTSTATUS ntStatus = Cng.Interop.BCryptDecrypt(
+                    keyHandle,
+                    ciphertextBytes,
+                    ciphertext.Length,
+                    new IntPtr(&authInfo),
+                    null,
+                    0,
+                    plaintextBytes,
+                    plaintext.Length,
+                    out int plaintextBytesWritten,
+                    0);
 
                 switch (ntStatus)
                 {

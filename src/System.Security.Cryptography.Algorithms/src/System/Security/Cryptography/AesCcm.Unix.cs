@@ -61,7 +61,10 @@ namespace System.Security.Cryptography
                     throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
 
-                if (!Interop.Crypto.EvpCipherFinalEx(ctx, ciphertext.Slice(ciphertextBytesWritten), out int bytesWritten))
+                if (!Interop.Crypto.EvpCipherFinalEx(
+                    ctx,
+                    ciphertext.Slice(ciphertextBytesWritten),
+                    out int bytesWritten))
                 {
                     throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
@@ -129,7 +132,7 @@ namespace System.Security.Cryptography
                 case 256: return Interop.Crypto.EvpAes256Ccm();
                 default:
                     Debug.Fail("Key size should already be validated");
-                    return IntPtr.Zero;
+                    throw new PlatformNotSupportedException();
             }
         }
 

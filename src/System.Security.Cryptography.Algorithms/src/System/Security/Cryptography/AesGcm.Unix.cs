@@ -26,13 +26,26 @@ namespace System.Security.Cryptography
             _ctxHandle = Interop.Crypto.EvpCipherCreatePartial(GetCipher(key.Length * 8));
 
             Interop.Crypto.CheckValidOpenSslHandle(_ctxHandle);
-            Interop.Crypto.EvpCipherSetKeyAndIV(_ctxHandle, key, Span<byte>.Empty, Interop.Crypto.EvpCipherDirection.NoChange);
+            Interop.Crypto.EvpCipherSetKeyAndIV(
+                _ctxHandle,
+                key,
+                Span<byte>.Empty,
+                Interop.Crypto.EvpCipherDirection.NoChange);
             Interop.Crypto.EvpCipherSetGcmNonceLength(_ctxHandle, NonceSize);
         }
 
-        private void EncryptInternal(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, Span<byte> tag, ReadOnlySpan<byte> associatedData = default)
+        private void EncryptInternal(
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> plaintext,
+            Span<byte> ciphertext,
+            Span<byte> tag,
+            ReadOnlySpan<byte> associatedData = default)
         {
-            Interop.Crypto.EvpCipherSetKeyAndIV(_ctxHandle, Span<byte>.Empty, nonce, Interop.Crypto.EvpCipherDirection.Encrypt);
+            Interop.Crypto.EvpCipherSetKeyAndIV(
+                _ctxHandle,
+                Span<byte>.Empty,
+                nonce,
+                Interop.Crypto.EvpCipherDirection.Encrypt);
 
             if (associatedData.Length != 0)
             {
@@ -47,7 +60,10 @@ namespace System.Security.Cryptography
                 throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
-            if (!Interop.Crypto.EvpCipherFinalEx(_ctxHandle, ciphertext.Slice(ciphertextBytesWritten), out int bytesWritten))
+            if (!Interop.Crypto.EvpCipherFinalEx(
+                _ctxHandle,
+                ciphertext.Slice(ciphertextBytesWritten),
+                out int bytesWritten))
             {
                 throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
@@ -63,9 +79,18 @@ namespace System.Security.Cryptography
             Interop.Crypto.EvpCipherGetGcmTag(_ctxHandle, tag);
         }
 
-        private void DecryptInternal(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag, Span<byte> plaintext, ReadOnlySpan<byte> associatedData)
+        private void DecryptInternal(
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> ciphertext,
+            ReadOnlySpan<byte> tag,
+            Span<byte> plaintext,
+            ReadOnlySpan<byte> associatedData)
         {
-            Interop.Crypto.EvpCipherSetKeyAndIV(_ctxHandle, ReadOnlySpan<byte>.Empty, nonce, Interop.Crypto.EvpCipherDirection.Decrypt);
+            Interop.Crypto.EvpCipherSetKeyAndIV(
+                _ctxHandle,
+                ReadOnlySpan<byte>.Empty,
+                nonce,
+                Interop.Crypto.EvpCipherDirection.Decrypt);
 
             if (associatedData.Length != 0)
             {
@@ -82,7 +107,10 @@ namespace System.Security.Cryptography
 
             Interop.Crypto.EvpCipherSetGcmTag(_ctxHandle, tag);
 
-            if (!Interop.Crypto.EvpCipherFinalEx(_ctxHandle, plaintext.Slice(plaintextBytesWritten), out int bytesWritten))
+            if (!Interop.Crypto.EvpCipherFinalEx(
+                _ctxHandle,
+                plaintext.Slice(plaintextBytesWritten),
+                out int bytesWritten))
             {
                 throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
             }
