@@ -346,6 +346,7 @@
     <DefineConstants Condition="'$(TargetsNetCoreApp)' == 'true'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants);netfx</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants);netcoreapp20</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
