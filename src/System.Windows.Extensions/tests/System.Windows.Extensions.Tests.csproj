@@ -7,4 +7,9 @@
     <Compile Include="X509Certificate2UITests.cs" />
     <Compile Include="X509Certificate2UIManualTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Media\SoundPlayerTests.cs" />
+    <Compile Include="System\Media\SystemSoundTests.cs" />
+    <Compile Include="System\Media\SystemSoundsTests.cs" />
+  </ItemGroup>
 </Project>
