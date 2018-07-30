@@ -387,51 +387,6 @@ namespace Internal.Cryptography
             return enhancedAttribute;
         }
 
-        public static byte[] GetSubjectKeyIdentifier(this X509Certificate2 certificate)
-        {
-            Debug.Assert(certificate != null);
-
-            X509Extension extension = certificate.Extensions[Oids.SubjectKeyIdentifier];
-
-            if (extension != null)
-            {
-                // Certificates are DER encoded.
-                AsnReader reader = new AsnReader(extension.RawData, AsnEncodingRules.DER);
-
-                if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
-                {
-                    return contents.ToArray();
-                }
-
-                // TryGetPrimitiveOctetStringBytes will have thrown if the next tag wasn't
-                // Universal (primitive) OCTET STRING, since we're in DER mode.
-                // So there's really no way we can get here.
-                Debug.Fail($"TryGetPrimitiveOctetStringBytes returned false in DER mode");
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            // The Desktop/Windows version of this method use CertGetCertificateContextProperty
-            // with a property ID of CERT_KEY_IDENTIFIER_PROP_ID.
-            //
-            // MSDN says that when there's no extension, this method takes the SHA-1 of the
-            // SubjectPublicKeyInfo block, and returns that.
-            //
-            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa376079%28v=vs.85%29.aspx
-
-            PublicKey key = certificate.PublicKey;
-            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn();
-            spki.Algorithm = new AlgorithmIdentifierAsn { Algorithm = key.Oid, Parameters = key.EncodedParameters.RawData };
-            spki.SubjectPublicKey = key.EncodedKeyValue.RawData;
-
-            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
-#pragma warning disable CA5350 // SHA-1 is required for compat.
-            using (HashAlgorithm hash = SHA1.Create())
-#pragma warning restore CA5350 // Do not use insecure cryptographic algorithm SHA1.
-            {
-                return hash.ComputeHash(writer.Encode());
-            }
-        }
-
         internal static byte[] OneShot(this ICryptoTransform transform, byte[] data)
         {
             return OneShot(transform, data, 0, data.Length);
