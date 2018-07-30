@@ -19,8 +19,10 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    public abstract class HttpClientHandler_Http2_Test : HttpClientTestBase
+    public abstract class SocketsHttpHandler_HttpClientHandler_Http2_Test : HttpClientTestBase
     {
+        protected override bool UseSocketsHttpHandler => true;
+
         [Fact]
         public async Task Http2_ClientConnectPreface_Sent()
         {
@@ -54,17 +56,23 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendConnectionPrefaceAsync();
                 await server.WriteFrameAsync(new Frame(0, FrameType.Settings, FrameFlags.Ack, 0));
 
+                // Receive the initial settings frame from the server.
+                Frame receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine("\n"+receivedFrame);
+
+                // Receive the request header frame.
+                receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine("\n"+receivedFrame);
+
+                // Send a malformed frame.
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, 0);
+                Console.WriteLine("\n"+invalidFrame);
                 await server.WriteFrameAsync(invalidFrame);
 
-                Frame receivedFrame = await server.ReadFrameAsync();
-                Console.WriteLine(receivedFrame);
-
+                // Receive a RST_STREAM frame.
                 receivedFrame = await server.ReadFrameAsync();
-                Console.WriteLine(receivedFrame);
+                Console.WriteLine("\n"+receivedFrame);
                 Assert.Equal(FrameType.RstStream, receivedFrame.Type);
-
-                await Assert.ThrowsAsync<Exception>(async () => await sendTask);
             }
         }
 
@@ -83,13 +91,25 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendConnectionPrefaceAsync();
                 await server.WriteFrameAsync(new Frame(0, FrameType.Settings, FrameFlags.Ack, 0));
 
+                // Receive the initial settings frame from the server.
                 Frame receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine("\nServer Recieved:\n"+receivedFrame);
 
+                // Receive the request header frame.
+                receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine("\nServer Recieved:\n"+receivedFrame);
+
+                // Send a malformed frame.
                 DataFrame invalidFrame = new DataFrame(new byte[0], FrameFlags.Padded, 10, 1);
+                Console.WriteLine("\nServer Sending:\n"+invalidFrame);
                 await server.WriteFrameAsync(invalidFrame);
 
+                // Receive a RST_STREAM frame.
                 receivedFrame = await server.ReadFrameAsync();
+                Console.WriteLine("\nServer Recieved:\n"+receivedFrame);
                 Assert.Equal(FrameType.RstStream, receivedFrame.Type);
+
+                await Assert.ThrowsAsync<Exception>(async () => await sendTask);
             }
         }
     }

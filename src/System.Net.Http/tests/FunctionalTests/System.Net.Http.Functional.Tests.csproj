@@ -86,7 +86,6 @@
     <Compile Include="HttpClientHandlerTest.ClientCertificates.cs" />
     <Compile Include="HttpClientHandlerTest.Asynchrony.cs" />
     <Compile Include="HttpClientHandlerTest.DefaultProxyCredentials.cs" />
-    <Compile Include="HttpClientHandlerTest.Http2.cs" />
     <Compile Include="HttpClientHandlerTest.Proxy.cs" />
     <Compile Include="HttpClientHandlerTest.ResponseDrain.cs" />
     <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
@@ -134,6 +133,7 @@
     <Compile Include="HttpMethodTest.netcoreapp.cs" />
     <Compile Include="ReadOnlyMemoryContentTest.cs" />
     <Compile Include="SocketsHttpHandlerTest.cs" />
+    <Compile Include="SocketsHttpHandlerTest.Http2.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs">

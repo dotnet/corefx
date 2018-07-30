@@ -37,9 +37,8 @@ namespace System.Net.Test.Common
     public enum FrameFlags : byte
     {
         None = 0,
-        
-        // Some frame types define bits differently.  Define them all here for simplicity.
 
+        // Some frame types define bits differently.  Define them all here for simplicity.
         EndStream =     0b00000001,
         Ack =           0b00000001,
         EndHeaders =    0b00000100,
@@ -56,8 +55,8 @@ namespace System.Net.Test.Common
         public FrameFlags Flags;
         public int StreamId;
 
-        public const int MinFrameSize = 9;
-        public const int MaxFrameSize = 16384;
+        public const int FrameHeaderLength = 9;
+        public const int MaxFrameLength = 16384;
 
         public Frame(int length, FrameType type, FrameFlags flags, int streamId)
         {
@@ -65,15 +64,6 @@ namespace System.Net.Test.Common
             Type = type;
             Flags = flags;
             StreamId = streamId;
-        }
-
-        // Used only by derived classes that need to initialize 
-        internal Frame()
-        {
-            Length = 0;
-            Type = 0;
-            Flags = 0;
-            StreamId = 0;
         }
 
         public bool PaddedFlag => (Flags & FrameFlags.Padded) != 0;
@@ -114,32 +104,24 @@ namespace System.Net.Test.Common
 
     public class DataFrame : Frame
     {
-        private byte _padLength = 0;
-        private byte[] _data;
+        public byte PadLength;
+        public byte[] Data;
 
-        public DataFrame(byte[] data, FrameFlags flags, byte padLength, int streamId)
+        public DataFrame(byte[] data, FrameFlags flags, byte padLength, int streamId) :
+            base(0, FrameType.Data, flags, streamId)
         {
             Length = (flags & FrameFlags.Padded) == 0 ? data.Length : data.Length + padLength + 1;
-            Type = FrameType.Data;
-            Flags = flags;
-            StreamId = streamId;
 
-            _data = data;
-            _padLength = padLength;
-        }
-
-        public byte[] Data
-        {
-            get
-            {
-                return _data;
-            }
+            Data = data;
+            PadLength = padLength;
         }
 
         public static DataFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
         {
-            byte padLength = (byte)(header.PaddedFlag ? buffer[Frame.MinFrameSize] : 0);
-            byte[] data = buffer.Slice(header.PaddedFlag ? Frame.MinFrameSize + 1 : Frame.MinFrameSize, buffer.Length).ToArray();
+            int idx = Frame.FrameHeaderLength;
+
+            byte padLength = (byte)(header.PaddedFlag ? buffer[idx++] : 0);
+            byte[] data = buffer.Slice(idx).ToArray();
 
             return new DataFrame(data, header.Flags, padLength, header.StreamId);
         }
@@ -150,61 +132,48 @@ namespace System.Net.Test.Common
 
             if (PaddedFlag)
             {
-                buffer[9] = _padLength;
-                _data.CopyTo(buffer.Slice(Frame.MinFrameSize + 1));
+                buffer[Frame.FrameHeaderLength] = PadLength;
+                Data.CopyTo(buffer.Slice(Frame.FrameHeaderLength + 1));
             }
             else
             {
-                _data.CopyTo(buffer.Slice(Frame.MinFrameSize));
+                Data.CopyTo(buffer.Slice(Frame.FrameHeaderLength));
             }
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $"\nPadding: {PadLength}";
         }
     }
 
     public class HeadersFrame : Frame
     {
-        private byte _padLength = 0;
-        private int _streamDependency = 0;
-        private int _weight = 0;
-        private byte[] _data;
+        public byte PadLength = 0;
+        public int StreamDependency = 0;
+        public byte Weight = 0;
+        public byte[] Data;
 
-        public HeadersFrame(byte[] data, FrameFlags flags, byte padLength, int streamDependency, byte weight, int streamId)
+        public HeadersFrame(byte[] data, FrameFlags flags, byte padLength, int streamDependency, byte weight, int streamId) :
+            base(0, FrameType.Headers, flags, streamId)
         {
-            Length = data.Length +
-                     ((flags & FrameFlags.Padded) == 0 ? 0 : padLength + 1) +
-                     ((flags & FrameFlags.Priority) == 0 ? 0 : 40);
+            Length = data.Length + (PaddedFlag ? 0 : padLength + 1) + (PriorityFlag ? 0 : 5);
 
-            Type = FrameType.Headers;
-            Flags = flags;
-            StreamId = streamId;
-
-            _data = data;
-            _padLength = padLength;
-            _streamDependency = streamDependency;
-            _weight = weight;
-        }
-
-        public byte[] Data
-        {
-            get
-            {
-                return _data;
-            }
+            Data = data;
+            PadLength = padLength;
+            StreamDependency = streamDependency;
+            Weight = weight;
         }
 
         public static HeadersFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
         {
-            int idx = Frame.MinFrameSize; // Since we have multiple optional fields in the header, it is easiest to parse using an index.
+            int idx = Frame.FrameHeaderLength;
 
             byte padLength = (byte)(header.PaddedFlag ? buffer[idx++] : 0);
-
-            int streamDependency = header.PriorityFlag ? (int)((uint)((buffer[idx++] << 24) |
-                                                                      (buffer[idx++] << 16) |
-                                                                      (buffer[idx++] << 8) |
-                                                                      (buffer[idx++])) & 0x7FFFFFFF) : 0;
-
+            int streamDependency = header.PriorityFlag ? (int)((uint)((buffer[idx++] << 24) | (buffer[idx++] << 16) | (buffer[idx++] << idx++) | buffer[idx++]) & 0x7FFFFFFF) : 0;
             byte weight = (byte)(header.PaddedFlag ? buffer[idx++] : 0);
 
-            byte[] data = buffer.Slice(idx, buffer.Length).ToArray();
+            byte[] data = buffer.Slice(idx).ToArray();
 
             return new HeadersFrame(data, header.Flags, padLength, streamDependency, weight, header.StreamId);
         }
@@ -213,15 +182,110 @@ namespace System.Net.Test.Common
         {
             base.WriteTo(buffer);
 
+            int idx = Frame.FrameHeaderLength;
             if (PaddedFlag)
             {
-                buffer[9] = _padLength;
-                _data.CopyTo(buffer.Slice(Frame.MinFrameSize + 1));
+                buffer[idx++] = PadLength;
             }
-            else
+
+            if (PriorityFlag)
             {
-                _data.CopyTo(buffer.Slice(Frame.MinFrameSize));
+                buffer[idx++] = (byte)((StreamDependency & 0xFF000000) >> 24);
+                buffer[idx++] = (byte)((StreamDependency & 0x00FF0000) >> 16);
+                buffer[idx++] = (byte)((StreamDependency & 0x0000FF00) >> 8);
+                buffer[idx++] = (byte)(StreamDependency & 0x000000FF);
+
+                buffer[idx++] = Weight;
             }
+            Data.CopyTo(buffer.Slice(idx));
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $"\nPadding: {PadLength}\nStream Dependency: {StreamDependency}\nWeight: {Weight}";
+        }
+    }
+
+    public class PriorityFrame : Frame
+    {
+        private int StreamDependency = 0;
+        private byte Weight = 0;
+
+        public PriorityFrame(FrameFlags flags, int streamDependency, byte weight, int streamId) :
+            base(Frame.FrameHeaderLength + 5, FrameType.Priority, flags, streamId)
+        {
+            StreamDependency = streamDependency;
+            Weight = weight;
+        }
+
+        public static PriorityFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
+        {
+            int idx = Frame.FrameHeaderLength;
+            int streamDependency = (int)(((buffer[idx++] << 24) |
+                                         (buffer[idx++] << 16) |
+                                         (buffer[idx++] << 8) |
+                                         buffer[idx++]) & 0x7FFFFFFF);
+            byte weight = (byte)buffer[idx++];
+
+            return new PriorityFrame(header.Flags, streamDependency, weight, header.StreamId);
+        }
+
+        public override void WriteTo(Span<byte> buffer)
+        {
+            base.WriteTo(buffer);
+
+            int idx = Frame.FrameHeaderLength;
+
+            buffer[idx++] = (byte)((StreamDependency & 0xFF000000) >> 24);
+            buffer[idx++] = (byte)((StreamDependency & 0x00FF0000) >> 16);
+            buffer[idx++] = (byte)((StreamDependency & 0x0000FF00) >> 8);
+            buffer[idx++] = (byte)(StreamDependency & 0x000000FF);
+
+            buffer[idx++] = Weight;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $"\nStream Dependency: {StreamDependency}\nWeight: {Weight}";
+        }
+    }
+
+    public class RstStreamFrame : Frame
+    {
+        private int _errorCode = 0;
+
+        public RstStreamFrame(FrameFlags flags, int errorCode, int streamId) :
+            base(Frame.FrameHeaderLength + 4, FrameType.RstStream, flags, streamId)
+        {
+            _errorCode = errorCode;
+        }
+
+        public static RstStreamFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
+        {
+            int idx = Frame.FrameHeaderLength;
+            int errorCode = (int)(((buffer[idx++] << 24) |
+                                         (buffer[idx++] << 16) |
+                                         (buffer[idx++] << 8) |
+                                         buffer[idx++]) & 0x7FFFFFFF);
+
+            return new RstStreamFrame(header.Flags, errorCode, header.StreamId);
+        }
+
+        public override void WriteTo(Span<byte> buffer)
+        {
+            base.WriteTo(buffer);
+
+            int idx = Frame.FrameHeaderLength;
+
+            buffer[idx++] = (byte)((_errorCode & 0xFF000000) >> 24);
+            buffer[idx++] = (byte)((_errorCode & 0x00FF0000) >> 16);
+            buffer[idx++] = (byte)((_errorCode & 0x0000FF00) >> 8);
+            buffer[idx++] = (byte)(_errorCode & 0x000000FF);
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $"\nError Code: {_errorCode}";
         }
     }
 }

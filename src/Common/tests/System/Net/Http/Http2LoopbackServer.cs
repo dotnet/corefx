@@ -54,7 +54,7 @@ namespace System.Net.Test.Common
 
         public async Task WriteFrameAsync(Frame frame)
         {
-            byte[] writeBuffer = new byte[Frame.MinFrameSize + frame.Length];
+            byte[] writeBuffer = new byte[Frame.FrameHeaderLength + frame.Length];
             frame.WriteTo(writeBuffer);
             await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
         }
@@ -62,12 +62,12 @@ namespace System.Net.Test.Common
         public async Task<Frame> ReadFrameAsync()
         {
             // First read the frame headers, which should tell us how long the rest of the frame is.
-            byte[] headerBytes = new byte[Frame.MinFrameSize];
+            byte[] headerBytes = new byte[Frame.FrameHeaderLength];
 
             int readBytes = 0;
-            while(readBytes < Frame.MinFrameSize)
+            while(readBytes < Frame.FrameHeaderLength)
             {
-                readBytes += await _connectionStream.ReadAsync(headerBytes, readBytes, Frame.MinFrameSize - readBytes);
+                readBytes += await _connectionStream.ReadAsync(headerBytes, readBytes, Frame.FrameHeaderLength - readBytes);
             }
 
             Frame header = Frame.ReadFrom(headerBytes);
@@ -86,6 +86,12 @@ namespace System.Net.Test.Common
             {
                 case FrameType.Data:
                     return DataFrame.ReadFrom(header, data);
+                case FrameType.Headers:
+                    return HeadersFrame.ReadFrom(header, data);
+                case FrameType.Priority:
+                    return PriorityFrame.ReadFrom(header, data);
+                case FrameType.RstStream:
+                    return RstStreamFrame.ReadFrom(header, data);
                 default:
                     return header;
             }
