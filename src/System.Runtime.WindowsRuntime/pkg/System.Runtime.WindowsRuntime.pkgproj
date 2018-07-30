@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
-  <PropertyGroup>
-    <SkipValidatePackage>true</SkipValidatePackage>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Runtime.WindowsRuntime.csproj">
-      <SupportedFramework>netcoreapp2.1</SupportedFramework>
+      <SupportedFramework>net461;netcoreapp2.0;uap10.0.16299;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.WindowsRuntime.csproj" />
     
     <HarvestIncludePaths Include="ref/netcore50" />
-    <HarvestIncludePaths Include="ref/netstandard1.0" />
-    <HarvestIncludePaths Include="ref/netstandard1.2" />
+    <HarvestIncludePaths Include="ref/netstandard1.0">
+      <SupportedFramework>netcore45;wp8;net45</SupportedFramework>
+    </HarvestIncludePaths>
+    <HarvestIncludePaths Include="ref/netstandard1.2">
+      <SupportedFramework>netcore451;wpa81;net451;netcoreapp1.0</SupportedFramework>
+    </HarvestIncludePaths>
 
     <!-- We can't harvest an assert to more than one path -->
     <File Include="$(PackagesDir)\System.Runtime.WindowsRuntime\4.3.0\runtimes\win8\lib\netstandard1.3\System.Runtime.WindowsRuntime.dll">
