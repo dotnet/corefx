@@ -50,6 +50,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
             if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
             {
+                reader.ThrowIfNotEmpty();
                 return contents.ToArray();
             }
 
