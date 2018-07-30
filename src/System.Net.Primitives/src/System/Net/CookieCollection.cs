@@ -163,7 +163,7 @@ namespace System.Net
             switch (how)
             {
                 case Stamp.Set:
-                    m_TimeStamp = DateTime.Now;
+                    m_TimeStamp = DateTime.UtcNow;
                     break;
                 case Stamp.SetToMaxUsed:
                     m_TimeStamp = DateTime.MaxValue;
