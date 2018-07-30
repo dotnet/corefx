@@ -38,7 +38,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
             if (extension == null)
             {
-                // Construct the value from the public key info
+                // Construct the value from the public key info.
                 extension = new X509SubjectKeyIdentifierExtension(
                     certificate.PublicKey,
                     X509SubjectKeyIdentifierHashAlgorithm.CapiSha1,
