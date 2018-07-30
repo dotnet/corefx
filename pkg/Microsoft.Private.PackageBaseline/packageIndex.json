@@ -288,7 +288,6 @@
     },
     "Microsoft.Win32.SystemEvents": {
       "InboxOn": {
-        "netcoreapp2.0": "4.0.0.0",
         "netcoreapp2.1": "4.0.1.0",
       },
       "AssemblyVersionInPackageVersion": {
@@ -1667,7 +1666,6 @@
     },
     "System.Drawing.Common": {
       "InboxOn": {
-        "netcoreapp2.0": "4.0.0.0",
         "netcoreapp2.1": "4.0.1.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
