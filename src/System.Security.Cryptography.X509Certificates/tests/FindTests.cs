@@ -180,7 +180,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void FindByThumbprintWithLrm()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "31463 is not fixed in NetFX")]
+        public static void FindByThumbprint_WithLrm()
         {
             RunTest(
                 (msCer, pfxCer, col1) =>
@@ -682,6 +683,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "31463 is not fixed in NetFX")]
         public static void TestBySerialNumber_WithLRM()
         {
             // Hex string is also an allowed input format and case-blind
@@ -764,9 +766,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [InlineData("597 1A6 5A3 34D DA9 807 80F F84 1EB E87 F97 232 41F 2")]
         // Non-symmetric whitespace is allowed
         [InlineData("    5971A65   A334DDA980780FF84  1EBE87F97           23241F   2")]
-        // Should ignore Left-to-right mark \u200E
-        [InlineData(_leftToRightMark + "59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2")]
         public static void TestBySubjectKeyIdentifier_ExtensionPresent(string subjectKeyIdentifier)
+        {
+            RunSingleMatchTest_MsCer(X509FindType.FindBySubjectKeyIdentifier, subjectKeyIdentifier);
+        }
+
+        // Should ignore Left-to-right mark \u200E
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "31463 is not fixed in NetFX")]
+        [InlineData(_leftToRightMark + "59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2")]
+        public static void TestBySubjectKeyIdentifier_ExtensionPresentWithLTM(string subjectKeyIdentifier)
         {
             RunSingleMatchTest_MsCer(X509FindType.FindBySubjectKeyIdentifier, subjectKeyIdentifier);
         }
