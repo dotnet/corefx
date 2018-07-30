@@ -48,6 +48,15 @@ namespace Microsoft.VisualBasic.Tests
             }
         }
 
+        public static IEnumerable<object[]> InvalidNumberObject_TestData()
+        {
+            yield return new object[] { char.MinValue };
+            yield return new object[] { (char)1 };
+            yield return new object[] { char.MaxValue };
+            yield return new object[] { new DateTime(10) };
+            yield return new object[] { new object() };
+        }
+
         public static IEnumerable<object[]> ToByte_String_TestData()
         {
             yield return new object[] { null, byte.MinValue };
@@ -77,16 +86,14 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToByte_OverflowString_TestData()
         {
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { "256" };
         }
 
         [Theory]
         [MemberData(nameof(ToByte_OverflowString_TestData))]
+        [MemberData(nameof(ToUShort_OverflowString_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         public void ToByte_OverflowString_ThrowsOverflowException(string value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToByte(value));
@@ -105,10 +112,8 @@ namespace Microsoft.VisualBasic.Tests
             // sbyte.
             yield return new object[] { (sbyte)0, byte.MinValue };
             yield return new object[] { (sbyte)1, (byte)1 };
-            yield return new object[] { (sbyte)1, (byte)1 };
             yield return new object[] { sbyte.MaxValue, (byte)127 };
             yield return new object[] { (SByteEnum)0, byte.MinValue };
-            yield return new object[] { (SByteEnum)1, (byte)1 };
             yield return new object[] { (SByteEnum)1, (byte)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (byte)127 };
 
@@ -166,36 +171,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, byte.MinValue };
-
-            // string.
-            yield return new object[] { "0", byte.MinValue };
-            yield return new object[] { "1", (byte)1 };
-            yield return new object[] { "&h5", (byte)5 };
-            yield return new object[] { "&h0", byte.MinValue };
-            yield return new object[] { "&o5", (byte)5 };
-            yield return new object[] { " &o5", (byte)5 };
-            yield return new object[] { "&o0", byte.MinValue };
-            yield return new object[] { 1.1.ToString(), (byte)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToByte_Object_TestData))]
+        [MemberData(nameof(ToByte_String_TestData))]
         public void ToByte_Object_ReturnsExpected(object value, byte expected)
         {
             AssertEqual(expected, Conversions.ToByte(value));
         }
 
-        public static IEnumerable<object[]> ToByte_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToByte_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToByte_InvalidObject_ThrowsInvalidCastException(object value)
@@ -205,59 +192,21 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToByte_OverflowObject_TestData()
         {
-            yield return new object[] { sbyte.MinValue };
-            yield return new object[] { (sbyte)(-1) };
-            yield return new object[] { (SByteEnum)sbyte.MinValue };
-            yield return new object[] { (SByteEnum)(-1) };
             yield return new object[] { ushort.MaxValue };
             yield return new object[] { (UShortEnum)ushort.MaxValue };
-            yield return new object[] { short.MinValue };
-            yield return new object[] { (short)(-1) };
             yield return new object[] { short.MaxValue };
-            yield return new object[] { (ShortEnum)short.MinValue };
-            yield return new object[] { (ShortEnum)(-1) };
             yield return new object[] { (ShortEnum)short.MaxValue };
-            yield return new object[] { uint.MaxValue };
-            yield return new object[] { (UIntEnum)uint.MaxValue };
-            yield return new object[] { int.MinValue };
-            yield return new object[] { -1 };
-            yield return new object[] { int.MaxValue };
-            yield return new object[] { (IntEnum)int.MinValue };
-            yield return new object[] { (IntEnum)(-1) };
-            yield return new object[] { (IntEnum)int.MaxValue };
-            yield return new object[] { ulong.MaxValue };
-            yield return new object[] { (ULongEnum)ulong.MaxValue };
-            yield return new object[] { long.MinValue };
-            yield return new object[] { (long)(-1) };
-            yield return new object[] { long.MaxValue };
-            yield return new object[] { (LongEnum)long.MinValue };
-            yield return new object[] { (LongEnum)(-1) };
-            yield return new object[] { (LongEnum)long.MaxValue };
-            yield return new object[] { float.MinValue };
-            yield return new object[] { (float)(-1) };
-            yield return new object[] { float.MaxValue };
-            yield return new object[] { float.PositiveInfinity };
-            yield return new object[] { float.NegativeInfinity };
-            yield return new object[] { float.NaN };
-            yield return new object[] { double.MinValue };
-            yield return new object[] { (double)(-1) };
-            yield return new object[] { double.MaxValue };
-            yield return new object[] { double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity };
-            yield return new object[] { double.NaN };
-            yield return new object[] { decimal.MinValue };
-            yield return new object[] { (decimal)(-1) };
-            yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
         }
 
         [Theory]
         [MemberData(nameof(ToByte_OverflowObject_TestData))]
+        [MemberData(nameof(ToUShort_OverflowObject_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowObject_TestData))]
+        [MemberData(nameof(ToULong_OverflowObject_TestData))]
+        [MemberData(nameof(ToByte_OverflowString_TestData))]
+        [MemberData(nameof(ToUShort_OverflowString_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         public void ToByte_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToByte(value));
@@ -293,15 +242,14 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToSByte_OverflowString_TestData()
         {
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { "128" };
         }
 
         [Theory]
         [MemberData(nameof(ToSByte_OverflowString_TestData))]
+        [MemberData(nameof(ToShort_OverflowString_TestData))]
+        [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToSByte_OverflowString_ThrowsOverflowException(string value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToSByte(value));
@@ -320,12 +268,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), (sbyte)(-1) };
             yield return new object[] { (sbyte)0, (sbyte)0 };
             yield return new object[] { (sbyte)1, (sbyte)1 };
-            yield return new object[] { (sbyte)1, (sbyte)1 };
             yield return new object[] { sbyte.MaxValue, sbyte.MaxValue };
             yield return new object[] { (SByteEnum)sbyte.MinValue, sbyte.MinValue };
             yield return new object[] { (SByteEnum)(-1), (sbyte)(-1) };
             yield return new object[] { (SByteEnum)0, (sbyte)0 };
-            yield return new object[] { (SByteEnum)1, (sbyte)1 };
             yield return new object[] { (SByteEnum)1, (sbyte)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, sbyte.MaxValue };
 
@@ -392,37 +338,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, (sbyte)0 };
-
-            // string.
-            yield return new object[] { "-1", (sbyte)(-1) };
-            yield return new object[] { "0", (sbyte)0 };
-            yield return new object[] { "1", (sbyte)1 };
-            yield return new object[] { "&h5", (sbyte)5 };
-            yield return new object[] { "&h0", (sbyte)0 };
-            yield return new object[] { "&o5", (sbyte)5 };
-            yield return new object[] { " &o5", (sbyte)5 };
-            yield return new object[] { "&o0", (sbyte)0 };
-            yield return new object[] { 1.1.ToString(), (sbyte)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToSByte_Object_TestData))]
+        [MemberData(nameof(ToSByte_String_TestData))]
         public void ToSByte_Object_ReturnsExpected(object value, sbyte expected)
         {
             AssertEqual(expected, Conversions.ToSByte(value));
         }
 
-        public static IEnumerable<object[]> ToSByte_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToSByte_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToSByte_InvalidObject_ThrowsInvalidCastException(object value)
@@ -434,45 +361,21 @@ namespace Microsoft.VisualBasic.Tests
         {
             yield return new object[] { byte.MaxValue };
             yield return new object[] { (ByteEnum)byte.MaxValue };
-            yield return new object[] { ushort.MaxValue };
-            yield return new object[] { (UShortEnum)ushort.MaxValue };
             yield return new object[] { short.MinValue };
             yield return new object[] { short.MaxValue };
             yield return new object[] { (ShortEnum)short.MinValue };
             yield return new object[] { (ShortEnum)short.MaxValue };
-            yield return new object[] { uint.MaxValue };
-            yield return new object[] { (UIntEnum)uint.MaxValue };
-            yield return new object[] { int.MinValue };
-            yield return new object[] { int.MaxValue };
-            yield return new object[] { (IntEnum)int.MinValue };
-            yield return new object[] { (IntEnum)int.MaxValue };
-            yield return new object[] { ulong.MaxValue };
-            yield return new object[] { (ULongEnum)ulong.MaxValue };
-            yield return new object[] { long.MinValue };
-            yield return new object[] { long.MaxValue };
-            yield return new object[] { (LongEnum)long.MinValue };
-            yield return new object[] { (LongEnum)long.MaxValue };
-            yield return new object[] { float.MinValue };
-            yield return new object[] { float.MaxValue };
-            yield return new object[] { float.PositiveInfinity };
-            yield return new object[] { float.NegativeInfinity };
-            yield return new object[] { float.NaN };
-            yield return new object[] { double.MinValue };
-            yield return new object[] { double.MaxValue };
-            yield return new object[] { double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity };
-            yield return new object[] { double.NaN };
-            yield return new object[] { decimal.MinValue };
-            yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
         }
 
         [Theory]
         [MemberData(nameof(ToSByte_OverflowObject_TestData))]
+        [MemberData(nameof(ToShort_OverflowObject_TestData))]
+        [MemberData(nameof(ToInteger_OverflowObject_TestData))]
+        [MemberData(nameof(ToLong_OverflowObject_TestData))]
+        [MemberData(nameof(ToSByte_OverflowString_TestData))]
+        [MemberData(nameof(ToShort_OverflowString_TestData))]
+        [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToSByte_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToSByte(value));
@@ -507,16 +410,13 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToUShort_OverflowString_TestData()
         {
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { "65536" };
         }
 
         [Theory]
         [MemberData(nameof(ToUShort_OverflowString_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         public void ToUShort_OverflowString_ThrowsOverflowException(string value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToUShort(value));
@@ -535,10 +435,8 @@ namespace Microsoft.VisualBasic.Tests
             // sbyte.
             yield return new object[] { (sbyte)0, ushort.MinValue };
             yield return new object[] { (sbyte)1, (ushort)1 };
-            yield return new object[] { (sbyte)1, (ushort)1 };
             yield return new object[] { sbyte.MaxValue, (ushort)127 };
             yield return new object[] { (SByteEnum)0, ushort.MinValue };
-            yield return new object[] { (SByteEnum)1, (ushort)1 };
             yield return new object[] { (SByteEnum)1, (ushort)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (ushort)127 };
 
@@ -600,36 +498,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, ushort.MinValue };
-
-            // string.
-            yield return new object[] { "0", ushort.MinValue };
-            yield return new object[] { "1", (ushort)1 };
-            yield return new object[] { "&h5", (ushort)5 };
-            yield return new object[] { "&h0", ushort.MinValue };
-            yield return new object[] { "&o5", (ushort)5 };
-            yield return new object[] { " &o5", (ushort)5 };
-            yield return new object[] { "&o0", ushort.MinValue };
-            yield return new object[] { 1.1.ToString(), (ushort)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToUShort_Object_TestData))]
+        [MemberData(nameof(ToUShort_String_TestData))]
         public void ToUShort_Object_ReturnsExpected(object value, ushort expected)
         {
             AssertEqual(expected, Conversions.ToUShort(value));
         }
 
-        public static IEnumerable<object[]> ToUShort_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToUShort_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToUShort_InvalidObject_ThrowsInvalidCastException(object value)
@@ -639,55 +519,19 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToUShort_OverflowObject_TestData()
         {
-            yield return new object[] { sbyte.MinValue };
-            yield return new object[] { (sbyte)(-1) };
-            yield return new object[] { (SByteEnum)sbyte.MinValue };
-            yield return new object[] { (SByteEnum)(-1) };
-            yield return new object[] { short.MinValue };
-            yield return new object[] { (short)(-1) };
-            yield return new object[] { (ShortEnum)short.MinValue };
-            yield return new object[] { (ShortEnum)(-1) };
+            yield return new object[] { int.MaxValue };
+            yield return new object[] { (IntEnum)int.MaxValue };
             yield return new object[] { uint.MaxValue };
             yield return new object[] { (UIntEnum)uint.MaxValue };
-            yield return new object[] { int.MinValue };
-            yield return new object[] { -1 };
-            yield return new object[] { int.MaxValue };
-            yield return new object[] { (IntEnum)int.MinValue };
-            yield return new object[] { (IntEnum)(-1) };
-            yield return new object[] { (IntEnum)int.MaxValue };
-            yield return new object[] { ulong.MaxValue };
-            yield return new object[] { (ULongEnum)ulong.MaxValue };
-            yield return new object[] { long.MinValue };
-            yield return new object[] { (long)(-1) };
-            yield return new object[] { long.MaxValue };
-            yield return new object[] { (LongEnum)long.MinValue };
-            yield return new object[] { (LongEnum)(-1) };
-            yield return new object[] { (LongEnum)long.MaxValue };
-            yield return new object[] { float.MinValue };
-            yield return new object[] { (float)(-1) };
-            yield return new object[] { float.MaxValue };
-            yield return new object[] { float.PositiveInfinity };
-            yield return new object[] { float.NegativeInfinity };
-            yield return new object[] { float.NaN };
-            yield return new object[] { double.MinValue };
-            yield return new object[] { (double)(-1) };
-            yield return new object[] { double.MaxValue };
-            yield return new object[] { double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity };
-            yield return new object[] { double.NaN };
-            yield return new object[] { decimal.MinValue };
-            yield return new object[] { (decimal)(-1) };
-            yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
         }
 
         [Theory]
+        [MemberData(nameof(ToUShort_OverflowString_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         [MemberData(nameof(ToUShort_OverflowObject_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowObject_TestData))]
+        [MemberData(nameof(ToULong_OverflowObject_TestData))]
         public void ToUShort_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToUShort(value));
@@ -723,15 +567,13 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToShort_OverflowString_TestData()
         {
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
+            yield return new object[] { "32768" };
         }
 
         [Theory]
         [MemberData(nameof(ToShort_OverflowString_TestData))]
+        [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToShort_OverflowString_ThrowsOverflowException(string value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToShort(value));
@@ -752,12 +594,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), (short)(-1) };
             yield return new object[] { (sbyte)0, (short)0 };
             yield return new object[] { (sbyte)1, (short)1 };
-            yield return new object[] { (sbyte)1, (short)1 };
             yield return new object[] { sbyte.MaxValue, (short)127 };
             yield return new object[] { (SByteEnum)sbyte.MinValue, (short)(-128) };
             yield return new object[] { (SByteEnum)(-1), (short)(-1) };
             yield return new object[] { (SByteEnum)0, (short)0 };
-            yield return new object[] { (SByteEnum)1, (short)1 };
             yield return new object[] { (SByteEnum)1, (short)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (short)127 };
 
@@ -828,37 +668,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, (short)0 };
-
-            // string.
-            yield return new object[] { "-1", (short)(-1) };
-            yield return new object[] { "0", (short)0 };
-            yield return new object[] { "1", (short)1 };
-            yield return new object[] { "&h5", (short)5 };
-            yield return new object[] { "&h0", (short)0 };
-            yield return new object[] { "&o5", (short)5 };
-            yield return new object[] { " &o5", (short)5 };
-            yield return new object[] { "&o0", (short)0 };
-            yield return new object[] { 1.1.ToString(), (short)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToShort_Object_TestData))]
+        [MemberData(nameof(ToShort_String_TestData))]
         public void ToShort_Object_ReturnsExpected(object value, short expected)
         {
             AssertEqual(expected, Conversions.ToShort(value));
         }
 
-        public static IEnumerable<object[]> ToShort_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToShort_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToShort_InvalidObject_ThrowsInvalidCastException(object value)
@@ -870,39 +691,19 @@ namespace Microsoft.VisualBasic.Tests
         {
             yield return new object[] { ushort.MaxValue };
             yield return new object[] { (UShortEnum)ushort.MaxValue };
-            yield return new object[] { uint.MaxValue };
-            yield return new object[] { (UIntEnum)uint.MaxValue };
             yield return new object[] { int.MinValue };
             yield return new object[] { int.MaxValue };
             yield return new object[] { (IntEnum)int.MinValue };
             yield return new object[] { (IntEnum)int.MaxValue };
-            yield return new object[] { ulong.MaxValue };
-            yield return new object[] { (ULongEnum)ulong.MaxValue };
-            yield return new object[] { long.MinValue };
-            yield return new object[] { long.MaxValue };
-            yield return new object[] { (LongEnum)long.MinValue };
-            yield return new object[] { (LongEnum)long.MaxValue };
-            yield return new object[] { float.MinValue };
-            yield return new object[] { float.MaxValue };
-            yield return new object[] { float.PositiveInfinity };
-            yield return new object[] { float.NegativeInfinity };
-            yield return new object[] { float.NaN };
-            yield return new object[] { double.MinValue };
-            yield return new object[] { double.MaxValue };
-            yield return new object[] { double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity };
-            yield return new object[] { double.NaN };
-            yield return new object[] { decimal.MinValue };
-            yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
         }
 
         [Theory]
         [MemberData(nameof(ToShort_OverflowObject_TestData))]
+        [MemberData(nameof(ToInteger_OverflowObject_TestData))]
+        [MemberData(nameof(ToLong_OverflowObject_TestData))]
+        [MemberData(nameof(ToShort_OverflowString_TestData))]
+        [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToShort_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToShort(value));
@@ -937,9 +738,7 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToUInteger_OverflowString_TestData()
         {
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { "4294967296" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
@@ -947,6 +746,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         public void ToUInteger_OverflowString_ThrowsOverflowException(string value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToUInteger(value));
@@ -965,10 +765,8 @@ namespace Microsoft.VisualBasic.Tests
             // sbyte.
             yield return new object[] { (sbyte)0, uint.MinValue };
             yield return new object[] { (sbyte)1, (uint)1 };
-            yield return new object[] { (sbyte)1, (uint)1 };
             yield return new object[] { sbyte.MaxValue, (uint)127 };
             yield return new object[] { (SByteEnum)0, uint.MinValue };
-            yield return new object[] { (SByteEnum)1, (uint)1 };
             yield return new object[] { (SByteEnum)1, (uint)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (uint)127 };
 
@@ -1034,37 +832,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, uint.MinValue };
-
-            // string.
-            yield return new object[] { "0", uint.MinValue };
-            yield return new object[] { "1", (uint)1 };
-            yield return new object[] { "&h5", (uint)5 };
-            yield return new object[] { "&h0", uint.MinValue };
-            yield return new object[] { "&o5", (uint)5 };
-            yield return new object[] { " &o5", (uint)5 };
-            yield return new object[] { "&o0", uint.MinValue };
-            yield return new object[] { 1.1.ToString(), (uint)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToUInteger_Object_TestData))]
+        [MemberData(nameof(ToUInteger_String_TestData))]
         public void ToUInteger_Object_ReturnsExpected(object value, uint expected)
         {
             AssertEqual(expected, Conversions.ToUInteger(value));
         }
 
-
-        public static IEnumerable<object[]> ToUInteger_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToUInteger_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToUInteger_InvalidObject_ThrowsInvalidCastException(object value)
@@ -1074,51 +853,17 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToUInteger_OverflowObject_TestData()
         {
-            yield return new object[] { sbyte.MinValue };
-            yield return new object[] { (sbyte)(-1) };
-            yield return new object[] { (SByteEnum)sbyte.MinValue };
-            yield return new object[] { (SByteEnum)(-1) };
-            yield return new object[] { short.MinValue };
-            yield return new object[] { (short)(-1) };
-            yield return new object[] { (ShortEnum)short.MinValue };
-            yield return new object[] { (ShortEnum)(-1) };
-            yield return new object[] { int.MinValue };
-            yield return new object[] { -1 };
-            yield return new object[] { (IntEnum)int.MinValue };
-            yield return new object[] { (IntEnum)(-1) };
             yield return new object[] { ulong.MaxValue };
             yield return new object[] { (ULongEnum)ulong.MaxValue };
-            yield return new object[] { long.MinValue };
-            yield return new object[] { (long)(-1) };
             yield return new object[] { long.MaxValue };
-            yield return new object[] { (LongEnum)long.MinValue };
-            yield return new object[] { (LongEnum)(-1) };
             yield return new object[] { (LongEnum)long.MaxValue };
-            yield return new object[] { float.MinValue };
-            yield return new object[] { (float)(-1) };
-            yield return new object[] { float.MaxValue };
-            yield return new object[] { float.PositiveInfinity };
-            yield return new object[] { float.NegativeInfinity };
-            yield return new object[] { float.NaN };
-            yield return new object[] { double.MinValue };
-            yield return new object[] { (double)(-1) };
-            yield return new object[] { double.MaxValue };
-            yield return new object[] { double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity };
-            yield return new object[] { double.NaN };
-            yield return new object[] { decimal.MinValue };
-            yield return new object[] { (decimal)(-1) };
-            yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
         }
 
         [Theory]
         [MemberData(nameof(ToUInteger_OverflowObject_TestData))]
+        [MemberData(nameof(ToULong_OverflowObject_TestData))]
+        [MemberData(nameof(ToUInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         public void ToUInteger_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToUInteger(value));
@@ -1154,8 +899,7 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToInteger_OverflowString_TestData()
         {
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
+            yield return new object[] { "2147483648" };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
@@ -1163,6 +907,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToInteger_OverflowString_ThrowsOverflowException(string value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToInteger(value));
@@ -1183,12 +928,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), -1 };
             yield return new object[] { (sbyte)0, 0 };
             yield return new object[] { (sbyte)1, 1 };
-            yield return new object[] { (sbyte)1, 1 };
             yield return new object[] { sbyte.MaxValue, 127 };
             yield return new object[] { (SByteEnum)sbyte.MinValue, -128 };
             yield return new object[] { (SByteEnum)(-1), -1 };
             yield return new object[] { (SByteEnum)0, 0 };
-            yield return new object[] { (SByteEnum)1, 1 };
             yield return new object[] { (SByteEnum)1, 1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, 127 };
 
@@ -1265,37 +1008,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, 0 };
-
-            // string.
-            yield return new object[] { "-1", -1 };
-            yield return new object[] { "0", 0 };
-            yield return new object[] { "1", 1 };
-            yield return new object[] { "&h5", 5 };
-            yield return new object[] { "&h0", 0 };
-            yield return new object[] { "&o5", 5 };
-            yield return new object[] { " &o5", 5 };
-            yield return new object[] { "&o0", 0 };
-            yield return new object[] { 1.1.ToString(), 1 };
         }
 
         [Theory]
         [MemberData(nameof(ToInteger_Object_TestData))]
+        [MemberData(nameof(ToInteger_String_TestData))]
         public void ToInteger_Object_ReturnsExpected(object value, int expected)
         {
             AssertEqual(expected, Conversions.ToInteger(value));
         }
 
-        public static IEnumerable<object[]> ToInteger_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToInteger_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToInteger_InvalidObject_ThrowsInvalidCastException(object value)
@@ -1307,33 +1031,17 @@ namespace Microsoft.VisualBasic.Tests
         {
             yield return new object[] { uint.MaxValue };
             yield return new object[] { (UIntEnum)uint.MaxValue };
-            yield return new object[] { ulong.MaxValue };
-            yield return new object[] { (ULongEnum)ulong.MaxValue };
             yield return new object[] { long.MinValue };
             yield return new object[] { long.MaxValue };
             yield return new object[] { (LongEnum)long.MinValue };
             yield return new object[] { (LongEnum)long.MaxValue };
-            yield return new object[] { float.MinValue };
-            yield return new object[] { float.MaxValue };
-            yield return new object[] { float.PositiveInfinity };
-            yield return new object[] { float.NegativeInfinity };
-            yield return new object[] { float.NaN };
-            yield return new object[] { double.MinValue };
-            yield return new object[] { double.MaxValue };
-            yield return new object[] { double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity };
-            yield return new object[] { double.NaN };
-            yield return new object[] { decimal.MinValue };
-            yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
         }
 
         [Theory]
         [MemberData(nameof(ToInteger_OverflowObject_TestData))]
+        [MemberData(nameof(ToLong_OverflowObject_TestData))]
+        [MemberData(nameof(ToInteger_OverflowString_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToInteger_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToInteger(value));
@@ -1401,10 +1109,8 @@ namespace Microsoft.VisualBasic.Tests
             // sbyte.
             yield return new object[] { (sbyte)0, ulong.MinValue };
             yield return new object[] { (sbyte)1, (ulong)1 };
-            yield return new object[] { (sbyte)1, (ulong)1 };
             yield return new object[] { sbyte.MaxValue, (ulong)127 };
             yield return new object[] { (SByteEnum)0, ulong.MinValue };
-            yield return new object[] { (SByteEnum)1, (ulong)1 };
             yield return new object[] { (SByteEnum)1, (ulong)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (ulong)127 };
 
@@ -1474,39 +1180,19 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, ulong.MinValue };
-
-            // string.
-            yield return new object[] { "0", ulong.MinValue };
-            yield return new object[] { "1", (ulong)1 };
-            yield return new object[] { "&h5", (ulong)5 };
-            yield return new object[] { "&h0", ulong.MinValue };
-            yield return new object[] { "&o5", (ulong)5 };
-            yield return new object[] { " &o5", (ulong)5 };
-            yield return new object[] { "&o0", ulong.MinValue };
-            yield return new object[] { 1.1.ToString(), (ulong)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToULong_Object_TestData))]
+        [MemberData(nameof(ToULong_String_TestData))]
         public void ToULong_Object_ReturnsExpected(object value, ulong expected)
         {
             AssertEqual(expected, Conversions.ToULong(value));
         }
 
-        public static IEnumerable<object[]> ToULong_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { double.PositiveInfinity.ToString() };
-            yield return new object[] { double.NegativeInfinity.ToString() };
-            yield return new object[] { double.NaN.ToString() };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToULong_InvalidObject_TestData))]
+        [MemberData(nameof(ToULong_InvalidString_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToULong_InvalidObject_ThrowsInvalidCastException(object value)
@@ -1547,13 +1233,11 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { decimal.MinValue };
             yield return new object[] { (decimal)(-1) };
             yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "-1" };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
         }
 
         [Theory]
         [MemberData(nameof(ToULong_OverflowObject_TestData))]
+        [MemberData(nameof(ToULong_OverflowString_TestData))]
         public void ToULong_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToULong(value));
@@ -1597,6 +1281,7 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToLong_OverflowString_TestData()
         {
+            yield return new object[] { "9223372036854775808" };
             yield return new object[] { "18446744073709551616" };
             yield return new object[] { "1844674407370955161618446744073709551616" };
         }
@@ -1623,12 +1308,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), (long)(-1) };
             yield return new object[] { (sbyte)0, (long)0 };
             yield return new object[] { (sbyte)1, (long)1 };
-            yield return new object[] { (sbyte)1, (long)1 };
             yield return new object[] { sbyte.MaxValue, (long)127 };
             yield return new object[] { (SByteEnum)sbyte.MinValue, (long)(-128) };
             yield return new object[] { (SByteEnum)(-1), (long)(-1) };
             yield return new object[] { (SByteEnum)0, (long)0 };
-            yield return new object[] { (SByteEnum)1, (long)1 };
             yield return new object[] { (SByteEnum)1, (long)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (long)127 };
 
@@ -1711,21 +1394,11 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, (long)0 };
-
-            // string.
-            yield return new object[] { "-1", (long)(-1) };
-            yield return new object[] { "0", (long)0 };
-            yield return new object[] { "1", (long)1 };
-            yield return new object[] { "&h5", (long)5 };
-            yield return new object[] { "&h0", (long)0 };
-            yield return new object[] { "&o5", (long)5 };
-            yield return new object[] { " &o5", (long)5 };
-            yield return new object[] { "&o0", (long)0 };
-            yield return new object[] { 1.1.ToString(), (long)1 };
         }
 
         [Theory]
         [MemberData(nameof(ToLong_Object_TestData))]
+        [MemberData(nameof(ToLong_String_TestData))]
         public void ToLong_Object_ReturnsExpected(object value, long expected)
         {
             AssertEqual(expected, Conversions.ToLong(value));
@@ -1733,18 +1406,14 @@ namespace Microsoft.VisualBasic.Tests
 
         public static IEnumerable<object[]> ToLong_InvalidObject_TestData()
         {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
             yield return new object[] { double.PositiveInfinity.ToString() };
             yield return new object[] { double.NegativeInfinity.ToString() };
             yield return new object[] { double.NaN.ToString() };
-            yield return new object[] { new object() };
         }
 
         [Theory]
         [MemberData(nameof(ToLong_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToLong_InvalidObject_ThrowsInvalidCastException(object value)
@@ -1768,12 +1437,11 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { double.NaN };
             yield return new object[] { decimal.MinValue };
             yield return new object[] { decimal.MaxValue };
-            yield return new object[] { "18446744073709551616" };
-            yield return new object[] { "1844674407370955161618446744073709551616" };
         }
 
         [Theory]
         [MemberData(nameof(ToLong_OverflowObject_TestData))]
+        [MemberData(nameof(ToLong_OverflowString_TestData))]
         public void ToLong_OverflowObject_ThrowsOverflowException(object value)
         {
             Assert.Throws<OverflowException>(() => Conversions.ToLong(value));
@@ -1838,12 +1506,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), (float)(-1) };
             yield return new object[] { (sbyte)0, (float)0 };
             yield return new object[] { (sbyte)1, (float)1 };
-            yield return new object[] { (sbyte)1, (float)1 };
             yield return new object[] { sbyte.MaxValue, (float)127 };
             yield return new object[] { (SByteEnum)sbyte.MinValue, (float)(-128) };
             yield return new object[] { (SByteEnum)(-1), (float)(-1) };
             yield return new object[] { (SByteEnum)0, (float)0 };
-            yield return new object[] { (SByteEnum)1, (float)1 };
             yield return new object[] { (SByteEnum)1, (float)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (float)127 };
 
@@ -1940,41 +1606,18 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, (float)0 };
-
-            // string.
-            yield return new object[] { "-1", (float)(-1) };
-            yield return new object[] { "0", (float)0 };
-            yield return new object[] { "1", (float)1 };
-            yield return new object[] { "&h5", (float)5 };
-            yield return new object[] { "&h0", (float)0 };
-            yield return new object[] { "&o5", (float)5 };
-            yield return new object[] { " &o5", (float)5 };
-            yield return new object[] { "&o0", (float)0 };
-            yield return new object[] { 1.1.ToString(), (float)1.1 };
-            yield return new object[] { "18446744073709551616", float.Parse("1.844674E+19", NumberStyles.Any, CultureInfo.InvariantCulture) };
-            yield return new object[] { double.PositiveInfinity.ToString(), float.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity.ToString(), float.NegativeInfinity };
-            yield return new object[] { double.NaN.ToString(), float.NaN };
         }
 
         [Theory]
         [MemberData(nameof(ToSingle_Object_TestData))]
+        [MemberData(nameof(ToSingle_String_TestData))]
         public void ToSingle_Object_ReturnsExpected(object value, float expected)
         {
             AssertEqual(expected, Conversions.ToSingle(value));
         }
 
-        public static IEnumerable<object[]> ToSingle_InvalidObject_TestData()
-        {
-            yield return new object[] { char.MinValue };
-            yield return new object[] { (char)1 };
-            yield return new object[] { char.MaxValue };
-            yield return new object[] { new DateTime(10) };
-            yield return new object[] { new object() };
-        }
-
         [Theory]
-        [MemberData(nameof(ToSingle_InvalidObject_TestData))]
+        [MemberData(nameof(InvalidNumberObject_TestData))]
         [MemberData(nameof(InvalidString_TestData))]
         [MemberData(nameof(InvalidBool_TestData))]
         public void ToSingle_InvalidObject_ThrowsInvalidCastException(object value)
@@ -2042,12 +1685,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), (double)(-1) };
             yield return new object[] { (sbyte)0, (double)0 };
             yield return new object[] { (sbyte)1, (double)1 };
-            yield return new object[] { (sbyte)1, (double)1 };
             yield return new object[] { sbyte.MaxValue, (double)127 };
             yield return new object[] { (SByteEnum)sbyte.MinValue, (double)(-128) };
             yield return new object[] { (SByteEnum)(-1), (double)(-1) };
             yield return new object[] { (SByteEnum)0, (double)0 };
-            yield return new object[] { (SByteEnum)1, (double)1 };
             yield return new object[] { (SByteEnum)1, (double)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (double)127 };
 
@@ -2144,26 +1785,11 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, (double)0 };
-
-            // string.
-            yield return new object[] { "-1", (double)(-1) };
-            yield return new object[] { "0", (double)0 };
-            yield return new object[] { "1", (double)1 };
-            yield return new object[] { "&h5", (double)5 };
-            yield return new object[] { "&h0", (double)0 };
-            yield return new object[] { "&o5", (double)5 };
-            yield return new object[] { " &o5", (double)5 };
-            yield return new object[] { "&o0", (double)0 };
-            yield return new object[] { 1.1.ToString(), (double)1.1 };
-            yield return new object[] { "18446744073709551616", double.Parse("1.84467440737096E+19", NumberStyles.Any, CultureInfo.InvariantCulture) };
-            yield return new object[] { "1844674407370955161618446744073709551616", double.Parse("1.84467440737096E+39", NumberStyles.Any, CultureInfo.InvariantCulture) };
-            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity };
-            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity };
-            yield return new object[] { double.NaN.ToString(), double.NaN };
         }
 
         [Theory]
         [MemberData(nameof(ToDouble_Object_TestData))]
+        [MemberData(nameof(ToDouble_String_TestData))]
         public void ToDouble_Object_ReturnsExpected(object value, double expected)
         {
             AssertEqual(expected, Conversions.ToDouble(value));
@@ -2251,12 +1877,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), (decimal)(-1) };
             yield return new object[] { (sbyte)0, (decimal)0 };
             yield return new object[] { (sbyte)1, (decimal)1 };
-            yield return new object[] { (sbyte)1, (decimal)1 };
             yield return new object[] { sbyte.MaxValue, (decimal)127 };
             yield return new object[] { (SByteEnum)sbyte.MinValue, (decimal)(-128) };
             yield return new object[] { (SByteEnum)(-1), (decimal)(-1) };
             yield return new object[] { (SByteEnum)0, (decimal)0 };
-            yield return new object[] { (SByteEnum)1, (decimal)1 };
             yield return new object[] { (SByteEnum)1, (decimal)1 };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, (decimal)127 };
 
@@ -2343,22 +1967,11 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, (decimal)0 };
-
-            // string.
-            yield return new object[] { "-1", (decimal)(-1) };
-            yield return new object[] { "0", (decimal)0 };
-            yield return new object[] { "1", (decimal)1 };
-            yield return new object[] { "&h5", (decimal)5 };
-            yield return new object[] { "&h0", (decimal)0 };
-            yield return new object[] { "&o5", (decimal)5 };
-            yield return new object[] { " &o5", (decimal)5 };
-            yield return new object[] { "&o0", (decimal)0 };
-            yield return new object[] { 1.1.ToString(), (decimal)1.1 };
-            yield return new object[] { "18446744073709551616", decimal.Parse("18446744073709551616", CultureInfo.InvariantCulture) };
         }
 
         [Theory]
         [MemberData(nameof(ToDecimal_Object_TestData))]
+        [MemberData(nameof(ToDecimal_String_TestData))]
         public void ToDecimal_Object_ReturnsExpected(object value, decimal expected)
         {
             AssertEqual(expected, Conversions.ToDecimal(value));
@@ -2466,12 +2079,10 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)(-1), true };
             yield return new object[] { (sbyte)0, false };
             yield return new object[] { (sbyte)1, true };
-            yield return new object[] { (sbyte)1, true };
             yield return new object[] { sbyte.MaxValue, true };
             yield return new object[] { (SByteEnum)sbyte.MinValue, true };
             yield return new object[] { (SByteEnum)(-1), true };
             yield return new object[] { (SByteEnum)0, false };
-            yield return new object[] { (SByteEnum)1, true };
             yield return new object[] { (SByteEnum)1, true };
             yield return new object[] { (SByteEnum)sbyte.MaxValue, true };
 
@@ -2568,28 +2179,11 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, false };
-
-            // string.
-            yield return new object[] { "-1", true };
-            yield return new object[] { "0", false };
-            yield return new object[] { "1", true };
-            yield return new object[] { "&h5", true };
-            yield return new object[] { "&h0", false };
-            yield return new object[] { "&o5", true };
-            yield return new object[] { " &o5", true };
-            yield return new object[] { "&o0", false };
-            yield return new object[] { 1.1.ToString(), true };
-            yield return new object[] { "true", true };
-            yield return new object[] { "false", false };
-            yield return new object[] { "18446744073709551616", true };
-            yield return new object[] { "1844674407370955161618446744073709551616", true };
-            yield return new object[] { double.PositiveInfinity.ToString(), true };
-            yield return new object[] { double.NegativeInfinity.ToString(), true };
-            yield return new object[] { double.NaN.ToString(), true };
         }
 
         [Theory]
         [MemberData(nameof(ToBoolean_Object_TestData))]
+        [MemberData(nameof(ToBoolean_String_TestData))]
         public void ToBoolean_Object_ReturnsExpected(object value, bool expected)
         {
             AssertEqual(expected, Conversions.ToBoolean(value));
@@ -2656,33 +2250,11 @@ namespace Microsoft.VisualBasic.Tests
 
             // null.
             yield return new object[] { null, char.MinValue };
-
-            // string.
-            yield return new object[] { "", char.MinValue };
-            yield return new object[] { "-1", (char)45 };
-            yield return new object[] { "0", '0' };
-            yield return new object[] { "1", '1' };
-            yield return new object[] { "&h5", (char)38 };
-            yield return new object[] { "&h0", (char)38 };
-            yield return new object[] { "&o5", (char)38 };
-            yield return new object[] { " &o5", (char)32 };
-            yield return new object[] { "&o0", (char)38 };
-            yield return new object[] { "&", (char)38 };
-            yield return new object[] { "&a", (char)38 };
-            yield return new object[] { "&a0", (char)38 };
-            yield return new object[] { 1.1.ToString(), '1' };
-            yield return new object[] { "true", 't' };
-            yield return new object[] { "false", 'f' };
-            yield return new object[] { "invalid", 'i' };
-            yield return new object[] { "18446744073709551616", '1' };
-            yield return new object[] { "1844674407370955161618446744073709551616", '1' };
-            yield return new object[] { double.PositiveInfinity.ToString(), double.PositiveInfinity.ToString()[0] };
-            yield return new object[] { double.NegativeInfinity.ToString(), double.NegativeInfinity.ToString()[0] };
-            yield return new object[] { double.NaN.ToString(), 'N' };
         }
 
         [Theory]
         [MemberData(nameof(ToChar_Object_TestData))]
+        [MemberData(nameof(ToChar_String_TestData))]
         public void ToChar_Object_ReturnsExpected(object value, char expected)
         {
             AssertEqual(expected, Conversions.ToChar(value));
