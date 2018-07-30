@@ -384,8 +384,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
-    <Compile Include="System\Security\Cryptography\AesGcm.Unix.cs" />
-    <Compile Include="System\Security\Cryptography\AesCcm.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
@@ -598,8 +596,6 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\SecKeyPair.cs">
       <Link>Common\System\Security\Cryptography\SecKeyPair.cs</Link>
     </Compile>
-    <Compile Include="System\Security\Cryptography\AesGcm.OSX.cs" />
-    <Compile Include="System\Security\Cryptography\AesCcm.OSX.cs" />
     <Compile Include="Internal\Cryptography\AesImplementation.OSX.cs" />
     <Compile Include="Internal\Cryptography\AppleCCCryptor.cs" />
     <Compile Include="Internal\Cryptography\DesImplementation.OSX.cs" />
@@ -625,6 +621,8 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\ECDiffieHellmanDerivation.cs">
       <Link>Common\System\Security\Cryptography\ECDiffieHellmanDerivation.cs</Link>
     </Compile>
+    <Compile Include="System\Security\Cryptography\AesGcm.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\AesCcm.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Reference Include="System.Buffers" />

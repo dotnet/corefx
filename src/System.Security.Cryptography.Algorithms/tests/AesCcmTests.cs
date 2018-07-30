@@ -11,7 +11,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
 {
     public class AesCcmTests : AesAEADTests
     {
-        [Theory]
+        private static bool SupportsCcm => !PlatformDetection.IsUbuntu1404;
+
+        [ConditionalTheory(nameof(SupportsCcm))]
         [InlineData(0, 1)]
         [InlineData(0, 30)]
         [InlineData(1, 1)]
@@ -48,7 +50,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]
@@ -62,7 +64,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             Assert.Throws<CryptographicException>(() => new AesCcm(key));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [MemberData(nameof(GetInvalidNonceSizes))]
         public static void InvalidNonceSize(int nonceSize)
         {
@@ -81,7 +83,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [MemberData(nameof(GetValidNonceSizes))]
         public static void ValidNonceSize(int nonceSize)
         {
@@ -104,7 +106,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [MemberData(nameof(GetInvalidTagSizes))]
         public static void InvalidTagSize(int tagSize)
         {
@@ -123,7 +125,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [MemberData(nameof(GetValidTagSizes))]
         public static void ValidTagSize(int tagSize)
         {
@@ -146,7 +148,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void TwoEncryptionsAndDecryptionsUsingOneInstance()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
@@ -190,7 +192,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [InlineData(0, 1)]
         [InlineData(1, 0)]
         [InlineData(3, 4)]
@@ -212,13 +214,13 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void NullKey()
         {
             Assert.Throws<ArgumentNullException>(() => new AesCcm((byte[])null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void EncryptDecryptNullNonce()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
@@ -233,7 +235,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void EncryptDecryptNullPlaintext()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
@@ -248,7 +250,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void EncryptDecryptNullCiphertext()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
@@ -263,7 +265,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void EncryptDecryptNullTag()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
@@ -278,7 +280,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [MemberData(nameof(GetNistCcmTestCases))]
         public static void AesCcmNistTests(AEADTest testCase)
         {
@@ -296,7 +298,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(SupportsCcm))]
         [MemberData(nameof(GetNistCcmTestCases))]
         public static void AesCcmNistTestsTamperTag(AEADTest testCase)
         {

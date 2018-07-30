@@ -132,7 +132,7 @@ namespace System.Security.Cryptography
                 case 256: return Interop.Crypto.EvpAes256Ccm();
                 default:
                     Debug.Fail("Key size should already be validated");
-                    throw new PlatformNotSupportedException();
+                    return IntPtr.Zero;
             }
         }
 
