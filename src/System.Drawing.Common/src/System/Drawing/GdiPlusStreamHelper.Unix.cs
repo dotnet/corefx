@@ -34,6 +34,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if netcoreapp20
+using System.Buffers;
+#endif
+
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -41,6 +45,9 @@ namespace System.Drawing
 {
     internal sealed partial class GdiPlusStreamHelper
     {
+#if netcoreapp20
+        private const int DefaultBufferSize = 4096;
+#endif
         private Stream _stream;
 
         public unsafe GdiPlusStreamHelper(Stream stream, bool seekToOrigin)
@@ -62,12 +69,12 @@ namespace System.Drawing
                 _stream.Seek(0, SeekOrigin.Begin);
             }
 
-            CloseDelegate = new StreamCloseDelegate(StreamCloseImpl);
-            GetBytesDelegate = new StreamGetBytesDelegate(StreamGetBytesImpl);
-            GetHeaderDelegate = new StreamGetHeaderDelegate(StreamGetHeaderImpl);
-            PutBytesDelegate = new StreamPutBytesDelegate(StreamPutBytesImpl);
-            SeekDelegate = new StreamSeekDelegate(StreamSeekImpl);
-            SizeDelegate = new StreamSizeDelegate(StreamSizeImpl);
+            CloseDelegate = StreamCloseImpl;
+            GetBytesDelegate = StreamGetBytesImpl;
+            GetHeaderDelegate = StreamGetHeaderImpl;
+            PutBytesDelegate = StreamPutBytesImpl;
+            SeekDelegate = StreamSeekImpl;
+            SizeDelegate = StreamSizeImpl;
         }
 
         public unsafe int StreamGetHeaderImpl(byte* buf, int bufsz)
@@ -94,7 +101,7 @@ namespace System.Drawing
             {
                 // Stream Span API isn't available in 2.0
 #if netcoreapp20
-                byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(Math.Max(DefaultBufferSize, bufsz));
                 read = _stream.Read(buffer, 0, bufsz);
                 Marshal.Copy(buffer, 0, (IntPtr)buf, read);
                 ArrayPool<byte>.Shared.Return(buffer);
@@ -133,7 +140,7 @@ namespace System.Drawing
 
             // Stream Span API isn't available in 2.0
 #if netcoreapp20
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(Math.Max(DefaultBufferSize, bufsz));
             Marshal.Copy((IntPtr)buf, buffer, 0, bufsz);
             _stream.Write(buffer, 0, bufsz);
             ArrayPool<byte>.Shared.Return(buffer);
