@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Security.Cryptography.Asn1;
+using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -58,54 +60,35 @@ namespace System.Security.Cryptography.X509Certificates
                     SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name));
             }
 
-            // RSASSA-PSS-params comes from RFC 4055, section 3.1:
-            // https://tools.ietf.org/html/rfc4055#section-3.1
-            //
-            // RSASSA-PSS-params  ::=  SEQUENCE  {
-            //   hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
-            //   maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
-            //   saltLength         [2] INTEGER DEFAULT 20,
-            //   trailerField       [3] INTEGER DEFAULT 1  }
-            //
-            // mgf1SHA1Identifier  AlgorithmIdentifier  ::= { id-mgf1, sha1Identifier }
-            // sha1Identifier  AlgorithmIdentifier  ::=  { id-sha1, NULL }
-            // (and similar for SHA256/384/512)
-            //
-            // RFC 5754 says that the NULL for SHA2 (256/384/512) MUST be omitted
-            // (https://tools.ietf.org/html/rfc5754#section-2) (and that you MUST
-            // be able to read it even if someone wrote it down)
+            RSAPssParamAsn parameters = new RSAPssParamAsn
+            {
+                HashAlgorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(digestOid) },
+                MaskGenAlgorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(Oids.Mgf1) },
+                SaltLength = cbSalt,
+                TrailerField = 1,
+            };
 
-            // Since we
-            //  * don't support SHA-1 in this class
-            //  * only support MGF-1
-            //  * don't support the MGF PRF being different than hashAlgorithm
-            //  * use saltLength==hashLength
-            //  * don't allow custom trailer
-            // we don't have to worry about any of the DEFAULTs. (specify, specify, specify, omit).
+            using (AsnWriter mgfParamWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                mgfParamWriter.PushSequence();
+                mgfParamWriter.WriteObjectIdentifier(digestOid);
+                mgfParamWriter.PopSequence();
+                parameters.MaskGenAlgorithm.Parameters = mgfParamWriter.Encode();
+            }
 
-            byte[][] hashAlgorithmAlgId = DerEncoder.ConstructSegmentedSequence(
-                DerEncoder.SegmentedEncodeOid(digestOid));
+            using (AsnWriter writer = AsnSerializer.Serialize(parameters, AsnEncodingRules.DER))
+            {
+                AlgorithmIdentifierAsn identifier = new AlgorithmIdentifierAsn
+                {
+                    Algorithm = new Oid(Oids.RsaSsaPss),
+                    Parameters = writer.Encode(),
+                };
 
-            byte[][] hashAlgorithmField = DerEncoder.ConstructSegmentedSequence(hashAlgorithmAlgId);
-            hashAlgorithmField[0][0] = DerSequenceReader.ContextSpecificConstructedTag0;
-
-            byte[][] maskGenField = DerEncoder.ConstructSegmentedSequence(
-                DerEncoder.ConstructSegmentedSequence(
-                    DerEncoder.SegmentedEncodeOid(Oids.Mgf1),
-                    hashAlgorithmAlgId));
-            maskGenField[0][0] = DerSequenceReader.ContextSpecificConstructedTag1;
-
-            byte[][] saltLengthField = DerEncoder.ConstructSegmentedSequence(
-                DerEncoder.SegmentedEncodeUnsignedInteger(cbSalt));
-            saltLengthField[0][0] = DerSequenceReader.ContextSpecificConstructedTag2;
-
-            return DerEncoder.ConstructSequence(
-                DerEncoder.SegmentedEncodeOid(Oids.RsaSsaPss),
-                // RSASSA-PSS-params
-                DerEncoder.ConstructSegmentedSequence(
-                    hashAlgorithmField,
-                    maskGenField,
-                    saltLengthField));
+                using (AsnWriter identifierWriter = AsnSerializer.Serialize(identifier, AsnEncodingRules.DER))
+                {
+                    return identifierWriter.Encode();
+                }
+            }
         }
 
         public override byte[] SignData(byte[] data, HashAlgorithmName hashAlgorithm)

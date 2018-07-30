@@ -110,6 +110,7 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificationRequestAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificationRequestInfoAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\KeyUsageFlagsAsn.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\RSAPssParamAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\TbsCertificateAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\TimeAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\ValidityAsn.cs" />

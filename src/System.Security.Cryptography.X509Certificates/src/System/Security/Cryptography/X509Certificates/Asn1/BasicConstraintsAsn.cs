@@ -10,8 +10,8 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     // https://tools.ietf.org/html/rfc5280#section-4.2.1.9
     //
     // BasicConstraints ::= SEQUENCE {
-    //   cA                      BOOLEAN DEFAULT FALSE,
-    //   pathLenConstraint       INTEGER (0..MAX) OPTIONAL
+    //     cA                      BOOLEAN DEFAULT FALSE,
+    //     pathLenConstraint       INTEGER (0..MAX) OPTIONAL
     // }
     [StructLayout(LayoutKind.Sequential)]
     internal struct BasicConstraintsAsn
