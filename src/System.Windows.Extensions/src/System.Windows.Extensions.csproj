@@ -27,6 +27,30 @@
     <Compile Include="$(CommonPath)\Interop\Windows\CryptUI\Interop.CryptUIDlgCertificate.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.CryptUIDlgCertificate.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.MessageBeep.cs">
+      <Link>Common\Interop\Windows\User32\Interop.MessageBeep.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.MMCKINFO.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.MMCKINFO.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.mmioAscend.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.mmioAscend.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.mmioClose.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.mmioClose.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.mmioDescend.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.mmioDescend.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.mmioRead.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.mmioRead.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.mmioOpen.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.mmioOpen.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\winmm\Interop.PlaySound.cs">
+      <Link>Common\Interop\Windows\winmm\Interop.PlaySound.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -42,9 +66,21 @@
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.ComponentModel.EventBasedAsync" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Net.Requests" />
     <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Media\SoundPlayer.cs" />
+    <Compile Include="System\Media\SystemSound.cs" />
+    <Compile Include="System\Media\SystemSounds.cs" />
   </ItemGroup>
 </Project>
