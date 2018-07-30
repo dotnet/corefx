@@ -41,8 +41,8 @@ namespace System.Security.Cryptography
             using (SafeEvpCipherCtxHandle ctx = Interop.Crypto.EvpCipherCreatePartial(GetCipher(_key.Length * 8)))
             {
                 Interop.Crypto.CheckValidOpenSslHandle(ctx);
-                Interop.Crypto.EvpCipherSetGcmTagLength(ctx, tag.Length);
-                Interop.Crypto.EvpCipherSetGcmNonceLength(ctx, nonce.Length);
+                Interop.Crypto.EvpCipherSetCcmTagLength(ctx, tag.Length);
+                Interop.Crypto.EvpCipherSetCcmNonceLength(ctx, nonce.Length);
                 Interop.Crypto.EvpCipherSetKeyAndIV(ctx, _key, nonce, Interop.Crypto.EvpCipherDirection.Encrypt);
 
                 if (associatedData.Length != 0)
