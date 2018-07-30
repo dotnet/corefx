@@ -75,7 +75,7 @@ namespace Internal.Cryptography.Pal
             if (hasPathLengthConstraint)
                 constraints.PathLengthConstraint = pathLengthConstraint;
 
-            using (AsnWriter writer = AsnSerializer.Serialize(constraints, AsnEncodingRules.BER))
+            using (AsnWriter writer = AsnSerializer.Serialize(constraints, AsnEncodingRules.DER))
             {
                 return writer.Encode();
             }
@@ -192,7 +192,7 @@ namespace Internal.Cryptography.Pal
             spki.Algorithm = new AlgorithmIdentifierAsn { Algorithm = key.Oid, Parameters = key.EncodedParameters.RawData };
             spki.SubjectPublicKey = key.EncodedKeyValue.RawData;
 
-            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.BER))
+            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
             using (SHA1 hash = SHA1.Create())
             {
                 return hash.ComputeHash(writer.Encode());
