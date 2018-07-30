@@ -103,7 +103,7 @@ namespace Internal.Cryptography.Pal
                 out bool hasPathLengthConstraint,
                 out int pathLengthConstraint)
         {
-            BasicConstraintsAsn constraints = AsnSerializer.Deserialize<BasicConstraintsAsn>(encoded, AsnEncodingRules.DER);
+            BasicConstraintsAsn constraints = AsnSerializer.Deserialize<BasicConstraintsAsn>(encoded, AsnEncodingRules.BER);
             certificateAuthority = constraints.CA;
             hasPathLengthConstraint = constraints.PathLengthConstraint.HasValue;
             pathLengthConstraint = constraints.PathLengthConstraint.GetValueOrDefault();
@@ -140,7 +140,7 @@ namespace Internal.Cryptography.Pal
             //
             // KeyPurposeId ::= OBJECT IDENTIFIER
 
-            Oid[] keyUsages = AsnSerializer.Deserialize<Oid[]>(encoded, AsnEncodingRules.DER);
+            Oid[] keyUsages = AsnSerializer.Deserialize<Oid[]>(encoded, AsnEncodingRules.BER);
             usages = new OidCollection();
             foreach (Oid KeyPurposeId in keyUsages)
                 usages.Add(KeyPurposeId);
@@ -173,7 +173,7 @@ namespace Internal.Cryptography.Pal
 
         internal static byte[] DecodeX509SubjectKeyIdentifierExtension(byte[] encoded)
         {
-            AsnReader reader = new AsnReader(encoded, AsnEncodingRules.DER);
+            AsnReader reader = new AsnReader(encoded, AsnEncodingRules.BER);
             ReadOnlyMemory<byte> contents;
             if (!reader.TryGetPrimitiveOctetStringBytes(out contents))
             {
