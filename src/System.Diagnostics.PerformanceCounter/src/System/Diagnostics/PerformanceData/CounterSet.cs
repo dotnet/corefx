@@ -45,7 +45,7 @@ namespace System.Diagnostics.PerformanceData
             }
             if (!PerfProviderCollection.ValidateCounterSetInstanceType(instanceType))
             {
-                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterSetInstanceType, instanceType), "instanceType");
+                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterSetInstanceType, instanceType), nameof(instanceType));
             }
 
             m_providerGuid = providerGuid;
@@ -110,7 +110,7 @@ namespace System.Diagnostics.PerformanceData
             }
             if (!PerfProviderCollection.ValidateCounterType(counterType))
             {
-                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterType, counterType), "counterType");
+                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterType, counterType), nameof(counterType));
             }
             if (m_instanceCreated)
             {
@@ -125,7 +125,7 @@ namespace System.Diagnostics.PerformanceData
                 }
                 if (m_idToCounter.ContainsKey(counterId))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, m_counterSet), "CounterId");
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, m_counterSet), nameof(counterId));
                 }
 
                 m_idToCounter.Add(counterId, counterType);
@@ -139,19 +139,19 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="counterType">One of defined CounterType values</param>
         /// <param name="counterName">This is friendly name to help provider developers as indexer. and it might not match what is displayed in counter consumption applications lie perfmon.</param>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        public void AddCounter(int counterId, CounterType counterType, String counterName)
+        public void AddCounter(int counterId, CounterType counterType, string counterName)
         {
             if (counterName == null)
             {
-                throw new ArgumentNullException("CounterName");
+                throw new ArgumentNullException(nameof(counterName));
             }
             if (counterName.Length == 0)
             {
-                throw new ArgumentException(SR.Perflib_Argument_EmptyCounterName, "counterName");
+                throw new ArgumentException(SR.Perflib_Argument_EmptyCounterName, nameof(counterName));
             }
             if (!PerfProviderCollection.ValidateCounterType(counterType))
             {
-                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterType, counterType), "counterType");
+                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterType, counterType), nameof(counterType));
             }
             if (m_provider == null)
             {
@@ -170,11 +170,11 @@ namespace System.Diagnostics.PerformanceData
                 }
                 if (m_stringToId.ContainsKey(counterName))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterNameAlreadyExists, counterName, m_counterSet), "CounterName");
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterNameAlreadyExists, counterName, m_counterSet), nameof(counterName));
                 }
                 if (m_idToCounter.ContainsKey(counterId))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, m_counterSet), "CounterId");
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, m_counterSet), nameof(counterId));
                 }
 
                 m_stringToId.Add(counterName, counterId);
@@ -186,17 +186,17 @@ namespace System.Diagnostics.PerformanceData
         /// Create instances of the CounterSet. Created CounterSetInstance identifies active identity and tracks raw counter data for that identity.
         /// </summary>
         /// <param name="instanceName">Friendly name identifies the instance. InstanceName would be shown in counter consumption applications like perfmon.</param>
-        /// <returns>CounterSetInstance object</returns>        
+        /// <returns>CounterSetInstance object</returns>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         public CounterSetInstance CreateCounterSetInstance(string instanceName)
         {
             if (instanceName == null)
             {
-                throw new ArgumentNullException("instanceName");
+                throw new ArgumentNullException(nameof(instanceName));
             }
             if (instanceName.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.Perflib_Argument_EmptyInstanceName), "instanceName");
+                throw new ArgumentException(SR.Format(SR.Perflib_Argument_EmptyInstanceName), nameof(instanceName));
             }
             if (m_provider == null)
             {

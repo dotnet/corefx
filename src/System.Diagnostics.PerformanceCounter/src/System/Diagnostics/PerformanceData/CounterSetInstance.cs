@@ -18,23 +18,23 @@ namespace System.Diagnostics.PerformanceData
         internal CounterSet m_counterSet;
         internal string m_instName;
         private int m_active;
-        private CounterSetInstanceCounterDataSet m_counters;        
+        private CounterSetInstanceCounterDataSet m_counters;
         unsafe internal UnsafeNativeMethods.PerfCounterSetInstanceStruct* m_nativeInst;
-        
+
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         internal CounterSetInstance(CounterSet counterSetDefined, string instanceName)
         {
             if (counterSetDefined == null)
             {
-                throw new ArgumentNullException("counterSetDefined");
+                throw new ArgumentNullException(nameof(counterSetDefined));
             }
             if (instanceName == null)
             {
-                throw new ArgumentNullException("InstanceName");
+                throw new ArgumentNullException(nameof(instanceName));
             }
             if (instanceName.Length == 0)
             {
-                throw new ArgumentException(SR.Perflib_Argument_EmptyInstanceName, "InstanceName");
+                throw new ArgumentException(SR.Perflib_Argument_EmptyInstanceName, nameof(instanceName));
             }
 
             m_counterSet = counterSetDefined;
@@ -58,7 +58,7 @@ namespace System.Diagnostics.PerformanceData
                     switch (Status)
                     {
                         case (int)UnsafeNativeMethods.ERROR_ALREADY_EXISTS:
-                            throw new ArgumentException(SR.Format(SR.Perflib_Argument_InstanceAlreadyExists, m_instName, m_counterSet.m_counterSet), "InstanceName");
+                            throw new ArgumentException(SR.Format(SR.Perflib_Argument_InstanceAlreadyExists, m_instName, m_counterSet.m_counterSet), nameof(instanceName));
 
                         case (int)UnsafeNativeMethods.ERROR_NOT_FOUND:
                             throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterSetNotInstalled, m_counterSet.m_counterSet));
@@ -66,7 +66,7 @@ namespace System.Diagnostics.PerformanceData
                         case (int)UnsafeNativeMethods.ERROR_INVALID_PARAMETER:
                             if (m_counterSet.m_instType == CounterSetInstanceType.Single)
                             {
-                                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidInstance, m_counterSet.m_counterSet), "InstanceName");
+                                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidInstance, m_counterSet.m_counterSet), nameof(instanceName));
                             }
                             else
                             {
@@ -81,18 +81,18 @@ namespace System.Diagnostics.PerformanceData
 
             m_active = 1;
         }
-        
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         ~CounterSetInstance()
         {
             Dispose(false);
         }
-        
+
         private void Dispose(bool disposing)
         {
             if (disposing)

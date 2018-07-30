@@ -16,7 +16,7 @@ namespace System.Diagnostics.PerformanceData
     /// CounterSetInstanceCounterDataSet, which is part of CounterSetInstance.
     /// </summary>    
     public sealed class CounterData
-    {        
+    {
         unsafe private long* m_offset;
 
         /// <summary>
@@ -34,14 +34,14 @@ namespace System.Diagnostics.PerformanceData
         /// Value property it used to query/update actual raw counter data.
         /// </summary>
         public long Value
-        {            
+        {
             get
             {
                 unsafe
                 {
                     return Interlocked.Read(ref (*m_offset));
                 }
-            }            
+            }
             set
             {
                 unsafe
@@ -50,7 +50,7 @@ namespace System.Diagnostics.PerformanceData
                 }
             }
         }
-        
+
         public void Increment()
         {
             unsafe
@@ -58,7 +58,7 @@ namespace System.Diagnostics.PerformanceData
                 Interlocked.Increment(ref (*m_offset));
             }
         }
-        
+
         public void Decrement()
         {
             unsafe
@@ -66,7 +66,7 @@ namespace System.Diagnostics.PerformanceData
                 Interlocked.Decrement(ref (*m_offset));
             }
         }
-       
+
         public void IncrementBy(long value)
         {
             unsafe
@@ -81,14 +81,14 @@ namespace System.Diagnostics.PerformanceData
         /// for performance-critical single-threaded access.
         /// </summary>
         public long RawValue
-        {            
+        {
             get
             {
                 unsafe
                 {
                     return (*m_offset);
                 }
-            }            
+            }
             set
             {
                 unsafe
@@ -107,9 +107,9 @@ namespace System.Diagnostics.PerformanceData
     {
         internal CounterSetInstance m_instance;
         private Dictionary<int, CounterData> m_counters;
-        private int m_disposed;        
+        private int m_disposed;
         unsafe internal byte* m_dataBlock;
-        
+
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst)
         {
@@ -166,18 +166,18 @@ namespace System.Diagnostics.PerformanceData
                 }
             }
         }
-        
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         ~CounterSetInstanceCounterDataSet()
         {
             Dispose(false);
         }
-        
+
         private void Dispose(bool disposing)
         {
             if (Interlocked.Exchange(ref m_disposed, 1) == 0)
@@ -235,11 +235,11 @@ namespace System.Diagnostics.PerformanceData
             {
                 if (counterName == null)
                 {
-                    throw new ArgumentNullException("CounterName");
+                    throw new ArgumentNullException(nameof(counterName));
                 }
                 if (counterName.Length == 0)
                 {
-                    throw new ArgumentNullException("CounterName");
+                    throw new ArgumentNullException(nameof(counterName));
                 }
                 if (m_disposed != 0)
                 {
