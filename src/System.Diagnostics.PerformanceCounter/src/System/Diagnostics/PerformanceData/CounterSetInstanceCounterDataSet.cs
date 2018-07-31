@@ -186,7 +186,7 @@ namespace System.Diagnostics.PerformanceData
                     if (_dataBlock != null)
                     {
                         // Need to free allocated heap memory that is used to store all raw counter data.
-                        Marshal.FreeHGlobal((System.IntPtr)_dataBlock);
+                        Marshal.FreeHGlobal((IntPtr)_dataBlock);
                         _dataBlock = null;
                     }
                 }
