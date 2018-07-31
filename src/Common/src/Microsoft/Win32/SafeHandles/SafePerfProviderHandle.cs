@@ -14,14 +14,8 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            IntPtr tempProviderHandle = handle;
-
-            if (Interlocked.Exchange(ref handle, IntPtr.Zero) != IntPtr.Zero)
-            {
-                uint Status = UnsafeNativeMethods.PerfStopProvider(tempProviderHandle);
-                Debug.Assert(Status == (uint)UnsafeNativeMethods.ERROR_SUCCESS, "PerfStopProvider() fails");
-                // ERROR_INVALID_PARAMETER
-            }
+            uint Status = Interop.PerfCounter.PerfStopProvider(handle);
+            Debug.Assert(Status == (uint)Interop.Errors.ERROR_SUCCESS, "PerfStopProvider() fails");
             return true;
         }
     }

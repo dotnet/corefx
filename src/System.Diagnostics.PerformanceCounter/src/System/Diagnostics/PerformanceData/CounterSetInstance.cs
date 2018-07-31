@@ -6,23 +6,21 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace System.Diagnostics.PerformanceData
 {
     /// <summary>
-    /// CounterSetInstance class maps to "Instace" in native performance counter implementation.
+    /// CounterSetInstance class maps to "Instance" in native performance counter implementation.
     /// </summary>
     public sealed class CounterSetInstance : IDisposable
     {
-        internal CounterSet m_counterSet;
-        internal string m_instName;
-        private int m_active;
-        private CounterSetInstanceCounterDataSet m_counters;
-        unsafe internal UnsafeNativeMethods.PerfCounterSetInstanceStruct* m_nativeInst;
+        internal CounterSet _counterSet;
+        internal string _instName;
+        private int _active;
+        unsafe internal Interop.PerfCounter.PerfCounterSetInstanceStruct* _nativeInst;
 
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
-        internal CounterSetInstance(CounterSet counterSetDefined, string instanceName)
+        internal unsafe CounterSetInstance(CounterSet counterSetDefined, string instanceName)
         {
             if (counterSetDefined == null)
             {
@@ -37,49 +35,49 @@ namespace System.Diagnostics.PerformanceData
                 throw new ArgumentException(SR.Perflib_Argument_EmptyInstanceName, nameof(instanceName));
             }
 
-            m_counterSet = counterSetDefined;
-            m_instName = instanceName;
-            unsafe
+            _counterSet = counterSetDefined;
+            _instName = instanceName;
+
+            Debug.Assert(sizeof(Interop.PerfCounter.PerfCounterSetInstanceStruct) == 32);
+
+            _nativeInst = Interop.PerfCounter.PerfCreateInstance(
+                    _counterSet._provider._hProvider, ref _counterSet._counterSet, _instName, 0);
+            int Status = (int)((_nativeInst != null) ? Interop.Errors.ERROR_SUCCESS : Marshal.GetLastWin32Error());
+            if (_nativeInst != null)
             {
-                m_nativeInst = UnsafeNativeMethods.PerfCreateInstance(
-                        m_counterSet.m_provider.m_hProvider, ref m_counterSet.m_counterSet, m_instName, 0);
-                int Status = (int)((m_nativeInst != null) ? UnsafeNativeMethods.ERROR_SUCCESS : Marshal.GetLastWin32Error());
-                if (m_nativeInst != null)
+                Counters = new CounterSetInstanceCounterDataSet(this);
+            }
+            else
+            {
+                // ERROR_INVALID_PARAMETER,
+                // ERROR_NOT_FOUND (cannot find installed CounterSet),
+                // ERROR_ALREADY_EXISTS,
+                // ERROR_NOT_ENOUGH_MEMORY
+
+                switch (Status)
                 {
-                    m_counters = new CounterSetInstanceCounterDataSet(this);
-                }
-                else
-                {
-                    // ERROR_INVALID_PARAMETER,
-                    // ERROR_NOT_FOUND (cannot find installed CounterSet),
-                    // ERROR_ALREADY_EXISTS,
-                    // ERROR_NOT_ENOUGH_MEMORY
+                    case (int)Interop.Errors.ERROR_ALREADY_EXISTS:
+                        throw new ArgumentException(SR.Format(SR.Perflib_Argument_InstanceAlreadyExists, _instName, _counterSet._counterSet), nameof(instanceName));
 
-                    switch (Status)
-                    {
-                        case (int)UnsafeNativeMethods.ERROR_ALREADY_EXISTS:
-                            throw new ArgumentException(SR.Format(SR.Perflib_Argument_InstanceAlreadyExists, m_instName, m_counterSet.m_counterSet), nameof(instanceName));
+                    case (int)Interop.Errors.ERROR_NOT_FOUND:
+                        throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterSetNotInstalled, _counterSet._counterSet));
 
-                        case (int)UnsafeNativeMethods.ERROR_NOT_FOUND:
-                            throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterSetNotInstalled, m_counterSet.m_counterSet));
-
-                        case (int)UnsafeNativeMethods.ERROR_INVALID_PARAMETER:
-                            if (m_counterSet.m_instType == CounterSetInstanceType.Single)
-                            {
-                                throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidInstance, m_counterSet.m_counterSet), nameof(instanceName));
-                            }
-                            else
-                            {
-                                throw new Win32Exception(Status);
-                            }
-
-                        default:
+                    case (int)Interop.Errors.ERROR_INVALID_PARAMETER:
+                        if (_counterSet._instType == CounterSetInstanceType.Single)
+                        {
+                            throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidInstance, _counterSet._counterSet), nameof(instanceName));
+                        }
+                        else
+                        {
                             throw new Win32Exception(Status);
-                    }
+                        }
+
+                    default:
+                        throw new Win32Exception(Status);
                 }
             }
 
-            m_active = 1;
+            _active = 1;
         }
 
         public void Dispose()
@@ -97,29 +95,23 @@ namespace System.Diagnostics.PerformanceData
         {
             if (disposing)
             {
-                if (m_counters != null)
+                if (Counters != null)
                 {
-                    m_counters.Dispose();
-                    m_counters = null;
+                    Counters.Dispose();
+                    Counters = null;
                 }
             }
             unsafe
             {
-                if (m_nativeInst != null)
+                if (_nativeInst != null && Interlocked.Exchange(ref _active, 0) != 0)
                 {
-                    if (Interlocked.Exchange(ref m_active, 0) != 0)
+                    lock (_counterSet)
                     {
-                        if (m_nativeInst != null)
+                        if (_counterSet._provider != null)
                         {
-                            lock (m_counterSet)
-                            {
-                                if (m_counterSet.m_provider != null)
-                                {
-                                    uint Status = UnsafeNativeMethods.PerfDeleteInstance(m_counterSet.m_provider.m_hProvider, m_nativeInst);
-                                }
-                                m_nativeInst = null;
-                            }
+                            uint Status = Interop.PerfCounter.PerfDeleteInstance(_counterSet._provider._hProvider, _nativeInst);
                         }
+                        _nativeInst = null;
                     }
                 }
             }
@@ -129,9 +121,6 @@ namespace System.Diagnostics.PerformanceData
         /// Access CounterSetInstanceCounterDataSet property. Developers can then use defined indexer to access
         /// specific CounterData object to query/update raw counter data.
         /// </summary>
-        public CounterSetInstanceCounterDataSet Counters
-        {
-            get { return m_counters; }
-        }
+        public CounterSetInstanceCounterDataSet Counters { get; private set; }
     }
 }

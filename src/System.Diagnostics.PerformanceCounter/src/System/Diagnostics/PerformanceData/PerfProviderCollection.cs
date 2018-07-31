@@ -6,23 +6,22 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics.PerformanceData
 {
     internal sealed class PerfProvider
     {
-        internal Guid m_providerGuid;
-        internal int m_counterSet;        
-        internal SafePerfProviderHandle m_hProvider;
+        internal Guid _providerGuid;
+        internal int _counterSet;
+        internal SafePerfProviderHandle _hProvider;
         
         internal PerfProvider(Guid providerGuid)
         {
-            m_providerGuid = providerGuid;
-            uint Status = UnsafeNativeMethods.PerfStartProvider(ref m_providerGuid, null, out m_hProvider);
+            _providerGuid = providerGuid;
+            uint Status = Interop.PerfCounter.PerfStartProvider(ref _providerGuid, null, out _hProvider);
             // ERROR_INVALID_PARAMETER, ERROR_OUTOFMEMORY
-            if (Status != (uint)UnsafeNativeMethods.ERROR_SUCCESS)
+            if (Status != (uint)Interop.Errors.ERROR_SUCCESS)
             {
                 throw new Win32Exception((int)Status);
             }
@@ -60,7 +59,7 @@ namespace System.Diagnostics.PerformanceData
             {
                 foreach (PerfProvider ProviderEntry in s_providerList)
                 {
-                    if (ProviderEntry.m_providerGuid == providerGuid)
+                    if (ProviderEntry._providerGuid == providerGuid)
                     {
                         return ProviderEntry;
                     }
@@ -80,14 +79,14 @@ namespace System.Diagnostics.PerformanceData
 
                 foreach (PerfProvider ProviderEntry in s_providerList)
                 {
-                    if (ProviderEntry.m_providerGuid == providerGuid)
+                    if (ProviderEntry._providerGuid == providerGuid)
                     {
                         MatchedProvider = ProviderEntry;
                     }
                 }
                 if (MatchedProvider != null)
                 {
-                    MatchedProvider.m_hProvider.Dispose();
+                    MatchedProvider._hProvider.Dispose();
                     s_providerList.Remove(MatchedProvider);
                 }
             }

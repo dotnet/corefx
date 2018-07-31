@@ -290,10 +290,7 @@
   </data>
   <data name="PlatformNotSupported_PerfCounters" xml:space="preserve">
     <value>Performance Counters are not supported on this platform.</value>
-  </data>
-  <data name="Perflib_PlatformNotSupported" xml:space="preserve">
-    <value>Classes in System.Diagnostics.PerformanceData is only supported in Windows Vista and above.</value>
-  </data>
+  </data>  
   <data name="Perflib_Argument_InvalidCounterSetInstanceType" xml:space="preserve">
     <value>CounterSetInstanceType '{0}' is not a valid CounterSetInstanceType.</value>
   </data>
@@ -329,10 +326,7 @@
   </data>
   <data name="Perflib_InvalidOperation_CounterSetContainsNoCounter" xml:space="preserve">
     <value>CounterSet '{0}' does not include any counters.</value>
-  </data>
-  <data name="Perflib_InsufficientMemory_CounterSetTemplate" xml:space="preserve">
-    <value>Cannot allocate memory for CounterSet '{0}' template with size '{1}'.</value>
-  </data>
+  </data>  
   <data name="Perflib_Argument_CounterSetAlreadyRegister" xml:space="preserve">
     <value>CounterSet '{0}' already registered.</value>
   </data>

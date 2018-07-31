@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace System.Diagnostics.PerformanceData
 {
@@ -19,15 +18,14 @@ namespace System.Diagnostics.PerformanceData
     /// </summary>    
     public class CounterSet : IDisposable
     {
-        private static readonly bool s_platformNotSupported = (Environment.OSVersion.Version.Major < 6);
-        internal PerfProvider m_provider;
-        internal Guid m_providerGuid;
-        internal Guid m_counterSet;
-        internal CounterSetInstanceType m_instType;
-        private readonly object m_lockObject;
-        private bool m_instanceCreated;
-        internal Dictionary<string, int> m_stringToId;
-        internal Dictionary<int, CounterType> m_idToCounter;
+        internal PerfProvider _provider;
+        internal Guid _providerGuid;
+        internal Guid _counterSet;
+        internal CounterSetInstanceType _instType;
+        private readonly object _lockObject;
+        private bool _instanceCreated;
+        internal Dictionary<string, int> _stringToId;
+        internal Dictionary<int, CounterType> _idToCounter;
 
         /// <summary>
         /// CounterSet constructor.
@@ -38,24 +36,19 @@ namespace System.Diagnostics.PerformanceData
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "guid", Justification = "Approved")]
         public CounterSet(Guid providerGuid, Guid counterSetGuid, CounterSetInstanceType instanceType)
         {
-            // Check only the mayor version, only support Windows Vista and later.
-            if (s_platformNotSupported)
-            {
-                throw new System.PlatformNotSupportedException(SR.Perflib_PlatformNotSupported);
-            }
             if (!PerfProviderCollection.ValidateCounterSetInstanceType(instanceType))
             {
                 throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterSetInstanceType, instanceType), nameof(instanceType));
             }
 
-            m_providerGuid = providerGuid;
-            m_counterSet = counterSetGuid;
-            m_instType = instanceType;
-            PerfProviderCollection.RegisterCounterSet(m_counterSet);
-            m_provider = PerfProviderCollection.QueryProvider(m_providerGuid);
-            m_lockObject = new object();
-            m_stringToId = new Dictionary<string, int>();
-            m_idToCounter = new Dictionary<int, CounterType>();
+            _providerGuid = providerGuid;
+            _counterSet = counterSetGuid;
+            _instType = instanceType;
+            PerfProviderCollection.RegisterCounterSet(_counterSet);
+            _provider = PerfProviderCollection.QueryProvider(_providerGuid);
+            _lockObject = new object();
+            _stringToId = new Dictionary<string, int>();
+            _idToCounter = new Dictionary<int, CounterType>();
         }
 
         public void Dispose()
@@ -69,27 +62,24 @@ namespace System.Diagnostics.PerformanceData
             Dispose(false);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
             lock (this)
             {
-                PerfProviderCollection.UnregisterCounterSet(m_counterSet);
-                if (m_instanceCreated)
+                PerfProviderCollection.UnregisterCounterSet(_counterSet);
+
+                if (_instanceCreated && _provider != null)
                 {
-                    if (m_provider != null)
+                    lock (_lockObject)
                     {
-                        lock (m_lockObject)
+                        if (_provider != null)
                         {
-                            if (m_provider != null)
+                            Interlocked.Decrement(ref _provider._counterSet);
+                            if (_provider._counterSet <= 0)
                             {
-                                Interlocked.Decrement(ref m_provider.m_counterSet);
-                                if (m_provider.m_counterSet <= 0)
-                                {
-                                    PerfProviderCollection.RemoveProvider(m_providerGuid);
-                                }
-                                m_provider = null;
+                                PerfProviderCollection.RemoveProvider(_providerGuid);
                             }
+                            _provider = null;
                         }
                     }
                 }
@@ -104,31 +94,31 @@ namespace System.Diagnostics.PerformanceData
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         public void AddCounter(int counterId, CounterType counterType)
         {
-            if (m_provider == null)
+            if (_provider == null)
             {
-                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, m_providerGuid));
+                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, _providerGuid));
             }
             if (!PerfProviderCollection.ValidateCounterType(counterType))
             {
                 throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterType, counterType), nameof(counterType));
             }
-            if (m_instanceCreated)
+            if (_instanceCreated)
             {
-                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, m_counterSet));
+                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, _counterSet));
             }
 
-            lock (m_lockObject)
+            lock (_lockObject)
             {
-                if (m_instanceCreated)
+                if (_instanceCreated)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, m_counterSet));
+                    throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, _counterSet));
                 }
-                if (m_idToCounter.ContainsKey(counterId))
+                if (_idToCounter.ContainsKey(counterId))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, m_counterSet), nameof(counterId));
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, _counterSet), nameof(counterId));
                 }
 
-                m_idToCounter.Add(counterId, counterType);
+                _idToCounter.Add(counterId, counterType);
             }
         }
 
@@ -153,32 +143,32 @@ namespace System.Diagnostics.PerformanceData
             {
                 throw new ArgumentException(SR.Format(SR.Perflib_Argument_InvalidCounterType, counterType), nameof(counterType));
             }
-            if (m_provider == null)
+            if (_provider == null)
             {
-                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, m_providerGuid));
+                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, _providerGuid));
             }
-            if (m_instanceCreated)
+            if (_instanceCreated)
             {
-                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, m_counterSet));
+                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, _counterSet));
             }
 
-            lock (m_lockObject)
+            lock (_lockObject)
             {
-                if (m_instanceCreated)
+                if (_instanceCreated)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, m_counterSet));
+                    throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_AddCounterAfterInstance, _counterSet));
                 }
-                if (m_stringToId.ContainsKey(counterName))
+                if (_stringToId.ContainsKey(counterName))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterNameAlreadyExists, counterName, m_counterSet), nameof(counterName));
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterNameAlreadyExists, counterName, _counterSet), nameof(counterName));
                 }
-                if (m_idToCounter.ContainsKey(counterId))
+                if (_idToCounter.ContainsKey(counterId))
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, m_counterSet), nameof(counterId));
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterAlreadyExists, counterId, _counterSet), nameof(counterId));
                 }
 
-                m_stringToId.Add(counterName, counterId);
-                m_idToCounter.Add(counterId, counterType);
+                _stringToId.Add(counterName, counterId);
+                _idToCounter.Add(counterId, counterType);
             }
         }
 
@@ -198,62 +188,60 @@ namespace System.Diagnostics.PerformanceData
             {
                 throw new ArgumentException(SR.Format(SR.Perflib_Argument_EmptyInstanceName), nameof(instanceName));
             }
-            if (m_provider == null)
+            if (_provider == null)
             {
-                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, m_providerGuid));
+                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, _providerGuid));
             }
-            if (!m_instanceCreated)
+            if (!_instanceCreated)
             {
-                lock (m_lockObject)
+                lock (_lockObject)
                 {
-                    if (!m_instanceCreated)
+                    if (!_instanceCreated)
                     {
-                        if (m_provider == null)
+                        if (_provider == null)
                         {
-                            throw new ArgumentException(SR.Format(SR.Perflib_Argument_ProviderNotFound, m_providerGuid), "ProviderGuid");
+                            throw new ArgumentException(SR.Format(SR.Perflib_Argument_ProviderNotFound, _providerGuid), "ProviderGuid");
                         }
-                        if (m_provider.m_hProvider.IsInvalid)
+                        if (_provider._hProvider.IsInvalid)
                         {
-                            throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, m_providerGuid));
+                            throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, _providerGuid));
                         }
-                        if (m_idToCounter.Count == 0)
+                        if (_idToCounter.Count == 0)
                         {
-                            throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterSetContainsNoCounter, m_counterSet));
+                            throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterSetContainsNoCounter, _counterSet));
                         }
 
-                        uint Status = (uint)UnsafeNativeMethods.ERROR_SUCCESS;
+                        uint Status = (uint)Interop.Errors.ERROR_SUCCESS;
 
                         unsafe
                         {
-                            uint CounterSetInfoSize = (uint)sizeof(UnsafeNativeMethods.PerfCounterSetInfoStruct)
-                                            + (uint)m_idToCounter.Count * (uint)sizeof(UnsafeNativeMethods.PerfCounterInfoStruct);
+                            uint CounterSetInfoSize = (uint)sizeof(Interop.PerfCounter.PerfCounterSetInfoStruct)
+                                            + (uint)_idToCounter.Count * (uint)sizeof(Interop.PerfCounter.PerfCounterInfoStruct);
                             uint CounterSetInfoUsed = 0;
                             byte* CounterSetBuffer = stackalloc byte[(int)CounterSetInfoSize];
 
-                            if (CounterSetBuffer == null)
-                            {
-                                throw new InsufficientMemoryException(SR.Format(SR.Perflib_InsufficientMemory_CounterSetTemplate, m_counterSet, CounterSetInfoSize));
-                            }
+                            Debug.Assert(sizeof(Interop.PerfCounter.PerfCounterSetInfoStruct) == 40);
+                            Debug.Assert(sizeof(Interop.PerfCounter.PerfCounterInfoStruct) == 32);
 
-                            UnsafeNativeMethods.PerfCounterSetInfoStruct* CounterSetInfo;
-                            UnsafeNativeMethods.PerfCounterInfoStruct* CounterInfo;
+                            Interop.PerfCounter.PerfCounterSetInfoStruct* CounterSetInfo;
+                            Interop.PerfCounter.PerfCounterInfoStruct* CounterInfo;
 
                             uint CurrentCounter = 0;
                             uint CurrentOffset = 0;
 
-                            CounterSetInfo = (UnsafeNativeMethods.PerfCounterSetInfoStruct*)CounterSetBuffer;
-                            CounterSetInfo->CounterSetGuid = m_counterSet;
-                            CounterSetInfo->ProviderGuid = m_providerGuid;
-                            CounterSetInfo->NumCounters = (uint)m_idToCounter.Count;
-                            CounterSetInfo->InstanceType = (uint)m_instType;
+                            CounterSetInfo = (Interop.PerfCounter.PerfCounterSetInfoStruct*)CounterSetBuffer;
+                            CounterSetInfo->CounterSetGuid = _counterSet;
+                            CounterSetInfo->ProviderGuid = _providerGuid;
+                            CounterSetInfo->NumCounters = (uint)_idToCounter.Count;
+                            CounterSetInfo->InstanceType = (uint)_instType;
 
-                            foreach (KeyValuePair<int, CounterType> CounterDef in m_idToCounter)
+                            foreach (KeyValuePair<int, CounterType> CounterDef in _idToCounter)
                             {
-                                CounterSetInfoUsed = (uint)sizeof(UnsafeNativeMethods.PerfCounterSetInfoStruct)
-                                                + (uint)CurrentCounter * (uint)sizeof(UnsafeNativeMethods.PerfCounterInfoStruct);
+                                CounterSetInfoUsed = (uint)sizeof(Interop.PerfCounter.PerfCounterSetInfoStruct)
+                                                + (uint)CurrentCounter * (uint)sizeof(Interop.PerfCounter.PerfCounterInfoStruct);
                                 if (CounterSetInfoUsed < CounterSetInfoSize)
                                 {
-                                    CounterInfo = (UnsafeNativeMethods.PerfCounterInfoStruct*)(CounterSetBuffer + CounterSetInfoUsed);
+                                    CounterInfo = (Interop.PerfCounter.PerfCounterInfoStruct*)(CounterSetBuffer + CounterSetInfoUsed);
                                     CounterInfo->CounterId = (uint)CounterDef.Key;
                                     CounterInfo->CounterType = (uint)CounterDef.Value;
                                     CounterInfo->Attrib = 0x0000000000000001;   // PERF_ATTRIB_BY_REFERENCE
@@ -266,25 +254,25 @@ namespace System.Diagnostics.PerformanceData
                                 }
                                 CurrentCounter++;
                             }
-                            Status = UnsafeNativeMethods.PerfSetCounterSetInfo(m_provider.m_hProvider, CounterSetInfo, CounterSetInfoSize);
+                            Status = Interop.PerfCounter.PerfSetCounterSetInfo(_provider._hProvider, CounterSetInfo, CounterSetInfoSize);
 
                             // ERROR_INVALID_PARAMETER, ERROR_ALREADY_EXISTS, ERROR_NOT_ENOUGH_MEMORY, ERROR_OUTOFMEMORY
-                            if (Status != (uint)UnsafeNativeMethods.ERROR_SUCCESS)
+                            if (Status != (uint)Interop.Errors.ERROR_SUCCESS)
                             {
                                 switch (Status)
                                 {
-                                    case (uint)UnsafeNativeMethods.ERROR_ALREADY_EXISTS:
-                                        throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterSetAlreadyRegister, m_counterSet), "CounterSetGuid");
+                                    case (uint)Interop.Errors.ERROR_ALREADY_EXISTS:
+                                        throw new ArgumentException(SR.Format(SR.Perflib_Argument_CounterSetAlreadyRegister, _counterSet), "CounterSetGuid");
 
                                     default:
                                         throw new Win32Exception((int)Status);
                                 }
                             }
 
-                            Interlocked.Increment(ref m_provider.m_counterSet);
+                            Interlocked.Increment(ref _provider._counterSet);
                         }
 
-                        m_instanceCreated = true;
+                        _instanceCreated = true;
                     }
                 }
             }

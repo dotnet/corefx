@@ -5,7 +5,6 @@
 using System.Diagnostics.PerformanceData;
 using System.IO;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace System.Diagnostics.Tests
 {
@@ -25,8 +24,7 @@ namespace System.Diagnostics.Tests
         /// ctrpp.exe -legacy provider.man
         /// rc.exe /r /i "c:\Program Files\Microsoft SDKs\Windows\v6.0\Include" provider.rc
         /// </summary>
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]        
         public void PerformanceCounter_PerformanceData()
         {
             // Create the 'Typing' counter set.
@@ -99,7 +97,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void PerformanceCounter_PerformanceData_CreateCounterSetInstance_EmptyCounters()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
@@ -109,7 +106,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PerformanceCounter_PerformanceData_CreateCounterSetInstance_AlreadyExists()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
@@ -123,7 +120,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PerformanceCounter_PerformanceData_CounterSet_AlreadyRegistered()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
@@ -135,7 +132,6 @@ namespace System.Diagnostics.Tests
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         [InlineData("", typeof(ArgumentException))]
         [InlineData(null, typeof(ArgumentNullException))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void PerformanceCounter_PerformanceData_CounterSet_InvalidInstanceName(string instanceName, Type exceptionType)
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
@@ -147,7 +143,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [InlineData(8, "", "counterName", typeof(ArgumentException))]
         [InlineData(8, null, "counterName", typeof(ArgumentNullException))]
         public void PerformanceCounter_PerformanceData_AddCounter_InvalidCounterName(int counterId, string counterName, string parameterName, Type exceptionType)
@@ -160,7 +156,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [InlineData("")]
         [InlineData(null)]
         public void PerformanceCounter_PerformanceData_InvalidCounterName_Indexer(string counterName)
@@ -176,7 +172,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void PerformanceCounter_PerformanceData_Counter_NotFound()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
@@ -191,7 +186,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void PerformanceCounter_PerformanceData_Counter_AlreadyAdded()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))

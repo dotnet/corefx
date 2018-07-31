@@ -138,8 +138,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\perfcounter\Interop.FormatFromRawValue.cs">
       <Link>Common\Interop\Windows\perfcounter\Interop.FormatFromRawValue.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\perfcounter\UnsafeNativeMethods.cs">
-      <Link>Common\Interop\Windows\perfcounter\UnsafeNativeMethods.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\perfcounter\Interop.PerformanceData.cs">
+      <Link>Common\Interop\Windows\perfcounter\Interop.PerformanceData.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>

@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace System.Diagnostics.PerformanceData
 {
@@ -17,7 +16,7 @@ namespace System.Diagnostics.PerformanceData
     /// </summary>    
     public sealed class CounterData
     {
-        unsafe private long* m_offset;
+        unsafe private long* _offset;
 
         /// <summary>
         /// CounterData constructor
@@ -26,8 +25,8 @@ namespace System.Diagnostics.PerformanceData
         /// <param name="pCounterData"> The memory location to store raw counter data </param>        
         unsafe internal CounterData(long* pCounterData)
         {
-            m_offset = pCounterData;
-            *m_offset = 0;
+            _offset = pCounterData;
+            *_offset = 0;
         }
 
         /// <summary>
@@ -39,14 +38,14 @@ namespace System.Diagnostics.PerformanceData
             {
                 unsafe
                 {
-                    return Interlocked.Read(ref (*m_offset));
+                    return Interlocked.Read(ref (*_offset));
                 }
             }
             set
             {
                 unsafe
                 {
-                    Interlocked.Exchange(ref (*m_offset), value);
+                    Interlocked.Exchange(ref (*_offset), value);
                 }
             }
         }
@@ -55,7 +54,7 @@ namespace System.Diagnostics.PerformanceData
         {
             unsafe
             {
-                Interlocked.Increment(ref (*m_offset));
+                Interlocked.Increment(ref (*_offset));
             }
         }
 
@@ -63,7 +62,7 @@ namespace System.Diagnostics.PerformanceData
         {
             unsafe
             {
-                Interlocked.Decrement(ref (*m_offset));
+                Interlocked.Decrement(ref (*_offset));
             }
         }
 
@@ -71,7 +70,7 @@ namespace System.Diagnostics.PerformanceData
         {
             unsafe
             {
-                Interlocked.Add(ref (*m_offset), value);
+                Interlocked.Add(ref (*_offset), value);
             }
         }
 
@@ -86,14 +85,14 @@ namespace System.Diagnostics.PerformanceData
             {
                 unsafe
                 {
-                    return (*m_offset);
+                    return (*_offset);
                 }
             }
             set
             {
                 unsafe
                 {
-                    *m_offset = value;
+                    *_offset = value;
                 }
             }
         }
@@ -105,58 +104,58 @@ namespace System.Diagnostics.PerformanceData
     /// </summary>    
     public sealed class CounterSetInstanceCounterDataSet : IDisposable
     {
-        internal CounterSetInstance m_instance;
-        private Dictionary<int, CounterData> m_counters;
-        private int m_disposed;
-        unsafe internal byte* m_dataBlock;
+        internal CounterSetInstance _instance;
+        private Dictionary<int, CounterData> _counters;
+        private int _disposed;
+        unsafe internal byte* _dataBlock;
 
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst)
         {
-            m_instance = thisInst;
-            m_counters = new Dictionary<int, CounterData>();
+            _instance = thisInst;
+            _counters = new Dictionary<int, CounterData>();
 
             unsafe
             {
-                if (m_instance.m_counterSet.m_provider == null)
+                if (_instance._counterSet._provider == null)
                 {
-                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_ProviderNotFound, m_instance.m_counterSet.m_providerGuid), "ProviderGuid");
+                    throw new ArgumentException(SR.Format(SR.Perflib_Argument_ProviderNotFound, _instance._counterSet._providerGuid), "ProviderGuid");
                 }
-                if (m_instance.m_counterSet.m_provider.m_hProvider.IsInvalid)
+                if (_instance._counterSet._provider._hProvider.IsInvalid)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, m_instance.m_counterSet.m_providerGuid));
+                    throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_NoActiveProvider, _instance._counterSet._providerGuid));
                 }
 
-                m_dataBlock = (byte*)Marshal.AllocHGlobal(m_instance.m_counterSet.m_idToCounter.Count * sizeof(long));
-                if (m_dataBlock == null)
+                _dataBlock = (byte*)Marshal.AllocHGlobal(_instance._counterSet._idToCounter.Count * sizeof(long));
+                if (_dataBlock == null)
                 {
-                    throw new InsufficientMemoryException(SR.Format(SR.Perflib_InsufficientMemory_InstanceCounterBlock, m_instance.m_counterSet.m_counterSet, m_instance.m_instName));
+                    throw new InsufficientMemoryException(SR.Format(SR.Perflib_InsufficientMemory_InstanceCounterBlock, _instance._counterSet._counterSet, _instance._instName));
                 }
 
                 int CounterOffset = 0;
 
-                foreach (KeyValuePair<int, CounterType> CounterDef in m_instance.m_counterSet.m_idToCounter)
+                foreach (KeyValuePair<int, CounterType> CounterDef in _instance._counterSet._idToCounter)
                 {
-                    CounterData thisCounterData = new CounterData((long*)(m_dataBlock + CounterOffset * sizeof(long)));
+                    CounterData thisCounterData = new CounterData((long*)(_dataBlock + CounterOffset * sizeof(long)));
 
-                    m_counters.Add(CounterDef.Key, thisCounterData);
+                    _counters.Add(CounterDef.Key, thisCounterData);
 
                     // ArgumentNullException - CounterName is NULL
                     // ArgumentException - CounterName already exists.
-                    uint Status = UnsafeNativeMethods.PerfSetCounterRefValue(
-                                    m_instance.m_counterSet.m_provider.m_hProvider,
-                                    m_instance.m_nativeInst,
+                    uint Status = Interop.PerfCounter.PerfSetCounterRefValue(
+                                    _instance._counterSet._provider._hProvider,
+                                    _instance._nativeInst,
                                     (uint)CounterDef.Key,
-                                    (void*)(m_dataBlock + CounterOffset * sizeof(long)));
-                    if (Status != (uint)UnsafeNativeMethods.ERROR_SUCCESS)
+                                    (void*)(_dataBlock + CounterOffset * sizeof(long)));
+                    if (Status != (uint)Interop.Errors.ERROR_SUCCESS)
                     {
                         Dispose(true);
 
                         // ERROR_INVALID_PARAMETER or ERROR_NOT_FOUND
                         switch (Status)
                         {
-                            case (uint)UnsafeNativeMethods.ERROR_NOT_FOUND:
-                                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterRefValue, m_instance.m_counterSet.m_counterSet, CounterDef.Key, m_instance.m_instName));
+                            case (uint)Interop.Errors.ERROR_NOT_FOUND:
+                                throw new InvalidOperationException(SR.Format(SR.Perflib_InvalidOperation_CounterRefValue, _instance._counterSet._counterSet, CounterDef.Key, _instance._instName));
 
                             default:
                                 throw new Win32Exception((int)Status);
@@ -180,15 +179,15 @@ namespace System.Diagnostics.PerformanceData
 
         private void Dispose(bool disposing)
         {
-            if (Interlocked.Exchange(ref m_disposed, 1) == 0)
+            if (Interlocked.Exchange(ref _disposed, 1) == 0)
             {
                 unsafe
                 {
-                    if (m_dataBlock != null)
+                    if (_dataBlock != null)
                     {
                         // Need to free allocated heap memory that is used to store all raw counter data.
-                        Marshal.FreeHGlobal((System.IntPtr)m_dataBlock);
-                        m_dataBlock = null;
+                        Marshal.FreeHGlobal((System.IntPtr)_dataBlock);
+                        _dataBlock = null;
                     }
                 }
             }
@@ -203,14 +202,14 @@ namespace System.Diagnostics.PerformanceData
         {
             get
             {
-                if (m_disposed != 0)
+                if (_disposed != 0)
                 {
                     return null;
                 }
 
                 try
                 {
-                    return m_counters[counterId];
+                    return _counters[counterId];
                 }
                 catch (KeyNotFoundException)
                 {
@@ -241,17 +240,17 @@ namespace System.Diagnostics.PerformanceData
                 {
                     throw new ArgumentNullException(nameof(counterName));
                 }
-                if (m_disposed != 0)
+                if (_disposed != 0)
                 {
                     return null;
                 }
 
                 try
                 {
-                    int CounterId = m_instance.m_counterSet.m_stringToId[counterName];
+                    int CounterId = _instance._counterSet._stringToId[counterName];
                     try
                     {
-                        return m_counters[CounterId];
+                        return _counters[CounterId];
                     }
                     catch (KeyNotFoundException)
                     {
