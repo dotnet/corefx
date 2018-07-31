@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
@@ -91,8 +90,7 @@ namespace System.Diagnostics.PerformanceData
                 }
             }
         }
-
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        
         internal static void RegisterCounterSet(Guid counterSetGuid)
         {
             // Input counterSetGuid should not be registered yet. That is, ContainsKey() should fail most of times.

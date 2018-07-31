@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -18,8 +17,7 @@ namespace System.Diagnostics.PerformanceData
         internal string _instName;
         private int _active;
         unsafe internal Interop.PerfCounter.PerfCounterSetInstanceStruct* _nativeInst;
-
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        
         internal unsafe CounterSetInstance(CounterSet counterSetDefined, string instanceName)
         {
             if (counterSetDefined == null)

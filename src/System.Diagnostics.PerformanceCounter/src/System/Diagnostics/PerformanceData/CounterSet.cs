@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Diagnostics.PerformanceData
@@ -32,8 +31,7 @@ namespace System.Diagnostics.PerformanceData
         /// </summary>
         /// <param name="providerGuid">ProviderGuid identifies the provider application. A provider identified by ProviderGuid could publish several CounterSets defined by different CounterSetGuids</param>
         /// <param name="counterSetGuid">CounterSetGuid identifies the specific CounterSet. CounterSetGuid should be unique.</param>
-        /// <param name="instanceType">One of defined CounterSetInstanceType values</param>        
-        [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "guid", Justification = "Approved")]
+        /// <param name="instanceType">One of defined CounterSetInstanceType values</param>                
         public CounterSet(Guid providerGuid, Guid counterSetGuid, CounterSetInstanceType instanceType)
         {
             if (!PerfProviderCollection.ValidateCounterSetInstanceType(instanceType))
@@ -90,8 +88,7 @@ namespace System.Diagnostics.PerformanceData
         /// Add non-displayable new counter to CounterSet; that is, perfmon would not display the counter.
         /// </summary>
         /// <param name="counterId">CounterId uniquely identifies the counter within CounterSet</param>
-        /// <param name="counterType">One of defined CounterType values</param>
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        /// <param name="counterType">One of defined CounterType values</param>        
         public void AddCounter(int counterId, CounterType counterType)
         {
             if (_provider == null)
@@ -127,8 +124,7 @@ namespace System.Diagnostics.PerformanceData
         /// </summary>
         /// <param name="counterId">CounterId uniquely identifies the counter within CounterSet</param>
         /// <param name="counterType">One of defined CounterType values</param>
-        /// <param name="counterName">This is friendly name to help provider developers as indexer. and it might not match what is displayed in counter consumption applications lie perfmon.</param>
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        /// <param name="counterName">This is friendly name to help provider developers as indexer. and it might not match what is displayed in counter consumption applications lie perfmon.</param>        
         public void AddCounter(int counterId, CounterType counterType, string counterName)
         {
             if (counterName == null)
@@ -176,8 +172,7 @@ namespace System.Diagnostics.PerformanceData
         /// Create instances of the CounterSet. Created CounterSetInstance identifies active identity and tracks raw counter data for that identity.
         /// </summary>
         /// <param name="instanceName">Friendly name identifies the instance. InstanceName would be shown in counter consumption applications like perfmon.</param>
-        /// <returns>CounterSetInstance object</returns>
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        /// <returns>CounterSetInstance object</returns>        
         public CounterSetInstance CreateCounterSetInstance(string instanceName)
         {
             if (instanceName == null)

@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -108,8 +107,7 @@ namespace System.Diagnostics.PerformanceData
         private Dictionary<int, CounterData> _counters;
         private int _disposed;
         unsafe internal byte* _dataBlock;
-
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        
         internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst)
         {
             _instance = thisInst;
@@ -226,8 +224,7 @@ namespace System.Diagnostics.PerformanceData
         /// CounterName indexer to access specific CounterData object.
         /// </summary>
         /// <param name="counterName">CounterName that matches one CounterSet::AddCounter() call</param>
-        /// <returns>CounterData object with matched counterName</returns>
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
+        /// <returns>CounterData object with matched counterName</returns>        
         public CounterData this[string counterName]
         {
             get

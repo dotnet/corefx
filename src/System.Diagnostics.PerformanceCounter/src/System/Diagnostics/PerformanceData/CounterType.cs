@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace System.Diagnostics.PerformanceData
 {
     /// <summary>
@@ -12,8 +10,7 @@ namespace System.Diagnostics.PerformanceData
     public enum CounterType
     {
         QueueLength = 0x00450400, // PERF_COUNTER_QUEUELEN_TYPE
-        LargeQueueLength = 0x00450500, // PERF_COUNTER_LARGE_QUEUELEN_TYPE
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ns", Justification = "Approved casing")]
+        LargeQueueLength = 0x00450500, // PERF_COUNTER_LARGE_QUEUELEN_TYPE        
         QueueLength100Ns = 0x00550500, // PERF_COUNTER_100NS_QUEUELEN_TYPE
         QueueLengthObjectTime = 0x00650500, // PERF_COUNTER_OBJ_TIME_QUEUELEN_TYPE
         RawData32 = 0x00010000, // PERF_COUNTER_RAWCOUNT
@@ -34,23 +31,18 @@ namespace System.Diagnostics.PerformanceData
         AverageCount64 = 0x40020500, // PERF_AVERAGE_BULK
         PercentageActive = 0x20410500, // PERF_COUNTER_TIMER
         PercentageNotActive = 0x21410500, // PERF_COUNTER_TIMER_INV
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ns", Justification = "Approved casing")]
         PercentageActive100Ns = 0x20510500, // PERF_100NSEC_TIMER
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ns", Justification = "Approved casing")]
         PercentageNotActive100Ns = 0x21510500, // PERF_100NSEC_TIMER_INV
         ElapsedTime = 0x30240500, // PERF_ELAPSED_TIME
         MultiTimerPercentageActive = 0x22410500, // PERF_COUNTER_MULTI_TIMER
         MultiTimerPercentageNotActive = 0x23410500, // PERF_COUNTER_MULTI_TIMER_INV
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ns", Justification = "Approved casing")]
         MultiTimerPercentageActive100Ns = 0x22510500, // PERF_100NSEC_MULTI_TIMER
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ns", Justification = "Approved casing")]
         MultiTimerPercentageNotActive100Ns = 0x23510500, // PERF_100NSEC_MULTI_TIMER_INV
         MultiTimerBase = 0x42030500, // PERF_COUNTER_MULTI_BASE
         Delta32 = 0x00400400, // PERF_COUNTER_DELTA
         Delta64 = 0x00400500, // PERF_COUNTER_LARGE_DELTA
         ObjectSpecificTimer = 0x20610500, // PERF_OBJ_TIME_TIMER
         PrecisionSystemTimer = 0x20470500, // PERF_PRECISION_SYSTEM_TIMER
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ns", Justification = "Approved casing")]
         PrecisionTimer100Ns = 0x20570500, // PERF_PRECISION_100NS_TIMER
         PrecisionObjectSpecificTimer = 0x20670500  // PERF_PRECISION_OBJECT_TIMER
     }

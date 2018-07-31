@@ -24,7 +24,7 @@ namespace System.Diagnostics.Tests
         /// ctrpp.exe -legacy provider.man
         /// rc.exe /r /i "c:\Program Files\Microsoft SDKs\Windows\v6.0\Include" provider.rc
         /// </summary>
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]        
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public void PerformanceCounter_PerformanceData()
         {
             // Create the 'Typing' counter set.
@@ -106,7 +106,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PerformanceCounter_PerformanceData_CreateCounterSetInstance_AlreadyExists()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
@@ -114,18 +113,17 @@ namespace System.Diagnostics.Tests
                 typingCounterSet.AddCounter(6, CounterType.SampleBase, "Percent Base");
                 using (CounterSetInstance typingCsInstance = typingCounterSet.CreateCounterSetInstance("Typing Instance"))
                 {
-                    Assert.Throws<ArgumentException>("instanceName", () => typingCounterSet.CreateCounterSetInstance("Typing Instance"));
+                    AssertExtensions.Throws<ArgumentException>("instanceName", "InstanceName", () => typingCounterSet.CreateCounterSetInstance("Typing Instance"));
                 }
             }
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PerformanceCounter_PerformanceData_CounterSet_AlreadyRegistered()
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
             {
-                Assert.Throws<ArgumentException>("counterSetGuid", () => new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single));
+                AssertExtensions.Throws<ArgumentException>("counterSetGuid", "CounterSetGuid", () => new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single));
             }
         }
 
@@ -143,20 +141,18 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [InlineData(8, "", "counterName", typeof(ArgumentException))]
-        [InlineData(8, null, "counterName", typeof(ArgumentNullException))]
-        public void PerformanceCounter_PerformanceData_AddCounter_InvalidCounterName(int counterId, string counterName, string parameterName, Type exceptionType)
+        [InlineData("", "counterName", "counterName", typeof(ArgumentException))]
+        [InlineData(null, "counterName", "CounterName", typeof(ArgumentNullException))]
+        public void PerformanceCounter_PerformanceData_AddCounter_InvalidCounterName(string counterName, string netCoreParameterName, string netfxParameterName, Type exceptionType)
         {
             using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
             {
-                ArgumentException argumentException = (ArgumentException)Assert.Throws(exceptionType, () => typingCounterSet.AddCounter(counterId, CounterType.SampleBase, counterName));
-                Assert.Equal(parameterName, argumentException.ParamName);
+                ArgumentException argumentException = (ArgumentException)Assert.Throws(exceptionType, () => typingCounterSet.AddCounter(8, CounterType.SampleBase, counterName));
+                Assert.Equal(PlatformDetection.IsFullFramework ? netfxParameterName : netCoreParameterName, argumentException.ParamName);
             }
         }
 
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [InlineData("")]
         [InlineData(null)]
         public void PerformanceCounter_PerformanceData_InvalidCounterName_Indexer(string counterName)
@@ -166,7 +162,7 @@ namespace System.Diagnostics.Tests
                 typingCounterSet.AddCounter(6, CounterType.SampleBase, "Percent Base");
                 using (CounterSetInstance typingCsInstance = typingCounterSet.CreateCounterSetInstance("Typing Instance"))
                 {
-                    Assert.Throws<ArgumentNullException>("counterName", () => typingCsInstance.Counters[counterName]);
+                    AssertExtensions.Throws<ArgumentNullException>("counterName", "CounterName", () => typingCsInstance.Counters[counterName]);
                 }
             }
         }

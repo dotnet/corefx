@@ -43,15 +43,15 @@ internal static partial class Interop
             internal uint Offset;
         }
 
-        [StructLayout(LayoutKind.Explicit, Size = 32)]
+        [StructLayout(LayoutKind.Sequential)]
         internal struct PerfCounterSetInstanceStruct
         {
             // PERF_COUNTERSET_INSTANCE structure defined in perflib.h
-            [FieldOffset(0)] internal Guid CounterSetGuid;
-            [FieldOffset(16)] internal uint dwSize;
-            [FieldOffset(20)] internal uint InstanceId;
-            [FieldOffset(24)] internal uint InstanceNameOffset;
-            [FieldOffset(28)] internal uint InstanceNameSize;
+            internal Guid CounterSetGuid;
+            internal uint dwSize;
+            internal uint InstanceId;
+            internal uint InstanceNameOffset;
+            internal uint InstanceNameSize;
         }
 
         [DllImport(Libraries.Advapi32, ExactSpelling = true)]
