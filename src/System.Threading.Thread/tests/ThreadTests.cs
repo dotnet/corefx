@@ -183,6 +183,7 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/19225", TargetFrameworkMonikers.Netcoreapp)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void ApartmentState_NoAttributePresent_DefaultState_Windows()
         {
