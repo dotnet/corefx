@@ -165,8 +165,8 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void Filter_Objects_WhenObjectCannotBeConvertedToString_ThrowsArgumentOutOfRangeException()
         {
-            var source = new object[] { typeof(object) };
-            var match = "a";
+            object[] source = new object[] { typeof(object) };
+            string match = "a";
 
             AssertExtensions.Throws<ArgumentException>("Source", null, () => Strings.Filter(source, match));
         }
@@ -215,7 +215,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("abab", "ab", 3)]
         public void InStr_FromWithin(string string1, string string2, int expected)
         {
-            var startPos = 2;
+            int startPos = 2;
             Assert.Equal(expected, Strings.InStr(startPos, string1, string2));
         }
 
@@ -242,9 +242,9 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(3)]
         public void InStr_WhenStartGreatherThanLength_ReturnsZero(int start)
         {
-            var string1 = "a";
-            var string2 = "a";
-            var expected = 0;
+            string string1 = "a";
+            string string2 = "a";
+            int expected = 0;
             Assert.Equal(expected, Strings.InStr(start, string1, string2));
         }
 
@@ -253,8 +253,8 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(-1)]
         public void InStr_WhenStartZeroOrLess_ThrowsArgumentException(int start)
         {
-            var string1 = "a";
-            var string2 = "a";
+            string string1 = "a";
+            string string2 = "a";
             AssertExtensions.Throws<ArgumentException>("Start", null, () => Strings.InStr(start, string1, string2));
         }
 
@@ -314,10 +314,10 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void InStrRev_WhenStartMinusOne_SearchesFromEnd()
         {
-            var stringCheck = "aa";
-            var stringMatch = "a";
-            var start = -1;
-            var expected = 2;
+            string stringCheck = "aa";
+            string stringMatch = "a";
+            int start = -1;
+            int expected = 2;
             Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start));
         }
 
@@ -326,9 +326,9 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(3)]
         public void InStrRev_WhenStartGreatherThanLength_ReturnsZero(int start)
         {
-            var stringCheck = "a";
-            var stringMatch = "a";
-            var expected = 0;
+            string stringCheck = "a";
+            string stringMatch = "a";
+            int expected = 0;
             Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start));
         }
 
@@ -338,8 +338,8 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(-3)]
         public void InStrRev_WhenStartZeroOrMinusTwoOrLess_ThrowsArgumentException(int start)
         {
-            var stringCheck = "a";
-            var stringMatch = "a";
+            string stringCheck = "a";
+            string stringMatch = "a";
             AssertExtensions.Throws<ArgumentException>("Start", null, () => Strings.InStrRev(stringCheck, stringMatch, start));
         }
 
