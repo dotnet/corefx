@@ -281,7 +281,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                VersionCheckCount();
+                VersionCheckCount(true);
                 return count;
             }
         }
@@ -310,8 +310,8 @@ namespace System.Collections.Generic
         #region Subclass helpers
 
         // Virtual function for TreeSubSet, which may need to update its count.
-        internal virtual void VersionCheck() { }
-        internal virtual void VersionCheckCount() { }
+        internal virtual void VersionCheck(bool updateCount = false) { }
+        // Virtual function for TreeSubSet, which may need the count variable of the parent set.
         internal virtual int TotalCount() { return Count; }
 
         // Virtual function for TreeSubSet, which may need to do range checks.

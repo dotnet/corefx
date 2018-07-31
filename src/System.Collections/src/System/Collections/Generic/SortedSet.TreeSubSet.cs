@@ -17,7 +17,10 @@ namespace System.Collections.Generic
         {
             private SortedSet<T> _underlying;
             private T _min, _max;
-            private int versionCount;
+            // keeps track of whether the count variable is up to date
+            // up to date -> countVersion = _underlying.version
+            // not up to date -> countVersion < _underlying.version
+            private int countVersion;
             // these exist for unbounded collections
             // for instance, you could allow this subset to be defined for i > 10. The set will throw if
             // anything <= 10 is added, but there is no upper bound. These features Head(), Tail(), were punted
@@ -43,7 +46,7 @@ namespace System.Collections.Generic
                 root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive); // root is first element within range
                 count = 0;
                 version = -1;
-                versionCount = -1;
+                countVersion = -1;
             }
 
             internal override bool AddIfNotPresent(T item)
@@ -301,31 +304,29 @@ namespace System.Collections.Generic
 
             /// <summary>
             /// Checks whether this subset is out of date, and updates it if necessary.
+            /// <param name="updateCount">Updates the count variable if necessary.</param>
             /// </summary>
-            internal override void VersionCheck() => VersionCheckImpl();
+            internal override void VersionCheck(bool updateCount = false) => VersionCheckImpl(updateCount);
 
-            private void VersionCheckImpl()
+            private void VersionCheckImpl(bool updateCount)
             {
                 Debug.Assert(_underlying != null);
                 if (version != _underlying.version)
                 {
                     root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
                     version = _underlying.version;
+
+                    if (updateCount) {
+                        count = 0;
+                        InOrderTreeWalk(n => { count++; return true; });
+                        countVersion = _underlying.version;
+                    }
                 }
             }
 
-            internal override void VersionCheckCount()
-            {
-                VersionCheckImpl();
-
-                if (versionCount != _underlying.version)
-                {
-                    count = 0;
-                    InOrderTreeWalk(n => { count++; return true; });
-                    versionCount = _underlying.version;
-                }
-            }
-
+            /// <summary>
+            /// Returns the number of elements <c>count</c> of the parent set.
+            /// </summary>
             internal override int TotalCount()
             {
                 Debug.Assert(_underlying != null);
