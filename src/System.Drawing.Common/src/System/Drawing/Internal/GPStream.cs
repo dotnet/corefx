@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if netcoreapp20
 using System.Buffers;
+#endif
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -10,6 +12,10 @@ namespace System.Drawing.Internal
 {
     internal sealed class GPStream : Interop.Ole32.IStream
     {
+#if netcoreapp20
+        private const int DefaultBufferSize = 4096;
+#endif
+
         private Stream _dataStream;
 
         // to support seeking ahead of the stream length...
@@ -103,7 +109,7 @@ namespace System.Drawing.Internal
 
             // Stream Span API isn't available in 2.0
 #if netcoreapp20
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(Math.Max(DefaultBufferSize, checked((int)cb)));
             int read = _dataStream.Read(buffer, 0, checked((int)cb));
             Marshal.Copy(buffer, 0, (IntPtr)pv, read);
             ArrayPool<byte>.Shared.Return(buffer);
@@ -212,7 +218,7 @@ namespace System.Drawing.Internal
 
             // Stream Span API isn't available in 2.0
 #if netcoreapp20
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(Math.Max(DefaultBufferSize, checked((int)cb)));
             Marshal.Copy((IntPtr)pv, buffer, 0, (int)cb);
             _dataStream.Write(buffer, 0, (int)cb);
             ArrayPool<byte>.Shared.Return(buffer);
