@@ -1554,14 +1554,6 @@
     ]
   },
   {
-    "Name": "System.Runtime.Intrinsics.Experimental",
-    "Description": "Provides APIs to processor specific instructions.",
-    "CommonTypes": [
-        "System.Runtime.Intrinsics.Vector128<>",
-        "System.Runtime.Intrinsics.Vector256<>"
-    ]
-  },
-  {
     "Name": "System.Runtime.Loader",
     "Description": "Provides the System.Runtime.Loader.AssemblyLoadContext class, which provides members for loading assemblies.",
     "CommonTypes": [
@@ -2130,6 +2122,14 @@
     "Description": "Provides the System.Web.HttpUtility class for encoding and decoding various web formats.",
     "CommonTypes": [
       "System.Web.HttpUtility"
+    ]
+  },
+  {
+    "Name": "System.Windows.Extensions",
+    "Description": "Provides miscellaneous Windows-specific types",
+    "CommonTypes":[
+      "System.Security.Cryptography.X509Certificates.X509Certificate2UI",
+      "System.Security.Cryptography.X509Certificates.X509SelectionFlag"
     ]
   },
   {
