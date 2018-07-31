@@ -22,7 +22,12 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            Stream testImageStream = assembly.GetManifestResourceStream("Resources.TestImage.bmp");
+            var imageName = "TestImage.bmp";
+            Stream testImageStream = assembly.GetManifestResourceStream(imageName);
+            if (testImageStream == null)
+            {
+                throw new InvalidOperationException($"Resource image \"{imageName}\" not found.");
+            }
 
             int length = (int)testImageStream.Length;
             _imageBytes = new byte[length];

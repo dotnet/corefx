@@ -22,7 +22,12 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            Stream testIconStream = assembly.GetManifestResourceStream("Resources.TestIcon.ico");
+            var imageName = "TestIcon.ico";
+            Stream testIconStream = assembly.GetManifestResourceStream(imageName);
+            if (testIconStream == null)
+            {
+                throw new InvalidOperationException($"Resource image \"{imageName}\" not found.");
+            }
 
             int length = (int)testIconStream.Length;
             _iconBytes = new byte[length];
