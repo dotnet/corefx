@@ -9,10 +9,10 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        internal struct UTimBuf
+        internal struct TimeVal
         {
-            internal long AcTime;
-            internal long ModTime;
+            internal long TvSec;
+            internal long TvUsec;
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ internal static partial class Interop
         /// <returns>
         /// Returns 0 on success; otherwise, returns -1 
         /// </returns>
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_UTime", SetLastError = true)]
-        internal static extern int UTime(string path, ref UTimBuf time);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_UTimes", SetLastError = true)]
+        internal static extern int UTimes(string path, TimeVal[] times);
     }
 }

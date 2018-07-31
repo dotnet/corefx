@@ -199,11 +199,21 @@ namespace System.IO
             // force a refresh so that we have an up-to-date times for values not being overwritten
             _fileStatusInitialized = -1;
             EnsureStatInitialized(path);
-            Interop.Sys.UTimBuf buf;
-            // we use utime() not utimensat() so we drop the subsecond part
-            buf.AcTime = accessTime ?? _fileStatus.ATime;
-            buf.ModTime = writeTime ?? _fileStatus.MTime;
-            Interop.CheckIo(Interop.Sys.UTime(path, ref buf), path, InitiallyDirectory);
+
+            // we use utimes() to set the accessTime and writeTime
+            Interop.Sys.TimeVal[] buf = new Interop.Sys.TimeVal[2];
+
+            // setting second part
+            buf[0].TvSec = accessTime ?? _fileStatus.ATime;
+            buf[1].TvSec = writeTime ?? _fileStatus.MTime;
+
+            // setting microsecond part
+            if (accessTime == null)
+                buf[0].TvUsec = _fileStatus.ATimeNsec / 1000;
+            if (writeTime == null)
+                buf[1].TvUsec = _fileStatus.MTimeNsec / 1000;
+
+            Interop.CheckIo(Interop.Sys.UTimes(path, buf), path, InitiallyDirectory);
             _fileStatusInitialized = -1;
         }
 

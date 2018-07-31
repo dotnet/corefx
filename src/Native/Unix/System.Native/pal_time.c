@@ -20,21 +20,17 @@ enum
     SecondsToNanoSeconds = 1000000000 // 10^9
 };
 
-static void ConvertUTimBuf(const UTimBuf* pal, struct utimbuf* native)
+int32_t SystemNative_UTimes(const char* path, TimeVal times[2])
 {
-    native->actime = (time_t)(pal->AcTime);
-    native->modtime = (time_t)(pal->ModTime);
-}
+    struct timeval origTimes[2];
+    origTimes[0].tv_sec = times[0].tv_sec;
+    origTimes[0].tv_usec = (int)times[0].tv_usec;
 
-int32_t SystemNative_UTime(const char* path, UTimBuf* times)
-{
-    assert(times != NULL);
-
-    struct utimbuf temp;
-    ConvertUTimBuf(times, &temp);
+    origTimes[1].tv_sec = times[1].tv_sec;
+    origTimes[1].tv_usec = (int)times[1].tv_usec;
 
     int32_t result;
-    while (CheckInterrupted(result = utime(path, &temp)));
+    while (CheckInterrupted(result = utimes(path, origTimes)));
     return result;
 }
 
