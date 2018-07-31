@@ -72,7 +72,7 @@ namespace System.Security.Cryptography.X509Certificates
             //  * don't allow custom trailer
             // we don't have to worry about any of the DEFAULTs. (specify, specify, specify, omit).
 
-            RSAPssParamAsn parameters = new RSAPssParamAsn
+            PssParamsAsn parameters = new PssParamsAsn
             {
                 HashAlgorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(digestOid) },
                 MaskGenAlgorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(Oids.Mgf1) },
