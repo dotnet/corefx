@@ -150,6 +150,9 @@
     <Compile Include="Design\DesignerOptionServiceTests.cs" />
     <Compile Include="Design\DesignerTransactionTests.cs" />
     <Compile Include="Security\Authentication\ExtendedProtection\ExtendedProtectionPolicyTypeConverterTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
+      <Link>Common\System\Drawing\Helpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
