@@ -226,6 +226,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         public RequiredAttribute() { }
         public bool AllowEmptyStrings { get { throw null; } set { } }
+        public bool AllowEmptyCollections { get { throw null; } set { } }
         public override bool IsValid(object value) { throw null; }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(384), AllowMultiple = false)]
