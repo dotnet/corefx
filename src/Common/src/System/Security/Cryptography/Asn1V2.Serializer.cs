@@ -398,7 +398,7 @@ namespace System.Security.Cryptography.Asn1
 
         private static Deserializer DefaultValueDeserializer(
             Deserializer valueDeserializer,
-            Deserializer defaultValueDeserializer,
+            Deserializer literalValueDeserializer,
             bool isOptional,
             byte[] defaultContents,
             Asn1Tag? expectedTag)
@@ -408,7 +408,7 @@ namespace System.Security.Cryptography.Asn1
                     reader,
                     expectedTag,
                     valueDeserializer,
-                    defaultValueDeserializer,
+                    literalValueDeserializer,
                     defaultContents,
                     isOptional);
         }
@@ -417,7 +417,7 @@ namespace System.Security.Cryptography.Asn1
             AsnReader reader,
             Asn1Tag? expectedTag,
             Deserializer valueDeserializer,
-            Deserializer defaultValueDeserializer,
+            Deserializer literalValueDeserializer,
             byte[] defaultContents,
             bool isOptional)
         {
@@ -440,7 +440,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (defaultContents != null)
             {
-                return DefaultValue(defaultContents, defaultValueDeserializer);
+                return DefaultValue(defaultContents, literalValueDeserializer);
             }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
