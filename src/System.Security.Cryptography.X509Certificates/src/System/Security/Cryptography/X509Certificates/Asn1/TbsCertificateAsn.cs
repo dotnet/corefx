@@ -28,7 +28,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     internal sealed class TbsCertificateAsn
     {
         [ExpectedTag(0, ExplicitTag = true)]
-        [DefaultValue(0xA0, 0x03, 0x02, 0x01, 0x00)]
+        [DefaultValue(0x02, 0x01, 0x00)]
         internal byte Version;
 
         [Integer]
