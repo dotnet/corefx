@@ -2232,14 +2232,20 @@ namespace System
         public int Length => throw null;
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
-        public ReadOnlySpan<byte> AsSpan() => throw null;
         public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
+        public static bool Equals(Utf8String a, Utf8String b) => throw null;
+        public static bool Equals(Utf8String a, Utf8String b, StringComparison comparisonType) => throw null;
         public override int GetHashCode() => throw null;
+        public int GetHashCode(StringComparison comparisonType) => throw null;
+        public static int GetHashCode(ReadOnlySpan<byte> value) => throw null;
+        public static int GetHashCode(ReadOnlySpan<byte> value, StringComparison comparisonType) => throw null;
         public ref readonly byte GetPinnableReference() => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
+        public Utf8String Substring(int startIndex) => throw null;
+        public Utf8String Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
     }
     public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string>, System.IConvertible, System.IEquatable<string>
@@ -2314,6 +2320,8 @@ namespace System
         public System.CharEnumerator GetEnumerator() { throw null; }
         public override int GetHashCode() { throw null; }
         public int GetHashCode(System.StringComparison comparisonType) { throw null; }
+        public static int GetHashCode(ReadOnlySpan<char> value) { throw null; }
+        public static int GetHashCode(ReadOnlySpan<char> value, StringComparison comparisonType) { throw null; }
         public System.TypeCode GetTypeCode() { throw null; }
         public int IndexOf(char value) { throw null; }
         public int IndexOf(char value, int startIndex) { throw null; }
@@ -4222,6 +4230,7 @@ namespace System.Globalization
         public static System.Globalization.CompareInfo GetCompareInfo(string name, System.Reflection.Assembly assembly) { throw null; }
         public override int GetHashCode() { throw null; }
         public virtual int GetHashCode(string source, System.Globalization.CompareOptions options) { throw null; }
+        public int GetHashCode(ReadOnlySpan<char> source, System.Globalization.CompareOptions options) { throw null; }
         public virtual System.Globalization.SortKey GetSortKey(string source) { throw null; }
         public virtual System.Globalization.SortKey GetSortKey(string source, System.Globalization.CompareOptions options) { throw null; }
         public virtual int IndexOf(string source, char value) { throw null; }
