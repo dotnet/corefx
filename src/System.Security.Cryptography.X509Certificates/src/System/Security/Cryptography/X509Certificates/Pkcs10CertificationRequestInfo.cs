@@ -47,8 +47,12 @@ namespace System.Security.Cryptography.X509Certificates
             byte[] signatureAlgorithm = signatureGenerator.GetSignatureAlgorithmIdentifier(hashAlgorithm);
             AlgorithmIdentifierAsn signatureAlgorithmAsn;
 
-            // Deserialization also does validation of the value.
+            // Deserialization also does validation of the value (except for Parameters, which have to be validated separately).
             signatureAlgorithmAsn = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(signatureAlgorithm, AsnEncodingRules.DER);
+            if (signatureAlgorithmAsn.Parameters.HasValue)
+            {
+                Helpers.ValidateAsn(signatureAlgorithmAsn.Parameters.Value, AsnEncodingRules.DER);
+            }
 
             SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn();
             spki.Algorithm = new AlgorithmIdentifierAsn { Algorithm = PublicKey.Oid, Parameters = PublicKey.EncodedParameters.RawData };
