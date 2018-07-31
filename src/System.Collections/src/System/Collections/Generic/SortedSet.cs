@@ -281,7 +281,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                VersionCheckCount(true);
+                VersionCheck(updateCount: true);
                 return count;
             }
         }
