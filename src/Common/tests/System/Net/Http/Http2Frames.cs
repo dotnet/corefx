@@ -147,6 +147,7 @@ namespace System.Net.Test.Common
         }
     }
 
+    // TODO: Add helpers to construct simple header data.
     public class HeadersFrame : Frame
     {
         public byte PadLength = 0;
@@ -208,8 +209,8 @@ namespace System.Net.Test.Common
 
     public class PriorityFrame : Frame
     {
-        private int StreamDependency = 0;
-        private byte Weight = 0;
+        public int StreamDependency = 0;
+        public byte Weight = 0;
 
         public PriorityFrame(FrameFlags flags, int streamDependency, byte weight, int streamId) :
             base(Frame.FrameHeaderLength + 5, FrameType.Priority, flags, streamId)
@@ -221,10 +222,7 @@ namespace System.Net.Test.Common
         public static PriorityFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
         {
             int idx = Frame.FrameHeaderLength;
-            int streamDependency = (int)(((buffer[idx++] << 24) |
-                                         (buffer[idx++] << 16) |
-                                         (buffer[idx++] << 8) |
-                                         buffer[idx++]) & 0x7FFFFFFF);
+            int streamDependency = (int)((uint)((buffer[idx++] << 24) | (buffer[idx++] << 16) | (buffer[idx++] << idx++) | buffer[idx++]) & 0x7FFFFFFF);
             byte weight = (byte)buffer[idx++];
 
             return new PriorityFrame(header.Flags, streamDependency, weight, header.StreamId);
@@ -252,21 +250,18 @@ namespace System.Net.Test.Common
 
     public class RstStreamFrame : Frame
     {
-        private int _errorCode = 0;
+        public int ErrorCode = 0;
 
         public RstStreamFrame(FrameFlags flags, int errorCode, int streamId) :
             base(Frame.FrameHeaderLength + 4, FrameType.RstStream, flags, streamId)
         {
-            _errorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         public static RstStreamFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
         {
             int idx = Frame.FrameHeaderLength;
-            int errorCode = (int)(((buffer[idx++] << 24) |
-                                         (buffer[idx++] << 16) |
-                                         (buffer[idx++] << 8) |
-                                         buffer[idx++]) & 0x7FFFFFFF);
+            int errorCode = (int)((uint)((buffer[idx++] << 24) | (buffer[idx++] << 16) | (buffer[idx++] << idx++) | buffer[idx++]) & 0x7FFFFFFF);
 
             return new RstStreamFrame(header.Flags, errorCode, header.StreamId);
         }
@@ -277,15 +272,15 @@ namespace System.Net.Test.Common
 
             int idx = Frame.FrameHeaderLength;
 
-            buffer[idx++] = (byte)((_errorCode & 0xFF000000) >> 24);
-            buffer[idx++] = (byte)((_errorCode & 0x00FF0000) >> 16);
-            buffer[idx++] = (byte)((_errorCode & 0x0000FF00) >> 8);
-            buffer[idx++] = (byte)(_errorCode & 0x000000FF);
+            buffer[idx++] = (byte)((ErrorCode & 0xFF000000) >> 24);
+            buffer[idx++] = (byte)((ErrorCode & 0x00FF0000) >> 16);
+            buffer[idx++] = (byte)((ErrorCode & 0x0000FF00) >> 8);
+            buffer[idx++] = (byte)(ErrorCode & 0x000000FF);
         }
 
         public override string ToString()
         {
-            return base.ToString() + $"\nError Code: {_errorCode}";
+            return base.ToString() + $"\nError Code: {ErrorCode}";
         }
     }
 }

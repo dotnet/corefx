@@ -50,6 +50,11 @@ namespace System.Net.Test.Common
         {
             Frame emptySettings = new Frame(0, FrameType.Settings, FrameFlags.None, 0);
             await WriteFrameAsync(emptySettings).ConfigureAwait(false);
+
+            // We also need to ack the client settings header sent with the preface.
+            // We could piggyback along with another frame, but this is simpler.
+            Frame ack = new Frame(0, FrameType.Settings, FrameFlags.Ack, 0);
+            await WriteFrameAsync(emptySettings).ConfigureAwait(false);
         }
 
         public async Task WriteFrameAsync(Frame frame)
@@ -59,15 +64,18 @@ namespace System.Net.Test.Common
             await _connectionStream.WriteAsync(writeBuffer, 0, writeBuffer.Length).ConfigureAwait(false);
         }
 
-        public async Task<Frame> ReadFrameAsync()
+        public async Task<Frame> ReadFrameAsync(TimeSpan timeout)
         {
+            // Prep the timeout cancellation token.
+            CancellationTokenSource timeoutCts = new CancellationTokenSource(timeout);
+
             // First read the frame headers, which should tell us how long the rest of the frame is.
             byte[] headerBytes = new byte[Frame.FrameHeaderLength];
 
             int readBytes = 0;
             while(readBytes < Frame.FrameHeaderLength)
             {
-                readBytes += await _connectionStream.ReadAsync(headerBytes, readBytes, Frame.FrameHeaderLength - readBytes);
+                readBytes += await _connectionStream.ReadAsync(headerBytes, readBytes, Frame.FrameHeaderLength - readBytes, timeoutCts.Token);
             }
 
             Frame header = Frame.ReadFrom(headerBytes);
@@ -78,7 +86,7 @@ namespace System.Net.Test.Common
             readBytes = 0;
             while(readBytes < header.Length)
             {
-                readBytes += await _connectionStream.ReadAsync(data, readBytes, header.Length - readBytes);
+                readBytes += await _connectionStream.ReadAsync(data, readBytes, header.Length - readBytes, timeoutCts.Token);
             }
 
             // Construct the correct frame type and return it.
