@@ -91,10 +91,6 @@
       <Link>System\Drawing\ColorTable.cs</Link>
     </Compile>
     <Compile Include="System\Drawing\ColorConverter.cs" />
-    <Compile Include="System\Drawing\FontConverter.cs" />
-    <Compile Include="System\Drawing\IconConverter.cs" />
-    <Compile Include="System\Drawing\ImageConverter.cs" />
-    <Compile Include="System\Drawing\ImageFormatConverter.cs" />
     <Compile Include="System\Drawing\PointConverter.cs" />
     <Compile Include="System\Drawing\RectangleConverter.cs" />
     <Compile Include="System\Drawing\SizeConverter.cs" />
@@ -246,6 +242,12 @@
     <Compile Include="System\ComponentModel\ComponentResourceManager.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicyTypeConverter.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Drawing\FontConverter.cs" />
+    <Compile Include="System\Drawing\IconConverter.cs" />
+    <Compile Include="System\Drawing\ImageConverter.cs" />
+    <Compile Include="System\Drawing\ImageFormatConverter.cs" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
@@ -258,7 +260,6 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
-    <Reference Include="System.Drawing.Common" />
     <Reference Include="System.Drawing.Primitives" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.IO.FileSystem" />
@@ -276,5 +277,8 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading.Timer" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Drawing.Common" />
   </ItemGroup>
 </Project>

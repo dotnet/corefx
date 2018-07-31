@@ -720,6 +720,7 @@ namespace System.Drawing
         public override System.ComponentModel.TypeConverter.StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
         public override bool GetStandardValuesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
     }
+#if netcoreapp
     public class FontConverter : System.ComponentModel.TypeConverter
     {
         public FontConverter() { }
@@ -777,6 +778,7 @@ namespace System.Drawing
         public override StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
         public override bool GetStandardValuesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
     }
+#endif
     public partial class PointConverter : System.ComponentModel.TypeConverter
     {
         public PointConverter() { }

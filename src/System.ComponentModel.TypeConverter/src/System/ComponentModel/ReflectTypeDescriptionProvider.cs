@@ -128,10 +128,12 @@ namespace System.ComponentModel
             [typeof(Guid)] = typeof(GuidConverter),
             [typeof(Uri)] = typeof(UriTypeConverter),
             [typeof(Color)] = typeof(ColorConverter),
+#if netcoreapp
             [typeof(Font)] = typeof(FontConverter),
             [typeof(Icon)] = typeof(IconConverter),
             [typeof(Image)] = typeof(ImageConverter),
             [typeof(ImageFormat)] = typeof(ImageFormatConverter),
+#endif
             [typeof(Point)] = typeof(PointConverter),
             [typeof(Rectangle)] = typeof(RectangleConverter),
             [typeof(Size)] = typeof(SizeConverter),
