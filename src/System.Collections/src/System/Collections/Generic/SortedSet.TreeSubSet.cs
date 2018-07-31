@@ -315,7 +315,6 @@ namespace System.Collections.Generic
                 {
                     root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
                     version = _underlying.version;
-
                 }
 
                 if (updateCount && countVersion != _underlying.version) {
