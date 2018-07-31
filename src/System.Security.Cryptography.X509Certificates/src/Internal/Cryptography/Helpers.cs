@@ -162,10 +162,10 @@ namespace Internal.Cryptography
             }
         }
 
-        public static void ValidateAsn(ReadOnlyMemory<byte> encodedValue, AsnEncodingRules rules)
+        public static void ValidateDer(ReadOnlyMemory<byte> encodedValue)
         {
             Asn1Tag tag;
-            AsnReader reader = new AsnReader(encodedValue, rules);
+            AsnReader reader = new AsnReader(encodedValue, AsnEncodingRules.DER);
 
             while (reader.HasData)
             {
@@ -175,7 +175,7 @@ namespace Internal.Cryptography
                 //
                 // DER limits the constructed encoding to SEQUENCE and SET, as well as anything which gets
                 // a defined encoding as being an IMPLICIT SEQUENCE.
-                if (tag.TagClass == TagClass.Universal && rules == AsnEncodingRules.DER)
+                if (tag.TagClass == TagClass.Universal)
                 {
                     switch ((UniversalTagNumber)tag.TagValue)
                     {
@@ -201,7 +201,7 @@ namespace Internal.Cryptography
 
                 if (tag.IsConstructed)
                 {
-                    ValidateAsn(reader.PeekContentBytes(), rules);
+                    ValidateDer(reader.PeekContentBytes());
                 }
 
                 // Skip past the current value.

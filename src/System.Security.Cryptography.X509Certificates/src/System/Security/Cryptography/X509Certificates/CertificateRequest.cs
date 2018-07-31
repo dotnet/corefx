@@ -540,7 +540,7 @@ namespace System.Security.Cryptography.X509Certificates
             signatureAlgorithmAsn = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(signatureAlgorithm, AsnEncodingRules.DER);
             if (signatureAlgorithmAsn.Parameters.HasValue)
             {
-                Helpers.ValidateAsn(signatureAlgorithmAsn.Parameters.Value, AsnEncodingRules.DER);
+                Helpers.ValidateDer(signatureAlgorithmAsn.Parameters.Value);
             }
 
             TbsCertificateAsn tbsCertificate = new TbsCertificateAsn
