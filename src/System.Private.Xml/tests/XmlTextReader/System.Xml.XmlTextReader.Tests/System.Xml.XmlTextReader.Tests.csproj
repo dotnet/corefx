@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <Import Project="$(CommonTestPath)\Tests.props" />
+  <PropertyGroup>
+    <ProjectGuid>{7FDF3054-AF3D-4804-88AE-37A9D62E4E3B}</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <ItemGroup>
+    <None Include="Configurations.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="XmlTextReaderAttributeTests.cs" />
+    <Compile Include="XmlTextReaderConstructionTests.cs" />
+    <Compile Include="XmlTextReaderMiscTests.cs" />
+    <Compile Include="XmlTextReaderNamespaceTests.cs" />
+    <Compile Include="XmlTextReaderPropertiesTests.cs" />
+    <Compile Include="XmlTextReaderReadTests.cs" />
+    <Compile Include="XmlTextReaderTestHelper.cs" />
+  </ItemGroup>
+</Project>
