@@ -58,7 +58,7 @@ namespace System.ComponentModel.DataAnnotations
 
             if (value is ICollection collectionValue)
             {
-                return AllowEmptyCollections || collectionValue.Count() != 0;
+                return AllowEmptyCollections || collectionValue.Count != 0;
             }
 
             return true;
