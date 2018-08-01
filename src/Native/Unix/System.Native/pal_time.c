@@ -10,6 +10,7 @@
 #include <utime.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/time.h>
 #if HAVE_MACH_ABSOLUTE_TIME
 #include <mach/mach_time.h>
@@ -21,7 +22,7 @@ enum
     SecondsToNanoSeconds = 1000000000 // 10^9
 };
 
-int32_t SystemNative_UTimensat(const char* path, TimeSpec times[2])
+int32_t SystemNative_UTimensat(const char* path, TimeSpec* times)
 {
     struct timespec origTimes[2];
     origTimes[0].tv_sec = (time_t)times[0].tv_sec;
@@ -32,8 +33,7 @@ int32_t SystemNative_UTimensat(const char* path, TimeSpec times[2])
 
     int32_t result;
     
-    // utimensat ignores dirfd when path is absolute.
-    while (CheckInterrupted(result = utimensat(100, path, origTimes, 0)));
+    while (CheckInterrupted(result = utimensat(AT_FDCWD, path, origTimes, 0)));
     return result;
 }
 

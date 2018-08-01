@@ -19,7 +19,7 @@ typedef struct TimeSpec
  *
  * Returns 0 on success; otherwise, returns -1 and errno is set.
  */
-DLLEXPORT int32_t SystemNative_UTimensat(const char* path, TimeSpec times[2]);
+DLLEXPORT int32_t SystemNative_UTimensat(const char* path, TimeSpec* times);
 
 /**
  * Gets the resolution of the timestamp, in counts per second.
