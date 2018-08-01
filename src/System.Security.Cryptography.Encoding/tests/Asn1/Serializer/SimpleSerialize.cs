@@ -212,7 +212,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             DirectoryStringClass directoryString = new DirectoryStringClass
             {
-                BMPString = "BMP",
+                BmpString = "BMP",
             };
 
             using (AsnWriter writer = AsnSerializer.Serialize(directoryString, AsnEncodingRules.DER))
@@ -249,7 +249,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             DirectoryStringClass directoryString = new DirectoryStringClass
             {
-                BMPString = "BMP",
+                BmpString = "BMP",
                 PrintableString = "Printable",
             };
 
@@ -295,7 +295,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             {
                 DirectoryString = new DirectoryStringAsn
                 {
-                    BMPString = "Polo",
+                    BmpString = "Polo",
                 },
             };
 
@@ -312,7 +312,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             {
                 DirectoryString = new DirectoryStringClass
                 {
-                    BMPString = "Polo",
+                    BmpString = "Polo",
                 },
             };
 

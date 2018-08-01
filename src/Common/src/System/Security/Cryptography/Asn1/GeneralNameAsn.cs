@@ -81,6 +81,6 @@ namespace System.Security.Cryptography.Asn1
         internal string Utf8String;
 
         [BMPString]
-        internal string BMPString;
+        internal string BmpString;
     }
 }
