@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -32,9 +33,16 @@ namespace System.Security.Cryptography.X509Certificates
         {
             RSAParameters parameters = rsa.ExportParameters(false);
 
-            byte[] rsaPublicKey = DerEncoder.ConstructSequence(
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Modulus),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Exponent));
+            byte[] rsaPublicKey;
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                writer.PushSequence();
+                writer.WriteIntegerUnsigned(parameters.Modulus);
+                writer.WriteIntegerUnsigned(parameters.Exponent);
+                writer.PopSequence();
+                rsaPublicKey = writer.Encode();
+            }
 
             Oid oid = new Oid(Oids.Rsa);
 
@@ -74,9 +82,14 @@ namespace System.Security.Cryptography.X509Certificates
                     SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name));
             }
 
-            return DerEncoder.ConstructSequence(
-                DerEncoder.SegmentedEncodeOid(oid),
-                DerEncoder.SegmentedEncodeNull());
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                writer.PushSequence();
+                writer.WriteObjectIdentifier(oid);
+                writer.WriteNull();
+                writer.PopSequence();
+                return writer.Encode();
+            }
         }
     }
 }

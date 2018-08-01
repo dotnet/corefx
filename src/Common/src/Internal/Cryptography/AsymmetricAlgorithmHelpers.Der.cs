@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
