@@ -33,6 +33,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
       <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Oids.cs">
+      <Link>Common\System\Security\Cryptography\Oids.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AlgorithmIdentifierAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\AlgorithmIdentifierAsn.cs</Link>
     </Compile>
