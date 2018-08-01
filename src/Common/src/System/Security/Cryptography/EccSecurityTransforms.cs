@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
@@ -184,12 +185,6 @@ namespace System.Security.Cryptography
 
     internal static class EcKeyBlobHelpers
     {
-        private static readonly byte[] s_version1 = { 1 };
-        private static readonly byte[][] s_encodedVersion1 = DerEncoder.SegmentedEncodeUnsignedInteger(s_version1);
-
-        private static readonly Oid s_idEcPublicKey = new Oid("1.2.840.10045.2.1", null);
-        private static readonly byte[][] s_encodedIdEcPublicKey = DerEncoder.SegmentedEncodeOid(s_idEcPublicKey);
-
         internal static void ReadPkcs8Blob(this DerSequenceReader reader, ref ECParameters parameters)
         {
             // OneAsymmetricKey ::= SEQUENCE {
@@ -221,7 +216,7 @@ namespace System.Security.Cryptography
 
                 string algorithmOid = algorithm.ReadOidAsString();
 
-                if (algorithmOid != s_idEcPublicKey.Value)
+                if (algorithmOid != Oids.EcPublicKey)
                 {
                     throw new CryptographicException();
                 }
@@ -301,7 +296,7 @@ namespace System.Security.Cryptography
             string algorithmOid = algorithm.ReadOidAsString();
 
             // EC Public Key
-            if (algorithmOid != s_idEcPublicKey.Value)
+            if (algorithmOid != Oids.EcPublicKey)
             {
                 throw new CryptographicException();
             }
@@ -328,13 +323,29 @@ namespace System.Security.Cryptography
                 throw new PlatformNotSupportedException(SR.Cryptography_ECC_NamedCurvesOnly);
             }
 
+            byte[] paramBlob;
             byte[] pointBlob = GetPointBlob(ref parameters);
 
-            return DerEncoder.ConstructSequence(
-                DerEncoder.ConstructSegmentedSequence(
-                    s_encodedIdEcPublicKey,
-                    DerEncoder.SegmentedEncodeOid(parameters.Curve.Oid)),
-                DerEncoder.SegmentedEncodeBitString(pointBlob));
+            using (AsnWriter paramsWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                paramsWriter.WriteObjectIdentifier(parameters.Curve.Oid);
+                paramBlob = paramsWriter.Encode();
+            }
+
+            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
+            {
+                Algorithm = new AlgorithmIdentifierAsn
+                {
+                    Algorithm = new Oid(Oids.EcPublicKey),
+                    Parameters = paramBlob,
+                },
+                SubjectPublicKey = pointBlob,
+            };
+
+            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
+            {
+                return writer.Encode();
+            }
         }
 
         private static byte[] GetPointBlob(ref ECParameters parameters)
@@ -365,15 +376,24 @@ namespace System.Security.Cryptography
             //   parameters [0] Parameters{{IOSet}} OPTIONAL,
             //   publicKey  [1] BIT STRING OPTIONAL
             // }
-            return DerEncoder.ConstructSequence(
-                s_encodedVersion1,
-                DerEncoder.SegmentedEncodeOctetString(parameters.D),
-                DerEncoder.ConstructSegmentedContextSpecificValue(
-                    0,
-                    DerEncoder.SegmentedEncodeOid(parameters.Curve.Oid)),
-                DerEncoder.ConstructSegmentedContextSpecificValue(
-                    1,
-                    DerEncoder.SegmentedEncodeBitString(pointBlob)));
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                Asn1Tag explicit0 = new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
+                Asn1Tag explicit1 = new Asn1Tag(TagClass.ContextSpecific, 1, isConstructed: true);
+
+                writer.PushSequence();
+                writer.WriteInteger(1);
+                writer.WriteOctetString(parameters.D);
+                writer.PushSequence(explicit0);
+                writer.WriteObjectIdentifier(parameters.Curve.Oid);
+                writer.PopSequence(explicit0);
+                writer.PushSequence(explicit1);
+                writer.WriteBitString(pointBlob);
+                writer.PopSequence(explicit1);
+                writer.PopSequence();
+                return writer.Encode();
+            }
         }
 
         private static void ReadEncodedPoint(byte[] encodedPoint, ref ECParameters parameters)
