@@ -279,7 +279,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void InplaceEncryptDecrypt()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
@@ -299,7 +299,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCcm))]
         public static void InplaceEncryptTamperTagDecrypt()
         {
             byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
