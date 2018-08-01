@@ -4,7 +4,9 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
@@ -321,8 +323,6 @@ namespace System.Security.Cryptography
 
     internal static class DsaKeyBlobHelpers
     {
-        private static readonly Oid s_idDsa = new Oid("1.2.840.10040.4.1");
-
         internal static void ReadSubjectPublicKeyInfo(this DerSequenceReader keyInfo, ref DSAParameters parameters)
         {
             // SubjectPublicKeyInfo::= SEQUENCE  {
@@ -331,8 +331,8 @@ namespace System.Security.Cryptography
             DerSequenceReader algorithm = keyInfo.ReadSequence();
             string algorithmOid = algorithm.ReadOidAsString();
 
-            // EC Public Key
-            if (algorithmOid != s_idDsa.Value)
+            // DSA Public Key
+            if (algorithmOid != Oids.Dsa)
             {
                 throw new CryptographicException();
             }
@@ -371,9 +371,8 @@ namespace System.Security.Cryptography
 
         internal static byte[] ToSubjectPublicKeyInfo(this DSAParameters parameters)
         {
-            // SubjectPublicKeyInfo::= SEQUENCE  {
-            //    algorithm AlgorithmIdentifier,
-            //    subjectPublicKey     BIT STRING  }
+            byte[] dssParams;
+            byte[] publicKey;
 
             // Dss-Parms ::= SEQUENCE {
             //   p INTEGER,
@@ -381,18 +380,36 @@ namespace System.Security.Cryptography
             //   g INTEGER
             // }
 
-            return DerEncoder.ConstructSequence(
-                DerEncoder.ConstructSegmentedSequence(
-                    DerEncoder.SegmentedEncodeOid(s_idDsa),
-                    DerEncoder.ConstructSegmentedSequence(
-                        DerEncoder.SegmentedEncodeUnsignedInteger(parameters.P),
-                        DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Q),
-                        DerEncoder.SegmentedEncodeUnsignedInteger(parameters.G)
-                    )
-                ),
-                DerEncoder.SegmentedEncodeBitString(
-                    DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Y))
-            );
+            using (AsnWriter paramsWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                paramsWriter.PushSequence();
+                paramsWriter.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
+                paramsWriter.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
+                paramsWriter.WriteInteger(new BigInteger(parameters.G, isUnsigned: true, isBigEndian: true));
+                paramsWriter.PopSequence();
+                dssParams = paramsWriter.Encode();
+            }
+
+            using (AsnWriter publicKeyWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                publicKeyWriter.WriteIntegerUnsigned(parameters.Y);
+                publicKey = publicKeyWriter.Encode();
+            }
+
+            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
+            {
+                Algorithm = new AlgorithmIdentifierAsn
+                {
+                    Algorithm = new Oid(Oids.Dsa),
+                    Parameters = dssParams,
+                },
+                SubjectPublicKey = publicKey,
+            };
+
+            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
+            {
+                return writer.Encode();
+            }
         }
 
         internal static void ReadPkcs8Blob(this DerSequenceReader reader, ref DSAParameters parameters)
@@ -433,7 +450,7 @@ namespace System.Security.Cryptography
 
                 string algorithmOid = algorithm.ReadOidAsString();
 
-                if (algorithmOid != s_idDsa.Value)
+                if (algorithmOid != Oids.Dsa)
                 {
                     throw new CryptographicException();
                 }
@@ -460,13 +477,18 @@ namespace System.Security.Cryptography
             //   x INTEGER,
             // )
 
-            return DerEncoder.ConstructSequence(
-                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0 }),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.P),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Q),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.G),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Y),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.X));
+            using (AsnWriter privateKeyWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                privateKeyWriter.PushSequence();
+                privateKeyWriter.WriteInteger(0);
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.G, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.Y, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.X, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.PopSequence();
+                return privateKeyWriter.Encode();
+            }
         }
     }
 }

@@ -5,7 +5,9 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
@@ -702,22 +704,8 @@ namespace System.Security.Cryptography
 
     internal static class RsaKeyBlobHelpers
     {
-        private const string RsaOid = "1.2.840.113549.1.1.1";
-
         // The PKCS#1 version blob for an RSA key based on 2 primes.
         private static readonly byte[] s_versionNumberBytes = { 0 };
-
-        // The AlgorithmIdentifier structure for RSA contains an explicit NULL, for legacy/compat reasons.
-        private static readonly byte[][] s_encodedRsaAlgorithmIdentifier =
-            DerEncoder.ConstructSegmentedSequence(
-                DerEncoder.SegmentedEncodeOid(new Oid(RsaOid)),
-                // DER:NULL (0x05 0x00)
-                new byte[][]
-                {
-                    new byte[] { (byte)DerSequenceReader.DerTag.Null },
-                    new byte[] { 0 }, 
-                    Array.Empty<byte>(),
-                });
 
         internal static byte[] ToPkcs1Blob(this RSAParameters parameters)
         {
@@ -735,9 +723,14 @@ namespace System.Security.Cryptography
                     throw new CryptographicException(SR.Cryptography_InvalidRsaParameters);
                 }
 
-                return DerEncoder.ConstructSequence(
-                    DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Modulus),
-                    DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Exponent));
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                {
+                    writer.PushSequence();
+                    writer.WriteInteger(new BigInteger(parameters.Modulus, isUnsigned: true, isBigEndian: true));
+                    writer.WriteInteger(new BigInteger(parameters.Exponent, isUnsigned: true, isBigEndian: true));
+                    writer.PopSequence();
+                    return writer.Encode();
+                }
             }
 
             if (parameters.P == null ||
@@ -749,16 +742,21 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_InvalidRsaParameters);
             }
 
-            return DerEncoder.ConstructSequence(
-                DerEncoder.SegmentedEncodeUnsignedInteger(s_versionNumberBytes),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Modulus),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Exponent),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.D),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.P),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Q),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.DP),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.DQ),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.InverseQ));
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                writer.PushSequence();
+                writer.WriteInteger(0);
+                writer.WriteInteger(new BigInteger(parameters.Modulus, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.Exponent, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.D, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.DP, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.DQ, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.InverseQ, isUnsigned: true, isBigEndian: true));
+                writer.PopSequence();
+                return writer.Encode();
+            }
         }
 
         internal static void ReadPkcs8Blob(this DerSequenceReader reader, ref RSAParameters parameters)
@@ -792,7 +790,7 @@ namespace System.Security.Cryptography
 
                 string algorithmOid = algorithm.ReadOidAsString();
 
-                if (algorithmOid != RsaOid)
+                if (algorithmOid != Oids.Rsa)
                 {
                     throw new CryptographicException();
                 }
@@ -809,13 +807,20 @@ namespace System.Security.Cryptography
         {
             Debug.Assert(parameters.D == null);
 
-            // SubjectPublicKeyInfo::= SEQUENCE  {
-            //    algorithm AlgorithmIdentifier,
-            //    subjectPublicKey     BIT STRING  }
-            return DerEncoder.ConstructSequence(
-                s_encodedRsaAlgorithmIdentifier,
-                DerEncoder.SegmentedEncodeBitString(
-                    parameters.ToPkcs1Blob()));
+            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
+            {
+                Algorithm = new AlgorithmIdentifierAsn
+                {
+                    Algorithm = new Oid(Oids.Rsa),
+                    Parameters = AlgorithmIdentifierAsn.ExplicitDerNull,
+                },
+                SubjectPublicKey = parameters.ToPkcs1Blob(),
+            };
+
+            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
+            {
+                return writer.Encode();
+            }
         }
 
         internal static void ReadSubjectPublicKeyInfo(this DerSequenceReader keyInfo, ref RSAParameters parameters)
@@ -826,7 +831,7 @@ namespace System.Security.Cryptography
             DerSequenceReader algorithm = keyInfo.ReadSequence();
             string algorithmOid = algorithm.ReadOidAsString();
 
-            if (algorithmOid != RsaOid)
+            if (algorithmOid != Oids.Rsa)
             {
                 throw new CryptographicException();
             }
