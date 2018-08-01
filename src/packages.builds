@@ -20,17 +20,7 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.NETCoreApp\Microsoft.Private.CoreFx.NETCoreApp.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="*\pkg\**\System.Reflection.TypeExtensions.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Windows.Compatibility\Microsoft.Windows.Compatibility.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Windows.Compatibility.Shims\Microsoft.Windows.Compatibility.Shims.builds">
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.UAP\Microsoft.Private.CoreFx.UAP.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
