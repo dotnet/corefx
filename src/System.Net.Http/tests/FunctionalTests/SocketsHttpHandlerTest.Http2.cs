@@ -17,7 +17,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public sealed class SocketsHttpHandler_HttpClientHandler_Http2_Test : HttpClientTestBase
+    public sealed class SocketsHttpHandler_HttpClientHandler_Http2_Test : HttpClientTestBase, IClassFixture<Http2AppContextFixture>
     {
         protected override bool UseSocketsHttpHandler => true;
 
@@ -35,6 +35,34 @@ namespace System.Net.Http.Functional.Tests
                 string connectionPreface = await server.AcceptConnectionAsync();
 
                 Assert.Equal(connectionPreface, "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n");
+            }
+        }
+
+        [Fact]
+        public async Task Http2_InitialSettings_SentAndAcked()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var client = new HttpClient(handler))
+            {
+                Task sendTask = client.GetAsync(server.CreateServer());
+
+                await server.AcceptConnectionAsync();
+
+                // Receive the initial client settings frame.
+                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Assert.Equal(FrameType.Settings, receivedFrame.Type);
+
+                // Send the initial server settings frame.
+                Frame emptySettings = new Frame(0, FrameType.Settings, FrameFlags.None, 0);
+                await server.WriteFrameAsync(emptySettings).ConfigureAwait(false);
+
+                // Receive the server settings frame ACK.
+                receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Assert.Equal(FrameType.Settings, receivedFrame.Type);
+                Assert.True(receivedFrame.AckFlag);
             }
         }
 
@@ -76,11 +104,8 @@ namespace System.Net.Http.Functional.Tests
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
 
-                // Receive the initial settings frame from the server.
-                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-
                 // Receive the request header frame.
-                receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
 
                 // Send a reset stream frame so that stream 1 moves to a terminal state.
                 RstStreamFrame resetStream = new RstStreamFrame(FrameFlags.Padded, 0x1, 1);
@@ -106,11 +131,8 @@ namespace System.Net.Http.Functional.Tests
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
 
-                // Receive the initial settings frame from the server.
-                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-
                 // Receive the request header frame.
-                receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
 
                 // Send a malformed frame.
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, 0);
@@ -140,11 +162,8 @@ namespace System.Net.Http.Functional.Tests
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
 
-                // Receive the initial settings frame from the server.
-                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-
                 // Receive the request header frame.
-                receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
 
                 // Send a malformed frame.
                 DataFrame invalidFrame = new DataFrame(new byte[Frame.MaxFrameLength + 1], FrameFlags.None, 0, 0);
@@ -174,11 +193,8 @@ namespace System.Net.Http.Functional.Tests
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
 
-                // Receive the initial settings frame from the server.
-                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-
                 // Receive the request header frame.
-                receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
 
                 // Send a malformed frame.
                 DataFrame invalidFrame = new DataFrame(new byte[0], FrameFlags.Padded, 10, 1);
@@ -207,11 +223,8 @@ namespace System.Net.Http.Functional.Tests
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
 
-                // Receive the initial settings frame from the server.
-                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-
                 // Receive the request header frame.
-                receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
 
                 // Send a reset stream frame so that stream 1 moves to a terminal state.
                 RstStreamFrame resetStream = new RstStreamFrame(FrameFlags.Padded, 0x1, 1);
@@ -228,16 +241,18 @@ namespace System.Net.Http.Functional.Tests
                 await Assert.ThrowsAsync<HttpRequestException>(async () => await sendTask);
             }
         }
+    }
 
-        public SocketsHttpHandler_HttpClientHandler_Http2_Test()
+    public class Http2AppContextFixture : IDisposable
+    {
+        public Http2AppContextFixture()
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
         }
 
-        public new void Dispose()
+        public void Dispose()
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", false);
-            base.Dispose();
         }
     }
 }

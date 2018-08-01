@@ -283,4 +283,34 @@ namespace System.Net.Test.Common
             return base.ToString() + $"\nError Code: {ErrorCode}";
         }
     }
+
+    public class PingFrame : Frame
+    {
+        public byte[] Data;
+
+        public PingFrame(byte[] data, FrameFlags flags, int streamId) :
+            base(Frame.FrameHeaderLength + 8, FrameType.Ping, flags, streamId)
+        {
+            Data = data;
+        }
+
+        public static PingFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
+        {
+            byte[] data = buffer.Slice(Frame.FrameHeaderLength).ToArray();
+
+            return new PingFrame(data, header.Flags, header.StreamId);
+        }
+
+        public override void WriteTo(Span<byte> buffer)
+        {
+            base.WriteTo(buffer);
+
+            Data.CopyTo(buffer.Slice(Frame.FrameHeaderLength));
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $"\nOpaque Data: {string.Join(", ", Data)}";
+        }
+    }
 }

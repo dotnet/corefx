@@ -48,13 +48,17 @@ namespace System.Net.Test.Common
 
         public async Task SendConnectionPrefaceAsync()
         {
+            // Send the initial server settings frame.
             Frame emptySettings = new Frame(0, FrameType.Settings, FrameFlags.None, 0);
             await WriteFrameAsync(emptySettings).ConfigureAwait(false);
 
-            // We also need to ack the client settings header sent with the preface.
-            // We could piggyback along with another frame, but this is simpler.
-            Frame ack = new Frame(0, FrameType.Settings, FrameFlags.Ack, 0);
-            await WriteFrameAsync(emptySettings).ConfigureAwait(false);
+            // Receive and ACK the client settings frame.
+            Frame clientSettings = await ReadFrameAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            clientSettings.Flags = clientSettings.Flags | FrameFlags.Ack;
+            await WriteFrameAsync(clientSettings).ConfigureAwait(false);
+
+            // Receive the client ACK of the server settings frame.
+            clientSettings = await ReadFrameAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
         }
 
         public async Task WriteFrameAsync(Frame frame)
@@ -72,10 +76,15 @@ namespace System.Net.Test.Common
             // First read the frame headers, which should tell us how long the rest of the frame is.
             byte[] headerBytes = new byte[Frame.FrameHeaderLength];
 
-            int readBytes = 0;
-            while(readBytes < Frame.FrameHeaderLength)
+            int totalReadBytes = 0;
+            while(totalReadBytes < Frame.FrameHeaderLength)
             {
-                readBytes += await _connectionStream.ReadAsync(headerBytes, readBytes, Frame.FrameHeaderLength - readBytes, timeoutCts.Token);
+                int readBytes = await _connectionStream.ReadAsync(headerBytes, totalReadBytes, Frame.FrameHeaderLength - totalReadBytes, timeoutCts.Token).ConfigureAwait(false);
+                totalReadBytes += readBytes;
+                if (readBytes == 0)
+                {
+                    throw new Exception("Connection stream closed while attempting to read frame header.");
+                }
             }
 
             Frame header = Frame.ReadFrom(headerBytes);
@@ -83,10 +92,15 @@ namespace System.Net.Test.Common
             // Read the data segment of the frame, if it is present.
             byte[] data = new byte[header.Length];
 
-            readBytes = 0;
-            while(readBytes < header.Length)
+            totalReadBytes = 0;
+            while(totalReadBytes < header.Length)
             {
-                readBytes += await _connectionStream.ReadAsync(data, readBytes, header.Length - readBytes, timeoutCts.Token);
+                int readBytes = await _connectionStream.ReadAsync(data, totalReadBytes, header.Length - totalReadBytes, timeoutCts.Token).ConfigureAwait(false);
+                totalReadBytes += readBytes;
+                if (readBytes == 0)
+                {
+                    throw new Exception("Connection stream closed while attempting to read frame body.");
+                }
             }
 
             // Construct the correct frame type and return it.
@@ -100,6 +114,8 @@ namespace System.Net.Test.Common
                     return PriorityFrame.ReadFrom(header, data);
                 case FrameType.RstStream:
                     return RstStreamFrame.ReadFrom(header, data);
+                case FrameType.Ping:
+                    return PingFrame.ReadFrom(header, data);
                 default:
                     return header;
             }
@@ -133,11 +149,20 @@ namespace System.Net.Test.Common
                 }
                 _connectionStream = sslStream;
             }
+            byte[] prefix = new byte[24];
+            
+            int totalReadBytes = 0;
+            while(totalReadBytes < Frame.FrameHeaderLength)
+            {
+                int readBytes = await _connectionStream.ReadAsync(prefix, totalReadBytes, prefix.Length).ConfigureAwait(false);;
+                totalReadBytes += readBytes;
+                if (readBytes == 0)
+                {
+                    throw new Exception("Connection stream closed while attempting to read connection preface.");
+                }
+            }
 
-            StreamReader reader = new StreamReader(_connectionStream, Encoding.ASCII);
-            char[] prefix = new char[24];
-            await reader.ReadBlockAsync(prefix, 0, prefix.Length);
-            return new string(prefix);
+            return System.Text.Encoding.UTF8.GetString(prefix, 0, prefix.Length);
         }
 
         public void Dispose()
