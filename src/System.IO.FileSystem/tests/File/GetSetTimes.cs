@@ -103,8 +103,9 @@ namespace System.IO.Tests
             File.WriteAllText(secondFile, "");
 
             File.SetLastAccessTimeUtc(secondFile, DateTime.UtcNow);
-
-            Assert.True(File.GetLastWriteTimeUtc(firstFile).Ticks < File.GetLastWriteTimeUtc(secondFile).Ticks);
+            long firstFileTicks = File.GetLastWriteTimeUtc(firstFile).Ticks;
+            long secondFileTicks = File.GetLastWriteTimeUtc(secondFile).Ticks;
+            Assert.True(firstFileTicks <= secondFileTicks, $"First File Ticks\t{firstFileTicks}\nSecond File Ticks\t{secondFileTicks}");
         }
     }
 }
