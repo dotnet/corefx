@@ -14,11 +14,7 @@ namespace System.Xml.Tests
         {
             var textReader = new XmlTextReader(null as string, new MemoryStream(), new NameTable());            
             Assert.NotNull(textReader);
-            Assert.Null(textReader.BaseURI);
-
-            textReader = new XmlTextReader("https://SomeBaseUri", new MemoryStream(), null);
-            Assert.NotNull(textReader);
-            Assert.Equal("https://SomeBaseUri", textReader.BaseURI);
+            Assert.True(string.IsNullOrEmpty(textReader.BaseURI));
         }
 
         [Fact]

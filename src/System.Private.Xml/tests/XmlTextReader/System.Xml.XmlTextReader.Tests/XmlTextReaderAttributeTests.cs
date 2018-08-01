@@ -33,7 +33,7 @@ namespace System.Xml.Tests
             Assert.Equal(XmlNodeType.Attribute, textReader.NodeType);
             Assert.Equal("val2", textReader.Value);
 
-            Assert.False(textReader.MoveToAttribute("attr2"));
+            Assert.False(textReader.MoveToAttribute("attr3"));
         }
 
         [Fact]
@@ -47,6 +47,7 @@ namespace System.Xml.Tests
             Assert.Equal(XmlNodeType.Attribute, textReader.NodeType);
             Assert.Equal("val", textReader.Value);
 
+            Assert.True(textReader.Read());
             Assert.True(textReader.MoveToAttribute("attr", "urn"));
             Assert.Equal(XmlNodeType.Attribute, textReader.NodeType);
             Assert.Equal("val2", textReader.Value);
