@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Security.Cryptography.Apple;
 using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
@@ -382,9 +383,9 @@ namespace System.Security.Cryptography
             using (AsnWriter paramsWriter = new AsnWriter(AsnEncodingRules.DER))
             {
                 paramsWriter.PushSequence();
-                paramsWriter.WriteIntegerUnsigned(parameters.P);
-                paramsWriter.WriteIntegerUnsigned(parameters.Q);
-                paramsWriter.WriteIntegerUnsigned(parameters.G);
+                paramsWriter.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
+                paramsWriter.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
+                paramsWriter.WriteInteger(new BigInteger(parameters.G, isUnsigned: true, isBigEndian: true));
                 paramsWriter.PopSequence();
                 dssParams = paramsWriter.Encode();
             }
@@ -480,11 +481,11 @@ namespace System.Security.Cryptography
             {
                 privateKeyWriter.PushSequence();
                 privateKeyWriter.WriteInteger(0);
-                privateKeyWriter.WriteIntegerUnsigned(parameters.P);
-                privateKeyWriter.WriteIntegerUnsigned(parameters.Q);
-                privateKeyWriter.WriteIntegerUnsigned(parameters.G);
-                privateKeyWriter.WriteIntegerUnsigned(parameters.Y);
-                privateKeyWriter.WriteIntegerUnsigned(parameters.X);
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.G, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.Y, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteInteger(new BigInteger(parameters.X, isUnsigned: true, isBigEndian: true));
                 privateKeyWriter.PopSequence();
                 return privateKeyWriter.Encode();
             }
