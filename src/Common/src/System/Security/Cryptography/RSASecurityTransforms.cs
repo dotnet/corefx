@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Security.Cryptography.Apple;
 using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
@@ -725,8 +726,8 @@ namespace System.Security.Cryptography
                 using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
                 {
                     writer.PushSequence();
-                    writer.WriteIntegerUnsigned(parameters.Modulus);
-                    writer.WriteIntegerUnsigned(parameters.Exponent);
+                    writer.WriteInteger(new BigInteger(parameters.Modulus, isUnsigned: true, isBigEndian: true));
+                    writer.WriteInteger(new BigInteger(parameters.Exponent, isUnsigned: true, isBigEndian: true));
                     writer.PopSequence();
                     return writer.Encode();
                 }
@@ -745,14 +746,14 @@ namespace System.Security.Cryptography
             {
                 writer.PushSequence();
                 writer.WriteInteger(0);
-                writer.WriteIntegerUnsigned(parameters.Modulus);
-                writer.WriteIntegerUnsigned(parameters.Exponent);
-                writer.WriteIntegerUnsigned(parameters.D);
-                writer.WriteIntegerUnsigned(parameters.P);
-                writer.WriteIntegerUnsigned(parameters.Q);
-                writer.WriteIntegerUnsigned(parameters.DP);
-                writer.WriteIntegerUnsigned(parameters.DQ);
-                writer.WriteIntegerUnsigned(parameters.InverseQ);
+                writer.WriteInteger(new BigInteger(parameters.Modulus, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.Exponent, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.D, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.DP, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.DQ, isUnsigned: true, isBigEndian: true));
+                writer.WriteInteger(new BigInteger(parameters.InverseQ, isUnsigned: true, isBigEndian: true));
                 writer.PopSequence();
                 return writer.Encode();
             }
