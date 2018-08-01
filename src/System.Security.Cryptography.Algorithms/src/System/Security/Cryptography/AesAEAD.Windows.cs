@@ -5,6 +5,7 @@
 using Internal.Cryptography;
 using Internal.NativeCrypto;
 using static Interop.BCrypt;
+using System.Diagnostics;
 
 namespace System.Security.Cryptography
 {
@@ -45,6 +46,8 @@ namespace System.Security.Cryptography
                     out int ciphertextBytesWritten,
                     0);
 
+                Debug.Assert(plaintext.Length == ciphertextBytesWritten);
+
                 if (ntStatus != NTSTATUS.STATUS_SUCCESS)
                 {
                     throw CreateCryptographicException(ntStatus);
@@ -59,7 +62,8 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> associatedData,
             ReadOnlySpan<byte> ciphertext,
             ReadOnlySpan<byte> tag,
-            Span<byte> plaintext)
+            Span<byte> plaintext,
+            bool clearPlaintextOnFailure)
         {
             fixed (byte* plaintextBytes = plaintext)
             fixed (byte* nonceBytes = nonce)
@@ -87,11 +91,15 @@ namespace System.Security.Cryptography
                     out int plaintextBytesWritten,
                     0);
 
+                Debug.Assert(ciphertext.Length == plaintextBytesWritten);
+
                 switch (ntStatus)
                 {
                     case NTSTATUS.STATUS_SUCCESS:
                         return;
                     case NTSTATUS.STATUS_AUTH_TAG_MISMATCH:
+                        if (clearPlaintextOnFailure)
+                            CryptographicOperations.ZeroMemory(plaintext);
                         throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
                     default:
                         throw CreateCryptographicException(ntStatus);

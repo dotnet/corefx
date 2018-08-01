@@ -112,6 +112,7 @@ namespace System.Security.Cryptography
                 plaintext.Slice(plaintextBytesWritten),
                 out int bytesWritten))
             {
+                CryptographicOperations.ZeroMemory(plaintext);
                 throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
             }
 

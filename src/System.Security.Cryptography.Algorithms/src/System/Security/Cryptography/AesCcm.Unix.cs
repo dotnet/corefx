@@ -25,8 +25,7 @@ namespace System.Security.Cryptography
 
             // OpenSSL does not allow setting nonce length after setting the key
             // we need to store it as bytes instead
-            _key = new byte[key.Length];
-            key.CopyTo(_key);
+            _key = key.ToArray();
         }
 
         private void EncryptInternal(

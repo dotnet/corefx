@@ -8,7 +8,7 @@ namespace System.Security.Cryptography
 {
     public sealed partial class AesGcm : IDisposable
     {
-        const int NonceSize = 12;
+        private const int NonceSize = 12;
         public static KeySizes NonceByteSizes { get; } = new KeySizes(NonceSize, NonceSize, 1);
         public static KeySizes TagByteSizes { get; } = new KeySizes(12, 16, 1);
 
@@ -40,7 +40,7 @@ namespace System.Security.Cryptography
             Span<byte> tag,
             ReadOnlySpan<byte> associatedData = default)
         {
-            CheckParameters(plaintext.Length, ciphertext.Length, nonce.Length, tag.Length);
+            CheckParameters(plaintext, ciphertext, nonce, tag);
             EncryptInternal(nonce, plaintext, ciphertext, tag, associatedData);
         }
 
@@ -57,20 +57,24 @@ namespace System.Security.Cryptography
             Span<byte> plaintext,
             ReadOnlySpan<byte> associatedData = default)
         {
-            CheckParameters(plaintext.Length, ciphertext.Length, nonce.Length, tag.Length);
+            CheckParameters(plaintext, ciphertext, nonce, tag);
             DecryptInternal(nonce, ciphertext, tag, plaintext, associatedData);
         }
 
-        private static void CheckParameters(int plaintextSize, int ciphertextSize, int nonceSize, int tagSize)
+        private static void CheckParameters(
+            ReadOnlySpan<byte> plaintext,
+            ReadOnlySpan<byte> ciphertext,
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> tag)
         {
-            if (plaintextSize != ciphertextSize)
+            if (plaintext.Length != ciphertext.Length)
                 throw new ArgumentException(SR.Cryptography_PlaintextCiphertextLengthMismatch);
 
-            if (!AesAEAD.MatchesKeySizes(nonceSize, NonceByteSizes))
-                throw new ArgumentException(SR.Cryptography_InvalidNonceLength);
+            if (!nonce.Length.IsLegalSize(NonceByteSizes))
+                throw new ArgumentException(SR.Cryptography_InvalidNonceLength, nameof(nonce));
 
-            if (!AesAEAD.MatchesKeySizes(tagSize, TagByteSizes))
-                throw new ArgumentException(SR.Cryptography_InvalidTagLength);
+            if (!tag.Length.IsLegalSize(TagByteSizes))
+                throw new ArgumentException(SR.Cryptography_InvalidTagLength, nameof(tag));
         }
     }
 }

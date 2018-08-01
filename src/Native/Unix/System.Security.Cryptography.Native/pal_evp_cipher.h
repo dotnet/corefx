@@ -27,9 +27,6 @@ CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type);
 
 DLLEXPORT int32_t CryptoNative_EvpCipherSetKeyAndIV(EVP_CIPHER_CTX* ctx, uint8_t* key, unsigned char* iv, int32_t enc);
 
-DLLEXPORT int32_t CryptoNative_EvpCipherGcmAvailable(void);
-DLLEXPORT int32_t CryptoNative_EvpCipherCcmAvailable(void);
-
 DLLEXPORT int32_t CryptoNative_EvpCipherSetGcmNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength);
 DLLEXPORT int32_t CryptoNative_EvpCipherSetCcmNonceLength(EVP_CIPHER_CTX* ctx, int32_t ivLength);
 

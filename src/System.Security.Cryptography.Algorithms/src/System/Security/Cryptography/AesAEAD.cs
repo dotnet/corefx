@@ -16,19 +16,11 @@ namespace System.Security.Cryptography
             }
         }
 
-        public static bool MatchesKeySizes(int size, KeySizes keySizes)
-        {
-            if (size < keySizes.MinSize || size > keySizes.MaxSize)
-                return false;
-
-            return ((size - keySizes.MinSize) % keySizes.SkipSize) == 0;
-        }
-
         public static void CheckArgumentsForNull(
-            ReadOnlySpan<byte> nonce,
-            ReadOnlySpan<byte> plaintext,
-            ReadOnlySpan<byte> ciphertext,
-            ReadOnlySpan<byte> tag)
+            byte[] nonce,
+            byte[] plaintext,
+            byte[] ciphertext,
+            byte[] tag)
         {
             if (nonce == null)
                 throw new ArgumentNullException(nameof(nonce));

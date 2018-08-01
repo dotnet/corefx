@@ -40,7 +40,8 @@ namespace System.Security.Cryptography
             Span<byte> plaintext,
             ReadOnlySpan<byte> associatedData = default)
         {
-            AesAEAD.Decrypt(s_aesCcm, _keyHandle, nonce, associatedData, ciphertext, tag, plaintext);
+            // BCrypt implementation of CCM clears plaintext for you on failure
+            AesAEAD.Decrypt(s_aesCcm, _keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: false);
         }
 
         public void Dispose()

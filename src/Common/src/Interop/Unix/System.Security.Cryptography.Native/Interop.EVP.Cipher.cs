@@ -48,22 +48,24 @@ internal static partial class Interop
             }
         }
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpCipherGcmAvailable")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool EvpCipherGcmAvailable();
+        internal static bool EvpCipherGcmAvailable()
+        {
+            return EvpAes128Gcm() != IntPtr.Zero;
+        }
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpCipherCcmAvailable")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool EvpCipherCcmAvailable();
+        internal static bool EvpCipherCcmAvailable()
+        {
+            return EvpAes128Ccm() != IntPtr.Zero;
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpCipherSetGcmNonceLength")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EvpCipherSetGcmNonceLength2(
+        private static extern bool CryptoNative_EvpCipherSetGcmNonceLength(
             SafeEvpCipherCtxHandle ctx, int nonceLength);
 
         internal static void EvpCipherSetGcmNonceLength(SafeEvpCipherCtxHandle ctx, int nonceLength)
         {
-            if (!EvpCipherSetGcmNonceLength2(ctx, nonceLength))
+            if (!CryptoNative_EvpCipherSetGcmNonceLength(ctx, nonceLength))
             {
                 throw CreateOpenSslCryptographicException();
             }
@@ -71,12 +73,12 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpCipherSetCcmNonceLength")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EvpCipherSetCcmNonceLength2(
+        private static extern bool CryptoNative_EvpCipherSetCcmNonceLength(
             SafeEvpCipherCtxHandle ctx, int nonceLength);
 
         internal static void EvpCipherSetCcmNonceLength(SafeEvpCipherCtxHandle ctx, int nonceLength)
         {
-            if (!EvpCipherSetCcmNonceLength2(ctx, nonceLength))
+            if (!CryptoNative_EvpCipherSetCcmNonceLength(ctx, nonceLength))
             {
                 throw CreateOpenSslCryptographicException();
             }

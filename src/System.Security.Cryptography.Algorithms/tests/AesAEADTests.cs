@@ -40,8 +40,8 @@ namespace System.Security.Cryptography.Algorithms.Tests
             public int CaseId { get; set; }
             public byte[] Key { get; set; }
             public byte[] Nonce { get; set; }
-            public byte[] Plaintext { get; set; } = new byte[0];
-            public byte[] Ciphertext { get; set; } = new byte[0];
+            public byte[] Plaintext { get; set; }
+            public byte[] Ciphertext { get; set; }
             public byte[] AssociatedData { get; set; }
             public byte[] Tag { get; set; }
 

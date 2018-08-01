@@ -60,7 +60,6 @@ namespace System.Security.Cryptography.Algorithms.Tests
         public static void InvalidKeyLength(int keyLength)
         {
             byte[] key = new byte[keyLength];
-            RandomNumberGenerator.Fill(key);
             Assert.Throws<CryptographicException>(() => new AesCcm(key));
         }
 
@@ -79,7 +78,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             using (var aesCcm = new AesCcm(key))
             {
-                Assert.Throws<ArgumentException>(() => aesCcm.Encrypt(nonce, plaintext, ciphertext, tag));
+                Assert.Throws<ArgumentException>("nonce", () => aesCcm.Encrypt(nonce, plaintext, ciphertext, tag));
             }
         }
 
@@ -121,7 +120,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             using (var aesCcm = new AesCcm(key))
             {
-                Assert.Throws<ArgumentException>(() => aesCcm.Encrypt(nonce, plaintext, ciphertext, tag));
+                Assert.Throws<ArgumentException>("tag", () => aesCcm.Encrypt(nonce, plaintext, ciphertext, tag));
             }
         }
 
@@ -172,13 +171,13 @@ namespace System.Security.Cryptography.Algorithms.Tests
             {
                 byte[] ciphertext1 = new byte[originalData1.Length];
                 byte[] tag1 = new byte[expectedTag1.Length];
-                aesCcm.Encrypt(nonce1, (byte[])originalData1.Clone(), ciphertext1, tag1);
+                aesCcm.Encrypt(nonce1, originalData1, ciphertext1, tag1);
                 Assert.Equal(expectedCiphertext1, ciphertext1);
                 Assert.Equal(expectedTag1, tag1);
 
                 byte[] ciphertext2 = new byte[originalData2.Length];
                 byte[] tag2 = new byte[expectedTag2.Length];
-                aesCcm.Encrypt(nonce2, (byte[])originalData2.Clone(), ciphertext2, tag2, associatedData2);
+                aesCcm.Encrypt(nonce2, originalData2, ciphertext2, tag2, associatedData2);
                 Assert.Equal(expectedCiphertext2, ciphertext2);
                 Assert.Equal(expectedTag2, tag2);
 
@@ -217,7 +216,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
         [ConditionalFact(nameof(SupportsCcm))]
         public static void NullKey()
         {
-            Assert.Throws<ArgumentNullException>(() => new AesCcm((byte[])null));
+            Assert.Throws<ArgumentNullException>("key", () => new AesCcm((byte[])null));
         }
 
         [ConditionalFact(nameof(SupportsCcm))]
@@ -230,8 +229,8 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             using (var aesCcm = new AesCcm(key))
             {
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Encrypt((byte[])null, plaintext, ciphertext, tag));
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Decrypt((byte[])null, ciphertext, tag, plaintext));
+                Assert.Throws<ArgumentNullException>("nonce", () => aesCcm.Encrypt((byte[])null, plaintext, ciphertext, tag));
+                Assert.Throws<ArgumentNullException>("nonce", () => aesCcm.Decrypt((byte[])null, ciphertext, tag, plaintext));
             }
         }
 
@@ -245,8 +244,8 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             using (var aesCcm = new AesCcm(key))
             {
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Encrypt(nonce, (byte[])null, ciphertext, tag));
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Decrypt(nonce, ciphertext, tag, (byte[])null));
+                Assert.Throws<ArgumentNullException>("plaintext", () => aesCcm.Encrypt(nonce, (byte[])null, ciphertext, tag));
+                Assert.Throws<ArgumentNullException>("plaintext", () => aesCcm.Decrypt(nonce, ciphertext, tag, (byte[])null));
             }
         }
 
@@ -260,8 +259,8 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             using (var aesCcm = new AesCcm(key))
             {
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Encrypt(nonce, plaintext, (byte[])null, tag));
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Decrypt(nonce, (byte[])null, tag, plaintext));
+                Assert.Throws<ArgumentNullException>("ciphertext", () => aesCcm.Encrypt(nonce, plaintext, (byte[])null, tag));
+                Assert.Throws<ArgumentNullException>("ciphertext", () => aesCcm.Decrypt(nonce, (byte[])null, tag, plaintext));
             }
         }
 
@@ -275,8 +274,51 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
             using (var aesCcm = new AesCcm(key))
             {
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Encrypt(nonce, plaintext, ciphertext, (byte[])null));
-                Assert.Throws<ArgumentNullException>(() => aesCcm.Decrypt(nonce, ciphertext, (byte[])null, plaintext));
+                Assert.Throws<ArgumentNullException>("tag", () => aesCcm.Encrypt(nonce, plaintext, ciphertext, (byte[])null));
+                Assert.Throws<ArgumentNullException>("tag", () => aesCcm.Decrypt(nonce, ciphertext, (byte[])null, plaintext));
+            }
+        }
+
+        [Fact]
+        public static void InplaceEncryptDecrypt()
+        {
+            byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
+            byte[] nonce = new byte[12];
+            byte[] originalPlaintext = new byte[] { 1, 2, 8, 12, 16, 99, 0 };
+            byte[] data = (byte[])originalPlaintext.Clone();
+            byte[] tag = new byte[16];
+            RandomNumberGenerator.Fill(nonce);
+
+            using (var aesCcm = new AesCcm(key))
+            {
+                aesCcm.Encrypt(nonce, data, data, tag);
+                Assert.NotEqual(originalPlaintext, data);
+
+                aesCcm.Decrypt(nonce, data, tag, data);
+                Assert.Equal(originalPlaintext, data);
+            }
+        }
+
+        [Fact]
+        public static void InplaceEncryptTamperTagDecrypt()
+        {
+            byte[] key = "d5a194ed90cfe08abecd4691997ceb2c".HexToByteArray();
+            byte[] nonce = new byte[12];
+            byte[] originalPlaintext = new byte[] { 1, 2, 8, 12, 16, 99, 0 };
+            byte[] data = (byte[])originalPlaintext.Clone();
+            byte[] tag = new byte[16];
+            RandomNumberGenerator.Fill(nonce);
+
+            using (var aesCcm = new AesCcm(key))
+            {
+                aesCcm.Encrypt(nonce, data, data, tag);
+                Assert.NotEqual(originalPlaintext, data);
+
+                tag[0] ^= 1;
+
+                Assert.Throws<CryptographicException>(
+                    () => aesCcm.Decrypt(nonce, data, tag, data));
+                Assert.Equal(new byte[data.Length], data);
             }
         }
 
@@ -313,8 +355,32 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 tag[0] ^= 1;
 
                 byte[] plaintext = new byte[testCase.Plaintext.Length];
+                RandomNumberGenerator.Fill(plaintext);
                 Assert.Throws<CryptographicException>(
                     () => aesCcm.Decrypt(testCase.Nonce, ciphertext, tag, plaintext, testCase.AssociatedData));
+                Assert.Equal(new byte[plaintext.Length], plaintext);
+            }
+        }
+
+        [ConditionalTheory(nameof(SupportsCcm))]
+        [MemberData(nameof(GetNistCcmTestCasesWithNonEmptyPT))]
+        public static void AesCcmNistTestsTamperCiphertext(AEADTest testCase)
+        {
+            using (var aesCcm = new AesCcm(testCase.Key))
+            {
+                byte[] ciphertext = new byte[testCase.Plaintext.Length];
+                byte[] tag = new byte[testCase.Tag.Length];
+                aesCcm.Encrypt(testCase.Nonce, testCase.Plaintext, ciphertext, tag, testCase.AssociatedData);
+                Assert.Equal(testCase.Ciphertext, ciphertext);
+                Assert.Equal(testCase.Tag, tag);
+
+                ciphertext[0] ^= 1;
+
+                byte[] plaintext = new byte[testCase.Plaintext.Length];
+                RandomNumberGenerator.Fill(plaintext);
+                Assert.Throws<CryptographicException>(
+                    () => aesCcm.Decrypt(testCase.Nonce, ciphertext, tag, plaintext, testCase.AssociatedData));
+                Assert.Equal(new byte[plaintext.Length], plaintext);
             }
         }
 
@@ -346,6 +412,15 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
+        public static IEnumerable<object[]> GetNistCcmTestCasesWithNonEmptyPT()
+        {
+            foreach (AEADTest test in s_nistCcmTestVectorsSelectedCases)
+            {
+                if (test.Plaintext.Length > 0)
+                    yield return new object[] { test };
+            }
+        }
+
         // https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/mac/ccmtestvectors.zip
         private const string NistCcmTestVectors = "NIST CCM Test Vectors";
 
@@ -357,6 +432,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 CaseId = 0,
                 Key = "4ae701103c63deca5b5a3939d7d05992".HexToByteArray(),
                 Nonce = "5a8aa485c316e9".HexToByteArray(),
+                Plaintext = Array.Empty<byte>(),
+                AssociatedData = null,
+                Ciphertext = Array.Empty<byte>(),
                 Tag = "02209f55".HexToByteArray(),
             },
             new AEADTest
@@ -366,6 +444,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 Key = "19ebfde2d5468ba0a3031bde629b11fd".HexToByteArray(),
                 Nonce = "5a8aa485c316e9".HexToByteArray(),
                 Plaintext = "3796cf51b8726652a4204733b8fbb047cf00fb91a9837e22".HexToByteArray(),
+                AssociatedData = Array.Empty<byte>(),
                 Ciphertext = "a90e8ea44085ced791b2fdb7fd44b5cf0bd7d27718029bb7".HexToByteArray(),
                 Tag = "03e1fa6b".HexToByteArray(),
             },
@@ -375,7 +454,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 CaseId = 120,
                 Key = "90929a4b0ac65b350ad1591611fe4829".HexToByteArray(),
                 Nonce = "5a8aa485c316e9".HexToByteArray(),
+                Plaintext = Array.Empty<byte>(),
                 AssociatedData = "3796cf51b8726652a4204733b8fbb047cf00fb91a9837e22ec22b1a268f88e2c".HexToByteArray(),
+                Ciphertext = Array.Empty<byte>(),
                 Tag = "782e4318".HexToByteArray(),
             },
             new AEADTest
@@ -384,6 +465,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 CaseId = 0,
                 Key = "c98ad7f38b2c7e970c9b965ec87a08208384718f78206c6c".HexToByteArray(),
                 Nonce = "5a8aa485c316e9".HexToByteArray(),
+                Plaintext = Array.Empty<byte>(),
+                AssociatedData = null,
+                Ciphertext = Array.Empty<byte>(),
                 Tag = "9d4b7f3b".HexToByteArray(),
             },
             new AEADTest
@@ -393,6 +477,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 Key = "19ebfde2d5468ba0a3031bde629b11fd4094afcb205393fa".HexToByteArray(),
                 Nonce = "5a8aa485c316e9".HexToByteArray(),
                 Plaintext = "3796cf51b8726652a4204733b8fbb047cf00fb91a9837e22".HexToByteArray(),
+                AssociatedData = null,
                 Ciphertext = "411986d04d6463100bff03f7d0bde7ea2c3488784378138c".HexToByteArray(),
                 Tag = "ddc93a54".HexToByteArray(),
             },
@@ -402,7 +487,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 CaseId = 120,
                 Key = "90929a4b0ac65b350ad1591611fe48297e03956f6083e451".HexToByteArray(),
                 Nonce = "5a8aa485c316e9".HexToByteArray(),
+                Plaintext = Array.Empty<byte>(),
                 AssociatedData = "3796cf51b8726652a4204733b8fbb047cf00fb91a9837e22ec22b1a268f88e2c".HexToByteArray(),
+                Ciphertext = Array.Empty<byte>(),
                 Tag = "1d089a5f".HexToByteArray(),
             },
             new AEADTest
@@ -411,6 +498,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 CaseId = 0,
                 Key = "eda32f751456e33195f1f499cf2dc7c97ea127b6d488f211ccc5126fbb24afa6".HexToByteArray(),
                 Nonce = "a544218dadd3c1".HexToByteArray(),
+                Plaintext = Array.Empty<byte>(),
+                AssociatedData = null,
+                Ciphertext = Array.Empty<byte>(),
                 Tag = "469c90bb".HexToByteArray(),
             },
             new AEADTest
@@ -420,6 +510,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 Key = "af063639e66c284083c5cf72b70d8bc277f5978e80d9322d99f2fdc718cda569".HexToByteArray(),
                 Nonce = "a544218dadd3c1".HexToByteArray(),
                 Plaintext = "d3d5424e20fbec43ae495353ed830271515ab104f8860c98".HexToByteArray(),
+                AssociatedData = null,
                 Ciphertext = "64a1341679972dc5869fcf69b19d5c5ea50aa0b5e985f5b7".HexToByteArray(),
                 Tag = "22aa8d59".HexToByteArray(),
             },
@@ -429,7 +520,9 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 CaseId = 120,
                 Key = "1b0e8df63c57f05d9ac457575ea764524b8610ae5164e6215f426f5a7ae6ede4".HexToByteArray(),
                 Nonce = "a544218dadd3c1".HexToByteArray(),
+                Plaintext = Array.Empty<byte>(),
                 AssociatedData = "d3d5424e20fbec43ae495353ed830271515ab104f8860c988d15b6d36c038eab".HexToByteArray(),
+                Ciphertext = Array.Empty<byte>(),
                 Tag = "92d00fbe".HexToByteArray(),
             },
             new AEADTest

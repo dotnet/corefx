@@ -160,16 +160,6 @@ int32_t CryptoNative_EvpCipherFinalEx(EVP_CIPHER_CTX* ctx, uint8_t* outm, int32_
     return ret;
 }
 
-int32_t CryptoNative_EvpCipherGcmAvailable(void)
-{
-    return API_EXISTS(EVP_aes_128_gcm);
-}
-
-int32_t CryptoNative_EvpCipherCcmAvailable(void)
-{
-    return API_EXISTS(EVP_aes_128_ccm);
-}
-
 int32_t CryptoNative_EvpCipherGetGcmTag(EVP_CIPHER_CTX* ctx, uint8_t* tag, int32_t tagLength)
 {
     return EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, tagLength, tag);
@@ -202,12 +192,12 @@ const EVP_CIPHER* CryptoNative_EvpAes128Cbc()
 
 const EVP_CIPHER* CryptoNative_EvpAes128Gcm()
 {
-    return EVP_aes_128_gcm();
+    return API_EXISTS(EVP_aes_128_gcm) ? EVP_aes_128_gcm() : NULL;
 }
 
 const EVP_CIPHER* CryptoNative_EvpAes128Ccm()
 {
-    return EVP_aes_128_ccm();
+    return API_EXISTS(EVP_aes_128_ccm) ? EVP_aes_128_ccm() : NULL;
 }
 
 const EVP_CIPHER* CryptoNative_EvpAes192Ecb()
@@ -222,12 +212,12 @@ const EVP_CIPHER* CryptoNative_EvpAes192Cbc()
 
 const EVP_CIPHER* CryptoNative_EvpAes192Gcm()
 {
-    return EVP_aes_192_gcm();
+    return API_EXISTS(EVP_aes_192_gcm) ? EVP_aes_192_gcm() : NULL;
 }
 
 const EVP_CIPHER* CryptoNative_EvpAes192Ccm()
 {
-    return EVP_aes_192_ccm();
+    return API_EXISTS(EVP_aes_192_ccm) ? EVP_aes_192_ccm() : NULL;
 }
 
 const EVP_CIPHER* CryptoNative_EvpAes256Ecb()
@@ -242,12 +232,12 @@ const EVP_CIPHER* CryptoNative_EvpAes256Cbc()
 
 const EVP_CIPHER* CryptoNative_EvpAes256Gcm()
 {
-    return EVP_aes_256_gcm();
+    return API_EXISTS(EVP_aes_256_gcm) ? EVP_aes_256_gcm() : NULL;
 }
 
 const EVP_CIPHER* CryptoNative_EvpAes256Ccm()
 {
-    return EVP_aes_256_ccm();
+    return API_EXISTS(EVP_aes_256_ccm) ? EVP_aes_256_ccm() : NULL;
 }
 
 const EVP_CIPHER* CryptoNative_EvpDesEcb()

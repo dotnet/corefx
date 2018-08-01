@@ -40,7 +40,7 @@ namespace System.Security.Cryptography
             Span<byte> plaintext,
             ReadOnlySpan<byte> associatedData = default)
         {
-            AesAEAD.Decrypt(s_aesGcm, _keyHandle, nonce, associatedData, ciphertext, tag, plaintext);
+            AesAEAD.Decrypt(s_aesGcm, _keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
         }
 
         public void Dispose()
