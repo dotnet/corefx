@@ -19,7 +19,7 @@ internal partial class Interop
             Span<uint> portNumbers,
             out uint portNumbersFound)
         {
-            fixed (uint* portNumbersBuffer = &portNumbers[0])
+            fixed (uint* portNumbersBuffer = &MemoryMarshal.GetReference(portNumbers))
             {
                 return GetCommPorts(portNumbersBuffer, (uint)portNumbers.Length, out portNumbersFound);
             }

@@ -33,6 +33,7 @@ namespace Legacy.Support
 
         private static string[] GetCommPortsFromRegistry()
         {
+            // See https://msdn.microsoft.com/en-us/library/windows/hardware/ff546502.aspx for more information.
             using (RegistryKey serialKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\SERIALCOMM"))
             {
                 if (serialKey != null)
