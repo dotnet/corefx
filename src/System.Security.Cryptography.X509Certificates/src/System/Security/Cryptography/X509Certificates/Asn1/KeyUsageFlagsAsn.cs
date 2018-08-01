@@ -7,20 +7,34 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography.X509Certificates.Asn1
 {
-    /// <summary>Version of X509KeyUsageFlags with reversed bit order.</summary>
+    // https://tools.ietf.org/html/rfc3280#section-4.2.1.3
+    //
+    // KeyUsage ::= BIT STRING {
+    //     digitalSignature        (0),
+    //     nonRepudiation          (1),
+    //     keyEncipherment         (2),
+    //     dataEncipherment        (3),
+    //     keyAgreement            (4),
+    //     keyCertSign             (5),
+    //     cRLSign                 (6),
+    //     encipherOnly            (7),
+    //     decipherOnly            (8)
+    // }
+    //
+    // Version of X509KeyUsageFlags with reversed bit order.
     [Flags]
     internal enum KeyUsageFlagsAsn
     {
-        None = 0x0000,
-        DigitalSignature = 0x0001,
-        NonRepudiation = 0x0002,
-        KeyEncipherment = 0x0004,
-        DataEncipherment = 0x0008,
-        KeyAgreement = 0x0010,
-        KeyCertSign = 0x0020,
-        CrlSign = 0x0040,
-        EncipherOnly = 0x0080,
-        DecipherOnly = 0x0100,
+        None = 0,
+        DigitalSignature = 1 << 0,
+        NonRepudiation = 1 << 1,
+        KeyEncipherment = 1 << 2,
+        DataEncipherment = 1 << 3,
+        KeyAgreement = 1 << 4,
+        KeyCertSign = 1 << 5,
+        CrlSign = 1 << 6,
+        EncipherOnly = 1 << 7,
+        DecipherOnly = 1 << 8,
     }
 }
 
