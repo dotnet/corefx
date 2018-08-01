@@ -3,16 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Pkcs.Asn1
+namespace System.Security.Cryptography.Asn1
 {
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct GeneralName
+    internal struct GeneralNameAsn
     {
         [ExpectedTag(0, ExplicitTag = true)]
-        internal OtherName? OtherName;
+        internal OtherNameAsn? OtherName;
 
         [ExpectedTag(1, ExplicitTag = true)]
         [IA5String]
@@ -31,7 +30,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
         internal ReadOnlyMemory<byte>? DirectoryName;
 
         [ExpectedTag(5, ExplicitTag = true)]
-        internal EdiPartyName? EdiPartyName;
+        internal EdiPartyNameAsn? EdiPartyName;
 
         [ExpectedTag(6, ExplicitTag = true)]
         [IA5String]
@@ -47,7 +46,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct OtherName
+    internal struct OtherNameAsn
     {
         internal string TypeId;
 
@@ -57,17 +56,17 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct EdiPartyName
+    internal struct EdiPartyNameAsn
     {
         [OptionalValue]
-        internal DirectoryString? NameAssigner;
+        internal DirectoryStringAsn? NameAssigner;
 
-        internal DirectoryString PartyName;
+        internal DirectoryStringAsn PartyName;
     }
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DirectoryString
+    internal struct DirectoryStringAsn
     {
         [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.TeletexString)]
         internal ReadOnlyMemory<byte>? TeletexString;

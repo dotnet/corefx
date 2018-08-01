@@ -30,13 +30,13 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             byte[] inputData = inputHex.HexToByteArray();
 
-            var algorithmIdentifier = AsnSerializer.Deserialize<AlgorithmIdentifier>(
+            var algorithmIdentifier = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(
                 inputData,
                 (AsnEncodingRules)ruleSet);
 
             Assert.Equal("1.2.840.10045.2.1", algorithmIdentifier.Algorithm.Value);
             
-            var reader = new AsnReader(algorithmIdentifier.Parameters, (AsnEncodingRules)ruleSet);
+            var reader = new AsnReader(algorithmIdentifier.Parameters.Value, (AsnEncodingRules)ruleSet);
             Oid curveId = reader.ReadObjectIdentifier(skipFriendlyName: true);
             Assert.Equal(curveOid, curveId.Value);
         }
@@ -157,14 +157,14 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             byte[] inputData = InputHex.HexToByteArray();
 
-            var spki = AsnSerializer.Deserialize<SubjectPublicKeyInfo>(
+            var spki = AsnSerializer.Deserialize<SubjectPublicKeyInfoAsn>(
                 inputData,
                 AsnEncodingRules.DER);
 
-            Assert.Equal("1.2.840.10045.2.1", spki.AlgorithmIdentifier.Algorithm.Value);
-            Assert.Equal(PublicKeyValue, spki.PublicKey.ByteArrayToHex());
+            Assert.Equal("1.2.840.10045.2.1", spki.Algorithm.Algorithm.Value);
+            Assert.Equal(PublicKeyValue, spki.SubjectPublicKey.ByteArrayToHex());
 
-            AsnReader reader = new AsnReader(spki.AlgorithmIdentifier.Parameters, AsnEncodingRules.DER);
+            AsnReader reader = new AsnReader(spki.Algorithm.Parameters.Value, AsnEncodingRules.DER);
             string curveOid = reader.ReadObjectIdentifierAsString();
             Assert.False(reader.HasData, "reader.HasData");
             Assert.Equal("1.2.840.10045.3.1.7", curveOid);
@@ -176,19 +176,19 @@ namespace System.Security.Cryptography.Tests.Asn1
             const string BmpInputHex = "1E0400480069";
             const string Utf8InputHex = "0C024869";
 
-            var ds1 = AsnSerializer.Deserialize<DirectoryString>(
+            var ds1 = AsnSerializer.Deserialize<DirectoryStringAsn>(
                 BmpInputHex.HexToByteArray(),
                 AsnEncodingRules.DER);
 
-            var ds2 = AsnSerializer.Deserialize<DirectoryString>(
+            var ds2 = AsnSerializer.Deserialize<DirectoryStringAsn>(
                 Utf8InputHex.HexToByteArray(),
                 AsnEncodingRules.DER);
 
             Assert.NotNull(ds1);
             Assert.NotNull(ds2);
             Assert.Null(ds1.Utf8String);
-            Assert.Null(ds2.BmpString);
-            Assert.Equal("Hi", ds1.BmpString);
+            Assert.Null(ds2.BMPString);
+            Assert.Equal("Hi", ds1.BMPString);
             Assert.Equal("Hi", ds2.Utf8String);
         }
 
@@ -213,12 +213,12 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Null(fs1.DirectoryString?.Utf8String);
             Assert.Null(fs1.Ascii);
-            Assert.Null(fs2.DirectoryString?.BmpString);
+            Assert.Null(fs2.DirectoryString?.BMPString);
             Assert.Null(fs2.Ascii);
-            Assert.Null(fs3.DirectoryString?.BmpString);
+            Assert.Null(fs3.DirectoryString?.BMPString);
             Assert.Null(fs3.DirectoryString?.Utf8String);
             Assert.False(fs3.DirectoryString.HasValue, "fs3.DirectoryString.HasValue");
-            Assert.Equal("Hi", fs1.DirectoryString?.BmpString);
+            Assert.Equal("Hi", fs1.DirectoryString?.BMPString);
             Assert.Equal("Hi", fs2.DirectoryString?.Utf8String);
             Assert.Equal("Hi", fs3.Ascii);
         }
@@ -244,12 +244,12 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Null(fs1.DirectoryString?.Utf8String);
             Assert.Null(fs1.Ascii);
-            Assert.Null(fs2.DirectoryString?.BmpString);
+            Assert.Null(fs2.DirectoryString?.BMPString);
             Assert.Null(fs2.Ascii);
-            Assert.Null(fs3.DirectoryString?.BmpString);
+            Assert.Null(fs3.DirectoryString?.BMPString);
             Assert.Null(fs3.DirectoryString?.Utf8String);
             Assert.Null(fs3.DirectoryString);
-            Assert.Equal("Hi", fs1.DirectoryString?.BmpString);
+            Assert.Equal("Hi", fs1.DirectoryString?.BMPString);
             Assert.Equal("Hi", fs2.DirectoryString?.Utf8String);
             Assert.Equal("Hi", fs3.Ascii);
         }
@@ -275,12 +275,12 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Null(fs1.DirectoryString?.Utf8String);
             Assert.Null(fs1.Ascii);
-            Assert.Null(fs2.DirectoryString?.BmpString);
+            Assert.Null(fs2.DirectoryString?.BMPString);
             Assert.Null(fs2.Ascii);
-            Assert.Null(fs3.DirectoryString?.BmpString);
+            Assert.Null(fs3.DirectoryString?.BMPString);
             Assert.Null(fs3.DirectoryString?.Utf8String);
             Assert.False(fs3.DirectoryString.HasValue, "fs3.DirectoryString.HasValue");
-            Assert.Equal("Hi", fs1.DirectoryString?.BmpString);
+            Assert.Equal("Hi", fs1.DirectoryString?.BMPString);
             Assert.Equal("Hi", fs2.DirectoryString?.Utf8String);
             Assert.Equal("Hi", fs3.Ascii);
         }
@@ -306,12 +306,12 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Null(fs1.DirectoryString?.Utf8String);
             Assert.Null(fs1.Ascii);
-            Assert.Null(fs2.DirectoryString?.BmpString);
+            Assert.Null(fs2.DirectoryString?.BMPString);
             Assert.Null(fs2.Ascii);
-            Assert.Null(fs3.DirectoryString?.BmpString);
+            Assert.Null(fs3.DirectoryString?.BMPString);
             Assert.Null(fs3.DirectoryString?.Utf8String);
             Assert.Null(fs3.DirectoryString);
-            Assert.Equal("Hi", fs1.DirectoryString?.BmpString);
+            Assert.Equal("Hi", fs1.DirectoryString?.BMPString);
             Assert.Equal("Hi", fs2.DirectoryString?.Utf8String);
             Assert.Equal("Hi", fs3.Ascii);
         }
@@ -519,23 +519,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
     }
 
-    // RFC 3280 / ITU-T X.509
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct AlgorithmIdentifier
-    {
-        public Oid Algorithm;
-        [AnyValue]
-        public ReadOnlyMemory<byte> Parameters;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct SubjectPublicKeyInfo
-    {
-        public AlgorithmIdentifier AlgorithmIdentifier;
-        [BitString]
-        public ReadOnlyMemory<byte> PublicKey;
-    }
-
     [StructLayout(LayoutKind.Sequential)]
     internal sealed class AllTheSimpleThings
     {
@@ -567,7 +550,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [IA5String]
         private string _ia5String;
         [BMPString]
-        private string _bmpString;
+        private string _BMPString;
         private bool[] _bools;
         [SetOf]
         private int[] _ints;
@@ -699,8 +682,8 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         public string BmpEncoded
         {
-            get => _bmpString;
-            set => _bmpString = value;
+            get => _BMPString;
+            set => _BMPString = value;
         }
 
         public bool[] Bools
@@ -724,19 +707,9 @@ namespace System.Security.Cryptography.Tests.Asn1
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public struct DirectoryString
+    struct FlexibleString
     {
-        [UTF8String]
-        public string Utf8String;
-        [BMPString]
-        public string BmpString;
-    }
-
-    [Choice]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct FlexibleString
-    {
-        public DirectoryString? DirectoryString;
+        public DirectoryStringAsn? DirectoryString;
 
         [IA5String]
         public string Ascii;
@@ -744,19 +717,19 @@ namespace System.Security.Cryptography.Tests.Asn1
 
     [Choice(AllowNull = true)]
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class DirectoryStringClass
+    sealed class DirectoryStringClass
     {
         [UTF8String]
         public string Utf8String;
         [BMPString]
-        public string BmpString;
+        public string BMPString;
         [PrintableString]
         public string PrintableString;
     }
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class FlexibleStringClass
+    sealed class FlexibleStringClass
     {
         public DirectoryStringClass DirectoryString;
 
@@ -766,9 +739,9 @@ namespace System.Security.Cryptography.Tests.Asn1
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class FlexibleStringClassHybrid
+    sealed class FlexibleStringClassHybrid
     {
-        public DirectoryString? DirectoryString;
+        public DirectoryStringAsn? DirectoryString;
 
         [IA5String]
         public string Ascii;
@@ -776,7 +749,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public struct FlexibleStringStructHybrid
+    struct FlexibleStringStructHybrid
     {
         public DirectoryStringClass DirectoryString;
 
@@ -786,28 +759,28 @@ namespace System.Security.Cryptography.Tests.Asn1
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class CycleRoot
+    sealed class CycleRoot
     {
         public Cycle2 C2;
     }
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class Cycle2
+    sealed class Cycle2
     {
         public Cycle3 C3;
     }
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class Cycle3
+    sealed class Cycle3
     {
         public CycleRoot CycleRoot;
     }
 
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ContextSpecificChoice
+    struct ContextSpecificChoice
     {
         [UTF8String]
         [ExpectedTag(3)]
@@ -819,7 +792,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct UtcTimeTwoDigitYears
+    struct UtcTimeTwoDigitYears
     {
         [UtcTime(TwoDigitYearMax = 2011)]
         public DateTimeOffset ErnestoSabatoLifetime;
@@ -832,7 +805,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [Flags]
-    public enum SomeFlagsEnum : short
+    enum SomeFlagsEnum : short
     {
         None = 0,
         BitZero = 1 << 0,
@@ -854,13 +827,13 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct NamedBitListModeVariants
+    struct NamedBitListModeVariants
     {
         public SomeFlagsEnum DefaultMode;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct ExplicitValueStruct
+    struct ExplicitValueStruct
     {
         [ExpectedTag(0, ExplicitTag = true)]
         public int ExplicitInt;
@@ -869,7 +842,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct AnyWithExpectedTag
+    struct AnyWithExpectedTag
     {
         [ObjectIdentifier]
         public string Id;
@@ -880,7 +853,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct OptionalValues
+    struct OptionalValues
     {
         [UTF8String, OptionalValue]
         public string Utf8String;
@@ -890,7 +863,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CustomTaggedBinaryStrings
+    struct CustomTaggedBinaryStrings
     {
         [OctetString]
         [ExpectedTag(0)]
@@ -902,7 +875,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct BigIntegers
+    struct BigIntegers
     {
         public BigInteger First;
 
