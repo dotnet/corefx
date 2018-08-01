@@ -10,10 +10,10 @@ namespace System.Xml.Tests
     public class XmlTextReaderNamespaceTests
     {
         [Fact]
-        public void XmlTextReaderLookupNamespaceTest()
+        public void LookupNamespaceTest()
         {
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>");
             Assert.True(textReader.Read());
             Assert.True(textReader.Read());
             Assert.True(textReader.MoveToAttribute("attr", "urn:NameSpace"));
@@ -22,10 +22,10 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderLookupPrefixTest()
+        public void LookupPrefixTest()
         {
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>");
             Assert.True(textReader.Read());
             Assert.True(textReader.Read());
             Assert.True(textReader.MoveToAttribute("attr", "urn:NameSpace"));
@@ -37,7 +37,7 @@ namespace System.Xml.Tests
         public void IXmlResolverGetNamespacesInScopeTest()
         {
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>");
             Assert.True(textReader.Read());
             var resolver = textReader as IXmlNamespaceResolver;
             var expectedOutput = new Dictionary<string, string> { ["ns"] = "urn:NameSpace" };
@@ -47,10 +47,10 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderGetNamespacesInScopeTest()
+        public void GetNamespacesInScopeTest()
         {
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>");
             Assert.True(textReader.Read());
             var expectedOutput = new Dictionary<string, string> { ["ns"] = "urn:NameSpace" };
             Assert.Equal(expectedOutput, textReader.GetNamespacesInScope(XmlNamespaceScope.ExcludeXml));

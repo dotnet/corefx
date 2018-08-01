@@ -10,22 +10,27 @@ namespace System.Xml.Tests
     public class XmlTextReaderConstructionTests
     {
         [Fact]
-        public void TextReaderConstructionWithStream()
+        public void ConstructionWithStream()
         {
-            var textReader = new XmlTextReader(null as string, new MemoryStream(), new NameTable());
-            Assert.NotNull(textReader);            
+            var textReader = new XmlTextReader(null as string, new MemoryStream(), new NameTable());            
+            Assert.NotNull(textReader);
+            Assert.Null(textReader.BaseURI);
+
+            textReader = new XmlTextReader("https://SomeBaseUri", new MemoryStream(), null);
+            Assert.NotNull(textReader);
+            Assert.Equal("https://SomeBaseUri", textReader.BaseURI);
         }
 
         [Fact]
-        public void TextReaderConstructionWithStringReader()
+        public void ConstructionWithStringReader()
         {
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>");
             Assert.NotNull(textReader);
         }
 
         [Fact]
-        public void TextReaderConstructionWithXmlFragment()
+        public void ConstructionWithXmlFragment()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1> abc </element1>");
             Assert.NotNull(textReader);

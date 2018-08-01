@@ -10,10 +10,11 @@ namespace System.Xml.Tests
     public class XmlTextReaderMiscTests
     {
         [Fact]
-        public void XmlTextReaderResetStateTest()
+        public void ResetStateTest()
         {
             XmlTextReader textReader = 
-                XmlTextReaderTestHelper.CreateReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>", new NameTable());            
+                XmlTextReaderTestHelper.CreateReaderWithStringReader(@"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'>abc</element1></List>");
+            Assert.Equal(ReadState.Initial, textReader.ReadState);
             Assert.True(textReader.Read());
             Assert.Equal(ReadState.Interactive, textReader.ReadState);
             textReader.ResetState();
@@ -21,10 +22,10 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderGetRemainderTest()
+        public void GetRemainderTest()
         {
             string input = @"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='val'></element1><element1 ns:attr='kal'></element1></List>";
-            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader(input, new NameTable());
+            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReaderWithStringReader(input);
             Assert.True(textReader.Read());
             Assert.True(textReader.Read());
             Assert.True(textReader.Read());

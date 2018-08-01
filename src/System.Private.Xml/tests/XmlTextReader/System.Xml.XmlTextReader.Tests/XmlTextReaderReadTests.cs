@@ -10,12 +10,11 @@ namespace System.Xml.Tests
     public class XmlTextReaderReadTests
     {
         [Fact]
-        public void XmlTextReaderReadContentAsBas64Test()
+        public void ReadContentAsBas64Test()
         {
             byte[] byteData = Encoding.ASCII.GetBytes("Sample String");
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader($"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='{Convert.ToBase64String(byteData)}' /></List>", 
-                new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader($"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='{Convert.ToBase64String(byteData)}' /></List>");
             Assert.True(textReader.Read());
             Assert.True(textReader.Read());
             Assert.True(textReader.MoveToAttribute("attr", "urn:NameSpace"));
@@ -26,13 +25,11 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderReadContentAsBinHexTest()
+        public void ReadContentAsBinHexTest()
         {
             byte[] byteData = Encoding.ASCII.GetBytes("Sample String");
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(
-                    $"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='{BitConverter.ToString(byteData).Replace("-", "")}' /></List>",
-                    new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader($"<List xmlns:ns='urn:NameSpace'><element1 ns:attr='{BitConverter.ToString(byteData).Replace("-", "")}' /></List>");
             Assert.True(textReader.Read());
             Assert.True(textReader.Read());
             Assert.True(textReader.MoveToAttribute("attr", "urn:NameSpace"));
@@ -43,10 +40,10 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderReadCharsTest()
+        public void ReadCharsTest()
         {
             string expectedOutput = "Sample String";
-            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader($"<element1 attr='val'>{expectedOutput}</element1>", new NameTable());
+            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReaderWithStringReader($"<element1 attr='val'>{expectedOutput}</element1>");
             Assert.True(textReader.Read());
             var output = new char[expectedOutput.Length];
             Assert.Equal(output.Length, textReader.ReadChars(output, 0, output.Length));
@@ -54,11 +51,11 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderReadBase64Test()
+        public void ReadBase64Test()
         {
             byte[] byteData = Encoding.ASCII.GetBytes("Sample String");
             XmlTextReader textReader = 
-                XmlTextReaderTestHelper.CreateReader($"<element1 attr='val'>{Convert.ToBase64String(byteData)}</element1>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader($"<element1 attr='val'>{Convert.ToBase64String(byteData)}</element1>");
             Assert.True(textReader.Read());
             var output = new byte[byteData.Length];
             Assert.Equal(output.Length, textReader.ReadBase64(output, 0, output.Length));
@@ -67,12 +64,11 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderReadBinHexTest()
+        public void ReadBinHexTest()
         {
             byte[] byteData = Encoding.ASCII.GetBytes("Sample String");
             XmlTextReader textReader =
-                XmlTextReaderTestHelper.CreateReader(
-                    $"<element1 attr='val'>{BitConverter.ToString(byteData).Replace("-", "")}</element1>", new NameTable());
+                XmlTextReaderTestHelper.CreateReaderWithStringReader($"<element1 attr='val'>{BitConverter.ToString(byteData).Replace("-", "")}</element1>");
             Assert.True(textReader.Read());
             var output = new byte[byteData.Length];
             Assert.Equal(output.Length, textReader.ReadBinHex(output, 0, output.Length));

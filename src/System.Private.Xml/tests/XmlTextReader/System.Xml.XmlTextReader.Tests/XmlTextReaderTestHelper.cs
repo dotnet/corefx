@@ -14,9 +14,9 @@ namespace System.Xml.Tests
             return textReader;
         }
 
-        internal static XmlTextReader CreateReader(string input, XmlNameTable nameTable)
+        internal static XmlTextReader CreateReaderWithStringReader(string input)
         {
-            var textReader = new XmlTextReader(null as string, new StringReader(input), nameTable);
+            var textReader = new XmlTextReader(null as string, new StringReader(input), null);
             return textReader;
         }
     }

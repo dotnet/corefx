@@ -10,7 +10,7 @@ namespace System.Xml.Tests
     public class XmlTextReaderPropertiesTests
     {
         [Fact]
-        public void XmlTextReaderHasValueTest()
+        public void HasValueTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 attr='val'> abc </element1>");
             Assert.False(textReader.HasValue);
@@ -20,7 +20,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderQuoteCharTest()
+        public void QuoteCharTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 attr='val'> abc </element1>");
             Assert.Equal('"', textReader.QuoteChar);
@@ -30,7 +30,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderXmlSpaceTest()
+        public void XmlSpaceTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:space='preserve'> abc </element1>");
             Assert.Equal(XmlSpace.None, textReader.XmlSpace);
@@ -39,7 +39,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderXmlLangTest()
+        public void XmlLangTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
             Assert.Equal(string.Empty, textReader.XmlLang);
@@ -48,21 +48,20 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderCanReadBinaryTest()
+        public void MiscPropertiesTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
             Assert.True(textReader.CanReadBinaryContent);
-        }
-
-        [Fact]
-        public void XmlTextReaderCanReadValueChunkTest()
-        {
-            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
             Assert.False(textReader.CanReadValueChunk);
+            Assert.Equal(true, textReader.CanResolveEntity);
+
+            Assert.True(textReader.Namespaces);
+            textReader.Namespaces = false;
+            Assert.False(textReader.Namespaces);
         }
 
         [Fact]
-        public void XmlTextReaderNormalizationTest()
+        public void NormalizationTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
             Assert.False(textReader.Normalization);
@@ -72,29 +71,20 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderNamespacesTest()
-        {
-            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
-            Assert.True(textReader.Namespaces);
-            textReader.Namespaces = false;
-            Assert.False(textReader.Namespaces);
-        }
-
-        [Fact]
-        public void XmlTextReaderEncodingTest()
+        public void EncodingTest()
         {
             string input = @"<?xml version=""1.0"" encoding=""utf-16""?><List>
             <Employee><ID>1</ID><First>David</First>
               <Last>Smith</Last><Salary>10000</Salary></Employee>            
             </List>";
-            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader(input, new NameTable());
+            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReaderWithStringReader(input);
             Assert.Null(textReader.Encoding);
             Assert.True(textReader.Read());
             Assert.Equal(Encoding.Unicode, textReader.Encoding);
         }
 
         [Fact]
-        public void XmlTextReaderDtdProcessingTest()
+        public void DtdProcessingTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
             Assert.Equal(DtdProcessing.Parse, textReader.DtdProcessing);
@@ -103,7 +93,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderProhibitDtdTest()
+        public void ProhibitDtdTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -114,19 +104,12 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        public void XmlTextReaderEntityHandling()
+        public void EntityHandlingTest()
         {
             XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
             Assert.Equal(EntityHandling.ExpandCharEntities, textReader.EntityHandling);
             textReader.EntityHandling = EntityHandling.ExpandEntities;
             Assert.Equal(EntityHandling.ExpandEntities, textReader.EntityHandling);
-        }
-
-        [Fact]
-        public void XmlTextReaderCanResolveEntity()
-        {
-            XmlTextReader textReader = XmlTextReaderTestHelper.CreateReader("<element1 xml:lang='en-us'> abc </element1>");
-            Assert.Equal(true, textReader.CanResolveEntity);
         }
     }
 }
