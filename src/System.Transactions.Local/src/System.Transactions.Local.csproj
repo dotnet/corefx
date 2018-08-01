@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E97557E3-7DB1-4828-ACA5-44D8C68B6698}</ProjectGuid>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
@@ -8,7 +8,7 @@
     There are many instances of comparing an instance of a struct with null. Until these are all fixed,
     disable the diagnostic.
     -->
-    <Features>$(Features.Replace('strict', '')</Features>
+    <Features>strict</Features>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
