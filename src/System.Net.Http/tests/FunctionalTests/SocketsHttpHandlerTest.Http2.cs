@@ -28,7 +28,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -46,7 +46,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -76,7 +76,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -100,7 +100,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -128,7 +128,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -160,7 +160,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -192,7 +192,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);
@@ -223,7 +223,7 @@ namespace System.Net.Http.Functional.Tests
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
             TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer())
             using (var client = new HttpClient(handler))
             {
                 Task sendTask = client.GetAsync(server.Address);

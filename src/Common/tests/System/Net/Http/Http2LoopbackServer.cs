@@ -40,6 +40,11 @@ namespace System.Net.Test.Common
             }
         }
 
+        public static Http2LoopbackServer CreateServer()
+        {
+            return new Http2LoopbackServer(new Http2Options());
+        }
+
         public static Http2LoopbackServer CreateServer(Http2Options options)
         {
             return new Http2LoopbackServer(options);
