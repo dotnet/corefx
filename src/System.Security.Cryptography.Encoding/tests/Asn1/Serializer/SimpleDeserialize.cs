@@ -550,7 +550,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [IA5String]
         private string _ia5String;
         [BMPString]
-        private string _BMPString;
+        private string _bmpString;
         private bool[] _bools;
         [SetOf]
         private int[] _ints;
@@ -682,8 +682,8 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         public string BmpEncoded
         {
-            get => _BMPString;
-            set => _BMPString = value;
+            get => _bmpString;
+            set => _bmpString = value;
         }
 
         public bool[] Bools
