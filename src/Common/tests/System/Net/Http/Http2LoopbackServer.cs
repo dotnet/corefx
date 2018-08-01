@@ -23,27 +23,34 @@ namespace System.Net.Test.Common
         private Http2Options _options;
         private Uri _uri;
 
-        public Http2LoopbackServer(Http2Options options)
+        public Uri Address
         {
-            _options = options;
+            get
+            {
+                var localEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
+                string host = _options.Address.AddressFamily == AddressFamily.InterNetworkV6 ?
+                    $"[{localEndPoint.Address}]" :
+                    localEndPoint.Address.ToString();
+
+                string scheme = _options.UseSsl ? "https" : "http";
+
+                _uri = new Uri($"{scheme}://{host}:{localEndPoint.Port}/");
+
+                return _uri;
+            }
         }
 
-        public Uri CreateServer()
+        public static Http2LoopbackServer CreateServer(Http2Options options)
         {
+            return new Http2LoopbackServer(options);
+        }
+
+        private Http2LoopbackServer(Http2Options options)
+        {
+            _options = options;
             _listenSocket = new Socket(_options.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _listenSocket.Bind(new IPEndPoint(_options.Address, 0));
             _listenSocket.Listen(_options.ListenBacklog);
-
-            var localEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
-            string host = _options.Address.AddressFamily == AddressFamily.InterNetworkV6 ?
-                $"[{localEndPoint.Address}]" :
-                localEndPoint.Address.ToString();
-
-            string scheme = _options.UseSsl ? "https" : "http";
-
-            _uri = new Uri($"{scheme}://{host}:{localEndPoint.Port}/");
-
-            return _uri;
         }
 
         public async Task SendConnectionPrefaceAsync()

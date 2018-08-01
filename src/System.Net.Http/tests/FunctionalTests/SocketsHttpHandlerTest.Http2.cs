@@ -17,7 +17,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public sealed class SocketsHttpHandler_HttpClientHandler_Http2_Test : HttpClientTestBase, IClassFixture<Http2AppContextFixture>
+    public sealed class SocketsHttpHandler_HttpClientHandler_Http2_Test : HttpClientTestBase
     {
         protected override bool UseSocketsHttpHandler => true;
 
@@ -25,12 +25,13 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2_ClientPreface_Sent()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 string connectionPreface = await server.AcceptConnectionAsync();
 
@@ -42,12 +43,13 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2_InitialSettings_SentAndAcked()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
 
@@ -71,12 +73,13 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2_DataSentBeforeServerPreface_ProtocolError()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
 
@@ -95,11 +98,12 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
@@ -122,11 +126,12 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
@@ -153,11 +158,12 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
@@ -184,11 +190,12 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
@@ -214,11 +221,12 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
 
-            using (var server = new Http2LoopbackServer(new Http2Options()))
+            using (var server = Http2LoopbackServer.CreateServer(new Http2Options()))
             using (var client = new HttpClient(handler))
             {
-                Task sendTask = client.GetAsync(server.CreateServer());
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
                 await server.SendConnectionPrefaceAsync();
@@ -240,19 +248,6 @@ namespace System.Net.Http.Functional.Tests
 
                 await Assert.ThrowsAsync<HttpRequestException>(async () => await sendTask);
             }
-        }
-    }
-
-    public class Http2AppContextFixture : IDisposable
-    {
-        public Http2AppContextFixture()
-        {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
-        }
-
-        public void Dispose()
-        {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", false);
         }
     }
 }
