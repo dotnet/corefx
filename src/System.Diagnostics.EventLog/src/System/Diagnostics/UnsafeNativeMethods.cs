@@ -8,7 +8,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Win32
 {
-    internal static class UnsafeNativeMethods
+    internal static partial class UnsafeNativeMethods
     {
         [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool ReportEvent(SafeHandle hEventLog, short type, ushort category,
