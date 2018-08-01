@@ -6726,6 +6726,7 @@ namespace System.Runtime.CompilerServices
         public static int GetHashCode(object o) { throw null; }
         public static object GetObjectValue(object obj) { throw null; }
         public static object GetUninitializedObject(System.Type type) { throw null; }
+        public static Utf8String GetUtf8StringLiteral(string s) { throw null; }
         public static void InitializeArray(System.Array array, System.RuntimeFieldHandle fldHandle) { }
         public static bool IsReferenceOrContainsReferences<T>() { throw null; }
         public static void PrepareConstrainedRegions() { }
