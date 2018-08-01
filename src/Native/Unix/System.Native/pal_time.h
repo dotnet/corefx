@@ -6,19 +6,20 @@
 
 #include "pal_compiler.h"
 #include "pal_types.h"
+#include <time.h>
 
-typedef struct TimeVal
+typedef struct TimeSpec
 {
-    long tv_sec; // seconds
-    long tv_usec; // microseconds
-} TimeVal;
+    time_t tv_sec; // seconds
+    long tv_nsec; // nanoseconds
+} TimeSpec;
 
 /**
  * Sets the last access and last modified time of a file
  *
  * Returns 0 on success; otherwise, returns -1 and errno is set.
  */
-DLLEXPORT int32_t SystemNative_UTimes(const char* path, TimeVal times[2]);
+DLLEXPORT int32_t SystemNative_UTimensat(const char* path, TimeSpec times[2]);
 
 /**
  * Gets the resolution of the timestamp, in counts per second.

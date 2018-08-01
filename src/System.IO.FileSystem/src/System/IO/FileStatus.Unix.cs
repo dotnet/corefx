@@ -201,7 +201,7 @@ namespace System.IO
             EnsureStatInitialized(path);
 
             // we use utimes() to set the accessTime and writeTime
-            Interop.Sys.TimeVal[] buf = new Interop.Sys.TimeVal[2];
+            var buf = new Interop.Sys.TimeSpec[2];
 
             // setting second part
             buf[0].TvSec = accessTime ?? _fileStatus.ATime;
@@ -209,11 +209,12 @@ namespace System.IO
 
             // setting microsecond part
             if (accessTime == null)
-                buf[0].TvUsec = _fileStatus.ATimeNsec / 1000;
+                buf[0].TvNsec = _fileStatus.ATimeNsec;
             if (writeTime == null)
-                buf[1].TvUsec = _fileStatus.MTimeNsec / 1000;
+                buf[1].TvNsec = _fileStatus.MTimeNsec;
 
-            Interop.CheckIo(Interop.Sys.UTimes(path, buf), path, InitiallyDirectory);
+            Interop.CheckIo(Interop.Sys.UTimensat(Path.GetFullPath(path), buf), path, InitiallyDirectory);      
+
             _fileStatusInitialized = -1;
         }
 
