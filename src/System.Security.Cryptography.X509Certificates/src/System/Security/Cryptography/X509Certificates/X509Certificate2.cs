@@ -206,10 +206,10 @@ namespace System.Security.Cryptography.X509Certificates
                 {
                     switch (GetKeyAlgorithm())
                     {
-                        case Oids.RsaRsa:
+                        case Oids.Rsa:
                             _lazyPrivateKey = Pal.GetRSAPrivateKey();
                             break;
-                        case Oids.DsaDsa:
+                        case Oids.Dsa:
                             _lazyPrivateKey = Pal.GetDSAPrivateKey();
                             break;
                         default:

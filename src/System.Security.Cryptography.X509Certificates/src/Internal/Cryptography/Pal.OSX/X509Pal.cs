@@ -33,10 +33,10 @@ namespace Internal.Cryptography.Pal
 
                     switch (oid.Value)
                     {
-                        case Oids.RsaRsa:
+                        case Oids.Rsa:
                             Debug.Assert(!key.IsInvalid);
                             return new RSAImplementation.RSASecurityTransforms(key);
-                        case Oids.DsaDsa:
+                        case Oids.Dsa:
                             if (key.IsInvalid)
                             {
                                 // SecCertificateCopyKey returns null for DSA, so fall back to manually building it.
@@ -70,9 +70,9 @@ namespace Internal.Cryptography.Pal
                 {
                     switch (oid.Value)
                     {
-                        case Oids.RsaRsa:
+                        case Oids.Rsa:
                             return DecodeRsaPublicKey(encodedKeyValue);
-                        case Oids.DsaDsa:
+                        case Oids.Dsa:
                             return DecodeDsaPublicKey(encodedKeyValue, encodedParameters);
                     }
                 }

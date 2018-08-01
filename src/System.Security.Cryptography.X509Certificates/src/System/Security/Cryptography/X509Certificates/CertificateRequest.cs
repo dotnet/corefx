@@ -460,7 +460,7 @@ namespace System.Security.Cryptography.X509Certificates
             {
                 switch (keyAlgorithm)
                 {
-                    case Oids.RsaRsa:
+                    case Oids.Rsa:
                         if (_rsaPadding == null)
                         {
                             throw new InvalidOperationException(SR.Cryptography_CertReq_RSAPaddingRequired);

@@ -44,7 +44,7 @@ namespace System.Security.Cryptography.X509Certificates
                 rsaPublicKey = writer.Encode();
             }
 
-            Oid oid = new Oid(Oids.RsaRsa);
+            Oid oid = new Oid(Oids.Rsa);
 
             // The OID is being passed to everything here because that's what
             // X509Certificate2.PublicKey does.

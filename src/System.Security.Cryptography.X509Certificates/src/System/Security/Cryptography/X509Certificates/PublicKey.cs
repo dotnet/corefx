@@ -31,8 +31,8 @@ namespace System.Security.Cryptography.X509Certificates
                 {
                     switch (_oid.Value)
                     {
-                        case Oids.RsaRsa:
-                        case Oids.DsaDsa:
+                        case Oids.Rsa:
+                        case Oids.Dsa:
                             _key = X509Pal.Instance.DecodePublicKey(_oid, EncodedKeyValue.RawData, EncodedParameters.RawData, null);
                             break;
 
