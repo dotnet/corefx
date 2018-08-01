@@ -782,7 +782,7 @@ namespace System.Net.Http.Headers
             // If we don't have the header in the store yet, add it now.
             HeaderStoreItemInfo result = new HeaderStoreItemInfo();
 
-            AddHeaderToStore(descriptor, result);
+            AddHeaderToStore((descriptor.HeaderType & _treatAsCustomHeaderTypes) != 0 ? descriptor.AsCustomHeader() : descriptor, result);
 
             return result;
         }
