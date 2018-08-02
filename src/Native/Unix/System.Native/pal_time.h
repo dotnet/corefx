@@ -6,12 +6,11 @@
 
 #include "pal_compiler.h"
 #include "pal_types.h"
-#include <time.h>
 
 typedef struct TimeSpec
 {
-    time_t tv_sec; // seconds
-    long tv_nsec; // nanoseconds
+    int64_t tv_sec; // seconds
+    int64_t tv_nsec; // nanoseconds
 } TimeSpec;
 
 /**

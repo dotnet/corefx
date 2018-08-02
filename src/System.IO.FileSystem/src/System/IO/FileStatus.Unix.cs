@@ -203,7 +203,7 @@ namespace System.IO
             EnsureStatInitialized(path);
 
             // we use utimes() to set the accessTime and writeTime
-            Span<Interop.Sys.TimeSpec> buf = stackalloc Interop.Sys.TimeSpec[2];;
+            Span<Interop.Sys.TimeSpec> buf = stackalloc Interop.Sys.TimeSpec[2];
 
             // setting second part
             buf[0].TvSec = accessTime ?? _fileStatus.ATime;
