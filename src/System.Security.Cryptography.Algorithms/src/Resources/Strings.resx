@@ -292,6 +292,9 @@
   <data name="Cryptography_NotValidPublicOrPrivateKey" xml:space="preserve">
     <value>Key is not a valid public or private key.</value>
   </data>
+  <data name="Cryptography_Oid_InvalidName" xml:space="preserve">
+    <value>No OID value matches this name.</value>
+  </data>
   <data name="Cryptography_OAEP_Decryption_Failed" xml:space="preserve">
     <value>Error occurred while decoding OAEP padding.</value>
   </data>
