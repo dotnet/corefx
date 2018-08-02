@@ -1583,6 +1583,7 @@ namespace System.Net.Http.Functional.Tests
                     request.Headers.Add("X-Csrf-Token", "i8XNjC4b8KVok4uw5RftR38Wgp2BFwql");
                     request.Headers.Add("X-Request-ID", "f058ebd6-02f7-4d3f-942e-904344e8cde5");
                     request.Headers.Add("X-Request-ID", "f058ebd6-02f7-4d3f-942e-904344e8cde5");
+
                     (await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)).Dispose();
                 }
             }, async server =>
