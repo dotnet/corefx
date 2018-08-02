@@ -4,6 +4,7 @@
 
 #include "pal_keychain.h"
 #include "pal_utilities.h"
+#include "pal_error.h"
 
 int32_t AppleCryptoNative_SecKeychainItemCopyKeychain(SecKeychainItemRef item, SecKeychainRef* pKeychainOut)
 {
@@ -350,9 +351,6 @@ AppleCryptoNative_X509StoreRemoveCertificate(CFTypeRef certOrIdentity, SecKeycha
         return -1;
     }
 
-    const int32_t kErrorUserTrust = 2;
-    const int32_t kErrorAdminTrust = 3;
-
     CFArrayRef settings = NULL;
 
     if (status == noErr)
@@ -369,7 +367,7 @@ AppleCryptoNative_X509StoreRemoveCertificate(CFTypeRef certOrIdentity, SecKeycha
     if (status == noErr)
     {
         CFRelease(cert);
-        return kErrorUserTrust;
+        return PAL_Error_UserTrust;
     }
 
     status = SecTrustSettingsCopyTrustSettings(cert, kSecTrustSettingsDomainAdmin, &settings);
@@ -383,7 +381,7 @@ AppleCryptoNative_X509StoreRemoveCertificate(CFTypeRef certOrIdentity, SecKeycha
     if (status == noErr)
     {
         CFRelease(cert);
-        return kErrorAdminTrust;
+        return PAL_Error_AdminTrust;
     }
 
     *pOSStatus = DeleteInKeychain(cert, keychain);

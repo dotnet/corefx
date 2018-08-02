@@ -8,6 +8,7 @@ find_library(COREFOUNDATION_LIBRARY CoreFoundation)
 find_library(SECURITY_LIBRARY Security)
 
 set(NATIVECRYPTO_SOURCES
+    pal_error.h
     pal_digest.c
     pal_ecc.c
     pal_hmac.c

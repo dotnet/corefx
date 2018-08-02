@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_ecc.h"
+#include "pal_error.h"
 
 int32_t AppleCryptoNative_EccGenerateKey(
     int32_t keySizeBits, SecKeychainRef tempKeychain, SecKeyRef* pPublicKey, SecKeyRef* pPrivateKey, int32_t* pOSStatus)
@@ -13,7 +14,7 @@ int32_t AppleCryptoNative_EccGenerateKey(
         *pPrivateKey = NULL;
 
     if (pPublicKey == NULL || pPrivateKey == NULL || pOSStatus == NULL)
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
 
     CFMutableDictionaryRef attributes = CFDictionaryCreateMutable(NULL, 2, &kCFTypeDictionaryKeyCallBacks, NULL);
 

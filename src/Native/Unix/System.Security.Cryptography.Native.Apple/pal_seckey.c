@@ -4,6 +4,7 @@
 
 #include "pal_seckey.h"
 #include "pal_utilities.h"
+#include "pal_error.h"
 
 int32_t AppleCryptoNative_SecKeyExport(
     SecKeyRef pKey, int32_t exportPrivate, CFStringRef cfExportPassphrase, CFDataRef* ppDataOut, int32_t* pOSStatus)
@@ -15,7 +16,7 @@ int32_t AppleCryptoNative_SecKeyExport(
 
     if (pKey == NULL || ppDataOut == NULL || pOSStatus == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     SecExternalFormat dataFormat = kSecFormatOpenSSL;
@@ -28,7 +29,7 @@ int32_t AppleCryptoNative_SecKeyExport(
     {
         if (cfExportPassphrase == NULL)
         {
-            return kErrorBadInput;
+            return PAL_Error_BadInput;
         }
 
         keyParams.passphrase = cfExportPassphrase;
@@ -51,7 +52,7 @@ int32_t AppleCryptoNative_SecKeyImportEphemeral(
     if (pbKeyBlob == NULL || cbKeyBlob < 0 || isPrivateKey < 0 || isPrivateKey > 1 || ppKeyOut == NULL ||
         pOSStatus == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     int32_t ret = 0;

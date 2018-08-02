@@ -26,9 +26,6 @@ internal static partial class Interop
             Span<byte> opportunisticDestination,
             out int bytesWritten)
         {
-            const int Success = 1;
-            const int kErrorSeeError = -2;
-
             SafeCFDataHandle data;
             SafeCFErrorHandle error;
 
@@ -37,12 +34,12 @@ internal static partial class Interop
             using (data)
             using (error)
             {
-                if (status == kErrorSeeError)
+                if (status == PAL_Error_SeeError)
                 {
                     throw CreateExceptionForCFError(error);
                 }
 
-                if (status == Success && !data.IsInvalid)
+                if (status == PAL_Error_True && !data.IsInvalid)
                 {
                     if (CoreFoundation.TryCFWriteData(data, opportunisticDestination, out bytesWritten))
                     {

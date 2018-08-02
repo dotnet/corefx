@@ -167,8 +167,9 @@ internal static partial class Interop
         {
             return ExecuteTransform(
                 data,
-                (ReadOnlySpan<byte> source, out SafeCFDataHandle encrypted, out SafeCFErrorHandle error) =>
+                (ReadOnlySpan<byte> source, out SafeCFDataHandle encrypted, out int status, out SafeCFErrorHandle error) =>
                 {
+                    status = 0;
                     if (padding == RSAEncryptionPadding.Pkcs1)
                     {
                         return RsaEncryptPkcs(publicKey, source, source.Length, out encrypted, out error);
@@ -198,8 +199,9 @@ internal static partial class Interop
                 source,
                 destination,
                 out bytesWritten,
-                delegate (ReadOnlySpan<byte> innerSource, out SafeCFDataHandle outputHandle, out SafeCFErrorHandle errorHandle)
+                delegate (ReadOnlySpan<byte> innerSource, out SafeCFDataHandle outputHandle, out int status, out SafeCFErrorHandle errorHandle)
                 {
+                    status = 0;
                     return padding.Mode == RSAEncryptionPaddingMode.Pkcs1 ?
                         RsaEncryptPkcs(publicKey, innerSource, innerSource.Length, out outputHandle, out errorHandle) :
                         RsaEncryptOaep(publicKey, innerSource, innerSource.Length, PalAlgorithmFromAlgorithmName(padding.OaepHashAlgorithm), out outputHandle, out errorHandle);
@@ -213,8 +215,9 @@ internal static partial class Interop
         {
             return ExecuteTransform(
                 data,
-                (ReadOnlySpan<byte> source, out SafeCFDataHandle decrypted, out SafeCFErrorHandle error) =>
+                (ReadOnlySpan<byte> source, out SafeCFDataHandle decrypted, out int status, out SafeCFErrorHandle error) =>
                 {
+                    status = 0;
                     if (padding == RSAEncryptionPadding.Pkcs1)
                     {
                         return RsaDecryptPkcs(privateKey, source, source.Length, out decrypted, out error);
@@ -244,8 +247,9 @@ internal static partial class Interop
                 source,
                 destination,
                 out bytesWritten,
-                delegate (ReadOnlySpan<byte> innerSource, out SafeCFDataHandle outputHandle, out SafeCFErrorHandle errorHandle)
+                delegate (ReadOnlySpan<byte> innerSource, out SafeCFDataHandle outputHandle, out int status, out SafeCFErrorHandle errorHandle)
                 {
+                    status = 0;
                     return padding.Mode == RSAEncryptionPaddingMode.Pkcs1 ?
                         RsaDecryptPkcs(privateKey, innerSource, innerSource.Length, out outputHandle, out errorHandle) :
                         RsaDecryptOaep(privateKey, innerSource, innerSource.Length, PalAlgorithmFromAlgorithmName(padding.OaepHashAlgorithm), out outputHandle, out errorHandle);
@@ -259,15 +263,12 @@ internal static partial class Interop
             Span<byte> destination,
             out int bytesWritten)
         {
-            const int kErrorSeeError = -2;
-            const int kSuccess = 1;
-
-            if (returnValue == kErrorSeeError)
+            if (returnValue == PAL_Error_SeeError)
             {
                 throw CreateExceptionForCFError(cfError);
             }
 
-            if (returnValue == kSuccess && !cfData.IsInvalid)
+            if (returnValue == PAL_Error_True && !cfData.IsInvalid)
             {
                 return CoreFoundation.TryCFWriteData(cfData, destination, out bytesWritten);
             }
