@@ -48,16 +48,6 @@ internal static partial class Interop
             }
         }
 
-        internal static bool EvpCipherGcmAvailable()
-        {
-            return EvpAes128Gcm() != IntPtr.Zero;
-        }
-
-        internal static bool EvpCipherCcmAvailable()
-        {
-            return EvpAes128Ccm() != IntPtr.Zero;
-        }
-
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpCipherSetGcmNonceLength")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CryptoNative_EvpCipherSetGcmNonceLength(

@@ -168,16 +168,16 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(ERR_reason_error_string, true) \
     PER_FUNCTION_BLOCK(EVP_aes_128_cbc, true) \
     PER_FUNCTION_BLOCK(EVP_aes_128_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_128_gcm, false) \
-    PER_FUNCTION_BLOCK(EVP_aes_128_ccm, false) \
+    PER_FUNCTION_BLOCK(EVP_aes_128_gcm, true) \
+    PER_FUNCTION_BLOCK(EVP_aes_128_ccm, true) \
     PER_FUNCTION_BLOCK(EVP_aes_192_cbc, true) \
     PER_FUNCTION_BLOCK(EVP_aes_192_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_192_gcm, false) \
-    PER_FUNCTION_BLOCK(EVP_aes_192_ccm, false) \
+    PER_FUNCTION_BLOCK(EVP_aes_192_gcm, true) \
+    PER_FUNCTION_BLOCK(EVP_aes_192_ccm, true) \
     PER_FUNCTION_BLOCK(EVP_aes_256_cbc, true) \
     PER_FUNCTION_BLOCK(EVP_aes_256_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_256_gcm, false) \
-    PER_FUNCTION_BLOCK(EVP_aes_256_ccm, false) \
+    PER_FUNCTION_BLOCK(EVP_aes_256_gcm, true) \
+    PER_FUNCTION_BLOCK(EVP_aes_256_ccm, true) \
     PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_cleanup, true) \
     PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_ctrl, true) \
     PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_init, true) \
@@ -672,6 +672,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
-#define API_EXISTS(fn) 1
+#define API_EXISTS(fn) true
 
 #endif // FEATURE_DISTRO_AGNOSTIC_SSL

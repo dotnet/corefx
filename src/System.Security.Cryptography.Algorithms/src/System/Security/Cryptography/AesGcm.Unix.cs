@@ -20,9 +20,6 @@ namespace System.Security.Cryptography
 
         private void ImportKey(ReadOnlySpan<byte> key)
         {
-            if (!Interop.Crypto.EvpCipherGcmAvailable())
-                throw new PlatformNotSupportedException();
-
             _ctxHandle = Interop.Crypto.EvpCipherCreatePartial(GetCipher(key.Length * 8));
 
             Interop.Crypto.CheckValidOpenSslHandle(_ctxHandle);

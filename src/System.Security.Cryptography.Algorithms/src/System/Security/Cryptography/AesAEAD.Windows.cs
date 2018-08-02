@@ -99,7 +99,10 @@ namespace System.Security.Cryptography
                         return;
                     case NTSTATUS.STATUS_AUTH_TAG_MISMATCH:
                         if (clearPlaintextOnFailure)
+                        {
                             CryptographicOperations.ZeroMemory(plaintext);
+                        }
+
                         throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
                     default:
                         throw CreateCryptographicException(ntStatus);
