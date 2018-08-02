@@ -202,14 +202,14 @@ namespace System.IO
             _fileStatusInitialized = -1;
             EnsureStatInitialized(path);
 
-            // we use utimes() to set the accessTime and writeTime
+            // we use utimes()/utimensat() to set the accessTime and writeTime
             Span<Interop.Sys.TimeSpec> buf = stackalloc Interop.Sys.TimeSpec[2];
 
             // setting second part
             buf[0].TvSec = accessTime ?? _fileStatus.ATime;
             buf[1].TvSec = writeTime ?? _fileStatus.MTime;
 
-            // setting microsecond part
+            // setting nanosecond part
             buf[0].TvNsec = accessTime == null ? _fileStatus.ATimeNsec : 0;
             buf[1].TvNsec = writeTime == null ? _fileStatus.MTimeNsec : 0;
 
