@@ -33,10 +33,16 @@ namespace System.Security.Cryptography
             try
             {
                 // Verify the name
-                Oid.FromFriendlyName(strName, OidGroup.HashAlgorithm);
-
-                // Uppercase known names as required for BCrypt
-                _algName = HashAlgorithmNames.ToUpper(strName);
+                if (CryptoConfig.MapNameToOID(strName) != null)
+                {
+                    // Uppercase known names as required for BCrypt
+                    _algName = HashAlgorithmNames.ToUpper(strName);
+                }
+                else
+                {
+                    // For desktop compat, exception is deferred until VerifySignature
+                    _algName = null;
+                }
             }
             catch (CryptographicException)
             {
