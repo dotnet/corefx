@@ -594,7 +594,6 @@
     <Compile Include="Internal\Cryptography\DesImplementation.OSX.cs" />
     <Compile Include="Internal\Cryptography\HashProviderDispenser.OSX.cs" />
     <Compile Include="Internal\Cryptography\OidLookupHelper.Unix.cs" />
-    <Compile Include="$(CommonPath)\Internal\Cryptography\OidLookupTable.cs" />
     <Compile Include="Internal\Cryptography\RandomNumberGeneratorImplementation.OSX.cs" />
     <Compile Include="Internal\Cryptography\RC2Implementation.OSX.cs" />
     <Compile Include="Internal\Cryptography\TripleDesImplementation.OSX.cs" />
