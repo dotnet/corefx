@@ -929,7 +929,7 @@ namespace System
         public virtual double NextDouble() { throw null; }
         protected virtual double Sample() { throw null; }
     }
-    public abstract partial class StringComparer : System.Collections.Generic.IComparer<string>, System.Collections.Generic.IEqualityComparer<string>, System.Collections.Generic.IEqualityComparer<Utf8String>, System.Collections.IComparer, System.Collections.IEqualityComparer
+    public abstract partial class StringComparer : System.Collections.Generic.IComparer<string>, System.Collections.Generic.IEqualityComparer<string>, System.Collections.IComparer, System.Collections.IEqualityComparer
     {
         protected StringComparer() { }
         public static System.StringComparer CurrentCulture { get { throw null; } }
@@ -944,10 +944,8 @@ namespace System
         public static System.StringComparer Create(System.Globalization.CultureInfo culture, System.Globalization.CompareOptions options) { throw null; }
         public new bool Equals(object x, object y) { throw null; }
         public abstract bool Equals(string x, string y);
-        public virtual bool Equals(Utf8String x, Utf8String y) { throw null; }
         public int GetHashCode(object obj) { throw null; }
         public abstract int GetHashCode(string obj);
-        public virtual int GetHashCode(Utf8String obj) { throw null; }
         public int Compare(object x, object y) { throw null; }
         bool System.Collections.IEqualityComparer.Equals(object x, object y) { throw null; }
         int System.Collections.IEqualityComparer.GetHashCode(object obj) { throw null; }
