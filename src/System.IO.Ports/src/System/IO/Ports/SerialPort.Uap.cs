@@ -25,9 +25,7 @@ namespace System.IO.Ports
 
             if (error == Interop.Errors.ERROR_MORE_DATA)
             {
-                portNumbers = portNumbersFound <= 64 ?
-                    stackalloc uint[(int)portNumbersFound] :
-                    new uint[portNumbersFound];
+                portNumbers = new uint[portNumbersFound];
                 error = Interop.mincore.GetCommPorts(portNumbers, out portNumbersFound);
             }
 
