@@ -274,79 +274,45 @@ namespace Internal.Cryptography.Pal
                 otherOid == null || otherOid == Oids.UserPrincipalName,
                 $"otherOid ({otherOid}) is not supported");
 
-            // SubjectAltName ::= GeneralNames
-            //
-            // IssuerAltName ::= GeneralNames
-            //
-            // GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
-            //
-            // GeneralName ::= CHOICE {
-            //   otherName                       [0]     OtherName,
-            //   rfc822Name                      [1]     IA5String,
-            //   dNSName                         [2]     IA5String,
-            //   x400Address                     [3]     ORAddress,
-            //   directoryName                   [4]     Name,
-            //   ediPartyName                    [5]     EDIPartyName,
-            //   uniformResourceIdentifier       [6]     IA5String,
-            //   iPAddress                       [7]     OCTET STRING,
-            //   registeredID                    [8]     OBJECT IDENTIFIER }
-            //
-            // OtherName::= SEQUENCE {
-            //   type - id    OBJECT IDENTIFIER,
-            //   value[0] EXPLICIT ANY DEFINED BY type - id }
+            GeneralNameAsn[] generalNames = AsnSerializer.Deserialize<GeneralNameAsn[]>(extensionBytes, AsnEncodingRules.DER);
 
-            byte expectedTag = (byte)(DerSequenceReader.ContextSpecificTagFlag | (byte)matchType);
-
-            if (matchType == GeneralNameType.OtherName)
+            foreach (var generalName in generalNames)
             {
-                expectedTag |= DerSequenceReader.ConstructedFlag;
-            }
-
-            DerSequenceReader altNameReader = new DerSequenceReader(extensionBytes);
-
-            while (altNameReader.HasData)
-            {
-                if (altNameReader.PeekTag() != expectedTag)
-                {
-                    altNameReader.SkipValue();
-                    continue;
-                }
-
                 switch (matchType)
                 {
                     case GeneralNameType.OtherName:
-                    {
-                        DerSequenceReader otherNameReader = altNameReader.ReadSequence();
-                        string oid = otherNameReader.ReadOidAsString();
-
-                        if (oid == otherOid)
+                        // If the OtherName OID didn't match, move to the next entry.
+                        if (generalName.OtherName.HasValue && generalName.OtherName.Value.TypeId == otherOid)
                         {
-                            // Payload is value[0] EXPLICIT, meaning
-                            // a) it'll be tagged as ContextSpecific0
-                            // b) that's interpretable as a Sequence (EXPLICIT)
-                            // c) the payload will then be retagged as the correct type (EXPLICIT)
-                            if (otherNameReader.PeekTag() != DerSequenceReader.ContextSpecificConstructedTag0)
-                            {
-                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                            }
-
-                            otherNameReader = otherNameReader.ReadSequence();
-
                             // Currently only UPN is supported, which is a UTF8 string per
                             // https://msdn.microsoft.com/en-us/library/ff842518.aspx
-                            return otherNameReader.ReadUtf8String();
+                            AsnReader reader = new AsnReader(generalName.OtherName.Value.Value, AsnEncodingRules.DER);
+                            string udnName = reader.GetCharacterString(UniversalTagNumber.UTF8String);
+                            reader.ThrowIfNotEmpty();
+                            return udnName;
                         }
+                        break;
 
-                        // If the OtherName OID didn't match, move to the next entry.
-                        continue;
-                    }
                     case GeneralNameType.Rfc822Name:
+                        if (generalName.Rfc822Name != null)
+                        {
+                            return generalName.Rfc822Name;
+                        }
+                        break;
+
                     case GeneralNameType.DnsName:
+                        if (generalName.DnsName != null)
+                        {
+                            return generalName.DnsName;
+                        }
+                        break;
+
                     case GeneralNameType.UniformResourceIdentifier:
-                        return altNameReader.ReadIA5String();
-                    default:
-                        altNameReader.SkipValue();
-                        continue;
+                        if (generalName.Uri != null)
+                        {
+                            return generalName.Uri;
+                        }
+                        break;
                 }
             }
 
