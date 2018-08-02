@@ -70,7 +70,7 @@ namespace System.Security.Cryptography.Asn1
         [ObjectIdentifier]
         internal string TypeId;
 
-        [ExpectedTag(0, ExplicitTag = true)]
+        [ExpectedTag(0)]
         [AnyValue]
         internal ReadOnlyMemory<byte> Value;
     }
