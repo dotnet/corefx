@@ -34,7 +34,7 @@ namespace System.Security.Cryptography.Asn1
         [IA5String]
         internal string DnsName;
 
-        [ExpectedTag(3, ExplicitTag = true)]
+        [ExpectedTag(3)]
         [AnyValue]
         internal ReadOnlyMemory<byte>? X400Address;
 
