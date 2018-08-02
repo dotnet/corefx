@@ -609,13 +609,6 @@ namespace System.Net.Http.Tests
             Assert.Equal(2, headers.Pragma.Count);
         }
 
-        [Fact]
-        public void CustomHeaders_RequestHeadersAsCustomHeadersWithGetValues_Success()
-        {
-            headers.TryAddWithoutValidation(new HeaderDescriptor(KnownHeaders.Range), "bytes=200-1000");
-            Assert.Equal("bytes=200-1000", headers.GetValues("Range").First());
-        }
-
         #endregion
 
         [Fact]
