@@ -106,6 +106,9 @@
   <data name="Cryptography_InvalidPaddingMode" xml:space="preserve">
     <value>Specified padding mode is not valid for this algorithm.</value>
   </data>
+  <data name="Cryptography_MissingIV" xml:space="preserve">
+    <value>The cipher mode specified requires that an initialization vector (IV) be used.</value>
+  </data>
   <data name="NotSupported_SubclassOverride" xml:space="preserve">
     <value>Method not supported. Derived class must override.</value>
   </data>

@@ -433,4 +433,7 @@
   <data name="Cryptography_AsnWriter_PopWrongTag" xml:space="preserve">
     <value>Cannot pop the requested tag as it is not currently in progress.</value>
   </data>
+  <data name="Cryptography_MissingIV" xml:space="preserve">
+    <value>The cipher mode specified requires that an initialization vector (IV) be used.</value>
+  </data>
 </root>

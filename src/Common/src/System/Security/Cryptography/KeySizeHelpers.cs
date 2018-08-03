@@ -8,16 +8,31 @@ using System.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
-    internal static class Helpers
+    internal static class KeySizeHelpers
     {
-        public static byte[] CloneByteArray(this byte[] src)
+        public static KeySizes[] CloneKeySizesArray(this KeySizes[] src)
         {
-            if (src == null)
+            return (KeySizes[])(src.Clone());
+        }
+
+        public static bool UsesIv(this CipherMode cipherMode)
+        {
+            return cipherMode != CipherMode.ECB;
+        }
+
+        public static byte[] GetCipherIv(this CipherMode cipherMode, byte[] iv)
+        {
+            if (cipherMode.UsesIv())
             {
-                return null;
+                if (iv == null)
+                {
+                    throw new CryptographicException(SR.Cryptography_MissingIV);
+                }
+
+                return iv;
             }
 
-            return (byte[])(src.Clone());
+            return null;
         }
 
         public static bool IsLegalSize(this int size, KeySizes[] legalSizes)
