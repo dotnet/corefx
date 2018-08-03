@@ -6,7 +6,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.X509Certificates.Asn1;
 using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
@@ -209,82 +211,27 @@ namespace Internal.Cryptography.Pal
                 return null;
             }
 
-            // CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
-            //
-            // DistributionPoint ::= SEQUENCE {
-            //    distributionPoint       [0]     DistributionPointName OPTIONAL,
-            //    reasons                 [1]     ReasonFlags OPTIONAL,
-            //    cRLIssuer               [2]     GeneralNames OPTIONAL }
-            //
-            // DistributionPointName ::= CHOICE {
-            //    fullName                [0]     GeneralNames,
-            //    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
-            //
-            // GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
-            //
-            // GeneralName ::= CHOICE {
-            //    otherName                       [0]     OtherName,
-            //    rfc822Name                      [1]     IA5String,
-            //    dNSName                         [2]     IA5String,
-            //    x400Address                     [3]     ORAddress,
-            //    directoryName                   [4]     Name,
-            //    ediPartyName                    [5]     EDIPartyName,
-            //    uniformResourceIdentifier       [6]     IA5String,
-            //    iPAddress                       [7]     OCTET STRING,
-            //    registeredID                    [8]     OBJECT IDENTIFIER }
+            DistributionPointAsn[] distributionPoints =
+                AsnSerializer.Deserialize<DistributionPointAsn[]>(crlDistributionPoints, AsnEncodingRules.DER);
 
-            DerSequenceReader cdpSequence = new DerSequenceReader(crlDistributionPoints);
-
-            while (cdpSequence.HasData)
+            foreach (DistributionPointAsn distributionPoint in distributionPoints)
             {
-                const byte ContextSpecificFlag = 0x80;
-                const byte ContextSpecific0 = ContextSpecificFlag;
-                const byte ConstructedFlag = 0x20;
-                const byte ContextSpecificConstructed0 = ContextSpecific0 | ConstructedFlag;
-                const byte GeneralNameUri = ContextSpecificFlag | 0x06;
-
-                DerSequenceReader distributionPointReader = cdpSequence.ReadSequence();
-                byte tag = distributionPointReader.PeekTag();
-
                 // Only distributionPoint is supported
-                if (tag != ContextSpecificConstructed0)
+                // Only fullName is supported, nameRelativeToCRLIssuer is for LDAP-based lookup.
+                if (distributionPoint.DistributionPoint != null &&
+                    distributionPoint.DistributionPoint.FullName != null)
                 {
-                    continue;
-                }
-
-                // The DistributionPointName is a CHOICE, not a SEQUENCE, but the reader is the same.
-                DerSequenceReader dpNameReader = distributionPointReader.ReadSequence();
-                tag = dpNameReader.PeekTag();
-
-                // Only fullName is supported,
-                // nameRelativeToCRLIssuer is for LDAP-based lookup.
-                if (tag != ContextSpecificConstructed0)
-                {
-                    continue;
-                }
-
-                DerSequenceReader fullNameReader = dpNameReader.ReadSequence();
-
-                while (fullNameReader.HasData)
-                {
-                    tag = fullNameReader.PeekTag();
-
-                    if (tag != GeneralNameUri)
+                    Uri uri;
+                    GeneralNameAsn[] fullName = distributionPoint.DistributionPoint.FullName;
+                    foreach (GeneralNameAsn name in fullName)
                     {
-                        fullNameReader.SkipValue();
-                        continue;
+                        if (name.Uri != null &&
+                            Uri.TryCreate(name.Uri, UriKind.Absolute, out uri) &&
+                            uri.Scheme == "http")
+                        {
+                            return name.Uri;
+                        }
                     }
-
-                    string uri = fullNameReader.ReadIA5String();
-
-                    Uri parsedUri = new Uri(uri);
-
-                    if (!StringComparer.Ordinal.Equals(parsedUri.Scheme, "http"))
-                    {
-                        continue;
-                    }
-
-                    return uri;
                 }
             }
 
