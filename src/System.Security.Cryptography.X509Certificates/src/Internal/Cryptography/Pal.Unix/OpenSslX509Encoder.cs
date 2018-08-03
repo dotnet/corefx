@@ -21,9 +21,9 @@ namespace Internal.Cryptography.Pal
 
             switch (oid.Value)
             {
-                case Oids.RsaRsa:
+                case Oids.Rsa:
                     return BuildRsaPublicKey(encodedKeyValue);
-                case Oids.DsaDsa:
+                case Oids.Dsa:
                     return BuildDsaPublicKey(encodedKeyValue, encodedParameters);
             }
 
