@@ -87,33 +87,29 @@ namespace System.Security.Cryptography
                         throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
                     }
 
-                    DSAParameters parameters = new DSAParameters();
-
-                    DerSequenceReader publicKeyReader =
-                        Interop.AppleCrypto.SecKeyExport(keys.PublicKey, exportPrivate: false);
-
-                    publicKeyReader.ReadSubjectPublicKeyInfo(ref parameters);
-
-                    if (includePrivateParameters)
+                    if (!includePrivateParameters)
                     {
-                        DerSequenceReader privateKeyReader =
-                            Interop.AppleCrypto.SecKeyExport(keys.PrivateKey, exportPrivate: true);
-
-                        privateKeyReader.ReadPkcs8Blob(ref parameters);
+                        byte[] publicKey = Interop.AppleCrypto.SecKeyExport(keys.PublicKey, exportPrivate: false, password: null);
+                        DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                            publicKey,
+                            out int localRead,
+                            out DSAParameters key);
+                        return key;
                     }
-
-                    KeyBlobHelpers.TrimPaddingByte(ref parameters.P);
-                    KeyBlobHelpers.TrimPaddingByte(ref parameters.Q);
-
-                    KeyBlobHelpers.PadOrTrim(ref parameters.G, parameters.P.Length);
-                    KeyBlobHelpers.PadOrTrim(ref parameters.Y, parameters.P.Length);
-
-                    if (includePrivateParameters)
+                    else
                     {
-                        KeyBlobHelpers.PadOrTrim(ref parameters.X, parameters.Q.Length);
-                    }
+                        // Apple requires all private keys to be exported encrypted, but since we're trying to export
+                        // as parsed structures we will need to decrypt it for the user.
+                        const string ExportPassword = "DotnetExportPassphrase";
 
-                    return parameters;
+                        byte[] privateKey = Interop.AppleCrypto.SecKeyExport(keys.PrivateKey, exportPrivate: true, password: ExportPassword);
+                        DSAKeyFormatHelper.ReadEncryptedPkcs8(
+                            privateKey,
+                            ExportPassword,
+                            out int localRead,
+                            out DSAParameters key);
+                        return key;
+                    }
                 }
 
                 public override void ImportParameters(DSAParameters parameters)
@@ -173,7 +169,19 @@ namespace System.Security.Cryptography
                 private static SafeSecKeyRefHandle ImportKey(DSAParameters parameters)
                 {
                     bool hasPrivateKey = parameters.X != null;
-                    byte[] blob = hasPrivateKey ? parameters.ToPrivateKeyBlob() : parameters.ToSubjectPublicKeyInfo();
+                    byte[] blob;
+                    
+                    if (hasPrivateKey)
+                    {
+                        blob = parameters.ToPrivateKeyBlob();
+                    }
+                    else
+                    {
+                        using (AsnWriter writer = DSAKeyFormatHelper.WriteSubjectPublicKeyInfo(parameters))
+                        {
+                            blob = writer.Encode();
+                        }
+                    }
 
                     return Interop.AppleCrypto.ImportEphemeralKey(blob, hasPrivateKey);
                 }
@@ -291,147 +299,6 @@ namespace System.Security.Cryptography
 
     internal static class DsaKeyBlobHelpers
     {
-        internal static void ReadSubjectPublicKeyInfo(this DerSequenceReader keyInfo, ref DSAParameters parameters)
-        {
-            // SubjectPublicKeyInfo::= SEQUENCE  {
-            //    algorithm AlgorithmIdentifier,
-            //    subjectPublicKey     BIT STRING  }
-            DerSequenceReader algorithm = keyInfo.ReadSequence();
-            string algorithmOid = algorithm.ReadOidAsString();
-
-            // DSA Public Key
-            if (algorithmOid != Oids.Dsa)
-            {
-                throw new CryptographicException();
-            }
-
-            // Dss-Parms ::= SEQUENCE {
-            //   p INTEGER,
-            //   q INTEGER,
-            //   g INTEGER
-            // }
-
-            DerSequenceReader algParameters = algorithm.ReadSequence();
-            byte[] publicKeyBlob = keyInfo.ReadBitString();
-            // We don't care about the rest of the blob here, but it's expected to not exist.
-
-            ReadSubjectPublicKeyInfo(algParameters, publicKeyBlob, ref parameters);
-        }
-
-        internal static void ReadSubjectPublicKeyInfo(
-            this DerSequenceReader algParameters,
-            byte[] publicKeyBlob,
-            ref DSAParameters parameters)
-        {
-            parameters.P = algParameters.ReadIntegerBytes();
-            parameters.Q = algParameters.ReadIntegerBytes();
-            parameters.G = algParameters.ReadIntegerBytes();
-
-            DerSequenceReader privateKeyReader = DerSequenceReader.CreateForPayload(publicKeyBlob);
-            parameters.Y = privateKeyReader.ReadIntegerBytes();
-
-            KeyBlobHelpers.TrimPaddingByte(ref parameters.P);
-            KeyBlobHelpers.TrimPaddingByte(ref parameters.Q);
-
-            KeyBlobHelpers.PadOrTrim(ref parameters.G, parameters.P.Length);
-            KeyBlobHelpers.PadOrTrim(ref parameters.Y, parameters.P.Length);
-        }
-
-        internal static byte[] ToSubjectPublicKeyInfo(this DSAParameters parameters)
-        {
-            byte[] dssParams;
-            byte[] publicKey;
-
-            // Dss-Parms ::= SEQUENCE {
-            //   p INTEGER,
-            //   q INTEGER,
-            //   g INTEGER
-            // }
-
-            using (AsnWriter paramsWriter = new AsnWriter(AsnEncodingRules.DER))
-            {
-                paramsWriter.PushSequence();
-                paramsWriter.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
-                paramsWriter.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
-                paramsWriter.WriteInteger(new BigInteger(parameters.G, isUnsigned: true, isBigEndian: true));
-                paramsWriter.PopSequence();
-                dssParams = paramsWriter.Encode();
-            }
-
-            using (AsnWriter publicKeyWriter = new AsnWriter(AsnEncodingRules.DER))
-            {
-                publicKeyWriter.WriteIntegerUnsigned(parameters.Y);
-                publicKey = publicKeyWriter.Encode();
-            }
-
-            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
-            {
-                Algorithm = new AlgorithmIdentifierAsn
-                {
-                    Algorithm = new Oid(Oids.Dsa),
-                    Parameters = dssParams,
-                },
-                SubjectPublicKey = publicKey,
-            };
-
-            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
-            {
-                return writer.Encode();
-            }
-        }
-
-        internal static void ReadPkcs8Blob(this DerSequenceReader reader, ref DSAParameters parameters)
-        {
-            // Since the PKCS#8 blob for DSS/DSA does not include the public key (Y) this
-            // structure is only read after filling the public half.
-            Debug.Assert(parameters.P != null);
-            Debug.Assert(parameters.Q != null);
-            Debug.Assert(parameters.G != null);
-            Debug.Assert(parameters.Y != null);
-
-            // OneAsymmetricKey ::= SEQUENCE {
-            //   version                   Version,
-            //   privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
-            //   privateKey                PrivateKey,
-            //   attributes            [0] Attributes OPTIONAL,
-            //   ...,
-            //   [[2: publicKey        [1] PublicKey OPTIONAL ]],
-            //   ...
-            // }
-            //
-            // PrivateKeyInfo ::= OneAsymmetricKey
-            //
-            // PrivateKey ::= OCTET STRING
-
-            int version = reader.ReadInteger();
-
-            // We understand both version 0 and 1 formats,
-            // which are now known as v1 and v2, respectively.
-            if (version > 1)
-            {
-                throw new CryptographicException();
-            }
-
-            {
-                // Ensure we're reading DSA, extract the parameters
-                DerSequenceReader algorithm = reader.ReadSequence();
-
-                string algorithmOid = algorithm.ReadOidAsString();
-
-                if (algorithmOid != Oids.Dsa)
-                {
-                    throw new CryptographicException();
-                }
-
-                // The Dss-Params SEQUENCE is present here, but not needed since
-                // we got it from the public key already.
-            }
-
-            byte[] privateKeyBlob = reader.ReadOctetString();
-            DerSequenceReader privateKeyReader = DerSequenceReader.CreateForPayload(privateKeyBlob);
-            parameters.X = privateKeyReader.ReadIntegerBytes();
-        }
-
         internal static byte[] ToPrivateKeyBlob(this DSAParameters parameters)
         {
             Debug.Assert(parameters.X != null);
@@ -449,11 +316,11 @@ namespace System.Security.Cryptography
             {
                 privateKeyWriter.PushSequence();
                 privateKeyWriter.WriteInteger(0);
-                privateKeyWriter.WriteInteger(new BigInteger(parameters.P, isUnsigned: true, isBigEndian: true));
-                privateKeyWriter.WriteInteger(new BigInteger(parameters.Q, isUnsigned: true, isBigEndian: true));
-                privateKeyWriter.WriteInteger(new BigInteger(parameters.G, isUnsigned: true, isBigEndian: true));
-                privateKeyWriter.WriteInteger(new BigInteger(parameters.Y, isUnsigned: true, isBigEndian: true));
-                privateKeyWriter.WriteInteger(new BigInteger(parameters.X, isUnsigned: true, isBigEndian: true));
+                privateKeyWriter.WriteKeyParameterInteger(parameters.P);
+                privateKeyWriter.WriteKeyParameterInteger(parameters.Q);
+                privateKeyWriter.WriteKeyParameterInteger(parameters.G);
+                privateKeyWriter.WriteKeyParameterInteger(parameters.Y);
+                privateKeyWriter.WriteKeyParameterInteger(parameters.X);
                 privateKeyWriter.PopSequence();
                 return privateKeyWriter.Encode();
             }

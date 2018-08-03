@@ -26,8 +26,6 @@
     <Compile Include="System\Security\Cryptography\AsymmetricSignatureDeformatter.cs" />
     <Compile Include="System\Security\Cryptography\AsymmetricSignatureFormatter.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\CurveAsn.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\DSSParms.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\DsaPrivateKeyAsn.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\ECDomainParameters.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\ECPrivateKey.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\FieldID.cs" />
@@ -123,6 +121,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
       <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\DSAKeyFormatHelper.cs">
+      <Link>Common\System\Security\Cryptography\DSAKeyFormatHelper.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyFormatHelper.cs">
       <Link>Common\System\Security\Cryptography\KeyFormatHelper.cs</Link>
     </Compile>
@@ -146,6 +147,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\DsaPrivateKeyAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\DsaPrivateKeyAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\DSSParms.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\DSSParms.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\EncryptedPrivateKeyInfoAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\EncryptedPrivateKeyInfoAsn.cs</Link>

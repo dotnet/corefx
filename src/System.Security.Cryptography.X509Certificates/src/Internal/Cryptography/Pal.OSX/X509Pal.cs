@@ -4,8 +4,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Internal.Cryptography.Pal
@@ -101,10 +103,12 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeDsaPublicKey(byte[] encodedKeyValue, byte[] encodedParameters)
             {
-                DSAParameters dsaParameters = new DSAParameters();
-                DerSequenceReader parameterReader = new DerSequenceReader(encodedParameters);
+                BigInteger y = AsnSerializer.Deserialize<BigInteger>(encodedKeyValue, AsnEncodingRules.DER);
 
-                parameterReader.ReadSubjectPublicKeyInfo(encodedKeyValue, ref dsaParameters);
+                DSAKeyFormatHelper.ReadDsaPublicKey(
+                    y,
+                    new AlgorithmIdentifierAsn { Parameters = encodedParameters },
+                    out DSAParameters dsaParameters);
 
                 DSA dsa = DSA.Create();
                 try

@@ -31,6 +31,57 @@ internal static partial class Interop
             out SafeCFDataHandle cfDataOut,
             out int pOSStatus);
 
+        internal static byte[] SecKeyExport(
+            SafeSecKeyRefHandle key,
+            bool exportPrivate,
+            string password)
+        {
+            SafeCreateHandle exportPassword = exportPrivate
+                ? CoreFoundation.CFStringCreateWithCString(password)
+                : s_nullExportString;
+
+            int ret;
+            SafeCFDataHandle cfData;
+            int osStatus;
+
+            try
+            {
+                ret = AppleCryptoNative_SecKeyExport(
+                    key,
+                    exportPrivate ? 1 : 0,
+                    exportPassword,
+                    out cfData,
+                    out osStatus);
+            }
+            finally
+            {
+                if (exportPassword != s_nullExportString)
+                {
+                    exportPassword.Dispose();
+                }
+            }
+
+            byte[] exportedData;
+
+            using (cfData)
+            {
+                if (ret == 0)
+                {
+                    throw CreateExceptionForOSStatus(osStatus);
+                }
+
+                if (ret != 1)
+                {
+                    Debug.Fail($"AppleCryptoNative_SecKeyExport returned {ret}");
+                    throw new CryptographicException();
+                }
+
+                exportedData = CoreFoundation.CFGetData(cfData);
+            }
+
+            return exportedData;
+        }
+
         internal static DerSequenceReader SecKeyExport(
             SafeSecKeyRefHandle key,
             bool exportPrivate)
