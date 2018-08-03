@@ -48,7 +48,7 @@ namespace System.IO.Tests
 
             Assert.All(TimeFunctions(requiresRoundtripping: true), (function) =>
             {
-                DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, function.Kind);
+                DateTime dt = new DateTime(2014, 12, 1, 12, 3, 3, 32, function.Kind);
                 function.Setter(item, dt);
                 DateTime result = function.Getter(item);
                 Assert.Equal(dt, result);
