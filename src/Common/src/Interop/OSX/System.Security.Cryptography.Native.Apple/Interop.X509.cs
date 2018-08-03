@@ -169,16 +169,13 @@ internal static partial class Interop
             certHandle.Dispose();
             identityHandle.Dispose();
 
-            const int SeeOSStatus = 0;
-            const int ImportReturnedEmpty = -2;
-            const int ImportReturnedNull = -3;
-
             switch (ret)
             {
-                case SeeOSStatus:
+                case PAL_Error_False:
+                case PAL_Error_SeeStatus:
                     throw CreateExceptionForOSStatus(osStatus);
-                case ImportReturnedNull:
-                case ImportReturnedEmpty:
+                case PAL_Error_OutItemsNull:
+                case PAL_Error_OutItemsEmpty:
                     throw new CryptographicException();
                 default:
                     Debug.Fail($"Unexpected return value {ret}");
@@ -243,16 +240,13 @@ internal static partial class Interop
 
             collectionHandle.Dispose();
 
-            const int SeeOSStatus = 0;
-            const int ImportReturnedEmpty = -2;
-            const int ImportReturnedNull = -3;
-
             switch (ret)
             {
-                case SeeOSStatus:
+                case PAL_Error_False:
+                case PAL_Error_SeeStatus:
                     throw CreateExceptionForOSStatus(osStatus);
-                case ImportReturnedNull:
-                case ImportReturnedEmpty:
+                case PAL_Error_OutItemsNull:
+                case PAL_Error_OutItemsEmpty:
                     throw new CryptographicException();
                 default:
                     Debug.Fail($"Unexpected return value {ret}");

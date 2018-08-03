@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_keyagree.h"
+#include "pal_error.h"
 
 int32_t
 AppleCryptoNative_EcdhKeyAgree(SecKeyRef privateKey, SecKeyRef publicKey, CFDataRef* pAgreeOut, CFErrorRef* pErrorOut)
@@ -13,7 +14,7 @@ AppleCryptoNative_EcdhKeyAgree(SecKeyRef privateKey, SecKeyRef publicKey, CFData
         *pErrorOut = NULL;
 
     if (privateKey == NULL || publicKey == NULL)
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
 
     CFDictionaryRef dict = NULL;
 
@@ -21,7 +22,7 @@ AppleCryptoNative_EcdhKeyAgree(SecKeyRef privateKey, SecKeyRef publicKey, CFData
         SecKeyCopyKeyExchangeResult(privateKey, kSecKeyAlgorithmECDHKeyExchangeStandard, publicKey, dict, pErrorOut);
 
     if (*pErrorOut != NULL)
-        return kErrorSeeError;
+        return PAL_Error_SeeError;
 
     return *pAgreeOut != NULL;
 }

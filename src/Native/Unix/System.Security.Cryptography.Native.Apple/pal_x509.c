@@ -4,11 +4,10 @@
 
 #include "pal_x509.h"
 #include "pal_utilities.h"
+#include "pal_error.h"
 #include <dlfcn.h>
 #include <pthread.h>
 
-static const int32_t kErrOutItemsNull = -3;
-static const int32_t kErrOutItemsEmpty = -2;
 static pthread_once_t once = PTHREAD_ONCE_INIT;
 static SecKeyRef (*secCertificateCopyKey)(SecCertificateRef);
 static OSStatus (*secCertificateCopyPublicKey)(SecCertificateRef, SecKeyRef*);
@@ -22,7 +21,7 @@ AppleCryptoNative_X509DemuxAndRetainHandle(CFTypeRef handle, SecCertificateRef* 
         *pIdentityOut = NULL;
 
     if (handle == NULL || pCertOut == NULL || pIdentityOut == NULL)
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
 
     CFTypeID objectType = CFGetTypeID(handle);
 
@@ -58,7 +57,7 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
         *pOSStatusOut = noErr;
 
     if (cert == NULL || pPublicKeyOut == NULL || pOSStatusOut == NULL)
-        return kErrorUnknownState;
+        return PAL_Error_UnknownState;
 
     pthread_once (&once, InitCertificateCopy);
     // SecCertificateCopyPublicKey was deprecated in 10.14, so use SecCertificateCopyKey on the systems that have it (10.14+),
@@ -73,7 +72,7 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
     }
     else
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
     return (*pOSStatusOut == noErr);
 }
@@ -181,14 +180,14 @@ static int32_t ProcessCertificateTypeReturn(CFArrayRef items, SecCertificateRef*
 
     if (items == NULL)
     {
-        return kErrOutItemsNull;
+        return PAL_Error_OutItemsNull;
     }
 
     CFIndex itemCount = CFArrayGetCount(items);
 
     if (itemCount == 0)
     {
-        return kErrOutItemsEmpty;
+        return PAL_Error_OutItemsEmpty;
     }
 
     CFTypeRef bestItem = NULL;
@@ -298,7 +297,7 @@ static int32_t ReadX509(uint8_t* pbData,
 
         if (keychain == NULL)
         {
-            return kErrorBadInput;
+            return PAL_Error_BadInput;
         }
 
         // if keyAttributes is NULL then it uses SENSITIVE | EXTRACTABLE
@@ -310,7 +309,7 @@ static int32_t ReadX509(uint8_t* pbData,
             if (keyAttributes == NULL)
             {
                 *pOSStatus = errSecAllocate;
-                return 0;
+                return PAL_Error_SeeStatus;
             }
 
             int32_t sensitiveValue = CSSM_KEYATTR_SENSITIVE;
@@ -332,7 +331,7 @@ static int32_t ReadX509(uint8_t* pbData,
     else
     {
         *pOSStatus = errSecUnknownFormat;
-        return 0;
+        return PAL_Error_SeeStatus;
     }
 
     CFDataRef cfData = CFDataCreateWithBytesNoCopy(NULL, pbData, cbData, kCFAllocatorNull);
@@ -411,7 +410,7 @@ int32_t AppleCryptoNative_X509ImportCollection(uint8_t* pbData,
     if (pbData == NULL || cbData < 0 || pCollectionOut == NULL || pOSStatus == NULL ||
         exportable != !!exportable)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     return ReadX509(pbData,
@@ -446,7 +445,7 @@ int32_t AppleCryptoNative_X509ImportCertificate(uint8_t* pbData,
     if (pbData == NULL || cbData < 0 || pCertOut == NULL || pIdentityOut == NULL || pOSStatus == NULL ||
         exportable != !!exportable)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     return ReadX509(pbData,
@@ -474,7 +473,7 @@ int32_t AppleCryptoNative_X509ExportData(CFArrayRef data,
 
     if (data == NULL || pExportOut == NULL || pOSStatus == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     SecExternalFormat dataFormat = kSecFormatUnknown;
@@ -488,7 +487,7 @@ int32_t AppleCryptoNative_X509ExportData(CFArrayRef data,
             dataFormat = kSecFormatPKCS12;
             break;
         default:
-            return kErrorBadInput;
+            return PAL_Error_BadInput;
     }
 
     SecItemImportExportKeyParameters keyParams;
@@ -510,7 +509,7 @@ int32_t AppleCryptoNative_X509GetRawData(SecCertificateRef cert, CFDataRef* ppDa
         *pOSStatus = noErr;
 
     if (cert == NULL || ppDataOut == NULL || pOSStatus == NULL)
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
 
     SecExternalFormat dataFormat = kSecFormatX509Cert;
     SecItemImportExportKeyParameters keyParams;

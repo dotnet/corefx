@@ -9,14 +9,6 @@
 
 #include <Security/Security.h>
 
-// Unless another interpretation is "obvious", pal_seckey functions return 1 on success.
-// functions which represent a boolean return 0 on "successful false"
-// otherwise functions will return one of the following return values:
-static const int32_t kErrorBadInput = -1;
-static const int32_t kErrorSeeError = -2;
-static const int32_t kErrorUnknownAlgorithm = -3;
-static const int32_t kErrorUnknownState = -4;
-
 /*
 Export a key object.
 

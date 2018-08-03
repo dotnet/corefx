@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_rsa.h"
+#include "pal_error.h"
 
 static int32_t ExecuteCFDataTransform(
     SecTransformRef xform, uint8_t* pbData, int32_t cbData, CFDataRef* pDataOut, CFErrorRef* pErrorOut);
@@ -16,7 +17,7 @@ int32_t AppleCryptoNative_RsaGenerateKey(
         *pPrivateKey = NULL;
 
     if (pPublicKey == NULL || pPrivateKey == NULL || pOSStatus == NULL)
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     if (keySizeBits < 384 || keySizeBits > 16384)
         return -2;
 
@@ -66,7 +67,7 @@ static int32_t ExecuteOaepTransform(SecTransformRef xform,
 {
     if (!SecTransformSetAttribute(xform, kSecPaddingKey, kSecPaddingOAEPKey, pErrorOut))
     {
-        return kErrorSeeError;
+        return PAL_Error_SeeError;
     }
 
     // Documentation mentions kSecOAEPMGF1DigestAlgorithmAttributeName, but on the Apple platform
@@ -74,7 +75,7 @@ static int32_t ExecuteOaepTransform(SecTransformRef xform,
     // a second attribute to encode SHA2-256 vs SHA2-384, be limited to SHA-1.
     if (algorithm != PAL_SHA1)
     {
-        return kErrorUnknownAlgorithm;
+        return PAL_Error_UnknownAlgorithm;
     }
 
     return ExecuteCFDataTransform(xform, pbData, cbData, pDataOut, pErrorOut);
@@ -94,10 +95,10 @@ int32_t AppleCryptoNative_RsaDecryptOaep(SecKeyRef privateKey,
 
     if (privateKey == NULL || pbData == NULL || cbData < 0 || pDecryptedOut == NULL || pErrorOut == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
-    int32_t ret = kErrorSeeError;
+    int32_t ret = PAL_Error_SeeError;
     SecTransformRef decryptor = SecDecryptTransformCreate(privateKey, pErrorOut);
 
     if (decryptor != NULL)
@@ -123,10 +124,10 @@ int32_t AppleCryptoNative_RsaDecryptPkcs(
 
     if (privateKey == NULL || pbData == NULL || cbData < 0 || pDecryptedOut == NULL || pErrorOut == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
-    int32_t ret = kErrorSeeError;
+    int32_t ret = PAL_Error_SeeError;
     SecTransformRef decryptor = SecDecryptTransformCreate(privateKey, pErrorOut);
 
     if (decryptor != NULL)
@@ -156,10 +157,10 @@ int32_t AppleCryptoNative_RsaEncryptOaep(SecKeyRef publicKey,
 
     if (publicKey == NULL || pbData == NULL || cbData < 0 || pEncryptedOut == NULL || pErrorOut == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
-    int32_t ret = kErrorSeeError;
+    int32_t ret = PAL_Error_SeeError;
     SecTransformRef encryptor = SecEncryptTransformCreate(publicKey, pErrorOut);
 
     if (encryptor != NULL)
@@ -185,10 +186,10 @@ int32_t AppleCryptoNative_RsaEncryptPkcs(
 
     if (publicKey == NULL || pbData == NULL || cbData < 0 || pEncryptedOut == NULL || pErrorOut == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
-    int32_t ret = kErrorSeeError;
+    int32_t ret = PAL_Error_SeeError;
     SecTransformRef encryptor = SecEncryptTransformCreate(publicKey, pErrorOut);
 
     if (encryptor != NULL)
@@ -209,7 +210,7 @@ static int32_t ExecuteCFDataTransform(
 {
     if (xform == NULL || pbData == NULL || cbData < 0 || pDataOut == NULL || pErrorOut == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     *pDataOut = NULL;
@@ -225,12 +226,12 @@ static int32_t ExecuteCFDataTransform(
     {
         // This probably means that there wasn't enough memory available, but no
         // particular failure cases are described.
-        return kErrorUnknownState;
+        return PAL_Error_UnknownState;
     }
 
     if (!SecTransformSetAttribute(xform, kSecTransformInputAttributeName, cfData, pErrorOut))
     {
-        ret = kErrorSeeError;
+        ret = PAL_Error_SeeError;
         goto cleanup;
     }
 
@@ -238,7 +239,7 @@ static int32_t ExecuteCFDataTransform(
 
     if (xformOutput == NULL || *pErrorOut != NULL)
     {
-        ret = kErrorSeeError;
+        ret = PAL_Error_SeeError;
         goto cleanup;
     }
 
@@ -251,7 +252,7 @@ static int32_t ExecuteCFDataTransform(
     }
     else
     {
-        ret = kErrorUnknownState;
+        ret = PAL_Error_UnknownState;
     }
 
 cleanup:
@@ -283,7 +284,7 @@ static int32_t RsaPrimitive(SecKeyRef key,
 
     if (key == NULL || pbData == NULL || cbData < 0 || pDataOut == NULL || pErrorOut == NULL)
     {
-        return kErrorBadInput;
+        return PAL_Error_BadInput;
     }
 
     assert(func != NULL);
@@ -299,12 +300,12 @@ static int32_t RsaPrimitive(SecKeyRef key,
             output = NULL;
         }
 
-        return kErrorSeeError;
+        return PAL_Error_SeeError;
     }
 
     if (output == NULL)
     {
-        return kErrorUnknownState;
+        return PAL_Error_UnknownState;
     }
 
     *pDataOut = output;

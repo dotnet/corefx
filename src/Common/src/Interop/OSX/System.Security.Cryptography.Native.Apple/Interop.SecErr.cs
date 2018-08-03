@@ -19,5 +19,21 @@ internal static partial class Interop
 
             return new AppleCommonCryptoCryptographicException(osStatus, msg);
         }
+
+        internal const int PAL_Error_False = 0;
+        internal const int PAL_Error_True = 1;
+
+        internal const int PAL_Error_BadInput = -1;
+        internal const int PAL_Error_SeeError = -2;
+        internal const int PAL_Error_SeeStatus = -3;
+        internal const int PAL_Error_Platform = -4;
+        internal const int PAL_Error_UnknownState = -5;
+        internal const int PAL_Error_UnknownAlgorithm = -6;
+
+        internal const int PAL_Error_UserTrust = -7;
+        internal const int PAL_Error_AdminTrust = -8;
+        internal const int PAL_Error_OutItemsNull = -9;
+        internal const int PAL_Error_OutItemsEmpty = -10;
+
     }
 }
