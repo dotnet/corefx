@@ -58,10 +58,7 @@ namespace System.Security.Cryptography.X509Certificates
             byte[] otherNameValue;
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                Asn1Tag explicit0 = new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
-                writer.PushSequence(explicit0);
                 writer.WriteCharacterString(UniversalTagNumber.UTF8String, upn);
-                writer.PopSequence(explicit0);
                 otherNameValue = writer.Encode();
             }
 
