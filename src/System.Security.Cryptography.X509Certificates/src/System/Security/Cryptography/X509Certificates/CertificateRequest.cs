@@ -470,7 +470,7 @@ namespace System.Security.Cryptography.X509Certificates
                         key = rsa;
                         generator = X509SignatureGenerator.CreateForRSA(rsa, _rsaPadding);
                         break;
-                    case Oids.Ecc:
+                    case Oids.EcPublicKey:
                         ECDsa ecdsa = issuerCertificate.GetECDsaPrivateKey();
                         key = ecdsa;
                         generator = X509SignatureGenerator.CreateForECDsa(ecdsa);

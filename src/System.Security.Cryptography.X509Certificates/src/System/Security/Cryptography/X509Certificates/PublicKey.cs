@@ -37,7 +37,7 @@ namespace System.Security.Cryptography.X509Certificates
                             break;
 
                         default:
-                            // This includes ECDSA, because an Oids.Ecc key can be
+                            // This includes ECDSA, because an Oids.EcPublicKey key can be
                             // many different algorithm kinds, not necessarily with mutual exclusion.
                             //
                             // Plus, .NET Framework only supports RSA and DSA in this property.

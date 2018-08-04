@@ -43,7 +43,7 @@ namespace Internal.Cryptography.Pal
                                 return DecodeDsaPublicKey(encodedKeyValue, encodedParameters);
                             } 
                             return new DSAImplementation.DSASecurityTransforms(key);
-                        case Oids.Ecc:
+                        case Oids.EcPublicKey:
                             // If X509GetPublicKey uses the new SecCertificateCopyKey API it can return an invalid
                             // key reference for unsupported algorithms. This currently happens for the BrainpoolP160r1
                             // algorithm in the test suite (as of macOS Mojave Developer Preview 4).

@@ -25,7 +25,6 @@ namespace System.Security.Cryptography
         internal const string RsaPkcs1Sha512 = "1.2.840.113549.1.1.13";
         internal const string Esdh = "1.2.840.113549.1.9.16.3.5";
         internal const string EcDiffieHellman = "1.3.132.1.12";
-        internal const string Ecc = "1.2.840.10045.2.1";
 
         // Cryptographic Attribute Types
         internal const string SigningTime = "1.2.840.113549.1.9.5";
@@ -64,7 +63,6 @@ namespace System.Security.Cryptography
         internal const string Sha512 = "2.16.840.1.101.3.4.2.3";
 
         // DSA CMS uses the combined signature+digest OID
-        internal const string DsaPublicKey = "1.2.840.10040.4.1";
         internal const string DsaWithSha1 = "1.2.840.10040.4.3";
         internal const string DsaWithSha256 = "2.16.840.1.101.3.4.3.2";
         internal const string DsaWithSha384 = "2.16.840.1.101.3.4.3.3";

@@ -67,7 +67,7 @@ namespace Internal.Cryptography.Pal
             if (typeof(T) == typeof(RSA))
                 return Oids.Rsa;
             if (typeof(T) == typeof(ECDsa))
-                return Oids.Ecc;
+                return Oids.EcPublicKey;
             if (typeof(T) == typeof(DSA))
                 return Oids.Dsa;
             throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
