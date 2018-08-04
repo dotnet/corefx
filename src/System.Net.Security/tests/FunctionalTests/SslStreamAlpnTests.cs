@@ -22,7 +22,7 @@ namespace System.Net.Security.Tests
 
     public class SslStreamAlpnTests
     {
-        private static bool BackendSupportsAlpn => PlatformDetection.BackendSupportsAlpn;
+        private static bool BackendSupportsAlpn => PlatformDetection.SupportsAlpn;
 
         private async Task DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
         {
