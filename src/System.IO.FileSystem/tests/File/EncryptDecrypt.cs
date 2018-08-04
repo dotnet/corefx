@@ -26,7 +26,7 @@ namespace System.IO.Tests
             Assert.Throws<PlatformNotSupportedException>(() => File.Decrypt("path"));
         }
 
-        [ConditionalFact(typeof(AdminHelpers), nameof(AdminHelpers.IsProcessElevated))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EncryptDecrypt_Read()
         {
