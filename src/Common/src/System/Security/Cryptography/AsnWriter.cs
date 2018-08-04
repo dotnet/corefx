@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace System.Security.Cryptography.Asn1
 {
@@ -1538,55 +1539,46 @@ namespace System.Security.Cryptography.Asn1
         // T-REC-X.690-201508 sec 8.23
         private void WriteCharacterStringCore(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str)
         {
-            int size = -1;
-
-            // T-REC-X.690-201508 sec 9.2
-            if (RuleSet == AsnEncodingRules.CER)
-            {
-                // TODO: Split this for netstandard vs netcoreapp for span?.
-                unsafe
-                {
-                    fixed (char* strPtr = &MemoryMarshal.GetReference(str))
-                    {
-                        size = encoding.GetByteCount(strPtr, str.Length);
-
-                        // If it exceeds the primitive segment size, use the constructed encoding.
-                        if (size > AsnReader.MaxCERSegmentSize)
-                        {
-                            WriteConstructedCerCharacterString(tag, encoding, str, size);
-                            return;
-                        }
-                    }
-                }
-            }
-
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
                 fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                 {
-                    if (size < 0)
+                    try
                     {
-                        size = encoding.GetByteCount(strPtr, str.Length);
-                    }
+                        int size = encoding.GetByteCount(strPtr, str.Length);
 
-                    // Clear the constructed tag, if present.
-                    WriteTag(tag.AsPrimitive());
-                    WriteLength(size);
-                    Span<byte> dest = _buffer.AsSpan(_offset, size);
-
-                    fixed (byte* destPtr = &MemoryMarshal.GetReference(dest))
-                    {
-                        int written = encoding.GetBytes(strPtr, str.Length, destPtr, dest.Length);
-
-                        if (written != size)
+                        // T-REC-X.690-201508 sec 9.2
+                        // If it exceeds the primitive segment size, use the constructed encoding.
+                        if (RuleSet == AsnEncodingRules.CER &&
+                            size > AsnReader.MaxCERSegmentSize)
                         {
-                            Debug.Fail($"Encoding produced different answer for GetByteCount ({size}) and GetBytes ({written})");
-                            throw new InvalidOperationException();
+                            WriteConstructedCerCharacterString(tag, encoding, str, size);
+                            return;
                         }
-                    }
 
-                    _offset += size;
+                        // Clear the constructed tag, if present.
+                        WriteTag(tag.AsPrimitive());
+                        WriteLength(size);
+                        Span<byte> dest = _buffer.AsSpan(_offset, size);
+
+                        fixed (byte* destPtr = &MemoryMarshal.GetReference(dest))
+                        {
+                            int written = encoding.GetBytes(strPtr, str.Length, destPtr, dest.Length);
+
+                            if (written != size)
+                            {
+                                Debug.Fail($"Encoding produced different answer for GetByteCount ({size}) and GetBytes ({written})");
+                                throw new InvalidOperationException();
+                            }
+                        }
+
+                        _offset += size;
+                    }
+                    catch (EncoderFallbackException e)
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding, e);
+                    }
                 }
             }
         }

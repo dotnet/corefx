@@ -483,7 +483,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
             {
-                Assert.Throws<EncoderFallbackException>(() => WriteString(writer, input));
+                Assert.Throws<CryptographicException>(() => WriteString(writer, input));
             }
         }
 
@@ -491,7 +491,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
             {
-                Assert.Throws<EncoderFallbackException>(() => WriteSpan(writer, input.AsSpan()));
+                Assert.Throws<CryptographicException>(() => WriteSpan(writer, input.AsSpan()));
             }
         }
     }
