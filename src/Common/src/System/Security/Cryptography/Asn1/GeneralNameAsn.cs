@@ -108,8 +108,10 @@ namespace System.Security.Cryptography.Asn1
     internal struct EdiPartyNameAsn
     {
         [OptionalValue]
+        [ExpectedTag(0, ExplicitTag = true)]
         internal DirectoryStringAsn? NameAssigner;
 
+        [ExpectedTag(1, ExplicitTag = true)]
         internal DirectoryStringAsn PartyName;
     }
 
