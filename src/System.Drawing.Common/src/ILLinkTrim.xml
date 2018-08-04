@@ -1,0 +1,6 @@
+<linker>
+  <assembly fullname="System.Drawing.Common">
+    <!-- Used by GDI+ in order to load images and save images -->
+    <type fullname="Interop/Ole32/IStream" required="true" />
+  </assembly>
+</linker>
