@@ -120,6 +120,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\EccKeyFormatHelper.cs">
       <Link>Common\System\Security\Cryptography\EccKeyFormatHelper.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyBlobHelpers.cs">
+      <Link>Common\System\Security\Cryptography\KeyBlobHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyFormatHelper.cs">
       <Link>Common\System\Security\Cryptography\KeyFormatHelper.cs</Link>
     </Compile>
@@ -595,9 +598,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\ECDsaSecurityTransforms.cs">
       <Link>Common\System\Security\Cryptography\ECDsaSecurityTransforms.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyBlobHelpers.cs">
-      <Link>Common\System\Security\Cryptography\KeyBlobHelpers.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\RSASecurityTransforms.cs">
       <Link>Common\System\Security\Cryptography\RSASecurityTransforms.cs</Link>
