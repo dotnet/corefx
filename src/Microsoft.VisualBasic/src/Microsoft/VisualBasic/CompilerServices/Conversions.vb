@@ -26,7 +26,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Shared Function ToBoolean(ByVal Value As String) As Boolean
 
             If Value Is Nothing Then
-                'For VB6 compatibility, treat Nothing as empty string.
                 Value = ""
             End If
 
@@ -133,7 +132,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                             Return CBool(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToBoolean(Nothing)
@@ -304,8 +302,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
                     Case TypeCode.String
                         Dim StringValue As String = TryCast(Value, String)
-
-
                         If StringValue IsNot Nothing Then
                             Return CByte(StringValue)
                         Else
@@ -426,7 +422,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                         Return CSByte(ValueInterface.ToUInt64(Nothing))
                     End If
 
-                    ' This case has been optimized for performance. Test any changes you make here
                 Case TypeCode.Decimal
                     If TypeOf Value Is Decimal Then
                         Return ValueInterface.ToSByte(Nothing)
@@ -499,8 +494,6 @@ ThrowInvalidCast:
 
             Dim ValueInterface As IConvertible
             Dim ValueTypeCode As TypeCode
-
-
             ValueInterface = TryCast(Value, IConvertible)
 
             If ValueInterface IsNot Nothing Then
@@ -572,7 +565,6 @@ ThrowInvalidCast:
                             Return CShort(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToInt16(Nothing)
@@ -719,7 +711,6 @@ ThrowInvalidCast:
                             Return CUShort(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToUInt16(Nothing)
@@ -863,7 +854,6 @@ ThrowInvalidCast:
                             Return CInt(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToInt32(Nothing)
@@ -1009,7 +999,6 @@ ThrowInvalidCast:
                             Return CUInt(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToUInt32(Nothing)
@@ -1055,7 +1044,7 @@ ThrowInvalidCast:
 
         Public Shared Function ToLong(ByVal Value As String) As Long
 
-            If (Value Is Nothing) Then
+            If Value Is Nothing Then
                 Return 0
             End If
 
@@ -1069,7 +1058,6 @@ ThrowInvalidCast:
                 'Using Decimal parse so that we full range of Int64
                 ' and still get currency and thousands parsing
                 Return CLng(ParseDecimal(Value, Nothing))
-
 
             Catch e As FormatException
                 Throw New InvalidCastException(SR.Format(SR.InvalidCast_FromStringTo, Left(Value, 32), "Long"), e)
@@ -1202,7 +1190,7 @@ ThrowInvalidCast:
         <CLSCompliant(False)>
         Public Shared Function ToULong(ByVal Value As String) As ULong
 
-            If (Value Is Nothing) Then
+            If Value Is Nothing Then
                 Return 0
             End If
 
@@ -1555,7 +1543,6 @@ ThrowInvalidCast:
                 End If
             End With
 
-
             With InNumberFormat
                 If (Not .CurrencyDecimalSeparator Is Nothing) AndAlso
                    (Not .NumberDecimalSeparator Is Nothing) AndAlso
@@ -1633,8 +1620,6 @@ MisMatch:
 
             Dim ValueInterface As IConvertible
             Dim ValueTypeCode As TypeCode
-
-
             ValueInterface = TryCast(Value, IConvertible)
 
             If ValueInterface IsNot Nothing Then
@@ -1706,7 +1691,6 @@ MisMatch:
                             Return CSng(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToSingle(Nothing)
@@ -1852,7 +1836,6 @@ MisMatch:
                             Return CDbl(ValueInterface.ToUInt64(Nothing))
                         End If
 
-                        ' This case has been optimized for performance. Test any changes you make here
                     Case TypeCode.Decimal
                         If TypeOf Value Is Decimal Then
                             Return ValueInterface.ToDouble(Nothing)
@@ -1917,7 +1900,6 @@ MisMatch:
 
             ' The below code handles the 80% case efficiently and is inefficient only when the numeric and currency settings
             ' are different
-
             If NumberFormat Is NormalizedNumberFormat Then
                 Return Double.TryParse(Value, flags, NormalizedNumberFormat, Result)
             Else
@@ -1958,8 +1940,6 @@ MisMatch:
             ' Normalize number format settings to enable us to first use the numeric settings for both currency and number parsing
             ' compatible with VB6
             NormalizedNumberFormat = GetNormalizedNumberFormat(NumberFormat)
-
-
             Const flags As NumberStyles =
                     NumberStyles.AllowDecimalPoint Or
                     NumberStyles.AllowExponent Or
@@ -1970,10 +1950,7 @@ MisMatch:
                     NumberStyles.AllowParentheses Or
                     NumberStyles.AllowTrailingWhite Or
                     NumberStyles.AllowCurrencySymbol
-
-
             Value = ToHalfwidthNumbers(Value, culture)
-
 
             Try
                 ' Use numeric settings to parse
@@ -2187,23 +2164,14 @@ MisMatch:
         End Function
 
         Public Shared Function FromCharArray(ByVal Value() As Char) As String
-            ' This is a private function used from the debug windows (VS7 264234)
-            ' NOTE: This is now Public because we no longer import private members
-            ' from FX assemblies for performance reasons.
             Return New String(Value)
         End Function
 
         Public Shared Function FromCharAndCount(ByVal Value As Char, ByVal Count As Integer) As String
-            ' This is a private function used from the debug windows (VS7 264234)
-            ' NOTE: This is now Public because we no longer import private members
-            ' from FX assemblies for performance reasons.
             Return New String(Value, Count)
         End Function
 
         Public Shared Function FromCharArraySubset(ByVal Value() As Char, ByVal StartIndex As Integer, ByVal Length As Integer) As String
-            ' This is a private function used from the debug windows (VS7 264234)
-            ' NOTE: This is now Public because we no longer import private members
-            ' from FX assemblies for performance reasons.
             Return New String(Value, StartIndex, Length)
         End Function
 
@@ -2216,7 +2184,7 @@ MisMatch:
         End Function
 
         <CLSCompliant(False)>
-        Public Shared Shadows Function ToString(ByVal Value As UInteger) As String  'REVIEW VSW#395745: are these needed here?  Why not call ToString directly?  Then we can keep from adding more useless helpers to the runtime
+        Public Shared Shadows Function ToString(ByVal Value As UInteger) As String
             Return Value.ToString(Nothing, Nothing)
         End Function
 
@@ -2236,7 +2204,6 @@ MisMatch:
         Public Shared Shadows Function ToString(ByVal Value As Double) As String
             Return ToString(Value, Nothing)
         End Function
-
 
         Public Shared Shadows Function ToString(ByVal Value As Single, ByVal NumberFormat As NumberFormatInfo) As String
             Return Value.ToString(Nothing, NumberFormat)
@@ -2647,7 +2614,6 @@ MisMatch:
 #If DEBUG Then
                     If InvocationResult IsNot Nothing Then
 
-
                         'disabling the assert below when we're converting to Nullable(Of T)
                         'since the Runtime hasn't been updated yet to handle Nullable.  In this case the assert 
                         'is harmless, but ClassifyPredefinedConversion hasn't been updated to consider Nullable conversions,
@@ -2659,7 +2625,6 @@ MisMatch:
                             TargetType.GetGenericTypeDefinition().Equals(GetType(Nullable(Of ))) AndAlso
                             TargetType.GetGenericArguments().Length > 0 AndAlso
                             InvocationResult.GetType().Equals(TargetType.GetGenericArguments()(0))) Then
-
 
                             Dim PostConversion As ConversionClass = ClassifyPredefinedConversion(TargetType, InvocationResult.GetType)
 
