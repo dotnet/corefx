@@ -456,6 +456,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\DSASecurityTransforms.cs">
       <Link>Common\System\Security\Cryptography\DSASecurityTransforms.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\EccKeyFormatHelper.cs">
+      <Link>Common\System\Security\Cryptography\EccKeyFormatHelper.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\EccSecurityTransforms.cs">
       <Link>Common\System\Security\Cryptography\EccSecurityTransforms.cs</Link>
     </Compile>
@@ -521,6 +524,21 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\CurveAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\CurveAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\ECDomainParameters.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\ECDomainParameters.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\ECPrivateKey.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\ECPrivateKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\FieldID.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\FieldID.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\SpecifiedECDomain.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\SpecifiedECDomain.cs</Link>
     </Compile>
     <Compile Include="Internal\Cryptography\Pal.OSX\AppleCertificatePal.cs" />
     <Compile Include="Internal\Cryptography\Pal.OSX\CertificatePal.cs" />
