@@ -84,9 +84,13 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeRsaPublicKey(byte[] encodedKeyValue)
             {
-                DerSequenceReader reader = new DerSequenceReader(encodedKeyValue);
-                RSAParameters rsaParameters = new RSAParameters();
-                reader.ReadPkcs1PublicBlob(ref rsaParameters);
+                RSAPublicKey publicKey = AsnSerializer.Deserialize<RSAPublicKey>(encodedKeyValue, AsnEncodingRules.BER);
+
+                AlgorithmIdentifierAsn ignored = default;
+                RSAKeyFormatHelper.ReadRsaPublicKey(
+                    publicKey,
+                    ignored,
+                    out RSAParameters rsaParameters);
 
                 RSA rsa = RSA.Create();
                 try

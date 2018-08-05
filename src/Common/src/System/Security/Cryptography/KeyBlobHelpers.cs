@@ -44,10 +44,12 @@ namespace System.Security.Cryptography
                         break;
                     }
 
-                    if (newStart != 0)
+                    if (integer[newStart] != 0)
                     {
                         break;
                     }
+
+                    newStart++;
                 }
 
                 if (newStart == integer.Length)

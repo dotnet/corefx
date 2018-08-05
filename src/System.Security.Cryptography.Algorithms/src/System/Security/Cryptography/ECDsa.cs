@@ -436,6 +436,7 @@ namespace System.Security.Cryptography
                 s_validOids,
                 source,
                 ECParameters.FromECPublicKey,
+                AsnEncodingRules.DER,
                 out int localRead,
                 out ECParameters key);
 

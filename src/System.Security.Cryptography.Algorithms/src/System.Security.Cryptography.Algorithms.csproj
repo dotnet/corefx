@@ -29,8 +29,6 @@
     <Compile Include="System\Security\Cryptography\Asn1\ECDomainParameters.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\ECPrivateKey.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\FieldID.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\RSAPrivateKeyAsn.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs" />
     <Compile Include="System\Security\Cryptography\Asn1\SpecifiedECDomain.cs" />
     <Compile Include="System\Security\Cryptography\CryptoConfig.cs" />
     <Compile Include="System\Security\Cryptography\DeriveBytes.cs" />
@@ -139,6 +137,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Pkcs12Kdf.cs">
       <Link>Common\System\Security\Cryptography\Pkcs12Kdf.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\RSAKeyFormatHelper.cs">
+      <Link>Common\System\Security\Cryptography\RSAKeyFormatHelper.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\RsaPaddingProcessor.cs">
       <Link>Common\System\Security\Cryptography\RsaPaddingProcessor.cs</Link>
     </Compile>
@@ -182,6 +183,12 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Rc2CbcParameters.manual.cs">
       <Link>Common\System\Security\Cryptography\Asn1\Rc2CbcParameters.manual.cs</Link>
       <DependentUpon>Common\System\Security\Cryptography\Asn1\Rc2CbcParameters.xml</DependentUpon>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\RSAPrivateKeyAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\RSAPrivateKeyAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\SubjectPublicKeyInfoAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\SubjectPublicKeyInfoAsn.cs</Link>

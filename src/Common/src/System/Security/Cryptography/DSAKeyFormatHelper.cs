@@ -80,6 +80,7 @@ namespace System.Security.Cryptography
                 s_validOids,
                 source,
                 ReadDsaPublicKey,
+                AsnEncodingRules.DER,
                 out bytesRead,
                 out key);
         }

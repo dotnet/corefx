@@ -26,10 +26,14 @@ namespace Internal.Cryptography
             // Output is the DER encoded value of CONSTRUCTEDSEQUENCE(INTEGER(r), INTEGER(s)). 
             int halfLength = input.Length / 2;
 
-            byte[][] rEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input.Slice(0, halfLength));
-            byte[][] sEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input.Slice(halfLength, halfLength));
-
-            return DerEncoder.ConstructSequence(rEncoded, sEncoded);
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                writer.PushSequence();
+                writer.WriteKeyParameterInteger(input.Slice(0, halfLength));
+                writer.WriteKeyParameterInteger(input.Slice(halfLength, halfLength));
+                writer.PopSequence();
+                return writer.Encode();
+            }
         }
 
         /// <summary>

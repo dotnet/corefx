@@ -448,4 +448,10 @@
   <data name="Cryptography_AlgKdfRequiresChars" xml:space="preserve">
     <value>The KDF for algorithm '{0}' requires a char-based password input.</value>
   </data>
+  <data name="Cryptography_RSAPrivateKey_VersionTooNew" xml:space="preserve">
+    <value>The provided RSAPrivateKey value has version '{0}', but version '{1}' is the maximum supported.</value>
+  </data>
+  <data name="Cryptography_NotValidPrivateKey" xml:space="preserve">
+    <value>Key is not a valid private key.</value>
+  </data>
 </root>

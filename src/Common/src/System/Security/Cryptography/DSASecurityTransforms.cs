@@ -79,6 +79,9 @@ namespace System.Security.Cryptography
 
                 public override DSAParameters ExportParameters(bool includePrivateParameters)
                 {
+                    // Apple requires all private keys to be exported encrypted, but since we're trying to export
+                    // as parsed structures we will need to decrypt it for the user.
+                    const string ExportPassword = "DotnetExportPassphrase";
                     SecKeyPair keys = GetKeys();
 
                     if (keys.PublicKey == null ||
@@ -87,28 +90,34 @@ namespace System.Security.Cryptography
                         throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
                     }
 
-                    if (!includePrivateParameters)
-                    {
-                        byte[] publicKey = Interop.AppleCrypto.SecKeyExport(keys.PublicKey, exportPrivate: false, password: null);
-                        DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
-                            publicKey,
-                            out int localRead,
-                            out DSAParameters key);
-                        return key;
-                    }
-                    else
-                    {
-                        // Apple requires all private keys to be exported encrypted, but since we're trying to export
-                        // as parsed structures we will need to decrypt it for the user.
-                        const string ExportPassword = "DotnetExportPassphrase";
+                    byte[] keyBlob = Interop.AppleCrypto.SecKeyExport(
+                        includePrivateParameters ? keys.PrivateKey : keys.PublicKey,
+                        exportPrivate: includePrivateParameters,
+                        password: ExportPassword);
 
-                        byte[] privateKey = Interop.AppleCrypto.SecKeyExport(keys.PrivateKey, exportPrivate: true, password: ExportPassword);
-                        DSAKeyFormatHelper.ReadEncryptedPkcs8(
-                            privateKey,
-                            ExportPassword,
-                            out int localRead,
-                            out DSAParameters key);
-                        return key;
+                    try
+                    {
+                        if (!includePrivateParameters)
+                        {
+                            DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                                keyBlob,
+                                out int localRead,
+                                out DSAParameters key);
+                            return key;
+                        }
+                        else
+                        {
+                            DSAKeyFormatHelper.ReadEncryptedPkcs8(
+                                keyBlob,
+                                ExportPassword,
+                                out int localRead,
+                                out DSAParameters key);
+                            return key;
+                        }
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(keyBlob);
                     }
                 }
 
