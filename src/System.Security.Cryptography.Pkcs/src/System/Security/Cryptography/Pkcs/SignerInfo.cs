@@ -178,10 +178,7 @@ namespace System.Security.Cryptography.Pkcs
                     AsnReader reader = new AsnReader(modifiedAttr.AttrValues, AsnEncodingRules.BER);
                     AsnReader collReader = reader.ReadSetOf();
 
-                    if (reader.HasData)
-                    {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
+                    reader.ThrowIfNotEmpty();
 
                     // re-add old values
                     while (collReader.HasData)
@@ -221,7 +218,7 @@ namespace System.Security.Cryptography.Pkcs
 
             if (isOnlyValue)
             {
-                Helpers.RemoveAt(ref mySigner.UnsignedAttributes, outerIndex);
+                PkcsHelpers.RemoveAt(ref mySigner.UnsignedAttributes, outerIndex);
             }
             else
             {
@@ -245,10 +242,7 @@ namespace System.Security.Cryptography.Pkcs
                     AsnReader reader = new AsnReader(attributeAsn.AttrValues, AsnEncodingRules.BER);
                     AsnReader collReader = reader.ReadSetOf();
 
-                    if (reader.HasData)
-                    {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
+                    reader.ThrowIfNotEmpty();
 
                     while (collReader.HasData)
                     {
@@ -377,10 +371,7 @@ namespace System.Security.Cryptography.Pkcs
                     AsnReader reader = new AsnReader(attributeAsn.AttrValues, AsnEncodingRules.BER);
                     AsnReader collReader = reader.ReadSetOf();
 
-                    if (reader.HasData)
-                    {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
+                    reader.ThrowIfNotEmpty();
 
                     int j = 0;
 
@@ -425,7 +416,7 @@ namespace System.Security.Cryptography.Pkcs
                 }
                 else
                 {
-                    Helpers.RemoveAt(ref myData.UnsignedAttributes, removeAttrIdx);
+                    PkcsHelpers.RemoveAt(ref myData.UnsignedAttributes, removeAttrIdx);
                 }
             }
             else
@@ -795,7 +786,7 @@ namespace System.Security.Cryptography.Pkcs
 
         private HashAlgorithmName GetDigestAlgorithm()
         {
-            return Helpers.GetDigestAlgorithm(DigestAlgorithm.Value);
+            return PkcsHelpers.GetDigestAlgorithm(DigestAlgorithm.Value);
         }
 
         internal static CryptographicAttributeObjectCollection MakeAttributeCollection(AttributeAsn[] attributes)
@@ -822,17 +813,14 @@ namespace System.Security.Cryptography.Pkcs
             AsnReader reader = new AsnReader(attrSetBytes, AsnEncodingRules.BER);
             AsnReader collReader = reader.ReadSetOf();
 
-            if (reader.HasData)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
+            reader.ThrowIfNotEmpty();
 
             AsnEncodedDataCollection valueColl = new AsnEncodedDataCollection();
 
             while (collReader.HasData)
             {
                 byte[] attrBytes = collReader.GetEncodedValue().ToArray();
-                valueColl.Add(Helpers.CreateBestPkcs9AttributeObjectAvailable(type, attrBytes));
+                valueColl.Add(PkcsHelpers.CreateBestPkcs9AttributeObjectAvailable(type, attrBytes));
             }
 
             return new CryptographicAttributeObject(type, valueColl);
@@ -856,10 +844,7 @@ namespace System.Security.Cryptography.Pkcs
             AsnReader reader = new AsnReader(attributeValues, AsnEncodingRules.BER);
             AsnReader collReader = reader.ReadSetOf();
 
-            if (reader.HasData)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
+            reader.ThrowIfNotEmpty();
 
             for (int i = 0; collReader.HasData; i++)
             {
@@ -907,10 +892,7 @@ namespace System.Security.Cryptography.Pkcs
                 AsnReader reader = new AsnReader(modifiedAttr.AttrValues, writer.RuleSet);
                 AsnReader collReader = reader.ReadSetOf();
 
-                if (reader.HasData)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
+                reader.ThrowIfNotEmpty();
 
                 int i = 0;
 
