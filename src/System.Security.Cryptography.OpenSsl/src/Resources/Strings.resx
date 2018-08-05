@@ -219,6 +219,9 @@
   <data name="Cryptography_AsnWriter_PopWrongTag" xml:space="preserve">
     <value>Cannot pop the requested tag as it is not currently in progress.</value>
   </data>
+  <data name="Cryptography_NotValidPublicOrPrivateKey" xml:space="preserve">
+    <value>Key is not a valid public or private key.</value>
+  </data>
   <data name="PlatformNotSupported_CryptographyOpenSSL" xml:space="preserve">
     <value>OpenSSL is not supported on this platform.</value>
   </data>
