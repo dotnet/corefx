@@ -43,7 +43,6 @@ namespace System
         public static bool IsRedHatFamily7 => false;
         public static bool IsNotRedHatFamily6 => true;
 
-        // Windows 10 Anniversary release a.k.a Windows 10 Version 1607 added support to native WinHTTP for HTTP/2 protocol support.
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => 
