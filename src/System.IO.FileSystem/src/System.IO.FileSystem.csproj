@@ -131,9 +131,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DeleteFile.cs">
       <Link>Common\Interop\Windows\Interop.DeleteFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EncryptDecrypt.cs">
-      <Link>Common\Interop\Windows\Interop.EncryptDecrypt.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CompareStringOrdinal.cs">
       <Link>Common\Interop\Windows\Interop.CompareStringOrdinal.cs</Link>
     </Compile>
@@ -180,6 +177,9 @@
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EncryptDecrypt.cs">
+      <Link>Common\Interop\Windows\Interop.EncryptDecrypt.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
