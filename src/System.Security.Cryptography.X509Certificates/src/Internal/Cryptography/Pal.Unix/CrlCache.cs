@@ -221,12 +221,10 @@ namespace Internal.Cryptography.Pal
                 if (distributionPoint.DistributionPoint != null &&
                     distributionPoint.DistributionPoint.FullName != null)
                 {
-                    Uri uri;
-                    GeneralNameAsn[] fullName = distributionPoint.DistributionPoint.FullName;
-                    foreach (GeneralNameAsn name in fullName)
+                    foreach (GeneralNameAsn name in distributionPoint.DistributionPoint.FullName)
                     {
                         if (name.Uri != null &&
-                            Uri.TryCreate(name.Uri, UriKind.Absolute, out uri) &&
+                            Uri.TryCreate(name.Uri, UriKind.Absolute, out Uri uri) &&
                             uri.Scheme == "http")
                         {
                             return name.Uri;

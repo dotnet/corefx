@@ -321,52 +321,24 @@ namespace Internal.Cryptography.Pal
 
         private static IEnumerable<KeyValuePair<string, string>> ReadReverseRdns(X500DistinguishedName name)
         {
-            DerSequenceReader x500NameReader = new DerSequenceReader(name.RawData);
-            var rdnReaders = new Stack<DerSequenceReader>();
+            AsnReader x500NameReader = new AsnReader(name.RawData, AsnEncodingRules.DER);
+            AsnReader sequenceReader = x500NameReader.ReadSequence();
+            var rdnReaders = new Stack<AsnReader>();
 
-            while (x500NameReader.HasData)
+            while (sequenceReader.HasData)
             {
-                rdnReaders.Push(x500NameReader.ReadSet());
+                rdnReaders.Push(sequenceReader.ReadSetOf());
             }
-
 
             while (rdnReaders.Count > 0)
             {
-                DerSequenceReader rdnReader = rdnReaders.Pop();
-
+                AsnReader rdnReader = rdnReaders.Pop();
                 while (rdnReader.HasData)
                 {
-                    DerSequenceReader tavReader = rdnReader.ReadSequence();
-                    string oid = tavReader.ReadOidAsString();
-
-                    var tag = (DerSequenceReader.DerTag)tavReader.PeekTag();
-                    string value = null;
-
-                    switch (tag)
-                    {
-                        case DerSequenceReader.DerTag.BMPString:
-                            value = tavReader.ReadBMPString();
-                            break;
-                        case DerSequenceReader.DerTag.IA5String:
-                            value = tavReader.ReadIA5String();
-                            break;
-                        case DerSequenceReader.DerTag.PrintableString:
-                            value = tavReader.ReadPrintableString();
-                            break;
-                        case DerSequenceReader.DerTag.UTF8String:
-                            value = tavReader.ReadUtf8String();
-                            break;
-                        case DerSequenceReader.DerTag.T61String:
-                            value = tavReader.ReadT61String();
-                            break;
-
-                        // Ignore anything we don't know how to read.
-                    }
-
-                    if (value != null)
-                    {
-                        yield return new KeyValuePair<string, string>(oid, value);
-                    }
+                    AsnReader tavReader = rdnReader.ReadSequence();
+                    string oid = tavReader.ReadObjectIdentifierAsString();
+                    string value = tavReader.ReadDirectoryString();
+                    yield return new KeyValuePair<string, string>(oid, value);
                 }
             }
         }

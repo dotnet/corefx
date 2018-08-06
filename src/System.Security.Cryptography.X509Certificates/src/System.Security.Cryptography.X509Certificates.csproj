@@ -15,9 +15,6 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleCache.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
-      <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.cs">
       <Link>Common\System\Security\Cryptography\Asn1V2.cs</Link>
     </Compile>
@@ -121,11 +118,16 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\X509SubjectKeyIdentifierExtension.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509SubjectKeyIdentifierHashAlgorithm.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509VerificationFlags.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\AccessDescriptionAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\BasicConstraintsAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificateAsn.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificatePolicyMappingAsn.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificateTemplateAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificationRequestAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\CertificationRequestInfoAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\KeyUsageFlagsAsn.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\PolicyConstraintsAsn.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\PolicyInformationAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\TbsCertificateAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\TimeAsn.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\ValidityAsn.cs" />
