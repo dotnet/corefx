@@ -30,7 +30,7 @@ namespace System.Net.Http.Functional.Tests
 
                 string connectionPreface = await server.AcceptConnectionAsync();
 
-                Assert.Equal(connectionPreface, "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n");
+                Assert.Equal("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n", connectionPreface);
             }
         }
 
