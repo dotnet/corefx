@@ -55,12 +55,6 @@
     <Compile Include="$(CommonTestPath)\System\Net\VerboseTestLogging.cs">
       <Link>Common\System\Net\VerboseTestLogging.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2Frames.cs">
-      <Link>Common\System\Net\Http\Http2Frames.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2LoopbackServer.cs">
-      <Link>Common\System\Net\Http\Http2LoopbackServer.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
       <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
     </Compile>
@@ -134,6 +128,12 @@
     <Compile Include="ReadOnlyMemoryContentTest.cs" />
     <Compile Include="SocketsHttpHandlerTest.cs" />
     <Compile Include="SocketsHttpHandlerTest.Http2.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2Frames.cs">
+      <Link>Common\System\Net\Http\Http2Frames.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2LoopbackServer.cs">
+      <Link>Common\System\Net\Http\Http2LoopbackServer.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs">
