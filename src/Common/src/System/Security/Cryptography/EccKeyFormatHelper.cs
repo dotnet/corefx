@@ -242,9 +242,13 @@ namespace System.Security.Cryptography
             switch (curveOid.Value)
             {
                 case Oids.secp256r1:
+                    curveOid = new Oid(Oids.secp256r1, nameof(ECCurve.NamedCurves.nistP256));
+                    break;
                 case Oids.secp384r1:
+                    curveOid = new Oid(Oids.secp384r1, nameof(ECCurve.NamedCurves.nistP384));
+                    break;
                 case Oids.secp521r1:
-                    curveOid = Oid.FromOidValue(curveOid.Value, OidGroup.PublicKeyAlgorithm);
+                    curveOid = new Oid(Oids.secp521r1, nameof(ECCurve.NamedCurves.nistP521));
                     break;
             }
 
