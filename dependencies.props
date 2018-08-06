@@ -10,14 +10,14 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>c18bb1edb637aff029cf3e15c1a41cd4817e11fd</CoreFxCurrentRef>
-    <CoreClrCurrentRef>139632ebaeee6d2b7fad7068eb7837717bff8331</CoreClrCurrentRef>
+    <CoreClrCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</CoreClrCurrentRef>
     <CoreSetupCurrentRef>f6b753baf6f0b28a1d318ad8fe31db8144af079a</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>139632ebaeee6d2b7fad7068eb7837717bff8331</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>139632ebaeee6d2b7fad7068eb7837717bff8331</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>9004703a1923e5c5582ceb8d79712df777412446</StandardCurrentRef>
-    <BuildToolsCurrentRef>139632ebaeee6d2b7fad7068eb7837717bff8331</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -33,7 +33,7 @@
   <PropertyGroup>
     <CoreFxExpectedPrerelease>alphautf8string-26726-02</CoreFxExpectedPrerelease>
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-alphautf8string-26726-02</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-alphautf8string-26730-09</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-alphautf8string-26806-06</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <ProjectNTfsExpectedPrerelease>beta-26806-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-26806-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26806-00</ProjectNTfsTestILCPackageVersion>
