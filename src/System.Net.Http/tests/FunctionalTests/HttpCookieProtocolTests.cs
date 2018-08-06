@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Test.Common;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -17,13 +16,6 @@ namespace System.Net.Http.Functional.Tests
     public abstract class HttpCookieProtocolTests : HttpClientTestBase
     {
         public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
-
-        // Windows - Schannel supports alpn from win8.1/2012 R2 and higher.
-        // Linux - OpenSsl supports alpn from openssl 1.0.2 and higher.
-        // OSX - SecureTransport doesn't expose alpn APIs.
-        private static bool BackendSupportsAlpn => (PlatformDetection.IsWindows && !PlatformDetection.IsWindows7) ||
-            (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
-            (PlatformDetection.OpenSslVersion.Major >= 1 && (PlatformDetection.OpenSslVersion.Minor >= 1 || PlatformDetection.OpenSslVersion.Build >= 2)));
 
         private const string s_cookieName = "ABC";
         private const string s_cookieValue = "123";
@@ -164,7 +156,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "HTTP/2 is not supported on NetFX, and manually added Cookie header will be ignored if sent with container cookies")]
-        //[OuterLoop("Uses external server")]
+        [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task SendAsync_RemoteServersWithCookies_Success(Uri remoteServer)
         {
@@ -176,6 +168,9 @@ namespace System.Net.Http.Functional.Tests
 
             if (remoteServer.Host == Configuration.Http.Http2Host && BackendSupportsAlpn)
             {
+                // Windows 10 Anniversary release a.k.a Windows 10 Version 1607 added support to native WinHTTP for HTTP/2 protocol support.
+                if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1607OrGreater) return;
+
                 expectedVersion = new Version(2,0);
                 TestHelper.EnsureHttp2Feature(handler);
             }
