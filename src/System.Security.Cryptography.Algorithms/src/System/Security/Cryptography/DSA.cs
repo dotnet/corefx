@@ -227,7 +227,7 @@ namespace System.Security.Cryptography
         internal static Exception HashAlgorithmNameNullOrEmpty() =>
             new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
 
-        public override bool TryExportEncryptedPkcs8PrivateKey(
+        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<byte> passwordBytes,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -263,7 +263,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public override bool TryExportEncryptedPkcs8PrivateKey(
+        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<char> password,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -299,7 +299,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public override bool TryExportPkcs8PrivateKey(
+        public override unsafe bool TryExportPkcs8PrivateKey(
             Span<byte> destination,
             out int bytesWritten)
         {

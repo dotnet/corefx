@@ -286,7 +286,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public virtual byte[] ExportRSAPrivateKey()
+        public virtual unsafe byte[] ExportRSAPrivateKey()
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
@@ -311,7 +311,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public virtual bool TryExportRSAPrivateKey(Span<byte> destination, out int bytesWritten)
+        public virtual unsafe bool TryExportRSAPrivateKey(Span<byte> destination, out int bytesWritten)
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
@@ -366,7 +366,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public override bool TryExportPkcs8PrivateKey(Span<byte> destination, out int bytesWritten)
+        public override unsafe bool TryExportPkcs8PrivateKey(Span<byte> destination, out int bytesWritten)
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
@@ -391,7 +391,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public override bool TryExportEncryptedPkcs8PrivateKey(
+        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<char> password,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -432,7 +432,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public override bool TryExportEncryptedPkcs8PrivateKey(
+        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<byte> passwordBytes,
             PbeParameters pbeParameters,
             Span<byte> destination,
