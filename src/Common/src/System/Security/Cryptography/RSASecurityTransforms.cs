@@ -131,6 +131,7 @@ namespace System.Security.Cryptography
                                 keyBlob,
                                 out int localRead,
                                 out key);
+                            Debug.Assert(localRead == keyBlob.Length);
                         }
                         return key;
                     }

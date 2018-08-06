@@ -255,7 +255,7 @@ namespace System.Security.Cryptography
             return ECCurve.CreateFromOid(curveOid);
         }
 
-        internal static AsnWriter WriteSubjectPublicKeyInfo(ECParameters ecParameters)
+        internal static AsnWriter WriteSubjectPublicKeyInfo(in ECParameters ecParameters)
         {
             ecParameters.Validate();
 
@@ -282,14 +282,14 @@ namespace System.Security.Cryptography
             return writer;
         }
 
-        private static AsnWriter WriteAlgorithmIdentifier(ECParameters ecParameters)
+        private static AsnWriter WriteAlgorithmIdentifier(in ECParameters ecParameters)
         {
             AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
             WriteAlgorithmIdentifier(ecParameters, writer);
             return writer;
         }
 
-        private static void WriteAlgorithmIdentifier(ECParameters ecParameters, AsnWriter writer)
+        private static void WriteAlgorithmIdentifier(in ECParameters ecParameters, AsnWriter writer)
         {
             writer.PushSequence();
 
@@ -298,8 +298,8 @@ namespace System.Security.Cryptography
 
             writer.PopSequence();
         }
-
-        internal static AsnWriter WritePkcs8PrivateKey(ECParameters ecParameters)
+ 
+        internal static AsnWriter WritePkcs8PrivateKey(in ECParameters ecParameters)
         {
             ecParameters.Validate();
 
@@ -321,7 +321,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static void WriteEcParameters(ECParameters ecParameters, AsnWriter writer)
+        private static void WriteEcParameters(in ECParameters ecParameters, AsnWriter writer)
         {
             if (ecParameters.Curve.IsNamed)
             {
@@ -341,7 +341,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static void WriteUncompressedPublicKey(ECParameters ecParameters, AsnWriter writer)
+        private static void WriteUncompressedPublicKey(in ECParameters ecParameters, AsnWriter writer)
         {
             int publicKeyLength = ecParameters.Q.X.Length * 2 + 1;
             Span<byte> publicKeyBytes = stackalloc byte[0];
@@ -376,12 +376,12 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static AsnWriter WriteECPrivateKey(ECParameters ecParameters)
+        internal static AsnWriter WriteECPrivateKey(in ECParameters ecParameters)
         {
             return WriteEcPrivateKey(ecParameters, includeDomainParameters: true);
         }
 
-        private static AsnWriter WriteEcPrivateKey(ECParameters ecParameters, bool includeDomainParameters)
+        private static AsnWriter WriteEcPrivateKey(in ECParameters ecParameters, bool includeDomainParameters)
         {
             bool returning = false;
             AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);

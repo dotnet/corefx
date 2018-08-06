@@ -103,6 +103,7 @@ namespace System.Security.Cryptography
                                 keyBlob,
                                 out int localRead,
                                 out DSAParameters key);
+                            Debug.Assert(localRead == keyBlob.Length);
                             return key;
                         }
                         else
@@ -112,6 +113,7 @@ namespace System.Security.Cryptography
                                 ExportPassword,
                                 out int localRead,
                                 out DSAParameters key);
+                            Debug.Assert(localRead == keyBlob.Length);
                             return key;
                         }
                     }

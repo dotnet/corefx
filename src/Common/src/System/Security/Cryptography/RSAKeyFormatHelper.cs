@@ -125,7 +125,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static AsnWriter WriteSubjectPublicKeyInfo(RSAParameters rsaParameters)
+        internal static AsnWriter WriteSubjectPublicKeyInfo(in RSAParameters rsaParameters)
         {
             using (AsnWriter pkcs1PublicKey = WritePkcs1PublicKey(rsaParameters))
             {
@@ -148,7 +148,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static unsafe AsnWriter WritePkcs8PrivateKey(RSAParameters rsaParameters)
+        internal static unsafe AsnWriter WritePkcs8PrivateKey(in RSAParameters rsaParameters)
         {
             using (AsnWriter pkcs1PrivateKey = WritePkcs1PrivateKey(rsaParameters))
             {
@@ -188,7 +188,7 @@ namespace System.Security.Cryptography
             writer.PopSequence();
         }
 
-        internal static AsnWriter WritePkcs1PublicKey(RSAParameters rsaParameters)
+        internal static AsnWriter WritePkcs1PublicKey(in RSAParameters rsaParameters)
         {
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
             {
@@ -204,7 +204,7 @@ namespace System.Security.Cryptography
             return writer;
         }
 
-        internal static unsafe AsnWriter WritePkcs1PrivateKey(RSAParameters rsaParameters)
+        internal static unsafe AsnWriter WritePkcs1PrivateKey(in RSAParameters rsaParameters)
         {
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
             {
