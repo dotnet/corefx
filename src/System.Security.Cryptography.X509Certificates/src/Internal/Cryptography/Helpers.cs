@@ -6,21 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 
 namespace Internal.Cryptography
 {
-    internal static class Helpers
+    internal static partial class Helpers
     {
-        public static byte[] CloneByteArray(this byte[] src)
-        {
-            if (src == null)
-            {
-                return null;
-            }
-
-            return (byte[])(src.Clone());
-        }
-
         // Encode a byte array as an array of upper-case hex characters.
         public static char[] ToHexArrayUpper(this byte[] bytes)
         {
@@ -46,9 +38,16 @@ namespace Internal.Cryptography
 
         // Decode a hex string-encoded byte array passed to various X509 crypto api.
         // The parsing rules are overly forgiving but for compat reasons, they cannot be tightened.
-        public static byte[] DecodeHexString(this string s)
+        public static byte[] DecodeHexString(this string hexString)
         {
             int whitespaceCount = 0;
+
+            ReadOnlySpan<char> s = hexString;
+
+            if (s.Length != 0 && s[0] == '\u200E')
+            {
+                s = s.Slice(1);
+            }
 
             for (int i = 0; i < s.Length; i++)
             {
@@ -160,6 +159,53 @@ namespace Internal.Cryptography
             foreach (IDisposable disposable in disposables)
             {
                 disposable.Dispose();
+            }
+        }
+
+        public static void ValidateDer(ReadOnlyMemory<byte> encodedValue)
+        {
+            Asn1Tag tag;
+            AsnReader reader = new AsnReader(encodedValue, AsnEncodingRules.DER);
+
+            while (reader.HasData)
+            {
+                tag = reader.PeekTag();
+
+                // If the tag is in the UNIVERSAL class
+                //
+                // DER limits the constructed encoding to SEQUENCE and SET, as well as anything which gets
+                // a defined encoding as being an IMPLICIT SEQUENCE.
+                if (tag.TagClass == TagClass.Universal)
+                {
+                    switch ((UniversalTagNumber)tag.TagValue)
+                    {
+                        case UniversalTagNumber.External:
+                        case UniversalTagNumber.Embedded:
+                        case UniversalTagNumber.Sequence:
+                        case UniversalTagNumber.Set:
+                        case UniversalTagNumber.UnrestrictedCharacterString:
+                            if (!tag.IsConstructed)
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            }
+                            break;
+
+                        default:
+                            if (tag.IsConstructed)
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            }
+                            break;
+                    }
+                }
+
+                if (tag.IsConstructed)
+                {
+                    ValidateDer(reader.PeekContentBytes());
+                }
+
+                // Skip past the current value.
+                reader.GetEncodedValue();
             }
         }
     }

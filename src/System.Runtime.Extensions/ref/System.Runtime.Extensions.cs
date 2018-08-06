@@ -8,7 +8,7 @@
 
 namespace System
 {
-    public partial class AppDomain : System.MarshalByRefObject
+    public sealed partial class AppDomain : System.MarshalByRefObject
     {
         private AppDomain() { }
         public static AppDomain CurrentDomain { get { throw null; } }
@@ -74,6 +74,18 @@ namespace System
         public void SetShadowCopyFiles() { }
         [Obsolete("AppDomain.SetShadowCopyPath has been deprecated. Please investigate the use of AppDomainSetup.ShadowCopyDirectories instead. http://go.microsoft.com/fwlink/?linkid=14202")]
         public void SetShadowCopyPath(string path) { }
+        public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName) { throw null; }
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
     }
 
     public sealed partial class AppDomainSetup
@@ -1758,6 +1770,14 @@ namespace System.Reflection
     {
         public AssemblyNameProxy() { }
         public System.Reflection.AssemblyName GetAssemblyName(System.String assemblyFile) { throw null; }
+    }
+}
+namespace System.Runtime
+{
+    public static class ProfileOptimization
+    {
+        public static void SetProfileRoot(string directoryPath) { throw null; }
+        public static void StartProfile(string profile) { throw null; }
     }
 }
 namespace System.Runtime.Versioning

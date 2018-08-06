@@ -632,6 +632,31 @@
         "fedora-x64-corert"
       ]
     },
+    "fedora.29": {
+      "#import": [
+        "fedora"
+      ]
+    },
+    "fedora.29-corert": {
+      "#import": [
+        "fedora.29",
+        "fedora-corert"
+      ]
+    },
+    "fedora.29-x64": {
+      "#import": [
+        "fedora.29",
+        "fedora-x64"
+      ]
+    },
+    "fedora.29-x64-corert": {
+      "#import": [
+        "fedora.29-corert",
+        "fedora.29-x64",
+        "fedora.29",
+        "fedora-x64-corert"
+      ]
+    },
     "freebsd": {
       "#import": [
         "unix"
@@ -1346,6 +1371,62 @@
         "ol.7.3-x64-corert"
       ]
     },
+    "ol.7.5": {
+      "#import": [
+        "ol.7.4",
+        "rhel.7.5"
+      ]
+    },
+    "ol.7.5-corert": {
+      "#import": [
+        "ol.7.5",
+        "ol.7.4-corert",
+        "rhel.7.5-corert"
+      ]
+    },
+    "ol.7.5-x64": {
+      "#import": [
+        "ol.7.5",
+        "ol.7.4-x64",
+        "rhel.7.5-x64"
+      ]
+    },
+    "ol.7.5-x64-corert": {
+      "#import": [
+        "ol.7.5-corert",
+        "ol.7.5-x64",
+        "ol.7.5",
+        "ol.7.4-x64-corert"
+      ]
+    },
+    "ol.7.6": {
+      "#import": [
+        "ol.7.5",
+        "rhel.7.6"
+      ]
+    },
+    "ol.7.6-corert": {
+      "#import": [
+        "ol.7.6",
+        "ol.7.5-corert",
+        "rhel.7.6-corert"
+      ]
+    },
+    "ol.7.6-x64": {
+      "#import": [
+        "ol.7.6",
+        "ol.7.5-x64",
+        "rhel.7.6-x64"
+      ]
+    },
+    "ol.7.6-x64-corert": {
+      "#import": [
+        "ol.7.6-corert",
+        "ol.7.6-x64",
+        "ol.7.6",
+        "ol.7.5-x64-corert"
+      ]
+    },
     "opensuse": {
       "#import": [
         "linux"
@@ -1594,6 +1675,31 @@
         "osx.10.12-x64-corert"
       ]
     },
+    "osx.10.14": {
+      "#import": [
+        "osx.10.13"
+      ]
+    },
+    "osx.10.14-corert": {
+      "#import": [
+        "osx.10.14",
+        "osx.10.13-corert"
+      ]
+    },
+    "osx.10.14-x64": {
+      "#import": [
+        "osx.10.14",
+        "osx.10.13-x64"
+      ]
+    },
+    "osx.10.14-x64-corert": {
+      "#import": [
+        "osx.10.14-corert",
+        "osx.10.14-x64",
+        "osx.10.14",
+        "osx.10.13-x64-corert"
+      ]
+    },
     "rhel": {
       "#import": [
         "linux"
@@ -1791,6 +1897,56 @@
         "rhel.7.4-x64",
         "rhel.7.4",
         "rhel.7.3-x64-corert"
+      ]
+    },
+    "rhel.7.5": {
+      "#import": [
+        "rhel.7.4"
+      ]
+    },
+    "rhel.7.5-corert": {
+      "#import": [
+        "rhel.7.5",
+        "rhel.7.4-corert"
+      ]
+    },
+    "rhel.7.5-x64": {
+      "#import": [
+        "rhel.7.5",
+        "rhel.7.4-x64"
+      ]
+    },
+    "rhel.7.5-x64-corert": {
+      "#import": [
+        "rhel.7.5-corert",
+        "rhel.7.5-x64",
+        "rhel.7.5",
+        "rhel.7.4-x64-corert"
+      ]
+    },
+    "rhel.7.6": {
+      "#import": [
+        "rhel.7.5"
+      ]
+    },
+    "rhel.7.6-corert": {
+      "#import": [
+        "rhel.7.6",
+        "rhel.7.5-corert"
+      ]
+    },
+    "rhel.7.6-x64": {
+      "#import": [
+        "rhel.7.6",
+        "rhel.7.5-x64"
+      ]
+    },
+    "rhel.7.6-x64-corert": {
+      "#import": [
+        "rhel.7.6-corert",
+        "rhel.7.6-x64",
+        "rhel.7.6",
+        "rhel.7.5-x64-corert"
       ]
     },
     "sles": {

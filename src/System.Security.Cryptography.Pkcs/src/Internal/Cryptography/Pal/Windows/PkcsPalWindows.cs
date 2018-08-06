@@ -54,7 +54,16 @@ namespace Internal.Cryptography.Pal.Windows
 
         public sealed override byte[] EncodeUtcTime(DateTime utcTime)
         {
-            long ft = utcTime.ToFileTimeUtc();
+            long ft;
+            try 
+            {
+                ft = utcTime.ToFileTimeUtc();
+            }
+            catch (ArgumentException ex)
+            {
+                throw new CryptographicException(ex.Message, ex);
+            }
+
             unsafe
             {
                 return Interop.Crypt32.CryptEncodeObjectToByteArray(CryptDecodeObjectStructType.PKCS_UTC_TIME, &ft);
@@ -134,8 +143,8 @@ namespace Internal.Cryptography.Pal.Windows
 
         public sealed override void AddCertsFromStoreForDecryption(X509Certificate2Collection certs)
         {
-            certs.AddRange(Helpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: true));
-            certs.AddRange(Helpers.GetStoreCertificates(StoreName.My, StoreLocation.LocalMachine, openExistingOnly: true));
+            certs.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: true));
+            certs.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.LocalMachine, openExistingOnly: true));
         }
 
         public sealed override Exception CreateRecipientsNotFoundException()
