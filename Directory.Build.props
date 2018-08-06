@@ -45,9 +45,7 @@
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
-
-    <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
+    
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'=='' and '$(NonShippingPackage)' == 'true'">$(BinDir)packages_noship/</PackageOutputRoot>
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'==''">$(BinDir)packages/</PackageOutputRoot>
@@ -268,8 +266,8 @@
     <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
 
-    <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)/</IntermediateOutputRootPath>
-    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)$(MSBuildProjectName)/$(TargetOutputRelPath)</IntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(RootIntermediateOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(BaseIntermediateOutputPath)$(TargetOutputRelPath)</IntermediateOutputPath>
 
     <RuntimePath Condition="'$(RuntimePath)' == ''">$(BinDir)runtime/$(BuildConfiguration)/</RuntimePath>
     <ShimsTargetRuntimeRoot>$(BinDir)shimsTargetRuntime/</ShimsTargetRuntimeRoot>
