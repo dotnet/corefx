@@ -106,10 +106,32 @@ namespace System.Security.Cryptography
                 {
                     if (!includePrivateParameters)
                     {
-                        RSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
-                            keyBlob,
-                            out int localRead,
-                            out RSAParameters key);
+                        // When exporting a key handle opened from a certificate, it seems to
+                        // export as a PKCS#1 blob instead of an X509 SubjectPublicKeyInfo blob.
+                        // So, check for that.
+                        // NOTE: It doesn't affect macOS Mojave when SecCertificateCopyKey API
+                        // is used.
+                        RSAParameters key;
+
+                        AsnReader reader = new AsnReader(keyBlob, AsnEncodingRules.BER);
+                        AsnReader sequenceReader = reader.ReadSequence();
+
+                        if (sequenceReader.PeekTag().Equals(Asn1Tag.Integer))
+                        {
+                            RSAPublicKey parsed = AsnSerializer.Deserialize<RSAPublicKey>(
+                                keyBlob,
+                                AsnEncodingRules.BER);
+
+                            AlgorithmIdentifierAsn ignored = default;
+                            RSAKeyFormatHelper.ReadRsaPublicKey(parsed, ignored, out key);
+                        }
+                        else
+                        {
+                            RSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                                keyBlob,
+                                out int localRead,
+                                out key);
+                        }
                         return key;
                     }
                     else
