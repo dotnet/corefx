@@ -85,7 +85,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        public static unsafe void ReadPkcs8(
+        internal static unsafe void ReadPkcs8(
             ReadOnlySpan<byte> source,
             out int bytesRead,
             out DSAParameters key)
@@ -128,7 +128,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static AsnWriter WriteSubjectPublicKeyInfo(DSAParameters dsaParameters)
+        internal static AsnWriter WriteSubjectPublicKeyInfo(in DSAParameters dsaParameters)
         {
             AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
 
@@ -140,27 +140,17 @@ namespace System.Security.Cryptography
             return writer;
         }
 
-        internal static unsafe AsnWriter WritePkcs8(DSAParameters dsaParameters)
+        internal static unsafe AsnWriter WritePkcs8(in DSAParameters dsaParameters)
         {
-            fixed (byte* privPin = dsaParameters.X)
-            {
-                try
-                {
-                    AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
 
-                    writer.PushSequence();
-                    writer.WriteInteger(0);
-                    WriteAlgorithmId(writer, dsaParameters);
-                    WriteKeyComponent(writer, dsaParameters.X, bitString: false);
-                    writer.PopSequence();
+            writer.PushSequence();
+            writer.WriteInteger(0);
+            WriteAlgorithmId(writer, dsaParameters);
+            WriteKeyComponent(writer, dsaParameters.X, bitString: false);
+            writer.PopSequence();
 
-                    return writer;
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(dsaParameters.X);
-                }
-            }
+            return writer;
         }
 
         private static void WriteAlgorithmId(AsnWriter writer, in DSAParameters dsaParameters)

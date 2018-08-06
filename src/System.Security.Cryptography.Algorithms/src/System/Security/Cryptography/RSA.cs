@@ -290,16 +290,24 @@ namespace System.Security.Cryptography
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
-            try
+            fixed (byte* dPin = rsaParameters.D)
+            fixed (byte* pPin = rsaParameters.P)
+            fixed (byte* qPin = rsaParameters.Q)
+            fixed (byte* dpPin = rsaParameters.DP)
+            fixed (byte* dqPin = rsaParameters.DQ)
+            fixed (byte* qInvPin = rsaParameters.InverseQ)
             {
-                using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters))
+                try
                 {
-                    return pkcs1PrivateKey.Encode();
+                    using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters))
+                    {
+                        return pkcs1PrivateKey.Encode();
+                    }
                 }
-            }
-            finally
-            {
-                ClearPrivateParameters(rsaParameters);
+                finally
+                {
+                    ClearPrivateParameters(rsaParameters);
+                }
             }
         }
 
@@ -307,16 +315,24 @@ namespace System.Security.Cryptography
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
-            try
+            fixed (byte* dPin = rsaParameters.D)
+            fixed (byte* pPin = rsaParameters.P)
+            fixed (byte* qPin = rsaParameters.Q)
+            fixed (byte* dpPin = rsaParameters.DP)
+            fixed (byte* dqPin = rsaParameters.DQ)
+            fixed (byte* qInvPin = rsaParameters.InverseQ)
             {
-                using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters))
+                try
                 {
-                    return pkcs1PrivateKey.TryEncode(destination, out bytesWritten);
+                    using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters))
+                    {
+                        return pkcs1PrivateKey.TryEncode(destination, out bytesWritten);
+                    }
                 }
-            }
-            finally
-            {
-                ClearPrivateParameters(rsaParameters);
+                finally
+                {
+                    ClearPrivateParameters(rsaParameters);
+                }
             }
         }
 
@@ -354,9 +370,24 @@ namespace System.Security.Cryptography
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
-            using (AsnWriter writer = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
+            fixed (byte* dPin = rsaParameters.D)
+            fixed (byte* pPin = rsaParameters.P)
+            fixed (byte* qPin = rsaParameters.Q)
+            fixed (byte* dpPin = rsaParameters.DP)
+            fixed (byte* dqPin = rsaParameters.DQ)
+            fixed (byte* qInvPin = rsaParameters.InverseQ)
             {
-                return writer.TryEncode(destination, out bytesWritten);
+                try
+                {
+                    using (AsnWriter writer = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
+                    {
+                        return writer.TryEncode(destination, out bytesWritten);
+                    }
+                }
+                finally
+                {
+                    ClearPrivateParameters(rsaParameters);
+                }
             }
         }
 
@@ -376,13 +407,28 @@ namespace System.Security.Cryptography
 
             RSAParameters rsaParameters = ExportParameters(true);
 
-            using (AsnWriter pkcs8PrivateKey = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
-            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                password,
-                pkcs8PrivateKey,
-                pbeParameters))
+            fixed (byte* dPin = rsaParameters.D)
+            fixed (byte* pPin = rsaParameters.P)
+            fixed (byte* qPin = rsaParameters.Q)
+            fixed (byte* dpPin = rsaParameters.DP)
+            fixed (byte* dqPin = rsaParameters.DQ)
+            fixed (byte* qInvPin = rsaParameters.InverseQ)
             {
-                return writer.TryEncode(destination, out bytesWritten);
+                try
+                {
+                    using (AsnWriter pkcs8PrivateKey = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
+                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                        password,
+                        pkcs8PrivateKey,
+                        pbeParameters))
+                    {
+                        return writer.TryEncode(destination, out bytesWritten);
+                    }
+                }
+                finally
+                {
+                    ClearPrivateParameters(rsaParameters);
+                }
             }
         }
 
@@ -402,13 +448,28 @@ namespace System.Security.Cryptography
 
             RSAParameters rsaParameters = ExportParameters(true);
 
-            using (AsnWriter pkcs8PrivateKey = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
-            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                passwordBytes,
-                pkcs8PrivateKey,
-                pbeParameters))
+            fixed (byte* dPin = rsaParameters.D)
+            fixed (byte* pPin = rsaParameters.P)
+            fixed (byte* qPin = rsaParameters.Q)
+            fixed (byte* dpPin = rsaParameters.DP)
+            fixed (byte* dqPin = rsaParameters.DQ)
+            fixed (byte* qInvPin = rsaParameters.InverseQ)
             {
-                return writer.TryEncode(destination, out bytesWritten);
+                try
+                {
+                    using (AsnWriter pkcs8PrivateKey = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
+                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                        passwordBytes,
+                        pkcs8PrivateKey,
+                        pbeParameters))
+                    {
+                        return writer.TryEncode(destination, out bytesWritten);
+                    }
+                }
+                finally
+                {
+                    ClearPrivateParameters(rsaParameters);
+                }
             }
         }
        

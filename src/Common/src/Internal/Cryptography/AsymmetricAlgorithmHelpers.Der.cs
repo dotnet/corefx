@@ -45,7 +45,7 @@ namespace Internal.Cryptography
         {
             int size = BitsToBytes(fieldSizeBits);
 
-            AsnReader reader = new AsnReader(new ReadOnlyMemory<byte>(input, inputOffset, inputCount), AsnEncodingRules.DER);
+            AsnReader reader = new AsnReader(input.AsMemory(inputOffset, inputCount), AsnEncodingRules.DER);
             AsnReader sequenceReader = reader.ReadSequence();
             reader.ThrowIfNotEmpty();
             ReadOnlySpan<byte> rDer = sequenceReader.GetIntegerBytes().Span;

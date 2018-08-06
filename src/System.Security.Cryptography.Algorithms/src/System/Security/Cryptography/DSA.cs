@@ -243,13 +243,23 @@ namespace System.Security.Cryptography
 
             DSAParameters dsaParameters = ExportParameters(true);
 
-            using (AsnWriter pkcs8PrivateKey = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
-            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                passwordBytes,
-                pkcs8PrivateKey,
-                pbeParameters))
+            fixed (byte* privPin = dsaParameters.X)
             {
-                return writer.TryEncode(destination, out bytesWritten);
+                try
+                {
+                    using (AsnWriter pkcs8PrivateKey = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
+                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                        passwordBytes,
+                        pkcs8PrivateKey,
+                        pbeParameters))
+                    {
+                        return writer.TryEncode(destination, out bytesWritten);
+                    }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(dsaParameters.X);
+                }
             }
         }
 
@@ -269,13 +279,23 @@ namespace System.Security.Cryptography
 
             DSAParameters dsaParameters = ExportParameters(true);
 
-            using (AsnWriter pkcs8PrivateKey = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
-            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                password,
-                pkcs8PrivateKey,
-                pbeParameters))
+            fixed (byte* privPin = dsaParameters.X)
             {
-                return writer.TryEncode(destination, out bytesWritten);
+                try
+                {
+                    using (AsnWriter pkcs8PrivateKey = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
+                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                        password,
+                        pkcs8PrivateKey,
+                        pbeParameters))
+                    {
+                        return writer.TryEncode(destination, out bytesWritten);
+                    }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(dsaParameters.X);
+                }
             }
         }
 
@@ -285,9 +305,19 @@ namespace System.Security.Cryptography
         {
             DSAParameters dsaParameters = ExportParameters(true);
 
-            using (AsnWriter writer = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
+            fixed (byte* privPin = dsaParameters.X)
             {
-                return writer.TryEncode(destination, out bytesWritten);
+                try
+                {
+                    using (AsnWriter writer = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
+                    {
+                        return writer.TryEncode(destination, out bytesWritten);
+                    }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(dsaParameters.X);
+                }
             }
         }
 
