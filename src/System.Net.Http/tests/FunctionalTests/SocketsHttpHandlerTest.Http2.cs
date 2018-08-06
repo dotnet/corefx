@@ -20,8 +20,9 @@ namespace System.Net.Http.Functional.Tests
     public sealed class SocketsHttpHandler_HttpClientHandler_Http2_Test : HttpClientTestBase
     {
         protected override bool UseSocketsHttpHandler => true;
+        public static bool SupportsAlpn => PlatformDetection.SupportsAlpn;
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_ClientPreface_Sent()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -39,7 +40,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_InitialSettings_SentAndAcked()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -68,7 +69,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         [ActiveIssue(31315)]
         public async Task Http2_DataSentBeforeServerPreface_ProtocolError()
         {
@@ -92,7 +93,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         [ActiveIssue(31315)]
         public async Task Http2_StreamResetByServer_RequestFails()
         {
@@ -120,7 +121,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         [ActiveIssue(31394)]
         public async Task DataFrame_NoStream_ConnectionError()
         {
@@ -152,7 +153,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         [ActiveIssue(31520)]
         public async Task DataFrame_TooLong_ConnectionError()
         {
@@ -184,7 +185,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         [ActiveIssue(31315)]
         public async Task DataFrame_PaddingOnly_ResetsStream()
         {
@@ -215,7 +216,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         [ActiveIssue(31514)]
         public async Task ClosedStream_FrameReceived_ResetsStream()
         {
