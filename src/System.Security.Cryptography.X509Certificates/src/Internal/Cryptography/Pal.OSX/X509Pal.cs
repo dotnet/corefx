@@ -108,8 +108,16 @@ namespace Internal.Cryptography.Pal
                 using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
                 {
                     DSA dsa = DSA.Create();
-                    dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
-                    return dsa;
+                    try
+                    {
+                        dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
+                        return dsa;
+                    }
+                    catch (Exception)
+                    {
+                        dsa.Dispose();
+                        throw;
+                    }
                 }
             }
 
