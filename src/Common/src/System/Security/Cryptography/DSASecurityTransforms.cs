@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.Apple;
 using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
@@ -217,6 +219,27 @@ namespace System.Security.Cryptography
                     }
 
                     return Interop.AppleCrypto.ImportEphemeralKey(blob, hasPrivateKey);
+                }
+
+                public override unsafe void ImportSubjectPublicKeyInfo(
+                    ReadOnlySpan<byte> source,
+                    out int bytesRead)
+                {
+                    fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+                    {
+                        using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
+                        {
+                            // Validate the DER value and get the number of bytes.
+                            DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                                manager.Memory,
+                                out int localRead);
+
+                            SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead).ToArray(), false);
+                            SetKey(SecKeyPair.PublicOnly(publicKey));
+
+                            bytesRead = localRead;
+                        }
+                    }
                 }
 
                 public override byte[] CreateSignature(byte[] rgbHash)

@@ -255,15 +255,17 @@ namespace Internal.Cryptography.Pal
 
         private static RSA BuildRsaPublicKey(byte[] encodedData)
         {
-            using (SafeRsaHandle rsaHandle = Interop.Crypto.DecodeRsaPublicKey(encodedData, encodedData.Length))
+            RSA rsa = new RSAOpenSsl();
+            try
             {
-                Interop.Crypto.CheckValidOpenSslHandle(rsaHandle);
-
-                RSAParameters rsaParameters = Interop.Crypto.ExportRsaParameters(rsaHandle, false);
-                RSA rsa = new RSAOpenSsl();
-                rsa.ImportParameters(rsaParameters);
-                return rsa;
+                rsa.ImportRSAPublicKey(encodedData.AsSpan(), out _);
             }
+            catch (Exception)
+            {
+                rsa.Dispose();
+                throw;
+            }
+            return rsa;
         }
 
         private static DSA BuildDsaPublicKey(byte[] encodedKey, byte[] encodedParameters)
@@ -277,8 +279,16 @@ namespace Internal.Cryptography.Pal
             using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
             {
                 DSA dsa = new DSAOpenSsl();
-                dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
-                return dsa;
+                try
+                {
+                    dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
+                    return dsa;
+                }
+                catch (Exception)
+                {
+                    dsa.Dispose();
+                    throw;
+                }
             }
         }
     }
