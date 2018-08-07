@@ -125,26 +125,52 @@ namespace System.Security.Cryptography
                 out key);
         }
 
+        internal static AsnWriter WriteSubjectPublicKeyInfo(in ReadOnlySpan<byte> pkcs1PublicKey)
+        {
+            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+
+            try
+            {
+                writer.PushSequence();
+                WriteAlgorithmIdentifier(writer);
+                writer.WriteBitString(pkcs1PublicKey);
+                writer.PopSequence();
+            }
+            catch
+            {
+                writer.Dispose();
+                throw;
+            }
+
+            return writer;
+        }
+
         internal static AsnWriter WriteSubjectPublicKeyInfo(in RSAParameters rsaParameters)
         {
             using (AsnWriter pkcs1PublicKey = WritePkcs1PublicKey(rsaParameters))
             {
-                AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+                return WriteSubjectPublicKeyInfo(pkcs1PublicKey.EncodeAsSpan());
+            }
+        }
 
-                try
-                {
-                    writer.PushSequence();
-                    WriteAlgorithmIdentifier(writer);
-                    writer.WriteBitString(pkcs1PublicKey.EncodeAsSpan());
-                    writer.PopSequence();
-                }
-                catch
-                {
-                    writer.Dispose();
-                    throw;
-                }
+        internal static unsafe AsnWriter WritePkcs8PrivateKey(in ReadOnlySpan<byte> pkcs1PrivateKey)
+        {
+            AsnWriter writer = new AsnWriter(AsnEncodingRules.BER);
 
+            try
+            {
+                writer.PushSequence();
+                // Version 0 format (no attributes)
+                writer.WriteInteger(0);
+                WriteAlgorithmIdentifier(writer);
+                writer.WriteOctetString(pkcs1PrivateKey);
+                writer.PopSequence();
                 return writer;
+            }
+            catch
+            {
+                writer.Dispose();
+                throw;
             }
         }
 
@@ -152,23 +178,7 @@ namespace System.Security.Cryptography
         {
             using (AsnWriter pkcs1PrivateKey = WritePkcs1PrivateKey(rsaParameters))
             {
-                AsnWriter writer = new AsnWriter(AsnEncodingRules.BER);
-
-                try
-                {
-                    writer.PushSequence();
-                    // Version 0 format (no attributes)
-                    writer.WriteInteger(0);
-                    WriteAlgorithmIdentifier(writer);
-                    writer.WriteOctetString(pkcs1PrivateKey.EncodeAsSpan());
-                    writer.PopSequence();
-                    return writer;
-                }
-                catch
-                {
-                    writer.Dispose();
-                    throw;
-                }
+                return WritePkcs8PrivateKey(pkcs1PrivateKey.EncodeAsSpan());
             }
         }
 

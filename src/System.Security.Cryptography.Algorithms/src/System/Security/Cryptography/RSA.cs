@@ -286,61 +286,25 @@ namespace System.Security.Cryptography
             }
         }
 
-        public virtual unsafe byte[] ExportRSAPrivateKey()
+        public virtual byte[] ExportRSAPrivateKey()
         {
-            RSAParameters rsaParameters = ExportParameters(true);
-
-            fixed (byte* dPin = rsaParameters.D)
-            fixed (byte* pPin = rsaParameters.P)
-            fixed (byte* qPin = rsaParameters.Q)
-            fixed (byte* dpPin = rsaParameters.DP)
-            fixed (byte* dqPin = rsaParameters.DQ)
-            fixed (byte* qInvPin = rsaParameters.InverseQ)
+            using (AsnWriter pkcs1PrivateKey = WritePkcs1PrivateKey())
             {
-                try
-                {
-                    using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters))
-                    {
-                        return pkcs1PrivateKey.Encode();
-                    }
-                }
-                finally
-                {
-                    ClearPrivateParameters(rsaParameters);
-                }
+                return pkcs1PrivateKey.Encode();
             }
         }
 
-        public virtual unsafe bool TryExportRSAPrivateKey(Span<byte> destination, out int bytesWritten)
+        public virtual bool TryExportRSAPrivateKey(Span<byte> destination, out int bytesWritten)
         {
-            RSAParameters rsaParameters = ExportParameters(true);
-
-            fixed (byte* dPin = rsaParameters.D)
-            fixed (byte* pPin = rsaParameters.P)
-            fixed (byte* qPin = rsaParameters.Q)
-            fixed (byte* dpPin = rsaParameters.DP)
-            fixed (byte* dqPin = rsaParameters.DQ)
-            fixed (byte* qInvPin = rsaParameters.InverseQ)
+            using (AsnWriter pkcs1PrivateKey = WritePkcs1PrivateKey())
             {
-                try
-                {
-                    using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters))
-                    {
-                        return pkcs1PrivateKey.TryEncode(destination, out bytesWritten);
-                    }
-                }
-                finally
-                {
-                    ClearPrivateParameters(rsaParameters);
-                }
+                return pkcs1PrivateKey.TryEncode(destination, out bytesWritten);
             }
         }
 
         public virtual byte[] ExportRSAPublicKey()
         {
-            RSAParameters rsaParameters = ExportParameters(false);
-
-            using (AsnWriter pkcs1PublicKey = RSAKeyFormatHelper.WritePkcs1PublicKey(rsaParameters))
+            using (AsnWriter pkcs1PublicKey = WritePkcs1PublicKey())
             {
                 return pkcs1PublicKey.Encode();
             }
@@ -348,9 +312,7 @@ namespace System.Security.Cryptography
 
         public virtual bool TryExportRSAPublicKey(Span<byte> destination, out int bytesWritten)
         {
-            RSAParameters rsaParameters = ExportParameters(false);
-
-            using (AsnWriter pkcs1PublicKey = RSAKeyFormatHelper.WritePkcs1PublicKey(rsaParameters))
+            using (AsnWriter pkcs1PublicKey = WritePkcs1PublicKey())
             {
                 return pkcs1PublicKey.TryEncode(destination, out bytesWritten);
             }
@@ -358,40 +320,89 @@ namespace System.Security.Cryptography
 
         public override unsafe bool TryExportSubjectPublicKeyInfo(Span<byte> destination, out int bytesWritten)
         {
-            RSAParameters rsaParameters = ExportParameters(false);
+            // The PKCS1 RSAPublicKey format is just the modulus (KeySize bits) and Exponent (usually 3 bytes),
+            // with each field having up to 7 bytes of overhead and then up to 6 extra bytes of overhead for the
+            // SEQUENCE tag.
+            //
+            // So KeySize / 4 is ideally enough to start.
+            int rentSize = KeySize / 4;
 
-            using (AsnWriter writer = RSAKeyFormatHelper.WriteSubjectPublicKeyInfo(rsaParameters))
+            while (true)
+            {
+                byte[] rented = ArrayPool<byte>.Shared.Rent(rentSize);
+                rentSize = rented.Length;
+                int pkcs1Size = 0;
+
+                fixed (byte* rentPtr = rented)
+                {
+                    try
+                    {
+                        if (!TryExportRSAPublicKey(rented, out pkcs1Size))
+                        {
+                            rentSize = checked(rentSize * 2);
+                            continue;
+                        }
+
+                        using (AsnWriter writer = RSAKeyFormatHelper.WriteSubjectPublicKeyInfo(rented.AsSpan(0, pkcs1Size)))
+                        {
+                            return writer.TryEncode(destination, out bytesWritten);
+                        }
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(rented.AsSpan(0, pkcs1Size));
+                        ArrayPool<byte>.Shared.Return(rented);
+                    }
+                }
+            }
+        }
+
+        public override bool TryExportPkcs8PrivateKey(Span<byte> destination, out int bytesWritten)
+        {
+            using (AsnWriter writer = WritePkcs8PrivateKey())
             {
                 return writer.TryEncode(destination, out bytesWritten);
             }
         }
 
-        public override unsafe bool TryExportPkcs8PrivateKey(Span<byte> destination, out int bytesWritten)
+        private unsafe AsnWriter WritePkcs8PrivateKey()
         {
-            RSAParameters rsaParameters = ExportParameters(true);
+            // A PKCS1 RSAPrivateKey is the Modulus (KeySize bits), D (~KeySize bits)
+            // P, Q, DP, DQ, InverseQ (all ~KeySize/2 bits)
+            // Each field can have up to 7 bytes of overhead, and then another 9 bytes
+            // of fixed overhead.
+            // So it should fit in 5 * KeySizeInBytes, but Exponent is a wildcard.
 
-            fixed (byte* dPin = rsaParameters.D)
-            fixed (byte* pPin = rsaParameters.P)
-            fixed (byte* qPin = rsaParameters.Q)
-            fixed (byte* dpPin = rsaParameters.DP)
-            fixed (byte* dqPin = rsaParameters.DQ)
-            fixed (byte* qInvPin = rsaParameters.InverseQ)
+            int rentSize = checked(5 * KeySize / 8);
+
+            while (true)
             {
-                try
+                byte[] rented = ArrayPool<byte>.Shared.Rent(rentSize);
+                rentSize = rented.Length;
+                int pkcs1Size = 0;
+
+                fixed (byte* rentPtr = rented)
                 {
-                    using (AsnWriter writer = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
+                    try
                     {
-                        return writer.TryEncode(destination, out bytesWritten);
+                        if (!TryExportRSAPrivateKey(rented, out pkcs1Size))
+                        {
+                            rentSize = checked(rentSize * 2);
+                            continue;
+                        }
+
+                        return RSAKeyFormatHelper.WritePkcs8PrivateKey(rented.AsSpan(0, pkcs1Size));
                     }
-                }
-                finally
-                {
-                    ClearPrivateParameters(rsaParameters);
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(rented.AsSpan(0, pkcs1Size));
+                        ArrayPool<byte>.Shared.Return(rented);
+                    }
                 }
             }
         }
 
-        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
+        public override bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<char> password,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -405,34 +416,17 @@ namespace System.Security.Cryptography
                 password,
                 ReadOnlySpan<byte>.Empty);
 
-            RSAParameters rsaParameters = ExportParameters(true);
-
-            fixed (byte* dPin = rsaParameters.D)
-            fixed (byte* pPin = rsaParameters.P)
-            fixed (byte* qPin = rsaParameters.Q)
-            fixed (byte* dpPin = rsaParameters.DP)
-            fixed (byte* dqPin = rsaParameters.DQ)
-            fixed (byte* qInvPin = rsaParameters.InverseQ)
+            using (AsnWriter pkcs8PrivateKey = WritePkcs8PrivateKey())
+            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                password,
+                pkcs8PrivateKey,
+                pbeParameters))
             {
-                try
-                {
-                    using (AsnWriter pkcs8PrivateKey = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
-                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                        password,
-                        pkcs8PrivateKey,
-                        pbeParameters))
-                    {
-                        return writer.TryEncode(destination, out bytesWritten);
-                    }
-                }
-                finally
-                {
-                    ClearPrivateParameters(rsaParameters);
-                }
+                return writer.TryEncode(destination, out bytesWritten);
             }
         }
 
-        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
+        public override bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<byte> passwordBytes,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -446,6 +440,24 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<char>.Empty,
                 passwordBytes);
 
+            using (AsnWriter pkcs8PrivateKey = WritePkcs8PrivateKey())
+            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                passwordBytes,
+                pkcs8PrivateKey,
+                pbeParameters))
+            {
+                return writer.TryEncode(destination, out bytesWritten);
+            }
+        }
+
+        private AsnWriter WritePkcs1PublicKey()
+        {
+            RSAParameters rsaParameters = ExportParameters(false);
+            return RSAKeyFormatHelper.WritePkcs1PublicKey(rsaParameters);
+        }
+
+        private unsafe AsnWriter WritePkcs1PrivateKey()
+        {
             RSAParameters rsaParameters = ExportParameters(true);
 
             fixed (byte* dPin = rsaParameters.D)
@@ -457,14 +469,7 @@ namespace System.Security.Cryptography
             {
                 try
                 {
-                    using (AsnWriter pkcs8PrivateKey = RSAKeyFormatHelper.WritePkcs8PrivateKey(rsaParameters))
-                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                        passwordBytes,
-                        pkcs8PrivateKey,
-                        pbeParameters))
-                    {
-                        return writer.TryEncode(destination, out bytesWritten);
-                    }
+                    return RSAKeyFormatHelper.WritePkcs1PrivateKey(rsaParameters);
                 }
                 finally
                 {
@@ -472,7 +477,6 @@ namespace System.Security.Cryptography
                 }
             }
         }
-       
 
         public override unsafe void ImportSubjectPublicKeyInfo(ReadOnlySpan<byte> source, out int bytesRead)
         {
