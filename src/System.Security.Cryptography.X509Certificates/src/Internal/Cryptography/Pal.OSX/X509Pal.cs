@@ -109,8 +109,16 @@ namespace Internal.Cryptography.Pal
                 {
                     spki.Encode(writer);
                     DSA dsa = DSA.Create();
-                    dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
-                    return dsa;
+                    try
+                    {
+                        dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
+                        return dsa;
+                    }
+                    catch (Exception)
+                    {
+                        dsa.Dispose();
+                        throw;
+                    }
                 }
             }
 
