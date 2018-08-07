@@ -87,44 +87,32 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Throws<NotSupportedException>(() => _imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, 10));
         }
 
-        private ImageFormat ShortName(string imgFormatValue)
+        private ImageFormat ConvertFromName(string imgFormatName)
         {
-            return (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, imgFormatValue);
+            return (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, imgFormatName);
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_ShortName()
         {
-            Assert.Equal(ImageFormat.Bmp, ShortName("Bmp"));
-            Assert.Equal(ImageFormat.Emf, ShortName("Emf"));
-            Assert.Equal(ImageFormat.Exif, ShortName("Exif"));
-            Assert.Equal(ImageFormat.Gif, ShortName("Gif"));
-            Assert.Equal(ImageFormat.Tiff, ShortName("Tiff"));
-            Assert.Equal(ImageFormat.Png, ShortName("Png"));
-            Assert.Equal(ImageFormat.MemoryBmp, ShortName("MemoryBmp"));
-            Assert.Equal(ImageFormat.Icon, ShortName("Icon"));
-            Assert.Equal(ImageFormat.Jpeg, ShortName("Jpeg"));
-            Assert.Equal(ImageFormat.Wmf, ShortName("Wmf"));
-        }
-
-        private void LongName(ImageFormat iformat)
-        {
-            Assert.Equal(iformat, (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, iformat.ToString()));
+            Assert.Equal(ImageFormat.Bmp, ConvertFromName("Bmp"));
+            Assert.Equal(ImageFormat.Emf, ConvertFromName("Emf"));
+            Assert.Equal(ImageFormat.Exif, ConvertFromName("Exif"));
+            Assert.Equal(ImageFormat.Gif, ConvertFromName("Gif"));
+            Assert.Equal(ImageFormat.Tiff, ConvertFromName("Tiff"));
+            Assert.Equal(ImageFormat.Png, ConvertFromName("Png"));
+            Assert.Equal(ImageFormat.MemoryBmp, ConvertFromName("MemoryBmp"));
+            Assert.Equal(ImageFormat.Icon, ConvertFromName("Icon"));
+            Assert.Equal(ImageFormat.Jpeg, ConvertFromName("Jpeg"));
+            Assert.Equal(ImageFormat.Wmf, ConvertFromName("Wmf"));
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_LongName()
         {
-            LongName(ImageFormat.Bmp);
-            LongName(ImageFormat.Emf);
-            LongName(ImageFormat.Exif);
-            LongName(ImageFormat.Gif);
-            LongName(ImageFormat.Tiff);
-            LongName(ImageFormat.Png);
-            LongName(ImageFormat.MemoryBmp);
-            LongName(ImageFormat.Icon);
-            LongName(ImageFormat.Jpeg);
-            LongName(ImageFormat.Wmf);
+            Guid testGuid = Guid.NewGuid();
+            ImageFormat imageformat = ConvertFromName($"[ImageFormat: {testGuid}]");
+            Assert.Equal(testGuid, imageformat.Guid);
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]

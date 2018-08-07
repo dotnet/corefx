@@ -22,8 +22,7 @@ namespace System.Drawing
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            byte[] bytes = value as byte[];
-            return bytes == null ? base.ConvertFrom(context, culture, value) : Image.FromStream(new MemoryStream(bytes));
+            return value is byte[] bytes ? Image.FromStream(new MemoryStream(bytes)) : base.ConvertFrom(context, culture, value);
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -49,7 +48,8 @@ namespace System.Drawing
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        ((Image)value).Save(ms, ((Image)value).RawFormat);
+                        Image imageValue = (Image)value;
+                        imageValue.Save(ms, imageValue.RawFormat);
                         return ms.ToArray();
                     }
                 }

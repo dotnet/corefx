@@ -22,8 +22,7 @@ namespace System.Drawing
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            byte[] bytes = value as byte[];
-            return bytes == null ? base.ConvertFrom(context, culture, value) : new Icon(new MemoryStream(bytes));
+            return value is byte[] bytes ? new Icon(new MemoryStream(bytes)) : base.ConvertFrom(context, culture, value);
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)

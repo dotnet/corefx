@@ -35,54 +35,35 @@ namespace System.Drawing
                 // case #1, this is not a string
                 return base.ConvertFrom(context, culture, value);
             }
-            else if (strFormat[0] == '[')
+
+            if ((strFormat[0] == '[') && (strFormat.Length >= 50) && Guid.TryParse(strFormat.Substring(14, 36), out Guid guid))
             {
                 // case #2, this is probably a long format (guid)
-                if (strFormat.Equals(ImageFormat.Bmp.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Bmp;
-                else if (strFormat.Equals(ImageFormat.Emf.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Emf;
-                else if (strFormat.Equals(ImageFormat.Exif.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Exif;
-                else if (strFormat.Equals(ImageFormat.Gif.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Gif;
-                else if (strFormat.Equals(ImageFormat.Icon.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Icon;
-                else if (strFormat.Equals(ImageFormat.Jpeg.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Jpeg;
-                else if (strFormat.Equals(ImageFormat.MemoryBmp.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.MemoryBmp;
-                else if (strFormat.Equals(ImageFormat.Png.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Png;
-                else if (strFormat.Equals(ImageFormat.Tiff.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Tiff;
-                else if (strFormat.Equals(ImageFormat.Wmf.ToString(), StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Wmf;
+                return new ImageFormat(guid);
             }
-            else
-            {
-                // case #3, this is probably a short format
-                if (strFormat.Equals("Bmp", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Bmp;
-                else if (strFormat.Equals("Emf", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Emf;
-                else if (strFormat.Equals("Exif", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Exif;
-                else if (strFormat.Equals("Gif", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Gif;
-                else if (strFormat.Equals("Icon", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Icon;
-                else if (strFormat.Equals("Jpeg", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Jpeg;
-                else if (strFormat.Equals("MemoryBmp", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.MemoryBmp;
-                else if (strFormat.Equals("Png", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Png;
-                else if (strFormat.Equals("Tiff", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Tiff;
-                else if (strFormat.Equals("Wmf", StringComparison.OrdinalIgnoreCase))
-                    return ImageFormat.Wmf;
-            }
+
+            // case #3, this is probably a short format
+            if (strFormat.Equals("Bmp", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Bmp;
+            else if (strFormat.Equals("Emf", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Emf;
+            else if (strFormat.Equals("Exif", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Exif;
+            else if (strFormat.Equals("Gif", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Gif;
+            else if (strFormat.Equals("Icon", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Icon;
+            else if (strFormat.Equals("Jpeg", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Jpeg;
+            else if (strFormat.Equals("MemoryBmp", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.MemoryBmp;
+            else if (strFormat.Equals("Png", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Png;
+            else if (strFormat.Equals("Tiff", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Tiff;
+            else if (strFormat.Equals("Wmf", StringComparison.OrdinalIgnoreCase))
+                return ImageFormat.Wmf;
+
             // last case, this is an unknown string
             return base.ConvertFrom(context, culture, value);
         }
@@ -91,34 +72,35 @@ namespace System.Drawing
         {
             if (value is ImageFormat imgFormat)
             {
-                string strFormat = null;
-                if (imgFormat.Guid.Equals(ImageFormat.Bmp.Guid))
-                    strFormat = "Bmp";
-                else if (imgFormat.Guid.Equals(ImageFormat.Emf.Guid))
-                    strFormat = "Emf";
-                else if (imgFormat.Guid.Equals(ImageFormat.Exif.Guid))
-                    strFormat = "Exif";
-                else if (imgFormat.Guid.Equals(ImageFormat.Gif.Guid))
-                    strFormat = "Gif";
-                else if (imgFormat.Guid.Equals(ImageFormat.Icon.Guid))
-                    strFormat = "Icon";
-                else if (imgFormat.Guid.Equals(ImageFormat.Jpeg.Guid))
-                    strFormat = "Jpeg";
-                else if (imgFormat.Guid.Equals(ImageFormat.MemoryBmp.Guid))
-                    strFormat = "MemoryBmp";
-                else if (imgFormat.Guid.Equals(ImageFormat.Png.Guid))
-                    strFormat = "Png";
-                else if (imgFormat.Guid.Equals(ImageFormat.Tiff.Guid))
-                    strFormat = "Tiff";
-                else if (imgFormat.Guid.Equals(ImageFormat.Wmf.Guid))
-                    strFormat = "Wmf";
-
                 if (destinationType == typeof(string))
                 {
-                    return strFormat ?? imgFormat.ToString();
+                    return imgFormat.ToString();
                 }
-                else if (destinationType == typeof(InstanceDescriptor))
+
+                if (destinationType == typeof(InstanceDescriptor))
                 {
+                    string strFormat = null;
+                    if (imgFormat.Guid.Equals(ImageFormat.Bmp.Guid))
+                        strFormat = "Bmp";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Emf.Guid))
+                        strFormat = "Emf";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Exif.Guid))
+                        strFormat = "Exif";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Gif.Guid))
+                        strFormat = "Gif";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Icon.Guid))
+                        strFormat = "Icon";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Jpeg.Guid))
+                        strFormat = "Jpeg";
+                    else if (imgFormat.Guid.Equals(ImageFormat.MemoryBmp.Guid))
+                        strFormat = "MemoryBmp";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Png.Guid))
+                        strFormat = "Png";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Tiff.Guid))
+                        strFormat = "Tiff";
+                    else if (imgFormat.Guid.Equals(ImageFormat.Wmf.Guid))
+                        strFormat = "Wmf";
+
                     if (strFormat != null)
                     {
                         return new InstanceDescriptor(typeof(ImageFormat).GetTypeInfo().GetProperty(strFormat), null);
@@ -136,7 +118,8 @@ namespace System.Drawing
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            return new TypeConverter.StandardValuesCollection(new ImageFormat[] {
+            return new TypeConverter.StandardValuesCollection(new ImageFormat[]
+            {
                 ImageFormat.MemoryBmp,
                 ImageFormat.Bmp,
                 ImageFormat.Emf,

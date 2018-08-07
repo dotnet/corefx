@@ -21,79 +21,72 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if (destinationType == typeof(string))
-            {
-                return true;
-            }
-            if (destinationType == typeof(InstanceDescriptor))
-            {
-                return true;
-            }
-            return base.CanConvertTo(context, destinationType);
+            return (destinationType == typeof(string)) || (destinationType == typeof(InstanceDescriptor));
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if ((destinationType == typeof(string)) && (value is Font))
+            if (value is Font font)
             {
-                Font font = (Font)value;
-                StringBuilder sb = new StringBuilder();
-                sb.Append(font.Name).Append(culture.TextInfo.ListSeparator[0] + " ");
-                sb.Append(font.Size);
-
-                switch (font.Unit)
+                if (destinationType == typeof(string))
                 {
-                    // MS throws ArgumentException, if unit is set
-                    // to GraphicsUnit.Display
-                    // Don't know what to append for GraphicsUnit.Display
-                    case GraphicsUnit.Display:
-                        sb.Append("display");
-                        break;
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append(font.Name).Append(culture.TextInfo.ListSeparator[0] + " ");
+                    sb.Append(font.Size);
 
-                    case GraphicsUnit.Document:
-                        sb.Append("doc");
-                        break;
+                    switch (font.Unit)
+                    {
+                        // MS throws ArgumentException, if unit is set
+                        // to GraphicsUnit.Display
+                        // Don't know what to append for GraphicsUnit.Display
+                        case GraphicsUnit.Display:
+                            sb.Append("display");
+                            break;
 
-                    case GraphicsUnit.Point:
-                        sb.Append("pt");
-                        break;
+                        case GraphicsUnit.Document:
+                            sb.Append("doc");
+                            break;
 
-                    case GraphicsUnit.Inch:
-                        sb.Append("in");
-                        break;
+                        case GraphicsUnit.Point:
+                            sb.Append("pt");
+                            break;
 
-                    case GraphicsUnit.Millimeter:
-                        sb.Append("mm");
-                        break;
+                        case GraphicsUnit.Inch:
+                            sb.Append("in");
+                            break;
 
-                    case GraphicsUnit.Pixel:
-                        sb.Append("px");
-                        break;
+                        case GraphicsUnit.Millimeter:
+                            sb.Append("mm");
+                            break;
 
-                    case GraphicsUnit.World:
-                        sb.Append("world");
-                        break;
+                        case GraphicsUnit.Pixel:
+                            sb.Append("px");
+                            break;
+
+                        case GraphicsUnit.World:
+                            sb.Append("world");
+                            break;
+                    }
+
+                    if (font.Style != FontStyle.Regular)
+                    {
+                        sb.Append(culture.TextInfo.ListSeparator[0] + " style=").Append(font.Style);
+                    }
+
+                    return sb.ToString();
                 }
 
-                if (font.Style != FontStyle.Regular)
+                if (destinationType == typeof(InstanceDescriptor))
                 {
-                    sb.Append(culture.TextInfo.ListSeparator[0] + " style=").Append(font.Style);
+                    ConstructorInfo met = typeof(Font).GetTypeInfo().GetConstructor(new Type[] { typeof(string), typeof(float), typeof(FontStyle), typeof(GraphicsUnit) });
+                    object[] args = new object[4];
+                    args[0] = font.Name;
+                    args[1] = font.Size;
+                    args[2] = font.Style;
+                    args[3] = font.Unit;
+
+                    return new InstanceDescriptor(met, args);
                 }
-
-                return sb.ToString();
-            }
-
-            if ((destinationType == typeof(InstanceDescriptor)) && (value is Font))
-            {
-                Font font = (Font)value;
-                ConstructorInfo met = typeof(Font).GetTypeInfo().GetConstructor(new Type[] { typeof(string), typeof(float), typeof(FontStyle), typeof(GraphicsUnit) });
-                object[] args = new object[4];
-                args[0] = font.Name;
-                args[1] = font.Size;
-                args[2] = font.Style;
-                args[3] = font.Unit;
-
-                return new InstanceDescriptor(met, args);
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
@@ -339,7 +332,7 @@ namespace System.Drawing
 
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             {
-                return value is string ? MatchFontName((string)value, context) : base.ConvertFrom(context, culture, value);
+                return value is string strValue ? MatchFontName(strValue, context) : base.ConvertFrom(context, culture, value);
             }
 
             public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
@@ -372,7 +365,7 @@ namespace System.Drawing
                         // For an exact match, return immediately
                         return fontName;
                     }
-                    else if (fontName.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
+                    if (fontName.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
                     {
                         if (bestMatch == null || fontName.Length <= bestMatch.Length)
                         {
@@ -381,7 +374,7 @@ namespace System.Drawing
                     }
                 }
 
-                // no match... fall back on whatever was provided
+                // No match... fall back on whatever was provided
                 return bestMatch ?? name;
             }
         }
