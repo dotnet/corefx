@@ -186,7 +186,7 @@ namespace System.Security.Cryptography
         {
             ReadEncryptedPkcs8(
                 validOids,
-                source.Span,
+                source,
                 password,
                 ReadOnlySpan<byte>.Empty,
                 keyReader,
@@ -210,31 +210,6 @@ namespace System.Security.Cryptography
                 keyReader,
                 out bytesRead,
                 out ret);
-        }
-
-        private static unsafe void ReadEncryptedPkcs8<TRet, TParsed>(
-            string[] validOids,
-            ReadOnlySpan<byte> source,
-            ReadOnlySpan<char> password,
-            ReadOnlySpan<byte> passwordBytes,
-            KeyReader<TRet, TParsed> keyReader,
-            out int bytesRead,
-            out TRet ret)
-        {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
-            {
-                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
-                {
-                    ReadEncryptedPkcs8(
-                        validOids,
-                        manager.Memory,
-                        password,
-                        passwordBytes,
-                        keyReader,
-                        out bytesRead,
-                        out ret);
-                }
-            }
         }
 
         private static void ReadEncryptedPkcs8<TRet, TParsed>(

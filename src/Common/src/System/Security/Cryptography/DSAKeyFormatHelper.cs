@@ -71,7 +71,7 @@ namespace System.Security.Cryptography
             ret.Y = y.ExportKeyParameter(ret.P.Length);
         }
 
-        internal static unsafe void ReadSubjectPublicKeyInfo(
+        internal static void ReadSubjectPublicKeyInfo(
             ReadOnlySpan<byte> source,
             out int bytesRead,
             out DSAParameters key)
@@ -85,7 +85,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static unsafe void ReadPkcs8(
+        internal static void ReadPkcs8(
             ReadOnlySpan<byte> source,
             out int bytesRead,
             out DSAParameters key)
@@ -98,7 +98,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static unsafe void ReadEncryptedPkcs8(
+        internal static void ReadEncryptedPkcs8(
             ReadOnlySpan<byte> source,
             ReadOnlySpan<char> password,
             out int bytesRead,
@@ -113,7 +113,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static unsafe void ReadEncryptedPkcs8(
+        internal static void ReadEncryptedPkcs8(
             ReadOnlySpan<byte> source,
             ReadOnlySpan<byte> passwordBytes,
             out int bytesRead,
@@ -140,7 +140,7 @@ namespace System.Security.Cryptography
             return writer;
         }
 
-        internal static unsafe AsnWriter WritePkcs8(in DSAParameters dsaParameters)
+        internal static AsnWriter WritePkcs8(in DSAParameters dsaParameters)
         {
             AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
 

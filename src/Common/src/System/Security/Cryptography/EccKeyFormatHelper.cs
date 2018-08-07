@@ -18,7 +18,7 @@ namespace System.Security.Cryptography
             Oids.EcPublicKey,
         };
 
-        internal static unsafe void ReadSubjectPublicKeyInfo(
+        internal static void ReadSubjectPublicKeyInfo(
             ReadOnlySpan<byte> source,
             out int bytesRead,
             out ECParameters key)
@@ -32,7 +32,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static unsafe void ReadEncryptedPkcs8(
+        internal static void ReadEncryptedPkcs8(
             ReadOnlySpan<byte> source,
             ReadOnlySpan<char> password,
             out int bytesRead,
@@ -47,7 +47,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static unsafe void ReadEncryptedPkcs8(
+        internal static void ReadEncryptedPkcs8(
             ReadOnlySpan<byte> source,
             ReadOnlySpan<byte> passwordBytes,
             out int bytesRead,

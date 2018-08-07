@@ -68,7 +68,7 @@ namespace System.Security.Cryptography
             };
         }
 
-        internal static unsafe void ReadSubjectPublicKeyInfo(
+        internal static void ReadSubjectPublicKeyInfo(
             ReadOnlySpan<byte> source,
             out int bytesRead,
             out RSAParameters key)
@@ -92,7 +92,7 @@ namespace System.Security.Cryptography
                 out bytesRead);
         }
 
-        public static unsafe void ReadPkcs8(
+        public static void ReadPkcs8(
             ReadOnlySpan<byte> source,
             out int bytesRead,
             out RSAParameters key)
@@ -115,7 +115,7 @@ namespace System.Security.Cryptography
                 out bytesRead);
         }
 
-        internal static unsafe void ReadEncryptedPkcs8(
+        internal static void ReadEncryptedPkcs8(
             ReadOnlySpan<byte> source,
             ReadOnlySpan<char> password,
             out int bytesRead,
@@ -130,7 +130,7 @@ namespace System.Security.Cryptography
                 out key);
         }
 
-        internal static unsafe void ReadEncryptedPkcs8(
+        internal static void ReadEncryptedPkcs8(
             ReadOnlySpan<byte> source,
             ReadOnlySpan<byte> passwordBytes,
             out int bytesRead,
@@ -173,7 +173,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static unsafe AsnWriter WritePkcs8PrivateKey(in ReadOnlySpan<byte> pkcs1PrivateKey)
+        internal static AsnWriter WritePkcs8PrivateKey(in ReadOnlySpan<byte> pkcs1PrivateKey)
         {
             AsnWriter writer = new AsnWriter(AsnEncodingRules.BER);
 
@@ -194,7 +194,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static unsafe AsnWriter WritePkcs8PrivateKey(in RSAParameters rsaParameters)
+        internal static AsnWriter WritePkcs8PrivateKey(in RSAParameters rsaParameters)
         {
             using (AsnWriter pkcs1PrivateKey = WritePkcs1PrivateKey(rsaParameters))
             {
@@ -234,7 +234,7 @@ namespace System.Security.Cryptography
             return writer;
         }
 
-        internal static unsafe AsnWriter WritePkcs1PrivateKey(in RSAParameters rsaParameters)
+        internal static AsnWriter WritePkcs1PrivateKey(in RSAParameters rsaParameters)
         {
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
             {
