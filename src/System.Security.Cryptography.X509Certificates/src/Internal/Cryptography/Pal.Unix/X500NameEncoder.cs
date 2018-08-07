@@ -581,7 +581,7 @@ namespace Internal.Cryptography.Pal
                 encoding.GetByteCount(value);
                 return true;
             }
-            catch (SystemException)
+            catch (EncoderFallbackException)
             {
                 return false;
             }
