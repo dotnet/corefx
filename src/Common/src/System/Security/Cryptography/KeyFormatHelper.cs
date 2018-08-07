@@ -31,6 +31,22 @@ namespace System.Security.Cryptography
             }
         }
 
+       internal static ReadOnlyMemory<byte> ReadSubjectPublicKeyInfo(
+            string[] validOids,
+            ReadOnlyMemory<byte> source,
+            out int bytesRead)
+        {
+            // X.509 SubjectPublicKeyInfo is described as DER.
+            SubjectPublicKeyInfoAsn spki =
+                AsnSerializer.Deserialize<SubjectPublicKeyInfoAsn>(source, AsnEncodingRules.DER, out int read);
+             if (Array.IndexOf(validOids, spki.Algorithm.Algorithm.Value) < 0)
+            {
+                throw new CryptographicException(SR.Cryptography_NotValidPublicOrPrivateKey);
+            }
+             bytesRead = read;
+            return spki.SubjectPublicKey;
+        }
+
         private static void ReadSubjectPublicKeyInfo<TRet, TParsed>(
             string[] validOids,
             ReadOnlyMemory<byte> source,
@@ -81,6 +97,21 @@ namespace System.Security.Cryptography
                     ReadPkcs8(validOids, manager.Memory, keyReader, out bytesRead, out ret);
                 }
             }
+        }
+
+        internal static ReadOnlyMemory<byte> ReadPkcs8(
+            string[] validOids,
+            ReadOnlyMemory<byte> source,
+            out int bytesRead)
+        {
+            PrivateKeyInfoAsn privateKeyInfo =
+                AsnSerializer.Deserialize<PrivateKeyInfoAsn>(source, AsnEncodingRules.BER, out int read);
+             if (Array.IndexOf(validOids, privateKeyInfo.PrivateKeyAlgorithm.Algorithm.Value) < 0)
+            {
+                throw new CryptographicException(SR.Cryptography_NotValidPublicOrPrivateKey);
+            }
+             bytesRead = read;
+            return privateKeyInfo.PrivateKey;
         }
 
         private static void ReadPkcs8<TRet, TParsed>(

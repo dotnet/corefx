@@ -480,14 +480,18 @@ namespace System.Security.Cryptography
 
         public override unsafe void ImportSubjectPublicKeyInfo(ReadOnlySpan<byte> source, out int bytesRead)
         {
-            RSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
-                source,
-                out int localRead,
-                out RSAParameters key);
+            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+            {
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
+                {
+                    ReadOnlyMemory<byte> pkcs1 = RSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                        manager.Memory,
+                        out int localRead);
 
-            ImportParameters(key);
-
-            bytesRead = localRead;
+                    ImportRSAPublicKey(pkcs1.Span, out _);
+                    bytesRead = localRead;
+                }
+            }
         }
 
         public virtual unsafe void ImportRSAPublicKey(ReadOnlySpan<byte> source, out int bytesRead)
@@ -550,29 +554,18 @@ namespace System.Security.Cryptography
 
         public override unsafe void ImportPkcs8PrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
         {
-            RSAKeyFormatHelper.ReadPkcs8(
-                source,
-                out int localRead,
-                out RSAParameters ret);
-
-            fixed (byte* dPin = ret.D)
-            fixed (byte* pPin = ret.P)
-            fixed (byte* qPin = ret.Q)
-            fixed (byte* dpPin = ret.DP)
-            fixed (byte* dqPin = ret.DQ)
-            fixed (byte* qInvPin = ret.InverseQ)
+            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                try
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
-                    ImportParameters(ret);
-                }
-                finally
-                {
-                    ClearPrivateParameters(ret);
+                    ReadOnlyMemory<byte> pkcs1 = RSAKeyFormatHelper.ReadPkcs8(
+                        manager.Memory,
+                        out int localRead);
+
+                    ImportRSAPrivateKey(pkcs1.Span, out _);
+                    bytesRead = localRead;
                 }
             }
-
-            bytesRead = localRead;
         }
 
         public override unsafe void ImportEncryptedPkcs8PrivateKey(

@@ -82,6 +82,16 @@ namespace System.Security.Cryptography
                 out key);
         }
 
+       internal static ReadOnlyMemory<byte> ReadSubjectPublicKeyInfo(
+            ReadOnlyMemory<byte> source,
+            out int bytesRead)
+        {
+            return KeyFormatHelper.ReadSubjectPublicKeyInfo(
+                s_validOids,
+                source,
+                out bytesRead);
+        }
+
         public static unsafe void ReadPkcs8(
             ReadOnlySpan<byte> source,
             out int bytesRead,
@@ -93,6 +103,16 @@ namespace System.Security.Cryptography
                 FromPkcs1PrivateKey, 
                 out bytesRead,
                 out key);
+        }
+
+        internal static ReadOnlyMemory<byte> ReadPkcs8(
+            ReadOnlyMemory<byte> source,
+            out int bytesRead)
+        {
+            return KeyFormatHelper.ReadPkcs8(
+                s_validOids,
+                source,
+                out bytesRead);
         }
 
         internal static unsafe void ReadEncryptedPkcs8(
