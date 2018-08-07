@@ -164,4 +164,7 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp2.0'">
+    <Reference Include="System.ComponentModel.TypeConverter" />
+  </ItemGroup>
 </Project>
