@@ -227,7 +227,7 @@ namespace System.Security.Cryptography
         internal static Exception HashAlgorithmNameNullOrEmpty() =>
             new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
 
-        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
+        public override bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<byte> passwordBytes,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -241,29 +241,17 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<char>.Empty,
                 passwordBytes);
 
-            DSAParameters dsaParameters = ExportParameters(true);
-
-            fixed (byte* privPin = dsaParameters.X)
+            using (AsnWriter pkcs8PrivateKey = WritePkcs8())
+            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                passwordBytes,
+                pkcs8PrivateKey,
+                pbeParameters))
             {
-                try
-                {
-                    using (AsnWriter pkcs8PrivateKey = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
-                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                        passwordBytes,
-                        pkcs8PrivateKey,
-                        pbeParameters))
-                    {
-                        return writer.TryEncode(destination, out bytesWritten);
-                    }
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(dsaParameters.X);
-                }
+                return writer.TryEncode(destination, out bytesWritten);
             }
         }
 
-        public override unsafe bool TryExportEncryptedPkcs8PrivateKey(
+        public override bool TryExportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<char> password,
             PbeParameters pbeParameters,
             Span<byte> destination,
@@ -277,47 +265,23 @@ namespace System.Security.Cryptography
                 password,
                 ReadOnlySpan<byte>.Empty);
 
-            DSAParameters dsaParameters = ExportParameters(true);
-
-            fixed (byte* privPin = dsaParameters.X)
+            using (AsnWriter pkcs8PrivateKey = WritePkcs8())
+            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                password,
+                pkcs8PrivateKey,
+                pbeParameters))
             {
-                try
-                {
-                    using (AsnWriter pkcs8PrivateKey = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
-                    using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
-                        password,
-                        pkcs8PrivateKey,
-                        pbeParameters))
-                    {
-                        return writer.TryEncode(destination, out bytesWritten);
-                    }
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(dsaParameters.X);
-                }
+                return writer.TryEncode(destination, out bytesWritten);
             }
         }
 
-        public override unsafe bool TryExportPkcs8PrivateKey(
+        public override bool TryExportPkcs8PrivateKey(
             Span<byte> destination,
             out int bytesWritten)
         {
-            DSAParameters dsaParameters = ExportParameters(true);
-
-            fixed (byte* privPin = dsaParameters.X)
+            using (AsnWriter writer = WritePkcs8())
             {
-                try
-                {
-                    using (AsnWriter writer = DSAKeyFormatHelper.WritePkcs8(dsaParameters))
-                    {
-                        return writer.TryEncode(destination, out bytesWritten);
-                    }
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(dsaParameters.X);
-                }
+                return writer.TryEncode(destination, out bytesWritten);
             }
         }
 
@@ -325,12 +289,33 @@ namespace System.Security.Cryptography
             Span<byte> destination,
             out int bytesWritten)
         {
-            DSAParameters dsaParameters = ExportParameters(false);
-
-            using (AsnWriter writer = DSAKeyFormatHelper.WriteSubjectPublicKeyInfo(dsaParameters))
+            using (AsnWriter writer = WriteSubjectPublicKeyInfo())
             {
                 return writer.TryEncode(destination, out bytesWritten);
             }
+        }
+
+        private unsafe AsnWriter WritePkcs8()
+        {
+            DSAParameters dsaParameters = ExportParameters(true);
+
+            fixed (byte* privPin = dsaParameters.X)
+            {
+                try
+                {
+                    return DSAKeyFormatHelper.WritePkcs8(dsaParameters);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(dsaParameters.X);
+                }
+            }
+        }
+
+        private AsnWriter WriteSubjectPublicKeyInfo()
+        {
+            DSAParameters dsaParameters = ExportParameters(false);
+            return DSAKeyFormatHelper.WriteSubjectPublicKeyInfo(dsaParameters);
         }
 
         public override unsafe void ImportEncryptedPkcs8PrivateKey(
