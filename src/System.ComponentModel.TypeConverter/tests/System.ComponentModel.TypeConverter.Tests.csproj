@@ -171,11 +171,5 @@
     <SupplementalTestData Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\1.0.0\content\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </SupplementalTestData>
-    <EmbeddedResource Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\1.0.0\content\bitmaps\TestIcon.ico">
-      <LogicalName>TestIcon.ico</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\1.0.0\content\bitmaps\TestImage.bmp">
-      <LogicalName>TestImage.bmp</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 </Project>
