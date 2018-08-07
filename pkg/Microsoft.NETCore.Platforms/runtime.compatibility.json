@@ -7524,21 +7524,6 @@
     "any",
     "base"
   ],
-  "unix-wasm": [
-    "unix-wasm",
-    "unix",
-    "any",
-    "base"
-  ],
-  "unix-wasm-corert": [
-    "unix-wasm-corert",
-    "unix-corert",
-    "unix-wasm",
-    "unix",
-    "corert",
-    "any",
-    "base"
-  ],
   "unix-x64": [
     "unix-x64",
     "unix",
@@ -7564,42 +7549,6 @@
     "unix-x86-corert",
     "unix-corert",
     "unix-x86",
-    "unix",
-    "corert",
-    "any",
-    "base"
-  ],
-  "webassembly": [
-    "webassembly",
-    "unix",
-    "any",
-    "base"
-  ],
-  "webassembly-corert": [
-    "webassembly-corert",
-    "webassembly",
-    "unix-corert",
-    "unix",
-    "corert",
-    "any",
-    "base"
-  ],
-  "webassembly-wasm": [
-    "webassembly-wasm",
-    "webassembly",
-    "unix-wasm",
-    "unix",
-    "any",
-    "base"
-  ],
-  "webassembly-wasm-corert": [
-    "webassembly-wasm-corert",
-    "webassembly-corert",
-    "webassembly-wasm",
-    "unix-wasm-corert",
-    "webassembly",
-    "unix-corert",
-    "unix-wasm",
     "unix",
     "corert",
     "any",

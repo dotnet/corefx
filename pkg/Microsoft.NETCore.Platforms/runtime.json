@@ -2842,17 +2842,6 @@
         "corert"
       ]
     },
-    "unix-wasm": {
-      "#import": [
-        "unix"
-      ]
-    },
-    "unix-wasm-corert": {
-      "#import": [
-        "unix-corert",
-        "unix-wasm"
-      ]
-    },
     "unix-x64": {
       "#import": [
         "unix"
@@ -2873,30 +2862,6 @@
       "#import": [
         "unix-corert",
         "unix-x86"
-      ]
-    },
-    "webassembly": {
-      "#import": [
-        "unix"
-      ]
-    },
-    "webassembly-corert": {
-      "#import": [
-        "webassembly",
-        "unix-corert"
-      ]
-    },
-    "webassembly-wasm": {
-      "#import": [
-        "webassembly",
-        "unix-wasm"
-      ]
-    },
-    "webassembly-wasm-corert": {
-      "#import": [
-        "webassembly-corert",
-        "webassembly-wasm",
-        "unix-wasm-corert"
       ]
     },
     "win": {
