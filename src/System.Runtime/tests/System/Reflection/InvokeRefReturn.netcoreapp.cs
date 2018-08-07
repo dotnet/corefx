@@ -88,11 +88,13 @@ namespace System.Reflection.Tests
                 // Don't use Assert.Throws because that will make a lambda and invalidate the pointer
                 object o = mi.Invoke(null, new object[] { Pointer.Box(pBrl, typeof(ByRefLike*)) });
                 
-                // If this is reached, it means `o` is a boxed byref-like type.
-                Assert.True(false);
+                // If this is reached, it means `o` is a boxed byref-like type. That's a GC hole right there.
+                throw new XunitException("Boxed a byref-like type.");
             }
             catch (NotSupportedException)
             {
+                // We expect a NotSupportedException from the Invoke call. Methods returning byref-like types by reference
+                // are not reflection invokable.
             }
         }
 
