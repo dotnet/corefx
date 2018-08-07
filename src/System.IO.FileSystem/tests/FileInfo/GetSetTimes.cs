@@ -105,7 +105,7 @@ namespace System.IO.Tests
             FileInfo input = new FileInfo(GetTestFilePath());
             input.Create().Dispose();
 
-            string dest = Path.Combine(GetTestFilePath(), GetTestFileName());
+            string dest = Path.Combine(input.DirectoryName, GetTestFileName());
             input.MoveTo(dest);
             FileInfo output = new FileInfo(dest);
             Assert.Equal(0, output.LastWriteTime.Millisecond);

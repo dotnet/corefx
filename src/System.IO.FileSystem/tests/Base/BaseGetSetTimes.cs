@@ -49,7 +49,7 @@ namespace System.IO.Tests
             Assert.All(TimeFunctions(requiresRoundtripping: true), (function) =>
             {
                 // Checking that milliseconds are not dropped after setter.
-                DateTime dt = new DateTime(2014, 12, 1, 12, 3, 3, 321, function.Kind);
+                DateTime dt = new DateTime(2014, 12, 1, 12, 3, 3, isHFS ? 0 : 321, function.Kind);
                 function.Setter(item, dt);
                 DateTime result = function.Getter(item);
                 Assert.Equal(dt, result);
