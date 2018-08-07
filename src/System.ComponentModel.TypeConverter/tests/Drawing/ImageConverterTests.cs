@@ -20,25 +20,14 @@ namespace System.ComponentModel.TypeConverterTests
 
         public ImageConverterTest()
         {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-
-            var imageName = "TestImage.bmp";
-            Stream testImageStream = assembly.GetManifestResourceStream(imageName);
-            if (testImageStream == null)
-            {
-                throw new InvalidOperationException($"Resource image \"{imageName}\" not found.");
-            }
-
-            int length = (int)testImageStream.Length;
-            _imageBytes = new byte[length];
-            if (testImageStream.Read(_imageBytes, 0, length) != length)
-            {
-                throw new InvalidOperationException("Failed to load resource image.");
-            }
-
-            testImageStream.Position = 0;
-            _image = Image.FromStream(testImageStream);
+            _image = Image.FromFile(Path.Combine("bitmaps", "TestImage.bmp"));
             _imageStr = _image.ToString();
+
+            using (MemoryStream destStream = new MemoryStream())
+            {
+                _image.Save(destStream, _image.RawFormat);
+                _imageBytes = destStream.ToArray();
+            }
 
             _imgConv = new ImageConverter();
             _imgConvFrmTD = (ImageConverter)TypeDescriptor.GetConverter(_image);

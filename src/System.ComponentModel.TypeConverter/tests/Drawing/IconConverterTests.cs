@@ -20,25 +20,14 @@ namespace System.ComponentModel.TypeConverterTests
 
         public IconConverterTest()
         {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-
-            var imageName = "TestIcon.ico";
-            Stream testIconStream = assembly.GetManifestResourceStream(imageName);
-            if (testIconStream == null)
-            {
-                throw new InvalidOperationException($"Resource image \"{imageName}\" not found.");
-            }
-
-            int length = (int)testIconStream.Length;
-            _iconBytes = new byte[length];
-            if (testIconStream.Read(_iconBytes, 0, length) != length)
-            {
-                throw new InvalidOperationException("Failed to load resource image.");
-            }
-
-            testIconStream.Position = 0;
-            _icon = new Icon(testIconStream);
+            _icon = new Icon(Path.Combine("bitmaps", "TestIcon.ico"));
             _iconStr = _icon.ToString();
+
+            using (MemoryStream destStream = new MemoryStream())
+            {
+                _icon.Save(destStream);
+                _iconBytes = destStream.ToArray();
+            }
 
             _icoConv = new IconConverter();
             _icoConvFrmTD = (IconConverter)TypeDescriptor.GetConverter(_icon);

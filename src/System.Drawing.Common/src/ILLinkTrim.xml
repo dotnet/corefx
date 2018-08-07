@@ -2,5 +2,13 @@
   <assembly fullname="System.Drawing.Common">
     <!-- Used by GDI+ in order to load images and save images -->
     <type fullname="Interop/Ole32/IStream" required="true" />
+    <type fullname="System.Drawing.Bitmap">
+      <!-- Required by serialization -->
+      <method name=".ctor" />
+    </type>
+    <type fullname="System.Drawing.Imaging.ColorPalette">
+      <!-- Required by serialization -->
+      <method name=".ctor" />
+    </type>
   </assembly>
 </linker>
