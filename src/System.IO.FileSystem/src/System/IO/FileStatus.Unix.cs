@@ -181,7 +181,7 @@ namespace System.IO
         {
             long secs = time.ToUnixTimeSeconds();
             long milli = time.ToUnixTimeMilliseconds() - secs * 1000;
-            SetAccessWriteTimes(path, secs, milli * 1000000, null , null);
+            SetAccessWriteTimes(path, secs, milli * 1_000_000, null , null);
         }
 
         internal DateTimeOffset GetLastWriteTime(ReadOnlySpan<char> path, bool continueOnError = false)
@@ -196,7 +196,7 @@ namespace System.IO
         {
             long secs = time.ToUnixTimeSeconds();
             long milli = time.ToUnixTimeMilliseconds() - secs * 1000;
-            SetAccessWriteTimes(path, null, null, secs, milli * 1000000);
+            SetAccessWriteTimes(path, null, null, secs, milli * 1_000_000);
         }
 
         private DateTimeOffset UnixTimeToDateTimeOffset(long seconds, long nanoseconds)
