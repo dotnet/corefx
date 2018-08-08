@@ -450,7 +450,7 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    if (NetEventSource.IsEnabled) Trace("Request content is not null. Start sending it.");
+                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing it. hasExpectContinueHeader = {hasExpectContinueHeader}");
 
                     // Send the body if there is one.  We prefer to serialize the sending of the content before
                     // we try to receive any response, but if ExpectContinue has been set, we allow the sending
@@ -631,7 +631,7 @@ namespace System.Net.Http
                 }
                 ((HttpConnectionResponseContent)response.Content).SetStream(responseStream);
 
-                if (NetEventSource.IsEnabled) Trace($"Response is received: {response}");
+                if (NetEventSource.IsEnabled) Trace($"Received response: {response}");
 
                 // Process Set-Cookie headers.
                 if (_pool.Settings._useCookies)
