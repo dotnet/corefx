@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Xunit;
 
 namespace System.ComponentModel.Tests
@@ -33,6 +34,31 @@ namespace System.ComponentModel.Tests
 
             Assert.Equal(42, new DefaultValueAttribute(typeof(int), "42").Value);
             Assert.Null(new DefaultValueAttribute(typeof(int), "caughtException").Value);
+        }
+
+        class CustomType { }
+
+        class CustomConverter : TypeConverter
+        {
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                return value;
+            }
+        }
+
+        [Fact]
+        public static void Ctor_CustomTypeConverter()
+        {
+            TypeDescriptor.AddAttributes(typeof(CustomType), new TypeConverterAttribute(typeof(CustomConverter)));
+            DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType), "42");
+            Assert.Equal("42", attr.Value);
+        }
+
+        [Fact]
+        public static void Ctor_DefaultTypeConverter_Null()
+        {
+            DefaultValueAttribute attr = new DefaultValueAttribute(typeof(DefaultValueAttribute), "42");
+            Assert.Null(attr.Value);
         }
 
         public static IEnumerable<object[]> Equals_TestData()
