@@ -7,6 +7,7 @@
     </ProjectReference>
     <ProjectReference Include="..\src\Microsoft.Win32.SystemEvents.csproj" />
 
+    <InboxOnTargetFramework Include="netcoreapp2.1" />
     <InboxOnTargetFramework Include="netcoreapp2.2" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
