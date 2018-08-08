@@ -8,6 +8,8 @@
     <ProjectReference Include="..\src\System.Drawing.Common.csproj" />
 
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+    <InboxOnTargetFramework Include="netcoreapp2.1" />
+    <InboxOnTargetFramework Include="netcoreapp2.2" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
