@@ -450,6 +450,8 @@ namespace System.Net.Http
                 }
                 else
                 {
+                    if (NetEventSource.IsEnabled) Trace("Request content is not null. Start sending it.");
+
                     // Send the body if there is one.  We prefer to serialize the sending of the content before
                     // we try to receive any response, but if ExpectContinue has been set, we allow the sending
                     // to run concurrently until we receive the final status line, at which point we wait for it.
@@ -558,6 +560,9 @@ namespace System.Net.Http
                     sendRequestContentTask = null;
                 }
 
+                // Now we are sure that the request was fully sent.
+                if (NetEventSource.IsEnabled) Trace("Request is fully sent.");
+
                 // Parse the response headers.
                 while (true)
                 {
@@ -626,7 +631,7 @@ namespace System.Net.Http
                 }
                 ((HttpConnectionResponseContent)response.Content).SetStream(responseStream);
 
-                if (NetEventSource.IsEnabled) Trace($"Received response: {response}");
+                if (NetEventSource.IsEnabled) Trace($"Response is received: {response}");
 
                 // Process Set-Cookie headers.
                 if (_pool.Settings._useCookies)
@@ -732,6 +737,8 @@ namespace System.Net.Http
 
             // Flush any content that might still be buffered.
             await FlushAsync().ConfigureAwait(false);
+
+            if (NetEventSource.IsEnabled) Trace("Finished sending request content.");
         }
 
         private async Task SendRequestContentWithExpect100ContinueAsync(

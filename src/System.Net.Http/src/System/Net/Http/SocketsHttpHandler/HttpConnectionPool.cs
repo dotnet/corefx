@@ -218,6 +218,7 @@ namespace System.Net.Http
         {
             if (cancellationToken.IsCancellationRequested)
             {
+                if (NetEventSource.IsEnabled) Trace("Unable to complete getting HTTP/1.1 connection due to requested cancellation.");
                 return new ValueTask<(HttpConnectionBase, bool, HttpResponseMessage)>(Task.FromCanceled<(HttpConnectionBase, bool, HttpResponseMessage)>(cancellationToken));
             }
 
