@@ -9,15 +9,15 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>078b491c85a2113416d7133554cff87f7e01494c</CoreFxCurrentRef>
-    <CoreClrCurrentRef>078b491c85a2113416d7133554cff87f7e01494c</CoreClrCurrentRef>
-    <CoreSetupCurrentRef>078b491c85a2113416d7133554cff87f7e01494c</CoreSetupCurrentRef>
+    <CoreFxCurrentRef>c18bb1edb637aff029cf3e15c1a41cd4817e11fd</CoreFxCurrentRef>
+    <CoreClrCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</CoreClrCurrentRef>
+    <CoreSetupCurrentRef>f6b753baf6f0b28a1d318ad8fe31db8144af079a</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>078b491c85a2113416d7133554cff87f7e01494c</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>078b491c85a2113416d7133554cff87f7e01494c</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>9004703a1923e5c5582ceb8d79712df777412446</StandardCurrentRef>
-    <BuildToolsCurrentRef>078b491c85a2113416d7133554cff87f7e01494c</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>606dc0f10e9597b7978501b155d0dddd2de50141</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -31,15 +31,15 @@
 
   <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview1-26807-04</CoreFxExpectedPrerelease>
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview1-26807-04</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview1-26807-05</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <ProjectNTfsExpectedPrerelease>beta-26807-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-26807-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26807-00</ProjectNTfsTestILCPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview1-26807-01</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview1-26807-01</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview1-26807-01</MicrosoftNETCoreAppPackageVersion>
+    <CoreFxExpectedPrerelease>alphautf8string-26726-02</CoreFxExpectedPrerelease>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-alphautf8string-26726-02</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-alphautf8string-26806-06</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-26806-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-26806-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26806-00</ProjectNTfsTestILCPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview1-26723-04</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview1-26723-04</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview1-26723-04</MicrosoftNETCoreAppPackageVersion>
 
     <!-- CoreFX-built SNI identity package -->
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
@@ -47,7 +47,7 @@
     <AppXRunnerVersion>2.2.0-preview1-02915-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0019</XunitPerfAnalysisPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
-    <XunitNetcoreExtensionsVersion>2.2.0-preview1-03107-01</XunitNetcoreExtensionsVersion>
+    <XunitNetcoreExtensionsVersion>2.2.0-preview1-03106-01</XunitNetcoreExtensionsVersion>
 
     <!-- Roslyn optimization data package version -->
     <MicrosoftDotNetIBCMergePackageVersion>4.6.0-alpha-00001</MicrosoftDotNetIBCMergePackageVersion>
@@ -60,7 +60,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.2.0-preview1-03107-01</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.2.0-preview1-03106-01</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
@@ -73,20 +73,21 @@
   <PropertyGroup>
     <BaseDotNetBuildInfo>build-info/dotnet/</BaseDotNetBuildInfo>
     <DependencyBranch>master</DependencyBranch>
+    <Utf8StringDependencyBranch>feature/utf8string</Utf8StringDependencyBranch>
     <CurrentRefXmlPath>$(MSBuildThisFileFullPath)</CurrentRefXmlPath>
   </PropertyGroup>
 
   <ItemGroup>
     <RemoteDependencyBuildInfo Include="CoreFx">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)corefx/$(DependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)corefx/$(Utf8StringDependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreFxCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="CoreClr">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)coreclr/$(DependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)coreclr/$(Utf8StringDependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreClrCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="CoreSetup">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(DependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(Utf8StringDependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreSetupCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="External">
