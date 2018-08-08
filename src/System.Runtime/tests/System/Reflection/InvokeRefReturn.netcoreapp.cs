@@ -89,7 +89,7 @@ namespace System.Reflection.Tests
                 object o = mi.Invoke(null, new object[] { Pointer.Box(pBrl, typeof(ByRefLike*)) });
                 
                 // If this is reached, it means `o` is a boxed byref-like type. That's a GC hole right there.
-                throw new XunitException("Boxed a byref-like type.");
+                throw new Xunit.Sdk.XunitException("Boxed a byref-like type.");
             }
             catch (NotSupportedException)
             {
