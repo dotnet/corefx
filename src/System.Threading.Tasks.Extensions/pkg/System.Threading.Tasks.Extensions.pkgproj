@@ -5,6 +5,9 @@
     <!-- we need to be supported on pre-nuget-3 platforms (Dev12, Dev11, etc) -->
     <MinClientVersion>2.8.6</MinClientVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <PackageVersion>4.5.1</PackageVersion>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Threading.Tasks.Extensions.csproj">
       <SupportedFramework>net45;netcore45;netcoreapp1.0;wpa81;wp8;$(AllXamarinFrameworks)</SupportedFramework>
@@ -12,7 +15,6 @@
     <ProjectReference Include="..\src\System.Threading.Tasks.Extensions.csproj" />
 
     <InboxOnTargetFramework Include="netcoreapp2.1" />
-    <InboxOnTargetFramework Include="$(UAPvNextTFM)" />
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
 
     <!-- this package is part of the implementation closure of NETStandard.Library
