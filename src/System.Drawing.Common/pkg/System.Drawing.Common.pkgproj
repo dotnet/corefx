@@ -8,8 +8,22 @@
     <ProjectReference Include="..\src\System.Drawing.Common.csproj" />
 
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+
     <InboxOnTargetFramework Include="netcoreapp2.1" />
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>runtimes/win/lib/netcoreapp2.1</TargetPath>
+    </File>
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>runtimes/unix/lib/netcoreapp2.1</TargetPath>
+    </File>
+
     <InboxOnTargetFramework Include="netcoreapp2.2" />
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>runtimes/win/lib/netcoreapp2.2</TargetPath>
+    </File>
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>runtimes/unix/lib/netcoreapp2.2</TargetPath>
+    </File>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
