@@ -177,7 +177,7 @@ namespace System.IO
             return UnixTimeToDateTimeOffset(_fileStatus.ATime, _fileStatus.ATimeNsec);
         }
 
-        internal void SetLastAccessTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time, null);
+        internal void SetLastAccessTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time, true);
 
         internal DateTimeOffset GetLastWriteTime(ReadOnlySpan<char> path, bool continueOnError = false)
         {
@@ -187,40 +187,45 @@ namespace System.IO
             return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
         }
 
-        internal void SetLastWriteTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, null, time);
+        internal void SetLastWriteTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time, false);
         
         private DateTimeOffset UnixTimeToDateTimeOffset(long seconds, long nanoseconds)
         {
             return DateTimeOffset.FromUnixTimeSeconds(seconds).AddTicks(nanoseconds / NanosecondsPerTick).ToLocalTime();
         }
 
-        private void SetAccessWriteTimes(string path, DateTimeOffset? accessTime, DateTimeOffset? writeTime)
+        private void SetAccessWriteTimes(string path, DateTimeOffset time, bool isAccessTime)
         {
             // force a refresh so that we have an up-to-date times for values not being overwritten
             _fileStatusInitialized = -1;
             EnsureStatInitialized(path);
 
-            long? accessTimeSeconds = accessTime?.ToUnixTimeSeconds();
-            long? writeTimeSeconds = writeTime?.ToUnixTimeSeconds();
-            
             // we use utimes()/utimensat() to set the accessTime and writeTime
             Span<Interop.Sys.TimeSpec> buf = stackalloc Interop.Sys.TimeSpec[2];
 
-            // setting second part
-            buf[0].TvSec = accessTimeSeconds ?? _fileStatus.ATime;
-            buf[1].TvSec = writeTimeSeconds ?? _fileStatus.MTime;
+            long seconds = time.ToUnixTimeSeconds();
+            long nanoSeconds = (time.ToUnixTimeMilliseconds() - seconds * 1000) * 1_000_000;
 
-            long? accessTimeNanoSeconds = accessTime != null
-               ? (accessTime?.ToUnixTimeMilliseconds() - accessTimeSeconds * 1000) * 1_000_000
-               : null;
-           
-            long? writeTimeNanoSeconds = writeTime != null
-                ? (writeTime?.ToUnixTimeMilliseconds() - writeTimeSeconds * 1000) * 1_000_000
-                : null;
+            if (isAccessTime)
+            {
+                // setting seconds and nanoseconds for LastAccessTime
+                buf[0].TvSec = seconds;
+                buf[0].TvNsec = nanoSeconds;
 
-            // setting nanosecond part
-            buf[0].TvNsec = accessTimeNanoSeconds ?? _fileStatus.ATimeNsec;
-            buf[1].TvNsec = writeTimeNanoSeconds ?? _fileStatus.MTimeNsec;
+                // setting seconds and nanoseconds for LastModifiedTime
+                buf[1].TvSec = _fileStatus.MTime;
+                buf[1].TvNsec = _fileStatus.MTimeNsec;
+            }
+            else
+            {
+                // setting seconds and nanoseconds for LastAccessTime
+                buf[0].TvSec = _fileStatus.ATime;
+                buf[0].TvNsec = _fileStatus.ATimeNsec;
+
+                // setting seconds and nanoseconds for LastModifiedTime
+                buf[1].TvSec = seconds;
+                buf[1].TvNsec = nanoSeconds;
+            }
 
             Interop.CheckIo(Interop.Sys.UTimensat(path, ref MemoryMarshal.GetReference(buf)), path, InitiallyDirectory);          
 
