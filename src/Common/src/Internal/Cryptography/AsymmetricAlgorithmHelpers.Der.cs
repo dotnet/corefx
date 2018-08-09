@@ -53,8 +53,8 @@ namespace Internal.Cryptography
             sequenceReader.ThrowIfNotEmpty();
 
             byte[] response = new byte[2 * size];
-            CopySignatureField(rDer, response, 0, size);
-            CopySignatureField(sDer, response, size, size);
+            CopySignatureField(rDer, response.AsSpan(0, size));
+            CopySignatureField(sDer, response.AsSpan(size, size));
 
             return response;
         }
@@ -65,12 +65,12 @@ namespace Internal.Cryptography
             return byteLength;
         }
 
-        private static void CopySignatureField(ReadOnlySpan<byte> signatureField, byte[] response, int offset, int fieldLength)
+        private static void CopySignatureField(ReadOnlySpan<byte> signatureField, Span<byte> response)
         {
-            if (signatureField.Length > fieldLength)
+            if (signatureField.Length > response.Length)
             {
                 // The only way this should be true is if the value required a zero-byte-pad.
-                Debug.Assert(signatureField.Length == fieldLength + 1, "signatureField.Length == fieldLength + 1");
+                Debug.Assert(signatureField.Length == response.Length + 1, "signatureField.Length == fieldLength + 1");
                 Debug.Assert(signatureField[0] == 0, "signatureField[0] == 0");
                 Debug.Assert(signatureField[1] > 0x7F, "signatureField[1] > 0x7F");
                 signatureField = signatureField.Slice(1);
@@ -79,8 +79,8 @@ namespace Internal.Cryptography
             // If the field is too short then it needs to be prepended
             // with zeroes in the response.  Since the array was already
             // zeroed out, just figure out where we need to start copying.
-            int writeOffset = fieldLength - signatureField.Length;
-            signatureField.CopyTo(new Span<byte>(response, offset + writeOffset, signatureField.Length));
+            int writeOffset = response.Length - signatureField.Length;
+            signatureField.CopyTo(response.Slice(writeOffset));
         }
     }
 }
