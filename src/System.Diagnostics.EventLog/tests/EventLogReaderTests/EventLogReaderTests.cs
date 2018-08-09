@@ -17,9 +17,18 @@ namespace System.Diagnostics.Tests
             var eventLog = new EventLogReader("Application");
             var record = eventLog.ReadEvent();
             Assert.NotNull(record);
+            Assert.Equal(record.LogName, "Application");
         }
 
-  
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void ApplicationEventLogQuery_Record()
+        {
+            var query = new EventLogQuery("Application", PathType.LogName) { ReverseDirection = true };
+            var eventLog = new EventLogReader(query);
+            var record = eventLog.ReadEvent();
+            Assert.NotNull(record);
+            Assert.Equal(record.LogName, "Application");
+        }
     }
 }
 
