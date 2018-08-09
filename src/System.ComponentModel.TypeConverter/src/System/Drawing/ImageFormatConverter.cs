@@ -64,8 +64,7 @@ namespace System.Drawing
             else if (strFormat.Equals("Wmf", StringComparison.OrdinalIgnoreCase))
                 return ImageFormat.Wmf;
 
-            // last case, this is an unknown string
-            return base.ConvertFrom(context, culture, value);
+            throw new FormatException(SR.Format(SR.ConvertInvalidPrimitive, strFormat, nameof(ImageFormat)));
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
