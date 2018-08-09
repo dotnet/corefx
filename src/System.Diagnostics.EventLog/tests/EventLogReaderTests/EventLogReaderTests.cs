@@ -12,9 +12,11 @@ namespace System.Diagnostics.Tests
     public class EventLogReaderTests
     {
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void CreateReader()
+        public void ApplicationEventLog_Record()
         {
-            // var eventLog = new EventLogReader("XXX");
+            var eventLog = new EventLogReader("Application");
+            var record = eventLog.ReadEvent();
+            Assert.NotNull(record);
         }
 
   
