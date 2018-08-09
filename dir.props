@@ -84,6 +84,14 @@
       $(OverridePackageSource);
       $(RestoreSources)
     </RestoreSources>
+    <!--
+      This feed points to the 2.1.3 build which has not been published yet to the normal set of feeds.
+      This can be removed when 2.1.3 is released.
+    -->
+    <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
+      $(RestoreSources);
+      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json;
+    </RestoreSources>
   </PropertyGroup>
 
   <PropertyGroup>
