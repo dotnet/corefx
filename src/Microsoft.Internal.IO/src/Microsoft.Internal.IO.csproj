@@ -4,13 +4,14 @@
     <AssemblyName>Microsoft.Internal.IO</AssemblyName>
     <IsPartialFacadeAssembly>false</IsPartialFacadeAssembly>
     <ProjectGuid>{FEF5811F-ED50-4407-A6B9-885EBD3206FB}</ProjectGuid>
-    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netcoreapp2.1-Windows_NT-Debug;netcoreapp2.1-Windows_NT-Release;netstandard1.3-Windows_NT-Debug;netstandard1.3-Windows_NT-Release</Configurations>
+    <Configurations>netfx-Debug;netfx-Release</Configurations>
     <DefineConstants>$(DefineConstants);MS_INTERNAL_IO</DefineConstants>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ClsCompliant>false</ClsCompliant>
+    <UWPCompatible Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">true</UWPCompatible>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
     <Compile Include="..\..\System.IO.FileSystem\src\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" Link="Microsoft\Internal\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Directory.cs" Link="Microsoft\Internal\IO\Directory.cs" />
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\DirectoryInfo.cs" Link="Microsoft\Internal\IO\DirectoryInfo.cs" />
@@ -225,8 +226,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ValueTuple" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetFx)' == 'true' or '$(TargetsNetStandard)' == 'true'">
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Reference Include="System.Collections" />

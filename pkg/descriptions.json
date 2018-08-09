@@ -2256,5 +2256,10 @@
     "CommonTypes": [
       "System.Xml.XPath.XmlDocumentExtensions"
     ]
+  },
+  {
+    "Name": "Microsoft.Internal.IO",
+    "Description": "Downlevel support package for System.IO classes.",
+    "CommonTypes": []
   }
 ]
