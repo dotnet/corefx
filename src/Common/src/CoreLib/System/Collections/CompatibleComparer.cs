@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -25,9 +25,12 @@ namespace System.Collections
 
         public int Compare(object a, object b)
         {
-            if (a == b) return 0;
-            if (a == null) return -1;
-            if (b == null) return 1;
+            if (a == b)
+                return 0;
+            if (a == null)
+                return -1;
+            if (b == null)
+                return 1;
 
             if (_comparer != null)
             {
@@ -39,7 +42,7 @@ namespace System.Collections
             {
                 return ia.CompareTo(b);
             }
-            
+
             throw new ArgumentException(SR.Argument_ImplementIComparable);
         }
 
@@ -50,7 +53,7 @@ namespace System.Collections
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            return _hcp != null ? 
+            return _hcp != null ?
                 _hcp.GetHashCode(obj) :
                 obj.GetHashCode();
         }
