@@ -34,6 +34,9 @@
     <ProjectReference Include="MTAMain\MTAMain.csproj">
       <Name>MTAMain</Name>
     </ProjectReference>
+    <ProjectReference Include="DefaultApartmentStateMain\DefaultApartmentStateMain.csproj">
+      <Name>DefaultApartmentStateMain</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
