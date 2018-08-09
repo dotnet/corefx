@@ -204,27 +204,21 @@ namespace System.IO
             Span<Interop.Sys.TimeSpec> buf = stackalloc Interop.Sys.TimeSpec[2];
 
             long seconds = time.ToUnixTimeSeconds();
-            long nanoSeconds = (time.ToUnixTimeMilliseconds() - seconds * 1000) * 1_000_000;
+            long nanoseconds = (time.ToUnixTimeMilliseconds() - seconds * 1000) * 1_000_000;
 
             if (isAccessTime)
             {
-                // setting seconds and nanoseconds for LastAccessTime
                 buf[0].TvSec = seconds;
-                buf[0].TvNsec = nanoSeconds;
-
-                // setting seconds and nanoseconds for LastModifiedTime
+                buf[0].TvNsec = nanoseconds;
                 buf[1].TvSec = _fileStatus.MTime;
                 buf[1].TvNsec = _fileStatus.MTimeNsec;
             }
             else
             {
-                // setting seconds and nanoseconds for LastAccessTime
                 buf[0].TvSec = _fileStatus.ATime;
                 buf[0].TvNsec = _fileStatus.ATimeNsec;
-
-                // setting seconds and nanoseconds for LastModifiedTime
                 buf[1].TvSec = seconds;
-                buf[1].TvNsec = nanoSeconds;
+                buf[1].TvNsec = nanoseconds;
             }
 
             Interop.CheckIo(Interop.Sys.UTimensat(path, ref MemoryMarshal.GetReference(buf)), path, InitiallyDirectory);          
