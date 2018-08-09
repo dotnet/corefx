@@ -34,7 +34,7 @@ namespace System.Drawing
                     ValueStringBuilder sb = new ValueStringBuilder();
                     sb.Append(font.Name);
                     sb.Append(culture.TextInfo.ListSeparator[0] + " ");
-                    sb.Append(font.Size.ToString(CultureInfo.InvariantCulture.NumberFormat));
+                    sb.Append(font.Size.ToString(CultureInfo.CurrentCulture.NumberFormat));
 
                     switch (font.Unit)
                     {
