@@ -30,9 +30,11 @@ namespace System.Drawing
             {
                 if (destinationType == typeof(string))
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append(font.Name).Append(culture.TextInfo.ListSeparator[0] + " ");
-                    sb.Append(font.Size);
+
+                    ValueStringBuilder sb = new ValueStringBuilder();
+                    sb.Append(font.Name);
+                    sb.Append(culture.TextInfo.ListSeparator[0] + " ");
+                    sb.Append(font.Size.ToString(CultureInfo.InvariantCulture.NumberFormat));
 
                     switch (font.Unit)
                     {
@@ -70,7 +72,8 @@ namespace System.Drawing
 
                     if (font.Style != FontStyle.Regular)
                     {
-                        sb.Append(culture.TextInfo.ListSeparator[0] + " style=").Append(font.Style);
+                        sb.Append(culture.TextInfo.ListSeparator[0] + " style=");
+                        sb.Append(font.Style.ToString());
                     }
 
                     return sb.ToString();
