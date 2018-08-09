@@ -177,7 +177,7 @@ namespace System.IO
             return UnixTimeToDateTimeOffset(_fileStatus.ATime, _fileStatus.ATimeNsec);
         }
 
-        internal void SetLastAccessTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time, true);
+        internal void SetLastAccessTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time,  isAccessTime: true);
 
         internal DateTimeOffset GetLastWriteTime(ReadOnlySpan<char> path, bool continueOnError = false)
         {
@@ -187,7 +187,7 @@ namespace System.IO
             return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
         }
 
-        internal void SetLastWriteTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time, false);
+        internal void SetLastWriteTime(string path, DateTimeOffset time) => SetAccessWriteTimes(path, time, isAccessTime: false);
         
         private DateTimeOffset UnixTimeToDateTimeOffset(long seconds, long nanoseconds)
         {
