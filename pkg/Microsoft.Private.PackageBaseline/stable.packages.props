@@ -1409,7 +1409,7 @@
       <Version>4.1.3</Version>
     </StablePackage>
     <StablePackage Include="System.Net.Http.WinHttpHandler">
-      <Version>4.0.4</Version>
+      <Version>4.0.3</Version>
     </StablePackage>
     <StablePackage Include="System.Net.Security">
       <Version>4.0.2</Version>
