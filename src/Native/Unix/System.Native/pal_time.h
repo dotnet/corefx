@@ -6,18 +6,18 @@
 
 #include "pal_types.h"
 
-struct UTimBuf
+typedef struct TimeSpec
 {
-    int64_t AcTime;
-    int64_t ModTime;
-};
+    int64_t tv_sec; // seconds
+    int64_t tv_nsec; // nanoseconds
+} TimeSpec;
 
 /**
  * Sets the last access and last modified time of a file
  *
  * Returns 0 on success; otherwise, returns -1 and errno is set.
  */
-extern "C" int32_t SystemNative_UTime(const char* path, UTimBuf* time);
+extern "C" int32_t SystemNative_UTimensat(const char* path, TimeSpec* times);
 
 /**
  * Gets the resolution of the timestamp, in counts per second.
