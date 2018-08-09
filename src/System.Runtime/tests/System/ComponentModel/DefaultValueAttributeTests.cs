@@ -36,13 +36,16 @@ namespace System.ComponentModel.Tests
             Assert.Null(new DefaultValueAttribute(typeof(int), "caughtException").Value);
         }
 
-        class CustomType { }
+        class CustomType
+        {
+            public int Value { get; set; }
+        }
 
         class CustomConverter : TypeConverter
         {
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             {
-                return value;
+                return new CustomType() { Value = int.Parse((string)value) };
             }
         }
 
@@ -51,7 +54,7 @@ namespace System.ComponentModel.Tests
         {
             TypeDescriptor.AddAttributes(typeof(CustomType), new TypeConverterAttribute(typeof(CustomConverter)));
             DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType), "42");
-            Assert.Equal("42", attr.Value);
+            Assert.Equal(42, ((CustomType)attr.Value).Value);
         }
 
         [Fact]
