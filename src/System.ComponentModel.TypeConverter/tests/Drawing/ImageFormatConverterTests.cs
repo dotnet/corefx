@@ -116,9 +116,11 @@ namespace System.ComponentModel.TypeConverterTests
         {
             Assert.Throws<FormatException>(() => _imgFmtConv.ConvertFrom("System.Drawing.String"));
             Assert.Throws<FormatException>(() => _imgFmtConv.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
+            Assert.Throws<FormatException>(() => _imgFmtConv.ConvertFrom("[ImageFormat: abcdefgh-ijkl-mnop-qrst-uvwxyz012345]"));
 
             Assert.Throws<FormatException>(() => _imgFmtConvFrmTD.ConvertFrom("System.Drawing.String"));
             Assert.Throws<FormatException>(() => _imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
+            Assert.Throws<FormatException>(() => _imgFmtConvFrmTD.ConvertFrom("[ImageFormat: abcdefgh-ijkl-mnop-qrst-uvwxyz012345]"));
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
