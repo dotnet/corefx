@@ -8,6 +8,7 @@
     <Compile Include="EventLogEntryCollectionTests.cs" />
     <Compile Include="EventLogTraceListenerTests.cs" />
     <Compile Include="EventLogReaderTests\EventLogReaderTests.cs" />
+    <Compile Include="EventLogReaderTests\EventLogWatcherTests.cs" />
     <Compile Include="EventLogTests\EventLogEntryWrittenTest.cs" />
     <Compile Include="EventLogTests\EventLogSourceCreationTests.cs" />
     <Compile Include="EventLogTests\EventLogTests.cs" />
