@@ -259,7 +259,6 @@ namespace System.Drawing
                     style |= FontStyle.Underline;
             }
 
-            /* ?? Should default font be culture dependent ?? */
             if (name == null)
             {
                 fontFamily = new FontFamily("Tahoma");
