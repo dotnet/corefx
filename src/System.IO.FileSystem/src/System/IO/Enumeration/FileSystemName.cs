@@ -6,7 +6,7 @@ using System;
 using System.Text;
 
 #if MS_IO_REDIST
-namespace Microsoft.IO.Redist.Enumeration
+namespace Microsoft.IO.Enumeration
 #else
 namespace System.IO.Enumeration
 #endif

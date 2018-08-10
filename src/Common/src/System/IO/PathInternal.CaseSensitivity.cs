@@ -5,7 +5,7 @@
 using System.Diagnostics;
 
 #if MS_IO_REDIST
-using Microsoft.IO.Redist;
+using Microsoft.IO;
 #endif
 
 namespace System.IO

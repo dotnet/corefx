@@ -5,7 +5,7 @@
 #if MS_IO_REDIST
 using System;
 
-namespace Microsoft.IO.Redist
+namespace Microsoft.IO
 #else
 namespace System.IO
 #endif

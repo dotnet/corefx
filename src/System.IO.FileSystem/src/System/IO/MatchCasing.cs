@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #if MS_IO_REDIST
-namespace Microsoft.IO.Redist
+namespace Microsoft.IO
 #else
 namespace System.IO
 #endif

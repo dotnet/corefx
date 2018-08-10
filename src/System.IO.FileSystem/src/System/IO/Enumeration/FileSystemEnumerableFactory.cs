@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file ref the project root for more information.
 
-using System.Collections.Generic;
-
-#if MS_IO_REDIST
 using System;
+using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.IO.Redist.Enumeration
+#if MS_IO_REDIST
+namespace Microsoft.IO.Enumeration
 #else
 namespace System.IO.Enumeration
 #endif

@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
+using System.IO;
 
 #if MS_IO_REDIST
-using System;
-using System.IO;
-using Microsoft.IO.Redist.Enumeration;
+using Microsoft.IO.Enumeration;
 
-namespace Microsoft.IO.Redist
+namespace Microsoft.IO
 #else
 using System.IO.Enumeration;
 

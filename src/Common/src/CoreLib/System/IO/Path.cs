@@ -10,7 +10,7 @@ using System.Text;
 using System;
 using System.IO;
 
-namespace Microsoft.IO.Redist
+namespace Microsoft.IO
 #else
 namespace System.IO
 #endif

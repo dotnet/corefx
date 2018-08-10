@@ -3,16 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.IO;
 using System.Text;
 
 #if MS_IO_REDIST
-using System;
-using System.IO;
-
-namespace Microsoft.IO.Redist
+namespace Microsoft.IO
 #else
 namespace System.IO
 #endif
