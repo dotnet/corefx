@@ -11,7 +11,7 @@
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.1'">4.0.1.0</AssemblyVersion>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
-  <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetGroup)'=='uap' or '$(TargetGroup)'=='uapaot'">
+  <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetsUap)'=='true'">
     <Compile Include="System\Runtime\InteropServices\HResults.cs" />
     <Compile Include="System\Windows\CornerRadius.cs" />
     <Compile Include="System\Windows\Duration.cs" />
@@ -31,7 +31,7 @@
       <Link>Common\System\Runtime\InteropServices\WindowsRuntime\WindowsRuntimeImportAttribute.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetGroup)'=='uap' or '$(TargetGroup)'=='uapaot'">
+  <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetsUap)'=='true'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Globalization" />
@@ -39,7 +39,7 @@
     <Reference Include="System.Runtime.Extensions" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+  <ItemGroup Condition="'$(TargetsUap)'=='true'">
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
 
@@ -49,7 +49,5 @@
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime.WindowsRuntime" />
-        <ProjectReference Include="..\..\..\external\winrt\winrt.depproj" />
-    <ProjectReference Include="..\..\mscorlib.WinRT-Facade\ref\mscorlib.WinRT-Facade.csproj" />
   </ItemGroup>
 </Project>
