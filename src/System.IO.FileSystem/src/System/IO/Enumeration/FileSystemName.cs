@@ -5,8 +5,8 @@
 using System;
 using System.Text;
 
-#if MS_INTERNAL_IO
-namespace Microsoft.Internal.IO.Enumeration
+#if MS_IO_REDIST
+namespace Microsoft.IO.Redist.Enumeration
 #else
 namespace System.IO.Enumeration
 #endif

@@ -4,12 +4,12 @@
 
 using System.Diagnostics;
 
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
 using System;
 using System.IO;
-using Microsoft.Internal.IO.Enumeration;
+using Microsoft.IO.Redist.Enumeration;
 
-namespace Microsoft.Internal.IO
+namespace Microsoft.IO.Redist
 #else
 using System.IO.Enumeration;
 

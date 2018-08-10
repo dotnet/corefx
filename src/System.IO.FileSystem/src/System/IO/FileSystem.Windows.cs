@@ -8,11 +8,11 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
 using System;
 using System.IO;
 
-namespace Microsoft.Internal.IO
+namespace Microsoft.IO.Redist
 #else
 namespace System.IO
 #endif

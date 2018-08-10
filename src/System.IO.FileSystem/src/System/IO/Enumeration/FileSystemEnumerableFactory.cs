@@ -4,11 +4,11 @@
 
 using System.Collections.Generic;
 
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
 using System;
 using System.IO;
 
-namespace Microsoft.Internal.IO.Enumeration
+namespace Microsoft.IO.Redist.Enumeration
 #else
 namespace System.IO.Enumeration
 #endif

@@ -4,8 +4,8 @@
 
 using System.Diagnostics;
 
-#if MS_INTERNAL_IO
-using Microsoft.Internal.IO;
+#if MS_IO_REDIST
+using Microsoft.IO.Redist;
 #endif
 
 namespace System.IO

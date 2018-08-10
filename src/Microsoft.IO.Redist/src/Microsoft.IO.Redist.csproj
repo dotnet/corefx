@@ -1,41 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Microsoft.Internal.IO</AssemblyName>
+    <AssemblyName>Microsoft.IO.Redist</AssemblyName>
     <IsPartialFacadeAssembly>false</IsPartialFacadeAssembly>
     <ProjectGuid>{FEF5811F-ED50-4407-A6B9-885EBD3206FB}</ProjectGuid>
     <Configurations>netfx-Debug;netfx-Release</Configurations>
-    <DefineConstants>$(DefineConstants);MS_INTERNAL_IO</DefineConstants>
+    <DefineConstants>$(DefineConstants);MS_IO_REDIST</DefineConstants>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ClsCompliant>false</ClsCompliant>
     <UWPCompatible Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">true</UWPCompatible>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
-    <Compile Include="..\..\System.IO.FileSystem\src\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" Link="Microsoft\Internal\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Directory.cs" Link="Microsoft\Internal\IO\Directory.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\DirectoryInfo.cs" Link="Microsoft\Internal\IO\DirectoryInfo.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\EnumerationOptions.cs" Link="Microsoft\Internal\IO\EnumerationOptions.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEntry.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEntry.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEntry.Windows.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEntry.Windows.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerable.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEnumerable.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerableFactory.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEnumerableFactory.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerator.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEnumerator.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerator.Win32.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEnumerator.Win32.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerator.Windows.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemEnumerator.Windows.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemName.cs" Link="Microsoft\Internal\IO\Enumeration\FileSystemName.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Error.cs" Link="Microsoft\Internal\IO\Error.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\File.cs" Link="Microsoft\Internal\IO\File.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileInfo.cs" Link="Microsoft\Internal\IO\FileInfo.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.Windows.cs" Link="Microsoft\Internal\IO\FileSystem.Windows.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystemInfo.cs" Link="Microsoft\Internal\IO\FileSystemInfo.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystemInfo.Windows.cs" Link="Microsoft\Internal\IO\FileSystemInfo.Windows.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Iterator.cs" Link="Microsoft\Internal\IO\Iterator.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\MatchCasing.cs" Link="Microsoft\Internal\IO\MatchCasing.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\MatchType.cs" Link="Microsoft\Internal\IO\MatchType.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\ReadLinesIterator.cs" Link="Microsoft\Internal\IO\ReadLinesIterator.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\SearchOption.cs" Link="Microsoft\Internal\IO\SearchOption.cs" />
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\SearchTarget.cs" Link="Microsoft\Internal\IO\SearchTarget.cs" />
+  <ItemGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' or ('$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true')">
+    <Compile Include="..\..\System.IO.FileSystem\src\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" Link="Microsoft\IO\Redist\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Directory.cs" Link="Microsoft\IO\Redist\Directory.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\DirectoryInfo.cs" Link="Microsoft\IO\Redist\DirectoryInfo.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\EnumerationOptions.cs" Link="Microsoft\IO\Redist\EnumerationOptions.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEntry.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEntry.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEntry.Windows.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEntry.Windows.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerable.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEnumerable.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerableFactory.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEnumerableFactory.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerator.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEnumerator.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerator.Win32.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEnumerator.Win32.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemEnumerator.Windows.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemEnumerator.Windows.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Enumeration\FileSystemName.cs" Link="Microsoft\IO\Redist\Enumeration\FileSystemName.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Error.cs" Link="Microsoft\IO\Redist\Error.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\File.cs" Link="Microsoft\IO\Redist\File.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileInfo.cs" Link="Microsoft\IO\Redist\FileInfo.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.Windows.cs" Link="Microsoft\IO\Redist\FileSystem.Windows.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystemInfo.cs" Link="Microsoft\IO\Redist\FileSystemInfo.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystemInfo.Windows.cs" Link="Microsoft\IO\Redist\FileSystemInfo.Windows.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Iterator.cs" Link="Microsoft\IO\Redist\Iterator.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\MatchCasing.cs" Link="Microsoft\IO\Redist\MatchCasing.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\MatchType.cs" Link="Microsoft\IO\Redist\MatchType.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\ReadLinesIterator.cs" Link="Microsoft\IO\Redist\ReadLinesIterator.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\SearchOption.cs" Link="Microsoft\IO\Redist\SearchOption.cs" />
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\SearchTarget.cs" Link="Microsoft\IO\Redist\SearchTarget.cs" />
     <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Win32.cs">
       <Link>Common\System\IO\DriveInfoInternal.Win32.cs</Link>
     </Compile>
@@ -219,7 +219,7 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.FormatMessage.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.FormatMessage.cs</Link>
     </Compile>
-    <Compile Include="Microsoft\Internal\IO\StringExtensions.cs" />
+    <Compile Include="Microsoft\IO\Redist\StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
@@ -247,7 +247,6 @@
     <Reference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Microsoft\Internal\IO\Enumeration\" />
-    <Folder Include="Microsoft\Internal\Win32\SafeHandles\" />
+    <Folder Include="Microsoft\IO\Redist\Enumeration\" />
   </ItemGroup>
 </Project>

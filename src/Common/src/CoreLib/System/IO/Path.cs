@@ -6,11 +6,11 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
 using System;
 using System.IO;
 
-namespace Microsoft.Internal.IO
+namespace Microsoft.IO.Redist
 #else
 namespace System.IO
 #endif
@@ -555,7 +555,7 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second))
             {
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
                 return StringExtensions.Create(
 #else
                 return string.Create(
@@ -583,7 +583,7 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third))
             {
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
                 return StringExtensions.Create(
 #else
                 return string.Create(
@@ -618,7 +618,7 @@ namespace System.IO
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third), u = &MemoryMarshal.GetReference(fourth))
             {
 
-#if MS_INTERNAL_IO
+#if MS_IO_REDIST
                 return StringExtensions.Create(
 #else
                 return string.Create(

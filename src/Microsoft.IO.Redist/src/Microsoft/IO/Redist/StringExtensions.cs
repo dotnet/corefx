@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Microsoft.Internal.IO
+namespace Microsoft.IO.Redist
 {
     public static class StringExtensions
     {
