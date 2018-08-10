@@ -2,16 +2,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.IO.Redist</AssemblyName>
-    <IsPartialFacadeAssembly>false</IsPartialFacadeAssembly>
     <ProjectGuid>{FEF5811F-ED50-4407-A6B9-885EBD3206FB}</ProjectGuid>
     <Configurations>netfx-Debug;netfx-Release</Configurations>
     <DefineConstants>$(DefineConstants);MS_IO_REDIST</DefineConstants>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ClsCompliant>false</ClsCompliant>
-    <UWPCompatible Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">true</UWPCompatible>
   </PropertyGroup>
-  <ItemGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' or ('$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true')">
+  <ItemGroup Condition="'$(BuildingInsideVisualStudio)' == 'true'">
     <Compile Include="..\..\System.IO.FileSystem\src\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" Link="Microsoft\IO\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\Directory.cs" Link="Microsoft\IO\Directory.cs" />
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\DirectoryInfo.cs" Link="Microsoft\IO\DirectoryInfo.cs" />
@@ -233,5 +231,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Microsoft\IO\Enumeration\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PinvokeAnalyzerExceptionList.analyzerdata" />
   </ItemGroup>
 </Project>

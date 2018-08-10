@@ -2,10 +2,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
-    <NET472RIDs Condition="'@(NET472RIDs)' == ''" Include="@(NET47RIDs)" />
-    <DefaultValidateFramework Include="net472" Condition="'$(ExcludeFromDesktopSupportValidation)' != 'true'">
-      <RuntimeIDs>;@(NET472RIDs)</RuntimeIDs>
-    </DefaultValidateFramework>
     <ProjectReference Include="..\src\Microsoft.IO.Redist.csproj">
       <SupportedFramework>net472</SupportedFramework>
     </ProjectReference>
