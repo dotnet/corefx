@@ -809,7 +809,7 @@ namespace System.ComponentModel
         }
 
         // This is called by System.ComponentModel.DefaultValueAttribute via reflection.
-        private static object InternalConvertFromInvariantString(Type type, string stringValue)
+        private static object ConvertFromInvariantString(Type type, string stringValue)
         {
             return GetConverter(type).ConvertFromInvariantString(stringValue);
         }
