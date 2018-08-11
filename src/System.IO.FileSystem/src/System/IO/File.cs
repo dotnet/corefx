@@ -641,18 +641,12 @@ namespace System.IO
         }
 
         public static void Encrypt(string path)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-        
+        {    
             FileSystem.Encrypt(path);
         }
 
         public static void Decrypt(string path)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
             FileSystem.Decrypt(path);
         }
 
