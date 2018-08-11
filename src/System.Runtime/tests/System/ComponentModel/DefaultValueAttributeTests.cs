@@ -49,12 +49,24 @@ namespace System.ComponentModel.Tests
             }
         }
 
+        class CustomType2
+        {
+            public int Value { get; set; }
+        }
+
         [Fact]
         public static void Ctor_CustomTypeConverter()
         {
             TypeDescriptor.AddAttributes(typeof(CustomType), new TypeConverterAttribute(typeof(CustomConverter)));
             DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType), "42");
             Assert.Equal(42, ((CustomType)attr.Value).Value);
+        }
+
+        [Fact]
+        public static void Ctor_CustomTypeConverter_Null()
+        {
+            DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType2), "42");
+            Assert.Null(attr.Value);
         }
 
         [Fact]
