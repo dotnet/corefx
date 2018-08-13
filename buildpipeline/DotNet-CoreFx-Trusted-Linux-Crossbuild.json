@@ -432,10 +432,10 @@
       "checkoutNestedSubmodules": "false",
       "labelSourcesFormat": "$(build.buildNumber)"
     },
-    "id": "58fa2458-e392-4373-ba2b-dd3ef0c2d7ce",
+    "id": "0a2b2664-c1be-429c-9b40-8a24dee27a4a",
     "type": "TfsGit",
-    "name": "DotNet-CoreFX-Trusted",
-    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-CoreFX-Trusted",
+    "name": "DotNet-BuildPipeline",
+    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline",
     "defaultBranch": "refs/heads/master",
     "clean": "false",
     "checkoutSubmodules": false
