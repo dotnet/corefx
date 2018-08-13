@@ -736,7 +736,7 @@ namespace System.Data
                 }
                 else if (dataSetElementCount > 1)
                 {
-                    throw ExceptionBuilder.TooManyIsDataSetAttributeInSchema();
+                    throw ExceptionBuilder.TooManyIsDataSetAttributesInSchema();
                 }
 
                 XmlSchemaComplexType ct = (XmlSchemaComplexType)FindTypeNode(_dsElement);
