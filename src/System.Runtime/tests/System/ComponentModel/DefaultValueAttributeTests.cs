@@ -3,12 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-    public static partial class DefaultValueAttributeTests
+    public partial class DefaultValueAttributeTests : RemoteExecutorTestBase
     {
         [Fact]
         public static void Ctor()
@@ -60,6 +62,46 @@ namespace System.ComponentModel.Tests
             TypeDescriptor.AddAttributes(typeof(CustomType), new TypeConverterAttribute(typeof(CustomConverter)));
             DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType), "42");
             Assert.Equal(42, ((CustomType)attr.Value).Value);
+        }
+
+        [Fact]
+        public void Ctor_CustomTypeConverter_TypeDescriptorNotFound_ExceptionFallback()
+        {
+            RemoteInvoke(() =>
+            {
+                FieldInfo s_convertFromInvariantString = typeof(DefaultValueAttribute).GetField("s_convertFromInvariantString", BindingFlags.GetField | Reflection.BindingFlags.NonPublic | Reflection.BindingFlags.Static);
+                Assert.NotNull(s_convertFromInvariantString);
+
+                // simulate TypeDescriptor.ConvertFromInvariantString not found
+                s_convertFromInvariantString.SetValue(null, new object());
+
+                // we fallback to empty catch in DefaultValueAttribute constructor
+                DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType), "42");
+
+                Assert.Null(attr.Value);
+
+                return 42;
+            }).Dispose();
+        }
+
+        [Fact]
+        public void Ctor_CustomTypeConverter_Fallback()
+        {
+            RemoteInvoke(() =>
+            {
+                FieldInfo s_convertFromInvariantString = typeof(DefaultValueAttribute).GetField("s_convertFromInvariantString", BindingFlags.GetField | Reflection.BindingFlags.NonPublic | Reflection.BindingFlags.Static);
+                Assert.NotNull(s_convertFromInvariantString);
+
+                // simulate TypeDescriptor.ConvertFromInvariantString not found
+                s_convertFromInvariantString.SetValue(null, new object());
+
+                // we fallback to Convert.ChangeType in DefaultValueAttribute constructor
+                DefaultValueAttribute attr = new DefaultValueAttribute(typeof(int), "42");
+
+                Assert.Equal(42, attr.Value);
+
+                return (int)attr.Value;
+            }).Dispose();
         }
 
         [Fact]
