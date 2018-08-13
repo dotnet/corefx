@@ -13,8 +13,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class EdgeCasesTests
     {
-        public static bool SupportsRc4 { get; } = ContentEncryptionAlgorithmTests.SupportsRc4;
-
         public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
 
         [ConditionalFact(nameof(SupportsCngCertificates))]
@@ -144,7 +142,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ValidateZeroLengthContent(encodedMessage);
         }
 
-        [ConditionalFact(nameof(SupportsRc4))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "RC4 isn't available via CNG, and CNG is the only library available to UWP")]
         public static void Rc4AndCngWrappersDontMixTest()

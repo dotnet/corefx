@@ -22,6 +22,7 @@ enum
     PAL_AlgorithmAES = 0,
     PAL_AlgorithmDES = 1,
     PAL_Algorithm3DES = 2,
+    PAL_AlgorithmRC4 = 4,
     PAL_AlgorithmRC2 = 5,
 };
 typedef uint32_t PAL_SymmetricAlgorithm;
@@ -30,6 +31,7 @@ enum
 {
     PAL_ChainingModeECB = 1,
     PAL_ChainingModeCBC = 2,
+    PAL_ChainingModeRC4 = 9,
 };
 typedef uint32_t PAL_ChainingMode;
 

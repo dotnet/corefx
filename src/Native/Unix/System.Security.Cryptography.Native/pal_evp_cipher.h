@@ -162,3 +162,11 @@ EvpRC2Cbc
 Direct shim to EVP_des_rc2_cbc.
 */
 DLLEXPORT const EVP_CIPHER* CryptoNative_EvpRC2Cbc(void);
+
+/*
+Function:
+EvpRC4
+
+Direct shim to EVP_rc4.
+*/
+DLLEXPORT const EVP_CIPHER* CryptoNative_EvpRC4(void);

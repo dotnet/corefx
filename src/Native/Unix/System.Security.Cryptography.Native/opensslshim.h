@@ -207,6 +207,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     PER_FUNCTION_BLOCK(EVP_PKEY_set1_RSA, true) \
     PER_FUNCTION_BLOCK(EVP_rc2_cbc, true) \
     PER_FUNCTION_BLOCK(EVP_rc2_ecb, true) \
+    PER_FUNCTION_BLOCK(EVP_rc4, true) \
     PER_FUNCTION_BLOCK(EVP_sha1, true) \
     PER_FUNCTION_BLOCK(EVP_sha256, true) \
     PER_FUNCTION_BLOCK(EVP_sha384, true) \
@@ -504,6 +505,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_PKEY_set1_RSA EVP_PKEY_set1_RSA_ptr
 #define EVP_rc2_cbc EVP_rc2_cbc_ptr
 #define EVP_rc2_ecb EVP_rc2_ecb_ptr
+#define EVP_rc4 EVP_rc4_ptr
 #define EVP_sha1 EVP_sha1_ptr
 #define EVP_sha256 EVP_sha256_ptr
 #define EVP_sha384 EVP_sha384_ptr

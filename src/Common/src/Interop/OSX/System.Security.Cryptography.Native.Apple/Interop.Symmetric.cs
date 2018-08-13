@@ -15,6 +15,7 @@ internal static partial class Interop
             AES = 0,
             DES = 1,
             TripleDES = 2,
+            RC4 = 4,
             RC2 = 5,
         }
 
@@ -34,6 +35,7 @@ internal static partial class Interop
         {
             ECB = 1,
             CBC = 2,
+            RC4 = 9,
         }
 
         internal enum PAL_SymmetricOptions

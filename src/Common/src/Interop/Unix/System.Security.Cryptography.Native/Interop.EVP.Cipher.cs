@@ -81,5 +81,8 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpRC2Ecb")]
         internal static extern IntPtr EvpRC2Ecb();
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpRC4")]
+        internal static extern IntPtr EvpRC4();
     }
 }

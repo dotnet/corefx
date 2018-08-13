@@ -168,6 +168,11 @@ namespace Internal.Cryptography.Pal.AnyOS
                     alg = RC2.Create();
 #pragma warning restore CA5351
                     break;
+                case Oids.Rc4:
+                    alg = CryptoConfig.CreateFromName("RC4") as SymmetricAlgorithm;
+                    if (alg == null)
+                        throw new CryptographicException(SR.Cryptography_Cms_UnknownAlgorithm, algorithmIdentifier.Value);
+                    break;
                 case Oids.DesCbc:
 #pragma warning disable CA5351
                     alg = DES.Create();
