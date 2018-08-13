@@ -694,12 +694,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             <TypeWithTimeSpanProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
             <TimeSpanProperty />
             </TypeWithTimeSpanProperty>";
-        XmlSerializer ser = new XmlSerializer(typeof(TypeWithTimeSpanProperty));
-        StringReader reader = new StringReader(xml);
-        TypeWithTimeSpanProperty deserializedObj = (TypeWithTimeSpanProperty)ser.Deserialize(reader);
+        XmlSerializer serializer = new XmlSerializer(typeof(TypeWithTimeSpanProperty));
 
-        Assert.NotNull(deserializedObj);
-        Assert.Equal(default(TimeSpan), deserializedObj.TimeSpanProperty);
+        using (StringReader reader = new StringReader(xml))
+        {
+            TypeWithTimeSpanProperty deserializedObj = (TypeWithTimeSpanProperty)serializer.Deserialize(reader);
+            Assert.NotNull(deserializedObj);
+            Assert.Equal(default(TimeSpan), deserializedObj.TimeSpanProperty);
+        }
     }
 
     [Fact]
