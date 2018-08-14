@@ -61,6 +61,7 @@ namespace Internal.NativeCrypto
         public const string BCRYPT_AES_ALGORITHM = "AES";
         public const string BCRYPT_DES_ALGORITHM = "DES";
         public const string BCRYPT_RC2_ALGORITHM = "RC2";
+        public const string BCRYPT_RC4_ALGORITHM = "RC4";
 
         public const string BCRYPT_CHAIN_MODE_CBC = "ChainingModeCBC";
         public const string BCRYPT_CHAIN_MODE_ECB = "ChainingModeECB";

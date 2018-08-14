@@ -128,6 +128,8 @@ namespace System.Security.Cryptography
                 Type SHA384DefaultType = typeof(System.Security.Cryptography.SHA384Managed);
                 Type SHA512DefaultType = typeof(System.Security.Cryptography.SHA512Managed);
 
+                Type RC4ImplementationType = typeof(Internal.Cryptography.RC4Implementation);
+
                 string SHA1CryptoServiceProviderType = "System.Security.Cryptography.SHA1CryptoServiceProvider, " + AssemblyName_Csp;
                 string MD5CryptoServiceProviderType = "System.Security.Cryptography.MD5CryptoServiceProvider," + AssemblyName_Csp;
                 string RSACryptoServiceProviderType = "System.Security.Cryptography.RSACryptoServiceProvider, " + AssemblyName_Csp;
@@ -207,6 +209,8 @@ namespace System.Security.Cryptography
 
                 ht.Add("RC2", RC2CryptoServiceProviderType);
                 ht.Add("System.Security.Cryptography.RC2", RC2CryptoServiceProviderType);
+
+                ht.Add("RC4", RC4ImplementationType);
 
                 ht.Add("Rijndael", RijndaelManagedType);
                 ht.Add("System.Security.Cryptography.Rijndael", RijndaelManagedType);

@@ -12,9 +12,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class ContentEncryptionAlgorithmTests
     {
-        public static bool SupportsRc4 => PlatformDetection.IsWindows;
-        public static bool DoesNotSupportRc4 => !SupportsRc4;
-
         [Fact]
         public static void EncryptionAlgorithmRc2_InvalidKeyLength()
         {
@@ -112,7 +109,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(40, algorithm.KeyLength);
         }
 
-        [ConditionalFact(nameof(SupportsRc4))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void DecodeAlgorithmRc4_40_RoundTrip()
         {
@@ -133,25 +129,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.NotNull(algorithm.Oid);
             Assert.Equal(Oids.Rc4, algorithm.Oid.Value);
             Assert.Equal(40, algorithm.KeyLength);
-        }
-
-
-        [ConditionalFact(nameof(DoesNotSupportRc4))]
-        [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void DecodeAlgorithmRc4_40_PlatformNotSupported()
-        {
-            ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3, 4 });
-            EnvelopedCms ecms = new EnvelopedCms(contentInfo, new AlgorithmIdentifier(new Oid(Oids.Rc4), 40));
-
-            using (X509Certificate2 cert = Certificates.RSAKeyTransferCapi1.GetCertificate())
-            {
-                CmsRecipient recipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, cert);
-
-                CryptographicException e =
-                    Assert.Throws<CryptographicException>(() => ecms.Encrypt(recipient));
-
-                Assert.Contains(Oids.Rc4, e.Message);
-            }
         }
 
         [Fact]
@@ -229,7 +206,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(192, algorithm.KeyLength);
         }
 
-        [ConditionalFact(nameof(SupportsRc4))]
         public static void DecodeAlgorithmRc4_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.Rc4));

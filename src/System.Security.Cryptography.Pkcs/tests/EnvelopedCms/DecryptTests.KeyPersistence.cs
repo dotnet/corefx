@@ -80,12 +80,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         [OuterLoop("Leaks key on disk if interrupted")]
         public void Decrypt_Capi_Perphemeral(string algOid)
         {
-            // Explicit key API uses managed implementation which does not support RC4
-            if (algOid == Oids.Rc4 && (!ContentEncryptionAlgorithmTests.SupportsRc4 || _useExplicitPrivateKey))
-            {
-                return;
-            }
-
             byte[] content = { 1, 1, 2, 3, 5, 8, 13, 21 };
             ContentInfo contentInfo = new ContentInfo(content);
             TestSimpleDecrypt_RoundTrip(

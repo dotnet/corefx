@@ -159,7 +159,7 @@ namespace Internal.Cryptography
                         ? Interop.AppleCrypto.PAL_SymmetricOperation.Encrypt
                         : Interop.AppleCrypto.PAL_SymmetricOperation.Decrypt,
                     algorithm,
-                    GetPalChainMode(cipherMode),
+                    GetPalChainMode(algorithm, cipherMode),
                     Interop.AppleCrypto.PAL_PaddingMode.None,
                     pbKey,
                     key.Length,
@@ -172,8 +172,13 @@ namespace Internal.Cryptography
             ProcessInteropError(ret, ccStatus);
         }
 
-        private Interop.AppleCrypto.PAL_ChainingMode GetPalChainMode(CipherMode cipherMode)
+        private Interop.AppleCrypto.PAL_ChainingMode GetPalChainMode(
+            Interop.AppleCrypto.PAL_SymmetricAlgorithm algorithm,
+            CipherMode cipherMode)
         {
+            if (algorithm == Interop.AppleCrypto.PAL_SymmetricAlgorithm.RC4)
+                return Interop.AppleCrypto.PAL_ChainingMode.RC4;
+
             switch (cipherMode)
             {
                 case CipherMode.CBC:
