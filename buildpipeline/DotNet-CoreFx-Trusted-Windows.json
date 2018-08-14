@@ -41,7 +41,7 @@
         "scriptName": "",
         "arguments": "-path $(build.SourcesDirectory)\\corefx",
         "workingFolder": "",
-        "inlineScript": "param($path)\nif ($path -and (Test-Path $path)){\nStop-Process -processname msbuild -ErrorAction Ignore -Verbose\nStop-Process -processname dotnet -ErrorAction Ignore -Verbose\nStop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n$emptyFolder = (New-Item -ItemType Directory (Join-Path -Path $env:TEMP -ChildPath ([System.IO.Path]::GetRandomFileName()))).FullName\nrobocopy $emptyFolder $path /purge\nRemove-Item -Recurse -Force $path,$emptyFolder \nexit 0\n}",
+        "inlineScript": "param($path)\nif ($path -and (Test-Path $path)){\nStop-Process -processname msbuild -ErrorAction Ignore -Verbose\nStop-Process -processname dotnet -ErrorAction Ignore -Verbose\nStop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\nStop-Process -processname vctip -ErrorAction Ignore -Verbose\n$emptyFolder = (New-Item -ItemType Directory (Join-Path -Path $env:TEMP -ChildPath ([System.IO.Path]::GetRandomFileName()))).FullName\nrobocopy $emptyFolder $path /purge\nRemove-Item -Recurse -Force $path,$emptyFolder \nexit 0\n}",
         "failOnStandardError": "true"
       }
     },
