@@ -20,6 +20,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Internal\IO\File.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\Padding.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\Runtime\CompilerServices\Unsafe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\CriticalHandleMinusOneIsInvalid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
@@ -58,6 +59,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\CharEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\CLSCompliantAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Comparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Concurrent\ConcurrentQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Concurrent\ConcurrentQueueSegment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Concurrent\IProducerConsumerCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Concurrent\IProducerConsumerCollectionDebugView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\DictionaryEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Generic\Dictionary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Generic\ICollection.cs" />
@@ -77,7 +82,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Generic\NonRandomizedStringEqualityComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Generic\ValueListBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Generic\List.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\CompatibleComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\Hashtable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\HashHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\HashHelpers.SerializationInfoTable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\ICollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IDictionary.cs" />
@@ -85,9 +93,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IEnumerable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IEqualityComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IHashCodeProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IStructuralComparable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\IStructuralEquatable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Collections\KeyValuePairs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\ListDictionaryInternal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\ObjectModel\Collection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Collections\ObjectModel\ReadOnlyCollection.cs" />

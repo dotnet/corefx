@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -61,7 +61,7 @@ namespace System.Collections
     {
         /*
           This Hashtable uses double hashing.  There are hashsize buckets in the 
-          table, and each bucket can contain 0 or 1 element.  We assign a bit to mark
+          table, and each bucket can contain 0 or 1 element.  We use a bit to mark
           whether there's been a collision when we inserted multiple elements
           (ie, an inserted item was hashed at least a second time and we probed 
           this bucket, but it was already in use).  Using the collision bit, we
@@ -110,7 +110,6 @@ namespace System.Collections
            -- 
         */
 
-        internal const Int32 HashPrime = 101;
         private const Int32 InitialSize = 3;
 
         private const String LoadFactorName = "LoadFactor"; // Do not rename (binary serialization)
@@ -152,9 +151,6 @@ namespace System.Collections
 
         private IEqualityComparer _keycomparer;
         private Object _syncRoot;
-
-        private static ConditionalWeakTable<object, SerializationInfo> s_serializationInfoTable;
-        private static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable => LazyInitializer.EnsureInitialized(ref s_serializationInfoTable);
 
         [Obsolete("Please use EqualityComparer property.")]
         protected IHashCodeProvider hcp
@@ -365,7 +361,8 @@ namespace System.Collections
                 throw new ArgumentNullException(nameof(d), SR.ArgumentNull_Dictionary);
 
             IDictionaryEnumerator e = d.GetEnumerator();
-            while (e.MoveNext()) Add(e.Key, e.Value);
+            while (e.MoveNext())
+                Add(e.Key, e.Value);
         }
 
         public Hashtable(IDictionary d, float loadFactor, IEqualityComparer equalityComparer)
@@ -375,7 +372,8 @@ namespace System.Collections
                 throw new ArgumentNullException(nameof(d), SR.ArgumentNull_Dictionary);
 
             IDictionaryEnumerator e = d.GetEnumerator();
-            while (e.MoveNext()) Add(e.Key, e.Value);
+            while (e.MoveNext())
+                Add(e.Key, e.Value);
         }
 
         protected Hashtable(SerializationInfo info, StreamingContext context)
@@ -383,7 +381,7 @@ namespace System.Collections
             //We can't do anything with the keys and values until the entire graph has been deserialized
             //and we have a reasonable estimate that GetHashCode is not going to fail.  For the time being,
             //we'll just cache this.  The graph is not valid until OnDeserialization has been called.
-            SerializationInfoTable.Add(this, info);
+            HashHelpers.SerializationInfoTable.Add(this, info);
         }
 
         // ?InitHash? is basically an implementation of classic DoubleHashing (see http://en.wikipedia.org/wiki/Double_hashing)  
@@ -408,20 +406,17 @@ namespace System.Collections
         // add incr each time through a loop.
         private uint InitHash(Object key, int hashsize, out uint seed, out uint incr)
         {
-            unchecked
-            {
-                // Hashcode must be positive.  Also, we must not use the sign bit, since
-                // that is used for the collision bit.
-                uint hashcode = (uint)GetHash(key) & 0x7FFFFFFF;
-                seed = (uint)hashcode;
-                // Restriction: incr MUST be between 1 and hashsize - 1, inclusive for
-                // the modular arithmetic to work correctly.  This guarantees you'll
-                // visit every bucket in the table exactly once within hashsize
-                // iterations.  Violate this and it'll cause obscure bugs forever.
-                // If you change this calculation for h2(key), update putEntry too!
-                incr = (uint)(1 + ((seed * HashPrime) % ((uint)hashsize - 1)));
-                return hashcode;
-            }
+            // Hashcode must be positive.  Also, we must not use the sign bit, since
+            // that is used for the collision bit.
+            uint hashcode = (uint)GetHash(key) & 0x7FFFFFFF;
+            seed = (uint)hashcode;
+            // Restriction: incr MUST be between 1 and hashsize - 1, inclusive for
+            // the modular arithmetic to work correctly.  This guarantees you'll
+            // visit every bucket in the table exactly once within hashsize
+            // iterations.  Violate this and it'll cause obscure bugs forever.
+            // If you change this calculation for h2(key), update putEntry too!
+            incr = (uint)(1 + ((seed * HashHelpers.HashPrime) % ((uint)hashsize - 1)));
+            return hashcode;
         }
 
         // Adds an entry with the given key and value to this hashtable. An
@@ -543,7 +538,8 @@ namespace System.Collections
                 for (int i = _buckets.Length; --i >= 0;)
                 {
                     Object val = _buckets[i].val;
-                    if (val != null && val.Equals(value)) return true;
+                    if (val != null && val.Equals(value))
+                        return true;
                 }
             }
             return false;
@@ -860,7 +856,8 @@ namespace System.Collections
         {
             get
             {
-                if (_keys == null) _keys = new KeyCollection(this);
+                if (_keys == null)
+                    _keys = new KeyCollection(this);
                 return _keys;
             }
         }
@@ -879,7 +876,8 @@ namespace System.Collections
         {
             get
             {
-                if (_values == null) _values = new ValueCollection(this);
+                if (_values == null)
+                    _values = new ValueCollection(this);
                 return _values;
             }
         }
@@ -1005,7 +1003,7 @@ namespace System.Collections
             Debug.Assert(hashcode >= 0, "hashcode >= 0");  // make sure collision bit (sign bit) wasn't set.
 
             uint seed = (uint)hashcode;
-            uint incr = unchecked((uint)(1 + ((seed * HashPrime) % ((uint)newBuckets.Length - 1))));
+            uint incr = unchecked((uint)(1 + ((seed * HashHelpers.HashPrime) % ((uint)newBuckets.Length - 1))));
             int bucketNumber = (int)(seed % (uint)newBuckets.Length);
             do
             {
@@ -1175,7 +1173,7 @@ namespace System.Collections
             }
 
             SerializationInfo siInfo;
-            SerializationInfoTable.TryGetValue(this, out siInfo);
+            HashHelpers.SerializationInfoTable.TryGetValue(this, out siInfo);
 
             if (siInfo == null)
             {
@@ -1257,7 +1255,7 @@ namespace System.Collections
 
             _version = siInfo.GetInt32(VersionName);
 
-            SerializationInfoTable.Remove(this);
+            HashHelpers.SerializationInfoTable.Remove(this);
         }
 
         // Implements a Collection for the keys of a hashtable. An instance of this
@@ -1550,14 +1548,16 @@ namespace System.Collections
             {
                 get
                 {
-                    if (_current == false) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
+                    if (_current == false)
+                        throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
                     return _currentKey;
                 }
             }
 
             public virtual bool MoveNext()
             {
-                if (_version != _hashtable._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                if (_version != _hashtable._version)
+                    throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 while (_bucket > 0)
                 {
                     _bucket--;
@@ -1578,7 +1578,8 @@ namespace System.Collections
             {
                 get
                 {
-                    if (_current == false) throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
+                    if (_current == false)
+                        throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     return new DictionaryEntry(_currentKey, _currentValue);
                 }
             }
@@ -1588,7 +1589,8 @@ namespace System.Collections
             {
                 get
                 {
-                    if (_current == false) throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
+                    if (_current == false)
+                        throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
 
                     if (_getObjectRetType == Keys)
                         return _currentKey;
@@ -1603,14 +1605,16 @@ namespace System.Collections
             {
                 get
                 {
-                    if (_current == false) throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
+                    if (_current == false)
+                        throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     return _currentValue;
                 }
             }
 
             public virtual void Reset()
             {
-                if (_version != _hashtable._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                if (_version != _hashtable._version)
+                    throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 _current = false;
                 _bucket = _hashtable._buckets.Length;
                 _currentKey = null;
