@@ -3,9 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <PackageVersion>4.5.220</PackageVersion>
     <TargetFrameworkName>netcoreapp</TargetFrameworkName>
-    <TargetFrameworkVersion>2.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>2.1</TargetFrameworkVersion>
     <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
 
     <RefBinDir>$(NETCoreAppPackageRefPath)</RefBinDir>
