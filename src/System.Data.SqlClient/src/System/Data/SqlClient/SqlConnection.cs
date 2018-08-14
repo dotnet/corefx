@@ -34,7 +34,7 @@ namespace System.Data.SqlClient
         private SqlCredential _credential;
         private string _connectionString;
         private int _connectRetryCount;
-        private string _accessToken; // Access Token to be used for token based authententication
+        private string _accessToken; // Access Token to be used for token based authentication
 
         // connection resiliency
         private object _reconnectLock = new object();
@@ -267,7 +267,7 @@ namespace System.Data.SqlClient
                 // If a connection is connecting or is ever opened, AccessToken cannot be set
                 if (!InnerConnection.AllowSetConnectionString)
                 {
-                    throw ADP.OpenConnectionPropertySet("AccessToken", InnerConnection.State);
+                    throw ADP.OpenConnectionPropertySet(nameof(AccessToken), InnerConnection.State);
                 }
 
                 if (value != null)

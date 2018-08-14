@@ -55,13 +55,7 @@ namespace System.Data.SqlClient
 
         internal SqlCredential Credential => _credential;
 
-        internal string AccessToken
-        {
-            get
-            {
-                return _accessToken;
-            }
-        }
+        internal string AccessToken => _accessToken;
 
         public override bool Equals(object obj)
         {
