@@ -11,5 +11,7 @@ internal partial class Interop
     {
         [DllImport(Libraries.Kernel32, EntryPoint = "GetVolumeInformationW", CharSet = CharSet.Unicode, SetLastError = true, BestFitMapping = false)]
         internal static extern bool GetVolumeInformation(string drive, [Out]StringBuilder volumeName, int volumeNameBufLen, out int volSerialNumber, out int maxFileNameLen, out int fileSystemFlags, [Out]StringBuilder fileSystemName, int fileSystemNameBufLen);
+
+        internal const uint FILE_SUPPORTS_ENCRYPTION = 0x00020000;
     }
 }
