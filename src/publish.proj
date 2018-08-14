@@ -31,7 +31,7 @@
     <OutDir>$(PackageDownloadDirectory)</OutDir>
     <!-- If we're re-publishing signed final packages, we need to overwrite the correct location in Azure storage. -->
     <!-- this means prepending the ConfigurationGroup (should be 'Release') to the blob path -->
-    <BlobNamePrefix Condition="$(RepublishSignedFinalPackages)' == 'true'">$(ConfigurationGroup)/</BlobNamePrefix>
+    <BlobNamePrefix Condition="'$(RepublishSignedFinalPackages)' == 'true'">$(ConfigurationGroup)/</BlobNamePrefix>
   </PropertyGroup>
 
   <PropertyGroup>
