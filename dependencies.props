@@ -10,9 +10,9 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>02316ac33cef9e1a85c40d4a1543a42aa74002b7</CoreFxCurrentRef>
-    <CoreClrCurrentRef>02316ac33cef9e1a85c40d4a1543a42aa74002b7</CoreClrCurrentRef>
-    <ProjectNTfsCurrentRef>02316ac33cef9e1a85c40d4a1543a42aa74002b7</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>02316ac33cef9e1a85c40d4a1543a42aa74002b7</ProjectNTfsTestILCCurrentRef>
+    <CoreClrCurrentRef>add1bd8ca4e8b268f6eaf7748037856e99f71741</CoreClrCurrentRef>
+    <ProjectNTfsCurrentRef>add1bd8ca4e8b268f6eaf7748037856e99f71741</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>add1bd8ca4e8b268f6eaf7748037856e99f71741</ProjectNTfsTestILCCurrentRef>
     <StandardCurrentRef>c520a2569b40fc53cf51e4f6970c3e7411adc173</StandardCurrentRef>
     <BuildToolsCurrentRef>02316ac33cef9e1a85c40d4a1543a42aa74002b7</BuildToolsCurrentRef>
   </PropertyGroup>
@@ -31,10 +31,10 @@
 
     <CoreFxExpectedPrerelease>servicing-26724-03</CoreFxExpectedPrerelease>
     <MicrosoftNETCorePlatformsPackageVersion>2.1.1-servicing-26724-03</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-servicing-26806-04</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <ProjectNTfsExpectedPrerelease>rel-26627-02</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>rel-26627-02</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-rel-26627-02</ProjectNTfsTestILCPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-uwp62-26810-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-26814-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-26814-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26814-00</ProjectNTfsTestILCPackageVersion>
     <MicrosoftNETCoreDotNetHostPackageVersion>2.1.1</MicrosoftNETCoreDotNetHostPackageVersion>
     <MicrosoftNETCoreDotNetHostPolicyPackageVersion>2.1.1</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.1</MicrosoftNETCoreAppPackageVersion>
@@ -84,11 +84,11 @@
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="ProjectNTfs">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/$(DependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/master</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="ProjectNTfsTestILC">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/master</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="BuildTools">
