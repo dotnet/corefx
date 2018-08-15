@@ -16,20 +16,20 @@ namespace System.Diagnostics
 
         public string PasswordInClearText
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
         }
 
         public string Domain
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Domain")); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Domain")); }
         }
 
         public bool LoadUserProfile
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "LoadUserProfile")); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "LoadUserProfile")); }
         }
 
         public bool UseShellExecute { get; set; }
@@ -39,8 +39,8 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public SecureString Password
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
         }
     }
 }
