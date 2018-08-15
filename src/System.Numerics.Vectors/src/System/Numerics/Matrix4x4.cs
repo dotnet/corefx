@@ -2170,33 +2170,30 @@ namespace System.Numerics
         {
             if (Sse.IsSupported)
             {
-                Matrix4x4 m = default;
-
-                Sse.Store(&m.M11,
+                Sse.Store(&value1.M11,
                     Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M11), Sse.LoadVector128(&value2.M11)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M12), Sse.LoadVector128(&value2.M21))),
                             Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M13), Sse.LoadVector128(&value2.M31)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M14), Sse.LoadVector128(&value2.M41)))));
 
-                Sse.Store(&m.M21,
+                Sse.Store(&value1.M21,
                     Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M21), Sse.LoadVector128(&value2.M11)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M22), Sse.LoadVector128(&value2.M21))),
                             Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M23), Sse.LoadVector128(&value2.M31)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M24), Sse.LoadVector128(&value2.M41)))));
 
-                Sse.Store(&m.M31, 
+                Sse.Store(&value1.M31, 
                     Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M31), Sse.LoadVector128(&value2.M11)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M32), Sse.LoadVector128(&value2.M21))),
                             Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M33), Sse.LoadVector128(&value2.M31)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M34), Sse.LoadVector128(&value2.M41)))));
 
-                Sse.Store(&m.M41,
+                Sse.Store(&value1.M41,
                     Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M41), Sse.LoadVector128(&value2.M11)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M42), Sse.LoadVector128(&value2.M21))),
                             Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M43), Sse.LoadVector128(&value2.M31)),
                                     Sse.Multiply(Sse.SetAllVector128(value1.M44), Sse.LoadVector128(&value2.M41)))));
-
-                return m;
+                return value1;
             }
             else
             {
@@ -2241,11 +2238,11 @@ namespace System.Numerics
 
             if (Sse.IsSupported)
             {
-                var all = Sse.SetAllVector128(value2);
-                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
-                Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), all));
-                Sse.Store(&value1.M31, Sse.Multiply(Sse.LoadVector128(&value1.M31), all));
-                Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), all));
+                var value2Vec = Sse.SetAllVector128(value2);
+                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), value2Vec));
+                Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), value2Vec));
+                Sse.Store(&value1.M31, Sse.Multiply(Sse.LoadVector128(&value1.M31), value2Vec));
+                Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), value2Vec));
                 return value1;
             }
             else
