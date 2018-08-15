@@ -705,6 +705,22 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void Xml_DeserializeEmptyTimeSpanType()
+    {
+        string xml =
+    @"<?xml version=""1.0""?>
+     <TimeSpan />";
+        XmlSerializer serializer = new XmlSerializer(typeof(TimeSpan));
+
+        using (StringReader reader = new StringReader(xml))
+        {
+            TimeSpan deserializedObj = (TimeSpan)serializer.Deserialize(reader);
+            Assert.NotNull(deserializedObj);
+            Assert.Equal(default(TimeSpan), deserializedObj);
+        }
+    }
+
+    [Fact]
     public static void Xml_TypeWithByteProperty()
     {
         var obj = new TypeWithByteProperty() { ByteProperty = 123 };
