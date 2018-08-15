@@ -44,13 +44,13 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public static Process Start(string fileName, string userName, SecureString password, string domain)
         {
-            throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported);
+            throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported);
         }
 
         [CLSCompliant(false)]
         public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
         {
-            throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported);
+            throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported);
         }
 
         /// <summary>Stops the associated process immediately.</summary>
