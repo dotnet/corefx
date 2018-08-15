@@ -18,7 +18,7 @@
           BeforeTargets="CoreCompile" 
           Condition="'$(OS)'=='Windows_NT'"
           Inputs="$(ContractOutputPath)/$(MSBuildProjectName).dll"
-          Outputs="$(IntermediateOutputPath)$(MSBuildProjectName).ref.obj">
+          Outputs="$(IntermediateOutputPath)$(MSBuildProjectName).ref.res.obj">
     <PropertyGroup>
       <_IldasmCommand>$(ToolsDir)ilasm/ildasm.exe</_IldasmCommand>
       <_IldasmCommand>$(_IldasmCommand) $(ContractOutputPath)/$(MSBuildProjectName).dll</_IldasmCommand>
@@ -28,7 +28,7 @@
       <_CvtResCommand Condition="Exists('$(SystemRoot)\Microsoft.NET\Framework\v4.0.30319\cvtres.exe')">$(SystemRoot)\Microsoft.NET\Framework\v4.0.30319\cvtres.exe</_CvtResCommand>
       <_CvtResCommand Condition="'$(_CvtResCommand)' == ''">cvtres.exe</_CvtResCommand>
       <_CvtResCommand>$(_CvtResCommand) /MACHINE:x86</_CvtResCommand>
-      <_CvtResCommand>$(_CvtResCommand) /OUT:$(IntermediateOutputPath)$(MSBuildProjectName).ref.obj</_CvtResCommand>
+      <_CvtResCommand>$(_CvtResCommand) /OUT:$(IntermediateOutputPath)$(MSBuildProjectName).ref.res.obj</_CvtResCommand>
       <_CvtResCommand>$(_CvtResCommand) $(IntermediateOutputPath)$(MSBuildProjectName).ref.res</_CvtResCommand>
     </PropertyGroup>
 
@@ -49,7 +49,7 @@
     <Error Condition="'$(_CvtResCommandExitCode)' != '0'" Text="cvtres failed while running command: &quot;$(_CvtResCommand)&quot;" />
 
     <PropertyGroup>
-      <IlasmResourceFile>$(IntermediateOutputPath)$(MSBuildProjectName).ref.obj</IlasmResourceFile>
+      <IlasmResourceFile>$(IntermediateOutputPath)$(MSBuildProjectName).ref.res.obj</IlasmResourceFile>
     </PropertyGroup>
   </Target>
 </Project>
