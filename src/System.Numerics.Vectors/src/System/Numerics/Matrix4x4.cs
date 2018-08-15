@@ -2275,13 +2275,23 @@ namespace System.Numerics
         /// <param name="value1">The first matrix to compare.</param>
         /// <param name="value2">The second matrix to compare.</param>
         /// <returns>True if the given matrices are equal; False otherwise.</returns>
-        public static bool operator ==(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe bool operator ==(Matrix4x4 value1, Matrix4x4 value2)
         {
-            return (value1.M11 == value2.M11 && value1.M22 == value2.M22 && value1.M33 == value2.M33 && value1.M44 == value2.M44 && // Check diagonal element first for early out.
-                                                value1.M12 == value2.M12 && value1.M13 == value2.M13 && value1.M14 == value2.M14 &&
-                    value1.M21 == value2.M21 && value1.M23 == value2.M23 && value1.M24 == value2.M24 &&
-                    value1.M31 == value2.M31 && value1.M32 == value2.M32 && value1.M34 == value2.M34 &&
-                    value1.M41 == value2.M41 && value1.M42 == value2.M42 && value1.M43 == value2.M43);
+            if (Sse.IsSupported)
+            {
+                return
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0xF &&
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0xF &&
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0xF &&
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0xF;
+            }
+            else
+            {
+                return (value1.M11 == value2.M11 && value1.M22 == value2.M22 && value1.M33 == value2.M33 && value1.M44 == value2.M44 && // Check diagonal element first for early out.
+                        value1.M12 == value2.M12 && value1.M13 == value2.M13 && value1.M14 == value2.M14 && value1.M21 == value2.M21 && 
+                        value1.M23 == value2.M23 && value1.M24 == value2.M24 && value1.M31 == value2.M31 && value1.M32 == value2.M32 && 
+                        value1.M34 == value2.M34 && value1.M41 == value2.M41 && value1.M42 == value2.M42 && value1.M43 == value2.M43);
+            }
         }
 
         /// <summary>
@@ -2290,12 +2300,23 @@ namespace System.Numerics
         /// <param name="value1">The first matrix to compare.</param>
         /// <param name="value2">The second matrix to compare.</param>
         /// <returns>True if the given matrices are not equal; False if they are equal.</returns>
-        public static bool operator !=(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe bool operator !=(Matrix4x4 value1, Matrix4x4 value2)
         {
-            return (value1.M11 != value2.M11 || value1.M12 != value2.M12 || value1.M13 != value2.M13 || value1.M14 != value2.M14 ||
-                    value1.M21 != value2.M21 || value1.M22 != value2.M22 || value1.M23 != value2.M23 || value1.M24 != value2.M24 ||
-                    value1.M31 != value2.M31 || value1.M32 != value2.M32 || value1.M33 != value2.M33 || value1.M34 != value2.M34 ||
-                    value1.M41 != value2.M41 || value1.M42 != value2.M42 || value1.M43 != value2.M43 || value1.M44 != value2.M44);
+            if (Sse.IsSupported)
+            {
+                return
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) != 0xF ||
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) != 0xF ||
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) != 0xF ||
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) != 0xF;
+            }
+            else 
+            {
+                return (value1.M11 != value2.M11 || value1.M12 != value2.M12 || value1.M13 != value2.M13 || value1.M14 != value2.M14 ||
+                        value1.M21 != value2.M21 || value1.M22 != value2.M22 || value1.M23 != value2.M23 || value1.M24 != value2.M24 ||
+                        value1.M31 != value2.M31 || value1.M32 != value2.M32 || value1.M33 != value2.M33 || value1.M34 != value2.M34 ||
+                        value1.M41 != value2.M41 || value1.M42 != value2.M42 || value1.M43 != value2.M43 || value1.M44 != value2.M44);
+            }
         }
 
         /// <summary>
@@ -2305,11 +2326,18 @@ namespace System.Numerics
         /// <returns>True if the matrices are equal; False otherwise.</returns>
         public bool Equals(Matrix4x4 other)
         {
-            return (M11 == other.M11 && M22 == other.M22 && M33 == other.M33 && M44 == other.M44 && // Check diagonal element first for early out.
-                                        M12 == other.M12 && M13 == other.M13 && M14 == other.M14 &&
-                    M21 == other.M21 && M23 == other.M23 && M24 == other.M24 &&
-                    M31 == other.M31 && M32 == other.M32 && M34 == other.M34 &&
-                    M41 == other.M41 && M42 == other.M42 && M43 == other.M43);
+            if (Sse.IsSupported)
+            {
+                return this == other;
+            }
+            else
+            {
+                return (M11 == other.M11 && M22 == other.M22 && M33 == other.M33 && M44 == other.M44 && // Check diagonal element first for early out.
+                                            M12 == other.M12 && M13 == other.M13 && M14 == other.M14 &&
+                        M21 == other.M21 && M23 == other.M23 && M24 == other.M24 &&
+                        M31 == other.M31 && M32 == other.M32 && M34 == other.M34 &&
+                        M41 == other.M41 && M42 == other.M42 && M43 == other.M43);
+            }
         }
 
         /// <summary>
