@@ -2280,10 +2280,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 return
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) != 0 &&
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) != 0 &&
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) != 0 &&
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) != 0;
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0 &&
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0 &&
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0 &&
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0;
             }
             else
             {
@@ -2305,10 +2305,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 return
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0 ||
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0 ||
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0 ||
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0;
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0 ||
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0 ||
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0 ||
+                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0;
             }
             else 
             {
