@@ -1852,7 +1852,7 @@ namespace System.Numerics
         {
             if (Sse.IsSupported)
             {
-                var zero = Sse.SetAllVector128(0f);
+                var zero = Sse.SetZeroVector128();
                 Sse.Store(&value.M11, Sse.Subtract(zero, Sse.LoadVector128(&value.M11)));
                 Sse.Store(&value.M21, Sse.Subtract(zero, Sse.LoadVector128(&value.M21)));
                 Sse.Store(&value.M31, Sse.Subtract(zero, Sse.LoadVector128(&value.M31)));
@@ -2088,7 +2088,7 @@ namespace System.Numerics
         {
             if (Sse.IsSupported)
             {
-                var zero = Sse.SetAllVector128(0f);
+                var zero = Sse.SetZeroVector128();
                 Sse.Store(&value.M11, Sse.Subtract(zero, Sse.LoadVector128(&value.M11)));
                 Sse.Store(&value.M21, Sse.Subtract(zero, Sse.LoadVector128(&value.M21)));
                 Sse.Store(&value.M31, Sse.Subtract(zero, Sse.LoadVector128(&value.M31)));
