@@ -1762,17 +1762,22 @@ namespace System.Numerics
         {
             if (Sse.IsSupported)
             {
-                Matrix4x4 result = default;
-                var t0 = Sse.Shuffle(Sse.LoadVector128(&matrix.M11), Sse.LoadVector128(&matrix.M21), 0x44);
-                var t1 = Sse.Shuffle(Sse.LoadVector128(&matrix.M31), Sse.LoadVector128(&matrix.M41), 0x44);
-                var t2 = Sse.Shuffle(Sse.LoadVector128(&matrix.M11), Sse.LoadVector128(&matrix.M21), 0xEE);
-                var t3 = Sse.Shuffle(Sse.LoadVector128(&matrix.M31), Sse.LoadVector128(&matrix.M41), 0xEE);
+                var row1 = Sse.LoadVector128(&matrix.M11);
+                var row2 = Sse.LoadVector128(&matrix.M21);
+                var row3 = Sse.LoadVector128(&matrix.M31);
+                var row4 = Sse.LoadVector128(&matrix.M41);
 
-                Sse.Store(&result.M11, Sse.Shuffle(t0, t1, 0x88));
-                Sse.Store(&result.M21, Sse.Shuffle(t0, t1, 0xDD));
-                Sse.Store(&result.M31, Sse.Shuffle(t2, t3, 0x88));
-                Sse.Store(&result.M41, Sse.Shuffle(t2, t3, 0xDD));
-                return result;
+                var l12 = Sse.UnpackLow(row1, row2);
+                var l34 = Sse.UnpackLow(row3, row4);
+                var h12 = Sse.UnpackHigh(row1, row2);
+                var h34 = Sse.UnpackHigh(row3, row4);
+
+                Sse.Store(&matrix.M11, Sse.MoveLowToHigh(l12, l34));
+                Sse.Store(&matrix.M21, Sse.MoveHighToLow(l34, l12));
+                Sse.Store(&matrix.M31, Sse.MoveLowToHigh(h12, h34));
+                Sse.Store(&matrix.M41, Sse.MoveHighToLow(h34, h12));
+
+                return matrix;
             }
             else
             {
