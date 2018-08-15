@@ -24,6 +24,7 @@ namespace System.Runtime.InteropServices.Tests
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
             Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, t);
+            GC.KeepAlive(d);
             VerifyDelegate(functionDelegate, targetMethod);
         }
 
@@ -47,6 +48,7 @@ namespace System.Runtime.InteropServices.Tests
             Type type = typeBuilder.CreateType();
 
             Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, type);
+            GC.KeepAlive(d);
             VerifyDelegate(functionDelegate, targetMethod);
         }
 
@@ -58,6 +60,7 @@ namespace System.Runtime.InteropServices.Tests
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
             Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer<NonGenericDelegate>(ptr);
+            GC.KeepAlive(d);
             VerifyDelegate(functionDelegate, targetMethod);
         }
 
@@ -69,6 +72,7 @@ namespace System.Runtime.InteropServices.Tests
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
             Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer<MulticastDelegate>(ptr);
+            GC.KeepAlive(d);
             VerifyDelegate(functionDelegate, targetMethod);
         }
 
@@ -134,6 +138,7 @@ namespace System.Runtime.InteropServices.Tests
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(d);
 
             Assert.Throws<InvalidCastException>(() => Marshal.GetDelegateForFunctionPointer<OtherNonGenericDelegate>(ptr));
+            GC.KeepAlive(d);
         }
 
         public delegate void GenericDelegate<T>(T t);
