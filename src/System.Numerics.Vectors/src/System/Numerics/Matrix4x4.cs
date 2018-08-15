@@ -1850,7 +1850,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
-        public static unsafe Matrix4x4 Negate(Matrix4x4 value)
+        public static Matrix4x4 Negate(Matrix4x4 value)
         {
             if (Sse.IsSupported)
             {
@@ -1887,7 +1887,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
-        public static unsafe Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
+        public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
         {
             if (Sse.IsSupported)
             {
@@ -1924,7 +1924,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
-        public static unsafe Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
+        public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
         {
             if (Sse.IsSupported)
             {
@@ -2005,7 +2005,7 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
-        public static unsafe Matrix4x4 Multiply(Matrix4x4 value1, float value2)
+        public static Matrix4x4 Multiply(Matrix4x4 value1, float value2)
         {
             if (Sse.IsSupported)
             {
@@ -2280,10 +2280,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 return
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0xF &&
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0xF &&
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0xF &&
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0xF;
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) != 0 &&
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) != 0 &&
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) != 0 &&
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) != 0;
             }
             else
             {
@@ -2305,10 +2305,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 return
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) != 0xF ||
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) != 0xF ||
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) != 0xF ||
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) != 0xF;
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0 ||
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0 ||
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0 ||
+                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0;
             }
             else 
             {
@@ -2333,10 +2333,9 @@ namespace System.Numerics
             else
             {
                 return (M11 == other.M11 && M22 == other.M22 && M33 == other.M33 && M44 == other.M44 && // Check diagonal element first for early out.
-                                            M12 == other.M12 && M13 == other.M13 && M14 == other.M14 &&
-                        M21 == other.M21 && M23 == other.M23 && M24 == other.M24 &&
-                        M31 == other.M31 && M32 == other.M32 && M34 == other.M34 &&
-                        M41 == other.M41 && M42 == other.M42 && M43 == other.M43);
+                        M12 == other.M12 && M13 == other.M13 && M14 == other.M14 && M21 == other.M21 && 
+                        M23 == other.M23 && M24 == other.M24 && M31 == other.M31 && M32 == other.M32 && 
+                        M34 == other.M34 && M41 == other.M41 && M42 == other.M42 && M43 == other.M43);
             }
         }
 
