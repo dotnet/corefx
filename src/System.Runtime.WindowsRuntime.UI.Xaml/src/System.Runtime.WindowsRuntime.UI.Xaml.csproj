@@ -5,8 +5,7 @@
     <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'netstandard1.1' or '$(TargetGroup)' == 'netstandard'">
-    <GeneratePlatformNotSupportedAssembly>true</GeneratePlatformNotSupportedAssembly>
-    <!--<GeneratePlatformNotSupportedAssemblyMessage>SR.PlatformNotSupported_WindowsRuntimeUIXaml</GeneratePlatformNotSupportedAssemblyMessage>-->
+    <GeneratePlatformNotSupportedAssemblyMessage>SR.PlatformNotSupported_WindowsRuntime</GeneratePlatformNotSupportedAssemblyMessage>
     <GeneratePlatformNotSupportedAssemblyWithGlobalPrefix>true</GeneratePlatformNotSupportedAssemblyWithGlobalPrefix>
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.1'">4.0.1.0</AssemblyVersion>
   </PropertyGroup>
