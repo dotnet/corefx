@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Runtime.InteropServices.Tests
 {
-    public class ChangeWrapperHandleStrengthTests
+    public partial class ChangeWrapperHandleStrengthTests
     {
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNative))]
         [PlatformSpecific(TestPlatforms.Windows)]

@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Runtime.InteropServices.Tests
 {
-    public class GetTypedObjectForIUnknownTests
+    public partial class GetTypedObjectForIUnknownTests
     {
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
