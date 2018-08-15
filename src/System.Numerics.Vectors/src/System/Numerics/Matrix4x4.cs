@@ -1851,6 +1851,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Matrix4x4 Negate(Matrix4x4 value)
         {
             if (Sse.IsSupported)
@@ -1894,6 +1895,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
         {
             if (Sse.IsSupported)
@@ -1935,6 +1937,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
         {
             if (Sse.IsSupported)
@@ -1976,6 +1979,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2)
         {
             if (Sse.IsSupported)
@@ -2046,6 +2050,7 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Matrix4x4 Multiply(Matrix4x4 value1, float value2)
         {
             if (Sse.IsSupported)
@@ -2142,6 +2147,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="other">The matrix to compare this instance to.</param>
         /// <returns>True if the matrices are equal; False otherwise.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Matrix4x4 other)
         {
             return (M11 == other.M11 && M22 == other.M22 && M33 == other.M33 && M44 == other.M44 && // Check diagonal element first for early out.
