@@ -14,19 +14,27 @@
     <Reference Include="System.Runtime" />
   </ItemGroup>
 
-  <Target Name="AddResourcesFileToIlasm" BeforeTargets="CoreCompile" Condition="'$(OS)'=='Windows_NT'">
-    <MakeDir Directories="$(IntermediateOutputPath)Disassembly" />
-
+  <Target Name="AddResourcesFileToIlasm" 
+          BeforeTargets="CoreCompile" 
+          Condition="'$(OS)'=='Windows_NT'"
+          Inputs="$(ContractOutputPath)/$(MSBuildProjectName).dll"
+          Outputs="$(IntermediateOutputPath)$(MSBuildProjectName).ref.obj">
     <PropertyGroup>
       <_IldasmCommand>$(ToolsDir)ilasm/ildasm.exe</_IldasmCommand>
       <_IldasmCommand>$(_IldasmCommand) $(ContractOutputPath)/$(MSBuildProjectName).dll</_IldasmCommand>
-      <_IldasmCommand>$(_IldasmCommand) /OUT=$(IntermediateOutputPath)Disassembly/$(MSBuildProjectName).il</_IldasmCommand>
+      <_IldasmCommand>$(_IldasmCommand) /OUT=$(IntermediateOutputPath)/$(MSBuildProjectName).ref.il</_IldasmCommand>
 
-      <_CvtResCommand>cvtres.exe</_CvtResCommand>
+      <!-- Try to use cvtres.exe from the framework and fallback to the one that is on the PATH in case we can't find it -->
+      <_CvtResCommand Condition="Exists('$(SystemRoot)\Microsoft.NET\Framework\v4.0.30319\cvtres.exe')">$(SystemRoot)\Microsoft.NET\Framework\v4.0.30319\cvtres.exe</_CvtResCommand>
+      <_CvtResCommand Condition="'$(_CvtResCommand)' == ''">cvtres.exe</_CvtResCommand>
       <_CvtResCommand>$(_CvtResCommand) /MACHINE:x86</_CvtResCommand>
-      <_CvtResCommand>$(_CvtResCommand) /OUT:$(IntermediateOutputPath)Disassembly/$(MSBuildProjectName).obj</_CvtResCommand>
-      <_CvtResCommand>$(_CvtResCommand) $(IntermediateOutputPath)Disassembly/$(MSBuildProjectName).res</_CvtResCommand>
+      <_CvtResCommand>$(_CvtResCommand) /OUT:$(IntermediateOutputPath)$(MSBuildProjectName).ref.obj</_CvtResCommand>
+      <_CvtResCommand>$(_CvtResCommand) $(IntermediateOutputPath)$(MSBuildProjectName).ref.res</_CvtResCommand>
     </PropertyGroup>
+
+    <ItemGroup>
+      <FileWrites Include="$(IntermediateOutputPath)$(MSBuildProjectName).ref.*" />
+    </ItemGroup>
 
     <!-- Getting the res file by disassemblying the contract assembly -->
     <Exec Command="$(_IldasmCommand)" ConsoleToMSBuild="true" StandardOutputImportance="Low">
@@ -41,7 +49,7 @@
     <Error Condition="'$(_CvtResCommandExitCode)' != '0'" Text="cvtres failed while running command: &quot;$(_CvtResCommand)&quot;" />
 
     <PropertyGroup>
-      <IlasmResourceFile>$(IntermediateOutputPath)Disassembly/$(MSBuildProjectName).obj</IlasmResourceFile>
+      <IlasmResourceFile>$(IntermediateOutputPath)$(MSBuildProjectName).ref.obj</IlasmResourceFile>
     </PropertyGroup>
   </Target>
 </Project>
