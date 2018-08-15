@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Runtime.Intrinsics.X86;
 
 namespace System.Numerics
 {
@@ -1786,35 +1787,60 @@ namespace System.Numerics
         /// <param name="matrix2">The second source matrix.</param>
         /// <param name="amount">The relative weight of the second source matrix.</param>
         /// <returns>The interpolated matrix.</returns>
-        public static Matrix4x4 Lerp(Matrix4x4 matrix1, Matrix4x4 matrix2, float amount)
+        public static unsafe Matrix4x4 Lerp(Matrix4x4 matrix1, Matrix4x4 matrix2, float amount)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                var amountVec = Sse.SetAllVector128(amount);
 
-            // First row
-            result.M11 = matrix1.M11 + (matrix2.M11 - matrix1.M11) * amount;
-            result.M12 = matrix1.M12 + (matrix2.M12 - matrix1.M12) * amount;
-            result.M13 = matrix1.M13 + (matrix2.M13 - matrix1.M13) * amount;
-            result.M14 = matrix1.M14 + (matrix2.M14 - matrix1.M14) * amount;
+                var m1Row = Sse.LoadVector128(&matrix1.M11);
+                var m2Row = Sse.LoadVector128(&matrix2.M11);
+                Sse.Store(&matrix1.M11, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
 
-            // Second row
-            result.M21 = matrix1.M21 + (matrix2.M21 - matrix1.M21) * amount;
-            result.M22 = matrix1.M22 + (matrix2.M22 - matrix1.M22) * amount;
-            result.M23 = matrix1.M23 + (matrix2.M23 - matrix1.M23) * amount;
-            result.M24 = matrix1.M24 + (matrix2.M24 - matrix1.M24) * amount;
+                m1Row = Sse.LoadVector128(&matrix1.M21);
+                m2Row = Sse.LoadVector128(&matrix2.M21);
+                Sse.Store(&matrix1.M21, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
 
-            // Third row
-            result.M31 = matrix1.M31 + (matrix2.M31 - matrix1.M31) * amount;
-            result.M32 = matrix1.M32 + (matrix2.M32 - matrix1.M32) * amount;
-            result.M33 = matrix1.M33 + (matrix2.M33 - matrix1.M33) * amount;
-            result.M34 = matrix1.M34 + (matrix2.M34 - matrix1.M34) * amount;
+                m1Row = Sse.LoadVector128(&matrix1.M31);
+                m2Row = Sse.LoadVector128(&matrix2.M31);
+                Sse.Store(&matrix1.M31, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
 
-            // Fourth row
-            result.M41 = matrix1.M41 + (matrix2.M41 - matrix1.M41) * amount;
-            result.M42 = matrix1.M42 + (matrix2.M42 - matrix1.M42) * amount;
-            result.M43 = matrix1.M43 + (matrix2.M43 - matrix1.M43) * amount;
-            result.M44 = matrix1.M44 + (matrix2.M44 - matrix1.M44) * amount;
+                m1Row = Sse.LoadVector128(&matrix1.M41);
+                m2Row = Sse.LoadVector128(&matrix2.M41);
+                Sse.Store(&matrix1.M41, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
+                
+                return matrix1;
+            }
+            else
+            {
+                Matrix4x4 result;
 
-            return result;
+                // First row
+                result.M11 = matrix1.M11 + (matrix2.M11 - matrix1.M11) * amount;
+                result.M12 = matrix1.M12 + (matrix2.M12 - matrix1.M12) * amount;
+                result.M13 = matrix1.M13 + (matrix2.M13 - matrix1.M13) * amount;
+                result.M14 = matrix1.M14 + (matrix2.M14 - matrix1.M14) * amount;
+
+                // Second row
+                result.M21 = matrix1.M21 + (matrix2.M21 - matrix1.M21) * amount;
+                result.M22 = matrix1.M22 + (matrix2.M22 - matrix1.M22) * amount;
+                result.M23 = matrix1.M23 + (matrix2.M23 - matrix1.M23) * amount;
+                result.M24 = matrix1.M24 + (matrix2.M24 - matrix1.M24) * amount;
+
+                // Third row
+                result.M31 = matrix1.M31 + (matrix2.M31 - matrix1.M31) * amount;
+                result.M32 = matrix1.M32 + (matrix2.M32 - matrix1.M32) * amount;
+                result.M33 = matrix1.M33 + (matrix2.M33 - matrix1.M33) * amount;
+                result.M34 = matrix1.M34 + (matrix2.M34 - matrix1.M34) * amount;
+
+                // Fourth row
+                result.M41 = matrix1.M41 + (matrix2.M41 - matrix1.M41) * amount;
+                result.M42 = matrix1.M42 + (matrix2.M42 - matrix1.M42) * amount;
+                result.M43 = matrix1.M43 + (matrix2.M43 - matrix1.M43) * amount;
+                result.M44 = matrix1.M44 + (matrix2.M44 - matrix1.M44) * amount;
+
+                return result;
+            }
         }
 
         /// <summary>
@@ -1822,28 +1848,41 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
-        public static Matrix4x4 Negate(Matrix4x4 value)
+        public static unsafe Matrix4x4 Negate(Matrix4x4 value)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                var zero = Sse.SetAllVector128(0f);
+                Sse.Store(&value.M11, Sse.Subtract(zero, Sse.LoadVector128(&value.M11)));
+                Sse.Store(&value.M21, Sse.Subtract(zero, Sse.LoadVector128(&value.M21)));
+                Sse.Store(&value.M31, Sse.Subtract(zero, Sse.LoadVector128(&value.M31)));
+                Sse.Store(&value.M41, Sse.Subtract(zero, Sse.LoadVector128(&value.M41)));
 
-            result.M11 = -value.M11;
-            result.M12 = -value.M12;
-            result.M13 = -value.M13;
-            result.M14 = -value.M14;
-            result.M21 = -value.M21;
-            result.M22 = -value.M22;
-            result.M23 = -value.M23;
-            result.M24 = -value.M24;
-            result.M31 = -value.M31;
-            result.M32 = -value.M32;
-            result.M33 = -value.M33;
-            result.M34 = -value.M34;
-            result.M41 = -value.M41;
-            result.M42 = -value.M42;
-            result.M43 = -value.M43;
-            result.M44 = -value.M44;
+                return value;
+            }
+            else
+            {
+                Matrix4x4 result;
 
-            return result;
+                result.M11 = -value.M11;
+                result.M12 = -value.M12;
+                result.M13 = -value.M13;
+                result.M14 = -value.M14;
+                result.M21 = -value.M21;
+                result.M22 = -value.M22;
+                result.M23 = -value.M23;
+                result.M24 = -value.M24;
+                result.M31 = -value.M31;
+                result.M32 = -value.M32;
+                result.M33 = -value.M33;
+                result.M34 = -value.M34;
+                result.M41 = -value.M41;
+                result.M42 = -value.M42;
+                result.M43 = -value.M43;
+                result.M44 = -value.M44;
+
+                return result;
+            }
         }
 
         /// <summary>
@@ -1852,28 +1891,39 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
-        public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&value1.M11, Sse.Add(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value1.M11)));
+                Sse.Store(&value1.M21, Sse.Add(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value1.M21)));
+                Sse.Store(&value1.M31, Sse.Add(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value1.M31)));
+                Sse.Store(&value1.M41, Sse.Add(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value1.M41)));
+                return value1;
+            }
+            else
+            {
+                Matrix4x4 result;
 
-            result.M11 = value1.M11 + value2.M11;
-            result.M12 = value1.M12 + value2.M12;
-            result.M13 = value1.M13 + value2.M13;
-            result.M14 = value1.M14 + value2.M14;
-            result.M21 = value1.M21 + value2.M21;
-            result.M22 = value1.M22 + value2.M22;
-            result.M23 = value1.M23 + value2.M23;
-            result.M24 = value1.M24 + value2.M24;
-            result.M31 = value1.M31 + value2.M31;
-            result.M32 = value1.M32 + value2.M32;
-            result.M33 = value1.M33 + value2.M33;
-            result.M34 = value1.M34 + value2.M34;
-            result.M41 = value1.M41 + value2.M41;
-            result.M42 = value1.M42 + value2.M42;
-            result.M43 = value1.M43 + value2.M43;
-            result.M44 = value1.M44 + value2.M44;
+                result.M11 = value1.M11 + value2.M11;
+                result.M12 = value1.M12 + value2.M12;
+                result.M13 = value1.M13 + value2.M13;
+                result.M14 = value1.M14 + value2.M14;
+                result.M21 = value1.M21 + value2.M21;
+                result.M22 = value1.M22 + value2.M22;
+                result.M23 = value1.M23 + value2.M23;
+                result.M24 = value1.M24 + value2.M24;
+                result.M31 = value1.M31 + value2.M31;
+                result.M32 = value1.M32 + value2.M32;
+                result.M33 = value1.M33 + value2.M33;
+                result.M34 = value1.M34 + value2.M34;
+                result.M41 = value1.M41 + value2.M41;
+                result.M42 = value1.M42 + value2.M42;
+                result.M43 = value1.M43 + value2.M43;
+                result.M44 = value1.M44 + value2.M44;
 
-            return result;
+                return result;
+            }
         }
 
         /// <summary>
@@ -1882,28 +1932,39 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
-        public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&value1.M11, Sse.Subtract(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value1.M11)));
+                Sse.Store(&value1.M21, Sse.Subtract(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value1.M21)));
+                Sse.Store(&value1.M31, Sse.Subtract(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value1.M31)));
+                Sse.Store(&value1.M41, Sse.Subtract(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value1.M41)));
+                return value1;
+            }
+            else
+            {
+                Matrix4x4 result;
 
-            result.M11 = value1.M11 - value2.M11;
-            result.M12 = value1.M12 - value2.M12;
-            result.M13 = value1.M13 - value2.M13;
-            result.M14 = value1.M14 - value2.M14;
-            result.M21 = value1.M21 - value2.M21;
-            result.M22 = value1.M22 - value2.M22;
-            result.M23 = value1.M23 - value2.M23;
-            result.M24 = value1.M24 - value2.M24;
-            result.M31 = value1.M31 - value2.M31;
-            result.M32 = value1.M32 - value2.M32;
-            result.M33 = value1.M33 - value2.M33;
-            result.M34 = value1.M34 - value2.M34;
-            result.M41 = value1.M41 - value2.M41;
-            result.M42 = value1.M42 - value2.M42;
-            result.M43 = value1.M43 - value2.M43;
-            result.M44 = value1.M44 - value2.M44;
+                result.M11 = value1.M11 - value2.M11;
+                result.M12 = value1.M12 - value2.M12;
+                result.M13 = value1.M13 - value2.M13;
+                result.M14 = value1.M14 - value2.M14;
+                result.M21 = value1.M21 - value2.M21;
+                result.M22 = value1.M22 - value2.M22;
+                result.M23 = value1.M23 - value2.M23;
+                result.M24 = value1.M24 - value2.M24;
+                result.M31 = value1.M31 - value2.M31;
+                result.M32 = value1.M32 - value2.M32;
+                result.M33 = value1.M33 - value2.M33;
+                result.M34 = value1.M34 - value2.M34;
+                result.M41 = value1.M41 - value2.M41;
+                result.M42 = value1.M42 - value2.M42;
+                result.M43 = value1.M43 - value2.M43;
+                result.M44 = value1.M44 - value2.M44;
 
-            return result;
+                return result;
+            }
         }
 
         /// <summary>
@@ -1912,35 +1973,68 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
-        public static Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                Matrix4x4 m = default;
 
-            // First row
-            result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
-            result.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
-            result.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
-            result.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 + value1.M14 * value2.M44;
+                Sse.Store(&m.M11,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M11), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M12), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M13), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M14), Sse.LoadVector128(&value2.M41)))));
 
-            // Second row
-            result.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 + value1.M24 * value2.M41;
-            result.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 + value1.M24 * value2.M42;
-            result.M23 = value1.M21 * value2.M13 + value1.M22 * value2.M23 + value1.M23 * value2.M33 + value1.M24 * value2.M43;
-            result.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 + value1.M24 * value2.M44;
+                Sse.Store(&m.M21,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M21), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M22), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M23), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M24), Sse.LoadVector128(&value2.M41)))));
 
-            // Third row
-            result.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 + value1.M34 * value2.M41;
-            result.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 + value1.M34 * value2.M42;
-            result.M33 = value1.M31 * value2.M13 + value1.M32 * value2.M23 + value1.M33 * value2.M33 + value1.M34 * value2.M43;
-            result.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 + value1.M34 * value2.M44;
+                Sse.Store(&m.M31,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M31), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M32), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M33), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M34), Sse.LoadVector128(&value2.M41)))));
 
-            // Fourth row
-            result.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 + value1.M44 * value2.M41;
-            result.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 + value1.M44 * value2.M42;
-            result.M43 = value1.M41 * value2.M13 + value1.M42 * value2.M23 + value1.M43 * value2.M33 + value1.M44 * value2.M43;
-            result.M44 = value1.M41 * value2.M14 + value1.M42 * value2.M24 + value1.M43 * value2.M34 + value1.M44 * value2.M44;
+                Sse.Store(&m.M41,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M41), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M42), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M43), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M44), Sse.LoadVector128(&value2.M41)))));
 
-            return result;
+                return m;
+            }
+            else
+            {
+                Matrix4x4 result;
+
+                // First row
+                result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
+                result.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
+                result.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
+                result.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 + value1.M14 * value2.M44;
+
+                // Second row
+                result.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 + value1.M24 * value2.M41;
+                result.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 + value1.M24 * value2.M42;
+                result.M23 = value1.M21 * value2.M13 + value1.M22 * value2.M23 + value1.M23 * value2.M33 + value1.M24 * value2.M43;
+                result.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 + value1.M24 * value2.M44;
+
+                // Third row
+                result.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 + value1.M34 * value2.M41;
+                result.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 + value1.M34 * value2.M42;
+                result.M33 = value1.M31 * value2.M13 + value1.M32 * value2.M23 + value1.M33 * value2.M33 + value1.M34 * value2.M43;
+                result.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 + value1.M34 * value2.M44;
+
+                // Fourth row
+                result.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 + value1.M44 * value2.M41;
+                result.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 + value1.M44 * value2.M42;
+                result.M43 = value1.M41 * value2.M13 + value1.M42 * value2.M23 + value1.M43 * value2.M33 + value1.M44 * value2.M43;
+                result.M44 = value1.M41 * value2.M14 + value1.M42 * value2.M24 + value1.M43 * value2.M34 + value1.M44 * value2.M44;
+
+                return result;
+            }
         }
 
         /// <summary>
@@ -1949,28 +2043,40 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
-        public static Matrix4x4 Multiply(Matrix4x4 value1, float value2)
+        public static unsafe Matrix4x4 Multiply(Matrix4x4 value1, float value2)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                var all = Sse.SetAllVector128(value2);
+                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
+                Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), all));
+                Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), all));
+                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
+                return value1;
+            }
+            else
+            {
+                Matrix4x4 result;
 
-            result.M11 = value1.M11 * value2;
-            result.M12 = value1.M12 * value2;
-            result.M13 = value1.M13 * value2;
-            result.M14 = value1.M14 * value2;
-            result.M21 = value1.M21 * value2;
-            result.M22 = value1.M22 * value2;
-            result.M23 = value1.M23 * value2;
-            result.M24 = value1.M24 * value2;
-            result.M31 = value1.M31 * value2;
-            result.M32 = value1.M32 * value2;
-            result.M33 = value1.M33 * value2;
-            result.M34 = value1.M34 * value2;
-            result.M41 = value1.M41 * value2;
-            result.M42 = value1.M42 * value2;
-            result.M43 = value1.M43 * value2;
-            result.M44 = value1.M44 * value2;
+                result.M11 = value1.M11 * value2;
+                result.M12 = value1.M12 * value2;
+                result.M13 = value1.M13 * value2;
+                result.M14 = value1.M14 * value2;
+                result.M21 = value1.M21 * value2;
+                result.M22 = value1.M22 * value2;
+                result.M23 = value1.M23 * value2;
+                result.M24 = value1.M24 * value2;
+                result.M31 = value1.M31 * value2;
+                result.M32 = value1.M32 * value2;
+                result.M33 = value1.M33 * value2;
+                result.M34 = value1.M34 * value2;
+                result.M41 = value1.M41 * value2;
+                result.M42 = value1.M42 * value2;
+                result.M43 = value1.M43 * value2;
+                result.M44 = value1.M44 * value2;
 
-            return result;
+                return result;
+            }
         }
 
         /// <summary>
@@ -1978,28 +2084,41 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
-        public static Matrix4x4 operator -(Matrix4x4 value)
+        public static unsafe Matrix4x4 operator -(Matrix4x4 value)
         {
-            Matrix4x4 m;
+            if (Sse.IsSupported)
+            {
+                var zero = Sse.SetAllVector128(0f);
+                Sse.Store(&value.M11, Sse.Subtract(zero, Sse.LoadVector128(&value.M11)));
+                Sse.Store(&value.M21, Sse.Subtract(zero, Sse.LoadVector128(&value.M21)));
+                Sse.Store(&value.M31, Sse.Subtract(zero, Sse.LoadVector128(&value.M31)));
+                Sse.Store(&value.M41, Sse.Subtract(zero, Sse.LoadVector128(&value.M41)));
 
-            m.M11 = -value.M11;
-            m.M12 = -value.M12;
-            m.M13 = -value.M13;
-            m.M14 = -value.M14;
-            m.M21 = -value.M21;
-            m.M22 = -value.M22;
-            m.M23 = -value.M23;
-            m.M24 = -value.M24;
-            m.M31 = -value.M31;
-            m.M32 = -value.M32;
-            m.M33 = -value.M33;
-            m.M34 = -value.M34;
-            m.M41 = -value.M41;
-            m.M42 = -value.M42;
-            m.M43 = -value.M43;
-            m.M44 = -value.M44;
+                return value;
+            }
+            else
+            {
+                Matrix4x4 m;
 
-            return m;
+                m.M11 = -value.M11;
+                m.M12 = -value.M12;
+                m.M13 = -value.M13;
+                m.M14 = -value.M14;
+                m.M21 = -value.M21;
+                m.M22 = -value.M22;
+                m.M23 = -value.M23;
+                m.M24 = -value.M24;
+                m.M31 = -value.M31;
+                m.M32 = -value.M32;
+                m.M33 = -value.M33;
+                m.M34 = -value.M34;
+                m.M41 = -value.M41;
+                m.M42 = -value.M42;
+                m.M43 = -value.M43;
+                m.M44 = -value.M44;
+
+                return m;
+            }
         }
 
         /// <summary>
@@ -2008,28 +2127,39 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
-        public static Matrix4x4 operator +(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 operator +(Matrix4x4 value1, Matrix4x4 value2)
         {
-            Matrix4x4 m;
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&value1.M11, Sse.Add(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value1.M11)));
+                Sse.Store(&value1.M21, Sse.Add(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value1.M21)));
+                Sse.Store(&value1.M31, Sse.Add(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value1.M31)));
+                Sse.Store(&value1.M41, Sse.Add(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value1.M41)));
+                return value1;
+            }
+            else
+            {
+                Matrix4x4 m;
 
-            m.M11 = value1.M11 + value2.M11;
-            m.M12 = value1.M12 + value2.M12;
-            m.M13 = value1.M13 + value2.M13;
-            m.M14 = value1.M14 + value2.M14;
-            m.M21 = value1.M21 + value2.M21;
-            m.M22 = value1.M22 + value2.M22;
-            m.M23 = value1.M23 + value2.M23;
-            m.M24 = value1.M24 + value2.M24;
-            m.M31 = value1.M31 + value2.M31;
-            m.M32 = value1.M32 + value2.M32;
-            m.M33 = value1.M33 + value2.M33;
-            m.M34 = value1.M34 + value2.M34;
-            m.M41 = value1.M41 + value2.M41;
-            m.M42 = value1.M42 + value2.M42;
-            m.M43 = value1.M43 + value2.M43;
-            m.M44 = value1.M44 + value2.M44;
+                m.M11 = value1.M11 + value2.M11;
+                m.M12 = value1.M12 + value2.M12;
+                m.M13 = value1.M13 + value2.M13;
+                m.M14 = value1.M14 + value2.M14;
+                m.M21 = value1.M21 + value2.M21;
+                m.M22 = value1.M22 + value2.M22;
+                m.M23 = value1.M23 + value2.M23;
+                m.M24 = value1.M24 + value2.M24;
+                m.M31 = value1.M31 + value2.M31;
+                m.M32 = value1.M32 + value2.M32;
+                m.M33 = value1.M33 + value2.M33;
+                m.M34 = value1.M34 + value2.M34;
+                m.M41 = value1.M41 + value2.M41;
+                m.M42 = value1.M42 + value2.M42;
+                m.M43 = value1.M43 + value2.M43;
+                m.M44 = value1.M44 + value2.M44;
 
-            return m;
+                return m;
+            }
         }
 
         /// <summary>
@@ -2038,28 +2168,39 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
-        public static Matrix4x4 operator -(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 operator -(Matrix4x4 value1, Matrix4x4 value2)
         {
-            Matrix4x4 m;
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&value1.M11, Sse.Subtract(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value1.M11)));
+                Sse.Store(&value1.M21, Sse.Subtract(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value1.M21)));
+                Sse.Store(&value1.M31, Sse.Subtract(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value1.M31)));
+                Sse.Store(&value1.M41, Sse.Subtract(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value1.M41)));
+                return value1;
+            }
+            else
+            {
+                Matrix4x4 m;
 
-            m.M11 = value1.M11 - value2.M11;
-            m.M12 = value1.M12 - value2.M12;
-            m.M13 = value1.M13 - value2.M13;
-            m.M14 = value1.M14 - value2.M14;
-            m.M21 = value1.M21 - value2.M21;
-            m.M22 = value1.M22 - value2.M22;
-            m.M23 = value1.M23 - value2.M23;
-            m.M24 = value1.M24 - value2.M24;
-            m.M31 = value1.M31 - value2.M31;
-            m.M32 = value1.M32 - value2.M32;
-            m.M33 = value1.M33 - value2.M33;
-            m.M34 = value1.M34 - value2.M34;
-            m.M41 = value1.M41 - value2.M41;
-            m.M42 = value1.M42 - value2.M42;
-            m.M43 = value1.M43 - value2.M43;
-            m.M44 = value1.M44 - value2.M44;
+                m.M11 = value1.M11 - value2.M11;
+                m.M12 = value1.M12 - value2.M12;
+                m.M13 = value1.M13 - value2.M13;
+                m.M14 = value1.M14 - value2.M14;
+                m.M21 = value1.M21 - value2.M21;
+                m.M22 = value1.M22 - value2.M22;
+                m.M23 = value1.M23 - value2.M23;
+                m.M24 = value1.M24 - value2.M24;
+                m.M31 = value1.M31 - value2.M31;
+                m.M32 = value1.M32 - value2.M32;
+                m.M33 = value1.M33 - value2.M33;
+                m.M34 = value1.M34 - value2.M34;
+                m.M41 = value1.M41 - value2.M41;
+                m.M42 = value1.M42 - value2.M42;
+                m.M43 = value1.M43 - value2.M43;
+                m.M44 = value1.M44 - value2.M44;
 
-            return m;
+                return m;
+            }
         }
 
         /// <summary>
@@ -2068,35 +2209,68 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
-        public static Matrix4x4 operator *(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 operator *(Matrix4x4 value1, Matrix4x4 value2)
         {
-            Matrix4x4 m;
+            if (Sse.IsSupported)
+            {
+                Matrix4x4 m = default;
 
-            // First row
-            m.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
-            m.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
-            m.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
-            m.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 + value1.M14 * value2.M44;
+                Sse.Store(&m.M11,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M11), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M12), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M13), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M14), Sse.LoadVector128(&value2.M41)))));
 
-            // Second row
-            m.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 + value1.M24 * value2.M41;
-            m.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 + value1.M24 * value2.M42;
-            m.M23 = value1.M21 * value2.M13 + value1.M22 * value2.M23 + value1.M23 * value2.M33 + value1.M24 * value2.M43;
-            m.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 + value1.M24 * value2.M44;
+                Sse.Store(&m.M21,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M21), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M22), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M23), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M24), Sse.LoadVector128(&value2.M41)))));
 
-            // Third row
-            m.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 + value1.M34 * value2.M41;
-            m.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 + value1.M34 * value2.M42;
-            m.M33 = value1.M31 * value2.M13 + value1.M32 * value2.M23 + value1.M33 * value2.M33 + value1.M34 * value2.M43;
-            m.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 + value1.M34 * value2.M44;
+                Sse.Store(&m.M31, 
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M31), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M32), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M33), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M34), Sse.LoadVector128(&value2.M41)))));
 
-            // Fourth row
-            m.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 + value1.M44 * value2.M41;
-            m.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 + value1.M44 * value2.M42;
-            m.M43 = value1.M41 * value2.M13 + value1.M42 * value2.M23 + value1.M43 * value2.M33 + value1.M44 * value2.M43;
-            m.M44 = value1.M41 * value2.M14 + value1.M42 * value2.M24 + value1.M43 * value2.M34 + value1.M44 * value2.M44;
+                Sse.Store(&m.M41,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M41), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M42), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M43), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.SetAllVector128(value1.M44), Sse.LoadVector128(&value2.M41)))));
 
-            return m;
+                return m;
+            }
+            else
+            {
+                Matrix4x4 m;
+
+                // First row
+                m.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
+                m.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
+                m.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
+                m.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 + value1.M14 * value2.M44;
+
+                // Second row
+                m.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 + value1.M24 * value2.M41;
+                m.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 + value1.M24 * value2.M42;
+                m.M23 = value1.M21 * value2.M13 + value1.M22 * value2.M23 + value1.M23 * value2.M33 + value1.M24 * value2.M43;
+                m.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 + value1.M24 * value2.M44;
+
+                // Third row
+                m.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 + value1.M34 * value2.M41;
+                m.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 + value1.M34 * value2.M42;
+                m.M33 = value1.M31 * value2.M13 + value1.M32 * value2.M23 + value1.M33 * value2.M33 + value1.M34 * value2.M43;
+                m.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 + value1.M34 * value2.M44;
+
+                // Fourth row
+                m.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 + value1.M44 * value2.M41;
+                m.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 + value1.M44 * value2.M42;
+                m.M43 = value1.M41 * value2.M13 + value1.M42 * value2.M23 + value1.M43 * value2.M33 + value1.M44 * value2.M43;
+                m.M44 = value1.M41 * value2.M14 + value1.M42 * value2.M24 + value1.M43 * value2.M34 + value1.M44 * value2.M44;
+
+                return m;
+            }
         }
 
         /// <summary>
@@ -2105,27 +2279,40 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
-        public static Matrix4x4 operator *(Matrix4x4 value1, float value2)
+        public static unsafe Matrix4x4 operator *(Matrix4x4 value1, float value2)
         {
-            Matrix4x4 m;
 
-            m.M11 = value1.M11 * value2;
-            m.M12 = value1.M12 * value2;
-            m.M13 = value1.M13 * value2;
-            m.M14 = value1.M14 * value2;
-            m.M21 = value1.M21 * value2;
-            m.M22 = value1.M22 * value2;
-            m.M23 = value1.M23 * value2;
-            m.M24 = value1.M24 * value2;
-            m.M31 = value1.M31 * value2;
-            m.M32 = value1.M32 * value2;
-            m.M33 = value1.M33 * value2;
-            m.M34 = value1.M34 * value2;
-            m.M41 = value1.M41 * value2;
-            m.M42 = value1.M42 * value2;
-            m.M43 = value1.M43 * value2;
-            m.M44 = value1.M44 * value2;
-            return m;
+            if (Sse.IsSupported)
+            {
+                var all = Sse.SetAllVector128(value2);
+                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
+                Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), all));
+                Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), all));
+                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
+                return value1;
+            }
+            else
+            {
+                Matrix4x4 m;
+
+                m.M11 = value1.M11 * value2;
+                m.M12 = value1.M12 * value2;
+                m.M13 = value1.M13 * value2;
+                m.M14 = value1.M14 * value2;
+                m.M21 = value1.M21 * value2;
+                m.M22 = value1.M22 * value2;
+                m.M23 = value1.M23 * value2;
+                m.M24 = value1.M24 * value2;
+                m.M31 = value1.M31 * value2;
+                m.M32 = value1.M32 * value2;
+                m.M33 = value1.M33 * value2;
+                m.M34 = value1.M34 * value2;
+                m.M41 = value1.M41 * value2;
+                m.M42 = value1.M42 * value2;
+                m.M43 = value1.M43 * value2;
+                m.M44 = value1.M44 * value2;
+                return m;
+            }
         }
 
         /// <summary>
