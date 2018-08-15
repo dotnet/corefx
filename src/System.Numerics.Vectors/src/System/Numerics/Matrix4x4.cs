@@ -1850,36 +1850,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
-        public static Matrix4x4 Negate(Matrix4x4 value)
-        {
-            if (Sse.IsSupported)
-            {
-                return -value;
-            }
-            else
-            {
-                Matrix4x4 result;
-
-                result.M11 = -value.M11;
-                result.M12 = -value.M12;
-                result.M13 = -value.M13;
-                result.M14 = -value.M14;
-                result.M21 = -value.M21;
-                result.M22 = -value.M22;
-                result.M23 = -value.M23;
-                result.M24 = -value.M24;
-                result.M31 = -value.M31;
-                result.M32 = -value.M32;
-                result.M33 = -value.M33;
-                result.M34 = -value.M34;
-                result.M41 = -value.M41;
-                result.M42 = -value.M42;
-                result.M43 = -value.M43;
-                result.M44 = -value.M44;
-
-                return result;
-            }
-        }
+        public static Matrix4x4 Negate(Matrix4x4 value) => -value;
 
         /// <summary>
         /// Adds two matrices together.
@@ -1887,36 +1858,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
-        public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
-        {
-            if (Sse.IsSupported)
-            {
-                return value1 + value2;
-            }
-            else
-            {
-                Matrix4x4 result;
-
-                result.M11 = value1.M11 + value2.M11;
-                result.M12 = value1.M12 + value2.M12;
-                result.M13 = value1.M13 + value2.M13;
-                result.M14 = value1.M14 + value2.M14;
-                result.M21 = value1.M21 + value2.M21;
-                result.M22 = value1.M22 + value2.M22;
-                result.M23 = value1.M23 + value2.M23;
-                result.M24 = value1.M24 + value2.M24;
-                result.M31 = value1.M31 + value2.M31;
-                result.M32 = value1.M32 + value2.M32;
-                result.M33 = value1.M33 + value2.M33;
-                result.M34 = value1.M34 + value2.M34;
-                result.M41 = value1.M41 + value2.M41;
-                result.M42 = value1.M42 + value2.M42;
-                result.M43 = value1.M43 + value2.M43;
-                result.M44 = value1.M44 + value2.M44;
-
-                return result;
-            }
-        }
+        public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2) => value1 + value2;
 
         /// <summary>
         /// Subtracts the second matrix from the first.
@@ -1924,36 +1866,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
-        public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
-        {
-            if (Sse.IsSupported)
-            {
-                return value1 - value2;
-            }
-            else
-            {
-                Matrix4x4 result;
-
-                result.M11 = value1.M11 - value2.M11;
-                result.M12 = value1.M12 - value2.M12;
-                result.M13 = value1.M13 - value2.M13;
-                result.M14 = value1.M14 - value2.M14;
-                result.M21 = value1.M21 - value2.M21;
-                result.M22 = value1.M22 - value2.M22;
-                result.M23 = value1.M23 - value2.M23;
-                result.M24 = value1.M24 - value2.M24;
-                result.M31 = value1.M31 - value2.M31;
-                result.M32 = value1.M32 - value2.M32;
-                result.M33 = value1.M33 - value2.M33;
-                result.M34 = value1.M34 - value2.M34;
-                result.M41 = value1.M41 - value2.M41;
-                result.M42 = value1.M42 - value2.M42;
-                result.M43 = value1.M43 - value2.M43;
-                result.M44 = value1.M44 - value2.M44;
-
-                return result;
-            }
-        }
+        public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2) => value1 - value2;
 
         /// <summary>
         /// Multiplies a matrix by another matrix.
@@ -1961,43 +1874,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
-        public static Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2)
-        {
-            if (Sse.IsSupported)
-            {
-                return value1 * value2;
-            }
-            else
-            {
-                Matrix4x4 result;
-
-                // First row
-                result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
-                result.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
-                result.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
-                result.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 + value1.M14 * value2.M44;
-
-                // Second row
-                result.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 + value1.M24 * value2.M41;
-                result.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 + value1.M24 * value2.M42;
-                result.M23 = value1.M21 * value2.M13 + value1.M22 * value2.M23 + value1.M23 * value2.M33 + value1.M24 * value2.M43;
-                result.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 + value1.M24 * value2.M44;
-
-                // Third row
-                result.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 + value1.M34 * value2.M41;
-                result.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 + value1.M34 * value2.M42;
-                result.M33 = value1.M31 * value2.M13 + value1.M32 * value2.M23 + value1.M33 * value2.M33 + value1.M34 * value2.M43;
-                result.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 + value1.M34 * value2.M44;
-
-                // Fourth row
-                result.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 + value1.M44 * value2.M41;
-                result.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 + value1.M44 * value2.M42;
-                result.M43 = value1.M41 * value2.M13 + value1.M42 * value2.M23 + value1.M43 * value2.M33 + value1.M44 * value2.M43;
-                result.M44 = value1.M41 * value2.M14 + value1.M42 * value2.M24 + value1.M43 * value2.M34 + value1.M44 * value2.M44;
-
-                return result;
-            }
-        }
+        public static Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2) => value1 * value2;
 
         /// <summary>
         /// Multiplies a matrix by a scalar value.
@@ -2005,36 +1882,7 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
-        public static Matrix4x4 Multiply(Matrix4x4 value1, float value2)
-        {
-            if (Sse.IsSupported)
-            {
-                return value1 * value2;
-            }
-            else
-            {
-                Matrix4x4 result;
-
-                result.M11 = value1.M11 * value2;
-                result.M12 = value1.M12 * value2;
-                result.M13 = value1.M13 * value2;
-                result.M14 = value1.M14 * value2;
-                result.M21 = value1.M21 * value2;
-                result.M22 = value1.M22 * value2;
-                result.M23 = value1.M23 * value2;
-                result.M24 = value1.M24 * value2;
-                result.M31 = value1.M31 * value2;
-                result.M32 = value1.M32 * value2;
-                result.M33 = value1.M33 * value2;
-                result.M34 = value1.M34 * value2;
-                result.M41 = value1.M41 * value2;
-                result.M42 = value1.M42 * value2;
-                result.M43 = value1.M43 * value2;
-                result.M44 = value1.M44 * value2;
-
-                return result;
-            }
-        }
+        public static Matrix4x4 Multiply(Matrix4x4 value1, float value2) => value1 * value2;
 
         /// <summary>
         /// Returns a new matrix with the negated elements of the given matrix.
@@ -2324,20 +2172,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="other">The matrix to compare this instance to.</param>
         /// <returns>True if the matrices are equal; False otherwise.</returns>
-        public bool Equals(Matrix4x4 other)
-        {
-            if (Sse.IsSupported)
-            {
-                return this == other;
-            }
-            else
-            {
-                return (M11 == other.M11 && M22 == other.M22 && M33 == other.M33 && M44 == other.M44 && // Check diagonal element first for early out.
-                        M12 == other.M12 && M13 == other.M13 && M14 == other.M14 && M21 == other.M21 && 
-                        M23 == other.M23 && M24 == other.M24 && M31 == other.M31 && M32 == other.M32 && 
-                        M34 == other.M34 && M41 == other.M41 && M42 == other.M42 && M43 == other.M43);
-            }
-        }
+        public bool Equals(Matrix4x4 other) => this == other;
 
         /// <summary>
         /// Returns a boolean indicating whether the given Object is equal to this matrix instance.
@@ -2346,9 +2181,9 @@ namespace System.Numerics
         /// <returns>True if the Object is equal to this matrix; False otherwise.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is Matrix4x4)
+            if (obj is Matrix4x4 m)
             {
-                return Equals((Matrix4x4)obj);
+                return this == m;
             }
 
             return false;
