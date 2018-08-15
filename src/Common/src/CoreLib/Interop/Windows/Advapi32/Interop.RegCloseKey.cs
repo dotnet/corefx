@@ -9,8 +9,7 @@ internal partial class Interop
 {
     internal partial class Advapi32
     {
-        public delegate void ServiceMainCallback(int argCount, IntPtr argPointer);
-        public delegate void ServiceControlCallback(int control);
-        public delegate int ServiceControlCallbackEx(int control, int eventType, IntPtr eventData, IntPtr eventContext);
+        [DllImport(Libraries.Advapi32)]
+        internal static extern int RegCloseKey(IntPtr hKey);
     }
 }
