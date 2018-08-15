@@ -65,6 +65,7 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Ctor_CustomTypeConverter_TypeDescriptorNotFound_ExceptionFallback()
         {
             RemoteInvoke(() =>
@@ -85,6 +86,7 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Ctor_CustomTypeConverter_Fallback()
         {
             RemoteInvoke(() =>
