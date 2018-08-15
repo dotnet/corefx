@@ -16,20 +16,20 @@ namespace System.Diagnostics
 
         public string PasswordInClearText
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
         }
 
         public string Domain
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
         }
 
         public bool LoadUserProfile
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
         }
 
         public bool UseShellExecute { get; set; }
@@ -39,8 +39,8 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public SecureString Password
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityPartiallySupported); }
         }
     }
 }
