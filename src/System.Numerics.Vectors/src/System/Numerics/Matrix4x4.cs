@@ -2050,8 +2050,8 @@ namespace System.Numerics
                 var all = Sse.SetAllVector128(value2);
                 Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
                 Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), all));
+                Sse.Store(&value1.M31, Sse.Multiply(Sse.LoadVector128(&value1.M31), all));
                 Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), all));
-                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
                 return value1;
             }
             else
@@ -2287,8 +2287,8 @@ namespace System.Numerics
                 var all = Sse.SetAllVector128(value2);
                 Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
                 Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), all));
+                Sse.Store(&value1.M31, Sse.Multiply(Sse.LoadVector128(&value1.M31), all));
                 Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), all));
-                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), all));
                 return value1;
             }
             else
