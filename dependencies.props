@@ -9,9 +9,9 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>a60bbcb781c64fba83bbb14df63a8bdda98b7698</CoreFxCurrentRef>
-    <CoreClrCurrentRef>a60bbcb781c64fba83bbb14df63a8bdda98b7698</CoreClrCurrentRef>
-    <CoreSetupCurrentRef>a60bbcb781c64fba83bbb14df63a8bdda98b7698</CoreSetupCurrentRef>
+    <CoreFxCurrentRef>71db6a73ef6b8781f0c05372eca442fd0d72ef7c</CoreFxCurrentRef>
+    <CoreClrCurrentRef>71db6a73ef6b8781f0c05372eca442fd0d72ef7c</CoreClrCurrentRef>
+    <CoreSetupCurrentRef>71db6a73ef6b8781f0c05372eca442fd0d72ef7c</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>ccd922b62227c43ed2dac6bcb737321dd2b07be0</ProjectNTfsCurrentRef>
     <ProjectNTfsTestILCCurrentRef>ccd922b62227c43ed2dac6bcb737321dd2b07be0</ProjectNTfsTestILCCurrentRef>
