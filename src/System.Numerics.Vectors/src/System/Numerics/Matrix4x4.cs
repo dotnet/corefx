@@ -1758,28 +1758,45 @@ namespace System.Numerics
         /// </summary>
         /// <param name="matrix">The source matrix.</param>
         /// <returns>The transposed matrix.</returns>
-        public static Matrix4x4 Transpose(Matrix4x4 matrix)
+        public static unsafe Matrix4x4 Transpose(Matrix4x4 matrix)
         {
-            Matrix4x4 result;
+            if (Sse.IsSupported)
+            {
+                Matrix4x4 result = default;
+                var t0 = Sse.Shuffle(Sse.LoadVector128(&matrix.M11), Sse.LoadVector128(&matrix.M21), 0x44);
+                var t1 = Sse.Shuffle(Sse.LoadVector128(&matrix.M31), Sse.LoadVector128(&matrix.M41), 0x44);
+                var t2 = Sse.Shuffle(Sse.LoadVector128(&matrix.M11), Sse.LoadVector128(&matrix.M21), 0xEE);
+                var t3 = Sse.Shuffle(Sse.LoadVector128(&matrix.M31), Sse.LoadVector128(&matrix.M41), 0xEE);
 
-            result.M11 = matrix.M11;
-            result.M12 = matrix.M21;
-            result.M13 = matrix.M31;
-            result.M14 = matrix.M41;
-            result.M21 = matrix.M12;
-            result.M22 = matrix.M22;
-            result.M23 = matrix.M32;
-            result.M24 = matrix.M42;
-            result.M31 = matrix.M13;
-            result.M32 = matrix.M23;
-            result.M33 = matrix.M33;
-            result.M34 = matrix.M43;
-            result.M41 = matrix.M14;
-            result.M42 = matrix.M24;
-            result.M43 = matrix.M34;
-            result.M44 = matrix.M44;
+                Sse.Store(&result.M11, Sse.Shuffle(t0, t1, 0x88));
+                Sse.Store(&result.M21, Sse.Shuffle(t0, t1, 0xDD));
+                Sse.Store(&result.M31, Sse.Shuffle(t2, t3, 0x88));
+                Sse.Store(&result.M41, Sse.Shuffle(t2, t3, 0xDD));
+                return result;
+            }
+            else
+            {
+                Matrix4x4 result;
 
-            return result;
+                result.M11 = matrix.M11;
+                result.M12 = matrix.M21;
+                result.M13 = matrix.M31;
+                result.M14 = matrix.M41;
+                result.M21 = matrix.M12;
+                result.M22 = matrix.M22;
+                result.M23 = matrix.M32;
+                result.M24 = matrix.M42;
+                result.M31 = matrix.M13;
+                result.M32 = matrix.M23;
+                result.M33 = matrix.M33;
+                result.M34 = matrix.M43;
+                result.M41 = matrix.M14;
+                result.M42 = matrix.M24;
+                result.M43 = matrix.M34;
+                result.M44 = matrix.M44;
+
+                return result;
+            }
         }
 
         /// <summary>
