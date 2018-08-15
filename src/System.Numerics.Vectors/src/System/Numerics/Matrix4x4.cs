@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace System.Numerics
@@ -10,6 +11,7 @@ namespace System.Numerics
     /// <summary>
     /// A structure encapsulating a 4x4 matrix.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Matrix4x4 : IEquatable<Matrix4x4>
     {
         #region Public Fields
