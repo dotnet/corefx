@@ -5,7 +5,6 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 #if HAS_INTRINSICS
-using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
 
@@ -1806,11 +1805,6 @@ namespace System.Numerics
             return result;
         }
 
-#if HAS_INTRINSICS
-        private static Vector128<float> Lerp(Vector128<float> a, Vector128<float> b, Vector128<float> t) => 
-            Sse.Add(a, Sse.Multiply(Sse.Subtract(b, a), t));
-#endif
-
         /// <summary>
         /// Linearly interpolates between the corresponding values of two matrices.
         /// </summary>
@@ -1824,10 +1818,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 var amountVec = Sse.SetAllVector128(amount);
-                Sse.Store(&matrix1.M11, Lerp(Sse.LoadVector128(&matrix1.M11), Sse.LoadVector128(&matrix2.M11), amountVec));
-                Sse.Store(&matrix1.M21, Lerp(Sse.LoadVector128(&matrix1.M21), Sse.LoadVector128(&matrix2.M21), amountVec));
-                Sse.Store(&matrix1.M31, Lerp(Sse.LoadVector128(&matrix1.M31), Sse.LoadVector128(&matrix2.M31), amountVec));
-                Sse.Store(&matrix1.M41, Lerp(Sse.LoadVector128(&matrix1.M41), Sse.LoadVector128(&matrix2.M41), amountVec));
+                Sse.Store(&matrix1.M11, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M11), Sse.LoadVector128(&matrix2.M11), amountVec));
+                Sse.Store(&matrix1.M21, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M21), Sse.LoadVector128(&matrix2.M21), amountVec));
+                Sse.Store(&matrix1.M31, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M31), Sse.LoadVector128(&matrix2.M31), amountVec));
+                Sse.Store(&matrix1.M41, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M41), Sse.LoadVector128(&matrix2.M41), amountVec));
                 return matrix1;
             }
 #endif
@@ -2138,10 +2132,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 return
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0 &&
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0 &&
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0 &&
-                    Sse.MoveMask(Sse.CompareNotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0;
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11)) &&
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21)) &&
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31)) &&
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41));
             }
 #endif
             return (value1.M11 == value2.M11 && value1.M22 == value2.M22 && value1.M33 == value2.M33 && value1.M44 == value2.M44 && // Check diagonal element first for early out.

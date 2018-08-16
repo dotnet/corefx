@@ -62,6 +62,7 @@
     <Compile Include="System\Numerics\Vector3_Intrinsics.cs" />
     <Compile Include="System\Numerics\Vector4.cs" />
     <Compile Include="System\Numerics\Vector4_Intrinsics.cs" />
+    <Compile Include="System\Numerics\VectorMath.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsTargetingNetFx)' == 'true'">
     <Reference Include="mscorlib" />
