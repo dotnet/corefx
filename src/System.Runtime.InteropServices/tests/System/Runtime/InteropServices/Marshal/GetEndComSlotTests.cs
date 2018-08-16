@@ -11,6 +11,15 @@ namespace System.Runtime.InteropServices.Tests
     public partial class GetEndComSlotTests
     {
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void GetEndComSlot_Unix_ThrowsPlatformNotSupportedException()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => Marshal.GetEndComSlot(null));
+        }
+
+        [Fact]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNative))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetEndComSlot_NullObject_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => Marshal.GetEndComSlot(null));

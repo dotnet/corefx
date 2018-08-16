@@ -11,6 +11,15 @@ namespace System.Runtime.InteropServices.Tests
     public partial class GetStartComSlotTests
     {
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void GetStartComSlot_Unix_ThrowsPlatformNotSupportedException()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => Marshal.GetStartComSlot(null));
+        }
+
+        [Fact]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNative))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetStartComSlot_NullType_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => Marshal.GetStartComSlot(null));
