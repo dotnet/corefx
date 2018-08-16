@@ -4,7 +4,7 @@
 
 using System.Globalization;
 using System.Runtime.InteropServices;
-#if netcoreapp
+#if HAS_INTRINSICS
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
@@ -1763,7 +1763,7 @@ namespace System.Numerics
         /// <returns>The transposed matrix.</returns>
         public static unsafe Matrix4x4 Transpose(Matrix4x4 matrix)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 var row1 = Sse.LoadVector128(&matrix.M11);
@@ -1806,7 +1806,7 @@ namespace System.Numerics
             return result;
         }
 
-#if netcoreapp
+#if HAS_INTRINSICS
         private static Vector128<float> Lerp(Vector128<float> a, Vector128<float> b, Vector128<float> t) => 
             Sse.Add(a, Sse.Multiply(Sse.Subtract(b, a), t));
 #endif
@@ -1820,7 +1820,7 @@ namespace System.Numerics
         /// <returns>The interpolated matrix.</returns>
         public static unsafe Matrix4x4 Lerp(Matrix4x4 matrix1, Matrix4x4 matrix2, float amount)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 var amountVec = Sse.SetAllVector128(amount);
@@ -1906,7 +1906,7 @@ namespace System.Numerics
         /// <returns>The negated matrix.</returns>
         public static unsafe Matrix4x4 operator -(Matrix4x4 value)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 var zero = Sse.SetZeroVector128();
@@ -1948,7 +1948,7 @@ namespace System.Numerics
         /// <returns>The resulting matrix.</returns>
         public static unsafe Matrix4x4 operator +(Matrix4x4 value1, Matrix4x4 value2)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 Sse.Store(&value1.M11, Sse.Add(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value1.M11)));
@@ -1988,7 +1988,7 @@ namespace System.Numerics
         /// <returns>The result of the subtraction.</returns>
         public static unsafe Matrix4x4 operator -(Matrix4x4 value1, Matrix4x4 value2)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 Sse.Store(&value1.M11, Sse.Subtract(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value1.M11)));
@@ -2028,7 +2028,7 @@ namespace System.Numerics
         /// <returns>The result of the multiplication.</returns>
         public static unsafe Matrix4x4 operator *(Matrix4x4 value1, Matrix4x4 value2)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 Sse.Store(&value1.M11,
@@ -2094,7 +2094,7 @@ namespace System.Numerics
         /// <returns>The scaled matrix.</returns>
         public static unsafe Matrix4x4 operator *(Matrix4x4 value1, float value2)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 var value2Vec = Sse.SetAllVector128(value2);
@@ -2134,7 +2134,7 @@ namespace System.Numerics
         /// <returns>True if the given matrices are equal; False otherwise.</returns>
         public static unsafe bool operator ==(Matrix4x4 value1, Matrix4x4 value2)
         {
-#if netcoreapp
+#if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
                 return
