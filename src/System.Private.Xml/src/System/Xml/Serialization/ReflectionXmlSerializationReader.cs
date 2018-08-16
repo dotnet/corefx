@@ -851,17 +851,10 @@ namespace System.Xml.Serialization
                 {
                     Reader.Skip();
                 }
-                else if(element.Mapping.TypeDesc.Type == typeof(TimeSpan))
-                {
-                    if(Reader.IsEmptyElement)
-                    {
-                        Reader.Skip();
-                        value = default(TimeSpan);
-                    }
-                    else
-                    {
-                        value = XmlConvert.ToTimeSpan(Reader.ReadElementString());
-                    }
+                else if(element.Mapping.TypeDesc.Type == typeof(TimeSpan) && Reader.IsEmptyElement)
+                {                   
+                    Reader.Skip();
+                    value = default(TimeSpan);                   
                 }
                 else
                 {
