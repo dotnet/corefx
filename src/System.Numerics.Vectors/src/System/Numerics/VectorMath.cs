@@ -25,8 +25,19 @@ namespace System.Numerics
         {
             if (Sse.IsSupported)
             {
-                // do not use !Equal if vectors contain NaN
                 return Sse.MoveMask(Sse.CompareNotEqual(vector1, vector2)) == 0;
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        public static bool NotEqual(Vector128<float> vector1, Vector128<float> vector2)
+        {
+            if (Sse.IsSupported)
+            {
+                return Sse.MoveMask(Sse.CompareNotEqual(vector1, vector2)) != 0;
             }
             else
             {
