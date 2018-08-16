@@ -2163,21 +2163,10 @@ namespace System.Numerics
         /// <returns>True if the given matrices are not equal; False if they are equal.</returns>
         public static unsafe bool operator !=(Matrix4x4 value1, Matrix4x4 value2)
         {
-            if (Sse.IsSupported)
-            {
-                return
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11))) == 0 ||
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21))) == 0 ||
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31))) == 0 ||
-                    Sse.MoveMask(Sse.CompareEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41))) == 0;
-            }
-            else 
-            {
-                return (value1.M11 != value2.M11 || value1.M12 != value2.M12 || value1.M13 != value2.M13 || value1.M14 != value2.M14 ||
-                        value1.M21 != value2.M21 || value1.M22 != value2.M22 || value1.M23 != value2.M23 || value1.M24 != value2.M24 ||
-                        value1.M31 != value2.M31 || value1.M32 != value2.M32 || value1.M33 != value2.M33 || value1.M34 != value2.M34 ||
-                        value1.M41 != value2.M41 || value1.M42 != value2.M42 || value1.M43 != value2.M43 || value1.M44 != value2.M44);
-            }
+            return (value1.M11 != value2.M11 || value1.M12 != value2.M12 || value1.M13 != value2.M13 || value1.M14 != value2.M14 ||
+                    value1.M21 != value2.M21 || value1.M22 != value2.M22 || value1.M23 != value2.M23 || value1.M24 != value2.M24 ||
+                    value1.M31 != value2.M31 || value1.M32 != value2.M32 || value1.M33 != value2.M33 || value1.M34 != value2.M34 ||
+                    value1.M41 != value2.M41 || value1.M42 != value2.M42 || value1.M43 != value2.M43 || value1.M44 != value2.M44);
         }
 
         /// <summary>
