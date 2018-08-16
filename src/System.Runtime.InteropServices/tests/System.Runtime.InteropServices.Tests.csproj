@@ -63,6 +63,8 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateProgIdForTypeTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetComObjectDataTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetDelegateForFunctionPointerTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetEndComSlotTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetEndComSlotTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionCodeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionForHRTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetFunctionPointerForDelegateTests.cs" />
@@ -70,8 +72,13 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\GetNativeVariantForObjectTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetObjectForNativeVariantTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetObjectsForNativeVariantsTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetStartComSlotTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetStartComSlotTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetTypedObjectForIUnknownTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsComObjectTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsComObjectTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\IsTypeVisibleFromComTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\IsTypeVisibleFromComTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\PtrToStructureTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\PtrToStringAnsiTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\PtrToStringBSTR.cs" />
