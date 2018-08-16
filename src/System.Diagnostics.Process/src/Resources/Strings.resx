@@ -244,7 +244,7 @@
     <value>Processor affinity for processes or threads is not supported on this platform.</value>
   </data>
   <data name="ProcessStartWithPasswordAndDomainNotSupported" xml:space="preserve">
-    <value>Starting process as another user with specified password and domain is not supported on this platform.</value>
+    <value>Starting a process as another user with specified password and domain is not supported on this platform.</value>
   </data>
   <data name="ProcessStartSingleFeatureNotSupported" xml:space="preserve">
     <value>The {0} property is not supported on this platform.</value>
