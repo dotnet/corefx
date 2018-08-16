@@ -49,6 +49,7 @@ namespace System.Runtime.InteropServices.Tests
             Delegate functionDelegate = Marshal.GetDelegateForFunctionPointer(ptr, type);
             GC.KeepAlive(d);
             VerifyDelegate(functionDelegate, targetMethod);
+            GC.KeepAlive(functionDelegate);
         }
 
         [Fact]
