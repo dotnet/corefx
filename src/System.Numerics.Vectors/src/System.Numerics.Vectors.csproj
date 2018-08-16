@@ -4,6 +4,7 @@
     <RootNamespace>System.Numerics</RootNamespace>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <IsTargetingNetFx Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsTargetingNetFx>
     <IsTargetingNetCoreApp Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap' OR '$(TargetGroup)'=='uapaot'">true</IsTargetingNetCoreApp>
     <IsPartialFacadeAssembly Condition="'$(IsTargetingNetFx)'=='true' OR '$(IsTargetingNetCoreApp)'=='true'">true</IsPartialFacadeAssembly>
