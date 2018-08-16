@@ -59,6 +59,7 @@ namespace System.Security.Principal
 
         public WindowsIdentity(IntPtr userToken, string type) : this(userToken, type, -1) { }
 
+        // The actual accType is ignored and always will be retrieved from the system.
         public WindowsIdentity(IntPtr userToken, string type, WindowsAccountType acctType) : this(userToken, type, -1) { }
 
         public WindowsIdentity(IntPtr userToken, string type, WindowsAccountType acctType, bool isAuthenticated)

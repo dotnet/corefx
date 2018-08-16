@@ -15,7 +15,7 @@ using Xunit;
 
 public class WindowsIdentityTests
 {
-    private static string authenticationType = "WindowsAuthentication";
+    private static readonly string authenticationType = "WindowsAuthentication";
 
     [Fact]
     public static void GetAnonymousUserTest()
@@ -31,13 +31,8 @@ public class WindowsIdentityTests
     public static void ConstructorsAndProperties()
     {
         // Retrieve the Windows account token for the current user.
-        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
-        bool gotRef = false;
-        try
+        DoTest((logonToken) =>
         {
-            token.DangerousAddRef(ref gotRef);
-            IntPtr logonToken = token.DangerousGetHandle();
-
             // Construct a WindowsIdentity object using the input account token.
             WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken);
             Assert.NotNull(windowsIdentity);
@@ -49,12 +44,7 @@ public class WindowsIdentityTests
 
             Assert.Equal(authenticationType, windowsIdentity2.AuthenticationType);
             CheckDispose(windowsIdentity2);
-        }
-        finally
-        {
-            if (gotRef)
-                token.DangerousRelease();
-        }
+        });
     }
 
     [Theory]
@@ -62,60 +52,36 @@ public class WindowsIdentityTests
     [InlineData(false)]
     public static void AuthenticationCtor(bool authentication)
     {
-        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
-        bool gotRef = false;
-        try
+        DoTest((logonToken) =>
         {
-            token.DangerousAddRef(ref gotRef);
-            IntPtr logonToken = token.DangerousGetHandle();
-
             WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal, isAuthenticated: authentication);
             Assert.NotNull(windowsIdentity);
             Assert.Equal(authentication, windowsIdentity.IsAuthenticated);
 
             Assert.Equal(authenticationType, windowsIdentity.AuthenticationType);
             CheckDispose(windowsIdentity);
-        }
-        finally
-        {
-            if (gotRef)
-                token.DangerousRelease();
-        }
+        });
     }
 
     [Fact]
-    public static void WinndowsAccountTypeCtor()
+    public static void WindowsAccountTypeCtor()
     {
-        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
-        bool gotRef = false;
-        try
+        DoTest((logonToken) =>
         {
-            token.DangerousAddRef(ref gotRef);
-            IntPtr logonToken = token.DangerousGetHandle();
+            WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal);
+            Assert.NotNull(windowsIdentity);
+            Assert.True(windowsIdentity.IsAuthenticated);
 
-            WindowsIdentity windowsIdentity2 = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal);
-            Assert.NotNull(windowsIdentity2);
-            Assert.True(windowsIdentity2.IsAuthenticated);
-
-            Assert.Equal(authenticationType, windowsIdentity2.AuthenticationType);
-            CheckDispose(windowsIdentity2);
-        }
-        finally
-        {
-            if (gotRef)
-                token.DangerousRelease();
-        }
+            Assert.Equal(authenticationType, windowsIdentity.AuthenticationType);
+            CheckDispose(windowsIdentity);
+        });
     }
 
     [Fact]
     public static void CloneAndProperties()
     {
-        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
-        bool gotRef = false;
-        try
+        DoTest((logonToken) =>
         {
-            token.DangerousAddRef(ref gotRef);
-            IntPtr logonToken = token.DangerousGetHandle();
             WindowsIdentity winId = new WindowsIdentity(logonToken);
 
             WindowsIdentity cloneWinId = winId.Clone() as WindowsIdentity;
@@ -134,12 +100,7 @@ public class WindowsIdentityTests
 
             CheckDispose(winId);
             CheckDispose(cloneWinId);
-        }
-        finally
-        {
-            if (gotRef)
-                token.DangerousRelease();
-        }
+        });
     }
 
     [Fact]
@@ -257,6 +218,23 @@ public class WindowsIdentityTests
             Assert.Throws<ObjectDisposedException>(() => identity.Name);
             Assert.Throws<ObjectDisposedException>(() => identity.Owner);
             Assert.Throws<ObjectDisposedException>(() => identity.User);
+        }
+    }
+
+    private static void DoTest(Action<IntPtr> test)
+    {
+        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
+        bool gotRef = false;
+        try
+        {
+            token.DangerousAddRef(ref gotRef);
+            IntPtr logonToken = token.DangerousGetHandle();
+            test(logonToken);
+        }
+        finally
+        {
+            if (gotRef)
+                token.DangerousRelease();
         }
     }
 }
