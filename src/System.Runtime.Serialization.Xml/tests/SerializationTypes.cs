@@ -1243,3 +1243,13 @@ public class TypeWithMismatchBetweenAttributeAndPropertyType
         }
     }
 }
+
+public class TestSerialize
+{
+    [XmlAttribute]
+    public double? Attr
+    {
+        get;
+        set;
+    }
+}

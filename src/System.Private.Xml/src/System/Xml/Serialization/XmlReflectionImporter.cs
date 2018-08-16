@@ -420,7 +420,7 @@ namespace System.Xml.Serialization
                     case TypeKind.Root:
                     case TypeKind.Class:
                     case TypeKind.Struct:
-                        if (context != ImportContext.Element) throw UnsupportedException(model.TypeDesc, context);
+                        if (context != ImportContext.Element && !model.TypeDesc.IsOptionalValue) throw UnsupportedException(model.TypeDesc, context);
                         if (model.TypeDesc.IsOptionalValue)
                         {
                             TypeDesc valueTypeDesc = string.IsNullOrEmpty(dataType) ? model.TypeDesc.BaseTypeDesc : _typeScope.GetTypeDesc(dataType, XmlSchema.Namespace);
@@ -1832,6 +1832,33 @@ namespace System.Xml.Serialization
                     }
                     accessor.Xmlns = new XmlnsAccessor();
                     accessor.Ignore = true;
+                }
+                else if(a.XmlAttribute != null && accessor.TypeDesc.IsOptionalValue)
+                {
+                    if (a.XmlElements.Count > 0)
+                        throw new InvalidOperationException(SR.XmlIllegalAttribute);
+                    if (a.XmlAttribute.Type != null)
+                        throw new InvalidOperationException(SR.Format(SR.XmlIllegalType, "XmlAttribute"));
+                    AttributeAccessor attribute = new AttributeAccessor();
+                    attribute.Name = Accessor.EscapeQName(a.XmlAttribute.AttributeName.Length == 0 ? accessorName : a.XmlAttribute.AttributeName);
+                    attribute.Namespace = a.XmlAttribute.Namespace == null ? ns : a.XmlAttribute.Namespace;
+                    attribute.Form = a.XmlAttribute.Form;
+                    if (attribute.Form == XmlSchemaForm.None && ns != attribute.Namespace)
+                    {
+                        attribute.Form = XmlSchemaForm.Qualified;
+                    }
+                    attribute.CheckSpecial();
+                    CheckForm(attribute.Form, ns != attribute.Namespace);
+                    attribute.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(accessorType), ns, ImportContext.Attribute, a.XmlAttribute.DataType, null, limiter);
+                    attribute.Default = GetDefaultValue(model.FieldTypeDesc, model.FieldType, a);
+                    attribute.Any = a.XmlAnyAttribute != null;
+                    if (attribute.Form == XmlSchemaForm.Qualified && attribute.Namespace != ns)
+                    {
+                        if (_xsdAttributes == null)
+                            _xsdAttributes = new NameTable();
+                        attribute = (AttributeAccessor)ReconcileAccessor(attribute, _xsdAttributes);
+                    }
+                    accessor.Attribute = attribute;
                 }
                 else
                 {
