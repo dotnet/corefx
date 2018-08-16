@@ -4,8 +4,10 @@
 
 using System.Globalization;
 using System.Runtime.InteropServices;
+#if netcoreapp
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+#endif
 
 namespace System.Numerics
 {
@@ -1804,8 +1806,10 @@ namespace System.Numerics
             return result;
         }
 
+#if netcoreapp
         private static Vector128<float> Lerp(Vector128<float> a, Vector128<float> b, Vector128<float> t) => 
             Sse.Add(a, Sse.Multiply(Sse.Subtract(b, a), t));
+#endif
 
         /// <summary>
         /// Linearly interpolates between the corresponding values of two matrices.
