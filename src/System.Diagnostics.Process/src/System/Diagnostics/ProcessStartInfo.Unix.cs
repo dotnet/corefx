@@ -16,20 +16,20 @@ namespace System.Diagnostics
 
         public string PasswordInClearText
         {
-            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
-            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(PasswordInClearText))); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(PasswordInClearText))); }
         }
 
         public string Domain
         {
-            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Domain")); }
-            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Domain")); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(Domain))); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(Domain))); }
         }
 
         public bool LoadUserProfile
         {
-            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "LoadUserProfile")); }
-            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "LoadUserProfile")); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(LoadUserProfile))); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(LoadUserProfile))); }
         }
 
         public bool UseShellExecute { get; set; }
@@ -39,8 +39,8 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public SecureString Password
         {
-            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
-            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartFeaturesNotSupported, "Password and PasswordInClearText")); }
+            get { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(Password))); }
+            set { throw new PlatformNotSupportedException(string.Format(SR.ProcessStartSingleFeatureNotSupported, nameof(Password))); }
         }
     }
 }
