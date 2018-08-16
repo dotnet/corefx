@@ -2963,6 +2963,7 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #31427")]
     public static void SerializePrimitiveXmlTextAttributeOnDerivedClass()
     {
         var value = new PrimiveAttributeTestDerived() { Number = 5 };
