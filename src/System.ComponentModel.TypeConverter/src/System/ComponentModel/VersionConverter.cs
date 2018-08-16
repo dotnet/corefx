@@ -36,12 +36,19 @@ namespace System.ComponentModel
         /// <summary>
         ///    <para>Converts the given object to a Version.</para>
         /// </summary>
+        /// <exception cref="FormatException"><paramref name="value"/> is not a valid version string</exception>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string versionString)
             {
-                // Let the Version constructor throw any informative exceptions
-                return Version.Parse(versionString);
+                try
+                {
+                    return Version.Parse(versionString);
+                }
+                catch (Exception e)
+                {
+                    throw new FormatException(SR.Format(SR.ConvertInvalidPrimitive, versionString, nameof(Version)), e);
+                }
             }
 
             if (value is Version version)

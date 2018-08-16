@@ -35,14 +35,21 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        public static void ConvertFrom_WithContext_Negative()
+        public static void ConvertFromNull_WithContext_ThrowsNotSupportedException()
         {
             Assert.Throws<NotSupportedException>(
                 () => VersionConverterTests.s_converter.ConvertFrom(TypeConverterTests.s_context, null, null));
-            Assert.Throws<ArgumentException>(
-                () => VersionConverterTests.s_converter.ConvertFrom(TypeConverterTests.s_context, null, ""));
-            Assert.Throws<ArgumentException>(
-                () => VersionConverterTests.s_converter.ConvertFrom(TypeConverterTests.s_context, null, "1"));
+        }
+        
+        [Theory]
+        [InlineData("")]
+        [InlineData("1")]
+        [InlineData("1.-2")]
+        [InlineData("1.9999999999")]
+        public static void ConvertFromInvalidVersion_WithContext_ThrowsFormatException(string version)
+        {
+            Assert.Throws<FormatException>(
+                () => VersionConverterTests.s_converter.ConvertFrom(TypeConverterTests.s_context, null, version));
         }
     }
 }
