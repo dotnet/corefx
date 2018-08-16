@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
 namespace System.Numerics
@@ -1803,6 +1804,9 @@ namespace System.Numerics
                 return result;
             }
         }
+        
+        private static Vector128<float> Lerp(Vector128<float> a, Vector128<float> b, Vector128<float> t) => 
+            Sse.Add(a, Sse.Multiply(Sse.Subtract(b, a), t));
 
         /// <summary>
         /// Linearly interpolates between the corresponding values of two matrices.
@@ -1816,23 +1820,10 @@ namespace System.Numerics
             if (Sse.IsSupported)
             {
                 var amountVec = Sse.SetAllVector128(amount);
-
-                var m1Row = Sse.LoadVector128(&matrix1.M11);
-                var m2Row = Sse.LoadVector128(&matrix2.M11);
-                Sse.Store(&matrix1.M11, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
-
-                m1Row = Sse.LoadVector128(&matrix1.M21);
-                m2Row = Sse.LoadVector128(&matrix2.M21);
-                Sse.Store(&matrix1.M21, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
-
-                m1Row = Sse.LoadVector128(&matrix1.M31);
-                m2Row = Sse.LoadVector128(&matrix2.M31);
-                Sse.Store(&matrix1.M31, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
-
-                m1Row = Sse.LoadVector128(&matrix1.M41);
-                m2Row = Sse.LoadVector128(&matrix2.M41);
-                Sse.Store(&matrix1.M41, Sse.Add(m1Row, Sse.Multiply(Sse.Subtract(m2Row, m1Row), amountVec)));
-                
+                Sse.Store(&matrix1.M11, Lerp(Sse.LoadVector128(&matrix1.M11), Sse.LoadVector128(&matrix2.M11), amountVec));
+                Sse.Store(&matrix1.M21, Lerp(Sse.LoadVector128(&matrix1.M21), Sse.LoadVector128(&matrix2.M21), amountVec));
+                Sse.Store(&matrix1.M31, Lerp(Sse.LoadVector128(&matrix1.M31), Sse.LoadVector128(&matrix2.M31), amountVec));
+                Sse.Store(&matrix1.M41, Lerp(Sse.LoadVector128(&matrix1.M41), Sse.LoadVector128(&matrix2.M41), amountVec));
                 return matrix1;
             }
             else
