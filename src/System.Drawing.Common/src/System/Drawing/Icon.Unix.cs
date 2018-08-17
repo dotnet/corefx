@@ -46,7 +46,7 @@ namespace System.Drawing
 {
 #if !NETCORE
 #if !MONOTOUCH
-    [Editor ("System.Drawing.Design.IconEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
+    [Editor("System.Drawing.Design.IconEditor, " + Consts.AssemblySystem_Drawing_Design, typeof(System.Drawing.Design.UITypeEditor))]
 #endif
     [TypeConverter(typeof(IconConverter))]
 #endif
@@ -855,7 +855,7 @@ namespace System.Drawing
                 for (int i = 0; i < numColors; i++)
                     iidata.iconColors[i] = bihReader.ReadUInt32();
 
-                //XOR mask is immediately after ColorTable and its size is 
+                //XOR mask is immediately after ColorTable and its size is
                 //icon height* no. of bytes per line
 
                 //icon height is half of BITMAPINFOHEADER.biHeight, since it contains
@@ -863,10 +863,10 @@ namespace System.Drawing
                 int iconHeight = bih.biHeight / 2;
 
                 //bytes per line should should be uint aligned
-                int numBytesPerLine = ((((bih.biWidth * bih.biPlanes * bih.biBitCount) + 31) >> 5) << 2);
+                int numBytesPerLine = checked((((bih.biWidth * bih.biPlanes * bih.biBitCount) + 31) >> 5) << 2);
 
                 //Determine the XOR array Size
-                int xorSize = numBytesPerLine * iconHeight;
+                int xorSize = checked(numBytesPerLine * iconHeight);
                 iidata.iconXOR = new byte[xorSize];
                 int nread = bihReader.Read(iidata.iconXOR, 0, xorSize);
                 if (nread != xorSize)
@@ -876,8 +876,8 @@ namespace System.Drawing
                 }
 
                 //Determine the AND array size
-                numBytesPerLine = (int)((((bih.biWidth) + 31) & ~31) >> 3);
-                int andSize = numBytesPerLine * iconHeight;
+                numBytesPerLine = checked((((bih.biWidth) + 31) & ~31) >> 3);
+                int andSize = checked(numBytesPerLine * iconHeight);
                 iidata.iconAND = new byte[andSize];
                 nread = bihReader.Read(iidata.iconAND, 0, andSize);
                 if (nread != andSize)
