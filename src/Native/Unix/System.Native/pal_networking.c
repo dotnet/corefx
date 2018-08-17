@@ -1752,7 +1752,6 @@ int32_t SystemNative_GetSockOpt(
             *(int32_t*)optionValue = value;
 #else
             *optionValue = 0;
-            return Error_SUCCESS;
 #endif
             return Error_SUCCESS;
         }
