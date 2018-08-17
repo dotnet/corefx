@@ -15,13 +15,12 @@ using Xunit;
 
 public class WindowsIdentityTests
 {
-    private static readonly string authenticationType = "WindowsAuthentication";
+    private const string authenticationType = "WindowsAuthentication";
 
     [Fact]
     public static void GetAnonymousUserTest()
     {
         WindowsIdentity windowsIdentity = WindowsIdentity.GetAnonymous();
-        Assert.NotNull(windowsIdentity);
         Assert.True(windowsIdentity.IsAnonymous);
         Assert.False(windowsIdentity.IsAuthenticated);
         CheckDispose(windowsIdentity, true);        
@@ -34,11 +33,9 @@ public class WindowsIdentityTests
         {
             // Construct a WindowsIdentity object using the input account token.
             var windowsIdentity = new WindowsIdentity(logonToken);
-            Assert.NotNull(windowsIdentity);
             CheckDispose(windowsIdentity);
 
             var windowsIdentity2 = new WindowsIdentity(logonToken, authenticationType);
-            Assert.NotNull(windowsIdentity2);
             Assert.True(windowsIdentity2.IsAuthenticated);
 
             Assert.Equal(authenticationType, windowsIdentity2.AuthenticationType);
@@ -54,7 +51,6 @@ public class WindowsIdentityTests
         TestUsingAccessToken((logonToken) =>
         {
             var windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal, isAuthenticated: authentication);
-            Assert.NotNull(windowsIdentity);
             Assert.Equal(authentication, windowsIdentity.IsAuthenticated);
 
             Assert.Equal(authenticationType, windowsIdentity.AuthenticationType);
@@ -68,7 +64,6 @@ public class WindowsIdentityTests
         TestUsingAccessToken((logonToken) =>
         {
             var windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal);
-            Assert.NotNull(windowsIdentity);
             Assert.True(windowsIdentity.IsAuthenticated);
 
             Assert.Equal(authenticationType, windowsIdentity.AuthenticationType);
