@@ -17,7 +17,6 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<PlatformNotSupportedException>(() => Marshal.GetStartComSlot(null));
         }
 
-        [Fact]
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNative))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetStartComSlot_NullType_ThrowsArgumentNullException()
