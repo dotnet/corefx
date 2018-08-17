@@ -82,7 +82,8 @@ namespace System.Net.Http
                 RTHttpRequestMessage rtRequest = await ConvertRequestAsync(
                     request,
                     requestHttpMethod,
-                    skipRequestContentIfPresent).ConfigureAwait(false);
+                    skipRequestContentIfPresent,
+                    redirects > 0).ConfigureAwait(false);
 
                 RTHttpResponseMessage rtResponse;
                 try
@@ -259,7 +260,8 @@ namespace System.Net.Http
         private async Task<RTHttpRequestMessage> ConvertRequestAsync(
             HttpRequestMessage request,
             HttpMethod httpMethod,
-            bool skipRequestContentIfPresent)
+            bool skipRequestContentIfPresent,
+            bool isRedirect)
         {
             RTHttpRequestMessage rtRequest = new RTHttpRequestMessage(
                 new RTHttpMethod(httpMethod.Method),
@@ -305,8 +307,11 @@ namespace System.Net.Http
             {
                 foreach (string value in headerPair.Value)
                 {
-                    bool success = rtRequest.Headers.TryAppendWithoutValidation(headerPair.Key, value);
-                    Debug.Assert(success);
+                    if (!isRedirect || headerPair.Key != HttpKnownHeaderNames.Authorization)
+                    {
+                        bool success = rtRequest.Headers.TryAppendWithoutValidation(headerPair.Key, value);
+                        Debug.Assert(success);
+                    }
                 }
             }
 
