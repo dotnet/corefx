@@ -30,15 +30,14 @@ public class WindowsIdentityTests
     [Fact]
     public static void ConstructorsAndProperties()
     {
-        // Retrieve the Windows account token for the current user.
-        DoTest((logonToken) =>
+        TestUsingAccessToken((logonToken) =>
         {
             // Construct a WindowsIdentity object using the input account token.
-            WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken);
+            var windowsIdentity = new WindowsIdentity(logonToken);
             Assert.NotNull(windowsIdentity);
             CheckDispose(windowsIdentity);
 
-            WindowsIdentity windowsIdentity2 = new WindowsIdentity(logonToken, authenticationType);
+            var windowsIdentity2 = new WindowsIdentity(logonToken, authenticationType);
             Assert.NotNull(windowsIdentity2);
             Assert.True(windowsIdentity2.IsAuthenticated);
 
@@ -52,9 +51,9 @@ public class WindowsIdentityTests
     [InlineData(false)]
     public static void AuthenticationCtor(bool authentication)
     {
-        DoTest((logonToken) =>
+        TestUsingAccessToken((logonToken) =>
         {
-            WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal, isAuthenticated: authentication);
+            var windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal, isAuthenticated: authentication);
             Assert.NotNull(windowsIdentity);
             Assert.Equal(authentication, windowsIdentity.IsAuthenticated);
 
@@ -66,9 +65,9 @@ public class WindowsIdentityTests
     [Fact]
     public static void WindowsAccountTypeCtor()
     {
-        DoTest((logonToken) =>
+        TestUsingAccessToken((logonToken) =>
         {
-            WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal);
+            var windowsIdentity = new WindowsIdentity(logonToken, authenticationType, WindowsAccountType.Normal);
             Assert.NotNull(windowsIdentity);
             Assert.True(windowsIdentity.IsAuthenticated);
 
@@ -80,9 +79,9 @@ public class WindowsIdentityTests
     [Fact]
     public static void CloneAndProperties()
     {
-        DoTest((logonToken) =>
+        TestUsingAccessToken((logonToken) =>
         {
-            WindowsIdentity winId = new WindowsIdentity(logonToken);
+            var winId = new WindowsIdentity(logonToken);
 
             WindowsIdentity cloneWinId = winId.Clone() as WindowsIdentity;
             Assert.NotNull(cloneWinId);
@@ -221,15 +220,16 @@ public class WindowsIdentityTests
         }
     }
 
-    private static void DoTest(Action<IntPtr> test)
+    private static void TestUsingAccessToken(Action<IntPtr> ctorOrPropertyTest)
     {
+        // Retrieve the Windows account token for the current user.
         SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
         bool gotRef = false;
         try
         {
             token.DangerousAddRef(ref gotRef);
             IntPtr logonToken = token.DangerousGetHandle();
-            test(logonToken);
+            ctorOrPropertyTest(logonToken);
         }
         finally
         {
