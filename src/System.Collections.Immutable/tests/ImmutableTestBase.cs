@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Collections.Immutable.Tests
 {
-    public abstract class ImmutablesTestBase
+    public abstract partial class ImmutablesTestBase
     {
         /// <summary>
         /// Gets the number of operations to perform in randomized tests.
