@@ -2025,29 +2025,36 @@ namespace System.Numerics
 #if HAS_INTRINSICS
             if (Sse.IsSupported)
             {
+                var row = Sse.LoadVector128(&value1.M11);
                 Sse.Store(&value1.M11,
-                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M11), Sse.LoadVector128(&value2.M11)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M12), Sse.LoadVector128(&value2.M21))),
-                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M13), Sse.LoadVector128(&value2.M31)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M14), Sse.LoadVector128(&value2.M41)))));
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
 
+                // 0x00 is _MM_SHUFFLE(0,0,0,0), 0x55 is _MM_SHUFFLE(1,1,1,1), etc.
+                // TODO: Replace with a method once it's added to the API.
+
+                row = Sse.LoadVector128(&value1.M21);
                 Sse.Store(&value1.M21,
-                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M21), Sse.LoadVector128(&value2.M11)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M22), Sse.LoadVector128(&value2.M21))),
-                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M23), Sse.LoadVector128(&value2.M31)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M24), Sse.LoadVector128(&value2.M41)))));
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
 
+                row = Sse.LoadVector128(&value1.M31);
                 Sse.Store(&value1.M31, 
-                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M31), Sse.LoadVector128(&value2.M11)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M32), Sse.LoadVector128(&value2.M21))),
-                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M33), Sse.LoadVector128(&value2.M31)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M34), Sse.LoadVector128(&value2.M41)))));
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
 
+                row = Sse.LoadVector128(&value1.M41);
                 Sse.Store(&value1.M41,
-                    Sse.Add(Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M41), Sse.LoadVector128(&value2.M11)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M42), Sse.LoadVector128(&value2.M21))),
-                            Sse.Add(Sse.Multiply(Sse.SetAllVector128(value1.M43), Sse.LoadVector128(&value2.M31)),
-                                    Sse.Multiply(Sse.SetAllVector128(value1.M44), Sse.LoadVector128(&value2.M41)))));
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
                 return value1;
             }
 #endif
