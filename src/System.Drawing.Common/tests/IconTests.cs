@@ -39,6 +39,7 @@ namespace System.Drawing.Tests
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData("48x48_multiple_entries_4bit.ico")]
         [InlineData("256x256_seven_entries_multiple_bits.ico")]
+        [InlineData("pngwithheight_icon.ico")]
         public void Ctor_FilePath(string name)
         {
             using (var icon = new Icon(Helpers.GetTestBitmapPath(name)))
