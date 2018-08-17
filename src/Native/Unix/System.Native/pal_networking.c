@@ -1729,8 +1729,8 @@ int32_t SystemNative_GetSockOpt(
                 return Error_EINVAL;
             }
 
-            socklen_t optLen = (socklen_t)*optionLen;
 #ifdef SO_REUSEPORT
+            socklen_t optLen = (socklen_t)*optionLen;
             // On Unix, SO_REUSEPORT controls the ability to bind multiple sockets to the same address.
             int err = getsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, &optLen);
 
