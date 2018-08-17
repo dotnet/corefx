@@ -94,6 +94,11 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>Gets parent process ID</summary>
+        // Looks like this will be easly to implement. The needed id can be found in Interop.libproc.proc_bsdinfo.ppid.
+		private int ParentProcessId =>
+            throw new PlatformNotSupportedException();
+
         // -----------------------------
         // ---- PAL layer ends here ----
         // -----------------------------

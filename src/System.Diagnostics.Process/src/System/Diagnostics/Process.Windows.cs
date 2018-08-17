@@ -85,7 +85,7 @@ namespace System.Diagnostics
             SetPrivilege(Interop.Advapi32.SeDebugPrivilege, 0);
         }
 
-        /// <summary>Stops the associated process immediately.</summary>
+        /// <summary>Terminates the associated process immediately.</summary>
         public void Kill()
         {
             using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE))
@@ -93,6 +93,106 @@ namespace System.Diagnostics
                 if (!Interop.Kernel32.TerminateProcess(handle, -1))
                     throw new Win32Exception();
             }
+        }
+
+        /// <summary>
+        /// Makes a best-effort attempt to kill all descendant (child, grandchild, etc.) processes.
+        /// </summary>
+        private void KillTree()
+        {
+            try
+            {
+                /*
+                   Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
+                   and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
+                */
+                OpenProcessHandle();
+
+                // Kill the process, so that no further children can be created.
+                Kill();
+            }
+            catch
+            {
+                // Made a best-effort attempt which failed (perhaps because the process is already dead), so give up.
+                return;
+            }
+
+            KillChildren(GetChildProcesses());
+        }
+
+        /// <summary>
+        /// Returns all immediate child processes.
+        /// </summary>
+        private IReadOnlyList<Process> GetChildProcesses()
+        {
+            var childProcesses = new List<Process>();
+
+            foreach (Process possibleChildProcess in GetProcesses())
+            {
+                var keep = false;
+
+                try
+                {
+                    try
+                    {
+                        /*
+                           Force the process object to hold a handle to the process. Ensures that if the process dies while we're working
+                           with it, it won't be reused. This way, any process we pass back is guaranteed to be an actual child, not a 
+                           reference to a new process that happens to have the same id as a deceased child.
+                        */
+                        possibleChildProcess.OpenProcessHandle();
+                    }
+                    catch
+                    {
+                        // Made a best-effort attempt which failed (perhaps because the process is already dead).
+                        continue;
+                    }
+
+                    if (IsParentOf(possibleChildProcess))
+                    {
+                        childProcesses.Add(possibleChildProcess);
+                        keep = true;
+                    }
+                }
+                finally
+                {
+                    if (!keep)
+                    {
+                        possibleChildProcess.Dispose();
+                    }
+                }
+            }
+
+            return childProcesses;
+        }
+
+        /// <summary>Checks whether the argument is a direct child of this process.</summary>
+        /// <remarks>
+        /// A child process is a process which has this process's id as its parent process id and which started after this process did.
+        /// </remakrs>
+        private bool IsParentOf(Process possibleChildProcess) =>
+            StartTime < possibleChildProcess.StartTime
+            && possibleChildProcess.TryGetParentProcessId(out var parentProcessId)
+            && Id == parentProcessId;
+
+        /// <summary>
+        /// Attempts to get the process's parent process id.
+        /// </summary>
+        private bool TryGetParentProcessId(out int? parentProcessId)
+        {
+            // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
+            // For now just return zero and worst case we will not kill some children.
+            var pbi = new Interop.NtDll.PROCESS_BASIC_INFORMATION();
+            int pSize = 0;
+
+            if (0 == Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
+            {
+                parentProcessId = (int)pbi.InheritedFromUniqueProcessId;
+                return true;
+            }
+
+            parentProcessId = null;
+            return false;
         }
 
         /// <summary>Discards any information about the associated process.</summary>

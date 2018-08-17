@@ -63,6 +63,10 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>Gets parent process ID</summary>
+		private int ParentProcessId =>
+            throw new PlatformNotSupportedException();
+
         // <summary>Gets execution path</summary>
         private string GetPathToOpenFile()
         {

@@ -53,7 +53,7 @@ namespace System.Diagnostics
             throw new PlatformNotSupportedException(SR.ProcessStartWithPasswordAndDomainNotSupported);
         }
 
-        /// <summary>Stops the associated process immediately.</summary>
+        /// <summary>Terminates the associated process immediately.</summary>
         public void Kill()
         {
             EnsureState(State.HaveNonExitedId);
@@ -61,6 +61,51 @@ namespace System.Diagnostics
             {
                 throw new Win32Exception(); // same exception as on Windows
             }
+        }
+
+        /// <summary>Stops the associated process immediately.</summary>
+        private void Stop()
+        {
+            EnsureState(State.HaveNonExitedId);
+            if (Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGSTOP) != 0)
+            {
+                throw new Win32Exception(); // to match behavior of Kill()
+            }
+        }
+
+        /// <summary>
+        /// Makes a best-effort attempt to kill all descendant (child, grandchild, etc.) processes.
+        /// </summary>
+        private void KillTree()
+        {
+            try
+            {
+                /*
+                   Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
+                   so that its children can be enumerated.
+                */
+                Stop();
+            }
+            catch
+            {
+                // Making a best attempt. If it fails (perhapse because the process is already dead), give up.
+                return;
+            }
+
+            IReadOnlyList<Process> children = GetChildProcesses();
+
+            try
+            {
+                // Since the process's children have been enumerated, it can now be terminated.
+                Kill();
+            }
+            catch
+            {
+                // Making a best attempt. If it fails (perhapse because the process is already dead), give up.
+                return;
+            }
+
+            KillChildren(children);
         }
 
         /// <summary>Discards any information about the associated process.</summary>
@@ -239,6 +284,41 @@ namespace System.Diagnostics
         {
             return Interop.Sys.GetPid();
         }
+
+        /// <summary>
+        /// Returns all immediate child processes.
+        /// </summary>
+        private IReadOnlyList<Process> GetChildProcesses()
+        {
+            var childProcesses = new List<Process>();
+
+            foreach (Process possibleChildProcess in GetProcesses())
+            {
+                var keep = false;
+
+                try
+                {
+                    if (IsParentOf(possibleChildProcess))
+                    {
+                        childProcesses.Add(possibleChildProcess);
+                        keep = true;
+                    }
+                }
+                finally
+                {
+                    if (!keep)
+                    {
+                        possibleChildProcess.Dispose();
+                    }
+                }
+            }
+
+            return childProcesses;
+        }
+
+        /// <summary>Checks whether the argument is a direct child of this process.</summary>
+        private bool IsParentOf(Process possibleChildProcess) =>
+            Id == possibleChildProcess.ParentProcessId;
 
         partial void ThrowIfExited(bool refresh)
         {
