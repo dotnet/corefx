@@ -471,6 +471,7 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
+#If HaveUI Then
 
         '''**************************************************************************
         ''' ;CopyDirectory
@@ -506,6 +507,7 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
                 False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
+#End If
 
         '''**************************************************************************
         ''' ;CopyFile
@@ -536,6 +538,8 @@ Namespace Microsoft.VisualBasic.FileIO
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
+#If HaveUI Then
+
         '''**************************************************************************
         ''' ;CopyFile
         ''' <summary>
@@ -552,6 +556,7 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
                 False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
         End Sub
+
 
         '''**************************************************************************
         ''' ;CopyFile
@@ -571,6 +576,8 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
                 False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
+#End If
+
 
         '''**************************************************************************
         ''' ;CreateDirectory
@@ -590,6 +597,7 @@ Namespace Microsoft.VisualBasic.FileIO
             System.IO.Directory.CreateDirectory(directory)
         End Sub
 
+
         '''**************************************************************************
         ''' ;DeleteDirectory
         ''' <summary>
@@ -604,6 +612,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 UIOptionInternal.NoUI, RecycleOption.DeletePermanently, UICancelOption.ThrowException)
         End Sub
 
+#If HaveUI Then
         '''**************************************************************************
         ''' ;DeleteDirectory
         ''' <summary>
@@ -635,6 +644,7 @@ Namespace Microsoft.VisualBasic.FileIO
             DeleteDirectoryInternal(directory, DeleteDirectoryOption.DeleteAllContents,
                 ToUIOptionInternal(showUI), recycle, onUserCancel)
         End Sub
+#End If
 
         '''**************************************************************************
         ''' ;DeleteFile
@@ -647,6 +657,8 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Sub DeleteFile(ByVal file As String)
             DeleteFileInternal(file, UIOptionInternal.NoUI, RecycleOption.DeletePermanently, UICancelOption.ThrowException)
         End Sub
+
+#If HaveUI Then
 
         '''**************************************************************************
         ''' ;DeleteFile
@@ -680,6 +692,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             DeleteFileInternal(file, ToUIOptionInternal(showUI), recycle, onUserCancel)
         End Sub
+#End If
 
         '''**************************************************************************
         ''' ;MoveDirectory
@@ -711,6 +724,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
+#If HaveUI Then
         '''**************************************************************************
         ''' ;MoveDirectory
         ''' <summary>
@@ -745,6 +759,7 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
                 False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
+#End If
 
         '''**************************************************************************
         ''' ;MoveFile
@@ -760,6 +775,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
+
         '''**************************************************************************
         ''' ;MoveFile
         ''' <summary>
@@ -774,6 +790,8 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
+
+#If HaveUI Then
 
         '''**************************************************************************
         ''' ;MoveFile
@@ -810,6 +828,7 @@ Namespace Microsoft.VisualBasic.FileIO
             CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
                 False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
+#End If
 
         '''**************************************************************************
         ''' ;RenameDirectory
@@ -856,6 +875,7 @@ Namespace Microsoft.VisualBasic.FileIO
             IO.Directory.Move(directory, FullNewPath)
         End Sub
 
+
         '''**************************************************************************
         ''' ;RenameFile
         ''' <summary>
@@ -895,6 +915,7 @@ Namespace Microsoft.VisualBasic.FileIO
             IO.File.Move(file, FullNewPath)
         End Sub
 
+
         '''**************************************************************************
         ''' ;WriteAllBytes
         ''' <summary>
@@ -929,6 +950,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
             End Try
         End Sub
+
 
         '''**************************************************************************
         ''' ;WriteAllText
@@ -1056,6 +1078,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Next
             End If
         End Sub
+
         '''**************************************************************************
         ''' ;DirectoryNode
         ''' <summary>

@@ -23,7 +23,7 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' specific to the current user (My Documents, My Music ...) and those specific
     ''' to the current Application that a developer expects to be able to find quickly.
     ''' </summary>
-    Public Module SpecialDirectories
+    Partial Public Module SpecialDirectories
 
         '= PUBLIC =============================================================
 

@@ -320,8 +320,12 @@ Namespace Microsoft.VisualBasic.FileIO
             ' NOTE: Decision to create target directory is different for Shell and Framework call.
 
             If showUI <> UIOptionInternal.NoUI AndAlso Environment.UserInteractive Then
+#If HaveUI Then
                 ' If ShowUI AND UserInteractive (VSWhidbey 230265), attempt to call Shell function.
                 ShellCopyOrMove(operation, FileOrDirectory.Directory, SourceDirectoryFullPath, TargetDirectoryFullPath, showUI, onUserCancel)
+#Else
+                Throw New PlatformNotSupportedException("No UI for ShellCopyOrMove(operation, FileOrDirectory.Directory, SourceDirectoryFullPath, TargetDirectoryFullPath, showUI, onUserCancel)")
+#End If
             Else
                 ' Otherwise, copy the directory using System.IO.
                 FxCopyOrMoveDirectory(operation, SourceDirectoryFullPath, TargetDirectoryFullPath, overwrite)
@@ -451,7 +455,11 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' If ShowUI, attempt to call Shell function.
             If showUI <> UIOptionInternal.NoUI AndAlso System.Environment.UserInteractive Then
+#If HaveUI Then
                 ShellCopyOrMove(operation, FileOrDirectory.File, sourceFileFullPath, destinationFileFullPath, showUI, onUserCancel)
+#Else
+                Throw New PlatformNotSupportedException("No UI for ShellCopyOrMove(operation, FileOrDirectory.File, sourceFileFullPath, destinationFileFullPath, showUI, onUserCancel)")
+#End If
                 Exit Sub
             End If
 
@@ -524,7 +532,11 @@ Namespace Microsoft.VisualBasic.FileIO
             ' If user want shell features (Progress, Recycle Bin), call shell operation.
             ' We don't need to consider onDirectoryNotEmpty here (VSWhidbey 283409).
             If (showUI <> UIOptionInternal.NoUI) AndAlso Environment.UserInteractive Then
+#If HaveUI Then
                 ShellDelete(directoryFullPath, showUI, recycle, onUserCancel, FileOrDirectory.Directory)
+#Else
+                Throw New PlatformNotSupportedException("No UI for ShellDelete(directoryFullPath, showUI, recycle, onUserCancel, FileOrDirectory.Directory)")
+#End If
                 Exit Sub
             End If
 
@@ -554,7 +566,11 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' If user want shell features (Progress, Recycle Bin), call shell operation.
             If (showUI <> UIOptionInternal.NoUI) AndAlso Environment.UserInteractive Then
+#If HaveUI Then
                 ShellDelete(fileFullPath, showUI, recycle, onUserCancel, FileOrDirectory.File)
+#Else
+                Throw New PlatformNotSupportedException("No UI for ShellDelete(fileFullPath, showUI, recycle, onUserCancel, FileOrDirectory.File)")
+#End If
                 Exit Sub
             End If
 
@@ -1164,6 +1180,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Otherwise, remove all separators at the end.
             Return Path.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)
         End Function
+#If HaveUI Then
 
         '''******************************************************************************
         ''' ;ShellCopyOrMove
@@ -1217,7 +1234,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
             End If
 
-            ' Call into ShellFileOperation.
+            'Call into ShellFileOperation.
             ShellFileOperation(OperationType, OperationFlags, FinalSourcePath, FullTargetPath, OnUserCancel, TargetType)
 
             ' *** Special action for Directory only. ***
@@ -1354,6 +1371,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 ThrowWinIOError(Result)
             End If
         End Sub
+#End If
 
         '''**************************************************************************
         ''' ;ThrowIfDevicePath
@@ -1371,42 +1389,42 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
         End Sub
 
-        '''**************************************************************************
-        ''' ;ThrowWinIOError
-        ''' <summary>
-        ''' Given an error code from winerror.h, throw the appropriate exception.
-        ''' </summary>
-        ''' <param name="errorCode">An error code from winerror.h.</param>
-        ''' <remarks>
-        ''' - This method is based on sources\ndp\clr\src\BCL\System\IO\_Error.cs::WinIOError, except the following.
-        ''' - Exception message does not contain the path since at this point it is normalized.
-        ''' - Instead of using PInvoke of GetMessage and MakeHRFromErrorCode, use managed code.
-        ''' </remarks>
+        ''''**************************************************************************
+        '''' ;ThrowWinIOError
+        '''' <summary>
+        '''' Given an error code from winerror.h, throw the appropriate exception.
+        '''' </summary>
+        '''' <param name="errorCode">An error code from winerror.h.</param>
+        '''' <remarks>
+        '''' - This method is based on sources\ndp\clr\src\BCL\System\IO\_Error.cs::WinIOError, except the following.
+        '''' - Exception message does not contain the path since at this point it is normalized.
+        '''' - Instead of using PInvoke of GetMessage and MakeHRFromErrorCode, use managed code.
+        '''' </remarks>
 
-        Private Sub ThrowWinIOError(ByVal errorCode As Integer)
-            Select Case errorCode
-                Case NativeTypes.ERROR_FILE_NOT_FOUND
-                    Throw New IO.FileNotFoundException()
-                Case NativeTypes.ERROR_PATH_NOT_FOUND
-                    Throw New IO.DirectoryNotFoundException()
-                Case NativeTypes.ERROR_ACCESS_DENIED
-                    Throw New UnauthorizedAccessException()
-                Case NativeTypes.ERROR_FILENAME_EXCED_RANGE
-                    Throw New IO.PathTooLongException()
-                Case NativeTypes.ERROR_INVALID_DRIVE
-                    Throw New IO.DriveNotFoundException()
-                Case NativeTypes.ERROR_OPERATION_ABORTED, NativeTypes.ERROR_CANCELLED
-                    Throw New OperationCanceledException()
-                Case Else
-                    ' Including these from _Error.cs::WinIOError.
-                    'Case NativeTypes.ERROR_ALREADY_EXISTS
-                    'Case NativeTypes.ERROR_INVALID_PARAMETER
-                    'Case NativeTypes.ERROR_SHARING_VIOLATION
-                    'Case NativeTypes.ERROR_FILE_EXISTS
-                    Throw New IO.IOException((New ComponentModel.Win32Exception(errorCode)).Message,
-                        System.Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
-            End Select
-        End Sub
+        'Private Sub ThrowWinIOError(ByVal errorCode As Integer)
+        '    Select Case errorCode
+        '        Case NativeTypes.ERROR_FILE_NOT_FOUND
+        '            Throw New IO.FileNotFoundException()
+        '        Case NativeTypes.ERROR_PATH_NOT_FOUND
+        '            Throw New IO.DirectoryNotFoundException()
+        '        Case NativeTypes.ERROR_ACCESS_DENIED
+        '            Throw New UnauthorizedAccessException()
+        '        Case NativeTypes.ERROR_FILENAME_EXCED_RANGE
+        '            Throw New IO.PathTooLongException()
+        '        Case NativeTypes.ERROR_INVALID_DRIVE
+        '            Throw New IO.DriveNotFoundException()
+        '        Case NativeTypes.ERROR_OPERATION_ABORTED, NativeTypes.ERROR_CANCELLED
+        '            Throw New OperationCanceledException()
+        '        Case Else
+        '            ' Including these from _Error.cs::WinIOError.
+        '            'Case NativeTypes.ERROR_ALREADY_EXISTS
+        '            'Case NativeTypes.ERROR_INVALID_PARAMETER
+        '            'Case NativeTypes.ERROR_SHARING_VIOLATION
+        '            'Case NativeTypes.ERROR_FILE_EXISTS
+        '            Throw New IO.IOException((New ComponentModel.Win32Exception(errorCode)).Message,
+        '                System.Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
+        '    End Select
+        'End Sub
 
         '''**************************************************************************
         ''' ;ToUIOptionInternal
