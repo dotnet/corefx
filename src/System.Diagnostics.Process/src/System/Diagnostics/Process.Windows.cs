@@ -181,11 +181,10 @@ namespace System.Diagnostics
         private bool TryGetParentProcessId(out int? parentProcessId)
         {
             // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
-            // For now just return zero and worst case we will not kill some children.
+            // For now just return null and worst case we will not kill some children.
             var pbi = new Interop.NtDll.PROCESS_BASIC_INFORMATION();
-            int pSize = 0;
 
-            if (0 == Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
+            if (0 == Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, out int _))
             {
                 parentProcessId = (int)pbi.InheritedFromUniqueProcessId;
                 return true;

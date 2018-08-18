@@ -11,9 +11,9 @@ internal partial class Interop
     internal partial class NtDll
     {
         [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode)]
-        internal static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, int cb, ref int pSize);
-		
-		internal enum PROCESSINFOCLASS : int
+        internal static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, int pbiSize, out int pSize);
+
+        internal enum PROCESSINFOCLASS : int
         {
             ProcessBasicInformation = 0,
             ProcessDebugPort = 7,
@@ -33,7 +33,7 @@ internal partial class Interop
             public IntPtr UniqueProcessId;
             public IntPtr InheritedFromUniqueProcessId;
 
-            public int Size => 
+            public int Size =>
                 Marshal.SizeOf<PROCESS_BASIC_INFORMATION>();
         }
     }
