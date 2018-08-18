@@ -52,11 +52,11 @@ namespace System.Diagnostics.Tests
                         typingCsInstance.Counters[6].Value = 0;
 
                         // Instance counters readers
-                        using (PerformanceCounter totalWordsTyped = new PerformanceCounter("Typing", "Total Words Typed"),
-                                                    wordsTypedInInterval = new PerformanceCounter("Typing", "Words Typed In Interval"),
-                                                    aKeyPressed = new PerformanceCounter("Typing", "Letter A Pressed"),
-                                                    wordsContainingA = new PerformanceCounter("Typing", "Words Containing A"),
-                                                    percentofWordsContaingA = new PerformanceCounter("Typing", "Percent of Words Containing A"))
+                        using (PerformanceCounter totalWordsTyped = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter("Typing", "Total Words Typed")),
+                                                    wordsTypedInInterval = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter("Typing", "Words Typed In Interval")),
+                                                    aKeyPressed = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter("Typing", "Letter A Pressed")),
+                                                    wordsContainingA = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter("Typing", "Words Containing A")),
+                                                    percentofWordsContaingA = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter("Typing", "Percent of Words Containing A")))
                         {
                             typingCsInstance.Counters[1].Increment();
                             Assert.Equal(1, typingCsInstance.Counters[1].Value);

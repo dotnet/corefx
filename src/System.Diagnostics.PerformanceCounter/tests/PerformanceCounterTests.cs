@@ -54,19 +54,15 @@ namespace System.Diagnostics.Tests
         {
             var name = nameof(PerformanceCounter_CreateCounter_MultiInstanceReadOnly) + "_Counter";
             var instance = name + "_Instance";
-            var category = "";
 
-            using (PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(
-                () =>
-                {
-                    category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
-                    return new PerformanceCounter(category, name, instance);
-                }))
+            var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
+
+            using (PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(category, name, instance)))
             {
                 Assert.Equal(name, counterSample.CounterName);
                 Assert.Equal(category, counterSample.CategoryName);
                 Assert.Equal(instance, counterSample.InstanceName);
-                Assert.Equal("counter description", Helpers.RetryOnAllPlatforms(() => counterSample.CounterHelp));
+                Assert.Equal("counter description",  Helpers.RetryOnAllPlatforms(() => counterSample.CounterHelp));
                 Assert.True(counterSample.ReadOnly);
                 Helpers.DeleteCategory(name);
             }
@@ -77,7 +73,9 @@ namespace System.Diagnostics.Tests
         {
             var name = nameof(PerformanceCounter_CreateCounter_SetReadOnly) + "_Counter";
 
-            using (PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance), name)))
+            var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
+
+            using (PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(category, name)))
             {
                 counterSample.ReadOnly = false;
 
@@ -279,7 +277,9 @@ namespace System.Diagnostics.Tests
             var name = nameof(PerformanceCounter_NextSample_MultiInstance) + "_Counter";
             var instance = name + "_Instance";
 
-            using (PerformanceCounter counterSample = new PerformanceCounter(Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance), name, instance, false))
+            var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
+
+            using (PerformanceCounter counterSample = new PerformanceCounter(category, name, instance, false))
             {
                 counterSample.RawValue = 10;
                 Helpers.RetryOnAllPlatforms(() => counterSample.Decrement());
@@ -289,9 +289,11 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        public static PerformanceCounter CreateCounterWithCategory(string name, bool readOnly, PerformanceCounterCategoryType categoryType)
+        public static PerformanceCounter CreateCounterWithCategory(string name, bool readOnly, PerformanceCounterCategoryType categoryType )
         {
-            PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(Helpers.CreateCategory(name, categoryType), name, readOnly));
+            var category = Helpers.CreateCategory(name, categoryType);
+
+            PerformanceCounter counterSample =  Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(category, name, readOnly));
 
             return counterSample;
         }
