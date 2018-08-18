@@ -16,29 +16,11 @@ internal partial class Interop
 		internal enum PROCESSINFOCLASS : int
         {
             ProcessBasicInformation = 0,
-            ProcessQuotaLimits,
-            ProcessIoCounters,
-            ProcessVmCounters,
-            ProcessTimes,
-            ProcessBasePriority,
-            ProcessRaisePriority,
-            ProcessDebugPort,
-            ProcessExceptionPort,
-            ProcessAccessToken,
-            ProcessLdtInformation,
-            ProcessLdtSize,
-            ProcessDefaultHardErrorMode,
-            ProcessIoPortHandlers, // Note: this is kernel mode only
-            ProcessPooledUsageAndLimits,
-            ProcessWorkingSetWatch,
-            ProcessUserModeIOPL,
-            ProcessEnableAlignmentFaultFixup,
-            ProcessPriorityClass,
-            ProcessWx86Information,
-            ProcessHandleCount,
-            ProcessAffinityMask,
-            ProcessPriorityBoost,
-            MaxProcessInfoClass
+            ProcessDebugPort = 7,
+            ProcessWow64Information = 26,
+            ProcessImageFileName = 27,
+            ProcessBreakOnTermination = 29,
+            ProcessSubsystemInformation = 75
         };
 
         [StructLayout(LayoutKind.Sequential)]
