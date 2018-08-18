@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using Xunit;
 
 namespace System.Runtime.Tests
@@ -14,43 +13,26 @@ namespace System.Runtime.Tests
         [Fact]
         public void ProfileOptimization_CheckFileExists()
         {
-            bool success = false;
-            int retryCount = 0;
-
-            // retry n times for max ~20 seconds in total
-            // sometimes ProfileOptimization.StartProfile isn't quick enough
-            while (retryCount < 7)
-            {
-                if (success = StartProfile(1000 * retryCount))
-                {
-                    break;
-                }
-                retryCount++;
-            }
-
-            Assert.True(success);
-        }
-
-        private bool StartProfile(int sleepMilliseconds)
-        {
             string tmpProfileFilePath = GetTestFileName();
 
-            RemoteInvoke((profileFilePath, sleepfor) =>
+            RemoteInvoke(profileFilePath =>
             {
-                ProfileOptimization.SetProfileRoot(Path.GetDirectoryName(profileFilePath));
-                ProfileOptimization.StartProfile(Path.GetFileName(profileFilePath));
-                int sleep = int.Parse(sleepfor);
+                string directoryName = Path.GetDirectoryName(profileFilePath);
 
-                // we sleep only in case of first test fail
-                if (sleep > 0)
-                {
-                    Thread.Sleep(sleep);
-                }
-            }, tmpProfileFilePath, sleepMilliseconds.ToString()).Dispose();
+                // after test fail tracked by https://github.com/dotnet/corefx/issues/31792
+                // we suspect that the reason is something related to write permission to the location
+                // to prove that we added a simple write to file in same location of profile file directory path
+                // ProfileOptimization/Multi-Core JIT could fail silently
+                File.WriteAllText(Path.Combine(directoryName, Path.GetRandomFileName()), "42");
+
+                ProfileOptimization.SetProfileRoot(directoryName);
+                ProfileOptimization.StartProfile(Path.GetFileName(profileFilePath));
+                return 42;
+            }, tmpProfileFilePath).Dispose();
 
             FileInfo fileInfo = new FileInfo(tmpProfileFilePath);
-            return fileInfo.Exists && fileInfo.Length > 0;
+            Assert.True(fileInfo.Exists);
+            Assert.True(fileInfo.Length > 0);
         }
-
     }
 }
