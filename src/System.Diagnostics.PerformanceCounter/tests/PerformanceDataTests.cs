@@ -9,7 +9,7 @@ using Xunit;
 namespace System.Diagnostics.Tests
 {
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, cannot write to perf counters
-    public class PerformanceDataTests : IClassFixture<PerformanceDataTestsFixture>
+    public class PerformanceDataTests : RemoteExecutorTestBase, IClassFixture<PerformanceDataTestsFixture>
     {
         PerformanceDataTestsFixture _fixture = null;
 
@@ -27,15 +27,10 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public void PerformanceCounter_PerformanceData()
         {
-            Helpers.RetryOnAllPlatforms(() =>
+            RemoteInvoke((string providerId, string typingCounterSetId) =>
             {
-                // Create and delete category only to reload internal cached state in PerformanceCounterLib
-                // create/delete counter changes registry state, but it's not immediately visibile to all threads
-                // this test could fail forever, we retry after reload internal states
-                Helpers.DeleteCategory(Helpers.CreateCategory(nameof(PerformanceCounter_PerformanceData), PerformanceCounterCategoryType.SingleInstance));
-
                 // Create the 'Typing' counter set.
-                using (CounterSet typingCounterSet = new CounterSet(_fixture._providerId, _fixture._typingCounterSetId, CounterSetInstanceType.Single))
+                using (CounterSet typingCounterSet = new CounterSet(Guid.Parse(providerId), Guid.Parse(typingCounterSetId), CounterSetInstanceType.Single))
                 {
                     // Add the counters to the counter set definition.
                     typingCounterSet.AddCounter(1, CounterType.RawData32, "Total Words Typed");
@@ -102,9 +97,7 @@ namespace System.Diagnostics.Tests
                         }
                     }
                 }
-
-                return 42;
-            });
+            }, _fixture._providerId.ToString(), _fixture._typingCounterSetId.ToString()).Dispose();
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
