@@ -27,6 +27,8 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public void PerformanceCounter_PerformanceData()
         {
+            // We run test in isolated process to avoid interferences on internal performance counter shared state with other tests.
+            // These interferences could lead to fail also after retries
             RemoteInvoke((string providerId, string typingCounterSetId) =>
             {
                 // Create the 'Typing' counter set.
