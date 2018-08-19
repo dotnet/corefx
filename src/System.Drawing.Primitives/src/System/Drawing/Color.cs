@@ -475,139 +475,66 @@ namespace System.Drawing
 
         public float GetBrightness()
         {
-            float r = R / 255.0f;
-            float g = G / 255.0f;
-            float b = B / 255.0f;
+            uint value = (uint)Value;
+            int r = (int)((value >> ARGBRedShift  ) & 0xff);
+            int g = (int)((value >> ARGBGreenShift) & 0xff);
+            int b = (int)((value >> ARGBBlueShift ) & 0xff);
 
-            float max, min;
+            int min = Math.Min(Math.Min(r, g), b);
+            int max = Math.Max(Math.Max(r, g), b);
 
-            max = r; min = r;
-
-            if (g > max)
-            {
-                max = g;
-            }
-            else if (g < min)
-            {
-                min = g;
-            }
-
-            if (b > max)
-            {
-                max = b;
-            }
-            else if (b < min)
-            {
-                min = b;
-            }
-
-            return (max + min) / 2;
+            return (max + min) / (byte.MaxValue * 2f);
         }
 
 
         public float GetHue()
         {
-            if (R == G && G == B)
-                return 0; // 0 makes as good an UNDEFINED value as any
+            uint value = (uint)Value;
+            int r = (int)((value >> ARGBRedShift  ) & 0xff);
+            int g = (int)((value >> ARGBGreenShift) & 0xff);
+            int b = (int)((value >> ARGBBlueShift ) & 0xff);
 
-            float r = R / 255.0f;
-            float g = G / 255.0f;
-            float b = B / 255.0f;
+            if (r == g && g == b)
+                return 0f;
 
-            float max, min;
-            float delta;
+            int min = Math.Min(Math.Min(r, g), b);
+            int max = Math.Max(Math.Max(r, g), b);
+
+            float delta = max - min;
             float hue;
 
-            max = r; min = r;
-
-            if (g > max)
-            {
-                max = g;
-            }
-            else if (g < min)
-            {
-                min = g;
-            }
-
-            if (b > max)
-            {
-                max = b;
-            }
-            else if (b < min)
-            {
-                min = b;
-            }
-
-            delta = max - min;
-
             if (r == max)
-            {
                 hue = (g - b) / delta;
-            }
             else if (g == max)
-            {
-                hue = 2 + (b - r) / delta;
-            }
+                hue = (b - r) / delta + 2f;
             else
-            {
-                Debug.Assert(b == max);
-                hue = 4 + (r - g) / delta;
-            }
-            hue *= 60;
+                hue = (r - g) / delta + 4f;
 
-            if (hue < 0.0f)
-            {
-                hue += 360.0f;
-            }
+            hue *= 60f;
+            if (hue < 0f)
+                hue += 360f;
+
             return hue;
         }
 
         public float GetSaturation()
         {
-            float r = R / 255.0f;
-            float g = G / 255.0f;
-            float b = B / 255.0f;
+            uint value = (uint)Value;
+            int r = (int)((value >> ARGBRedShift  ) & 0xff);
+            int g = (int)((value >> ARGBGreenShift) & 0xff);
+            int b = (int)((value >> ARGBBlueShift ) & 0xff);
 
-            float s = 0;
+            if (r == g && g == b)
+                return 0f;
 
-            float max = r;
-            float min = r;
+            int min = Math.Min(Math.Min(r, g), b);
+            int max = Math.Max(Math.Max(r, g), b);
 
-            if (g > max)
-            {
-                max = g;
-            }
-            else if (g < min)
-            {
-                min = g;
-            }
+            int div = max + min;
+            if (div > byte.MaxValue)
+                div = byte.MaxValue * 2 - max - min;
 
-            if (b > max)
-            {
-                max = b;
-            }
-            else if (b < min)
-            {
-                min = b;
-            }
-
-            // if max == min, then there is no color and
-            // the saturation is zero.
-            //
-            if (max != min)
-            {
-                float l = (max + min) / 2;
-
-                if (l <= .5)
-                {
-                    s = (max - min) / (max + min);
-                }
-                else
-                {
-                    s = (max - min) / (2 - max - min);
-                }
-            }
-            return s;
+            return (max - min) / (float)div;
         }
 
         public int ToArgb() => unchecked((int)Value);
