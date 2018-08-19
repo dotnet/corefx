@@ -65,6 +65,7 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
+        // On NetFramework will fail because there isn't fallback code, only call to TypeDescriptor.GetConverter
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Ctor_CustomTypeConverter_TypeDescriptorNotFound_ExceptionFallback()
         {
@@ -80,12 +81,11 @@ namespace System.ComponentModel.Tests
                 DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType), "42");
 
                 Assert.Null(attr.Value);
-
-                return 42;
             }).Dispose();
         }
 
         [Fact]
+        // On NetFramework will fail because there isn't fallback code, only call to TypeDescriptor.GetConverter
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Ctor_CustomTypeConverter_Fallback()
         {
@@ -101,22 +101,15 @@ namespace System.ComponentModel.Tests
                 DefaultValueAttribute attr = new DefaultValueAttribute(typeof(int), "42");
 
                 Assert.Equal(42, attr.Value);
-
-                return (int)attr.Value;
             }).Dispose();
         }
 
-        [Fact]
-        public static void Ctor_CustomTypeConverter_Null()
+        [Theory]
+        [InlineData(typeof(CustomType2))]
+        [InlineData(typeof(DefaultValueAttribute))]
+        public static void Ctor_DefaultTypeConverter_Null(Type type)
         {
-            DefaultValueAttribute attr = new DefaultValueAttribute(typeof(CustomType2), "42");
-            Assert.Null(attr.Value);
-        }
-
-        [Fact]
-        public static void Ctor_DefaultTypeConverter_Null()
-        {
-            DefaultValueAttribute attr = new DefaultValueAttribute(typeof(DefaultValueAttribute), "42");
+            DefaultValueAttribute attr = new DefaultValueAttribute(type, "42");
             Assert.Null(attr.Value);
         }
 
