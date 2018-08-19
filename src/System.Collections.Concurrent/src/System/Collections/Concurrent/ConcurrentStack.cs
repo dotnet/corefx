@@ -609,6 +609,10 @@ namespace System.Collections.Concurrent
                     next = next._next;
                 }
 
+                // fast spin till _next is set
+                while (next._next == null)
+                { }
+
                 // Try to swap the new head.  If we succeed, break out of the loop.
                 if (Interlocked.CompareExchange(ref _head, next._next, head) == head)
                 {
