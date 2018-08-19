@@ -320,7 +320,7 @@ namespace System.Drawing
         private const int ARGBRedShift = 16;
         private const int ARGBGreenShift = 8;
         private const int ARGBBlueShift = 0;
-
+        private const uint ARGBAlphaMask = 0xffu << ARGBAlphaShift;
 
         // user supplied name of color. Will not be filled in if
         // we map to a "knowncolor"
@@ -420,19 +420,24 @@ namespace System.Drawing
             }
         }
 
+        private static void ThrowOutOfByteRange(int value, string name) =>
+            throw new ArgumentException(SR.Format(SR.InvalidEx2BoundArgument, name, value, byte.MinValue, byte.MaxValue));
+
         private static void CheckByte(int value, string name)
         {
-            if (value < 0 || value > 255)
-                throw new ArgumentException(SR.Format(SR.InvalidEx2BoundArgument, name, value, 0, 255));
+            if ((uint)value > byte.MaxValue)
+                ThrowOutOfByteRange(value, name);
         }
 
-        private static long MakeArgb(byte alpha, byte red, byte green, byte blue) =>
-            (long)unchecked((uint)(red << ARGBRedShift |
+        private static uint MakeArgb(byte alpha, byte red, byte green, byte blue) =>
+            unchecked((uint)(red << ARGBRedShift |
                 green << ARGBGreenShift |
                 blue << ARGBBlueShift |
-                alpha << ARGBAlphaShift)) & 0xffffffff;
+                alpha << ARGBAlphaShift));
 
-        public static Color FromArgb(int argb) => new Color(argb & 0xffffffff, StateARGBValueValid, null, 0);
+        private static Color FromArgb(uint argb) => new Color(argb, StateARGBValueValid, null, (KnownColor)0);
+
+        public static Color FromArgb(int argb) => FromArgb((uint)argb);
 
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
@@ -440,17 +445,18 @@ namespace System.Drawing
             CheckByte(red, nameof(red));
             CheckByte(green, nameof(green));
             CheckByte(blue, nameof(blue));
-            return new Color(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue), StateARGBValueValid, null, (KnownColor)0);
+
+            return FromArgb(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue));
         }
 
         public static Color FromArgb(int alpha, Color baseColor)
         {
             CheckByte(alpha, nameof(alpha));
-            // unchecked - because we already checked that alpha is a byte in CheckByte above
-            return new Color(MakeArgb(unchecked((byte)alpha), baseColor.R, baseColor.G, baseColor.B), StateARGBValueValid, null, (KnownColor)0);
+
+            return FromArgb(unchecked((uint)alpha << ARGBAlphaShift | ((uint)baseColor.Value & ~ARGBAlphaMask)));
         }
 
-        public static Color FromArgb(int red, int green, int blue) => FromArgb(255, red, green, blue);
+        public static Color FromArgb(int red, int green, int blue) => FromArgb(byte.MaxValue, red, green, blue);
 
         public static Color FromKnownColor(KnownColor color) =>
             color <= 0 || color > KnownColor.MenuHighlight ? FromName(color.ToString()) : new Color(color);
