@@ -80,6 +80,13 @@ namespace System.Security.Cryptography
                 KeySizeValue = _ecc.ImportParameters(parameters);
             }
 
+            public override void ImportSubjectPublicKeyInfo(
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                KeySizeValue = _ecc.ImportSubjectPublicKeyInfo(source, out bytesRead);
+            }
+
             public override void GenerateKey(ECCurve curve)
             {
                 KeySizeValue = _ecc.GenerateKey(curve);
@@ -267,7 +274,7 @@ namespace System.Security.Cryptography
                         throw new ObjectDisposedException(typeof(ECDiffieHellmanSecurityTransformsPublicKey).Name);
                     }
 
-                    return _ecc.ExportParameters(includePrivateParameters: false, keySizeInBIts: -1);
+                    return _ecc.ExportParameters(includePrivateParameters: false, keySizeInBits: -1);
                 }
 
                 internal SafeSecKeyRefHandle KeyHandle
