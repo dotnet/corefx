@@ -1,9 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <ProjectGuid>{da95454e-5f0e-4f8a-871a-25d1ab62867a}</ProjectGuid>
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="Dummy.vb" />
-  </ItemGroup>
+    <PropertyGroup>
+        <ProjectGuid>{da95454e-5f0e-4f8a-871a-25d1ab62867a}</ProjectGuid>
+        <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+        <OptionStrict>On</OptionStrict>
+        <OptionInfer>Off</OptionInfer>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'">
+        <NoWarn />
+        <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'">
+        <NoWarn />
+        <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="DriveInfo.Unix.Tests.vb" />
+        <Compile Include="DriveInfo.Windows.Tests.vb" />
+        <Compile Include="Dummy.vb" />
+        <Compile Include="FileIOTestBase.vb" />
+        <Compile Include="FileIOTests.vb" />
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="netstandard" />
+        <Reference Include="System" />
+        <Reference Include="System.Collections" />
+        <Reference Include="System.Collections.Specialized" />
+        <Reference Include="System.Diagnostics.Debug" />
+        <Reference Include="System.Globalization" />
+        <Reference Include="System.Dynamic.Runtime" />
+        <Reference Include="System.Linq" />
+        <Reference Include="System.Linq.Expressions" />
+        <Reference Include="System.ObjectModel" />
+        <Reference Include="System.Reflection" />
+        <Reference Include="System.Reflection.Extensions" />
+        <Reference Include="System.Reflection.Primitives" />
+        <Reference Include="System.Reflection.TypeExtensions" />
+        <Reference Include="System.Resources.ResourceManager" />
+        <Reference Include="System.Runtime" />
+        <Reference Include="System.Runtime.Extensions" />
+        <Reference Include="System.Runtime.InteropServices" />
+        <Reference Include="System.Text" />
+        <Reference Include="System.Threading" />
+    </ItemGroup>
 </Project>
