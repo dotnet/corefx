@@ -37,8 +37,7 @@ Namespace Microsoft.VisualBasic.FileIO
     '''  and also contains some commonly use methods for IO tasks.
     ''' </summary>
     '<HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
-    Partial Public Module FileSystem
-
+    Partial Public Class FileSystem
         ' When calling MoveFileEx, set the following flags:
         ' - Simulate CopyFile and DeleteFile if copied to a different volume.
         ' - Replace contents of existing target with the contents of source file.
@@ -1512,6 +1511,6 @@ Namespace Microsoft.VisualBasic.FileIO
 
         'FileOperationFlags
 
-    End Module
+    End Class
 
 End Namespace

@@ -421,7 +421,7 @@ namespace Microsoft.VisualBasic.FileIO
     }
     public sealed partial class FileSystem
     {
-        //public FileSystem() { }
+        public FileSystem() { }
         public static string CurrentDirectory { get { throw null; } set { } }
         public static System.Collections.ObjectModel.ReadOnlyCollection<System.IO.DriveInfo> Drives { get { throw null; } }
         public static string CombinePath(string baseDirectory, string relativePath) { throw null; }
@@ -507,7 +507,7 @@ namespace Microsoft.VisualBasic.FileIO
     }
     public sealed partial class SpecialDirectories
     {
-        //public SpecialDirectories() { }
+        public SpecialDirectories() { }
         public static string AllUsersApplicationData { get { throw null; } }
         public static string CurrentUserApplicationData { get { throw null; } }
         public static string Desktop { get { throw null; } }

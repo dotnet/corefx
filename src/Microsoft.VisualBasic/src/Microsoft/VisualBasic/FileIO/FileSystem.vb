@@ -30,7 +30,10 @@ Namespace Microsoft.VisualBasic.FileIO
     '''  and also contains some commonly use methods for IO tasks.
     ''' </summary>
     '<HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
-    Partial Public Module FileSystem
+    Partial Public Class FileSystem
+        Sub New()
+
+        End Sub
 
         '= PUBLIC =============================================================
 
@@ -42,7 +45,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Return the names of all available drives on the computer.
         ''' </summary>
         ''' <value>A ReadOnlyCollection(Of DriveInfo) containing all the current drives' names.</value>
-        Public ReadOnly Property Drives() As ObjectModel.ReadOnlyCollection(Of System.IO.DriveInfo)
+        Public Shared ReadOnly Property Drives() As ObjectModel.ReadOnlyCollection(Of System.IO.DriveInfo)
             Get
                 ' NOTE: Don't cache the collection since it may change without us knowing.
                 ' The performance hit will be small since it's a small collection.
@@ -61,7 +64,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Get or set the current working directory.
         ''' </summary>
         ''' <value>A String containing the path to the directory.</value>
-        Public Property CurrentDirectory() As String
+        Public Shared Property CurrentDirectory() As String
             Get
                 Return NormalizePath(IO.Directory.GetCurrentDirectory())
             End Get
@@ -80,7 +83,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="baseDirectory">The first part of the path.</param>
         ''' <param name="relativePath">The second part of the path, must be a relative path.</param>
         ''' <returns>A String contains the combined path.</returns>
-        Public Function CombinePath(ByVal baseDirectory As String, ByVal relativePath As String) As String
+        Public Shared Function CombinePath(ByVal baseDirectory As String, ByVal relativePath As String) As String
 
             ' VSWhidbey 258686.
             If baseDirectory.Length = 0 Then
@@ -102,7 +105,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="directory">The path to verify.</param>
         ''' <returns>True if DirectoryPath refers to an existing directory. Otherwise, False.</returns>
-        Public Function DirectoryExists(ByVal directory As String) As Boolean
+        Public Shared Function DirectoryExists(ByVal directory As String) As Boolean
             Return IO.Directory.Exists(directory)
         End Function
 
@@ -113,7 +116,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="file">The path to verify.</param>
         ''' <returns>True if FilePath refers to an existing file on disk. Otherwise, False.</returns>
-        Public Function FileExists(ByVal file As String) As Boolean
+        Public Shared Function FileExists(ByVal file As String) As Boolean
             If Not String.IsNullOrEmpty(file) AndAlso
                 (file.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) Or
                 file.EndsWith(IO.Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) Then
@@ -133,7 +136,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="ignoreCase">True to ignore case. Otherwise, False.</param>
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <returns>A string array containing the files that match the search condition.</returns>
-        Public Function FindInFiles(ByVal directory As String,
+        Public Shared Function FindInFiles(ByVal directory As String,
             ByVal containsText As String, ByVal ignoreCase As Boolean, ByVal searchType As SearchOption) As ObjectModel.ReadOnlyCollection(Of String)
             Return FindInFiles(directory, containsText, ignoreCase, searchType, Nothing)
         End Function
@@ -150,7 +153,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="fileWildcards">The search patterns to use for the file name ("*.*")</param>
         ''' <returns>A string array containing the files that match the search condition.</returns>
         ''' <exception cref="System.ArgumentNullException">If one of the pattern is Null, Empty or all-spaces string.</exception>
-        Public Function FindInFiles(ByVal directory As String, ByVal containsText As String, ByVal ignoreCase As Boolean,
+        Public Shared Function FindInFiles(ByVal directory As String, ByVal containsText As String, ByVal ignoreCase As Boolean,
             ByVal searchType As SearchOption, ByVal ParamArray fileWildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
 
             ' Find the files with matching name.
@@ -178,7 +181,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="directory">The directory to find the sub directories inside.</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched directories' paths.</returns>
-        Public Function GetDirectories(ByVal directory As String) As ObjectModel.ReadOnlyCollection(Of String)
+        Public Shared Function GetDirectories(ByVal directory As String) As ObjectModel.ReadOnlyCollection(Of String)
 
             Return FindFilesOrDirectories(FileOrDirectory.Directory, directory, SearchOption.SearchTopLevelOnly, Nothing)
         End Function
@@ -192,7 +195,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <param name="wildcards">The wildcards for the file name, for example "*.bmp", "*.txt"</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched directories' paths.</returns>
-        Public Function GetDirectories(ByVal directory As String, ByVal searchType As SearchOption,
+        Public Shared Function GetDirectories(ByVal directory As String, ByVal searchType As SearchOption,
             ByVal ParamArray wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
 
             Return FindFilesOrDirectories(FileOrDirectory.Directory, directory, searchType, wildcards)
@@ -205,7 +208,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="directory">The path to the directory.</param>
         ''' <returns>A DirectoryInfo object containing the information about the specified directory.</returns>
-        Public Function GetDirectoryInfo(ByVal directory As String) As System.IO.DirectoryInfo
+        Public Shared Function GetDirectoryInfo(ByVal directory As String) As System.IO.DirectoryInfo
             Return New System.IO.DirectoryInfo(directory)
         End Function
 
@@ -216,7 +219,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="drive">The path to the drive.</param>
         ''' <returns>A DriveInfo object containing the information about the specified drive.</returns>
-        Public Function GetDriveInfo(ByVal drive As String) As System.IO.DriveInfo
+        Public Shared Function GetDriveInfo(ByVal drive As String) As System.IO.DriveInfo
             Return New System.IO.DriveInfo(drive)
         End Function
 
@@ -227,7 +230,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="file">The path to the file.</param>
         ''' <returns>A FileInfo object containing the information about the specified file.</returns>
-        Public Function GetFileInfo(ByVal file As String) As System.IO.FileInfo
+        Public Shared Function GetFileInfo(ByVal file As String) As System.IO.FileInfo
             file = NormalizeFilePath(file, "file")
             Return New System.IO.FileInfo(file)
         End Function
@@ -239,7 +242,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="directory">The directory to find the files inside.</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched files' paths.</returns>
-        Public Function GetFiles(ByVal directory As String) As ObjectModel.ReadOnlyCollection(Of String)
+        Public Shared Function GetFiles(ByVal directory As String) As ObjectModel.ReadOnlyCollection(Of String)
             Return FindFilesOrDirectories(FileOrDirectory.File, directory, SearchOption.SearchTopLevelOnly, Nothing)
         End Function
 
@@ -252,7 +255,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <param name="wildcards">The wildcards for the file name, for example "*.bmp", "*.txt"</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched files' paths.</returns>
-        Public Function GetFiles(ByVal directory As String, ByVal searchType As SearchOption,
+        Public Shared Function GetFiles(ByVal directory As String, ByVal searchType As SearchOption,
             ByVal ParamArray wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
 
             Return FindFilesOrDirectories(FileOrDirectory.File, directory, searchType, wildcards)
@@ -266,7 +269,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="path">The path string from which to obtain the file name (and extension).</param>
         ''' <returns>A String containing the name of the file or directory.</returns>
         ''' <exception cref="ArgumentException">path contains one or more of the invalid characters defined in InvalidPathChars.</exception>
-        Public Function GetName(ByVal path As String) As String
+        Public Shared Function GetName(ByVal path As String) As String
             Return IO.Path.GetFileName(path)
         End Function
 
@@ -285,7 +288,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' The path will be normalized (for example: C:\Dir1////\\\Dir2 will become C:\Dir1\Dir2)
         ''' but will not be resolved (for example: C:\Dir1\Dir2\..\Dir3 WILL NOT become C:\Dir1\Dir3). Use CombinePath.
         ''' </remarks>
-        Public Function GetParentPath(ByVal path As String) As String
+        Public Shared Function GetParentPath(ByVal path As String) As String
             ' Call IO.Path.GetFullPath to handle exception cases. Don't use the full path returned.
             IO.Path.GetFullPath(path)
 
@@ -303,7 +306,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Create a uniquely named zero-byte temporary file on disk and return the full path to that file.
         ''' </summary>
         ''' <returns>A String containing the name of the temporary file.</returns>
-        Public Function GetTempFileName() As String
+        Public Shared Function GetTempFileName() As String
             Return System.IO.Path.GetTempFileName()
         End Function
 
@@ -314,7 +317,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="file">The path to the file to parse.</param>
         ''' <returns>An instance of a TextFieldParser.</returns>
-        Public Function OpenTextFieldParser(ByVal file As String) As TextFieldParser
+        Public Shared Function OpenTextFieldParser(ByVal file As String) As TextFieldParser
             Return New TextFieldParser(file)
         End Function
 
@@ -326,7 +329,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to the file to parse.</param>
         ''' <param name="delimiters">A list of delimiters.</param>
         ''' <returns>An instance of a TextFieldParser</returns>
-        Public Function OpenTextFieldParser(ByVal file As String, ByVal ParamArray delimiters As String()) As TextFieldParser
+        Public Shared Function OpenTextFieldParser(ByVal file As String, ByVal ParamArray delimiters As String()) As TextFieldParser
             Dim Result As New TextFieldParser(file)
             Result.SetDelimiters(delimiters)
             Result.TextFieldType = FieldType.Delimited
@@ -341,7 +344,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to the file to parse.</param>
         ''' <param name="fieldWidths">A list of field widths.</param>
         ''' <returns>An instance of a TextFieldParser</returns>
-        Public Function OpenTextFieldParser(ByVal file As String, ByVal ParamArray fieldWidths As Integer()) As TextFieldParser
+        Public Shared Function OpenTextFieldParser(ByVal file As String, ByVal ParamArray fieldWidths As Integer()) As TextFieldParser
             Dim Result As New TextFieldParser(file)
             Result.SetFieldWidths(fieldWidths)
             Result.TextFieldType = FieldType.FixedWidth
@@ -355,7 +358,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="file">The file to open the StreamReader on.</param>
         ''' <returns>An instance of System.IO.StreamReader opened on the file (with FileShare.Read).</returns>
-        Public Function OpenTextFileReader(ByVal file As String) As IO.StreamReader
+        Public Shared Function OpenTextFileReader(ByVal file As String) As IO.StreamReader
             Return OpenTextFileReader(file, Encoding.UTF8)
         End Function
 
@@ -367,7 +370,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The file to open the StreamReader on.</param>
         ''' <param name="Encoding">The preferred encoding that will be used if the encoding of the file could not be detected.</param>
         ''' <returns>An instance of System.IO.StreamReader opened on the file (with FileShare.Read).</returns>
-        Public Function OpenTextFileReader(ByVal file As String, ByVal encoding As Encoding) As IO.StreamReader
+        Public Shared Function OpenTextFileReader(ByVal file As String, ByVal encoding As Encoding) As IO.StreamReader
 
             file = NormalizeFilePath(file, "file")
             Return New IO.StreamReader(file, encoding, detectEncodingFromByteOrderMarks:=True)
@@ -381,7 +384,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The file to write to.</param>
         ''' <param name="Append">True to append to the content of the file. False to overwrite the content of the file.</param>
         ''' <returns>An instance of StreamWriter opened on the file (with FileShare.Read).</returns>
-        Public Function OpenTextFileWriter(ByVal file As String, ByVal append As Boolean) As IO.StreamWriter
+        Public Shared Function OpenTextFileWriter(ByVal file As String, ByVal append As Boolean) As IO.StreamWriter
             Return OpenTextFileWriter(file, append, Encoding.UTF8)
         End Function
 
@@ -394,7 +397,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="Append">True to append to the content of the file. False to overwrite the content of the file.</param>
         ''' <param name="Encoding">The encoding to use to write to the file.</param>
         ''' <returns>An instance of StreamWriter opened on the file (with FileShare.Read).</returns>
-        Public Function OpenTextFileWriter(ByVal file As String, ByVal append As Boolean,
+        Public Shared Function OpenTextFileWriter(ByVal file As String, ByVal append As Boolean,
             ByVal encoding As Encoding) As IO.StreamWriter
 
             file = NormalizeFilePath(file, "file")
@@ -410,7 +413,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>A byte array contains the content of the file.</returns>
         ''' <exception cref="IO.IOException">If the length of the file is larger than Integer.MaxValue (~2GB).</exception>
         ''' <exception cref="IO.FileStream">See FileStream constructor and Read: for other exceptions.</exception>
-        Public Function ReadAllBytes(ByVal file As String) As Byte()
+        Public Shared Function ReadAllBytes(ByVal file As String) As Byte()
             Return IO.File.ReadAllBytes(file)
         End Function
 
@@ -422,7 +425,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to the text file.</param>
         ''' <returns>A String contains the content of the given file.</returns>
         ''' <exception cref="IO.StreamReader">See StreamReader constructor and ReadToEnd.</exception>
-        Public Function ReadAllText(ByVal file As String) As String
+        Public Shared Function ReadAllText(ByVal file As String) As String
             Return IO.File.ReadAllText(file)
         End Function
 
@@ -435,7 +438,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="encoding">The character encoding to use if the encoding was not detected.</param>
         ''' <returns>A String contains the content of the given file.</returns>
         ''' <exception cref="IO.StreamReader">See StreamReader constructor and ReadToEnd.</exception>
-        Public Function ReadAllText(ByVal file As String, ByVal encoding As Encoding) As String
+        Public Shared Function ReadAllText(ByVal file As String, ByVal encoding As Encoding) As String
             Return IO.File.ReadAllText(file, encoding)
         End Function
 
@@ -1024,7 +1027,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="ParamName">The parameter name to include in the exception if one is raised.</param>
         ''' <returns>The normalized path.</returns>
         ''' <remarks>VSWhidbey 372980.</remarks>
-        Friend Function NormalizeFilePath(ByVal Path As String, ByVal ParamName As String) As String
+        Friend Shared Function NormalizeFilePath(ByVal Path As String, ByVal ParamName As String) As String
             CheckFilePathTrailingSeparator(Path, ParamName)
             Return NormalizePath(Path)
         End Function
@@ -1038,7 +1041,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>The normalized path.</returns>
         ''' <exception cref="IO.Path.GetFullPath">See IO.Path.GetFullPath for possible exceptions.</exception>
         ''' <remarks>Keep this function since we might change the implementation / behavior later.</remarks>
-        Friend Function NormalizePath(ByVal Path As String) As String
+        Friend Shared Function NormalizePath(ByVal Path As String) As String
             Return GetLongPath(RemoveEndingSeparator(IO.Path.GetFullPath(Path)))
         End Function
 
@@ -1176,7 +1179,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ''' <param name="ByteBuffer">The byte array to find the text in</param>
             ''' <param name="Count">The number of valid bytes in the byte array</param>
             ''' <returns>True if the text is found. Otherwise, False.</returns>
-            Friend Function IsTextFound(ByVal ByteBuffer() As Byte, ByVal Count As Integer) As Boolean
+            Friend Shared Function IsTextFound(ByVal ByteBuffer() As Byte, ByVal Count As Integer) As Boolean
                 Debug.Assert(ByteBuffer IsNot Nothing, "Null ByteBuffer!!!")
                 Debug.Assert(Count > 0, Count.ToString(CultureInfo.InvariantCulture))
                 Debug.Assert(m_Decoder IsNot Nothing, "Null Decoder!!!")
@@ -1266,7 +1269,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Private m_Preamble() As Byte ' The byte order mark we need to consider.
         End Class 'Private Class TextSearchHelper
 
-    End Module
+    End Class
 
     '''**************************************************************************
     ''' ;DeleteDirectoryOption

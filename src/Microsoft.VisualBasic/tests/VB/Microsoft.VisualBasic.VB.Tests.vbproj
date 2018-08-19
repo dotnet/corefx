@@ -39,7 +39,6 @@
         <Reference Include="System.Runtime" />
         <Reference Include="System.Runtime.Extensions" />
         <Reference Include="System.Runtime.InteropServices" />
-        <Reference Include="System.Text" />
         <Reference Include="System.Threading" />
     </ItemGroup>
 </Project>
