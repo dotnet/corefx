@@ -30,15 +30,6 @@
     <Compile Include="System\Security\Cryptography\AsymmetricKeyExchangeFormatter.cs" />
     <Compile Include="System\Security\Cryptography\AsymmetricSignatureDeformatter.cs" />
     <Compile Include="System\Security\Cryptography\AsymmetricSignatureFormatter.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\CurveAsn.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\DSSParms.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\DsaPrivateKeyAsn.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\ECDomainParameters.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\ECPrivateKey.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\FieldID.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\RSAPrivateKeyAsn.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs" />
-    <Compile Include="System\Security\Cryptography\Asn1\SpecifiedECDomain.cs" />
     <Compile Include="System\Security\Cryptography\CryptoConfig.cs" />
     <Compile Include="System\Security\Cryptography\DeriveBytes.cs" />
     <Compile Include="System\Security\Cryptography\DES.cs" />
@@ -128,6 +119,15 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
       <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\DSAKeyFormatHelper.cs">
+      <Link>Common\System\Security\Cryptography\DSAKeyFormatHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\EccKeyFormatHelper.cs">
+      <Link>Common\System\Security\Cryptography\EccKeyFormatHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyBlobHelpers.cs">
+      <Link>Common\System\Security\Cryptography\KeyBlobHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyFormatHelper.cs">
       <Link>Common\System\Security\Cryptography\KeyFormatHelper.cs</Link>
     </Compile>
@@ -143,6 +143,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Pkcs12Kdf.cs">
       <Link>Common\System\Security\Cryptography\Pkcs12Kdf.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\RSAKeyFormatHelper.cs">
+      <Link>Common\System\Security\Cryptography\RSAKeyFormatHelper.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\RsaPaddingProcessor.cs">
       <Link>Common\System\Security\Cryptography\RsaPaddingProcessor.cs</Link>
     </Compile>
@@ -151,6 +154,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\DsaPrivateKeyAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\DsaPrivateKeyAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\DSSParms.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\DSSParms.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\EncryptedPrivateKeyInfoAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\EncryptedPrivateKeyInfoAsn.cs</Link>
@@ -173,8 +182,29 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Rc2CbcParameters.cs">
       <Link>Common\System\Security\Cryptography\Asn1\Rc2CbcParameters.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\RSAPrivateKeyAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\RSAPrivateKeyAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\RSAPublicKeyAsn.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\SubjectPublicKeyInfoAsn.cs">
       <Link>Common\System\Security\Cryptography\Asn1\SubjectPublicKeyInfoAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\CurveAsn.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\CurveAsn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\ECDomainParameters.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\ECDomainParameters.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\ECPrivateKey.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\ECPrivateKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\FieldID.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\FieldID.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\SpecifiedECDomain.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\SpecifiedECDomain.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(IsPartialFacadeAssembly)' != 'true'">
@@ -578,9 +608,6 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\ECDsaSecurityTransforms.cs">
       <Link>Common\System\Security\Cryptography\ECDsaSecurityTransforms.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyBlobHelpers.cs">
-      <Link>Common\System\Security\Cryptography\KeyBlobHelpers.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\RSASecurityTransforms.cs">
       <Link>Common\System\Security\Cryptography\RSASecurityTransforms.cs</Link>
     </Compile>
@@ -602,12 +629,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Internal\Cryptography\AsymmetricAlgorithmHelpers.Hash.cs">
       <Link>Common\Internal\Cryptography\AsymmetricAlgorithmHelpers.Hash.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerEncoder.cs">
-      <Link>Common\System\Security\Cryptography\DerEncoder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
-      <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\ECDiffieHellmanDerivation.cs">
       <Link>Common\System\Security\Cryptography\ECDiffieHellmanDerivation.cs</Link>
