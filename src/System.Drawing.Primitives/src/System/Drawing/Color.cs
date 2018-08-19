@@ -364,13 +364,13 @@ namespace System.Drawing
 
         public byte A => (byte)((Value >> ARGBAlphaShift) & 0xFF);
 
-        public bool IsKnownColor => ((state & StateKnownColorValid) != 0);
+        public bool IsKnownColor => (state & StateKnownColorValid) != 0;
 
         public bool IsEmpty => state == 0;
 
         public bool IsNamedColor => ((state & StateNameValid) != 0) || IsKnownColor;
 
-        public bool IsSystemColor => IsKnownColor && ((((KnownColor) knownColor) <= KnownColor.WindowText) || (((KnownColor) knownColor) > KnownColor.YellowGreen));
+        public bool IsSystemColor => IsKnownColor && (((KnownColor)knownColor <= KnownColor.WindowText) || ((KnownColor)knownColor > KnownColor.YellowGreen));
 
         // Not localized because it's only used for the DebuggerDisplayAttribute, and the values are
         // programmatic items.
@@ -464,11 +464,9 @@ namespace System.Drawing
         public static Color FromName(string name)
         {
             // try to get a known color first
-            Color color;
-            if (ColorTable.TryGetNamedColor(name, out color))
-            {
+            if (ColorTable.TryGetNamedColor(name, out Color color))
                 return color;
-            }
+
             // otherwise treat it as a named color
             return new Color(NotDefinedValue, StateNameValid, name, (KnownColor)0);
         }
@@ -543,7 +541,7 @@ namespace System.Drawing
 
         public override string ToString()
         {
-            if ((state & StateNameValid) != 0 || (state & StateKnownColorValid) != 0)
+            if (IsNamedColor)
             {
                 return nameof(Color) + " [" + Name + "]";
             }
@@ -565,7 +563,7 @@ namespace System.Drawing
 
         public static bool operator !=(Color left, Color right) => !(left == right);
 
-        public override bool Equals(object obj) => obj is Color && Equals((Color)obj);
+        public override bool Equals(object obj) => obj is Color other && Equals(other);
 
         public bool Equals(Color other) => this == other;
 
