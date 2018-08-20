@@ -49,7 +49,7 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="asn:Sequence">using System;<xsl:if test="asn:SequenceOf">
+  <xsl:template match="asn:Sequence">using System;<xsl:if test="asn:SequenceOf | asn:SetOf">
 using System.Collections.Generic;</xsl:if>
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
