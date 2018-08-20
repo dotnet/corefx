@@ -1750,7 +1750,7 @@ int32_t SystemNative_GetSockOpt(
                 value = value == 0 ? 1 : 0;
             }
             *(int32_t*)optionValue = value;
-#else
+#else // !SO_REUSEPORT
             *optionValue = 0;
 #endif
             return Error_SUCCESS;
@@ -1834,7 +1834,7 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
 
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &value, (socklen_t)optionLen);
             return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-#else
+#else // !SO_REUSEPORT
             return Error_SUCCESS;
 #endif
         }
