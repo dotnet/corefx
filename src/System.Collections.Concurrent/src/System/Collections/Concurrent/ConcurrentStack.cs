@@ -55,6 +55,25 @@ namespace System.Collections.Concurrent
                 _value = value;
                 _next = null;
             }
+
+            internal void EnsureNextIsSet()
+            {
+                if (_next != null)
+                {
+                    return;
+                }
+
+                EnsureSlowPath();
+            }
+
+            void EnsureSlowPath()
+            {
+                var spin = new SpinWait();
+                while (_next == null)
+                {
+                    spin.SpinOnce();
+                }
+            }
         }
 
         private static readonly Node Guard = new Node(default(T));
@@ -155,9 +174,7 @@ namespace System.Collections.Concurrent
 
                 for (Node curr = _head; ReferenceEquals(curr, Guard) == false;)
                 {
-                    // spin till _next is set
-                    while (curr._next == null)
-                    {}
+                    curr.EnsureNextIsSet();
 
                     curr = curr._next;
 
@@ -455,10 +472,8 @@ namespace System.Collections.Concurrent
                 return false;
             }
 
-            // fast spin till _next is set
-            while (head._next == null)
-            {}
-
+            head.EnsureNextIsSet();
+            
             if (Interlocked.CompareExchange(ref _head, head._next, head) == head)
             {
                 result = head._value;
@@ -599,19 +614,14 @@ namespace System.Collections.Concurrent
                     return 0;
                 }
                 next = head;
+                next.EnsureNextIsSet();
+
                 int nodesCount = 1;
-                for (; nodesCount < count && ReferenceEquals(next, Guard) == false; nodesCount++)
+                for (; nodesCount < count && ReferenceEquals(next._next, Guard) == false; nodesCount++)
                 {
-                    // fast spin till _next is set
-                    while (next._next == null)
-                    { }
-
                     next = next._next;
+                    next.EnsureNextIsSet();
                 }
-
-                // fast spin till _next is set
-                while (next._next == null)
-                { }
 
                 // Try to swap the new head.  If we succeed, break out of the loop.
                 if (Interlocked.CompareExchange(ref _head, next._next, head) == head)
@@ -717,10 +727,7 @@ namespace System.Collections.Concurrent
             {
                 list.Add(curr._value);
 
-                // fast spin till _next is set
-                while (curr._next == null)
-                { }
-
+                curr.EnsureNextIsSet();
                 curr = curr._next;
             }
 
@@ -755,9 +762,7 @@ namespace System.Collections.Concurrent
             Node current = head;
             while (ReferenceEquals(current, Guard) == false)
             {
-                // fast spin till _next is set
-                while (current._next == null)
-                { }
+                current.EnsureNextIsSet();
 
                 yield return current._value;
                 current = current._next;
