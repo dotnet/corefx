@@ -17,7 +17,7 @@ namespace System.Runtime.InteropServices.Tests
         [InlineData(typeof(string), -1)]
         [InlineData(typeof(NonGenericClass), -1)]
         [InlineData(typeof(NonGenericStruct), -1)]
-        [InlineData(typeof(NonGenericInterface), 7)]
+        [InlineData(typeof(NonGenericInterface), 6)]
         [InlineData(typeof(int*), -1)]
         [PlatformSpecific(TestPlatforms.Windows)]
         [ActiveIssue(31068, ~TargetFrameworkMonikers.NetFramework)]
