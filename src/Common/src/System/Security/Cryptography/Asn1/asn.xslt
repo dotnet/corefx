@@ -159,7 +159,7 @@ namespace <xsl:value-of select="@namespace" />
             Asn1Tag tag = reader.PeekTag();<xsl:if test="*[@explicitTag]">
             AsnReader explicitReader;</xsl:if><xsl:if test="asn:SequenceOf | asn:SetOf">
             AsnReader collectionReader;</xsl:if>
-            <xsl:apply-templates mode="Decode" />
+            <xsl:apply-templates select="*" mode="Decode" />
             else
             {
                 throw new CryptographicException();
