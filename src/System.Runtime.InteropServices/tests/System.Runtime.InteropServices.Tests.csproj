@@ -74,7 +74,6 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\GetObjectsForNativeVariantsTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetStartComSlotTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetStartComSlotTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetTypedObjectForIUnknownTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsComObjectTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsComObjectTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsTypeVisibleFromComTests.cs" />

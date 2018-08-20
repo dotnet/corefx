@@ -49,6 +49,7 @@ namespace System.Runtime.InteropServices.Tests
             TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
             AssertExtensions.Throws<ArgumentException>("t", () => Marshal.GetStartComSlot(typeBuilder));
         }
+        
         public static IEnumerable<object[]> GetStartComSlot_InvalidGenericType_TestData()
         {
             yield return new object[] { typeof(int).MakeByRefType() };
@@ -73,7 +74,7 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { typeof(NonComVisibleClass) };
             yield return new object[] { typeof(NonComVisibleStruct) };
             yield return new object[] { typeof(NonComVisibleInterface) };
-             yield return new object[] { typeof(int[]) };
+            yield return new object[] { typeof(int[]) };
             yield return new object[] { typeof(int[][]) };
             yield return new object[] { typeof(int[,]) };
              AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
@@ -81,6 +82,14 @@ namespace System.Runtime.InteropServices.Tests
             TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
             Type collectibleType = typeBuilder.CreateType();
             yield return new object[] { collectibleType };
+        }
+        
+        [Theory]
+        [MemberData(nameof(GetStartComSlot_NotComVisibleType_TestData))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetStartComSlot_NotComVisibleType_ThrowsArgumentException(Type type)
+        {
+            AssertExtensions.Throws<ArgumentException>("t", () => Marshal.GetStartComSlot(type));
         }
     }
 }
