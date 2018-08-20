@@ -857,7 +857,7 @@ namespace System.Diagnostics
 
                 // Only call close on the streams if the user cannot have a reference on them.
                 // If they are referenced it is the user's responsibility to dispose of them.
-                try 
+                try
                 {
                     if (_standardOutput != null && (_outputStreamReadMode == StreamReadMode.AsyncMode || _outputStreamReadMode == StreamReadMode.Undefined))
                     {
@@ -882,7 +882,7 @@ namespace System.Diagnostics
                         _standardInput.Close();
                     }
                 }
-                finally 
+                finally
                 {
                     _standardOutput = null;
                     _standardInput = null;

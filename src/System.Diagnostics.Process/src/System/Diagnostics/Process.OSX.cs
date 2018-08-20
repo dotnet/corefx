@@ -54,7 +54,7 @@ namespace System.Diagnostics
                 }
 
                 // usually seconds will be negative
-                double seconds = (((long) info.ri_proc_start_abstime - (long) absoluteTime) * (double)numer / denom) / NanoSecondToSecondFactor;
+                double seconds = (((long) info.ri_proc_start_abstime - (long)absoluteTime) * (double)numer / denom) / NanoSecondToSecondFactor;
                 return  DateTime.UtcNow.AddSeconds(seconds).ToLocalTime();
             }
         }
@@ -96,7 +96,7 @@ namespace System.Diagnostics
 
         /// <summary>Gets parent process ID</summary>
         // Looks like this will be easly to implement. The needed id can be found in Interop.libproc.proc_bsdinfo.ppid.
-		private int ParentProcessId =>
+        private int ParentProcessId =>
             throw new PlatformNotSupportedException();
 
         // -----------------------------

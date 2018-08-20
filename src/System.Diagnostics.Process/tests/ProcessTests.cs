@@ -281,7 +281,7 @@ namespace System.Diagnostics.Tests
         public void TestId()
         {
             CreateDefaultProcess();
-            
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.Equal(_process.Id, Interop.GetProcessId(_process.SafeHandle));
@@ -521,7 +521,7 @@ namespace System.Diagnostics.Tests
         public void TestMaxWorkingSet()
         {
             CreateDefaultProcess();
-            
+
             using (Process p = Process.GetCurrentProcess())
             {
                 Assert.True((long)p.MaxWorkingSet > 0);
@@ -576,7 +576,7 @@ namespace System.Diagnostics.Tests
         public void TestMinWorkingSet()
         {
             CreateDefaultProcess();
-            
+
             using (Process p = Process.GetCurrentProcess())
             {
                 Assert.True((long)p.MaxWorkingSet > 0);
@@ -648,7 +648,7 @@ namespace System.Diagnostics.Tests
         public void TestNonpagedSystemMemorySize64()
         {
             CreateDefaultProcess();
-            
+
             AssertNonZeroWindowsZeroUnix(_process.NonpagedSystemMemorySize64);
         }
 
@@ -799,7 +799,7 @@ namespace System.Diagnostics.Tests
         public void TestProcessorTime()
         {
             CreateDefaultProcess();
-            
+
             Assert.True(_process.UserProcessorTime.TotalSeconds >= 0);
             Assert.True(_process.PrivilegedProcessorTime.TotalSeconds >= 0);
 
@@ -899,7 +899,7 @@ namespace System.Diagnostics.Tests
         public void TestProcessorAffinity()
         {
             CreateDefaultProcess();
-            
+
             IntPtr curProcessorAffinity = _process.ProcessorAffinity;
             try
             {
@@ -1021,7 +1021,7 @@ namespace System.Diagnostics.Tests
 
             uint sessionId;
 #if TargetsWindows
-                Interop.ProcessIdToSessionId((uint)_process.Id, out sessionId);
+            Interop.ProcessIdToSessionId((uint)_process.Id, out sessionId);
 #else
                 sessionId = (uint)Interop.getsid(_process.Id);
 #endif
@@ -1246,7 +1246,7 @@ namespace System.Diagnostics.Tests
             process.Kill();
             Assert.True(process.WaitForExit(WaitInMS));
         }
-        
+
         [Fact]
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]        
         public void StartInfo_SetOnRunningProcess_ThrowsInvalidOperationException()

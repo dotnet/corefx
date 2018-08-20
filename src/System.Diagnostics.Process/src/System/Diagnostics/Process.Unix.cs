@@ -80,15 +80,13 @@ namespace System.Diagnostics
         {
             try
             {
-                /*
-                   Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
-                   so that its children can be enumerated.
-                */
+                // Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
+                // so that its children can be enumerated.
                 Stop();
             }
             catch
             {
-                // Making a best attempt. If it fails (perhapse because the process is already dead), give up.
+                // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
                 return;
             }
 
@@ -101,7 +99,7 @@ namespace System.Diagnostics
             }
             catch
             {
-                // Making a best attempt. If it fails (perhapse because the process is already dead), give up.
+                // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
                 return;
             }
 
@@ -417,7 +415,7 @@ namespace System.Diagnostics
                 Interop.Sys.ForkAndExecProcess(
                     filename, argv, envp, cwd,
                     startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                    setCredentials, userId, groupId, 
+                    setCredentials, userId, groupId,
                     out childPid,
                     out stdinFd, out stdoutFd, out stderrFd);
 

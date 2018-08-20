@@ -99,10 +99,10 @@ namespace System.Diagnostics
                 return DateTime.UtcNow;
             }
         }
-		
-		/// <summary>Gets the parent process ID</summary>
-		private int ParentProcessId => 
-		    GetStat().ppid;
+
+        /// <summary>Gets the parent process ID</summary>
+        private int ParentProcessId =>
+            GetStat().ppid;
 
         /// <summary>Gets execution path</summary>
         private string GetPathToOpenFile()

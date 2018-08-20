@@ -48,7 +48,7 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public static Process Start(string fileName, string userName, SecureString password, string domain)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);            
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);
             startInfo.UserName = userName;
             startInfo.Password = password;
             startInfo.Domain = domain;
@@ -59,11 +59,11 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);                        
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);
             startInfo.UserName = userName;
             startInfo.Password = password;
             startInfo.Domain = domain;
-            startInfo.UseShellExecute = false;            
+            startInfo.UseShellExecute = false;
             return Start(startInfo);
         }
 
@@ -102,10 +102,8 @@ namespace System.Diagnostics
         {
             try
             {
-                /*
-                   Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
-                   and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
-                */
+                // Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
+                // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
                 OpenProcessHandle();
 
                 // Kill the process, so that no further children can be created.
@@ -135,11 +133,9 @@ namespace System.Diagnostics
                 {
                     try
                     {
-                        /*
-                           Force the process object to hold a handle to the process. Ensures that if the process dies while we're working
-                           with it, it won't be reused. This way, any process we pass back is guaranteed to be an actual child, not a 
-                           reference to a new process that happens to have the same id as a deceased child.
-                        */
+                        // Force the process object to hold a handle to the process. Ensures that if the process dies while we're working
+                        // with it, it won't be reused. This way, any process we pass back is guaranteed to be an actual child, not a 
+                        // reference to a new process that happens to have the same id as a deceased child.
                         possibleChildProcess.OpenProcessHandle();
                     }
                     catch
@@ -544,7 +540,7 @@ namespace System.Diagnostics
 
             StringBuilder commandLine = BuildCommandLine(startInfo.FileName, StartInfo.Arguments);
             Process.AppendArguments(commandLine, StartInfo.ArgumentList);
-            
+
             Interop.Kernel32.STARTUPINFO startupInfo = new Interop.Kernel32.STARTUPINFO();
             Interop.Kernel32.PROCESS_INFORMATION processInfo = new Interop.Kernel32.PROCESS_INFORMATION();
             Interop.Kernel32.SECURITY_ATTRIBUTES unused_SecAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
