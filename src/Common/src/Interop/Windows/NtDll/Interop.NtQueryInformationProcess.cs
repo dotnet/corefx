@@ -11,7 +11,7 @@ internal partial class Interop
     internal partial class NtDll
     {
         [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode)]
-        internal static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, int pbiSize, out int pSize);
+        internal static extern unsafe uint NtQueryInformationProcess(SafeProcessHandle ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, void* ProcessInformation, uint ProcessInformationLength, out uint ReturnLength);
 
         internal enum PROCESSINFOCLASS : int
         {
@@ -26,15 +26,12 @@ internal partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal struct PROCESS_BASIC_INFORMATION
         {
-            public IntPtr ExitStatus;
+            public uint ExitStatus;
             public IntPtr PebBaseAddress;
-            public IntPtr AffinityMask;
-            public IntPtr BasePriority;
-            public IntPtr UniqueProcessId;
-            public IntPtr InheritedFromUniqueProcessId;
-
-            public int Size =>
-                Marshal.SizeOf<PROCESS_BASIC_INFORMATION>();
+            public UIntPtr AffinityMask;
+            public int BasePriority;
+            public UIntPtr UniqueProcessId;
+            public UIntPtr InheritedFromUniqueProcessId;
         }
     }
 }
