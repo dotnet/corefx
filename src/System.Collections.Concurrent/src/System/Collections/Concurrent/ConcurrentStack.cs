@@ -44,7 +44,7 @@ namespace System.Collections.Concurrent
         private class Node
         {
             internal readonly T _value; // Value of the node.
-            internal Node _next; // Next pointer.
+            internal volatile Node _next; // Next pointer.
 
             /// <summary>
             /// Constructs a new node with the specified value and no next node.
@@ -55,7 +55,28 @@ namespace System.Collections.Concurrent
                 _value = value;
                 _next = null;
             }
+
+            internal void EnsureNextIsSet()
+            {
+                if (_next != null)
+                {
+                    return;
+                }
+
+                EnsureSlowPath();
+            }
+
+            void EnsureSlowPath()
+            {
+                var spin = new SpinWait();
+                while (_next == null)
+                {
+                    spin.SpinOnce();
+                }
+            }
         }
+
+        private static readonly Node Guard = new Node(default(T));
 
         private volatile Node _head; // The stack is a singly linked list, and only remembers the head.
         private const int BACKOFF_MAX_YIELDS = 8; // Arbitrary number to cap backoff.
@@ -66,6 +87,7 @@ namespace System.Collections.Concurrent
         /// </summary>
         public ConcurrentStack()
         {
+            _head = Guard;
         }
 
         /// <summary>
@@ -82,6 +104,8 @@ namespace System.Collections.Concurrent
             {
                 throw new ArgumentNullException(nameof(collection));
             }
+
+            _head = Guard;
             InitializeFromCollection(collection);
         }
 
@@ -92,7 +116,7 @@ namespace System.Collections.Concurrent
         private void InitializeFromCollection(IEnumerable<T> collection)
         {
             // We just copy the contents of the collection to our stack.
-            Node lastNode = null;
+            Node lastNode = _head;
             foreach (T element in collection)
             {
                 Node newNode = new Node(element);
@@ -121,7 +145,7 @@ namespace System.Collections.Concurrent
             // the function returning (i.e. if another thread concurrently adds to the stack). It does
             // guarantee, however, that, if another thread does not mutate the stack, a subsequent call
             // to TryPop will return true -- i.e. it will also read the stack as non-empty.
-            get { return _head == null; }
+            get { return ReferenceEquals(_head, Guard); }
         }
 
         /// <summary>
@@ -148,8 +172,12 @@ namespace System.Collections.Concurrent
                 // they are being dequeued. If we ever changed this (e.g. to pool nodes somehow),
                 // we'd need to revisit this implementation.
 
-                for (Node curr = _head; curr != null; curr = curr._next)
+                for (Node curr = _head; ReferenceEquals(curr, Guard) == false;)
                 {
+                    curr.EnsureNextIsSet();
+
+                    curr = curr._next;
+
                     count++; //we don't handle overflow, to be consistent with existing generic collection types in CLR
                 }
 
@@ -196,7 +224,7 @@ namespace System.Collections.Concurrent
             // operation for this: anybody who is mutating the head by pushing or popping
             // will need to use an atomic operation to guarantee they serialize and don't
             // overwrite our setting of the head to null.
-            _head = null;
+            _head = Guard;
         }
 
         /// <summary>
@@ -283,19 +311,12 @@ namespace System.Collections.Concurrent
         public void Push(T item)
         {
             // Pushes a node onto the front of the stack thread-safely. Internally, this simply
-            // swaps the current head pointer using a (thread safe) CAS operation to accomplish
-            // lock freedom. If the CAS fails, we add some back off to statistically decrease
-            // contention at the head, and then go back around and retry.
+            // swaps the current head pointer using a (thread safe) EXCH operation to accomplish
+            // lock freedom. Then it assings _next.
 
             Node newNode = new Node(item);
-            newNode._next = _head;
-            if (Interlocked.CompareExchange(ref _head, newNode, newNode._next) == newNode._next)
-            {
-                return;
-            }
-
-            // If we failed, go to the slow path and loop around until we succeed.
-            PushCore(newNode, newNode);
+            Node head = Interlocked.Exchange(ref _head, newNode);
+            newNode._next = head;
         }
 
         /// <summary>
@@ -352,7 +373,7 @@ namespace System.Collections.Concurrent
 
 
             Node head, tail;
-            head = tail = new Node(items[startIndex]);
+            head = tail =  new Node(items[startIndex]);
             for (int i = startIndex + 1; i < startIndex + count; i++)
             {
                 Node node = new Node(items[i]);
@@ -360,41 +381,8 @@ namespace System.Collections.Concurrent
                 head = node;
             }
 
-            tail._next = _head;
-            if (Interlocked.CompareExchange(ref _head, head, tail._next) == tail._next)
-            {
-                return;
-            }
-
-            // If we failed, go to the slow path and loop around until we succeed.
-            PushCore(head, tail);
-        }
-
-
-        /// <summary>
-        /// Push one or many nodes into the stack, if head and tails are equal then push one node to the stack other wise push the list between head
-        /// and tail to the stack
-        /// </summary>
-        /// <param name="head">The head pointer to the new list</param>
-        /// <param name="tail">The tail pointer to the new list</param>
-        private void PushCore(Node head, Node tail)
-        {
-            SpinWait spin = new SpinWait();
-
-            // Keep trying to CAS the existing head with the new node until we succeed.
-            do
-            {
-                spin.SpinOnce();
-                // Reread the head and link our new node.
-                tail._next = _head;
-            }
-            while (Interlocked.CompareExchange(
-                ref _head, head, tail._next) != tail._next);
-
-            if (CDSCollectionETWBCLProvider.Log.IsEnabled())
-            {
-                CDSCollectionETWBCLProvider.Log.ConcurrentStack_FastPushFailed(spin.Count);
-            }
+            Node prevHead = Interlocked.Exchange(ref _head, head);
+            tail._next = prevHead;
         }
 
         /// <summary>
@@ -452,7 +440,7 @@ namespace System.Collections.Concurrent
             Node head = _head;
 
             // If the stack is empty, return false; else return the element and true.
-            if (head == null)
+            if (ReferenceEquals(head, Guard))
             {
                 result = default(T);
                 return false;
@@ -478,11 +466,14 @@ namespace System.Collections.Concurrent
         {
             Node head = _head;
             //stack is empty
-            if (head == null)
+            if (ReferenceEquals(head, Guard))
             {
                 result = default(T);
                 return false;
             }
+
+            head.EnsureNextIsSet();
+            
             if (Interlocked.CompareExchange(ref _head, head._next, head) == head)
             {
                 result = head._value;
@@ -612,7 +603,7 @@ namespace System.Collections.Concurrent
             {
                 head = _head;
                 // Is the stack empty?
-                if (head == null)
+                if (ReferenceEquals(head, Guard))
                 {
                     if (count == 1 && CDSCollectionETWBCLProvider.Log.IsEnabled())
                     {
@@ -623,10 +614,13 @@ namespace System.Collections.Concurrent
                     return 0;
                 }
                 next = head;
+                next.EnsureNextIsSet();
+
                 int nodesCount = 1;
-                for (; nodesCount < count && next._next != null; nodesCount++)
+                for (; nodesCount < count && ReferenceEquals(next._next, Guard) == false; nodesCount++)
                 {
                     next = next._next;
+                    next.EnsureNextIsSet();
                 }
 
                 // Try to swap the new head.  If we succeed, break out of the loop.
@@ -729,9 +723,11 @@ namespace System.Collections.Concurrent
         {
             List<T> list = new List<T>();
 
-            while (curr != null)
+            while (ReferenceEquals(curr, Guard) == false)
             {
                 list.Add(curr._value);
+
+                curr.EnsureNextIsSet();
                 curr = curr._next;
             }
 
@@ -764,8 +760,10 @@ namespace System.Collections.Concurrent
         private IEnumerator<T> GetEnumerator(Node head)
         {
             Node current = head;
-            while (current != null)
+            while (ReferenceEquals(current, Guard) == false)
             {
+                current.EnsureNextIsSet();
+
                 yield return current._value;
                 current = current._next;
             }
