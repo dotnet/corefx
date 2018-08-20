@@ -18,7 +18,7 @@ namespace System.IO
 
             if (!Interop.Kernel32.EncryptFile(fullPath))
             {
-                ThrowException(fullPath);
+                ThrowExceptionEncryptDecryptFail(fullPath);
             }
         }
 
@@ -31,24 +31,21 @@ namespace System.IO
 
             if (!Interop.Kernel32.DecryptFile(fullPath))
             {
-                ThrowException(fullPath);
+                ThrowExceptionEncryptDecryptFail(fullPath);
             }
         }
 
-        private static void ThrowException(string fullPath)
+        private static unsafe void ThrowExceptionEncryptDecryptFail(string fullPath)
         {
             int errorCode = Marshal.GetLastWin32Error();
             if (errorCode == Interop.Errors.ERROR_ACCESS_DENIED)
             {
                 // Check to see if the file system support the Encrypted File System (EFS)
                 string name = DriveInfoInternal.NormalizeDriveName(Path.GetPathRoot(fullPath));
-                StringBuilder volumeName = new StringBuilder(50);
-                StringBuilder fileSystemName = new StringBuilder(50);
 
-                bool success = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out uint oldMode);
-                try
+                using (DisableMediaInsertionPrompt.Create())
                 {
-                    if (!Interop.Kernel32.GetVolumeInformation(name, volumeName, volumeName.Length, out int serialNumber, out int maxFileNameLen, out int fileSystemFlags, fileSystemName, fileSystemName.Length))
+                    if (!Interop.Kernel32.GetVolumeInformation(name, null, 0, null, null, out int fileSystemFlags, null, 0))
                     {
                         errorCode = Marshal.GetLastWin32Error();
                         throw Win32Marshal.GetExceptionForWin32Error(errorCode, name);
@@ -58,11 +55,6 @@ namespace System.IO
                     {
                         throw new NotSupportedException(SR.PlatformNotSupported_FileEncryption);
                     }
-                }
-                finally
-                {
-                    if (success)
-                        Interop.Kernel32.SetThreadErrorMode(oldMode, out oldMode);
                 }
             }
             throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
