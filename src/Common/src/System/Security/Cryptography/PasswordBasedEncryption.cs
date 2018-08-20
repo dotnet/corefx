@@ -609,9 +609,10 @@ namespace System.Security.Cryptography
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Rc2CbcParameters rc2Parameters = AsnSerializer.Deserialize<Rc2CbcParameters>(
-                    encryptionScheme.Parameters.Value,
-                    AsnEncodingRules.BER);
+                Rc2CbcParameters.Decode(
+                    new AsnReader(encryptionScheme.Parameters.Value, AsnEncodingRules.BER),
+                    out Rc2CbcParameters rc2Parameters,
+                    out _);
 
                 // iv is the eight-octet initialization vector
                 if (rc2Parameters.Iv.Length != 8)

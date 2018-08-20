@@ -1,0 +1,22 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <AsnXml />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)asn.xsd">
+      <Link>Common\System\Security\Cryptography\Asn1\asn.xsd</Link>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CompileAsn" BeforeTargets="CoreCompile"
+    Inputs="@(AsnXml);$(MSBuildThisFileDirectory)asn.xslt"
+    Outputs="@(AsnXml -> '$(IntermediateOutputPath)asnxml\%(filename).cs')">
+
+    <MakeDir Directories="$(IntermediateOutputPath)asnxml" />
+
+    <XslTransformation
+      XslInputPath="$(MSBuildThisFileDirectory)asn.xslt"
+      XmlInputPaths="@(AsnXml)"
+      OutputPaths="@(AsnXml -> '$(IntermediateOutputPath)asnxml\%(filename).cs')" />
+  </Target>
+</Project>  
