@@ -17,6 +17,22 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { typeof(InterfaceComImportObject), -1 };
             yield return new object[] { typeof(InterfaceAndComImportObject), 7 };
             yield return new object[] { typeof(IComImportObject), 7 };
+
+            yield return new object[] { typeof(DualInterface), 7};
+            yield return new object[] { typeof(IUnknownInterface), 3};
+            yield return new object[] { typeof(IDispatchInterface), 7};
+            yield return new object[] { typeof(IInspectableInterface), 6};
+            yield return new object[] { typeof(DualComObject), 7};
+            yield return new object[] { typeof(IUnknownComObject), 3};
+            yield return new object[] { typeof(IDispatchComObject), 7};
+            yield return new object[] { typeof(IInspectableComObject), 6};
+            yield return new object[] { typeof(NonDualComObject), 7};
+            yield return new object[] { typeof(AutoDispatchComObject), 7};
+            yield return new object[] { typeof(AutoDualComObject), 7};
+            yield return new object[] { typeof(NonDualComObjectEmpty), -1};
+            yield return new object[] { typeof(AutoDispatchComObjectEmpty), -1};
+            yield return new object[] { typeof(AutoDualComObjectEmpty), -1};
+
             yield return new object[] { typeof(ManagedInterfaceSupportIUnknown), 3 };
             yield return new object[] { typeof(ManagedInterfaceSupportIUnknownWithMethods), 3 };
             yield return new object[] { typeof(ManagedInterfaceSupportDualInterfaceWithMethods), 7 };
