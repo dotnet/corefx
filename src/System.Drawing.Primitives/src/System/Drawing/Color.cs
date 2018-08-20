@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics.Hashing;
+using System.Runtime.CompilerServices;
 
 namespace System.Drawing
 {
@@ -320,7 +321,7 @@ namespace System.Drawing
         private const int ARGBRedShift = 16;
         private const int ARGBGreenShift = 8;
         private const int ARGBBlueShift = 0;
-        private const uint ARGBAlphaMask = 0xffu << ARGBAlphaShift;
+        private const uint ARGBAlphaMask = 0xFFu << ARGBAlphaShift;
 
         // user supplied name of color. Will not be filled in if
         // we map to a "knowncolor"
@@ -425,7 +426,7 @@ namespace System.Drawing
 
         private static void CheckByte(int value, string name)
         {
-            if ((uint)value > byte.MaxValue)
+            if (unchecked((uint)value) > byte.MaxValue)
                 ThrowOutOfByteRange(value, name);
         }
 
@@ -437,7 +438,7 @@ namespace System.Drawing
 
         private static Color FromArgb(uint argb) => new Color(argb, StateARGBValueValid, null, (KnownColor)0);
 
-        public static Color FromArgb(int argb) => FromArgb((uint)argb);
+        public static Color FromArgb(int argb) => FromArgb(unchecked((uint)argb));
 
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
@@ -446,7 +447,7 @@ namespace System.Drawing
             CheckByte(green, nameof(green));
             CheckByte(blue, nameof(blue));
 
-            return FromArgb(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue));
+            return FromArgb(unchecked(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue)));
         }
 
         public static Color FromArgb(int alpha, Color baseColor)
@@ -471,12 +472,18 @@ namespace System.Drawing
             return new Color(NotDefinedValue, StateNameValid, name, (KnownColor)0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void GetRgbValues(out int r, out int g, out int b)
+        {
+            int value = unchecked((int)Value);
+            r = (value >> ARGBRedShift) & 0xFF;
+            g = (value >> ARGBGreenShift) & 0xFF;
+            b = (value >> ARGBBlueShift) & 0xFF;
+        }
+
         public float GetBrightness()
         {
-            uint value = (uint)Value;
-            int r = (int)((value >> ARGBRedShift  ) & 0xff);
-            int g = (int)((value >> ARGBGreenShift) & 0xff);
-            int b = (int)((value >> ARGBBlueShift ) & 0xff);
+            GetRgbValues(out int r, out int g, out int b);
 
             int min = Math.Min(Math.Min(r, g), b);
             int max = Math.Max(Math.Max(r, g), b);
@@ -484,13 +491,9 @@ namespace System.Drawing
             return (max + min) / (byte.MaxValue * 2f);
         }
 
-
         public float GetHue()
         {
-            uint value = (uint)Value;
-            int r = (int)((value >> ARGBRedShift  ) & 0xff);
-            int g = (int)((value >> ARGBGreenShift) & 0xff);
-            int b = (int)((value >> ARGBBlueShift ) & 0xff);
+            GetRgbValues(out int r, out int g, out int b);
 
             if (r == g && g == b)
                 return 0f;
@@ -517,10 +520,7 @@ namespace System.Drawing
 
         public float GetSaturation()
         {
-            uint value = (uint)Value;
-            int r = (int)((value >> ARGBRedShift  ) & 0xff);
-            int g = (int)((value >> ARGBGreenShift) & 0xff);
-            int b = (int)((value >> ARGBBlueShift ) & 0xff);
+            GetRgbValues(out int r, out int g, out int b);
 
             if (r == g && g == b)
                 return 0f;
