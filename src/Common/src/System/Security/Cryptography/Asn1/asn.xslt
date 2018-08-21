@@ -196,7 +196,7 @@ namespace <xsl:value-of select="@namespace" />
             ensureUniqueTag(<xsl:call-template name="ContextTag" />, "<xsl:value-of select="@name"/>");</xsl:when>
       <xsl:when test="@universalTagNumber" xml:space="preserve">
             ensureUniqueTag(new Asn1Tag((UniversalTagNumber)<xsl:value-of select="@universalTagNumber"/>), "<xsl:value-of select="@name"/>");</xsl:when>
-      <xsl:otherwise>
+      <xsl:otherwise xml:space="preserve">
             ensureUniqueTag(<xsl:apply-templates select="." mode="DefaultTag" />, "<xsl:value-of select="@name"/>");</xsl:otherwise>
     </xsl:choose>
   </xsl:template>
