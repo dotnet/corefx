@@ -19,8 +19,7 @@ namespace System.Runtime.Tests
         public void ProfileOptimization_CheckFileExists()
         {
             string tmpProfileFilePath = GetTestFileName();
-            string directoryName = Path.GetDirectoryName(tmpProfileFilePath);
-            string tmpTestFileName = Path.Combine(directoryName, Path.GetRandomFileName());
+            string tmpTestFileName = Path.Combine(Path.GetDirectoryName(tmpProfileFilePath), Path.GetRandomFileName());
 
             _output.WriteLine($"We'll test write permission on path '{tmpTestFileName}'");
 
