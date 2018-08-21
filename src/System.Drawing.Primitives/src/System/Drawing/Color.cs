@@ -322,6 +322,9 @@ namespace System.Drawing
         private const int ARGBGreenShift = 8;
         private const int ARGBBlueShift = 0;
         private const uint ARGBAlphaMask = 0xFFu << ARGBAlphaShift;
+        private const uint ARGBRedMask = 0xFFu << ARGBRedShift;
+        private const uint ARGBGreenMask = 0xFFu << ARGBGreenShift;
+        private const uint ARGBBlueMask = 0xFFu << ARGBBlueShift;
 
         // user supplied name of color. Will not be filled in if
         // we map to a "knowncolor"
@@ -357,13 +360,13 @@ namespace System.Drawing
             this.knownColor = unchecked((short)knownColor);
         }
 
-        public byte R => (byte)((Value >> ARGBRedShift) & 0xFF);
+        public byte R => (byte)(((uint)Value & ARGBRedMask) >> ARGBRedShift);
 
-        public byte G => (byte)((Value >> ARGBGreenShift) & 0xFF);
+        public byte G => (byte)(((uint)Value & ARGBGreenMask) >> ARGBGreenShift);
 
-        public byte B => (byte)((Value >> ARGBBlueShift) & 0xFF);
+        public byte B => (byte)(((uint)Value & ARGBBlueMask) >> ARGBBlueShift);
 
-        public byte A => (byte)((Value >> ARGBAlphaShift) & 0xFF);
+        public byte A => (byte)(((uint)Value & ARGBAlphaMask) >> ARGBAlphaShift);
 
         public bool IsKnownColor => (state & StateKnownColorValid) != 0;
 
@@ -477,10 +480,10 @@ namespace System.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void GetRgbValues(out int r, out int g, out int b)
         {
-            int value = unchecked((int)Value);
-            r = value >> ARGBRedShift & 0xFF;
-            g = value >> ARGBGreenShift & 0xFF;
-            b = value >> ARGBBlueShift & 0xFF;
+            uint value = (uint)Value;
+            r = (int)(value & ARGBRedMask) >> ARGBRedShift;
+            g = (int)(value & ARGBGreenMask) >> ARGBGreenShift;
+            b = (int)(value & ARGBBlueMask) >> ARGBBlueShift;
         }
 
         public float GetBrightness()
