@@ -65,6 +65,10 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="ExternalCollectionTypeRef">
+    <xs:attribute name="typeName" use="required" type="QualifiedName" />
+  </xs:complexType>
+
   <xs:complexType name="AnyValueType">
     <xs:complexContent>
       <xs:extension base="FieldBase">
@@ -118,6 +122,7 @@
       <xs:extension base="FieldBase">
         <xs:sequence>
           <xs:choice>
+            <xs:element name="AsnType" type="ExternalCollectionTypeRef"/>
             <xs:element name="AnyValue"/>
             <xs:element name="Boolean"/>
             <xs:element name="Integer" type="IntegerCollectionType" />

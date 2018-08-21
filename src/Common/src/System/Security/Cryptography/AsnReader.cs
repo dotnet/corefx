@@ -24,6 +24,7 @@ namespace System.Security.Cryptography.Asn1
         private ReadOnlyMemory<byte> _data;
         private readonly AsnEncodingRules _ruleSet;
 
+        public AsnEncodingRules RuleSet => _ruleSet;
         public bool HasData => !_data.IsEmpty;
 
         public AsnReader(ReadOnlyMemory<byte> data, AsnEncodingRules ruleSet)

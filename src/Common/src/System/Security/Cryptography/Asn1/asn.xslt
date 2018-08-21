@@ -110,7 +110,7 @@ namespace <xsl:value-of select="@namespace" />
 }
 </xsl:template>
 
-    <xsl:template match="asn:Choice">using System;<xsl:if test="asn:SequenceOf">
+    <xsl:template match="asn:Choice">using System;<xsl:if test="asn:SequenceOf | asn:SetOf">
 using System.Collections.Generic;</xsl:if>
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -403,7 +403,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>.Encode(<xsl:value-of select="$writerName"/><xsl:call-template name="MaybeImplicitCallS"/>);</xsl:if>
   </xsl:template>
@@ -434,7 +434,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:choose>
       <xsl:when test="@universalTagNumber" xml:space="preserve">
             <xsl:value-of select="$indent"/>// Validator for UniversalTagNumber constraint for <xsl:value-of select="@name"/>
@@ -484,7 +484,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteBoolean(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
@@ -516,7 +516,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteInteger(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
@@ -592,7 +592,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteBitString(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>.Span);</xsl:if>
   </xsl:template>
@@ -625,7 +625,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteNamedBitList(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
@@ -649,7 +649,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteOctetString(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>.Span);</xsl:if>
   </xsl:template>
@@ -713,7 +713,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteEnumeratedValue(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
@@ -814,7 +814,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteUtcTime(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
@@ -837,7 +837,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
-    <xsl:variable name="nullable" select="@optional | /asn:Choice"/>
+    <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:if test="1" xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteGeneralizedTime(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
