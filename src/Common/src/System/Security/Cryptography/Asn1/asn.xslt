@@ -110,7 +110,7 @@ namespace <xsl:value-of select="@namespace" />
 {
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct <xsl:value-of select="@name" />
-    {<xsl:apply-templates mode="ValidateChoice" /><xsl:apply-templates mode="FieldDef" />
+    {<xsl:apply-templates mode="Validate" /><xsl:apply-templates mode="ValidateChoice" /><xsl:apply-templates mode="FieldDef" />
 
 #if DEBUG
         static <xsl:value-of select="@name" />()
@@ -168,9 +168,13 @@ namespace <xsl:value-of select="@namespace" />
   <xsl:template match="*[@implicitTag and @explicitTag]" mode="Validate">
     <xsl:message terminate="yes">Error: implicitTag and explicitTag both specified in [<xsl:copy-of select="."/>]</xsl:message>
   </xsl:template>
+    
+  <xsl:template match="*[@implicitTag and @universalTagNumber]" mode="Validate">
+    <xsl:message terminate="yes">Error: implicitTag and universalTagNumber both specified in [<xsl:copy-of select="."/>]</xsl:message>
+  </xsl:template>
 
   <xsl:template match="*[@defaultDerInit | @optional]" mode="ValidateChoice">
-    <xsl:message terminate="yes">Error: neiher optional or defaultDerInit may be specified for a Choice type (<xsl:copy-of select="."/>)</xsl:message>
+    <xsl:message terminate="yes">Error: neiher optional or defaultDerInit may be specified for fields in a Choice type (<xsl:copy-of select="."/>)</xsl:message>
   </xsl:template>
 
   <xsl:template match="*[@defaultDerInit]" mode="DefaultFieldDef">
