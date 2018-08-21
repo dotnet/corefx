@@ -21,7 +21,7 @@ namespace Microsoft.VisualBasic
         Binary = 0,
         Text = 1,
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
     public sealed partial class ComClassAttribute : System.Attribute
     {
         public ComClassAttribute() { }
@@ -72,13 +72,13 @@ namespace Microsoft.VisualBasic
         public static DateTime Now { get; }
         public static DateTime Today { get; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class HideModuleNameAttribute : System.Attribute
     {
         public HideModuleNameAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public sealed partial class MyGroupCollectionAttribute : System.Attribute
     {
@@ -150,7 +150,7 @@ namespace Microsoft.VisualBasic
         UserDefinedType = 36,
         Variant = 12,
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited = false, AllowMultiple = false)]
     public sealed partial class VBFixedArrayAttribute : System.Attribute
     {
         public VBFixedArrayAttribute(int UpperBound1) { }
@@ -158,7 +158,7 @@ namespace Microsoft.VisualBasic
         public int[] Bounds { get { throw null; } }
         public int Length { get { throw null; } }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited = false, AllowMultiple = false)]
     public sealed partial class VBFixedStringAttribute : System.Attribute
     {
         public VBFixedStringAttribute(int Length) { }
@@ -182,7 +182,7 @@ namespace Microsoft.VisualBasic.ApplicationServices
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public partial class UnhandledExceptionEventArgs : System.Threading.ThreadExceptionEventArgs
     {
-        public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
+        public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base(default(System.Exception)) { }
         public bool ExitApplication { get { throw null; } set { } }
     }
 }
@@ -267,7 +267,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static decimal FromString(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         public static decimal Parse(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DesignerGeneratedAttribute : System.Attribute
     {
@@ -352,13 +352,13 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static object SubtractObject(object Left, object Right) { throw null; }
         public static object XorObject(object Left, object Right) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false, AllowMultiple = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionCompareAttribute : System.Attribute
     {
         public OptionCompareAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionTextAttribute : System.Attribute
     {
@@ -372,7 +372,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class StandardModuleAttribute : System.Attribute
     {
@@ -419,7 +419,12 @@ namespace Microsoft.VisualBasic.FileIO
         Delimited = 0,
         FixedWidth = 1,
     }
-    public sealed partial class FileSystem
+    public class FileIOPermission
+    {
+        public FileIOPermission(System.Security.Permissions.FileIOPermissionAccess access, string fullDirectoryPath) { }
+        public void Demand() { }
+    }
+    public partial class FileSystem
     {
         public FileSystem() { }
         public static string CurrentDirectory { get { throw null; } set { } }
@@ -495,6 +500,7 @@ namespace Microsoft.VisualBasic.FileIO
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
+
     public enum RecycleOption
     {
         DeletePermanently = 2,
@@ -505,7 +511,7 @@ namespace Microsoft.VisualBasic.FileIO
         SearchAllSubDirectories = 3,
         SearchTopLevelOnly = 2,
     }
-    public sealed partial class SpecialDirectories
+    public partial class SpecialDirectories
     {
         public SpecialDirectories() { }
         public static string AllUsersApplicationData { get { throw null; } }
@@ -518,8 +524,8 @@ namespace Microsoft.VisualBasic.FileIO
         public static string Programs { get { throw null; } }
         public static string Temp { get { throw null; } }
     }
-    public partial class TextFieldParser
-    {
+    public partial class TextFieldParser:IDisposable
+       {
         public TextFieldParser(System.IO.Stream stream) { }
         public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding) { }
         public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding, bool detectEncoding) { }
@@ -553,15 +559,29 @@ namespace Microsoft.VisualBasic.FileIO
         public string ReadToEnd() { throw null; }
         public void SetDelimiters(params string[] delimiters) { }
         public void SetFieldWidths(params int[] fieldWidths) { }
+        void IDisposable.Dispose() { }
     }
-    //public enum UICancelOption
-    //{
-    //    DoNothing = 2,
-    //    ThrowException = 3,
-    //}
-    //public enum UIOption
-    //{
-    //    AllDialogs = 3,
-    //    OnlyErrorDialogs = 2,
-    //}
+    public enum UIOption
+    {
+        OnlyErrorDialogs = 2,
+        AllDialogs = 3
+    }
+    public enum UICancelOption
+    {
+        DoNothing = 2,
+        ThrowException = 3
+    }
 }
+namespace System.Security.Permissions
+{
+    public enum FileIOPermissionAccess
+    {
+        NoAccess = 0,
+        Read = 1,
+        Write = 2,
+        Append = 4,
+        PathDiscovery = 8,
+        AllAccess = 15
+    }
+}
+

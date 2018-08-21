@@ -14,7 +14,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Me.fullDirectoryPath = fullDirectoryPath
         End Sub
         Public Sub Demand()
-
         End Sub
     End Class
 End Namespace

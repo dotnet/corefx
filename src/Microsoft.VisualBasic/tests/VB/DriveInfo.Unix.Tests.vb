@@ -6,7 +6,7 @@ Imports System.IO
 Imports System.Linq
 Imports Xunit
 
-Namespace System.IO.FileSystem.DriveInfoTests
+Namespace Microsoft.VisualBasic.Tests
 
     Partial Public Class DriveInfoUnixTests
 

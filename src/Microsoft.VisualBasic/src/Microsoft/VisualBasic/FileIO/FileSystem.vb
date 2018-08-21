@@ -1052,7 +1052,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="path">The file path.</param>
         ''' <param name="paramName">The parameter name to include in ArgumentException.</param>
-        Friend Sub CheckFilePathTrailingSeparator(ByVal path As String, ByVal paramName As String)
+        Friend Shared Sub CheckFilePathTrailingSeparator(ByVal path As String, ByVal paramName As String)
             If path.Length = 0 Then ' Check for argument null - VSWhidbey 452078.
                 Throw ExUtils.GetArgumentNullException(paramName)
             End If
@@ -1069,7 +1069,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         ''' Add an array of string into a Generic Collection of String.
         ''' </summary>
-        Private Sub AddToStringCollection(ByVal StrCollection As ObjectModel.Collection(Of String), ByVal StrArray() As String)
+        Private Shared Sub AddToStringCollection(ByVal StrCollection As ObjectModel.Collection(Of String), ByVal StrArray() As String)
             ' CONSIDER: : BCL to support adding an array of string directly into a generic string collection?
             Debug.Assert(StrCollection IsNot Nothing, "StrCollection is NULL!!!")
 
@@ -1179,7 +1179,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ''' <param name="ByteBuffer">The byte array to find the text in</param>
             ''' <param name="Count">The number of valid bytes in the byte array</param>
             ''' <returns>True if the text is found. Otherwise, False.</returns>
-            Friend Shared Function IsTextFound(ByVal ByteBuffer() As Byte, ByVal Count As Integer) As Boolean
+            Friend Function IsTextFound(ByVal ByteBuffer() As Byte, ByVal Count As Integer) As Boolean
                 Debug.Assert(ByteBuffer IsNot Nothing, "Null ByteBuffer!!!")
                 Debug.Assert(Count > 0, Count.ToString(CultureInfo.InvariantCulture))
                 Debug.Assert(m_Decoder IsNot Nothing, "Null Decoder!!!")
@@ -1261,12 +1261,12 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return True
             End Function
 
-            Private m_SearchText As String ' The text to search.
-            Private ReadOnly m_IgnoreCase As Boolean ' Should we ignore case?
-            Private m_Decoder As Text.Decoder ' The Decoder to use.
-            Private m_PreviousCharBuffer() As Char = Array.Empty(Of Char)() ' The cached character array from previous call to IsTextExist.
-            Private m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
-            Private m_Preamble() As Byte ' The byte order mark we need to consider.
+            Private Shared m_SearchText As String ' The text to search.
+            Private Shared m_IgnoreCase As Boolean ' Should we ignore case?
+            Private Shared m_Decoder As Text.Decoder ' The Decoder to use.
+            Private Shared m_PreviousCharBuffer() As Char = Array.Empty(Of Char)() ' The cached character array from previous call to IsTextExist.
+            Private Shared m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
+            Private Shared m_Preamble() As Byte ' The byte order mark we need to consider.
         End Class 'Private Class TextSearchHelper
 
     End Class
