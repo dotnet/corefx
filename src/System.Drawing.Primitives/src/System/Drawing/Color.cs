@@ -421,20 +421,14 @@ namespace System.Drawing
             }
         }
 
-        private static void ThrowOutOfByteRange(int value, string name) =>
-            throw new ArgumentException(SR.Format(SR.InvalidEx2BoundArgument, name, value, byte.MinValue, byte.MaxValue));
-
         private static void CheckByte(int value, string name)
         {
+            void ThrowOutOfByteRange(int v, string n) =>
+                throw new ArgumentException(SR.Format(SR.InvalidEx2BoundArgument, n, v, byte.MinValue, byte.MaxValue));
+
             if (unchecked((uint)value) > byte.MaxValue)
                 ThrowOutOfByteRange(value, name);
         }
-
-        private static uint MakeArgb(byte alpha, byte red, byte green, byte blue) =>
-            unchecked((uint)(red << ARGBRedShift |
-                green << ARGBGreenShift |
-                blue << ARGBBlueShift |
-                alpha << ARGBAlphaShift));
 
         private static Color FromArgb(uint argb) => new Color(argb, StateARGBValueValid, null, (KnownColor)0);
 
@@ -447,14 +441,22 @@ namespace System.Drawing
             CheckByte(green, nameof(green));
             CheckByte(blue, nameof(blue));
 
-            return FromArgb(unchecked(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue)));
+            return FromArgb(
+                (uint)alpha << ARGBAlphaShift |
+                (uint)red << ARGBRedShift |
+                (uint)green << ARGBGreenShift |
+                (uint)blue << ARGBBlueShift
+            );
         }
 
         public static Color FromArgb(int alpha, Color baseColor)
         {
             CheckByte(alpha, nameof(alpha));
 
-            return FromArgb(unchecked((uint)alpha << ARGBAlphaShift | ((uint)baseColor.Value & ~ARGBAlphaMask)));
+            return FromArgb(
+                (uint)alpha << ARGBAlphaShift |
+                (uint)baseColor.Value & ~ARGBAlphaMask
+            );
         }
 
         public static Color FromArgb(int red, int green, int blue) => FromArgb(byte.MaxValue, red, green, blue);
@@ -476,9 +478,9 @@ namespace System.Drawing
         private void GetRgbValues(out int r, out int g, out int b)
         {
             int value = unchecked((int)Value);
-            r = (value >> ARGBRedShift) & 0xFF;
-            g = (value >> ARGBGreenShift) & 0xFF;
-            b = (value >> ARGBBlueShift) & 0xFF;
+            r = value >> ARGBRedShift & 0xFF;
+            g = value >> ARGBGreenShift & 0xFF;
+            b = value >> ARGBBlueShift & 0xFF;
         }
 
         public float GetBrightness()
