@@ -8,6 +8,7 @@
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
+    <Compile Include="Interop\Interop.zlib.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipArchive.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipArchiveEntry.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipArchiveMode.cs" />
@@ -32,35 +33,30 @@
     <Compile Include="System\IO\Compression\DeflateManaged\MatchState.cs" />
     <Compile Include="System\IO\Compression\DeflateManaged\OutputBuffer.cs" />
     <Compile Include="System\IO\Compression\DeflateManaged\OutputWindow.cs" />
-    <Compile Include="System\IO\Compression\PositionPreservingWriteOnlyStreamWrapper.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
-      <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Interop\Interop.zlib.cs" />
-    <Compile Include="System\IO\Compression\CompressionLevel.cs" />
-    <Compile Include="System\IO\Compression\CompressionMode.cs" />
-    <Compile Include="System\IO\Compression\GZipStream.cs" />
-    <Compile Include="System\IO\Compression\Crc32Helper.ZLib.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\Deflater.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\DeflateStream.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\Inflater.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibException.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.ZStream.cs" />
+    <Compile Include="System\IO\Compression\CompressionLevel.cs" />
+    <Compile Include="System\IO\Compression\CompressionMode.cs" />
+    <Compile Include="System\IO\Compression\Crc32Helper.ZLib.cs" />
+    <Compile Include="System\IO\Compression\GZipStream.cs" />
+    <Compile Include="System\IO\Compression\PositionPreservingWriteOnlyStreamWrapper.cs" />
+    <Compile Include="System\IO\Compression\PositionPreservingWriteOnlyStreamWrapper.netcoreapp.cs" />
     <Compile Include="System\IO\Compression\ZipArchiveEntry.netcoreapp.cs" />
     <Compile Include="System\IO\Compression\ZipCustomStreams.netcoreapp.cs" />
-    <Compile Include="System\IO\Compression\PositionPreservingWriteOnlyStreamWrapper.netcoreapp.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
       <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows specific files -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\IO\Compression\ZipArchiveEntry.Windows.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
       <Link>Common\System\IO\PathInternal.Windows.cs</Link>
     </Compile>

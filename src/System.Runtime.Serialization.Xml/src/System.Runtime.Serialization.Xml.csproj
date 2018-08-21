@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>System.Runtime.Serialization.Xml</AssemblyName>
-    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly> <!-- actually it looks more like a 100% facade to me now?... -->
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <ProjectGuid>{9D747A18-C8FD-4D7A-8913-4ED7911683B4}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>

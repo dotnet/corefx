@@ -8,10 +8,6 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="System\Data\Common\DbColumn.cs" />
-    <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="System.Data.Common.TypeForwards.cs" />
     <Compile Include="System\HResults.cs" />
     <Compile Include="System\Xml\TreeIterator.cs" />
@@ -175,6 +171,7 @@
     <Compile Include="System\Data\Common\DataTableMappingCollection.cs" />
     <Compile Include="System\Data\Common\DateTimeOffsetStorage.cs" />
     <Compile Include="System\Data\Common\DateTimeStorage.cs" />
+    <Compile Include="System\Data\Common\DbColumn.cs" />
     <Compile Include="System\Data\Common\DbCommand.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -217,6 +214,7 @@
     <Compile Include="System\Data\Common\DoubleStorage.cs" />
     <Compile Include="System\Data\Common\FieldNameLookup.cs" />
     <Compile Include="System\Data\Common\Groupbybehavior.cs" />
+    <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
     <Compile Include="System\Data\Common\identifiercase.cs" />
     <Compile Include="System\Data\Common\Int16Storage.cs" />
     <Compile Include="System\Data\Common\Int32Storage.cs" />
