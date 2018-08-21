@@ -611,8 +611,7 @@ namespace System.Security.Cryptography
 
                 Rc2CbcParameters.Decode(
                     new AsnReader(encryptionScheme.Parameters.Value, AsnEncodingRules.BER),
-                    out Rc2CbcParameters rc2Parameters,
-                    out _);
+                    out Rc2CbcParameters rc2Parameters);
 
                 // iv is the eight-octet initialization vector
                 if (rc2Parameters.Iv.Length != 8)

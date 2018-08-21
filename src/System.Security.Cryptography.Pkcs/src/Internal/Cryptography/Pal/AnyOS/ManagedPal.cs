@@ -74,8 +74,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                 Rc2CbcParameters.Decode(
                     new AsnReader(contentEncryptionAlgorithm.Parameters.Value, AsnEncodingRules.BER),
-                    out Rc2CbcParameters rc2Params,
-                    out _);
+                    out Rc2CbcParameters rc2Params);
 
                 alg.KeySize = rc2Params.GetEffectiveKeyBits();
                 alg.IV = rc2Params.Iv.ToArray();
