@@ -340,7 +340,7 @@ namespace <xsl:value-of select="@namespace" />
             {<xsl:apply-templates select="." mode="DecodeImplicitValue"><xsl:with-param name="readerName" select="'sequenceReader'" /><xsl:with-param name="indent" select="'    '"/></xsl:apply-templates>
             }<xsl:call-template name="DefaultValueDecoder"/>
 </xsl:when>
-          <xsl:when test="local-name() = 'AnyValue' and namespace-uri() = 'http://schemas.dot.net/asnxml/201808/'" xml:space="preserve">
+          <xsl:when test="self::asn:AnyValue" xml:space="preserve">
 
             if (sequenceReader.HasData)
             {<xsl:apply-templates select="." mode="DecodeSimpleValue"><xsl:with-param name="readerName" select="'sequenceReader'"/><xsl:with-param name="indent" select="'    '"/></xsl:apply-templates>
