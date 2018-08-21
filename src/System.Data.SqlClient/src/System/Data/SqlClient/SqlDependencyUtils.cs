@@ -324,6 +324,9 @@ namespace System.Data.SqlClient
         {
             lock (_instanceLock)
             {
+                List<string> notificationIdsToRemove = new List<string>();
+                List<string> commandHashesToRemove = new List<string>();
+
                 foreach (KeyValuePair<string, DependencyList> entry in _notificationIdToDependenciesHash)
                 {
                     DependencyList dependencies = entry.Value;
@@ -332,12 +335,22 @@ namespace System.Data.SqlClient
                         if (dependencies.Count == 0)
                         {
                             // this dependency was the last associated with this notification ID, remove the entry
-                            _notificationIdToDependenciesHash.Remove(entry.Key);
-                            _commandHashToNotificationId.Remove(entry.Value.CommandHash);
+                            // note: cannot do it inside foreach over dictionary
+                            notificationIdsToRemove.Add(entry.Key);
+                            commandHashesToRemove.Add(entry.Value.CommandHash);
                         }
                     }
 
                     // same SqlDependency can be associated with more than one command, so we have to continue till the end...
+                }
+
+                Debug.Assert(commandHashesToRemove.Count == notificationIdsToRemove.Count, "maps should be kept in sync");
+                for (int i = 0; i < notificationIdsToRemove.Count; i++)
+                {
+                    // cleanup the entry outside of foreach
+                    _notificationIdToDependenciesHash.Remove(notificationIdsToRemove[i]);
+                    // Cleanup the map between the command hash and associated notification ID
+                    _commandHashToNotificationId.Remove(commandHashesToRemove[i]);
                 }
 
                 Debug.Assert(_notificationIdToDependenciesHash.Count == _commandHashToNotificationId.Count, "always keep these maps in sync!");
