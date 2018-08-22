@@ -205,7 +205,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        private bool MatchPattern(string text, int index)
+        private bool MatchPattern(ReadOnlyMemory<char> text, int index)
         {
             if (CaseInsensitive)
             {
@@ -214,18 +214,37 @@ namespace System.Text.RegularExpressions
                     return false;
                 }
 
-                return (0 == string.Compare(Pattern, 0, text, index, Pattern.Length, CaseInsensitive, _culture));
+                unsafe
+                {
+                    ReadOnlySpan<char> patternSpan = Pattern.ToUpperInvariant().AsSpan();
+                    Span<char> textSpan = stackalloc char[Pattern.Length];
+
+                    text.Span.Slice(index, Pattern.Length).ToUpperInvariant(textSpan);
+
+                    return patternSpan.SequenceEqual(textSpan);
+                }
             }
             else
             {
-                return (0 == string.CompareOrdinal(Pattern, 0, text, index, Pattern.Length));
+                ReadOnlySpan<char> patternSpan = Pattern.ToUpperInvariant().AsSpan();
+                ReadOnlySpan<char> textSpan = text.Span.Slice(index, Pattern.Length);
+
+                return patternSpan.SequenceEqual(textSpan);
             }
+        }
+
+        public bool IsMatch(string text, int index, int beglimit, int endlimit)
+        {
+            if (text is null)
+                throw new ArgumentNullException(nameof(text));
+
+            return IsMatch(text.AsMemory(), index, beglimit, endlimit);
         }
 
         /// <summary>
         /// When a regex is anchored, we can do a quick IsMatch test instead of a Scan
         /// </summary>
-        public bool IsMatch(string text, int index, int beglimit, int endlimit)
+        public bool IsMatch(ReadOnlyMemory<char> text, int index, int beglimit, int endlimit)
         {
             if (!RightToLeft)
             {
@@ -243,6 +262,14 @@ namespace System.Text.RegularExpressions
             }
         }
 
+        public int Scan(string text, int index, int beglimit, int endlimit)
+        {
+            if (text is null)
+                throw new ArgumentNullException(nameof(text));
+
+            return Scan(text.AsMemory(), index, beglimit, endlimit);
+        }
+
         /// <summary>
         /// Scan uses the Boyer-Moore algorithm to find the first occurrence
         /// of the specified string within text, beginning at index, and
@@ -251,7 +278,7 @@ namespace System.Text.RegularExpressions
         /// The direction and case-sensitivity of the match is determined
         /// by the arguments to the RegexBoyerMoore constructor.
         /// </summary>
-        public int Scan(string text, int index, int beglimit, int endlimit)
+        public int Scan(ReadOnlyMemory<char> text, int index, int beglimit, int endlimit)
         {
             int defadv;
             int test;
@@ -282,13 +309,14 @@ namespace System.Text.RegularExpressions
             int match;
             int advance;
             int[] unicodeLookup;
+            ReadOnlySpan<char> span = text.Span;
 
             for (; ;)
             {
                 if (test >= endlimit || test < beglimit)
                     return -1;
 
-                chTest = text[test];
+                chTest = span[test];
 
                 if (CaseInsensitive)
                     chTest = _culture.TextInfo.ToLower(chTest);
@@ -317,7 +345,7 @@ namespace System.Text.RegularExpressions
                         match -= bump;
                         test2 -= bump;
 
-                        chTest = text[test2];
+                        chTest = span[test2];
 
                         if (CaseInsensitive)
                             chTest = _culture.TextInfo.ToLower(chTest);

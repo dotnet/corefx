@@ -439,14 +439,8 @@ namespace System.Text.RegularExpressions
         /// Internal worker called by all the public APIs
         /// </summary>
         /// <returns></returns>
-        internal Match Run(bool quick, int prevlen, string input, int beginning, int length, int startat)
+        internal Match Run(bool quick, int prevlen, ReadOnlyMemory<char> input, int beginning, int length, int startat)
         {
-            if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
-
-            if (length < 0 || length > input.Length)
-                throw new ArgumentOutOfRangeException(nameof(length), SR.LengthNotNegative);
-
             // There may be a cached runner; grab ownership of it if we can.
             RegexRunner runner = _runnerref.Get();
 

@@ -51,7 +51,7 @@ namespace System.Text.RegularExpressions
         internal bool _balancing;        // whether we've done any balancing with this match.  If we
                                          // have done balancing, we'll need to do extra work in Tidy().
 
-        internal Match(Regex regex, int capcount, string text, int begpos, int len, int startpos)
+        internal Match(Regex regex, int capcount, ReadOnlyMemory<char> text, int begpos, int len, int startpos)
             : base(text, new int[2], 0, "0")
         {
             _regex = regex;
@@ -71,12 +71,12 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Returns an empty Match object.
         /// </summary>
-        public static Match Empty { get; } = new Match(null, 1, string.Empty, 0, 0, 0);
+        public static Match Empty { get; } = new Match(null, 1, Memory<char>.Empty, 0, 0, 0);
 
-        internal virtual void Reset(Regex regex, string text, int textbeg, int textend, int textstart)
+        internal virtual void Reset(Regex regex, ReadOnlyMemory<char> text, int textbeg, int textend, int textstart)
         {
             _regex = regex;
-            Text = text;
+            Memory = text;
             _textbeg = textbeg;
             _textend = textend;
             _textstart = textstart;
@@ -110,7 +110,7 @@ namespace System.Text.RegularExpressions
             if (_regex == null)
                 return this;
 
-            return _regex.Run(false, Length, Text, _textbeg, _textend - _textbeg, _textpos);
+            return _regex.Run(false, Length, Memory, _textbeg, _textend - _textbeg, _textpos);
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace System.Text.RegularExpressions
         // the lookup hashtable
         new internal readonly Hashtable _caps;
 
-        internal MatchSparse(Regex regex, Hashtable caps, int capcount, string text, int begpos, int len, int startpos)
+        internal MatchSparse(Regex regex, Hashtable caps, int capcount, ReadOnlyMemory<char> text, int begpos, int len, int startpos)
             : base(regex, capcount, text, begpos, len, startpos)
         {
             _caps = caps;

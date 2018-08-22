@@ -27,7 +27,7 @@ namespace System.Text.RegularExpressions
         private readonly Regex _regex;
         private readonly List<Match> _matches;
         private bool _done;
-        private readonly string _input;
+        private readonly ReadOnlyMemory<char> _input;
         private readonly int _beginning;
         private readonly int _length;
         private int _startat;
@@ -39,7 +39,7 @@ namespace System.Text.RegularExpressions
                 throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
 
             _regex = regex;
-            _input = input;
+            _input = input.AsMemory();
             _beginning = beginning;
             _length = length;
             _startat = startat;

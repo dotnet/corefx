@@ -15,12 +15,14 @@ namespace System.Text.RegularExpressions
     /// </summary>
     public class Capture
     {
-        internal Capture(string text, int index, int length)
+        internal Capture(ReadOnlyMemory<char> text, int index, int length)
         {
-            Text = text;
+            Memory = text;
             Index = index;
             Length = length;
         }
+
+        private protected string _text;
 
         /// <summary>
         /// Returns the position in the original string where the first character of
@@ -33,10 +35,24 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public int Length { get; private protected set; }
 
+
+        public ReadOnlyMemory<char> Memory { get; private protected set; }
+
         /// <summary>
         /// The original string
         /// </summary>
-        internal string Text { get; private protected set; }
+        internal string Text
+        {
+            get
+            {
+                if (_text is null)
+                {
+                    _text = new string(Memory.Span);
+                }
+
+                return _text;
+            }
+        }
 
         /// <summary>
         /// Returns the value of this Regex Capture.
@@ -51,11 +67,11 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// The substring to the left of the capture
         /// </summary>
-        internal ReadOnlySpan<char> GetLeftSubstring() => Text.AsSpan(0, Index);
+        internal ReadOnlySpan<char> GetLeftSubstring() => Memory.Slice(0, Index).Span;
 
         /// <summary>
         /// The substring to the right of the capture
         /// </summary>
-        internal ReadOnlySpan<char> GetRightSubstring() => Text.AsSpan(Index + Length, Text.Length - Index - Length);
+        internal ReadOnlySpan<char> GetRightSubstring() => Memory.Slice(Index + Length, Text.Length - Index - Length).Span;
     }
 }

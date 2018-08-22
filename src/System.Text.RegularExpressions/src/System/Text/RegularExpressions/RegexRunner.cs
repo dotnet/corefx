@@ -21,15 +21,15 @@ namespace System.Text.RegularExpressions
 {
     public abstract class RegexRunner
     {
-        protected internal int runtextbeg;         // beginning of text to search
-        protected internal int runtextend;         // end of text to search
-        protected internal int runtextstart;       // starting point for search
+        protected internal int runtextbeg;               // beginning of text to search
+        protected internal int runtextend;               // end of text to search
+        protected internal int runtextstart;             // starting point for search
 
-        protected internal string runtext;         // text to search
-        protected internal int runtextpos;         // current position in text
-
-        protected internal int[] runtrack;         // The backtracking stack.  Opcodes use this to store data regarding
-        protected internal int runtrackpos;        // what they have matched and where to backtrack to.  Each "frame" on
+        protected internal ReadOnlyMemory<char> runtext; // text to search
+        protected internal int runtextpos;               // current position in text
+                                                         
+        protected internal int[] runtrack;               // The backtracking stack.  Opcodes use this to store data regarding
+        protected internal int runtrackpos;              // what they have matched and where to backtrack to.  Each "frame" on
                                            // the stack takes the form of [CodePosition Data1 Data2...], where
                                            // CodePosition is the position of the current opcode and
                                            // the data values are all optional.  The CodePosition can be negative, and
@@ -89,7 +89,7 @@ namespace System.Text.RegularExpressions
             return Scan(regex, text, textbeg, textend, textstart, prevlen, quick, regex.MatchTimeout);
         }
 
-        protected internal Match Scan(Regex regex, string text, int textbeg, int textend, int textstart, int prevlen, bool quick, TimeSpan timeout)
+        protected internal Match Scan(Regex regex, ReadOnlyMemory<char> text, int textbeg, int textend, int textstart, int prevlen, bool quick, TimeSpan timeout)
         {
             int bump;
             int stoppos;
@@ -127,7 +127,7 @@ namespace System.Text.RegularExpressions
 
             StartTimeoutWatch();
 
-            for (; ;)
+            for (; ; )
             {
 #if DEBUG
                 if (runregex.Debug)
@@ -183,6 +183,9 @@ namespace System.Text.RegularExpressions
             }
             // We never get here
         }
+
+        protected internal Match Scan(Regex regex, string text, int textbeg, int textend, int textstart, int prevlen, bool quick, TimeSpan timeout)
+            => Scan(regex, text.AsMemory(), textbeg, textend, textstart, prevlen, quick, timeout);
 
         private void StartTimeoutWatch()
         {
@@ -358,14 +361,14 @@ namespace System.Text.RegularExpressions
         /// </summary>
         protected bool IsBoundary(int index, int startpos, int endpos)
         {
-            return (index > startpos && RegexCharClass.IsWordChar(runtext[index - 1])) !=
-                   (index < endpos && RegexCharClass.IsWordChar(runtext[index]));
+            return (index > startpos && RegexCharClass.IsWordChar(runtext.Span[index - 1])) !=
+                   (index < endpos && RegexCharClass.IsWordChar(runtext.Span[index]));
         }
 
         protected bool IsECMABoundary(int index, int startpos, int endpos)
         {
-            return (index > startpos && RegexCharClass.IsECMAWordChar(runtext[index - 1])) !=
-                   (index < endpos && RegexCharClass.IsECMAWordChar(runtext[index]));
+            return (index > startpos && RegexCharClass.IsECMAWordChar(runtext.Span[index - 1])) !=
+                   (index < endpos && RegexCharClass.IsECMAWordChar(runtext.Span[index]));
         }
 
         protected static bool CharInSet(char ch, string set, string category)
@@ -603,7 +606,7 @@ namespace System.Text.RegularExpressions
                 sb.Append(' ', 8 - sb.Length);
 
             if (runtextpos > runtextbeg)
-                sb.Append(RegexCharClass.CharDescription(runtext[runtextpos - 1]));
+                sb.Append(RegexCharClass.CharDescription(runtext.Span[runtextpos - 1]));
             else
                 sb.Append('^');
 
@@ -613,7 +616,7 @@ namespace System.Text.RegularExpressions
 
             for (int i = runtextpos; i < runtextend; i++)
             {
-                sb.Append(RegexCharClass.CharDescription(runtext[i]));
+                sb.Append(RegexCharClass.CharDescription(runtext.Span[i]));
             }
             if (sb.Length >= 64)
             {
