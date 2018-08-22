@@ -69,7 +69,7 @@ namespace System.ComponentModel.Tests
         [InlineData(typeof(int), false, "42", 42)]
         // On NetFramework will fail because there isn't fallback code, only call to TypeDescriptor.GetConverter
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void Ctor_CustomTypeConverter_TypeDescriptorNotFound_ExceptionFallback(Type type, bool returnNull, string stringToConvert, int expectedValue)
+        public void Ctor_TypeDescriptorNotFound_ExceptionFallback(Type type, bool returnNull, string stringToConvert, int expectedValue)
         {
             RemoteInvoke((innerType, innerReturnNull, innerStringToConvert, innerExpectedValue) =>
             {
