@@ -139,13 +139,12 @@ namespace <xsl:value-of select="@namespace" />
             }
         }
 
-        internal static void Decode(AsnReader reader, out <xsl:value-of select="@name" /> decoded, out int bytesRead)
+        internal static void Decode(AsnReader reader, out <xsl:value-of select="@name" /> decoded)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
 
             decoded = default;
-            int localBytesRead = reader.PeekEncodedValue().Length;
             Asn1Tag tag = reader.PeekTag();<xsl:if test="*[@explicitTag]">
             AsnReader explicitReader;</xsl:if><xsl:if test="asn:SequenceOf | asn:SetOf">
             AsnReader collectionReader;</xsl:if>
@@ -154,8 +153,6 @@ namespace <xsl:value-of select="@namespace" />
             {
                 throw new CryptographicException();
             }
-
-            bytesRead = localBytesRead;
         }
     }
 }
