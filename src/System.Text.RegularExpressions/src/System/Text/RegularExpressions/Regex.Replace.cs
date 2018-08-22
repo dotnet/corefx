@@ -153,6 +153,91 @@ namespace System.Text.RegularExpressions
         /// The right-to-left case is split out because StringBuilder
         /// doesn't handle right-to-left string building directly very well.
         /// </summary>
+        private static ReadOnlyMemory<char> Replace(MatchEvaluator evaluator, Regex regex, ReadOnlyMemory<char> input, int count, int startat)
+        {
+            if (evaluator == null)
+                throw new ArgumentNullException(nameof(evaluator));
+            if (count < -1)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
+            if (startat < 0 || startat > input.Length)
+                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
+
+            if (count == 0)
+                return input;
+
+            Match match = regex.Match(input, startat);
+
+            if (!match.Success)
+            {
+                return input;
+            }
+            else
+            {
+                Span<char> charInitSpan = stackalloc char[ReplaceBufferSize];
+                var vsb = new ValueStringBuilder(charInitSpan);
+
+                if (!regex.RightToLeft)
+                {
+                    int prevat = 0;
+
+                    do
+                    {
+                        if (match.Index != prevat)
+                            vsb.Append(input.Slice(prevat, match.Index - prevat).Span);
+
+                        prevat = match.Index + match.Length;
+                        vsb.Append(evaluator(match));
+
+                        if (--count == 0)
+                            break;
+
+                        match = match.NextMatch();
+                    } while (match.Success);
+
+                    if (prevat < input.Length)
+                        vsb.Append(input.Slice(prevat, input.Length - prevat).Span);
+                }
+                else
+                {
+                    // In right to left mode append all the inputs in reversed order to avoid an extra dynamic data structure
+                    // and to be able to work with Spans. A final reverse of the transformed reversed input string generates
+                    // the desired output. Similar to Tower of Hanoi.
+
+                    int prevat = input.Length;
+
+                    do
+                    {
+                        if (match.Index + match.Length != prevat)
+                            vsb.AppendReversed(input.Slice(match.Index + match.Length, prevat - match.Index - match.Length).Span);
+
+                        prevat = match.Index;
+                        vsb.AppendReversed(evaluator(match));
+
+                        if (--count == 0)
+                            break;
+
+                        match = match.NextMatch();
+                    } while (match.Success);
+
+                    if (prevat > 0)
+                        vsb.AppendReversed(input.Slice(0, prevat).Span);
+
+                    vsb.Reverse();
+                }
+
+                return new ReadOnlyMemory<char>(vsb.AsSpan().ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Replaces all occurrences of the regex in the string with the
+        /// replacement evaluator.
+        ///
+        /// Note that the special case of no matches is handled on its own:
+        /// with no matches, the input string is returned unchanged.
+        /// The right-to-left case is split out because StringBuilder
+        /// doesn't handle right-to-left string building directly very well.
+        /// </summary>
         private static string Replace(MatchEvaluator evaluator, Regex regex, string input, int count, int startat)
         {
             if (evaluator == null)

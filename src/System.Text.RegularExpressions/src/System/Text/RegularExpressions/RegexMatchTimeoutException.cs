@@ -28,6 +28,16 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
+        /// Constructs a new RegexMatchTimeoutException.
+        /// </summary>
+        /// <param name="regexInput">Matching timeout occurred during matching within the specified input.</param>
+        /// <param name="regexPattern">Matching timeout occurred during matching to the specified pattern.</param>
+        /// <param name="matchTimeout">Matching timeout occurred because matching took longer than the specified timeout.</param>
+        public RegexMatchTimeoutException(ReadOnlyMemory<char> regexInput, string regexPattern, TimeSpan matchTimeout)
+            : this (new string(regexInput.Span), regexPattern, matchTimeout)
+        { }
+
+        /// <summary>
         /// This constructor is provided in compliance with common NetFx design patterns;
         /// developers should prefer using the constructor
         /// <code>public RegexMatchTimeoutException(string input, string pattern, TimeSpan matchTimeout)</code>.

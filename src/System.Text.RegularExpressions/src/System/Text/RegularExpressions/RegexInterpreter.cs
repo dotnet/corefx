@@ -247,7 +247,7 @@ namespace System.Text.RegularExpressions
 
         private char Forwardcharnext()
         {
-            char ch = (_rightToLeft ? runtext[--runtextpos] : runtext[runtextpos++]);
+            char ch = (_rightToLeft ? runtext.Span[--runtextpos] : runtext.Span[runtextpos++]);
 
             return (_caseInsensitive ? _culture.TextInfo.ToLower(ch) : ch);
         }
@@ -256,6 +256,7 @@ namespace System.Text.RegularExpressions
         {
             int c;
             int pos;
+            ReadOnlySpan<char> span = runtext.Span;
 
             if (!_rightToLeft)
             {
@@ -275,13 +276,13 @@ namespace System.Text.RegularExpressions
             if (!_caseInsensitive)
             {
                 while (c != 0)
-                    if (str[--c] != runtext[--pos])
+                    if (str[--c] != span[--pos])
                         return false;
             }
             else
             {
                 while (c != 0)
-                    if (str[--c] != _culture.TextInfo.ToLower(runtext[--pos]))
+                    if (str[--c] != _culture.TextInfo.ToLower(span[--pos]))
                         return false;
             }
 
@@ -300,6 +301,7 @@ namespace System.Text.RegularExpressions
             int c;
             int pos;
             int cmpos;
+            ReadOnlySpan<char> span = runtext.Span;
 
             if (!_rightToLeft)
             {
@@ -322,13 +324,13 @@ namespace System.Text.RegularExpressions
             if (!_caseInsensitive)
             {
                 while (c-- != 0)
-                    if (runtext[--cmpos] != runtext[--pos])
+                    if (span[--cmpos] != span[--pos])
                         return false;
             }
             else
             {
                 while (c-- != 0)
-                    if (_culture.TextInfo.ToLower(runtext[--cmpos]) != _culture.TextInfo.ToLower(runtext[--pos]))
+                    if (_culture.TextInfo.ToLower(span[--cmpos]) != _culture.TextInfo.ToLower(span[--pos]))
                         return false;
             }
 
@@ -349,7 +351,7 @@ namespace System.Text.RegularExpressions
 
         private char CharAt(int j)
         {
-            return runtext[j];
+            return runtext.Span[j];
         }
 
         protected override bool FindFirstChar()
