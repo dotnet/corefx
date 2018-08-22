@@ -23,7 +23,7 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' specific to the current user (My Documents, My Music ...) and those specific
     ''' to the current Application that a developer expects to be able to find quickly.
     ''' </summary>
-    Partial Public Class SpecialDirectories
+    Partial Public NotInheritable Class SpecialDirectories
         Public Sub New()
         End Sub
 
@@ -39,7 +39,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <remarks>
         ''' If a path does not exist, one is created in the following format
         ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
-        ''' 
+        '''
         ''' See above for reason why we don't use System.Environment.GetFolderPath(*).
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
@@ -58,13 +58,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <remarks>
         ''' If a path does not exist, one is created in the following format
         ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
-        ''' 
+        '''
         ''' We choose to use System.Windows.Forms.Application.* instead of System.Environment.GetFolderPath(*)
         ''' since the second function will only return the C:\Documents and Settings\[UserName]\Application Data.\
         ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
         ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
         ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
-        ''' 
+        '''
         ''' Also, we chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
         ''' will work with Roaming User as well.
         ''' </remarks>

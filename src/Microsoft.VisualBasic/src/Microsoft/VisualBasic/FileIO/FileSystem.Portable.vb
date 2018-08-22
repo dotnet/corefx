@@ -268,14 +268,14 @@ Namespace Microsoft.VisualBasic.FileIO
             Dim TargetDirectoryFullPath As String = NormalizePath(destinationDirectoryName)
 
             ' Demand FileIOPermission on the given path. See CopyOrMoveFile for reason why we don't wait for Framework to demand.
-            Dim sourceAccess As FileIOPermissionAccess = FileIOPermissionAccess.Read
-            If operation = CopyOrMove.Move Then
-                sourceAccess = sourceAccess Or FileIOPermissionAccess.Write
-            End If
-            DemandDirectoryPermission(SourceDirectoryFullPath, sourceAccess)
+            'Dim sourceAccess As FileIOPermissionAccess = FileIOPermissionAccess.Read
+            'If operation = CopyOrMove.Move Then
+            '    sourceAccess = sourceAccess Or FileIOPermissionAccess.Write
+            'End If
+            'DemandDirectoryPermission(SourceDirectoryFullPath, sourceAccess)
             ' Copy / Move Directory will create the target directory.
             ' Therefore we also demand Read permission on target path. This will also fix VSWhidbey 421158.
-            DemandDirectoryPermission(TargetDirectoryFullPath, FileIOPermissionAccess.Read Or FileIOPermissionAccess.Write)
+            'DemandDirectoryPermission(TargetDirectoryFullPath, FileIOPermissionAccess.Read Or FileIOPermissionAccess.Write)
 
             ' Throw if device path.
             ThrowIfDevicePath(SourceDirectoryFullPath)
@@ -428,12 +428,12 @@ Namespace Microsoft.VisualBasic.FileIO
             ' - Security reason.
             ' SECURITY NOTE: We assert UnmanagedCodePermission to call MoveFileEx later if needed so make sure
             '   we demand the appropriate FileIOPermission.
-            Dim sourceAccess As FileIOPermissionAccess = FileIOPermissionAccess.Read
-            If operation = CopyOrMove.Move Then
-                sourceAccess = sourceAccess Or FileIOPermissionAccess.Write
-            End If
-            Call (New FileIOPermission(sourceAccess, sourceFileFullPath)).Demand()
-            Call (New FileIOPermission(FileIOPermissionAccess.Write, destinationFileFullPath)).Demand()
+            'Dim sourceAccess As FileIOPermissionAccess = FileIOPermissionAccess.Read
+            'If operation = CopyOrMove.Move Then
+            '    sourceAccess = sourceAccess Or FileIOPermissionAccess.Write
+            'End If
+            'Call (New FileIOPermission(sourceAccess, sourceFileFullPath)).Demand()
+            'Call (New FileIOPermission(FileIOPermissionAccess.Write, destinationFileFullPath)).Demand()
 
             ' Throw if device path.
             ThrowIfDevicePath(sourceFileFullPath)
@@ -514,7 +514,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Dim directoryFullPath As String = IO.Path.GetFullPath(directory)
 
             ' Demand Write permission for security reason (see CopyOrMoveFile / CopyOrMoveDirectory).
-            DemandDirectoryPermission(directoryFullPath, FileIOPermissionAccess.Write)
+            'DemandDirectoryPermission(directoryFullPath, FileIOPermissionAccess.Write)
 
             ' Throw if device path.
             ThrowIfDevicePath(directoryFullPath)
@@ -554,7 +554,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Dim fileFullPath As String = NormalizeFilePath(file, "file")
 
             ' Demand Write permission for security reason (see CopyOrMoveFile / CopyOrMoveDirectory).
-            Call (New FileIOPermission(FileIOPermissionAccess.Write, fileFullPath)).Demand()
+            'Call (New FileIOPermission(FileIOPermissionAccess.Write, fileFullPath)).Demand()
 
             ' Throw if device path.
             ThrowIfDevicePath(fileFullPath)
@@ -576,20 +576,20 @@ Namespace Microsoft.VisualBasic.FileIO
             IO.File.Delete(fileFullPath)
         End Sub
 
-        Private Shared Sub DemandDirectoryPermission(ByVal fullDirectoryPath As String, ByVal access As FileIOPermissionAccess)
-            Debug.Assert(NormalizePath(fullDirectoryPath).Equals(fullDirectoryPath, StringComparison.OrdinalIgnoreCase),
-                "fullDirectoryPath must be normalized before calling this method.")
+        'Private Shared Sub DemandDirectoryPermission(ByVal fullDirectoryPath As String, ByVal access As FileIOPermissionAccess)
+        '    Debug.Assert(NormalizePath(fullDirectoryPath).Equals(fullDirectoryPath, StringComparison.OrdinalIgnoreCase),
+        '        "fullDirectoryPath must be normalized before calling this method.")
 
-            ' Add a directory separator character to the end if needed to demand permission on the whole directory.
-            If Not (fullDirectoryPath.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.Ordinal) Or
-                fullDirectoryPath.EndsWith(IO.Path.AltDirectorySeparatorChar, StringComparison.Ordinal)) Then
+        '    ' Add a directory separator character to the end if needed to demand permission on the whole directory.
+        '    If Not (fullDirectoryPath.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.Ordinal) Or
+        '        fullDirectoryPath.EndsWith(IO.Path.AltDirectorySeparatorChar, StringComparison.Ordinal)) Then
 
-                fullDirectoryPath &= IO.Path.DirectorySeparatorChar
-            End If
+        '        fullDirectoryPath &= IO.Path.DirectorySeparatorChar
+        '    End If
 
-            Dim fileIOPerm As New FileIOPermission(access, fullDirectoryPath)
-            fileIOPerm.Demand()
-        End Sub
+        'Dim fileIOPerm As New FileIOPermission(access, fullDirectoryPath)
+        'fileIOPerm.Demand()
+        'End Sub
 
         '''**************************************************************************
         ''' ;CopyOrMoveFile

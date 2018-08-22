@@ -419,11 +419,11 @@ namespace Microsoft.VisualBasic.FileIO
         Delimited = 0,
         FixedWidth = 1,
     }
-    public class FileIOPermission
-    {
-        public FileIOPermission(System.Security.Permissions.FileIOPermissionAccess access, string fullDirectoryPath) { }
-        public void Demand() { }
-    }
+    //public class FileIOPermission
+    //{
+    //    public FileIOPermission(System.Security.Permissions.FileIOPermissionAccess access, string fullDirectoryPath) { }
+    //    public void Demand() { }
+    //}
     public partial class FileSystem
     {
         public FileSystem() { }
@@ -511,7 +511,7 @@ namespace Microsoft.VisualBasic.FileIO
         SearchAllSubDirectories = 3,
         SearchTopLevelOnly = 2,
     }
-    public partial class SpecialDirectories
+    public sealed partial class SpecialDirectories
     {
         public SpecialDirectories() { }
         public static string AllUsersApplicationData { get { throw null; } }
@@ -572,16 +572,16 @@ namespace Microsoft.VisualBasic.FileIO
         ThrowException = 3
     }
 }
-namespace System.Security.Permissions
-{
-    public enum FileIOPermissionAccess
-    {
-        NoAccess = 0,
-        Read = 1,
-        Write = 2,
-        Append = 4,
-        PathDiscovery = 8,
-        AllAccess = 15
-    }
-}
+//namespace System.Security.Permissions
+//{
+//    public enum FileIOPermissionAccess
+//    {
+//        NoAccess = 0,
+//        Read = 1,
+//        Write = 2,
+//        Append = 4,
+//        PathDiscovery = 8,
+//        AllAccess = 15
+//    }
+//}
 
