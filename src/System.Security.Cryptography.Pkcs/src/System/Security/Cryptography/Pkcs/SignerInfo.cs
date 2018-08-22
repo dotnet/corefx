@@ -48,8 +48,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 SignedAttributesSet.Decode(
                     new AsnReader(_signedAttributesMemory.Value, AsnEncodingRules.BER),
-                    out SignedAttributesSet signedSet,
-                    out _);
+                    out SignedAttributesSet signedSet);
 
                 _signedAttributes = signedSet.SignedAttributes;
                 Debug.Assert(_signedAttributes != null);
