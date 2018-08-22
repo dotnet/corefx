@@ -1,0 +1,2 @@
+Compat issues with assembly System.Runtime.InteropServices:
+TypeCannotChangeClassification : Type 'System.Runtime.InteropServices.HandleRef' is marked as readonly in the contract so it must also be marked readonly in the implementation.
