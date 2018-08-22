@@ -14,6 +14,9 @@
     <BinPlaceILCInputFolder>false</BinPlaceILCInputFolder>
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetsAOT)'=='true' AND '$(ArchGroup)'=='wasm'">
+    <NugetRuntimeIdentifier>win10-x86</NugetRuntimeIdentifier>
+  </PropertyGroup>
   <ItemGroup Condition="'$(TargetsAOT)'=='true'">
     <PackageReference Include="Microsoft.TargetingPack.Private.NETNative">
       <Version Condition="'$(TargetGroup)'=='uapaot' OR '$(TargetGroup)'=='netcoreappaot'">1.1.0-$(ProjectNTfsExpectedPrerelease)</Version>
@@ -50,6 +53,10 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 
+    <Target Name="DumpStuff" BeforeTargets="ResolveNuGetPackages">
+        <Message Text="TargetsAOT: '$(TargetsAOT)' ArchGroup: '$(ArchGroup)' OSGroup: '$(OSGroup)' NugetRuntimeIdentifier: '$(NugetRuntimeIdentifier)'" Importance="high" />
+    </Target>
+    
   <ItemGroup>
     <!-- For IL rewrite tools of crossgen dll from CoreClr we need the respective IL and respective pdbs -->
     <!-- For crossgen dlls save respective pdbs too -->
