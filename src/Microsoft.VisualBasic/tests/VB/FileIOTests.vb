@@ -8,275 +8,375 @@ Imports System
 Imports System.Collections
 Imports System.Collections.Generic
 Imports System.ComponentModel
-Imports System.IO
 Imports System.Linq
 Imports System.Runtime.InteropServices
 Imports Xunit
+' Do not Imports System.IO
+
 
 Namespace Microsoft.VisualBasic.Tests
-    Public Class FileIOTests
+    Public NotInheritable Class FileIOTests
         <Fact>
-        Public Sub CombinePathTest_BaseDirectory_RelativePath()
+        Public Shared Sub CombineBadPathTest_BaseDirectory_RelativePath()
+            Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
+            Assert.Equal(FileSystem.CombinePath("C:\", ""), "C:\")
+        End Sub
+
+        <Fact>
+        Public Shared Sub CombinePathTest_BaseDirectory_RelativePath()
+            Assert.Equal(FileSystem.CombinePath("C:\", "Test2"), IO.Path.Combine("C:\", "Test2"))
+        End Sub
+        <Fact>
+        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
 
         End Sub
 
         <Fact>
-        Public Sub Copy_FileSource_FileName_DestinationFileName_Overwrite()
+        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_Overwrite()
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
 
-        End Sub
-
-        <Fact>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
-        End Sub
-
-        <Fact>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_Overwrite()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
+        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
+        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
 
         End Sub
 
         <Fact>
-        Public Sub CopyFile_SourceFileName_DestinationFileName()
+        Public Shared Sub CopyFile_FileSourceFileName_DestinationFileName_Overwrite()
+            Dim TestBase As New FileIOTestBase
+            Dim testFileSource As String = TestBase.GetTestFilePath()
+            Dim testFileDest As String = TestBase.GetTestFilePath()
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+            Dim destData() As Char = {"x"c, "X"c, "y"c}
+
+            ' Write and copy file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                    sourceStream.Write(sourceData, 0, sourceData.Length)
+                    destStream.Write(destData, 0, destData.Length)
+                End Using
+            End Using
+            FileSystem.CopyFile(testFileSource, testFileDest, True)
+
+            ' Ensure copy transferred written data
+            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
+                Dim readData(sourceData.Length - 1) As Char
+                stream.Read(readData, 0, sourceData.Length)
+                Assert.Equal(sourceData, readData)
+            End Using
+            TestBase.Dispose()
+        End Sub
+
+        <Fact>
+        Public Shared Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteFalse()
+            Dim TestBase As New FileIOTestBase
+            Dim testFileSource As String = TestBase.GetTestFilePath()
+            Dim testFileDest As String = TestBase.GetTestFilePath()
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+            Dim destData() As Char = {"x"c, "X"c, "y"c}
+
+            ' Write and copy file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                    sourceStream.Write(sourceData, 0, sourceData.Length)
+                    destStream.Write(destData, 0, destData.Length)
+                End Using
+            End Using
+            Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest, False))
+
+            ' Ensure copy didn't overwrite existing data
+            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
+                Dim readData(sourceData.Length - 1) As Char
+                stream.Read(readData, 0, sourceData.Length)
+                Assert.Equal(destData, readData)
+            End Using
+            TestBase.Dispose()
+        End Sub
+
+        <Fact>
+        Public Shared Sub CopyFile_SourceFileName_DestinationFileName()
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
+
+            Dim TestBase As New FileIOTestBase
+            Dim testFileSource As String = TestBase.GetTestFilePath()
+            Dim testFileDest As String = TestBase.GetTestFilePath()
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+            Dim destData() As Char = {"x"c, "X"c, "y"c}
+
+            ' Write and copy file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                    sourceStream.Write(sourceData, 0, sourceData.Length)
+                    destStream.Write(destData, 0, destData.Length)
+                End Using
+            End Using
+            Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest))
+
+            ' Ensure copy didn't overwrite existing data
+            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
+                Dim readData(sourceData.Length - 1) As Char
+                stream.Read(readData, 0, sourceData.Length)
+                Assert.Equal(destData, readData)
+            End Using
+
+            ' Get a new destination nanme
+            testFileDest = TestBase.GetTestFilePath()
+            FileSystem.CopyFile(testFileSource, testFileDest)
+
+            ' Ensure copy transferred written data
+            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
+                Dim readData(sourceData.Length - 1) As Char
+                stream.Read(readData, 0, sourceData.Length)
+                Assert.Equal(sourceData, readData)
+            End Using
+
+            TestBase.Dispose()
+
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption()
+        Public Shared Sub CopyFile_SourceFileName_DestinationFileName_UIOption()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption_UICancelOption()
+        Public Shared Sub CopyFile_SourceFileName_DestinationFileName_UIOption_UICancelOption()
 
         End Sub
 
         <Fact>
-        Public Sub CreateDirectory_Directory()
+        Public Shared Sub CreateDirectory_Directory()
 
         End Sub
 
         <Fact>
-        Public Sub CreateDirectoryTest()
+        Public Shared Sub CreateDirectoryTest()
             Dim TestBase As New FileIOTestBase
         End Sub
 
         <Fact>
-        Public Sub CurrentDirectoryTest()
+        Public Shared Sub CurrentDirectoryTest()
 
         End Sub
         <Fact>
-        Public Sub DeleteDirectory_Directory_DeleteDirectory_Option()
+        Public Shared Sub DeleteDirectory_Directory_DeleteDirectory_Option()
 
         End Sub
 
         <Fact>
-        Public Sub DeleteDirectory_Directory_UIOption_RecycleOption()
+        Public Shared Sub DeleteDirectory_Directory_UIOption_RecycleOption()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub DeleteDirectory_Directory_UIOption_RecycleOption_UICancelOption()
+        Public Shared Sub DeleteDirectory_Directory_UIOption_RecycleOption_UICancelOption()
 
         End Sub
 
         <Fact>
-        Public Sub DeleteFile_File()
+        Public Shared Sub DeleteFile_File()
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub DeleteFile_File_UIOption_RecycleOption()
-
-        End Sub
-
-        <Fact(Skip:="Not Implemented")>
-        Public Sub DeleteFile_File_UIOption_RecycleOption_UICancelOption()
-
-        End Sub
-
-        <Fact>
-        Public Sub DirectoryExists_directory()
-
-        End Sub
-
-        <Fact>
-        Public Sub FileExists_File()
-
-        End Sub
-
-        <Fact>
-        Public Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchOption_FileWildcards()
-
-        End Sub
-
-        <Fact>
-        Public Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchType_SearchOption()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetDirectories_Directory()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetDirectories_Directory_SearchOption_Wildcards()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetDirectoryInfo_Directory()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetDriveInfo_Drive()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetFileInfo_File()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetFiles_Directory()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetFilesDirectory_SearchOption_Wildcards()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetName_Path()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetParentPath_Path()
-
-        End Sub
-
-        <Fact>
-        Public Sub GetTempFileName()
-
-        End Sub
-
-        <Fact>
-        Public Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName()
-
-        End Sub
-
-        <Fact>
-        Public Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName_Overwrite()
+        Public Shared Sub DeleteFile_File_UIOption_RecycleOption()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
+        Public Shared Sub DeleteFile_File_UIOption_RecycleOption_UICancelOption()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub DirectoryExists_directory()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub FileExists_File()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchOption_FileWildcards()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchType_SearchOption()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetDirectories_Directory()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetDirectories_Directory_SearchOption_Wildcards()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetDirectoryInfo_Directory()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetDriveInfo_Drive()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetFileInfo_File()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetFiles_Directory()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetFilesDirectory_SearchOption_Wildcards()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetName_Path()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetParentPath_Path()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetTempFileName()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName_Overwrite()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
-
-        End Sub
-        <Fact>
-        Public Sub MoveFile_SourceFileName_DestinationFileName_Overwrite()
-
-        End Sub
-
-        <Fact>
-        Public Sub MoveFile_SourceFileNameDestinationFileName()
+        Public Shared Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub MoveFile_SourceFileNameDestinationFileName_UIOption()
+        Public Shared Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
+
+        End Sub
+        <Fact>
+        Public Shared Sub MoveFile_SourceFileName_DestinationFileName_Overwrite()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub MoveFile_SourceFileNameDestinationFileName()
 
         End Sub
 
         <Fact(Skip:="Not Implemented")>
-        Public Sub MoveFile_SourceFileNameDestinationFileName_UIOption_UICancelOption()
+        Public Shared Sub MoveFile_SourceFileNameDestinationFileName_UIOption()
+
+        End Sub
+
+        <Fact(Skip:="Not Implemented")>
+        Public Shared Sub MoveFile_SourceFileNameDestinationFileName_UIOption_UICancelOption()
 
         End Sub
         <Fact>
-        Public Sub OpenTextFieldParser_File()
+        Public Shared Sub OpenTextFieldParser_File()
 
         End Sub
 
-        Public Sub OpenTextFieldParser_File_Delimiters()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFieldParser_File_FieldWidths()
-
-        End Sub
-        <Fact>
-        Public Sub OpenTextFileReader_File()
+        Public Shared Sub OpenTextFieldParser_File_Delimiters()
 
         End Sub
 
         <Fact>
-        Public Sub OpenTextFileReader_File_Encoding()
+        Public Shared Sub OpenTextFieldParser_File_FieldWidths()
+
+        End Sub
+        <Fact>
+        Public Shared Sub OpenTextFileReader_File()
 
         End Sub
 
         <Fact>
-        Public Sub OpenTextFileWriter_File_Append_Encoding()
+        Public Shared Sub OpenTextFileReader_File_Encoding()
 
         End Sub
 
         <Fact>
-        Public Sub OpenTextFileWriter_FileAppend()
-
-        End Sub
-        <Fact>
-        Public Sub ReadAllBytes_File()
+        Public Shared Sub OpenTextFileWriter_File_Append_Encoding()
 
         End Sub
 
         <Fact>
-        Public Sub ReadAllText_File()
+        Public Shared Sub OpenTextFileWriter_FileAppend()
+
+        End Sub
+        <Fact>
+        Public Shared Sub ReadAllBytes_File()
 
         End Sub
 
         <Fact>
-        Public Sub ReadAllText_File_Encoding()
+        Public Shared Sub ReadAllText_File()
 
         End Sub
 
         <Fact>
-        Public Sub RenameDirectory_Directory_NewName()
-        End Sub
-
-        <Fact>
-        Public Sub RenameFile_File_NewName()
+        Public Shared Sub ReadAllText_File_Encoding()
 
         End Sub
 
         <Fact>
-        Public Sub WriteAllBytes_FileData_Append()
+        Public Shared Sub RenameDirectory_Directory_NewName()
+        End Sub
+
+        <Fact>
+        Public Shared Sub RenameFile_File_NewName()
 
         End Sub
 
         <Fact>
-        Public Sub WriteAllText_File_Text_Append()
+        Public Shared Sub WriteAllBytes_FileData_Append()
 
         End Sub
 
         <Fact>
-        Public Sub WriteAllText_File_Text_Append_Encoding()
+        Public Shared Sub WriteAllText_File_Text_Append()
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub WriteAllText_File_Text_Append_Encoding()
 
         End Sub
     End Class

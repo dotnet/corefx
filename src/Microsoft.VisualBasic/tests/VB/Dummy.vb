@@ -8,14 +8,14 @@ Imports Xunit
 
 Namespace Microsoft.VisualBasic.Tests
 
-    Public Class Dummy
+    Public NotInheritable Class Dummy
 
         <Fact>
-        Public Sub Dummy()
+        Public Shared Sub Dummy()
 
-            Dim dateTimeNowBefore As DateTime = DateTime.Now()
-            Dim now As DateTime = DateAndTime.Now()
-            Dim dateTimeNowAfter As DateTime = DateTime.Now()
+            Dim dateTimeNowBefore As Date = Date.Now()
+            Dim now As Date = DateAndTime.Now()
+            Dim dateTimeNowAfter As Date = Date.Now()
 
             Assert.InRange(now, dateTimeNowBefore, dateTimeNowAfter)
 

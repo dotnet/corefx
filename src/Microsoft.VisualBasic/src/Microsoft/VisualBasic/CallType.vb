@@ -3,6 +3,7 @@
 ' See the LICENSE file in the project root for more information.
 
 Namespace Global.Microsoft.VisualBasic
+    <System.Flags>
     Public Enum CallType
         Method = 1
         [Get] = 2

@@ -15,13 +15,10 @@ Imports System.Text
 ' DO NOT IMPORT System.IO
 Namespace Microsoft.VisualBasic.Tests
 
-    Public Class DriveInfoWindowsTests
-        Private Sub DoDriveCheck()
+    Public NotInheritable Class DriveInfoWindowsTests
+        Private Shared Sub DoDriveCheck()
             ' Get Volume Label - valid drive
             Dim serialNumber, maxFileNameLen, fileSystemFlags As Integer
-            While Not Diagnostics.Debugger.IsAttached
-                Threading.Thread.Sleep(1000)
-            End While
             Dim volNameLen As Integer = 50
             Dim fileNameLen As Integer = 50
             Dim volumeName As StringBuilder = New StringBuilder(volNameLen)
@@ -39,7 +36,7 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub TestGetDrives()
+        Public Shared Sub TestGetDrives()
             Dim validExpectedDrives As IEnumerable(Of Char) = GetValidDriveLettersOnMachine()
             Dim validActualDrives() As IO.DriveInfo = FileSystem.Drives().ToArray
 
@@ -53,7 +50,7 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Sub TestDriveProperties_AppContainer()
+        Public Shared Sub TestDriveProperties_AppContainer()
             Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
             Dim isReady As Boolean = validDrive.IsReady
             If PlatformDetection.IsInAppContainer Then
@@ -76,7 +73,7 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         <PlatformSpecific(TestPlatforms.Windows)>
         <SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Accessing drive format is not permitted inside an AppContainer.")>
-        Public Sub TestDriveFormat()
+        Public Shared Sub TestDriveFormat()
             Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
             Const VolNameLen As Integer = 50
             Dim VolumeName As StringBuilder = New StringBuilder(VolNameLen)
@@ -96,7 +93,7 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub TestDriveType()
+        Public Shared Sub TestDriveType()
             Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
             Dim expectedDriveType As Integer = GetDriveType(validDrive.Name)
             Assert.Equal(CType(expectedDriveType, IO.DriveType), validDrive.DriveType)
@@ -105,7 +102,7 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         <PlatformSpecific(TestPlatforms.Windows)>
         <SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "GetDiskFreeSpaceEx blocked in AC")>
-        Public Sub TestValidDiskSpaceProperties()
+        Public Shared Sub TestValidDiskSpaceProperties()
             Dim win32Result As Boolean
             Dim fbUser As Long = -1
             Dim tbUser As Long
@@ -136,7 +133,7 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub GetVolumeLabel_Returns_CorrectLabel()
+        Public Shared Sub GetVolumeLabel_Returns_CorrectLabel()
             If PlatformDetection.IsInAppContainer Then
                 Assert.Throws(Of UnauthorizedAccessException)(Sub() DoDriveCheck())
             Else
@@ -161,7 +158,7 @@ Namespace Microsoft.VisualBasic.Tests
         Friend Shared Function GetDiskFreeSpaceEx(drive As String, <Out> ByRef freeBytesForUser As Long, <Out> ByRef totalBytes As Long, <Out> ByRef freeBytes As Long) As Boolean
         End Function
 
-        Private Iterator Function GetValidDriveLettersOnMachine() As IEnumerable(Of Char)
+        Private Shared Iterator Function GetValidDriveLettersOnMachine() As IEnumerable(Of Char)
             Dim mask As UInteger = CUInt(GetLogicalDrives())
             Assert.NotEqual(Of UInteger)(mask, 0)
 

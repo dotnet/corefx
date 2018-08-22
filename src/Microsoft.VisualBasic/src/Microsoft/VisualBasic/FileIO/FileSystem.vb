@@ -454,7 +454,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="destinationDirectoryName">The path to the target directory, can be relative or absolute. Parent directory will always be created.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
+        Public Shared Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
             CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
                 False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -470,7 +470,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="overwrite">True to overwrite existing files with the same name. Otherwise False.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal overwrite As Boolean)
+        Public Shared Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal overwrite As Boolean)
             CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -521,7 +521,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="destinationFileName">The path to the destination file, can be relative or absolute. Parent directory will always be created.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
+        Public Shared Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
             CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
                 False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -536,7 +536,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="overwrite">True to overwrite existing file with the same name. Otherwise False.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
+        Public Shared Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
             CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -588,7 +588,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Creates a directory from the given path (including all parent directories).
         ''' </summary>
         ''' <param name="directory">The path to create the directory at.</param>
-        Public Sub CreateDirectory(ByVal directory As String)
+        Public Shared Sub CreateDirectory(ByVal directory As String)
             ' Get the full path. GetFullPath will throw if invalid path.
             directory = IO.Path.GetFullPath(directory)
 
@@ -610,7 +610,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="onDirectoryNotEmpty">DeleteAllContents to delete everything. ThrowIfDirectoryNonEmpty to throw exception if the directory is not empty.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub DeleteDirectory(ByVal directory As String, ByVal onDirectoryNotEmpty As DeleteDirectoryOption)
+        Public Shared Sub DeleteDirectory(ByVal directory As String, ByVal onDirectoryNotEmpty As DeleteDirectoryOption)
             DeleteDirectoryInternal(directory, onDirectoryNotEmpty,
                 UIOptionInternal.NoUI, RecycleOption.DeletePermanently, UICancelOption.ThrowException)
         End Sub
@@ -657,7 +657,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to the file.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub DeleteFile(ByVal file As String)
+        Public Shared Sub DeleteFile(ByVal file As String)
             DeleteFileInternal(file, UIOptionInternal.NoUI, RecycleOption.DeletePermanently, UICancelOption.ThrowException)
         End Sub
 
@@ -707,7 +707,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="destinationDirectoryName">The path to the target directory, can be relative or absolute. Parent directory will always be created.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
+        Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
             CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
                 False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -722,7 +722,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="destinationDirectoryName">The path to the target directory, can be relative or absolute. Parent directory will always be created.</param>        ''' <param name="overwrite">True to overwrite existing files with the same name. Otherwise False.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal overwrite As Boolean)
+        Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal overwrite As Boolean)
             CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -773,7 +773,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="destinationFileName">The path to the destination file, can be relative or absolute. Parent directory will always be created.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
+        Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
             CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
                 False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -789,7 +789,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="overwrite">True to overwrite existing file with the same name. Otherwise False.</param>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
-        Public Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
+        Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
             CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
                 overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -845,7 +845,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <exception cref="IO.FileNotFoundException">If directory does not point to an existing directory.</exception>
         ''' <exception cref="IO.IOException">If directory points to a root directory.
         '''     Or if there's an existing directory or an existing file with the same name.</exception>
-        Public Sub RenameDirectory(ByVal directory As String, ByVal newName As String)
+        Public Shared Sub RenameDirectory(ByVal directory As String, ByVal newName As String)
             ' Get the full path. This will handle invalid path exceptions.
             directory = IO.Path.GetFullPath(directory)
             ' Throw if device path.
@@ -890,7 +890,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <exception cref="System.ArgumentException">If newName is Nothing or Empty String or contains path information.</exception>
         ''' <exception cref="IO.FileNotFoundException">If file does not point to an existing file.</exception>
         ''' <exception cref="IO.IOException">If there's an existing directory or an existing file with the same name.</exception>
-        Public Sub RenameFile(ByVal file As String, ByVal newName As String)
+        Public Shared Sub RenameFile(ByVal file As String, ByVal newName As String)
             ' Get the full path. This will handle invalid path exceptions.
             file = NormalizeFilePath(file, "file")
             ' Throw if device path.
@@ -929,7 +929,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="data">The byte array to write to the file.</param>
         ''' <param name="append">True to append the text to the existing content. False to overwrite the existing content.</param>
         ''' <exception cref="IO.FileStream">See FileStream constructor and Write: For other exceptions.</exception>
-        Public Sub WriteAllBytes(ByVal file As String, ByVal data() As Byte, ByVal append As Boolean)
+        Public Shared Sub WriteAllBytes(ByVal file As String, ByVal data() As Byte, ByVal append As Boolean)
 
             ' VSWhidbey 445570: Cannot call through IO.File.WriteAllBytes (since they don't support append)
             ' so only check for trailing separator as specified in VSWhidbey 372980.
@@ -965,7 +965,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="text">The text to write to the file.</param>
         ''' <param name="append">True to append the text to the existing content. False to overwrite the existing content.</param>
         ''' <exception cref="IO.StreamWriter">See StreamWriter constructor and Write: For other exceptions.</exception>
-        Public Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean)
+        Public Shared Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean)
             WriteAllText(file, text, append, Encoding.UTF8)
         End Sub
 
@@ -980,7 +980,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="append">True to append the text to the existing content. False to overwrite the existing content.</param>
         ''' <param name="encoding">The encoding to use.</param>
         ''' <exception cref="IO.StreamWriter">See StreamWriter constructor and Write: For other exceptions.</exception>
-        Public Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean,
+        Public Shared Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean,
             ByVal encoding As Encoding)
 
             ' VSWhidbey 445570: Cannot call through IO.File.WriteAllText (since they don't support: append, prefer current encoding than specified one)
@@ -1261,12 +1261,12 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return True
             End Function
 
-            Private Shared m_SearchText As String ' The text to search.
-            Private Shared m_IgnoreCase As Boolean ' Should we ignore case?
-            Private Shared m_Decoder As Text.Decoder ' The Decoder to use.
-            Private Shared m_PreviousCharBuffer() As Char = Array.Empty(Of Char)() ' The cached character array from previous call to IsTextExist.
-            Private Shared m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
-            Private Shared m_Preamble() As Byte ' The byte order mark we need to consider.
+            Private m_SearchText As String ' The text to search.
+            Private ReadOnly m_IgnoreCase As Boolean ' Should we ignore case?
+            Private m_Decoder As Text.Decoder ' The Decoder to use.
+            Private m_PreviousCharBuffer() As Char = Array.Empty(Of Char)() ' The cached character array from previous call to IsTextExist.
+            Private m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
+            Private m_Preamble() As Byte ' The byte order mark we need to consider.
         End Class 'Private Class TextSearchHelper
 
     End Class
