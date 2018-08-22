@@ -168,13 +168,12 @@ namespace System.Diagnostics
         /// </remakrs>
         private bool IsParentOf(Process possibleChildProcess) =>
             StartTime < possibleChildProcess.StartTime
-            && possibleChildProcess.TryGetParentProcessId(out var parentProcessId)
-            && Id == parentProcessId;
+            && Id == possibleChildProcess.GetParentProcessId();
 
         /// <summary>
         /// Attempts to get the process's parent process id.
         /// </summary>
-        private unsafe bool TryGetParentProcessId(out int? parentProcessId)
+        private unsafe int? GetParentProcessId()
         {
             // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
             // For now just return null and worst case we will not kill some children.
@@ -182,12 +181,10 @@ namespace System.Diagnostics
 
             if (Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, &info, (uint)sizeof(Interop.NtDll.PROCESS_BASIC_INFORMATION), out _) == 0)
             {
-                parentProcessId = (int)info.InheritedFromUniqueProcessId;
-                return true;
+                return (int)info.InheritedFromUniqueProcessId;
             }
 
-            parentProcessId = null;
-            return false;
+            return null;
         }
 
         /// <summary>Discards any information about the associated process.</summary>
