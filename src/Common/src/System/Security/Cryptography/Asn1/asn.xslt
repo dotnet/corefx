@@ -299,7 +299,7 @@ namespace <xsl:value-of select="@namespace" />
           <xsl:when test="@explicitTag" xml:space="preserve">
             <xsl:if test="position() != 1">else </xsl:if>if (tag.HasSameClassAndValue(<xsl:call-template name="ContextTag" />))
             {
-                explicitReader = reader.ReadSequence(<xsl:call-template name="ContextTag"/>);<xsl:apply-templates select="." mode="DecodeSimpleValue"><xsl:with-param name="readerName" select="'explicitReader'"/><xsl:with-param name="indent" select="'    '"/><xsl:with-param name="name" select="@name"/></xsl:apply-templates>
+                explicitReader = reader.ReadSequence(<xsl:call-template name="ContextTag"/>);<xsl:apply-templates select="." mode="DecodeSimpleValue"><xsl:with-param name="readerName" select="'explicitReader'"/><xsl:with-param name="indent" select="'    '"/></xsl:apply-templates>
                 explicitReader.ThrowIfNotEmpty();
             }</xsl:when>
           <xsl:otherwise xml:space="preserve">
