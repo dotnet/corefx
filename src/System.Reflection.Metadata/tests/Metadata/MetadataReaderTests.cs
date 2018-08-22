@@ -3048,5 +3048,168 @@ namespace System.Reflection.Metadata.Tests
 
             return obfuscated;
         }
+
+        #region TypeSystem factory methods
+        [Fact]
+        public void GetAssemblyReference_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetAssemblyReference(new AssemblyReferenceHandle()));
+        }
+
+        [Fact]
+        public void GetTypeDefinition_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetTypeDefinition(new TypeDefinitionHandle()));
+        }
+
+        [Fact]
+        public void GetTypeReference_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetTypeReference(new TypeReferenceHandle()));
+        }
+
+        [Fact]
+        public void GetExportedType_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetExportedType(new ExportedTypeHandle()));
+        }
+
+        [Fact]
+        public void GetCustomAttribute_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetCustomAttribute(new CustomAttributeHandle()));
+        }
+
+        [Fact]
+        public void GetDeclarativeSecurityAttribute_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetDeclarativeSecurityAttribute(new DeclarativeSecurityAttributeHandle()));
+        }
+
+        [Fact]
+        public void GetConstant_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetConstant(new ConstantHandle()));
+        }
+
+        [Fact]
+        public void GetMethodDefinition_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetMethodDefinition(new MethodDefinitionHandle()));
+        }
+
+        [Fact]
+        public void GetFieldDefinition_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetFieldDefinition(new FieldDefinitionHandle()));
+        }
+
+        [Fact]
+        public void GetPropertyDefinition_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetPropertyDefinition(new PropertyDefinitionHandle()));
+        }
+
+        [Fact]
+        public void GetEventDefinition_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetEventDefinition(new EventDefinitionHandle()));
+        }
+
+        [Fact]
+        public void GetMethodImplementation_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetMethodImplementation(new MethodImplementationHandle()));
+        }
+
+        [Fact]
+        public void GetMemberReference_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetMemberReference(new MemberReferenceHandle()));
+        }
+
+        [Fact]
+        public void GetMethodSpecification_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetMethodSpecification(new MethodSpecificationHandle()));
+        }
+
+        [Fact]
+        public void GetParameter_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetParameter(new ParameterHandle()));
+        }
+
+        [Fact]
+        public void GetGenericParameter_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetGenericParameter(new GenericParameterHandle()));
+        }
+
+        [Fact]
+        public void GetGenericParameterConstraint_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetGenericParameterConstraint(new GenericParameterConstraintHandle()));
+        }
+
+        [Fact]
+        public void GetManifestResource_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetManifestResource(new ManifestResourceHandle()));
+        }
+
+        [Fact]
+        public void GetAssemblyFile_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetAssemblyFile(new AssemblyFileHandle()));
+        }
+
+        [Fact]
+        public void GetStandaloneSignature_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetStandaloneSignature(new StandaloneSignatureHandle()));
+        }
+
+        [Fact]
+        public void GetTypeSpecification_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetTypeSpecification(new TypeSpecificationHandle()));
+        }
+
+        [Fact]
+        public void GetModuleReference_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetModuleReference(new ModuleReferenceHandle()));
+        }
+
+        [Fact]
+        public void GetInterfaceImplementation_Nil_Handle()
+        {
+            var reader = GetMetadataReader(NetModule.ModuleCS01);
+            Assert.Throws<BadImageFormatException>(() => reader.GetInterfaceImplementation(new InterfaceImplementationHandle()));
+        }
+        #endregion
     }
 }

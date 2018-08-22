@@ -12,7 +12,7 @@ using System.Text;
 namespace System.Reflection.Metadata
 {
     /// <summary>
-    /// Reads metadata as defined byte the ECMA 335 CLI specification.
+    /// Reads metadata as defined by the ECMA 335 CLI specification.
     /// </summary>
     public sealed partial class MetadataReader
     {
@@ -1121,11 +1121,21 @@ namespace System.Reflection.Metadata
 
         public AssemblyReference GetAssemblyReference(AssemblyReferenceHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new AssemblyReference(this, handle.Value);
         }
 
         public TypeDefinition GetTypeDefinition(TypeDefinitionHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new TypeDefinition(this, GetTypeDefTreatmentAndRowId(handle));
         }
@@ -1155,6 +1165,11 @@ namespace System.Reflection.Metadata
 
         public TypeReference GetTypeReference(TypeReferenceHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new TypeReference(this, GetTypeRefTreatmentAndRowId(handle));
         }
@@ -1172,6 +1187,11 @@ namespace System.Reflection.Metadata
 
         public ExportedType GetExportedType(ExportedTypeHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new ExportedType(this, handle.RowId);
         }
 
@@ -1182,6 +1202,11 @@ namespace System.Reflection.Metadata
 
         public CustomAttribute GetCustomAttribute(CustomAttributeHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new CustomAttribute(this, GetCustomAttributeTreatmentAndRowId(handle));
         }
@@ -1199,17 +1224,32 @@ namespace System.Reflection.Metadata
 
         public DeclarativeSecurityAttribute GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new DeclarativeSecurityAttribute(this, handle.RowId);
         }
 
         public Constant GetConstant(ConstantHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new Constant(this, handle.RowId);
         }
 
         public MethodDefinition GetMethodDefinition(MethodDefinitionHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new MethodDefinition(this, GetMethodDefTreatmentAndRowId(handle));
         }
@@ -1227,6 +1267,11 @@ namespace System.Reflection.Metadata
 
         public FieldDefinition GetFieldDefinition(FieldDefinitionHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new FieldDefinition(this, GetFieldDefTreatmentAndRowId(handle));
         }
@@ -1244,21 +1289,41 @@ namespace System.Reflection.Metadata
 
         public PropertyDefinition GetPropertyDefinition(PropertyDefinitionHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new PropertyDefinition(this, handle);
         }
 
         public EventDefinition GetEventDefinition(EventDefinitionHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new EventDefinition(this, handle);
         }
 
         public MethodImplementation GetMethodImplementation(MethodImplementationHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new MethodImplementation(this, handle);
         }
 
         public MemberReference GetMemberReference(MemberReferenceHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new MemberReference(this, GetMemberRefTreatmentAndRowId(handle));
         }
@@ -1276,51 +1341,101 @@ namespace System.Reflection.Metadata
 
         public MethodSpecification GetMethodSpecification(MethodSpecificationHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new MethodSpecification(this, handle);
         }
 
         public Parameter GetParameter(ParameterHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new Parameter(this, handle);
         }
 
         public GenericParameter GetGenericParameter(GenericParameterHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new GenericParameter(this, handle);
         }
 
         public GenericParameterConstraint GetGenericParameterConstraint(GenericParameterConstraintHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new GenericParameterConstraint(this, handle);
         }
 
         public ManifestResource GetManifestResource(ManifestResourceHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new ManifestResource(this, handle);
         }
 
         public AssemblyFile GetAssemblyFile(AssemblyFileHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new AssemblyFile(this, handle);
         }
 
         public StandaloneSignature GetStandaloneSignature(StandaloneSignatureHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new StandaloneSignature(this, handle);
         }
 
         public TypeSpecification GetTypeSpecification(TypeSpecificationHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new TypeSpecification(this, handle);
         }
 
         public ModuleReference GetModuleReference(ModuleReferenceHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new ModuleReference(this, handle);
         }
 
         public InterfaceImplementation GetInterfaceImplementation(InterfaceImplementationHandle handle)
         {
+            if (handle.IsNil)
+            {
+                Throw.InvalidHandle();
+            }
+
             return new InterfaceImplementation(this, handle);
         }
 
