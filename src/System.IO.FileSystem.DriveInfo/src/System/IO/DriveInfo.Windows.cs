@@ -131,12 +131,7 @@ namespace System.IO
                 {
                     if (!Interop.Kernel32.GetVolumeInformation(Name, volumeName, Interop.Kernel32.MAX_PATH + 1, null, null, out int fileSystemFlags, null, 0))
                     {
-                        int errorCode = Marshal.GetLastWin32Error();
-                        // Win9x appears to return ERROR_INVALID_DATA when a
-                        // drive doesn't exist.
-                        if (errorCode == Interop.Errors.ERROR_INVALID_DATA)
-                            errorCode = Interop.Errors.ERROR_INVALID_DRIVE;
-                        throw Error.GetExceptionForWin32DriveError(errorCode, Name);
+                        throw Error.GetExceptionForWin32DriveError(Name);
                     }
                 }
 
