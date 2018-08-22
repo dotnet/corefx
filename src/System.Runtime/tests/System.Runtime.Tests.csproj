@@ -117,6 +117,7 @@
     <Compile Include="System\Uri.CreateStringTests.cs" />
     <Compile Include="System\Uri.CreateUriTests.cs" />
     <Compile Include="System\Uri.MethodsTests.cs" />
+    <Compile Include="System\Utf8StringTests.cs" />
     <Compile Include="System\ValueTypeTests.cs" />
     <Compile Include="System\VersionTests.cs" />
     <Compile Include="System\WeakReferenceTests.cs" />

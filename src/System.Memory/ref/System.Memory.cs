@@ -21,6 +21,9 @@ namespace System
         public static System.ReadOnlySpan<char> AsSpan(this string text) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start, int length) { throw null; }
+        public static System.ReadOnlySpan<byte> AsSpan(this Utf8String text) { throw null; }
+        public static System.ReadOnlySpan<byte> AsSpan(this Utf8String text, int start) { throw null; }
+        public static System.ReadOnlySpan<byte> AsSpan(this Utf8String text, int start, int length) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }

@@ -2249,10 +2249,14 @@ namespace System
         public static int GetHashCode(ReadOnlySpan<byte> value) => throw null;
         public static int GetHashCode(ReadOnlySpan<byte> value, StringComparison comparisonType) => throw null;
         public ref readonly byte GetPinnableReference() => throw null;
+        public static Utf8String Literal(string value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
+        public Utf8String Trim() => throw null;
+        public Utf8String TrimEnd() => throw null;
+        public Utf8String TrimStart() => throw null;
     }
     public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string>, System.IConvertible, System.IEquatable<string>
     {
