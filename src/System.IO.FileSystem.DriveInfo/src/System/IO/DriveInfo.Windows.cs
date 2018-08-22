@@ -131,7 +131,7 @@ namespace System.IO
                 {
                     if (!Interop.Kernel32.GetVolumeInformation(Name, volumeName, Interop.Kernel32.MAX_PATH + 1, null, null, out int fileSystemFlags, null, 0))
                     {
-                        throw Error.GetExceptionForWin32DriveError(Name);
+                        throw Error.GetExceptionForLastWin32DriveError(Name);
                     }
                 }
 
