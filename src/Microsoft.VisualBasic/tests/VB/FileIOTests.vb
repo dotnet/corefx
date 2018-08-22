@@ -107,10 +107,6 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Shared Sub CopyFile_SourceFileName_DestinationFileName()
-            While (Not System.Diagnostics.Debugger.IsAttached)
-                System.Threading.Thread.Sleep(1000)
-            End While
-
             Dim TestBase As New FileIOTestBase
             Dim testFileSource As String = TestBase.GetTestFilePath()
             Dim testFileDest As String = TestBase.GetTestFilePath()
@@ -160,24 +156,29 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Shared Sub CreateDirectory_Directory()
-
-        End Sub
-
-        <Fact>
-        Public Shared Sub CreateDirectoryTest()
             Dim TestBase As New FileIOTestBase
+            Dim TestDirectory As String = TestBase.TestDirectory()
+            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
+            Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
+            FileSystem.CreateDirectory(FullPathToNewDirectory)
+            Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+            TestBase.Dispose()
         End Sub
 
         <Fact>
-        Public Shared Sub CurrentDirectoryTest()
+        Public Shared Sub CurrentDirectoryGetSet()
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
 
+            Dim c As String = FileSystem.CurrentDirectory
         End Sub
         <Fact>
-        Public Shared Sub DeleteDirectory_Directory_DeleteDirectory_Option()
+        Public Shared Sub DeleteDirectory_Directory_DeleteDirectoryOption()
 
         End Sub
 
-        <Fact>
+        <Fact(Skip:="Not Implemented")>
         Public Shared Sub DeleteDirectory_Directory_UIOption_RecycleOption()
 
         End Sub

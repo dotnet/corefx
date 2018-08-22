@@ -77,7 +77,7 @@ Namespace Microsoft.VisualBasic.Tests
         ''' Gets the test directory into which all files and directories created by tests should be stored.
         ''' This directory is isolated per test class.
         ''' </summary>
-        Protected ReadOnly Property TestDirectory() As String
+        Public ReadOnly Property TestDirectory() As String
 
         ''' <summary>Gets a test file full path that is associated with the call site.</summary>
         ''' <param name="index">An optional index value to use as a suffix on the file name.  Typically a loop index.</param>
