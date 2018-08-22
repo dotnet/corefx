@@ -116,6 +116,7 @@ namespace System.IO.Pipelines
         {
             _readerCompletion.Reset();
             _writerCompletion.Reset();
+            _readerAwaitable.Reset();
             _commitHeadIndex = 0;
             _currentWriteLength = 0;
             _length = 0;
