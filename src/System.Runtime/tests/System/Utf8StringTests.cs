@@ -95,6 +95,64 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData("Hello", 0, 5, "Hello")]
+        [InlineData("Hello", 0, 3, "Hel")]
+        [InlineData("Hello", 2, 3, "llo")]
+        [InlineData("Hello", 5, 0, "")]
+        [InlineData("", 0, 0, "")]
+        public static void Substring_Ascii(string sAsString, int startIndex, int length, string expectedAsString)
+        {
+            void Substring_AsciiCore(Utf8String s, Utf8String expected)
+            {
+                if (startIndex + length == s.Length)
+                {
+                    Assert.Equal(expected, s.Substring(startIndex));
+                    Assert.Equal(expected, new Utf8String(s.AsSpan(startIndex)));
+
+                    if (length == 0)
+                    {
+                        Assert.Same(Utf8String.Empty, s.Substring(startIndex));
+                    }
+                }
+                Assert.Equal(expected, s.Substring(startIndex, length));
+
+                Assert.Equal(expected, new Utf8String(s.AsSpan(startIndex, length)));
+
+                if (length == s.Length)
+                {
+                    Assert.Same(s, s.Substring(startIndex));
+                    Assert.Same(s, s.Substring(startIndex, length));
+                }
+                else if (length == 0)
+                {
+                    Assert.Same(Utf8String.Empty, s.Substring(startIndex, length));
+                }
+            };
+
+            Substring_AsciiCore(new Utf8String(sAsString), new Utf8String(expectedAsString));
+        }
+
+        [Fact]
+        public static void Substring_Invalid()
+        {
+            // Start index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Utf8String.Literal("foo").Substring(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Utf8String.Literal("foo").Substring(-1, 0));
+
+            // Start index > string.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Utf8String.Literal("foo").Substring(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Utf8String.Literal("foo").Substring(4, 0));
+
+            // Length < 0 or length > string.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Utf8String.Literal("foo").Substring(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Utf8String.Literal("foo").Substring(0, 4));
+
+            // Start index + length > string.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Utf8String.Literal("foo").Substring(3, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Utf8String.Literal("foo").Substring(2, 2));
+        }
+
+        [Theory]
         [MemberData(nameof(TrimData))]
         public static void Trim(Utf8String input, Utf8String leftTrimmed, Utf8String rightTrimmed, Utf8String bothTrimmed)
         {
