@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 //
 
-// Enable calling OpenSSL functions through shims to enable support for 
+// Enable calling OpenSSL functions through shims to enable support for
 // different versioned so files naming and different configuration options
 // on various Linux distributions.
 
@@ -36,7 +36,30 @@
 
 #include "pal_crypto_config.h"
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+// Remove problematic #defines
+#undef SSL_get_state
+#undef X509_get_X509_PUBKEY
+#undef X509_get_version
+
+// Minimal forward definitions
+typedef enum
+{
+    TLS_ST_BEFORE,
+    TLS_ST_OK,
+} OSSL_HANDSHAKE_STATE;
+
+#endif
+
+#if defined FEATURE_DISTRO_AGNOSTIC_SSL || OPENSSL_VERSION_NUMBER < 0x10100000L
+#include "apibridge.h"
+#endif
+
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+
+#define NEED_OPENSSL_1_0 true
+#define NEED_OPENSSL_1_1 true
 
 #if !HAVE_OPENSSL_EC2M
 // In portable build, we need to support the following functions even if they were not present
@@ -673,5 +696,51 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
 #define API_EXISTS(fn) true
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+#define NEED_OPENSSL_1_0 true
+
+// Alias "future" API to the local_ version.
+#define DSA_get0_key local_DSA_get0_key
+#define DSA_get0_pqg local_DSA_get0_pqg
+#define DSA_get_method local_DSA_get_method
+#define DSA_set0_key local_DSA_set0_key
+#define DSA_set0_pqg local_DSA_set0_pqg
+#define EVP_CIPHER_CTX_free local_EVP_CIPHER_CTX_free
+#define EVP_CIPHER_CTX_new local_EVP_CIPHER_CTX_new
+#define EVP_CIPHER_CTX_reset local_EVP_CIPHER_CTX_reset
+#define EVP_PKEY_up_ref local_EVP_PKEY_up_ref
+#define HMAC_CTX_free local_HMAC_CTX_free
+#define HMAC_CTX_new local_HMAC_CTX_new
+#define OpenSSL_version_num local_OpenSSL_version_num
+#define RSA_get0_crt_params local_RSA_get0_crt_params
+#define RSA_get0_factors local_RSA_get0_factors
+#define RSA_get0_key local_RSA_get0_key
+#define RSA_meth_get_flags local_RSA_meth_get_flags
+#define RSA_set0_crt_params local_RSA_set0_crt_params
+#define RSA_set0_factors local_RSA_set0_factors
+#define RSA_set0_key local_RSA_set0_key
+#define SSL_get_state local_SSL_get_state
+#define X509_CRL_get0_nextUpdate local_X509_CRL_get0_nextUpdate
+#define X509_NAME_get0_der local_X509_NAME_get0_der
+#define X509_PUBKEY_get0_param local_X509_PUBKEY_get0_param
+#define X509_STORE_CTX_get0_cert local_X509_STORE_CTX_get0_cert
+#define X509_STORE_CTX_get0_untrusted local_X509_STORE_CTX_get0_untrusted
+#define X509_get0_notAfter local_X509_get0_notAfter
+#define X509_get0_notBefore local_X509_get0_notBefore
+#define X509_get0_pubkey_bitstr local_X509_get0_pubkey_bitstr
+#define X509_get0_tbs_sigalg local_X509_get0_tbs_sigalg
+#define X509_get_X509_PUBKEY local_X509_get_X509_PUBKEY
+#define X509_get_issuer_name local_X509_get_issuer_name
+#define X509_get_subject_name local_X509_get_subject_name
+#define X509_get_version local_X509_get_version
+#define X509_up_ref local_X509_up_ref
+
+#else // if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+#define NEED_OPENSSL_1_1 true
+
+#endif
 
 #endif // FEATURE_DISTRO_AGNOSTIC_SSL

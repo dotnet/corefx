@@ -1441,6 +1441,8 @@ done:
 }
 #endif // NEED_OPENSSL_1_0 */
 
+#ifdef NEED_OPENSSL_1_1
+
 static int32_t EnsureOpenSsl11Initialized()
 {
     // In OpenSSL 1.0 we call OPENSSL_add_all_algorithms_conf() and ERR_load_crypto_strings(),
@@ -1458,12 +1460,14 @@ static int32_t EnsureOpenSsl11Initialized()
     return 0;
 }
 
+#endif
+
 int32_t CryptoNative_EnsureOpenSslInitialized()
 {
     // If portable then decide which OpenSSL we are, and call the right one.
     // If 1.0, call the 1.0 one.
     // Otherwise call the 1.1 one.
-#ifdef HAVE_OPENSSL_1_0
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     return EnsureOpenSsl10Initialized();
 #else
     return EnsureOpenSsl11Initialized();

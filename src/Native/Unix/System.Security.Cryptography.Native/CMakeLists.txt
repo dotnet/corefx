@@ -17,6 +17,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 set(NATIVECRYPTO_SOURCES
+    apibridge.c
     openssl.c
     pal_asn1.c
     pal_bignum.c

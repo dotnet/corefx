@@ -2,6 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#include "opensslshim.h"
+#include "pal_crypto_types.h"
+#include "pal_types.h"
+
+#ifdef NEED_OPENSSL_1_0
+
+#include "apibridge.h"
+
 const ASN1_TIME* local_X509_get0_notBefore(const X509* x509)
 {
     if (x509 && x509->cert_info && x509->cert_info->validity)
@@ -22,7 +30,7 @@ const ASN1_TIME* local_X509_get0_notAfter(const X509* x509)
     return NULL;
 }
 
-const ASN1_TIME *local_X509_CRL_get0_nextUpdate(const X509_CRL *crl);
+const ASN1_TIME *local_X509_CRL_get0_nextUpdate(const X509_CRL *crl)
 {
     if (crl)
     {
@@ -47,33 +55,33 @@ X509_PUBKEY* local_X509_get_X509_PUBKEY(const X509* x509)
 {
     if (x509)
     {
-        return x509->key;
+        return x509->cert_info->key;
     }
 
     return NULL;
 }
 
 int32_t local_X509_PUBKEY_get0_param(
-    ASN1_OBJECT **palgOid,
-    const unsigned char **pkeyBytes,
-    int *pkeyBytesLen,
-    X509_ALGOR **palg,
+    ASN1_OBJECT** palgOid,
+    const uint8_t** pkeyBytes,
+    int* pkeyBytesLen,
+    X509_ALGOR** palg,
     X509_PUBKEY* pubkey)
 {
-    if (ppkalg)
+    if (palgOid)
     {
-        *ppkalg = pub->algor->algorithm;
+        *palgOid = pubkey->algor->algorithm;
     }
 
-    if (pk)
+    if (pkeyBytes)
     {
-        *pk = pub->public_key->data;
-        *ppklen = pub->public_key->length;
+        *pkeyBytes = pubkey->public_key->data;
+        *pkeyBytesLen = pubkey->public_key->length;
     }
 
-    if (pa)
+    if (palg)
     {
-        *pa = pub->algor;
+        *palg = pubkey->algor;
     }
 
     return 1;
@@ -141,7 +149,7 @@ X509_NAME* local_X509_get_subject_name(const X509* x509)
 
 long local_OpenSSL_version_num()
 {
-    return SSLeay();
+    return (long)SSLeay();
 }
 
 const DSA_METHOD* local_DSA_get_method(const DSA* dsa)
@@ -154,7 +162,7 @@ const DSA_METHOD* local_DSA_get_method(const DSA* dsa)
     return NULL;
 }
 
-const void local_DSA_get0_pqg(const DSA* dsa, const BIGNUM** p, const BIGNUM** q, const BIGNUM** g)
+void local_DSA_get0_pqg(const DSA* dsa, const BIGNUM** p, const BIGNUM** q, const BIGNUM** g)
 {
     if (!dsa)
     {
@@ -481,9 +489,10 @@ int32_t local_RSA_set0_crt_params(RSA* rsa, BIGNUM* dmp1, BIGNUM* dmq1, BIGNUM* 
     return 1;
 }
 
-OSSL_HANDSHAKE_STATE local_SSL_get_state()
+OSSL_HANDSHAKE_STATE local_SSL_get_state(SSL* ssl)
 {
-    return (OSSL_HANDSHAKE_STATE)SSL_state(ssl);
+    int state = SSL_state(ssl);
+    return (OSSL_HANDSHAKE_STATE)state;
 }
 
 X509Stack* local_X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx)
@@ -505,3 +514,5 @@ int32_t local_X509_up_ref(X509* x509)
 
     return 0;
 }
+
+#endif

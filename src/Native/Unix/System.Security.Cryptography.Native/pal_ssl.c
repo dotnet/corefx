@@ -32,7 +32,7 @@ void CryptoNative_EnsureLibSslInitialized()
     // If portable, call the 1.0 initializer when eeded.
     // If 1.0, call it statically.
     // In 1.1 no action is required, since EnsureOpenSslInitialized does both libraries.
-#ifdef HAVE_OPENSSL_1_0
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EnsureLibSsl10Initialized();
 #endif
 }
