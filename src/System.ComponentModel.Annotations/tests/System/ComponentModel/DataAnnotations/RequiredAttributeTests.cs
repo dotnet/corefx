@@ -15,6 +15,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(new RequiredAttribute() { AllowEmptyStrings = true }, string.Empty);
             yield return new TestCase(new RequiredAttribute() { AllowEmptyStrings = true }, " \t \r \n ");
             yield return new TestCase(new RequiredAttribute(), new object());
+            yield return new TestCase(new RequiredAttribute(), new List<string>() { "SomeString" });
+            yield return new TestCase(new RequiredAttribute() { AllowEmptyCollections = true }, new List<string>());
         }
 
         protected override IEnumerable<TestCase> InvalidValues()
@@ -22,6 +24,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(new RequiredAttribute(), null);
             yield return new TestCase(new RequiredAttribute() { AllowEmptyStrings = false }, string.Empty);
             yield return new TestCase(new RequiredAttribute() { AllowEmptyStrings = false }, " \t \r \n ");
+            yield return new TestCase(new RequiredAttribute() { AllowEmptyCollections = false }, new List<string>());
+            yield return new TestCase(new RequiredAttribute(), new List<string>());
         }
 
         [Fact]
@@ -29,10 +33,28 @@ namespace System.ComponentModel.DataAnnotations.Tests
         {
             var attribute = new RequiredAttribute();
             Assert.False(attribute.AllowEmptyStrings);
+            Assert.False(attribute.AllowEmptyCollections);
+
             attribute.AllowEmptyStrings = true;
             Assert.True(attribute.AllowEmptyStrings);
+            Assert.False(attribute.AllowEmptyCollections);
+
             attribute.AllowEmptyStrings = false;
             Assert.False(attribute.AllowEmptyStrings);
+            Assert.False(attribute.AllowEmptyCollections);
+
+            attribute.AllowEmptyCollections = true;
+            Assert.False(attribute.AllowEmptyStrings);
+            Assert.True(attribute.AllowEmptyCollections);
+
+            attribute.AllowEmptyCollections = false;
+            Assert.False(attribute.AllowEmptyStrings);
+            Assert.False(attribute.AllowEmptyCollections);
+
+            attribute.AllowEmptyCollections = true;
+            attribute.AllowEmptyStrings = true;
+            Assert.True(attribute.AllowEmptyStrings);
+            Assert.True(attribute.AllowEmptyCollections);
         }
     }
 }
