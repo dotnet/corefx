@@ -16,6 +16,27 @@ Imports Xunit
 
 Namespace Microsoft.VisualBasic.Tests
     Public NotInheritable Class FileIOTests
+        Sub New()
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While 'End While
+            Dim x As Integer = 1
+        End Sub
+        ReadOnly sourceData() As Char = {"a"c, "A"c, "b"c}
+        ReadOnly destData() As Char = {"x"c, "X"c, "y"c}
+        Private Function CreateTestFile(TestBase As FileIOTestBase, Optional TestFileNameWithPath As String = "") As String
+            If TestFileNameWithPath.Length = 0 Then
+                TestFileNameWithPath = TestBase.GetTestFilePath()
+            End If
+
+            ' Write and copy file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(TestFileNameWithPath))
+                sourceStream.Write(sourceData, 0, sourceData.Length)
+            End Using
+
+            Return TestFileNameWithPath
+        End Function
+
         <Fact>
         Public Shared Sub CombineBadPathTest_BaseDirectory_RelativePath()
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
@@ -28,9 +49,6 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
         <Fact>
         Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
-            'While (Not System.Diagnostics.Debugger.IsAttached)
-            '    System.Threading.Thread.Sleep(1000)
-            'End While
 
         End Sub
 
@@ -39,8 +57,6 @@ Namespace Microsoft.VisualBasic.Tests
             'While (Not System.Diagnostics.Debugger.IsAttached)
             '    System.Threading.Thread.Sleep(1000)
             'End While
-
-
         End Sub
 
         <Fact>
@@ -48,8 +64,6 @@ Namespace Microsoft.VisualBasic.Tests
             'While (Not System.Diagnostics.Debugger.IsAttached)
             '    System.Threading.Thread.Sleep(1000)
             'End While
-
-
         End Sub
 
         <Fact(Skip:="Not Implemented")>
@@ -63,12 +77,10 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteFalse()
+        Public Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteFalse()
             Dim TestBase As New FileIOTestBase
             Dim testFileSource As String = TestBase.GetTestFilePath()
             Dim testFileDest As String = TestBase.GetTestFilePath()
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
-            Dim destData() As Char = {"x"c, "X"c, "y"c}
 
             ' Write and copy file
             Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
@@ -89,12 +101,10 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteTrue()
+        Public Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteTrue()
             Dim TestBase As New FileIOTestBase
             Dim testFileSource As String = TestBase.GetTestFilePath()
             Dim testFileDest As String = TestBase.GetTestFilePath()
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
-            Dim destData() As Char = {"x"c, "X"c, "y"c}
 
             ' Write and copy file
             Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
@@ -114,12 +124,10 @@ Namespace Microsoft.VisualBasic.Tests
             TestBase.Dispose()
         End Sub
         <Fact>
-        Public Shared Sub CopyFile_SourceFileName_DestinationFileName()
+        Public Sub CopyFile_SourceFileName_DestinationFileName()
             Dim TestBase As New FileIOTestBase
             Dim testFileSource As String = TestBase.GetTestFilePath()
             Dim testFileDest As String = TestBase.GetTestFilePath()
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
-            Dim destData() As Char = {"x"c, "X"c, "y"c}
 
             ' Write and copy file
             Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
@@ -191,22 +199,13 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub DeleteDirectory_Directory_DeleteAllContents()
-            While (Not System.Diagnostics.Debugger.IsAttached)
-                System.Threading.Thread.Sleep(1000)
-            End While
+        Public Sub DeleteDirectory_Directory_DeleteAllContents()
             Dim TestBase As New FileIOTestBase
             Dim TestDirectory As String = TestBase.TestDirectory()
             Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
-            FileSystem.CreateDirectory(FullPathToNewDirectory)
+            IO.Directory.CreateDirectory(FullPathToNewDirectory)
             Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-            Dim testFileSource As String = IO.Path.Combine(FullPathToNewDirectory, "Test")
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
-
-            ' Write file
-            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                sourceStream.Write(sourceData, 0, sourceData.Length)
-            End Using
+            Dim testFileSource As String = CreateTestFile(TestBase, IO.Path.Combine(FullPathToNewDirectory, "TestFile"))
             Assert.True(IO.File.Exists(testFileSource))
             FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.DeleteAllContents)
             Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
@@ -214,22 +213,14 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub DeleteDirectory_Directory_ThrowIfDirectoryNonEmpty()
-            While (Not System.Diagnostics.Debugger.IsAttached)
-                System.Threading.Thread.Sleep(1000)
-            End While
+        Public Sub DeleteDirectory_Directory_ThrowIfDirectoryNonEmpty()
             Dim TestBase As New FileIOTestBase
             Dim TestDirectory As String = TestBase.TestDirectory()
             Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
             FileSystem.CreateDirectory(FullPathToNewDirectory)
             Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-            Dim testFileSource As String = IO.Path.Combine(FullPathToNewDirectory, "Test")
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+            Dim testFileSource As String = CreateTestFile(TestBase, IO.Path.Combine(FullPathToNewDirectory, "TestFile"))
 
-            ' Write file
-            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                sourceStream.Write(sourceData, 0, sourceData.Length)
-            End Using
             Assert.True(IO.File.Exists(testFileSource))
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.ThrowIfDirectoryNonEmpty))
             Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
@@ -247,15 +238,10 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub DeleteFile_File()
+        Public Sub DeleteFile_File()
             Dim TestBase As New FileIOTestBase
-            Dim testFileSource As String = TestBase.GetTestFilePath()
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+            Dim testFileSource As String = CreateTestFile(TestBase)
 
-            ' Write and copy file
-            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                sourceStream.Write(sourceData, 0, sourceData.Length)
-            End Using
             Assert.True(IO.File.Exists(testFileSource))
             FileSystem.DeleteFile(testFileSource)
             Assert.False(IO.File.Exists(testFileSource))
@@ -275,18 +261,22 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         Public Shared Sub DirectoryExists_directory()
             Dim TestBase As New FileIOTestBase
-
             Dim TestDirectory As String = TestBase.TestDirectory()
             Assert.True(FileSystem.DirectoryExists(TestDirectory))
-            Assert.False(FileSystem.DirectoryExists(IO.Path.Combine(TestDirectory, "Test1")))
+            Assert.False(FileSystem.DirectoryExists(IO.Path.Combine(TestDirectory, "NewDirectory")))
             TestBase.Dispose()
         End Sub
 
         <Fact>
-        Public Shared Sub FileExists_File()
-
+        Public Sub FileExists_File()
+            Dim TestBase As New FileIOTestBase
+            Dim testFileSource As String = CreateTestFile(TestBase)
+            Assert.True(FileSystem.FileExists(testFileSource))
+            FileSystem.FileExists(testFileSource)
+            IO.File.Delete(testFileSource)
+            Assert.False(FileSystem.FileExists(testFileSource))
+            TestBase.Dispose()
         End Sub
-
         <Fact>
         Public Shared Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchOption_FileWildcards()
 
