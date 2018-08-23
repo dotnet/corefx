@@ -2258,6 +2258,31 @@ namespace System
         public Utf8String TrimEnd() => throw null;
         public Utf8String TrimStart() => throw null;
     }
+    public readonly partial struct Utf8StringSegment : IEquatable<Utf8StringSegment>
+    {
+        private readonly object _dummy;
+        public Utf8StringSegment(Utf8String value) => throw null;
+        public Utf8StringSegment(Utf8String value, int offset, int count) => throw null;
+        public static implicit operator Utf8StringSegment(Utf8String value) => throw null;
+        public static bool operator ==(Utf8StringSegment a, Utf8StringSegment b) => throw null;
+        public static bool operator !=(Utf8StringSegment a, Utf8StringSegment b) => throw null;
+        public bool IsEmpty => throw null;
+        public int Length => throw null;
+        public override bool Equals(object obj) => throw null;
+        public bool Equals(Utf8StringSegment value) => throw null;
+        public static bool Equals(Utf8StringSegment a, Utf8StringSegment b, StringComparison comparisonType) => throw null;
+        public Utf8String GetBuffer(out int offset, out int length) => throw null;
+        public override int GetHashCode() => throw null;
+        public int GetHashCode(StringComparison comparisonType) => throw null;
+        public bool IsEmptyOrWhiteSpace() => throw null;
+        public Utf8StringSegment Substring(int startIndex) => throw null;
+        public Utf8StringSegment Substring(int startIndex, int length) => throw null;
+        public override string ToString() => throw null;
+        public Utf8String ToUtf8String() => throw null;
+        public Utf8StringSegment Trim() => throw null;
+        public Utf8StringSegment TrimEnd() => throw null;
+        public Utf8StringSegment TrimStart() => throw null;
+    }
     public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string>, System.IConvertible, System.IEquatable<string>
     {
         public static readonly string Empty;
