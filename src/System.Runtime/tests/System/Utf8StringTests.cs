@@ -10,6 +10,9 @@ namespace System.Tests
 {
     public static unsafe class Utf8StringTests
     {
+        // whitespace chars
+        private const string AllWhitespaceChars = "\u0009\u000A\u000B\u000C\u000D\u0020\u0085\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000";
+
         [Fact]
         public static void Empty_HasLengthZero()
         {
@@ -74,6 +77,26 @@ namespace System.Tests
         public static void IsNullOrEmpty_Null_ReturnsTrue()
         {
             Assert.True(Utf8String.IsNullOrEmpty(null));
+        }
+
+        [Theory]
+        [InlineData("", true)]
+        [InlineData("not whitespace", false)]
+        [InlineData("   not whitespace   ", false)]
+        [InlineData("    ", true)]
+        [InlineData(AllWhitespaceChars, true)]
+        public static void IsNullOrWhiteSpace_And_IsEmptyOrWhiteSpace(string value, bool expectedIsNullOrWhiteSpace)
+        {
+            var utf8 = new Utf8String(value);
+
+            Assert.Equal(expectedIsNullOrWhiteSpace, Utf8String.IsNullOrWhiteSpace(utf8));
+            Assert.Equal(expectedIsNullOrWhiteSpace, Utf8String.IsEmptyOrWhiteSpace(utf8.AsSpan()));
+        }
+
+        [Fact]
+        public static void IsNullOrWhiteSpace_Null_ReturnsTrue()
+        {
+            Assert.True(Utf8String.IsNullOrWhiteSpace(null));
         }
 
         [Fact]
@@ -187,21 +210,18 @@ namespace System.Tests
                 Utf8String.Literal("Hello!"), Utf8String.Literal("Hello!"), Utf8String.Literal("Hello!"), Utf8String.Literal("Hello!")
             };
 
-            // whitespace chars
-            const string allWhitespaceChars = "\u0009\u000A\u000B\u000C\u000D\u0020\u0085\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000";
-
             // data that's only whitespace chars
             yield return new object[]
             {
-                Utf8String.Literal(allWhitespaceChars), Utf8String.Empty, Utf8String.Empty, Utf8String.Empty
+                Utf8String.Literal(AllWhitespaceChars), Utf8String.Empty, Utf8String.Empty, Utf8String.Empty
             };
 
             // whitespace chars on either side with non-whitespace in the middle
             yield return new object[]
             {
-                Utf8String.Literal(allWhitespaceChars + "Hello there!" + allWhitespaceChars),
-                Utf8String.Literal("Hello there!" + allWhitespaceChars),
-                Utf8String.Literal(allWhitespaceChars + "Hello there!"),
+                Utf8String.Literal(AllWhitespaceChars + "Hello there!" + AllWhitespaceChars),
+                Utf8String.Literal("Hello there!" + AllWhitespaceChars),
+                Utf8String.Literal(AllWhitespaceChars + "Hello there!"),
                 Utf8String.Literal("Hello there!")
             };
 

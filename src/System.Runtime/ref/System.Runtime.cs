@@ -2250,7 +2250,9 @@ namespace System
         public static int GetHashCode(ReadOnlySpan<byte> value, StringComparison comparisonType) => throw null;
         public ref readonly byte GetPinnableReference() => throw null;
         public static Utf8String Literal(string value) => throw null;
+        public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
+        public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
