@@ -4,8 +4,10 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using Microsoft.Win32.SafeHandles;
@@ -388,6 +390,12 @@ internal static partial class Interop
             int cbTargetName,
             out int osStatus);
 
+        [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslCtxSetAlpnProtos")]
+        internal static extern int SslCtxSetAlpnProtos(SafeSslHandle ctx, IntPtr protos, int len, out int osStatus);
+
+        [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslGetAlpnSelected")]
+        internal static extern int SslGetAlpnSelected(SafeSslHandle ssl, out IntPtr protocol, out int len);
+
         [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslHandshake")]
         internal static extern PAL_TlsHandshakeState SslHandshake(SafeSslHandle sslHandle);
 
@@ -567,6 +575,60 @@ internal static partial class Interop
 
             Debug.Fail($"AppleCryptoNative_SslSetTargetName returned {result}");
             throw new SslException();
+        }
+
+        internal static unsafe void SslCtxSetAlpnProtos(SafeSslHandle ctx, List<SslApplicationProtocol> protocols)
+        {
+            byte[] buffer = ConvertAlpnProtocolListToByteArray(protocols);
+            int osStatus;
+
+            fixed (byte* b = buffer)
+            {
+                int result = SslCtxSetAlpnProtos(ctx, (IntPtr)b, buffer.Length, out osStatus);
+                if (result != 1)
+                {
+                    throw CreateExceptionForOSStatus(osStatus);
+                }
+            }
+        }
+
+        internal static byte[] SslGetAlpnSelected(SafeSslHandle ssl)
+        {
+            IntPtr protocol;
+            int len;
+            SslGetAlpnSelected(ssl, out protocol, out len);
+
+            if (len == 0)
+                return null;
+
+            byte[] result = new byte[len];
+            Marshal.Copy(protocol, result, 0, len);
+            return result;
+        }
+
+        internal static byte[] ConvertAlpnProtocolListToByteArray(List<SslApplicationProtocol> applicationProtocols)
+        {
+            int protocolSize = 0;
+            foreach (SslApplicationProtocol protocol in applicationProtocols)
+            {
+                if (protocol.Protocol.Length == 0 || protocol.Protocol.Length > byte.MaxValue)
+                {
+                    throw new ArgumentException(SR.net_ssl_app_protocols_invalid, nameof(applicationProtocols));
+                }
+
+                protocolSize += protocol.Protocol.Length + 1;
+            }
+
+            byte[] buffer = new byte[protocolSize];
+            var offset = 0;
+            foreach (SslApplicationProtocol protocol in applicationProtocols)
+            {
+                buffer[offset++] = (byte)(protocol.Protocol.Length);
+                protocol.Protocol.Span.CopyTo(new Span<byte>(buffer).Slice(offset));
+                offset += protocol.Protocol.Length;
+            }
+
+            return buffer;
         }
 
         public static bool SslCheckHostnameMatch(SafeSslHandle handle, string hostName, DateTime notBefore)

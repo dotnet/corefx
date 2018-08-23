@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Security.Tests
 {
@@ -23,6 +24,14 @@ namespace System.Net.Security.Tests
     public class SslStreamAlpnTests
     {
         private static bool BackendSupportsAlpn => PlatformDetection.SupportsAlpn;
+        readonly ITestOutputHelper _output;
+        public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
+
+        public SslStreamAlpnTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
 
         private async Task DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
         {
@@ -177,6 +186,38 @@ namespace System.Net.Security.Tests
             finally
             {
                 listener.Stop();
+            }
+        }
+
+        [OuterLoop("Uses external server")]
+        [PlatformSpecific(TestPlatforms.OSX)]
+        [Theory]
+        [MemberData(nameof(Http2Servers))]
+        public async Task SslStream_OSX_Alpn_Success(Uri server)
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                try
+                {
+                    await client.ConnectAsync(server.Host, server.Port);
+                    using (SslStream clientStream = new SslStream(client.GetStream(), leaveInnerStreamOpen: false))
+                    {
+                        SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions
+                        {
+                            ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http2 ,  SslApplicationProtocol.Http11 },
+                            TargetHost =  server.Host
+                        };
+
+                        await clientStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);
+                        Assert.Equal("h2", clientStream.NegotiatedApplicationProtocol.ToString());
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Failures to connect do not cause test failure.
+                    _output.WriteLine("Unable to connect: {0}", e);
+                }
+
             }
         }
 

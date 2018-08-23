@@ -4,6 +4,16 @@
 
 #include "pal_ssl.h"
 
+// This would come from private header  <Security/SecureTransportPriv.h>
+// 10.13.4 introduced public API but linking would fail on all prior versions.
+// This can be revisited after we drop support for 10.12.
+// Also note, this works only on client side in coretls-155 and lower.
+
+const void * SSLGetALPNData(SSLContextRef contex, size_t *length);
+OSStatus SSLSetALPNData(SSLContextRef context, const void *data, size_t length);
+
+// end of private ALPN.
+
 SSLContextRef AppleCryptoNative_SslCreateContext(int32_t isServer)
 {
     if (isServer != 0 && isServer != 1)
@@ -151,6 +161,42 @@ int32_t AppleCryptoNative_SslSetTargetName(SSLContextRef sslContext,
     }
 
     return *pOSStatus == noErr;
+}
+
+DLLEXPORT int32_t AppleCryptoNative_SslCtxSetAlpnProtos(SSLContextRef sslContext,
+                                                     const uint8_t* protocols,
+                                                     int32_t len,
+                                                     int32_t* pOSStatus)
+{
+    if (sslContext == NULL || protocols == NULL || pOSStatus == NULL || pOSStatus == NULL)
+        return -1;
+
+    *pOSStatus = SSLSetALPNData(sslContext, protocols, (size_t)len);
+
+    return *pOSStatus == noErr;
+}
+
+DLLEXPORT int32_t AppleCryptoNative_SslGetAlpnSelected(SSLContextRef sslContext, const uint8_t** protocol, uint32_t* len)
+{
+    size_t  alpnLen = 0;
+    const uint8_t * ext;
+    if (sslContext == NULL || protocol == NULL || len == NULL)
+        return -1;
+
+    ext = SSLGetALPNData(sslContext, &alpnLen);
+
+    if (ext == NULL ||  alpnLen < 1)
+    {
+        *len = 0;
+        *protocol = NULL;
+        return 0;
+    }
+
+    // Get protocol data from TLS extension
+    *len = (uint32_t)alpnLen - 1;
+    *protocol = ext + 1;
+
+    return 1;
 }
 
 int32_t
