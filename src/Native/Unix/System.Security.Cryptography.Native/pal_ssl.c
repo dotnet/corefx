@@ -17,11 +17,24 @@ c_static_assert(PAL_SSL_ERROR_ZERO_RETURN == SSL_ERROR_ZERO_RETURN);
 
 int32_t CryptoNative_EnsureOpenSslInitialized(void);
 
+#ifdef NEED_OPENSSL_1_0
+static void EnsureLibSsl10Initialized()
+{
+    SSL_library_init();
+    SSL_load_error_strings();
+}
+#endif
+
 void CryptoNative_EnsureLibSslInitialized()
 {
     CryptoNative_EnsureOpenSslInitialized();
-    SSL_library_init();
-    SSL_load_error_strings();
+
+    // If portable, call the 1.0 initializer when eeded.
+    // If 1.0, call it statically.
+    // In 1.1 no action is required, since EnsureOpenSslInitialized does both libraries.
+#ifdef HAVE_OPENSSL_1_0
+    EnsureLibSsl10Initialized();
+#endif
 }
 
 const SSL_METHOD* CryptoNative_SslV2_3Method()
@@ -81,6 +94,9 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
         return;
     }
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    unsigned
+#endif
     long protocolOptions = 0;
 
     if ((protocols & PAL_SSL_SSL2) != PAL_SSL_SSL2)
@@ -398,7 +414,8 @@ int32_t CryptoNative_GetSslConnectionInfo(SSL* ssl,
         goto err;
     }
 
-    *dataKeySize = cipher->alg_bits;
+    SSL_CIPHER_get_bits(cipher, dataKeySize);
+
     if (GetSslConnectionInfoFromDescription(cipher, dataCipherAlg, keyExchangeAlg, dataHashAlg, hashKeySize))
     {
         return 1;
@@ -455,7 +472,7 @@ int32_t CryptoNative_SslDoHandshake(SSL* ssl)
 
 int32_t CryptoNative_IsSslStateOK(SSL* ssl)
 {
-    return SSL_state(ssl) == SSL_ST_OK;
+    return SSL_get_state(ssl) == TLS_ST_OK;
 }
 
 X509* CryptoNative_SslGetPeerCertificate(SSL* ssl)

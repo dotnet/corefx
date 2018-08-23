@@ -7,7 +7,7 @@ add_compile_options(-Wno-cast-align)
 add_compile_options(-Wno-reserved-id-macro)
 add_compile_options(-Wno-documentation)
 
-add_definitions(-DPIC=1)
+add_definitions(-DPIC=1 -DOPENSSL_API_COMPAT=0x10100000L)
 
 if(CMAKE_STATIC_LIB_LINK)
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
