@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Runtime.InteropServices.Tests
 {
-    public class GetFunctionPointerForDelegateTests
+    public partial class GetFunctionPointerForDelegateTests
     {
         [Fact]
         public void GetFunctionPointerForDelegate_NormalDelegateNonGeneric_ReturnsExpected()
@@ -30,6 +30,7 @@ namespace System.Runtime.InteropServices.Tests
             Delegate original = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(original);
             Delegate d = Marshal.GetDelegateForFunctionPointer<NonGenericDelegate>(ptr);
+            GC.KeepAlive(original);
 
             IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(d);
             IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(d);
@@ -57,7 +58,8 @@ namespace System.Runtime.InteropServices.Tests
             Delegate original = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(original);
             NonGenericDelegate d = Marshal.GetDelegateForFunctionPointer<NonGenericDelegate>(ptr);
-
+            GC.KeepAlive(original);
+            
             IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(d);
             IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(d);
             Assert.NotEqual(IntPtr.Zero, pointer1);
@@ -84,26 +86,6 @@ namespace System.Runtime.InteropServices.Tests
             MethodInfo targetMethod = typeof(GetFunctionPointerForDelegateTests).GetMethod(nameof(Method));
             Delegate d = targetMethod.CreateDelegate(typeof(GenericDelegate<string>));
             AssertExtensions.Throws<ArgumentException>("delegate", () => Marshal.GetFunctionPointerForDelegate(d));
-        }
-
-        [Fact]
-        public void GetFunctionPointerForDelegate_DelegateCollectible_ThrowsNotSupportedException()
-        {
-            MethodInfo targetMethod = typeof(GetFunctionPointerForDelegateTests).GetMethod(nameof(Method));
-
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
-            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type", TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof(MulticastDelegate));
-            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(IntPtr) });
-            constructorBuilder.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-
-            MethodBuilder methodBuilder = typeBuilder.DefineMethod("Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, targetMethod.ReturnType, targetMethod.GetParameters().Select(p => p.ParameterType).ToArray());
-            methodBuilder.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-
-            Type type = typeBuilder.CreateType();
-
-            Delegate d = targetMethod.CreateDelegate(type);
-            Assert.Throws<NotSupportedException>(() => Marshal.GetFunctionPointerForDelegate(d));
         }
 
         public delegate void GenericDelegate<T>(T t);

@@ -4,26 +4,16 @@
 
 using System.Collections.Generic;
 using System.Xml;
-using System.Collections.ObjectModel;
-using System.Xml.Serialization;
-using System.Runtime.Serialization;
-using System.Runtime.CompilerServices;
 
 namespace System.ServiceModel.Syndication
 {
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationLink : IExtensibleSyndicationObject
     {
-        private Uri _baseUri;
         private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
         private long _length;
-        private string _mediaType;
-        private string _relationshipType;
-        private string _title;
-        private Uri _uri;
 
-        public SyndicationLink(Uri uri)
-            : this(uri, null, null, null, 0)
+        public SyndicationLink(Uri uri) : this(uri, null, null, null, 0)
         {
         }
 
@@ -33,17 +23,16 @@ namespace System.ServiceModel.Syndication
             {
                 throw new ArgumentOutOfRangeException(nameof(length));
             }
-            _baseUri = null;
-            _uri = uri;
-            _title = title;
-            _relationshipType = relationshipType;
-            _mediaType = mediaType;
 
+            BaseUri = null;
+            Uri = uri;
+            Title = title;
+            RelationshipType = relationshipType;
+            MediaType = mediaType;
             _length = length;
         }
 
-        public SyndicationLink()
-            : this(null, null, null, null, 0)
+        public SyndicationLink() : this(null, null, null, null, 0)
         {
         }
 
@@ -55,33 +44,23 @@ namespace System.ServiceModel.Syndication
             }
 
             _length = source._length;
-            _mediaType = source._mediaType;
-            _relationshipType = source._relationshipType;
-            _title = source._title;
-            _baseUri = source._baseUri;
-            _uri = source._uri;
+            MediaType = source.MediaType;
+            RelationshipType = source.RelationshipType;
+            Title = source.Title;
+            BaseUri = source.BaseUri;
+            Uri = source.Uri;
             _extensions = source._extensions.Clone();
         }
 
-        public Dictionary<XmlQualifiedName, string> AttributeExtensions
-        {
-            get { return _extensions.AttributeExtensions; }
-        }
+        public Dictionary<XmlQualifiedName, string> AttributeExtensions => _extensions.AttributeExtensions;
 
-        public Uri BaseUri
-        {
-            get { return _baseUri; }
-            set { _baseUri = value; }
-        }
+        public Uri BaseUri { get; set; }
 
-        public SyndicationElementExtensionCollection ElementExtensions
-        {
-            get { return _extensions.ElementExtensions; }
-        }
+        public SyndicationElementExtensionCollection ElementExtensions => _extensions.ElementExtensions;
 
         public long Length
         {
-            get { return _length; }
+            get => _length;
             set
             {
                 if (value < 0)
@@ -93,29 +72,13 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        public string MediaType
-        {
-            get { return _mediaType; }
-            set { _mediaType = value; }
-        }
+        public string MediaType { get; set; }
 
-        public string RelationshipType
-        {
-            get { return _relationshipType; }
-            set { _relationshipType = value; }
-        }
+        public string RelationshipType { get; set; }
 
-        public string Title
-        {
-            get { return _title; }
-            set { _title = value; }
-        }
+        public string Title { get; set; }
 
-        public Uri Uri
-        {
-            get { return _uri; }
-            set { _uri = value; }
-        }
+        public Uri Uri { get; set; }
 
         public static SyndicationLink CreateAlternateLink(Uri uri)
         {
@@ -142,22 +105,19 @@ namespace System.ServiceModel.Syndication
             return new SyndicationLink(uri, Atom10Constants.SelfTag, null, mediaType, 0);
         }
 
-        public virtual SyndicationLink Clone()
-        {
-            return new SyndicationLink(this);
-        }
+        public virtual SyndicationLink Clone() => new SyndicationLink(this);
 
         public Uri GetAbsoluteUri()
         {
-            if (_uri != null)
+            if (Uri != null)
             {
-                if (_uri.IsAbsoluteUri)
+                if (Uri.IsAbsoluteUri)
                 {
-                    return _uri;
+                    return Uri;
                 }
-                else if (_baseUri != null)
+                else if (BaseUri != null)
                 {
-                    return new Uri(_baseUri, _uri);
+                    return new Uri(BaseUri, Uri);
                 }
                 else
                 {
