@@ -74,6 +74,9 @@
     <Compile Include="$(CommonPath)\System\Net\ByteOrder.cs">
       <Link>ProductionCode\Common\System\Net\ByteOrder.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\Common\src\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>ProductionCode\Common\System\Net\HttpKnownHeaderNames.cs</Link>
     </Compile>
