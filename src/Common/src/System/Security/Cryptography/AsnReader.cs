@@ -1124,7 +1124,7 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(rented.AsSpan(0, dataLength));
+                rented.AsSpan(0, dataLength).Clear();
                 ArrayPool<byte>.Shared.Return(rented);
             }
         }
@@ -1676,7 +1676,7 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(rented.AsSpan(0, dataLength));
+                rented.AsSpan(0, dataLength).Clear();
                 ArrayPool<byte>.Shared.Return(rented);
             }
         }
