@@ -35,7 +35,16 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_Overwrite()
+        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteFalse()
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
+
+
+        End Sub
+
+        <Fact>
+        Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteTrue()
             'While (Not System.Diagnostics.Debugger.IsAttached)
             '    System.Threading.Thread.Sleep(1000)
             'End While
@@ -51,32 +60,6 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact(Skip:="Not Implemented")>
         Public Shared Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
 
-        End Sub
-
-        <Fact>
-        Public Shared Sub CopyFile_FileSourceFileName_DestinationFileName_Overwrite()
-            Dim TestBase As New FileIOTestBase
-            Dim testFileSource As String = TestBase.GetTestFilePath()
-            Dim testFileDest As String = TestBase.GetTestFilePath()
-            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
-            Dim destData() As Char = {"x"c, "X"c, "y"c}
-
-            ' Write and copy file
-            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
-                    sourceStream.Write(sourceData, 0, sourceData.Length)
-                    destStream.Write(destData, 0, destData.Length)
-                End Using
-            End Using
-            FileSystem.CopyFile(testFileSource, testFileDest, True)
-
-            ' Ensure copy transferred written data
-            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
-                Dim readData(sourceData.Length - 1) As Char
-                stream.Read(readData, 0, sourceData.Length)
-                Assert.Equal(sourceData, readData)
-            End Using
-            TestBase.Dispose()
         End Sub
 
         <Fact>
@@ -105,6 +88,31 @@ Namespace Microsoft.VisualBasic.Tests
             TestBase.Dispose()
         End Sub
 
+        <Fact>
+        Public Shared Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteTrue()
+            Dim TestBase As New FileIOTestBase
+            Dim testFileSource As String = TestBase.GetTestFilePath()
+            Dim testFileDest As String = TestBase.GetTestFilePath()
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+            Dim destData() As Char = {"x"c, "X"c, "y"c}
+
+            ' Write and copy file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                    sourceStream.Write(sourceData, 0, sourceData.Length)
+                    destStream.Write(destData, 0, destData.Length)
+                End Using
+            End Using
+            FileSystem.CopyFile(testFileSource, testFileDest, True)
+
+            ' Ensure copy transferred written data
+            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
+                Dim readData(sourceData.Length - 1) As Char
+                stream.Read(readData, 0, sourceData.Length)
+                Assert.Equal(sourceData, readData)
+            End Using
+            TestBase.Dispose()
+        End Sub
         <Fact>
         Public Shared Sub CopyFile_SourceFileName_DestinationFileName()
             Dim TestBase As New FileIOTestBase
@@ -166,18 +174,68 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub CurrentDirectoryGetSet()
+        Public Shared Sub CurrentDirectoryGet()
+            Dim CurrentDirectory As String = IO.Directory.GetCurrentDirectory()
+            Assert.Equal(FileSystem.CurrentDirectory, CurrentDirectory)
+        End Sub
+
+        <Fact>
+        Public Shared Sub CurrentDirectorySet()
+            Dim SavedCurrentDirectory As String = IO.Directory.GetCurrentDirectory()
+            Dim TestBase As New FileIOTestBase
+            FileSystem.CurrentDirectory = TestBase.TestDirectory
+            Assert.Equal(FileSystem.CurrentDirectory, TestBase.TestDirectory)
+            FileSystem.CurrentDirectory = SavedCurrentDirectory
+            Assert.Equal(FileSystem.CurrentDirectory, SavedCurrentDirectory)
+            TestBase.Dispose()
+        End Sub
+
+        <Fact>
+        Public Shared Sub DeleteDirectory_Directory_DeleteAllContents()
             While (Not System.Diagnostics.Debugger.IsAttached)
                 System.Threading.Thread.Sleep(1000)
             End While
+            Dim TestBase As New FileIOTestBase
+            Dim TestDirectory As String = TestBase.TestDirectory()
+            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
+            FileSystem.CreateDirectory(FullPathToNewDirectory)
+            Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+            Dim testFileSource As String = IO.Path.Combine(FullPathToNewDirectory, "Test")
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
 
-            Dim c As String = FileSystem.CurrentDirectory
+            ' Write file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                sourceStream.Write(sourceData, 0, sourceData.Length)
+            End Using
+            Assert.True(IO.File.Exists(testFileSource))
+            FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.DeleteAllContents)
+            Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
+            TestBase.Dispose()
         End Sub
+
         <Fact>
-        Public Shared Sub DeleteDirectory_Directory_DeleteDirectoryOption()
+        Public Shared Sub DeleteDirectory_Directory_ThrowIfDirectoryNonEmpty()
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
+            Dim TestBase As New FileIOTestBase
+            Dim TestDirectory As String = TestBase.TestDirectory()
+            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
+            FileSystem.CreateDirectory(FullPathToNewDirectory)
+            Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+            Dim testFileSource As String = IO.Path.Combine(FullPathToNewDirectory, "Test")
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
 
+            ' Write file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                sourceStream.Write(sourceData, 0, sourceData.Length)
+            End Using
+            Assert.True(IO.File.Exists(testFileSource))
+            Assert.Throws(Of IO.IOException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.ThrowIfDirectoryNonEmpty))
+            Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+            Assert.True(IO.File.Exists(testFileSource))
+            TestBase.Dispose()
         End Sub
-
         <Fact(Skip:="Not Implemented")>
         Public Shared Sub DeleteDirectory_Directory_UIOption_RecycleOption()
 
@@ -190,6 +248,18 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Shared Sub DeleteFile_File()
+            Dim TestBase As New FileIOTestBase
+            Dim testFileSource As String = TestBase.GetTestFilePath()
+            Dim sourceData() As Char = {"a"c, "A"c, "b"c}
+
+            ' Write and copy file
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                sourceStream.Write(sourceData, 0, sourceData.Length)
+            End Using
+            Assert.True(IO.File.Exists(testFileSource))
+            FileSystem.DeleteFile(testFileSource)
+            Assert.False(IO.File.Exists(testFileSource))
+            TestBase.Dispose()
         End Sub
 
         <Fact(Skip:="Not Implemented")>
@@ -204,7 +274,12 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Shared Sub DirectoryExists_directory()
+            Dim TestBase As New FileIOTestBase
 
+            Dim TestDirectory As String = TestBase.TestDirectory()
+            Assert.True(FileSystem.DirectoryExists(TestDirectory))
+            Assert.False(FileSystem.DirectoryExists(IO.Path.Combine(TestDirectory, "Test1")))
+            TestBase.Dispose()
         End Sub
 
         <Fact>

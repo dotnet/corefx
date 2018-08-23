@@ -947,6 +947,9 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Use DirectoryInfo.GetFiles and GetDirectories (which call FindFirstFile) so that we always have permission.
         '''</remarks>
         Private Shared Function GetLongPath(ByVal FullPath As String) As String
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
             Debug.Assert(FullPath.Length = 0 AndAlso IO.Path.IsPathRooted(FullPath), "Must be full path!!!")
 
             Try
