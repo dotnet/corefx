@@ -40,8 +40,8 @@
     <Compile Include="ProcessStreamReadTests.netcoreapp.cs" />
     <Compile Include="ProcessTests.netcoreapp.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="ProcessTests.netcoreappNonUap.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <Compile Include="ProcessTests.Uap.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
