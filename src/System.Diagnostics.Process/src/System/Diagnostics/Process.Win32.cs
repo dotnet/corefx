@@ -341,5 +341,30 @@ namespace System.Diagnostics
             }
             return idle;
         }
+
+        /// <summary>Checks whether the argument is a direct child of this process.</summary>
+        /// <remarks>
+        /// A child process is a process which has this process's id as its parent process id and which started after this process did.
+        /// </remakrs>
+        private bool IsParentOf(Process possibleChildProcess) =>
+            StartTime < possibleChildProcess.StartTime
+            && Id == possibleChildProcess.GetParentProcessId();
+
+        /// <summary>
+        /// Attempts to get the process's parent process id.
+        /// </summary>
+        private unsafe int? GetParentProcessId()
+        {
+            // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
+            // For now just return null and worst case we will not kill some children.
+            Interop.NtDll.PROCESS_BASIC_INFORMATION info = default;
+
+            if (Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, &info, (uint)sizeof(Interop.NtDll.PROCESS_BASIC_INFORMATION), out _) == 0)
+            {
+                return (int)info.InheritedFromUniqueProcessId;
+            }
+
+            return null;
+        }
     }
 }
