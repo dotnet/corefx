@@ -10,7 +10,7 @@ We recommend using [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) 
 
 ## Defining your benchmark
 
-See [BenchmarkDotNet](http://benchmarkdotnet.org/Guides/GettingStarted.htm) documentation -- minimally you need to adorn a public method with the `[Benchmark]` attribute but there are many other ways to customize what is done such as using parameter sets or setup/cleanup methods. Of course, you'll want to bracket just the relevant code in your benchmark, ensure there are sufficient iterations that you minimise noise, as well as leaving the machine otherwise idle while you measure.
+See [BenchmarkDotNet](https://benchmarkdotnet.org/articles/guides/getting-started.html) documentation -- minimally you need to adorn a public method with the `[Benchmark]` attribute but there are many other ways to customize what is done such as using parameter sets or setup/cleanup methods. Of course, you'll want to bracket just the relevant code in your benchmark, ensure there are sufficient iterations that you minimise noise, as well as leaving the machine otherwise idle while you measure.
 
 # Benchmarking local CoreFX builds
 
@@ -18,7 +18,7 @@ Since `0.11.1` BenchmarkDotNet knows how to run benchmarks with CoreRun. So you 
 
     dotnet run -c Release -f netcoreapp2.1 -- -f *MyBenchmarkName* --coreRun "C:\Projects\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9\CoreRun.exe"
 
-**Hint:** If you are curious to know what BDN does internally you just need to apply `[KeepBenchmarkFiles]` attribute to your class or set `KeepBenchmarkFiles = true` in your config file. After runing the benchmarks you can find the auto-generated files in `%pathToBenchmarkApp\bin\Release\$TFM\` folder.
+**Hint:** If you are curious to know what BDN does internally you just need to apply `[KeepBenchmarkFiles]` attribute to your class or set `KeepBenchmarkFiles = true` in your config file. After running the benchmarks you can find the auto-generated files in `%pathToBenchmarkApp\bin\Release\$TFM\` folder.
 
 The alternative is to use `CoreRunToolchain` from code level:
 
@@ -61,7 +61,7 @@ After that, you should be able to find `CoreRun.exe` in a location similar to:
 2. Create a new .NET Core console app using your favorite IDE
 3. Install BenchmarkDotNet (0.11.1+)
 4. Define the benchmarks
-5. Run the benchmarks using `--coreRun` from the fist step. Save the results in a dedicated folder.
+5. Run the benchmarks using `--coreRun` from the first step. Save the results in a dedicated folder.
 
         dotnet run -c Release -f netcoreapp2.1 -- -f * --coreRun "C:\Projects\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9\CoreRun.exe" --artifacts ".\before"
 
@@ -73,7 +73,7 @@ After that, you should be able to find `CoreRun.exe` in a location similar to:
 
 You should notice that given `.dll` file have been updated in the `CoreRun` folder.
 
-9. Run the benchmarks using `--coreRun` from the fist step. Save the results in a dedicated folder.
+9. Run the benchmarks using `--coreRun` from the first step. Save the results in a dedicated folder.
 
         dotnet run -c Release -f netcoreapp2.1 -- -f * --coreRun "C:\Projects\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9\CoreRun.exe" --artifacts ".\after"
 
