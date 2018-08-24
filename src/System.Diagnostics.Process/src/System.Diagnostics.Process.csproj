@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F55047F8-E47B-46E3-B221-C23595AFE168}</ProjectGuid>
@@ -395,6 +395,9 @@
     <Compile Include="System\Diagnostics\Process.Uap.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Uap.cs" />
     <Compile Include="System\Diagnostics\ProcessStartInfo.Uap.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
+    <Compile Include="System\Diagnostics\Process.NonUap.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true'">
     <Compile Include="System\Diagnostics\Process.BSD.cs" />

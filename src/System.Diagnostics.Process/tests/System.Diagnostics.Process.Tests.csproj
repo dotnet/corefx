@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E1114510-844C-4BB2-BBAD-8595BD16E24B}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -39,6 +39,9 @@
     <Compile Include="ProcessStartInfoTests.netcoreapp.cs" />
     <Compile Include="ProcessStreamReadTests.netcoreapp.cs" />
     <Compile Include="ProcessTests.netcoreapp.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="ProcessTests.netcoreappNonUap.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
