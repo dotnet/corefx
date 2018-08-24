@@ -26,6 +26,9 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="*\pkg\**\System.Data.SqlClient.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <!--
       In general we are servicing 2.x library packages from release/2.1 branch so only add library packages
       to this build if they contain unique 2.2 features. If they are added here you need to ensure their
