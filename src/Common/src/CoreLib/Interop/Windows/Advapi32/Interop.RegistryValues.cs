@@ -4,7 +4,7 @@
 
 internal partial class Interop
 {
-    internal partial class Kernel32
+    internal partial class Advapi32
     {
         internal partial class RegistryValues
         {
