@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -365,6 +366,74 @@ namespace System.Diagnostics
             }
 
             return null;
+        }
+
+
+        /// <summary>
+        /// Makes a best-effort attempt to kill all descendant (child, grandchild, etc.) processes.
+        /// </summary>
+        private void KillTree()
+        {
+            try
+            {
+                // Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
+                // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
+                OpenProcessHandle();
+
+                // Kill the process, so that no further children can be created.
+                Kill();
+            }
+            catch
+            {
+                // Made a best-effort attempt which failed (perhaps because the process is already dead), so give up.
+                return;
+            }
+
+            KillChildren(GetChildProcesses());
+        }
+
+        /// <summary>
+        /// Returns all immediate child processes.
+        /// </summary>
+        private IReadOnlyList<Process> GetChildProcesses()
+        {
+            var childProcesses = new List<Process>();
+
+            foreach (Process possibleChildProcess in GetProcesses())
+            {
+                var keep = false;
+
+                try
+                {
+                    try
+                    {
+                        // Force the process object to hold a handle to the process. Ensures that if the process dies while we're working
+                        // with it, it won't be reused. This way, any process we pass back is guaranteed to be an actual child, not a 
+                        // reference to a new process that happens to have the same id as a deceased child.
+                        possibleChildProcess.OpenProcessHandle();
+                    }
+                    catch
+                    {
+                        // Made a best-effort attempt which failed (perhaps because the process is already dead).
+                        continue;
+                    }
+
+                    if (IsParentOf(possibleChildProcess))
+                    {
+                        childProcesses.Add(possibleChildProcess);
+                        keep = true;
+                    }
+                }
+                finally
+                {
+                    if (!keep)
+                    {
+                        possibleChildProcess.Dispose();
+                    }
+                }
+            }
+
+            return childProcesses;
         }
     }
 }
