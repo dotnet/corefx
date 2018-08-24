@@ -23,6 +23,6 @@ namespace System.Diagnostics
 
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
 
-        public Kill(bool entireProcessTree) { }
+        public void Kill(bool entireProcessTree) { }
     }
 }
