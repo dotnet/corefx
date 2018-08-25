@@ -11,8 +11,5 @@ namespace System
         public static bool IsNetfx470OrNewer => false;
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
-
-        public static string LibcRelease => "glibc_not_found";
-        public static string LibcVersion => "glibc_not_found";
     }
 }
