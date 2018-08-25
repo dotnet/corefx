@@ -167,6 +167,7 @@
 
   <!-- Set some shortcuts for more terse conditions in project files -->
   <PropertyGroup>
+    <TargetsNetCoreApp Condition="$(TargetGroup.StartsWith('netcoreapp'))">true</TargetsNetCoreApp>
     <TargetsUap Condition="$(TargetGroup.StartsWith('uap'))">true</TargetsUap>
     <TargetsAot Condition="$(TargetGroup.EndsWith('aot'))">true</TargetsAot>
     <TargetsNetStandard Condition="$(TargetGroup.StartsWith('netstandard'))">true</TargetsNetStandard>
