@@ -831,13 +831,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>An array of String containing the paths found.</returns>
         Private Shared Function FindPaths(ByVal FileOrDirectory As FileOrDirectory, ByVal directory As String, ByVal wildCard As String) As String()
             If FileOrDirectory = FileSystem.FileOrDirectory.Directory Then
-                If wildCard.Length = 0 Then
+                If IsEmptyNullOrWhitespace(wildCard) Then
                     Return IO.Directory.GetDirectories(directory)
                 Else
                     Return IO.Directory.GetDirectories(directory, wildCard)
                 End If
             Else
-                If wildCard.Length = 0 Then
+                If IsEmptyNullOrWhitespace(wildCard) Then
                     Return IO.Directory.GetFiles(directory)
                 Else
                     Return IO.Directory.GetFiles(directory, wildCard)
@@ -1114,6 +1114,12 @@ Namespace Microsoft.VisualBasic.FileIO
             Debug.Assert(MultiString.ToString.EndsWith(ControlChars.NullChar, StringComparison.Ordinal))
 
             Return MultiString.ToString()
+        End Function
+        Private Shared Function IsEmptyNullOrWhitespace(ByVal StringToCheck As String) As Boolean
+            If StringToCheck Is Nothing Then
+                Return True
+            End If
+            Return StringToCheck.Trim.Length = 0
         End Function
 
         '''******************************************************************************

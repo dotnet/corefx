@@ -118,6 +118,29 @@ Namespace Microsoft.VisualBasic.Tests
             Return testFileName
         End Function
 
+        '''**************************************************************************
+        ''' ;RemoveEndingSeparator
+        ''' <summary>
+        ''' Removes all directory separators at the end of a path.
+        ''' </summary>
+        ''' <param name="Path">a full or relative path.</param>
+        ''' <returns>If Path is a root path, the same value. Otherwise, removes any directory separators at the end.</returns>
+        ''' <remarks>We decided not to return path with separators at the end (VsWhidbey 54741).</remarks>
+        Public Function RemoveEndingSeparator(ByVal Path As String) As String
+            If IO.Path.IsPathRooted(Path) Then
+                ' If the path is rooted, attempt to check if it is a root path.
+                ' Note: IO.Path.GetPathRoot: C: -> C:, C:\ -> C:\, \\myshare\mydir -> \\myshare\mydir
+                ' BUT \\myshare\mydir\ -> \\myshare\mydir!!! This function will remove the ending separator of
+                ' \\myshare\mydir\ as well. Do not use IsRoot here.
+                If Path.Equals(IO.Path.GetPathRoot(Path), StringComparison.OrdinalIgnoreCase) Then
+                    Return Path
+                End If
+            End If
+
+            ' Otherwise, remove all separators at the end.
+            Return Path.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)
+        End Function
+
         Private Shared Function GenerateTestFileName(index? As Integer, memberName As String, lineNumber As Integer) As String ' randomness to avoid collisions between derived test classes using same base method concurrently
             Return String.Format(If(index.HasValue, "{0}_{1}_{2}_{3}", "{0}_{1}_{3}"), If(memberName, "TestBase"), lineNumber, index.GetValueOrDefault(), Guid.NewGuid().ToString("N").Substring(0, 8))
         End Function
