@@ -731,7 +731,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Numerics\Vector_Operations.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetsWindows)">
-    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegistryValues.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\BCrypt\Interop.BCryptGenRandom.GetRandomBytes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\BCrypt\Interop.NTSTATUS.cs" />
@@ -806,6 +805,7 @@
   </ItemGroup>
   <ItemGroup Condition="$(TargetsWindows) and '$(EnableWinRT)' != 'true'">
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\NtDll\NtQueryInformationFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegistryOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.Win32.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\TimeZoneInfo.Win32.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\Registry.cs" />
