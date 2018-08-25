@@ -74,8 +74,8 @@ namespace System
         public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
 
-        public static string LibcRelease => string.Empty;
-        public static string LibcVersion => string.Empty;
+        public static string LibcRelease => "glibc_not_found";
+        public static string LibcVersion => "glibc_not_found";
 
         public static string GetDistroVersionString() { return "WindowsProductType=" + GetWindowsProductType() + " WindowsInstallationType=" + GetInstallationType(); }
 
