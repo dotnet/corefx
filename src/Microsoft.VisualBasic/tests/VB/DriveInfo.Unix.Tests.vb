@@ -15,7 +15,7 @@ Namespace Microsoft.VisualBasic.Tests
         Public Shared Sub TestGetDrives()
             Dim DriveList() As IO.DriveInfo = FileSystem.Drives().ToArray
             Assert.NotNull(DriveList)
-            Assert.[True](DriveList.Length > 0, "Expected at least one drive")
+            Assert.True(DriveList.Length > 0, "Expected at least one drive")
             Assert.All(DriveList, Sub(d) Assert.NotNull(d))
             Assert.Contains(DriveList, Function(d) d.Name = "/")
             Assert.All(DriveList, Sub(d)

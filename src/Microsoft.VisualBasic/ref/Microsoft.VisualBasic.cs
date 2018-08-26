@@ -419,11 +419,6 @@ namespace Microsoft.VisualBasic.FileIO
         Delimited = 0,
         FixedWidth = 1,
     }
-    //public class FileIOPermission
-    //{
-    //    public FileIOPermission(System.Security.Permissions.FileIOPermissionAccess access, string fullDirectoryPath) { }
-    //    public void Demand() { }
-    //}
     public partial class FileSystem
     {
         public FileSystem() { }
@@ -431,20 +426,12 @@ namespace Microsoft.VisualBasic.FileIO
         public static System.Collections.ObjectModel.ReadOnlyCollection<System.IO.DriveInfo> Drives { get { throw null; } }
         public static string CombinePath(string baseDirectory, string relativePath) { throw null; }
         public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName) { }
-        //public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        //public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
         public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, bool overwrite) { }
         public static void CopyFile(string sourceFileName, string destinationFileName) { }
-        //public static void CopyFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        //public static void CopyFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
         public static void CopyFile(string sourceFileName, string destinationFileName, bool overwrite) { }
         public static void CreateDirectory(string directory) { }
         public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.DeleteDirectoryOption onDirectoryNotEmpty) { }
-        //public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle) { }
-        //public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
         public static void DeleteFile(string file) { }
-        //public static void DeleteFile(string file, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle) { }
-        //public static void DeleteFile(string file, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
         public static bool DirectoryExists(string directory) { throw null; }
         public static bool FileExists(string file) { throw null; }
         public static System.Collections.ObjectModel.ReadOnlyCollection<string> FindInFiles(string directory, string containsText, bool ignoreCase, Microsoft.VisualBasic.FileIO.SearchOption searchType) { throw null; }
@@ -460,12 +447,8 @@ namespace Microsoft.VisualBasic.FileIO
         public static string GetParentPath(string path) { throw null; }
         public static string GetTempFileName() { throw null; }
         public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName) { }
-        //public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        //public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
         public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, bool overwrite) { }
         public static void MoveFile(string sourceFileName, string destinationFileName) { }
-        //public static void MoveFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        //public static void MoveFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
         public static void MoveFile(string sourceFileName, string destinationFileName, bool overwrite) { }
         public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file) { throw null; }
         public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file, params int[] fieldWidths) { throw null; }
@@ -500,7 +483,6 @@ namespace Microsoft.VisualBasic.FileIO
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
-
     public enum RecycleOption
     {
         DeletePermanently = 2,
@@ -524,8 +506,8 @@ namespace Microsoft.VisualBasic.FileIO
         public static string Programs { get { throw null; } }
         public static string Temp { get { throw null; } }
     }
-    public partial class TextFieldParser:IDisposable
-       {
+    public partial class TextFieldParser : IDisposable
+    {
         public TextFieldParser(System.IO.Stream stream) { }
         public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding) { }
         public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding, bool detectEncoding) { }
@@ -572,16 +554,3 @@ namespace Microsoft.VisualBasic.FileIO
         ThrowException = 3
     }
 }
-//namespace System.Security.Permissions
-//{
-//    public enum FileIOPermissionAccess
-//    {
-//        NoAccess = 0,
-//        Read = 1,
-//        Write = 2,
-//        Append = 4,
-//        PathDiscovery = 8,
-//        AllAccess = 15
-//    }
-//}
-

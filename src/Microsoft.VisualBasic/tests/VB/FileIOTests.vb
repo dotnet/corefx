@@ -14,12 +14,17 @@ Imports System.Runtime.InteropServices
 Imports Xunit
 ' Do not Imports System.IO
 
-
 Namespace Microsoft.VisualBasic.Tests
     Public NotInheritable Class FileIOTests
         ReadOnly DestData() As Char = {"x"c, "X"c, "y"c}
 
         ReadOnly SourceData() As Char = {"a"c, "A"c, "b"c}
+        ''' <summary>
+        ''' All "Public" tests are Named for the FileIO function they test followed by _ParameterName for each Parameter and if there are options
+        ''' they are separated into additional test and the Option Value is the last  part of the name.
+        ''' For example CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteFalse tests CopyDirectory with 3 arguments
+        ''' SourceDirectoryName, DestinationDirectoryName and Overwrite and the value of Overwrite being tested is False
+        ''' </summary>
 
         Sub New()
         End Sub
@@ -49,6 +54,7 @@ Namespace Microsoft.VisualBasic.Tests
         Public Sub CombinePathTest_BaseDirectory_RelativePath()
             Assert.Equal(FileSystem.CombinePath("C:\", "Test2"), IO.Path.Combine("C:\", "Test2"))
         End Sub
+
         <Fact>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
             Dim TestBase As New FileIOTestBase
@@ -276,8 +282,7 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         Public Sub DeleteDirectory_Directory_DeleteAllContents()
             Dim TestBase As New FileIOTestBase
-            Dim TestDirectory As String = TestBase.TestDirectory()
-            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
+            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
             IO.Directory.CreateDirectory(FullPathToNewDirectory)
             Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
             Dim testFileSource As String = CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToNewDirectory, "TestFile"))
@@ -794,7 +799,13 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Sub OpenTextFieldParser_File()
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
 
+            Dim TestBase As New FileIOTestBase
+            Dim T As New FileIO.TextFieldParser(TestBase.TestDirectory)
+            TestBase.Dispose()
         End Sub
 
         Public Sub OpenTextFieldParser_File_Delimiters()
