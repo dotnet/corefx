@@ -768,9 +768,9 @@ Namespace Microsoft.VisualBasic.Tests
             "35950513,01D,000148,JV239,89,001150000000000000,,0000000008,379730+051095,""Variable 22222""" & vbCrLf &
             "35950514,01E,000148,JV239,90,005245000000000000,,0000000001,801293-051095,""Variable 333444555666"""
 
-            While (Not System.Diagnostics.Debugger.IsAttached)
-                System.Threading.Thread.Sleep(1000)
-            End While
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
 
             Dim TestBase As New FileIOTestBase
             Dim TestFilePath As String = CreateTestFile(TestBase, CType(CSVData, Char()), TestFileName:="TestFile.CSV")
