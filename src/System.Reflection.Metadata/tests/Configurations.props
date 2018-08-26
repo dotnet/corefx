@@ -3,6 +3,8 @@
   <PropertyGroup>
     <BuildConfigurations>
       netcoreapp;
+      netfx;
+      netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
