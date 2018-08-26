@@ -91,12 +91,23 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         Public Sub CombinePathTest_BadBaseDirectory_RelativePath()
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
-            Assert.Equal(FileSystem.CombinePath("C:\", ""), "C:\")
         End Sub
 
         <Fact>
         Public Sub CombinePathTest_BaseDirectory_RelativePath()
-            Assert.Equal(FileSystem.CombinePath("C:\", "Test2"), IO.Path.Combine("C:\", "Test2"))
+            Dim TestBase As New FileIOTestBase
+            Dim TestDirInfo As New IO.DirectoryInfo(TestBase.TestDirectory)
+            Dim Root As String = TestDirInfo.Root.Name
+            Assert.Equal(FileSystem.CombinePath(Root, "Test2"), IO.Path.Combine(Root, "Test2"))
+            TestBase.Dispose()
+        End Sub
+
+        <Fact>
+        Public Sub CombinePathTest_RootDirectory_RelativePath()
+            Dim TestBase As New FileIOTestBase
+            Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, ""), TestBase.TestDirectory)
+            Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, "Test"), IO.Path.Combine(TestBase.TestDirectory, "Test"))
+            TestBase.Dispose()
         End Sub
 
         <Fact>
@@ -763,10 +774,10 @@ Namespace Microsoft.VisualBasic.Tests
         Public Sub OpenTextFieldParser_CSVFile()
             Const CSVData As String =
             "FIELD0,FIELD1,FIELD2,FIELD3,FIELD4,FIELD5,FIELD6,FIELD7,FIELD8,FIELD9" & vbCrLf &
-            "35950511,01B,,00000,,,003904476580,0390447658,," & vbCrLf &
-            "35950512,01C,000148,JV239,89,005206000000000000,,0000000008,379730-051095,""Variable 1""" & vbCrLf &
-            "35950513,01D,000148,JV239,89,001150000000000000,,0000000008,379730+051095,""Variable 22222""" & vbCrLf &
-            "35950514,01E,000148,JV239,90,005245000000000000,,0000000001,801293-051095,""Variable 333444555666"""
+            "   0,AAA,,AA000,,,,AAAAAAAAAA,000000-000000," & vbCrLf &
+            "  10,BBB,000001,BB111,89,005206000000000000,,BBBBBBBBBB,111111-111111,""Variable 1""" & vbCrLf &
+            " 100,CCC,000002,CC222,90,001150000000000000,,CCCCCCCCCC,222222-222222,""Variable 22""" & vbCrLf &
+            "1000,DDD,000003,DD333,91,005245000000000000,,DDDDDDDDDD,333333-333333,""Variable 333"""
 
             'While (Not System.Diagnostics.Debugger.IsAttached)
             '    System.Threading.Thread.Sleep(1000)
