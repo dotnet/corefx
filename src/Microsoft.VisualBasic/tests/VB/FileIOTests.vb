@@ -10,15 +10,28 @@ Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
 Imports System.ComponentModel
 Imports System.Linq
+Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports Xunit
 ' Do not Imports System.IO
 
 Namespace Microsoft.VisualBasic.Tests
     Public NotInheritable Class FileIOTests
-        ReadOnly DestData() As Char = {"x"c, "X"c, "y"c}
+        ReadOnly FixedLengthData As String =
+            "35950511 01B      000000                   0039044765800390447658" & vbCrLf &
+            "35950512 01C000148JV23989005206000000000000            0000000008379730-051095Variable 1" & vbCrLf &
+            "35950513 01D000148JV23989001150000000000000            0000000008379730+051095Variable 22222" & vbCrLf &
+            "35950514 01E000148JV23990005245000000000000            0000000001801293-051095Variable 333444555666"
 
+        ReadOnly SpaceDelimitedData As String =
+            "35950511 01B 000000  003904476580 0390447658" & vbCrLf &
+            "35950512 01D 000148 JV239 89 005206000000000000  0000000008 379730-051095 ""Variable 1""" & vbCrLf &
+            "35950513 01D 000148 JV239 89 001150000000000000  0000000008 379730+051095 ""Variable 22222""" & vbCrLf &
+            "35950514 01D 000148 JV239 90 005245000000000000  0000000001 801293-051095 ""Variable 333444555666"""
+
+        ReadOnly DestData() As Char = {"x"c, "X"c, "y"c}
         ReadOnly SourceData() As Char = {"a"c, "A"c, "b"c}
+
         ''' <summary>
         ''' All "Public" tests are Named for the FileIO function they test followed by _ParameterName for each Parameter and if there are options
         ''' they are separated into additional test and the Option Value is the last  part of the name.
@@ -29,19 +42,50 @@ Namespace Microsoft.VisualBasic.Tests
         Sub New()
         End Sub
 
-        Private Function CreateTestFile(TestBase As FileIOTestBase, ByVal TestData() As Char, Optional TestFileNameWithPath As String = "") As String
-            If TestFileNameWithPath.Length = 0 Then
-                TestFileNameWithPath = TestBase.GetTestFilePath()
+        Private Function CreateTestFile(TestBase As FileIOTestBase, ByVal TestData() As Char, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+            Return CreateTestFile(TestBase, TestData, "", "", memberName, lineNumber)
+        End Function
+
+        Private Function CreateTestFile(TestBase As FileIOTestBase, ByVal TestData() As Char, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+            Return CreateTestFile(TestBase, TestData, "", TestFileName, memberName, lineNumber)
+        End Function
+
+        ''' <summary>
+        ''' Create a new file with TestData
+        ''' </summary>
+        ''' <param name="TestBase">Opbject to manage temporary Files</param>
+        ''' <param name="TestData">Data to be written to file</param>
+        ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
+        ''' <param name="TestFileName">Optional Filename, if none a randon one based on TestName will be created</param>
+        ''' <returns>Full Path to New File</returns>
+        Private Function CreateTestFile(TestBase As FileIOTestBase, ByVal TestData() As Char, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+            Dim TempFileNameWithPath As String
+            If TestFileName.Length = 0 Then
+                TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
             Else
-                Assert.True(IO.Path.IsPathRooted(TestFileNameWithPath))
-                Assert.True(TestFileNameWithPath.StartsWith(TestBase.TestDirectory))
+                Assert.False(IO.Path.IsPathRooted(TestFileName))
+                If PathFromBase.Length = 0 Then
+                    TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, TestFileName)
+                Else
+                    ' If we have a Base we must have a filename
+                    Assert.False(String.IsNullOrWhiteSpace(TestFileName))
+                    TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, PathFromBase, TestFileName)
+                End If
             End If
+            Assert.False(IO.File.Exists(TempFileNameWithPath), $"File {TempFileNameWithPath} should not exist!")
             ' Write and copy file
-            Using sourceStream As New IO.StreamWriter(IO.File.Create(TestFileNameWithPath))
+            Using sourceStream As New IO.StreamWriter(IO.File.Create(TempFileNameWithPath))
                 sourceStream.Write(TestData, 0, TestData.Length)
             End Using
 
-            Return TestFileNameWithPath
+            Return TempFileNameWithPath
+        End Function
+        Private Function FileHasExpectedDate(FileNameWithPath As String, ExpectedData() As Char) As Boolean
+            Using stream As New IO.StreamReader(IO.File.OpenRead(FileNameWithPath))
+                Dim ReadData(ExpectedData.Length - 1) As Char
+                stream.Read(ReadData, 0, SourceData.Length)
+                Return ExpectedData = ReadData
+            End Using
         End Function
 
         <Fact>
@@ -59,24 +103,20 @@ Namespace Microsoft.VisualBasic.Tests
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
             Dim TestBase As New FileIOTestBase
             Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-            Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
             IO.Directory.CreateDirectory(FullPathToSourceDirectory)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToSourceDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
             Next
+            Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
             FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory)
             Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 ' Ensure copy transferred written data
-                Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                    Dim ReadData(SourceData.Length - 1) As Char
-                    stream.Read(ReadData, 0, SourceData.Length)
-                    Assert.Equal(SourceData, ReadData)
-                End Using
+                Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
             Next
             IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
             IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-            CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToTargetDirectory, $"NewFile0"))
+            CreateTestFile(TestBase, TestData:=SourceData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile0")
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory))
             TestBase.Dispose()
         End Sub
@@ -88,39 +128,26 @@ Namespace Microsoft.VisualBasic.Tests
             Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
             IO.Directory.CreateDirectory(FullPathToSourceDirectory)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToSourceDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
             Next
             FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False)
             Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 ' Ensure copy transferred written data
-                Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                    Dim ReadData(SourceData.Length - 1) As Char
-                    stream.Read(ReadData, 0, SourceData.Length)
-                    Assert.Equal(SourceData, ReadData)
-                End Using
+                Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
             Next
             IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
             IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-            Dim NewFileNameWithPath As String = IO.Path.Combine(FullPathToTargetDirectory, $"NewFile0")
-            CreateTestFile(TestBase, DestData, NewFileNameWithPath)
+            CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile0")
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False))
             Assert.Equal(IO.Directory.GetFiles(FullPathToTargetDirectory).Count, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 If CurrentFile.EndsWith("0") Then
                     ' Make sure file 0 is unchanged with DestDate
-                    Using stream As New IO.StreamReader(CurrentFile)
-                        Dim ReadData(DestData.Length - 1) As Char
-                        stream.Read(ReadData, 0, DestData.Length)
-                        Assert.Equal(DestData, ReadData)
-                    End Using
+                    Assert.True(FileHasExpectedDate(CurrentFile, DestData))
                 Else
                     ' Ensure file 1 - 5 transferred SourData
-                    Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                        Dim ReadData(SourceData.Length - 1) As Char
-                        stream.Read(ReadData, 0, SourceData.Length)
-                        Assert.Equal(SourceData, ReadData)
-                    End Using
+                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
                 End If
             Next
             TestBase.Dispose()
@@ -134,17 +161,13 @@ Namespace Microsoft.VisualBasic.Tests
             IO.Directory.CreateDirectory(FullPathToSourceDirectory)
             IO.Directory.CreateDirectory(FullPathToTargetDirectory)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToSourceDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
             Next
             FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=True)
             Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 ' Ensure copy transferred written data
-                Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                    Dim ReadData(SourceData.Length - 1) As Char
-                    stream.Read(ReadData, 0, SourceData.Length)
-                    Assert.Equal(SourceData, ReadData)
-                End Using
+                Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
             Next
             TestBase.Dispose()
         End Sub
@@ -175,23 +198,14 @@ Namespace Microsoft.VisualBasic.Tests
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest))
 
             ' Ensure copy didn't overwrite existing data
-            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
-                Dim readData(SourceData.Length - 1) As Char
-                stream.Read(readData, 0, SourceData.Length)
-                Assert.Equal(DestData, readData)
-            End Using
+            Assert.True(FileHasExpectedDate(testFileDest, DestData))
 
             ' Get a new destination nanme
             testFileDest = TestBase.GetTestFilePath()
             FileSystem.CopyFile(testFileSource, testFileDest)
 
             ' Ensure copy transferred written data
-            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
-                Dim readData(SourceData.Length - 1) As Char
-                stream.Read(readData, 0, SourceData.Length)
-                Assert.Equal(SourceData, readData)
-            End Using
-
+            Assert.True(FileHasExpectedDate(testFileDest, SourceData))
             TestBase.Dispose()
         End Sub
 
@@ -211,11 +225,7 @@ Namespace Microsoft.VisualBasic.Tests
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest, overwrite:=False))
 
             ' Ensure copy didn't overwrite existing data
-            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
-                Dim readData(SourceData.Length - 1) As Char
-                stream.Read(readData, 0, SourceData.Length)
-                Assert.Equal(DestData, readData)
-            End Using
+            Assert.True(FileHasExpectedDate(testFileDest, DestData))
             TestBase.Dispose()
         End Sub
 
@@ -235,11 +245,7 @@ Namespace Microsoft.VisualBasic.Tests
             FileSystem.CopyFile(testFileSource, testFileDest, overwrite:=True)
 
             ' Ensure copy transferred written data
-            Using stream As New IO.StreamReader(IO.File.OpenRead(testFileDest))
-                Dim readData(SourceData.Length - 1) As Char
-                stream.Read(readData, 0, SourceData.Length)
-                Assert.Equal(SourceData, readData)
-            End Using
+            Assert.True(FileHasExpectedDate(testFileDest, SourceData))
             TestBase.Dispose()
         End Sub
         <Fact(Skip:="Not Implemented")>
@@ -285,7 +291,7 @@ Namespace Microsoft.VisualBasic.Tests
             Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
             IO.Directory.CreateDirectory(FullPathToNewDirectory)
             Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-            Dim testFileSource As String = CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToNewDirectory, "TestFile"))
+            Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="NewDirectory", TestFileName:="TestFile")
             Assert.True(IO.File.Exists(testFileSource))
             FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.DeleteAllContents)
             Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
@@ -295,11 +301,10 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         Public Sub DeleteDirectory_Directory_ThrowIfDirectoryNonEmpty()
             Dim TestBase As New FileIOTestBase
-            Dim TestDirectory As String = TestBase.TestDirectory()
-            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestDirectory, "NewDirectory")
+            Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
             FileSystem.CreateDirectory(FullPathToNewDirectory)
             Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-            Dim testFileSource As String = CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToNewDirectory, "TestFile"))
+            Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="NewDirectory", TestFileName:="TestFile")
 
             Assert.True(IO.File.Exists(testFileSource))
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.ThrowIfDirectoryNonEmpty))
@@ -513,36 +518,36 @@ Namespace Microsoft.VisualBasic.Tests
             Dim FileList As ReadOnlyCollection(Of String) = FileSystem.GetFiles(TestBase.TestDirectory)
             Assert.True(FileList.Count = 0)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, TestFileName:=$"NewFile{i}")
             Next
             FileList = FileSystem.GetFiles(TestBase.TestDirectory)
             Assert.True(FileList.Count = 6)
             For i As Integer = 0 To 5
                 Assert.Equal(FileList(i), IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}"))
             Next
-            IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory"))
-            CreateTestFile(TestBase, SourceData, IO.Path.Combine(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory", $"NewFile")))
+            IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, "NewSubDirectory"))
+            CreateTestFile(TestBase, SourceData, PathFromBase:="NewSubDirectory", TestFileName:="NewFile")
             FileList = FileSystem.GetFiles(TestBase.TestDirectory)
             Assert.True(FileList.Count = 6)
             TestBase.Dispose()
         End Sub
 
         <Fact>
-        Public Sub GetFilesDirectory_SearchOption()
+        Public Sub GetFiles_Directory_SearchOption()
             Dim TestBase As New FileIOTestBase
             Dim FileList As ReadOnlyCollection(Of String) = FileSystem.GetFiles(TestBase.TestDirectory)
             Assert.True(FileList.Count = 0)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, TestFileName:=$"NewFile{i}")
             Next
             FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly)
             Assert.True(FileList.Count = 6)
             For i As Integer = 0 To 5
                 Assert.Equal(FileList(i), IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}"))
             Next
-            Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory")
+            Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewSubDirectory")
             IO.Directory.CreateDirectory(NewSubDirectoryPath)
-            CreateTestFile(TestBase, SourceData, IO.Path.Combine(NewSubDirectoryPath, $"NewFile"))
+            CreateTestFile(TestBase, SourceData, TestFileName:="NewFile")
             FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchAllSubDirectories)
             Assert.True(FileList.Count = 7)
             For i As Integer = 0 To 6
@@ -552,27 +557,25 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Sub GetFilesDirectory_SearchOption_Wildcards()
+        Public Sub GetFiles_Directory_SearchOption_Wildcards()
             Dim TestBase As New FileIOTestBase
             Dim FileList As ReadOnlyCollection(Of String) = FileSystem.GetFiles(TestBase.TestDirectory)
             Assert.True(FileList.Count = 0)
             Dim TestFileList As New List(Of String)
             For i As Integer = 0 To 5
-                TestFileList.Add(IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}{If(i Mod 2 = 0, ".vb", ".cs")}"))
-                CreateTestFile(TestBase, SourceData, TestFileList(i))
+                TestFileList.Add(CreateTestFile(TestBase, SourceData, TestFileName:=$"NewFile{i}{If(i Mod 2 = 0, ".vb", ".cs")}"))
             Next
             FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*.vb")
             Assert.True(FileList.Count = 3)
             For i As Integer = 0 To 2
-                Assert.Equal(FileList(i), TestFileList(i * 2))
+                Assert.True(TestFileList.Contains(FileList(i)))
             Next
-            Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory")
+            Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewSubDirectory")
             IO.Directory.CreateDirectory(NewSubDirectoryPath)
-            TestFileList.Add(CreateTestFile(TestBase, SourceData, IO.Path.Combine(NewSubDirectoryPath, $"NewFile.cs")))
+            TestFileList.Add(CreateTestFile(TestBase, SourceData, PathFromBase:="NewSubDirectory", TestFileName:="NewFile.cs"))
             FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchAllSubDirectories, "*.cs")
-            Assert.True(FileList.Count = 4)
-            Assert.True(IO.File.Exists(FileList.Last))
-            Assert.Equal(FileList.Last, TestFileList.Last)
+            Assert.True(FileList.Contains(TestFileList.Last), "File in Subdirectory not found")
+            Assert.True(FileList.Count = 4, $"4 files expected, {FileList.Count} returned from FileSystem.GetFiles")
             TestBase.Dispose()
         End Sub
 
@@ -616,22 +619,18 @@ Namespace Microsoft.VisualBasic.Tests
             Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
             IO.Directory.CreateDirectory(FullPathToSourceDirectory)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToSourceDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
             Next
             FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory)
             Assert.Equal(6, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
             Assert.False(IO.Directory.Exists(FullPathToSourceDirectory))
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 ' Ensure move transferred written data
-                Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                    Dim ReadData(SourceData.Length - 1) As Char
-                    stream.Read(ReadData, 0, SourceData.Length)
-                    Assert.Equal(SourceData, ReadData)
-                End Using
+                Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
             Next
             IO.Directory.Move(FullPathToTargetDirectory, FullPathToSourceDirectory)
             IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-            CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToTargetDirectory, $"NewFile0"))
+            CreateTestFile(TestBase, SourceData, PathFromBase:="TargetDirectory", TestFileName:="NewFile0")
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory))
             TestBase.Dispose()
         End Sub
@@ -643,48 +642,34 @@ Namespace Microsoft.VisualBasic.Tests
             Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
             IO.Directory.CreateDirectory(FullPathToSourceDirectory)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToSourceDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
             Next
             FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False)
             Assert.Equal(6, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
             Assert.False(IO.Directory.Exists(FullPathToSourceDirectory))
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 ' Ensure move transferred written data
-                Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                    Dim ReadData(SourceData.Length - 1) As Char
-                    stream.Read(ReadData, 0, SourceData.Length)
-                    Assert.Equal(SourceData, ReadData)
-                End Using
+                Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
             Next
             IO.Directory.Move(FullPathToTargetDirectory, FullPathToSourceDirectory)
             IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-            Dim NewTestFileNameWithPath As String = IO.Path.Combine(FullPathToTargetDirectory, $"NewFile0")
-            CreateTestFile(TestBase, DestData, NewTestFileNameWithPath)
+            Dim NewFile0WithPath As String = CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:="NewFile0")
             Assert.Throws(Of IO.IOException)(Sub() FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False))
+            Dim RemainingSourceFilesWithPath As String() = IO.Directory.GetFiles(FullPathToSourceDirectory)
             ' We couldn't move one file
-            Assert.Equal(1, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
+            Assert.Equal(1, RemainingSourceFilesWithPath.Count)
             ' Ensure the file left has correct data
-            Using stream As New IO.StreamReader(IO.File.OpenRead(IO.Path.Combine(FullPathToSourceDirectory, $"NewFile0")))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(SourceData, ReadData)
-            End Using
-            Assert.Equal(6, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-            For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+            Assert.True(FileHasExpectedDate(RemainingSourceFilesWithPath(0), SourceData))
+
+            Dim DestinationFilesWithPath As String() = IO.Directory.GetFiles(FullPathToTargetDirectory)
+            Assert.Equal(6, DestinationFilesWithPath.Count)
+            For Each CurrentFile As String In DestinationFilesWithPath
                 If CurrentFile.EndsWith("0") Then
                     ' Make sure file 0 is unchanged with DestDate
-                    Using stream As New IO.StreamReader(CurrentFile)
-                        Dim ReadData(DestData.Length - 1) As Char
-                        stream.Read(ReadData, 0, DestData.Length)
-                        Assert.Equal(DestData, ReadData)
-                    End Using
+                    Assert.True(FileHasExpectedDate(CurrentFile, DestData))
                 Else
                     ' Ensure file 1 - 5 transferred SourData
-                    Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                        Dim ReadData(SourceData.Length - 1) As Char
-                        stream.Read(ReadData, 0, SourceData.Length)
-                        Assert.Equal(SourceData, ReadData)
-                    End Using
+                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
                 End If
             Next
             TestBase.Dispose()
@@ -698,21 +683,18 @@ Namespace Microsoft.VisualBasic.Tests
             IO.Directory.CreateDirectory(FullPathToSourceDirectory)
             IO.Directory.CreateDirectory(FullPathToTargetDirectory)
             For i As Integer = 0 To 5
-                CreateTestFile(TestBase, SourceData, IO.Path.Combine(FullPathToSourceDirectory, $"NewFile{i}"))
+                CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
             Next
             FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=True)
             Assert.False(IO.Directory.Exists(FullPathToSourceDirectory))
             Assert.Equal(6, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
             For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                 ' Ensure copy transferred written data
-                Using stream As New IO.StreamReader(IO.File.OpenRead(CurrentFile))
-                    Dim ReadData(SourceData.Length - 1) As Char
-                    stream.Read(ReadData, 0, SourceData.Length)
-                    Assert.Equal(SourceData, ReadData)
-                End Using
+                Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
             Next
             TestBase.Dispose()
         End Sub
+
         <Fact>
         Public Sub MoveFile_SourceFileName_DestinationFileName()
             Dim TestBase As New FileIOTestBase
@@ -721,19 +703,14 @@ Namespace Microsoft.VisualBasic.Tests
             FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath)
             Assert.False(IO.File.Exists(SourceFileNameWithPath))
             Assert.True(IO.File.Exists(DestinationFileNameWithPath))
-            Using stream As New IO.StreamReader(IO.File.OpenRead(DestinationFileNameWithPath))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(SourceData, ReadData)
-            End Using
-            CreateTestFile(TestBase, DestData, SourceFileNameWithPath)
-            Assert.Throws(Of IO.IOException)(Sub() FileSystem.MoveFile(sourceFileName:=DestinationFileNameWithPath, destinationFileName:=SourceFileNameWithPath))
+            Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, SourceData))
+
+            SourceFileNameWithPath = DestinationFileNameWithPath
+            DestinationFileNameWithPath = CreateTestFile(TestBase, DestData)
+            Assert.Throws(Of IO.IOException)(Sub() FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath))
             ' Make sure we did not override existing file
-            Using stream As New IO.StreamReader(IO.File.OpenRead(DestinationFileNameWithPath))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(SourceData, ReadData)
-            End Using
+            Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, DestData))
+            Assert.True(IO.File.Exists(SourceFileNameWithPath))
             TestBase.Dispose()
         End Sub
 
@@ -745,20 +722,13 @@ Namespace Microsoft.VisualBasic.Tests
             FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath, overwrite:=False)
             Assert.False(IO.File.Exists(SourceFileNameWithPath))
             Assert.True(IO.File.Exists(DestinationFileNameWithPath))
-            Using stream As New IO.StreamReader(IO.File.OpenRead(DestinationFileNameWithPath))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(SourceData, ReadData)
-            End Using
-            CreateTestFile(TestBase, DestData, SourceFileNameWithPath)
-            Assert.Throws(Of IO.IOException)(Sub() FileSystem.MoveFile(sourceFileName:=DestinationFileNameWithPath, destinationFileName:=SourceFileNameWithPath, overwrite:=False))
-            ' Make sure SourceFile has not chnaged
-            Using stream As New IO.StreamReader(IO.File.OpenRead(SourceFileNameWithPath))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(DestData, ReadData)
-            End Using
-            Assert.True(IO.File.Exists(DestinationFileNameWithPath))
+            Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, SourceData))
+            SourceFileNameWithPath = DestinationFileNameWithPath
+            DestinationFileNameWithPath = CreateTestFile(TestBase, DestData)
+            Assert.Throws(Of IO.IOException)(Sub() FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath, overwrite:=False))
+            ' Make sure we did not override existing file
+            Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, DestData))
+            Assert.True(IO.File.Exists(SourceFileNameWithPath))
             TestBase.Dispose()
         End Sub
 
@@ -770,20 +740,12 @@ Namespace Microsoft.VisualBasic.Tests
             FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath, overwrite:=True)
             Assert.False(IO.File.Exists(SourceFileNameWithPath))
             Assert.True(IO.File.Exists(DestinationFileNameWithPath))
-            Using stream As New IO.StreamReader(IO.File.OpenRead(DestinationFileNameWithPath))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(SourceData, ReadData)
-            End Using
-            CreateTestFile(TestBase, DestData, SourceFileNameWithPath)
+            Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, SourceData))
+            CreateTestFile(TestBase, DestData, TestFileName:=(New IO.FileInfo(SourceFileNameWithPath)).Name)
             FileSystem.MoveFile(sourceFileName:=DestinationFileNameWithPath, destinationFileName:=SourceFileNameWithPath, overwrite:=True)
             Assert.True(IO.File.Exists(SourceFileNameWithPath))
             Assert.False(IO.File.Exists(DestinationFileNameWithPath))
-            Using stream As New IO.StreamReader(IO.File.OpenRead(SourceFileNameWithPath))
-                Dim ReadData(SourceData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Assert.Equal(SourceData, ReadData)
-            End Using
+            Assert.True(FileHasExpectedDate(SourceFileNameWithPath, SourceData))
             TestBase.Dispose()
         End Sub
 
@@ -798,13 +760,47 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Sub OpenTextFieldParser_File()
+        Public Sub OpenTextFieldParser_CSVFile()
+            Const CSVData As String =
+            "FIELD0,FIELD1,FIELD2,FIELD3,FIELD4,FIELD5,FIELD6,FIELD7,FIELD8,FIELD9" & vbCrLf &
+            "35950511,01B,,00000,,,003904476580,0390447658,," & vbCrLf &
+            "35950512,01C,000148,JV239,89,005206000000000000,,0000000008,379730-051095,""Variable 1""" & vbCrLf &
+            "35950513,01D,000148,JV239,89,001150000000000000,,0000000008,379730+051095,""Variable 22222""" & vbCrLf &
+            "35950514,01E,000148,JV239,90,005245000000000000,,0000000001,801293-051095,""Variable 333444555666"""
+
             While (Not System.Diagnostics.Debugger.IsAttached)
                 System.Threading.Thread.Sleep(1000)
             End While
 
             Dim TestBase As New FileIOTestBase
-            Dim T As New FileIO.TextFieldParser(TestBase.TestDirectory)
+            Dim TestFilePath As String = CreateTestFile(TestBase, CType(CSVData, Char()), TestFileName:="TestFile.CSV")
+            Dim myReader As TextFieldParser = New TextFieldParser(TestFilePath)
+            myReader.Delimiters = New String() {","}
+            myReader.TextFieldType = FileIO.FieldType.Delimited
+            myReader.HasFieldsEnclosedInQuotes = True
+            myReader.TrimWhiteSpace = True
+            Dim currentRow As String()
+            Dim headerRow As Integer = 0
+
+            While Not myReader.EndOfData
+                Try
+                    currentRow = myReader.ReadFields()
+                    'Read Header
+                    If (headerRow = 0) Then
+                        Assert.True(currentRow.Count = 10)
+                        For i As Integer = 1 To 10
+                            Assert.True(currentRow(i) = $"FIELD{i}", "Header row does not match expected value")
+                        Next
+                        headerRow += 1
+                    Else
+                        'Do work for Data Row
+                    End If
+
+                Catch ex As Exception
+                    Dim errorline As String = myReader.ErrorLine
+                End Try
+            End While
+            myReader.Close()
             TestBase.Dispose()
         End Sub
 
