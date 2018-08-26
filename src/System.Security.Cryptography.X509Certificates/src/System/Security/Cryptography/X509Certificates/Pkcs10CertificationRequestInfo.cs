@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.Asn1;
-using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -45,10 +44,11 @@ namespace System.Security.Cryptography.X509Certificates
             Debug.Assert(PublicKey != null);
 
             byte[] signatureAlgorithm = signatureGenerator.GetSignatureAlgorithmIdentifier(hashAlgorithm);
-            AlgorithmIdentifierAsn signatureAlgorithmAsn;
 
             // Deserialization also does validation of the value (except for Parameters, which have to be validated separately).
-            signatureAlgorithmAsn = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(signatureAlgorithm, AsnEncodingRules.DER);
+            AlgorithmIdentifierAsn.Decode(
+                new AsnReader(signatureAlgorithm, AsnEncodingRules.DER),
+                out AlgorithmIdentifierAsn signatureAlgorithmAsn);
             if (signatureAlgorithmAsn.Parameters.HasValue)
             {
                 Helpers.ValidateDer(signatureAlgorithmAsn.Parameters.Value);
@@ -63,11 +63,14 @@ namespace System.Security.Cryptography.X509Certificates
                 Version = 0,
                 Subject = this.Subject.RawData,
                 SubjectPublicKeyInfo = spki,
-                Attributes = Attributes.Select(e => new X501AttributeAsn(e)).ToArray(),
+                Attributes = Attributes.Select(a => new X501AttributeAsn(a)).ToArray(),
             };
 
-            using (AsnWriter writer = AsnSerializer.Serialize(requestInfo, AsnEncodingRules.DER))
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            using (AsnWriter signedWriter = new AsnWriter(AsnEncodingRules.DER))
             {
+                requestInfo.Encode(writer);
+
                 byte[] encodedRequestInfo = writer.Encode();
                 CertificationRequestAsn certificationRequest = new CertificationRequestAsn
                 {
@@ -76,10 +79,8 @@ namespace System.Security.Cryptography.X509Certificates
                     SignatureValue = signatureGenerator.SignData(encodedRequestInfo, hashAlgorithm),
                 };
 
-                using (AsnWriter signedWriter = AsnSerializer.Serialize(certificationRequest, AsnEncodingRules.DER))
-                {
-                    return signedWriter.Encode();
-                }
+                certificationRequest.Encode(signedWriter);
+                return signedWriter.Encode();
             }
         }
     }

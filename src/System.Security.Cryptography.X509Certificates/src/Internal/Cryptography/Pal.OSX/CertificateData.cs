@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.X509Certificates.Asn1;
 using System.Text;
 
 namespace Internal.Cryptography.Pal
@@ -77,13 +76,14 @@ namespace Internal.Cryptography.Pal
         {
 #endif
             RawData = rawData;
-            certificate = AsnSerializer.Deserialize<CertificateAsn>(rawData, AsnEncodingRules.DER);
+            CertificateAsn.Decode(new AsnReader(rawData, AsnEncodingRules.DER), out certificate);
             certificate.TbsCertificate.ValidateVersion();
             Issuer = new X500DistinguishedName(certificate.TbsCertificate.Issuer.ToArray());
             Subject = new X500DistinguishedName(certificate.TbsCertificate.Subject.ToArray());
 
-            using (AsnWriter writer = AsnSerializer.Serialize(certificate.TbsCertificate.SubjectPublicKeyInfo, AsnEncodingRules.DER))
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
+                certificate.TbsCertificate.SubjectPublicKeyInfo.Encode(writer);
                 SubjectPublicKeyInfo = writer.Encode();
             }
 

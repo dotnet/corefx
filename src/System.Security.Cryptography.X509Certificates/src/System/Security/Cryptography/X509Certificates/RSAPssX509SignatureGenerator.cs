@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Security.Cryptography.Asn1;
-using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -88,18 +87,19 @@ namespace System.Security.Cryptography.X509Certificates
                 parameters.MaskGenAlgorithm.Parameters = mgfParamWriter.Encode();
             }
 
-            using (AsnWriter writer = AsnSerializer.Serialize(parameters, AsnEncodingRules.DER))
+            using (AsnWriter parametersWriter = new AsnWriter(AsnEncodingRules.DER))
+            using (AsnWriter identifierWriter = new AsnWriter(AsnEncodingRules.DER))
             {
+                parameters.Encode(parametersWriter);
+
                 AlgorithmIdentifierAsn identifier = new AlgorithmIdentifierAsn
                 {
                     Algorithm = new Oid(Oids.RsaPss),
-                    Parameters = writer.Encode(),
+                    Parameters = parametersWriter.Encode(),
                 };
 
-                using (AsnWriter identifierWriter = AsnSerializer.Serialize(identifier, AsnEncodingRules.DER))
-                {
-                    return identifierWriter.Encode();
-                }
+                identifier.Encode(identifierWriter);
+                return identifierWriter.Encode();
             }
         }
 

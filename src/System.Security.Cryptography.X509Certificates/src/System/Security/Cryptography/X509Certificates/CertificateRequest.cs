@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Security.Cryptography.Asn1;
-using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -534,10 +533,11 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new ArgumentException(SR.Arg_EmptyOrNullArray, nameof(serialNumber));
 
             byte[] signatureAlgorithm = generator.GetSignatureAlgorithmIdentifier(HashAlgorithm);
-            AlgorithmIdentifierAsn signatureAlgorithmAsn;
 
             // Deserialization also does validation of the value (except for Parameters, which have to be validated separately).
-            signatureAlgorithmAsn = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(signatureAlgorithm, AsnEncodingRules.DER);
+            AlgorithmIdentifierAsn.Decode(
+                new AsnReader(signatureAlgorithm, AsnEncodingRules.DER),
+                out AlgorithmIdentifierAsn signatureAlgorithmAsn);
             if (signatureAlgorithmAsn.Parameters.HasValue)
             {
                 Helpers.ValidateDer(signatureAlgorithmAsn.Parameters.Value);
@@ -590,8 +590,11 @@ namespace System.Security.Cryptography.X509Certificates
                 tbsCertificate.Extensions = extensionAsns.ToArray();
             }
 
-            using (AsnWriter writer = AsnSerializer.Serialize(tbsCertificate, AsnEncodingRules.DER))
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            using (AsnWriter signedWriter = new AsnWriter(AsnEncodingRules.DER))
             {
+                tbsCertificate.Encode(writer);
+
                 byte[] encodedTbsCertificate = writer.Encode();
                 CertificateAsn certificate = new CertificateAsn
                 {
@@ -600,10 +603,8 @@ namespace System.Security.Cryptography.X509Certificates
                     SignatureValue = generator.SignData(encodedTbsCertificate, HashAlgorithm),
                 };
 
-                using (AsnWriter signedWriter = AsnSerializer.Serialize(certificate, AsnEncodingRules.DER))
-                {
-                    return new X509Certificate2(signedWriter.Encode());
-                }
+                certificate.Encode(signedWriter);
+                return new X509Certificate2(signedWriter.Encode());
             }
         }
 

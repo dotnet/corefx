@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Security.Cryptography.Asn1;
-using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -27,7 +26,7 @@ namespace System.Security.Cryptography.X509Certificates
 
                 foreach (X509Extension e in extensions)
                 {
-                    AsnSerializer.Serialize(new X509ExtensionAsn(e), writer);
+                    new X509ExtensionAsn(e).Encode(writer);
                 }
 
                 writer.PopSequence();

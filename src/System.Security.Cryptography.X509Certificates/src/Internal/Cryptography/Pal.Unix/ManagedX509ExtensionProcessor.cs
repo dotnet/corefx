@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.X509Certificates.Asn1;
 
 namespace Internal.Cryptography.Pal
 {
@@ -75,8 +74,9 @@ namespace Internal.Cryptography.Pal
             if (hasPathLengthConstraint)
                 constraints.PathLengthConstraint = pathLengthConstraint;
 
-            using (AsnWriter writer = AsnSerializer.Serialize(constraints, AsnEncodingRules.DER))
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
+                constraints.Encode(writer);
                 return writer.Encode();
             }
         }
@@ -103,7 +103,10 @@ namespace Internal.Cryptography.Pal
                 out bool hasPathLengthConstraint,
                 out int pathLengthConstraint)
         {
-            BasicConstraintsAsn constraints = AsnSerializer.Deserialize<BasicConstraintsAsn>(encoded, AsnEncodingRules.BER);
+            BasicConstraintsAsn.Decode(
+                new AsnReader(encoded, AsnEncodingRules.BER),
+                out BasicConstraintsAsn constraints);
+
             certificateAuthority = constraints.CA;
             hasPathLengthConstraint = constraints.PathLengthConstraint.HasValue;
             pathLengthConstraint = constraints.PathLengthConstraint.GetValueOrDefault();
@@ -140,10 +143,14 @@ namespace Internal.Cryptography.Pal
             //
             // KeyPurposeId ::= OBJECT IDENTIFIER
 
-            Oid[] keyUsages = AsnSerializer.Deserialize<Oid[]>(encoded, AsnEncodingRules.BER);
+            AsnReader reader = new AsnReader(encoded, AsnEncodingRules.BER);
+            AsnReader sequenceReader = reader.ReadSequence();
+            reader.ThrowIfNotEmpty();
             usages = new OidCollection();
-            foreach (Oid KeyPurposeId in keyUsages)
-                usages.Add(KeyPurposeId);
+            while (sequenceReader.HasData)
+            {
+                usages.Add(sequenceReader.ReadObjectIdentifier());
+            }
         }
 
         public virtual byte[] EncodeX509SubjectKeyIdentifierExtension(byte[] subjectKeyIdentifier)
@@ -193,9 +200,10 @@ namespace Internal.Cryptography.Pal
             spki.Algorithm = new AlgorithmIdentifierAsn { Algorithm = key.Oid, Parameters = key.EncodedParameters.RawData };
             spki.SubjectPublicKey = key.EncodedKeyValue.RawData;
 
-            using (AsnWriter writer = AsnSerializer.Serialize(spki, AsnEncodingRules.DER))
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             using (SHA1 hash = SHA1.Create())
             {
+                spki.Encode(writer);
                 return hash.ComputeHash(writer.Encode());
             }
         }
