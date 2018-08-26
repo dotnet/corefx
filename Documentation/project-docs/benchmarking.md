@@ -60,15 +60,13 @@ After that, you should be able to find `CoreRun.exe` in a location similar to:
 
 2. Create a new .NET Core console app using your favorite IDE
 3. Install BenchmarkDotNet (0.11.1+)
-4. Define the benchmarks and setup runner
+4. Define the benchmarks and pass the arguments to BenchmarkSwitcher
 
 ```cs
-...
 class Program
 {
    static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }
-...
 ```
 5. Run the benchmarks using `--coreRun` from the first step. Save the results in a dedicated folder.
 
