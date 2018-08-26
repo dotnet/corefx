@@ -4,7 +4,7 @@
 
 namespace System.Security.Cryptography.Asn1
 {
-	internal partial struct TimeAsn
+    internal partial struct TimeAsn
     {
         public TimeAsn(DateTimeOffset dateTimeOffset)
         {

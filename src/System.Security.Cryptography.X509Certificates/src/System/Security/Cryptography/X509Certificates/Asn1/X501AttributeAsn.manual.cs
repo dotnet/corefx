@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography.Asn1
 {
-	internal partial struct X501AttributeAsn
+    internal partial struct X501AttributeAsn
     {
         public X501AttributeAsn(X501Attribute attribute)
         {

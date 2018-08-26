@@ -4,7 +4,7 @@
 
 namespace System.Security.Cryptography.Asn1
 {
-	internal partial struct ValidityAsn
+    internal partial struct ValidityAsn
     {
         public ValidityAsn(DateTimeOffset notBefore, DateTimeOffset notAfter)
         {
