@@ -3,13 +3,13 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Asn1
+namespace System.Security.Cryptography.X509Certificates.Asn1
 {
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct ValidityAsn
     {
-        internal System.Security.Cryptography.Asn1.TimeAsn NotBefore;
-        internal System.Security.Cryptography.Asn1.TimeAsn NotAfter;
+        internal System.Security.Cryptography.X509Certificates.Asn1.TimeAsn NotBefore;
+        internal System.Security.Cryptography.X509Certificates.Asn1.TimeAsn NotAfter;
       
         internal void Encode(AsnWriter writer)
         {
@@ -41,8 +41,8 @@ namespace System.Security.Cryptography.Asn1
             decoded = default;
             AsnReader sequenceReader = reader.ReadSequence(expectedTag);
             
-            System.Security.Cryptography.Asn1.TimeAsn.Decode(sequenceReader, out decoded.NotBefore);
-            System.Security.Cryptography.Asn1.TimeAsn.Decode(sequenceReader, out decoded.NotAfter);
+            System.Security.Cryptography.X509Certificates.Asn1.TimeAsn.Decode(sequenceReader, out decoded.NotBefore);
+            System.Security.Cryptography.X509Certificates.Asn1.TimeAsn.Decode(sequenceReader, out decoded.NotAfter);
 
             sequenceReader.ThrowIfNotEmpty();
         }

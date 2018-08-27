@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Asn1
+namespace System.Security.Cryptography.X509Certificates.Asn1
 {
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct CertificationRequestInfoAsn
@@ -12,7 +12,7 @@ namespace System.Security.Cryptography.Asn1
         internal System.Numerics.BigInteger Version;
         internal ReadOnlyMemory<byte> Subject;
         internal System.Security.Cryptography.Asn1.SubjectPublicKeyInfoAsn SubjectPublicKeyInfo;
-        internal System.Security.Cryptography.Asn1.X501AttributeAsn[] Attributes;
+        internal System.Security.Cryptography.X509Certificates.Asn1.X501AttributeAsn[] Attributes;
       
         internal void Encode(AsnWriter writer)
         {
@@ -36,12 +36,12 @@ namespace System.Security.Cryptography.Asn1
             writer.WriteEncodedValue(Subject);
             SubjectPublicKeyInfo.Encode(writer);
 
-            writer.PushSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
+            writer.PushSetOf(new Asn1Tag(TagClass.ContextSpecific, 0));
             for (int i = 0; i < Attributes.Length; i++)
             {
                 Attributes[i].Encode(writer); 
             }
-            writer.PopSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
+            writer.PopSetOf(new Asn1Tag(TagClass.ContextSpecific, 0));
 
             writer.PopSequence(tag);
         }
@@ -74,13 +74,13 @@ namespace System.Security.Cryptography.Asn1
 
             // Decode SEQUENCE OF for Attributes
             {
-                collectionReader = sequenceReader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
-                var tmpList = new List<System.Security.Cryptography.Asn1.X501AttributeAsn>();
-                System.Security.Cryptography.Asn1.X501AttributeAsn tmpItem;
+                collectionReader = sequenceReader.ReadSetOf(new Asn1Tag(TagClass.ContextSpecific, 0));
+                var tmpList = new List<System.Security.Cryptography.X509Certificates.Asn1.X501AttributeAsn>();
+                System.Security.Cryptography.X509Certificates.Asn1.X501AttributeAsn tmpItem;
 
                 while (collectionReader.HasData)
                 {
-                    System.Security.Cryptography.Asn1.X501AttributeAsn.Decode(collectionReader, out tmpItem); 
+                    System.Security.Cryptography.X509Certificates.Asn1.X501AttributeAsn.Decode(collectionReader, out tmpItem); 
                     tmpList.Add(tmpItem);
                 }
 

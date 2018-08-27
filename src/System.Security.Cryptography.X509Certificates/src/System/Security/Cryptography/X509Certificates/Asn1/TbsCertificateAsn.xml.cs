@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Asn1
+namespace System.Security.Cryptography.X509Certificates.Asn1
 {
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct TbsCertificateAsn
@@ -15,7 +15,7 @@ namespace System.Security.Cryptography.Asn1
         internal ReadOnlyMemory<byte> SerialNumber;
         internal System.Security.Cryptography.Asn1.AlgorithmIdentifierAsn SignatureAlgorithm;
         internal ReadOnlyMemory<byte> Issuer;
-        internal System.Security.Cryptography.Asn1.ValidityAsn Validity;
+        internal System.Security.Cryptography.X509Certificates.Asn1.ValidityAsn Validity;
         internal ReadOnlyMemory<byte> Subject;
         internal System.Security.Cryptography.Asn1.SubjectPublicKeyInfoAsn SubjectPublicKeyInfo;
         internal ReadOnlyMemory<byte>? IssuerUniqueId;
@@ -169,7 +169,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             decoded.Issuer = sequenceReader.GetEncodedValue();
-            System.Security.Cryptography.Asn1.ValidityAsn.Decode(sequenceReader, out decoded.Validity);
+            System.Security.Cryptography.X509Certificates.Asn1.ValidityAsn.Decode(sequenceReader, out decoded.Validity);
             if (!sequenceReader.PeekTag().HasSameClassAndValue(new Asn1Tag((UniversalTagNumber)16)))
             {
                 throw new CryptographicException();

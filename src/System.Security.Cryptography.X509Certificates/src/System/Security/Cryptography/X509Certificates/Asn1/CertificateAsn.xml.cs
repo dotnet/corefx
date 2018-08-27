@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Asn1
+namespace System.Security.Cryptography.X509Certificates.Asn1
 {
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct CertificateAsn
     {
-        internal System.Security.Cryptography.Asn1.TbsCertificateAsn TbsCertificate;
+        internal System.Security.Cryptography.X509Certificates.Asn1.TbsCertificateAsn TbsCertificate;
         internal System.Security.Cryptography.Asn1.AlgorithmIdentifierAsn SignatureAlgorithm;
         internal ReadOnlyMemory<byte> SignatureValue;
       
@@ -43,7 +43,7 @@ namespace System.Security.Cryptography.Asn1
             decoded = default;
             AsnReader sequenceReader = reader.ReadSequence(expectedTag);
             
-            System.Security.Cryptography.Asn1.TbsCertificateAsn.Decode(sequenceReader, out decoded.TbsCertificate);
+            System.Security.Cryptography.X509Certificates.Asn1.TbsCertificateAsn.Decode(sequenceReader, out decoded.TbsCertificate);
             System.Security.Cryptography.Asn1.AlgorithmIdentifierAsn.Decode(sequenceReader, out decoded.SignatureAlgorithm);
 
             if (sequenceReader.TryGetPrimitiveBitStringValue(out _, out ReadOnlyMemory<byte> tmpSignatureValue))

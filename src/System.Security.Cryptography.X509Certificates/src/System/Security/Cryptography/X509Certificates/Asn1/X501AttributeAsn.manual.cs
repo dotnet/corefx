@@ -4,7 +4,7 @@
 
 using System.Security.Cryptography.X509Certificates;
 
-namespace System.Security.Cryptography.Asn1
+namespace System.Security.Cryptography.X509Certificates.Asn1
 {
     internal partial struct X501AttributeAsn
     {
