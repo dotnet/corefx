@@ -502,7 +502,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''**************************************************************************
         ''' ;GetDriveInfo
         ''' <summary>
-        ''' Return the information about the specified drive.
+        ''' Return the information about the specified drive. If
         ''' </summary>
         ''' <param name="drive">The path to the drive.</param>
         ''' <returns>A DriveInfo object containing the information about the specified drive.</returns>
@@ -525,7 +525,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''**************************************************************************
         ''' ;GetFiles
         ''' <summary>
-        ''' Return a collection of file paths found directly under a directory.
+        ''' Return an unordered collection of file paths found directly under a directory.
         ''' </summary>
         ''' <param name="directory">The directory to find the files inside.</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched files' paths.</returns>
@@ -536,7 +536,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''**************************************************************************
         ''' ;GetFiles
         ''' <summary>
-        ''' Return a collection of file paths found under a directory with the specified name patterns and containing the specified text.
+        ''' Return an unordered collection of file paths found under a directory with the specified name patterns and containing the specified text.
         ''' </summary>
         ''' <param name="directory">The directory to find the files inside.</param>
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
