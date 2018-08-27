@@ -51,23 +51,31 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Shared Sub TestDriveProperties_AppContainer()
-            Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
-            Dim isReady As Boolean = validDrive.IsReady
             If PlatformDetection.IsInAppContainer Then
+                Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
+                Dim isReady As Boolean = validDrive.IsReady
                 Assert.Throws(Of UnauthorizedAccessException)(Function() validDrive.AvailableFreeSpace)
                 Assert.Throws(Of UnauthorizedAccessException)(Function() validDrive.DriveFormat)
                 Assert.Throws(Of UnauthorizedAccessException)(Function() validDrive.TotalFreeSpace)
                 Assert.Throws(Of UnauthorizedAccessException)(Function() validDrive.TotalSize)
                 Assert.Throws(Of UnauthorizedAccessException)(Function() validDrive.VolumeLabel)
-            Else
-                Assert.NotNull(validDrive.Name)
-                Assert.NotNull(validDrive.RootDirectory.Name)
-                Assert.NotNull(validDrive.DriveFormat)
-                Assert.[True](validDrive.AvailableFreeSpace > 0)
-                Assert.[True](validDrive.TotalFreeSpace > 0)
-                Assert.[True](validDrive.TotalSize > 0)
-                Assert.NotNull(validDrive.VolumeLabel)
             End If
+        End Sub
+
+        <Fact>
+        Public Shared Sub TestDriveProperties_()
+            If PlatformDetection.IsInAppContainer Then
+                Exit Sub
+            End If
+            Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
+                Dim isReady As Boolean = validDrive.IsReady
+            Assert.NotNull(validDrive.Name)
+            Assert.NotNull(validDrive.RootDirectory.Name)
+            Assert.NotNull(validDrive.DriveFormat)
+            Assert.[True](validDrive.AvailableFreeSpace > 0)
+            Assert.[True](validDrive.TotalFreeSpace > 0)
+            Assert.[True](validDrive.TotalSize > 0)
+            Assert.NotNull(validDrive.VolumeLabel)
         End Sub
 
         <Fact>
