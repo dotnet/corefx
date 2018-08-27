@@ -57,7 +57,8 @@ namespace <xsl:value-of select="@namespace" />
         static <xsl:value-of select="@name" />()
         {
             <xsl:value-of select="@name" /> decoded = default;
-            AsnReader reader;<xsl:apply-templates mode="DefaultFieldVerify" />
+            AsnReader reader;<xsl:if test="asn:SequenceOf[@defaultDerInit] | asn:SetOf[@defaultDerInit]">
+            AsnReader collectionReader;</xsl:if><xsl:apply-templates mode="DefaultFieldVerify" />
         }
 #endif
  </xsl:if>
