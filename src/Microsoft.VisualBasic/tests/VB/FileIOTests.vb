@@ -427,9 +427,10 @@ Namespace Microsoft.VisualBasic.Tests
                     IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory{i}"))
                 Next
                 DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
-                Assert.True(DirectoryList.Count = 2)
+                Assert.True(DirectoryList.Count = 2, $"Search count {DirectoryList.Count}")
                 For i As Integer = 0 To 1
-                    Assert.True(DirectoryList.Contains(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory{i}")))
+                    Dim DirectoryName As String = IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory{i}")
+                    Assert.True(DirectoryList.Contains(DirectoryName), $"{DirectoryName} Is missing from Wildcard Search")
                 Next
                 IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory0", $"NewSubSubDirectory0"))
                 DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0")
@@ -447,10 +448,9 @@ Namespace Microsoft.VisualBasic.Tests
                 Next
                 IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectoryInfo_DirectoryNewSubDirectory0", $"NewSubSubDirectory"))
                 Dim info As IO.DirectoryInfo = FileSystem.GetDirectoryInfo(TestBase.TestDirectory)
-                Assert.True(info.Attributes = IO.FileAttributes.Directory)
                 Assert.True(info.CreationTime > Date.MinValue, "Creation Time = 0")
-                Assert.True(info.Extension = IO.Path.GetExtension(TestBase.TestDirectory))
-                Assert.True(info.FullName = TestBase.TestDirectory)
+                Assert.True(info.Extension = IO.Path.GetExtension(TestBase.TestDirectory), $"Extension {info.Extension} <> Path.Extension {IO.Path.GetExtension(TestBase.TestDirectory)}")
+                Assert.True(info.FullName = TestBase.TestDirectory, $"Fullname {info.FullName} <> TestBase.TestDirectory {TestBase.TestDirectory}")
                 Assert.True(info.LastAccessTime > Date.MinValue)
                 Assert.True(info.Name = IO.Path.GetFileName(TestBase.TestDirectory))
                 Assert.True(TestBase.RemoveEndingSeparator(info.Parent.ToString) = TestBase.RemoveEndingSeparator(IO.Path.GetTempPath()))
@@ -469,8 +469,6 @@ Namespace Microsoft.VisualBasic.Tests
                 Catch ex As Exception
                     If TypeOf (ex) Is UnauthorizedAccessException Then
                         Assert.Throws(Of UnauthorizedAccessException)(Function() New IO.DriveInfo(Rootname))
-                    Else
-                        Assert.NotNull(Info)
                     End If
                 End Try
 

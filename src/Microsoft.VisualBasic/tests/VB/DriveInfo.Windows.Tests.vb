@@ -63,19 +63,19 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <Fact>
-        Public Shared Sub TestDriveProperties_()
+        Public Shared Sub TestDriveProperties()
             If PlatformDetection.IsInAppContainer Then
                 Exit Sub
             End If
             Dim validDrive As IO.DriveInfo = FileSystem.Drives().Where(Function(d) d.DriveType = IO.DriveType.Fixed).First()
-                Dim isReady As Boolean = validDrive.IsReady
-            Assert.NotNull(validDrive.Name)
-            Assert.NotNull(validDrive.RootDirectory.Name)
-            Assert.NotNull(validDrive.DriveFormat)
-            Assert.[True](validDrive.AvailableFreeSpace > 0)
-            Assert.[True](validDrive.TotalFreeSpace > 0)
-            Assert.[True](validDrive.TotalSize > 0)
-            Assert.NotNull(validDrive.VolumeLabel)
+            Dim isReady As Boolean = validDrive.IsReady
+            Assert.False(validDrive.Name Is Nothing, "Volume Label is Nothing")
+            Assert.False(validDrive.RootDirectory.Name Is Nothing, "Root Directory Name is Nothing")
+            Assert.False(validDrive.DriveFormat Is Nothing, "Drive Format is Nothing")
+            Assert.True(validDrive.AvailableFreeSpace > 0, "Available Free Space = 0")
+            Assert.True(validDrive.TotalFreeSpace > 0, "Total Free Space = 0")
+            Assert.True(validDrive.TotalSize > 0, "Total Size = 0")
+            Assert.False(validDrive.VolumeLabel Is Nothing, "Volume Label is Nothing")
         End Sub
 
         <Fact>
