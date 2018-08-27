@@ -342,7 +342,7 @@ namespace System.Drawing
                 dest = ImageFormat.Png;
 
             // If we don't find an Encoder (for things like Icon), we just switch back to PNG...
-            ImageCodecInfo codec = findEncoderForFormat(dest) ?? findEncoderForFormat(ImageFormat.Png);
+            ImageCodecInfo codec = FindEncoderForFormat(dest) ?? FindEncoderForFormat(ImageFormat.Png);
 
             Save(stream, codec, null);
         }
