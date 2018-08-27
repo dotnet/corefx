@@ -36,7 +36,7 @@ namespace System.Net.Http
 
         private const int MaxStreamId = int.MaxValue;
 
-        private static readonly byte[] s_http2ConnectionPreface = Encoding.ASCII.GetBytes("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n");
+        private static Utf8String s_http2ConnectionPreface => Utf8String.Literal("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n");
 
         private const int InitialBufferSize = 4096;
 

@@ -278,7 +278,7 @@ namespace System.Net.Http
                 return _response;
             }
 
-            private static readonly byte[] s_statusHeaderName = Encoding.ASCII.GetBytes(":status");
+            private static Utf8String s_statusHeaderName => Utf8String.Literal(":status");
 
             // Copied from HttpConnection
             // TODO: Consolidate this logic?
@@ -288,7 +288,7 @@ namespace System.Net.Http
             {
                 // TODO: ISSUE 31309: Optimize HPACK static table decoding
 
-                if (name.SequenceEqual(s_statusHeaderName))
+                if (name.SequenceEqual(s_statusHeaderName.AsSpan()))
                 {
                     if (value.Length != 3)
                         throw new Exception("Invalid status code");

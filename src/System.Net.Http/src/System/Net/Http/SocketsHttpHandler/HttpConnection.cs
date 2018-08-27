@@ -38,7 +38,7 @@ namespace System.Net.Http
         private static readonly byte[] s_spaceHttp10NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.0\r\n");
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
         private static readonly byte[] s_httpSchemeAndDelimiter = Encoding.ASCII.GetBytes(Uri.UriSchemeHttp + Uri.SchemeDelimiter);
-        private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
+        private static Utf8String s_http1DotBytes => Utf8String.Literal("HTTP/1.");
         private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
         private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
 
@@ -793,7 +793,7 @@ namespace System.Net.Http
             {
                 byte minorVersion = line[7];
                 if (IsDigit(minorVersion) &&
-                    line.Slice(0, 7).SequenceEqual(s_http1DotBytes))
+                    line.Slice(0, 7).SequenceEqual(s_http1DotBytes.AsSpan()))
                 {
                     response.SetVersionWithoutValidation(new Version(1, minorVersion - '0'));
                 }
