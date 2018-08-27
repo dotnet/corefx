@@ -24,7 +24,7 @@
     <Compile Include="Matrix4x4Tests.cs" />
     <Compile Include="PlaneTests.cs" />
     <Compile Include="QuaternionTests.cs" />
-    <Compile Condition="'$(TargetGroup)' != 'netcoreapp' AND '$(TargetGroup)' != 'uap'" Include="..\..\Common\src\System\MathF.netstandard.cs">
+    <Compile Condition="'$(TargetGroup)' == 'netfx' OR '$(TargetGroup)' == 'netstandard'" Include="..\..\Common\src\System\MathF.netstandard.cs">
       <Link>System\MathF.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
