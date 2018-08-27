@@ -31,7 +31,7 @@
         <xs:element name="BitString" type="FieldBase" />
         <xs:element name="NamedBitList" type="EnumerationType" />
         <xs:element name="OctetString" type="FieldBase" />
-        <xs:element name="ObjectIdentifier" type="FieldBase" />
+        <xs:element name="ObjectIdentifier" type="ObjectIdentifierType" />
         <xs:element name="Enumerated" type="EnumerationType" />
         <xs:element name="UTF8String" type="FieldBase" />
         <xs:element name="SequenceOf" type="CollectionType" />
@@ -157,6 +157,21 @@
 
   <xs:complexType name="UtcTimeCollectionType">
     <xs:attribute name="twoDigitYearMax" use="optional" type="xs:unsignedShort" />
+  </xs:complexType>
+
+  <xs:complexType name="ObjectIdentifierType">
+    <xs:complexContent>
+      <xs:extension base="FieldBase">
+        <xs:attribute name="backingType" default="Oid">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Oid" />
+              <xs:enumeration value="string" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:simpleType name="QualifiedName">

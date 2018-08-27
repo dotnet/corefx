@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.IO;
@@ -110,44 +111,56 @@ namespace Internal.Cryptography
             arr = tmp;
         }
 
-        public static T[] NormalizeSet<T>(
-            T[] setItems,
+        public static AttributeAsn[] NormalizeAttributeSet(
+            AttributeAsn[] setItems,
             Action<byte[]> encodedValueProcessor=null)
         {
-            AsnSet<T> set = new AsnSet<T>
-            {
-                SetData = setItems,
-            };
+            byte[] normalizedValue;
 
-            AsnWriter writer = AsnSerializer.Serialize(set, AsnEncodingRules.DER);
-            byte[] normalizedValue = writer.Encode();
-            set = AsnSerializer.Deserialize<AsnSet<T>>(normalizedValue, AsnEncodingRules.DER);
-
-            if (encodedValueProcessor != null)
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                encodedValueProcessor(normalizedValue);
+                writer.PushSequence();
+                writer.PushSetOf();
+                foreach (AttributeAsn item in setItems)
+                {
+                    item.Encode(writer);
+                }
+                writer.PopSetOf();
+                writer.PopSequence();
+                normalizedValue = writer.Encode();
+                if (encodedValueProcessor != null)
+                {
+                    encodedValueProcessor(normalizedValue);
+                }
             }
 
-            return set.SetData;
+            AsnReader reader = new AsnReader(normalizedValue, AsnEncodingRules.DER);
+            AsnReader sequenceReader = reader.ReadSequence();
+            AsnReader setReader = sequenceReader.ReadSetOf();
+            List<AttributeAsn> decodedSet = new List<AttributeAsn>(setItems.Length);
+            while (setReader.HasData)
+            {
+                AttributeAsn.Decode(setReader, out AttributeAsn item);
+                decodedSet.Add(item);
+            }
+            return decodedSet.ToArray();
         }
 
-        internal static byte[] EncodeContentInfo<T>(
-            T value,
+        internal static byte[] EncodeContentInfo(
+            ReadOnlyMemory<byte> content,
             string contentType,
             AsnEncodingRules ruleSet = AsnEncodingRules.DER)
         {
-            using (AsnWriter innerWriter = AsnSerializer.Serialize(value, ruleSet))
+            ContentInfoAsn contentInfo = new ContentInfoAsn
             {
-                ContentInfoAsn content = new ContentInfoAsn
-                {
-                    ContentType = contentType,
-                    Content = innerWriter.Encode(),
-                };
-
-                using (AsnWriter outerWriter = AsnSerializer.Serialize(content, ruleSet))
-                {
-                    return outerWriter.Encode();
-                }
+                ContentType = contentType,
+                Content = content,
+            };
+            
+            using (AsnWriter writer = new AsnWriter(ruleSet))
+            {
+                contentInfo.Encode(writer);
+                return writer.Encode();
             }
         }
 
@@ -433,13 +446,6 @@ namespace Internal.Cryptography
 
             Debug.Fail("TryCopyOctetStringBytes failed with an over-allocated array");
             throw new CryptographicException();
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct AsnSet<T>
-        {
-            [SetOf]
-            public T[] SetData;
         }
     }
 }

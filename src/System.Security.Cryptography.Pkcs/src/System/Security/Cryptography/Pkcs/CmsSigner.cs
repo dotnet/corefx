@@ -170,7 +170,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 // Use the serializer/deserializer to DER-normalize the attribute order.
                 SignedAttributesSet signedAttrsSet = new SignedAttributesSet();
-                signedAttrsSet.SignedAttributes = PkcsHelpers.NormalizeSet(
+                signedAttrsSet.SignedAttributes = PkcsHelpers.NormalizeAttributeSet(
                     signedAttrs.ToArray(),
                     normalized =>
                     {
@@ -225,7 +225,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 List<AttributeAsn> attrs = BuildAttributes(UnsignedAttributes);
 
-                newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeSet(attrs.ToArray());
+                newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeAttributeSet(attrs.ToArray());
             }
 
             bool signed = CmsSignature.Sign(
