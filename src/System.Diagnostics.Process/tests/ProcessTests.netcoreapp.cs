@@ -167,7 +167,8 @@ namespace System.Diagnostics.Tests
 
                 parentProcess.Kill(entireProcessTree: false);
 
-                Assert.Equal(new[] { true, false, false }, tree.Select(p => p.HasExited));
+                var actual = tree.Select(p => p.HasExited).ToList();
+                Assert.Equal(new[] { true, false, false }, actual);
             }
             finally
             {
@@ -197,7 +198,8 @@ namespace System.Diagnostics.Tests
 
                 parentProcess.Kill(entireProcessTree: true);
 
-                Assert.True(tree.Select(p => p.HasExited).All(x => x == true));
+                var actual = tree.Select(p => p.HasExited).ToList();
+                Assert.True(actual.All(x => x == true));
             }
             finally
             {
