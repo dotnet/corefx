@@ -44,30 +44,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 }
             });
         }
-            
-        [Fact]
-        public void Santi()
-        {
-            const string InlineJpegImage = "/9j/4AAQSkZJRgABAQEAwADAAAD/4QAiRXhpZgAATU0AKgAAAAgAAQESAAMAAAABAAEAAAAAAAD/2wBDABALDA4MChAODQ4SERATGCkbGBYWGDIkJh4pOzQ+PTo0OThBSV5QQUVZRjg5Um9TWWFkaWppP09ze3Jmel5naWX/2wBDARESEhgVGDAbGzBlQzlDZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWX/wAARCAACAAIDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCpARJb/9k=";
-            byte[] rawInlineImageBytes = Convert.FromBase64String(InlineJpegImage);
-            // Stream is disposed by the save operation on Bitmap.
-            MemoryStream ms = new MemoryStream(rawInlineImageBytes);
-
-            // Bitmap
-            Bitmap bitmapImage = new Bitmap(ms);
-                
-            // Metafile
-            Metafile mf = null;
-            using (Bitmap bm = new Bitmap(16, 16))
-            {
-                using (Graphics gr = Graphics.FromImage(bm))
-                {
-                    RectangleF bounds = new RectangleF(0, 0, 10, 10);
-                    mf = new Metafile("test.emf", gr.GetHdc(), bounds, MetafileFrameUnit.Pixel);
-                    gr.ReleaseHdc();
-                }
-            }
-        }
 
         [Theory]
         [MemberData(nameof(BasicObjectsRoundtrip_MemberData))]

@@ -1382,7 +1382,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     using (Graphics gr = Graphics.FromImage(bm))
                     {
                         RectangleF bounds = new RectangleF(0, 0, 10, 10);
-                        mf = new Metafile("test.emf", gr.GetHdc(), bounds, MetafileFrameUnit.Pixel);
+                        mf = new Metafile($"{Path.GetTempFileName()}.emf", gr.GetHdc(), bounds, MetafileFrameUnit.Pixel);
                         gr.ReleaseHdc();
                     }
                 }
