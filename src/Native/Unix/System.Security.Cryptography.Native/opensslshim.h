@@ -9,8 +9,6 @@
 
 #pragma once
 
-#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
-
 // All the openssl includes need to be here to ensure that the APIs we use
 // are overriden to be called through our function pointers.
 #include <openssl/asn1.h>
