@@ -9,6 +9,8 @@
 
 #pragma once
 
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+
 // All the openssl includes need to be here to ensure that the APIs we use
 // are overriden to be called through our function pointers.
 #include <openssl/asn1.h>
@@ -52,6 +54,13 @@ typedef enum
 
 #endif
 
+#ifdef EVP_MD_CTX_create
+#undef EVP_MD_CTX_create
+#undef EVP_MD_CTX_init
+#undef EVP_MD_CTX_destroy
+#undef SSLv23_method
+#endif
+
 #if defined FEATURE_DISTRO_AGNOSTIC_SSL || OPENSSL_VERSION_NUMBER < 0x10100000L
 #include "apibridge.h"
 #endif
@@ -74,6 +83,31 @@ int EC_POINT_get_affine_coordinates_GF2m(const EC_GROUP *group,
 int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
         const BIGNUM *x, const BIGNUM *y, BN_CTX *ctx);
 #endif
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+typedef struct stack_st _STACK;
+int CRYPTO_add_lock(int *pointer, int amount, int type, const char *file, int line);
+int CRYPTO_num_locks(void);
+void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char *file, int line));
+void ERR_load_crypto_strings(void);
+int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
+int EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *a);
+EVP_MD_CTX *EVP_MD_CTX_create(void);
+void EVP_MD_CTX_destroy(EVP_MD_CTX *ctx);
+void HMAC_CTX_cleanup(HMAC_CTX *ctx);
+void HMAC_CTX_init(HMAC_CTX *ctx);
+void OPENSSL_add_all_algorithms_conf(void);
+void sk_free(_STACK *);
+_STACK *sk_new_null(void);
+int sk_num(const _STACK *);
+void sk_pop_free(_STACK *st, void (*func) (void *));
+int sk_push(_STACK *st, void *data);
+void *sk_value(const _STACK *, int);
+int SSL_library_init(void);
+void SSL_load_error_strings(void);
+int SSL_state(const SSL *ssl);
+unsigned long SSLeay(void);
+const SSL_METHOD *SSLv23_method(void);
+#endif
 
 #if !HAVE_OPENSSL_ALPN
 #undef HAVE_OPENSSL_ALPN
@@ -93,307 +127,354 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
 // List of all functions from the libssl that are used in the System.Security.Cryptography.Native.
 // Forgetting to add a function here results in build failure with message reporting the function
 // that needs to be added.
+
 #define FOR_ALL_OPENSSL_FUNCTIONS \
-    PER_FUNCTION_BLOCK(ASN1_BIT_STRING_free, true) \
-    PER_FUNCTION_BLOCK(ASN1_INTEGER_get, true) \
-    PER_FUNCTION_BLOCK(ASN1_OBJECT_free, true) \
-    PER_FUNCTION_BLOCK(ASN1_OCTET_STRING_free, true) \
-    PER_FUNCTION_BLOCK(ASN1_OCTET_STRING_new, true) \
-    PER_FUNCTION_BLOCK(ASN1_OCTET_STRING_set, true) \
-    PER_FUNCTION_BLOCK(ASN1_STRING_free, true) \
-    PER_FUNCTION_BLOCK(ASN1_STRING_print_ex, true) \
-    PER_FUNCTION_BLOCK(BASIC_CONSTRAINTS_free, true) \
-    PER_FUNCTION_BLOCK(BIO_ctrl, true) \
-    PER_FUNCTION_BLOCK(BIO_ctrl_pending, true) \
-    PER_FUNCTION_BLOCK(BIO_free, true) \
-    PER_FUNCTION_BLOCK(BIO_gets, true) \
-    PER_FUNCTION_BLOCK(BIO_new, true) \
-    PER_FUNCTION_BLOCK(BIO_new_file, true) \
-    PER_FUNCTION_BLOCK(BIO_read, true) \
-    PER_FUNCTION_BLOCK(BIO_s_mem, true) \
-    PER_FUNCTION_BLOCK(BIO_write, true) \
-    PER_FUNCTION_BLOCK(BN_bin2bn, true) \
-    PER_FUNCTION_BLOCK(BN_bn2bin, true) \
-    PER_FUNCTION_BLOCK(BN_clear_free, true) \
-    PER_FUNCTION_BLOCK(BN_free, true) \
-    PER_FUNCTION_BLOCK(BN_new, true) \
-    PER_FUNCTION_BLOCK(BN_num_bits, true) \
-    PER_FUNCTION_BLOCK(CRYPTO_add_lock, true) \
-    PER_FUNCTION_BLOCK(CRYPTO_num_locks, true) \
-    PER_FUNCTION_BLOCK(CRYPTO_set_locking_callback, true) \
-    PER_FUNCTION_BLOCK(d2i_ASN1_BIT_STRING, true) \
-    PER_FUNCTION_BLOCK(d2i_ASN1_OCTET_STRING, true) \
-    PER_FUNCTION_BLOCK(d2i_ASN1_type_bytes, true) \
-    PER_FUNCTION_BLOCK(d2i_BASIC_CONSTRAINTS, true) \
-    PER_FUNCTION_BLOCK(d2i_EXTENDED_KEY_USAGE, true) \
-    PER_FUNCTION_BLOCK(d2i_PKCS12, true) \
-    PER_FUNCTION_BLOCK(d2i_PKCS12_bio, true) \
-    PER_FUNCTION_BLOCK(d2i_PKCS7, true) \
-    PER_FUNCTION_BLOCK(d2i_PKCS7_bio, true) \
-    PER_FUNCTION_BLOCK(d2i_RSAPublicKey, true) \
-    PER_FUNCTION_BLOCK(d2i_X509, true) \
-    PER_FUNCTION_BLOCK(d2i_X509_bio, true) \
-    PER_FUNCTION_BLOCK(d2i_X509_CRL, true) \
-    PER_FUNCTION_BLOCK(d2i_X509_NAME, true) \
-    PER_FUNCTION_BLOCK(DSA_free, true) \
-    PER_FUNCTION_BLOCK(DSA_generate_key, true) \
-    PER_FUNCTION_BLOCK(DSA_generate_parameters_ex, true) \
-    PER_FUNCTION_BLOCK(DSA_new, true) \
-    PER_FUNCTION_BLOCK(DSA_OpenSSL, true) \
-    PER_FUNCTION_BLOCK(DSA_sign, true) \
-    PER_FUNCTION_BLOCK(DSA_size, true) \
-    PER_FUNCTION_BLOCK(DSA_up_ref, true) \
-    PER_FUNCTION_BLOCK(DSA_verify, true) \
-    PER_FUNCTION_BLOCK(ECDSA_sign, true) \
-    PER_FUNCTION_BLOCK(ECDSA_size, true) \
-    PER_FUNCTION_BLOCK(ECDSA_verify, true) \
-    PER_FUNCTION_BLOCK(EC_GFp_mont_method, true) \
-    PER_FUNCTION_BLOCK(EC_GFp_simple_method, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_check, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_free, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get0_generator, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get0_seed, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_cofactor, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GFp, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_curve_name, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_degree, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_order, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_seed_len, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_method_of, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_new, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GFp, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_set_generator, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_set_seed, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_check_key, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_free, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_generate_key, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_get0_group, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_get0_private_key, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_get0_public_key, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_new, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_new_by_curve_name, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_set_group, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_set_private_key, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_set_public_key_affine_coordinates, true) \
-    PER_FUNCTION_BLOCK(EC_KEY_up_ref, true) \
-    PER_FUNCTION_BLOCK(EC_METHOD_get_field_type, true) \
-    PER_FUNCTION_BLOCK(EC_POINT_free, true) \
-    PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GFp, true) \
-    PER_FUNCTION_BLOCK(EC_POINT_new, true) \
-    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GFp, true) \
-    PER_FUNCTION_BLOCK(ERR_clear_error, true) \
-    PER_FUNCTION_BLOCK(ERR_error_string_n, true) \
-    PER_FUNCTION_BLOCK(ERR_get_error, true) \
-    PER_FUNCTION_BLOCK(ERR_load_crypto_strings, true) \
-    PER_FUNCTION_BLOCK(ERR_put_error, true) \
-    PER_FUNCTION_BLOCK(ERR_peek_error, true) \
-    PER_FUNCTION_BLOCK(ERR_peek_last_error, true) \
-    PER_FUNCTION_BLOCK(ERR_reason_error_string, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_128_cbc, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_128_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_128_gcm, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_128_ccm, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_192_cbc, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_192_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_192_gcm, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_192_ccm, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_256_cbc, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_256_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_256_gcm, true) \
-    PER_FUNCTION_BLOCK(EVP_aes_256_ccm, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_cleanup, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_ctrl, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_init, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_set_key_length, true) \
-    PER_FUNCTION_BLOCK(EVP_CIPHER_CTX_set_padding, true) \
-    PER_FUNCTION_BLOCK(EVP_CipherFinal_ex, true) \
-    PER_FUNCTION_BLOCK(EVP_CipherInit_ex, true) \
-    PER_FUNCTION_BLOCK(EVP_CipherUpdate, true) \
-    PER_FUNCTION_BLOCK(EVP_des_cbc, true) \
-    PER_FUNCTION_BLOCK(EVP_des_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_des_ede3, true) \
-    PER_FUNCTION_BLOCK(EVP_des_ede3_cbc, true) \
-    PER_FUNCTION_BLOCK(EVP_DigestFinal_ex, true) \
-    PER_FUNCTION_BLOCK(EVP_DigestInit_ex, true) \
-    PER_FUNCTION_BLOCK(EVP_DigestUpdate, true) \
-    PER_FUNCTION_BLOCK(EVP_get_digestbyname, true) \
-    PER_FUNCTION_BLOCK(EVP_md5, true) \
-    PER_FUNCTION_BLOCK(EVP_MD_CTX_create, true) \
-    PER_FUNCTION_BLOCK(EVP_MD_CTX_destroy, true) \
-    PER_FUNCTION_BLOCK(EVP_MD_size, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_CTX_free, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_CTX_new, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_derive_set_peer, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_derive_init, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_derive, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_free, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_get1_DSA, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_get1_EC_KEY, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_get1_RSA, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_new, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_set1_DSA, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_set1_EC_KEY, true) \
-    PER_FUNCTION_BLOCK(EVP_PKEY_set1_RSA, true) \
-    PER_FUNCTION_BLOCK(EVP_rc2_cbc, true) \
-    PER_FUNCTION_BLOCK(EVP_rc2_ecb, true) \
-    PER_FUNCTION_BLOCK(EVP_sha1, true) \
-    PER_FUNCTION_BLOCK(EVP_sha256, true) \
-    PER_FUNCTION_BLOCK(EVP_sha384, true) \
-    PER_FUNCTION_BLOCK(EVP_sha512, true) \
-    PER_FUNCTION_BLOCK(EXTENDED_KEY_USAGE_free, true) \
-    PER_FUNCTION_BLOCK(GENERAL_NAMES_free, true) \
-    PER_FUNCTION_BLOCK(HMAC_CTX_cleanup, true) \
-    PER_FUNCTION_BLOCK(HMAC_CTX_init, true) \
-    PER_FUNCTION_BLOCK(HMAC_Final, true) \
-    PER_FUNCTION_BLOCK(HMAC_Init_ex, true) \
-    PER_FUNCTION_BLOCK(HMAC_Update, true) \
-    PER_FUNCTION_BLOCK(i2d_ASN1_INTEGER, true) \
-    PER_FUNCTION_BLOCK(i2d_ASN1_TYPE, true) \
-    PER_FUNCTION_BLOCK(i2d_PKCS12, true) \
-    PER_FUNCTION_BLOCK(i2d_PKCS7, true) \
-    PER_FUNCTION_BLOCK(i2d_X509, true) \
-    PER_FUNCTION_BLOCK(i2d_X509_PUBKEY, true) \
-    PER_FUNCTION_BLOCK(OBJ_ln2nid, true) \
-    PER_FUNCTION_BLOCK(OBJ_nid2ln, true) \
-    PER_FUNCTION_BLOCK(OBJ_nid2sn, true) \
-    PER_FUNCTION_BLOCK(OBJ_nid2obj, true) \
-    PER_FUNCTION_BLOCK(OBJ_obj2nid, true) \
-    PER_FUNCTION_BLOCK(OBJ_obj2txt, true) \
-    PER_FUNCTION_BLOCK(OBJ_sn2nid, true) \
-    PER_FUNCTION_BLOCK(OBJ_txt2nid, true) \
-    PER_FUNCTION_BLOCK(OBJ_txt2obj, true) \
-    PER_FUNCTION_BLOCK(OPENSSL_add_all_algorithms_conf, true) \
-    PER_FUNCTION_BLOCK(OPENSSL_cleanse, true) \
-    PER_FUNCTION_BLOCK(PEM_read_bio_PKCS7, true) \
-    PER_FUNCTION_BLOCK(PEM_read_bio_X509_AUX, true) \
-    PER_FUNCTION_BLOCK(PEM_read_bio_X509_CRL, true) \
-    PER_FUNCTION_BLOCK(PEM_write_bio_X509_CRL, true) \
-    PER_FUNCTION_BLOCK(PKCS12_create, true) \
-    PER_FUNCTION_BLOCK(PKCS12_free, true) \
-    PER_FUNCTION_BLOCK(PKCS12_parse, true) \
-    PER_FUNCTION_BLOCK(PKCS7_sign, true) \
-    PER_FUNCTION_BLOCK(PKCS7_free, true) \
-    PER_FUNCTION_BLOCK(RAND_bytes, true) \
-    PER_FUNCTION_BLOCK(RAND_poll, true) \
-    PER_FUNCTION_BLOCK(RSA_free, true) \
-    PER_FUNCTION_BLOCK(RSA_generate_key_ex, true) \
-    PER_FUNCTION_BLOCK(RSA_get_method, true) \
-    PER_FUNCTION_BLOCK(RSA_new, true) \
-    PER_FUNCTION_BLOCK(RSA_private_decrypt, true) \
-    PER_FUNCTION_BLOCK(RSA_private_encrypt, true) \
-    PER_FUNCTION_BLOCK(RSA_public_decrypt, true) \
-    PER_FUNCTION_BLOCK(RSA_public_encrypt, true) \
-    PER_FUNCTION_BLOCK(RSA_sign, true) \
-    PER_FUNCTION_BLOCK(RSA_size, true) \
-    PER_FUNCTION_BLOCK(RSA_up_ref, true) \
-    PER_FUNCTION_BLOCK(RSA_verify, true) \
-    PER_FUNCTION_BLOCK(sk_free, true) \
-    PER_FUNCTION_BLOCK(sk_new_null, true) \
-    PER_FUNCTION_BLOCK(sk_num, true) \
-    PER_FUNCTION_BLOCK(sk_pop_free, true) \
-    PER_FUNCTION_BLOCK(sk_push, true) \
-    PER_FUNCTION_BLOCK(sk_value, true) \
-    PER_FUNCTION_BLOCK(SSL_CIPHER_description, true) \
-    PER_FUNCTION_BLOCK(SSL_ctrl, true) \
-    PER_FUNCTION_BLOCK(SSL_set_quiet_shutdown, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_check_private_key, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_ctrl, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_free, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_new, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_alpn_protos, false) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_alpn_select_cb, false) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_cert_verify_callback, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_cipher_list, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_client_cert_cb, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_quiet_shutdown, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_set_verify, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_use_certificate, true) \
-    PER_FUNCTION_BLOCK(SSL_CTX_use_PrivateKey, true) \
-    PER_FUNCTION_BLOCK(SSL_do_handshake, true) \
-    PER_FUNCTION_BLOCK(SSL_free, true) \
-    PER_FUNCTION_BLOCK(SSL_get_client_CA_list, true) \
-    PER_FUNCTION_BLOCK(SSL_get_current_cipher, true) \
-    PER_FUNCTION_BLOCK(SSL_get_error, true) \
-    PER_FUNCTION_BLOCK(SSL_get_finished, true) \
-    PER_FUNCTION_BLOCK(SSL_get_peer_cert_chain, true) \
-    PER_FUNCTION_BLOCK(SSL_get_peer_certificate, true) \
-    PER_FUNCTION_BLOCK(SSL_get_peer_finished, true) \
-    PER_FUNCTION_BLOCK(SSL_get_SSL_CTX, true) \
-    PER_FUNCTION_BLOCK(SSL_get_version, true) \
-    PER_FUNCTION_BLOCK(SSL_get0_alpn_selected, false) \
-    PER_FUNCTION_BLOCK(SSL_library_init, true) \
-    PER_FUNCTION_BLOCK(SSL_load_error_strings, true) \
-    PER_FUNCTION_BLOCK(SSL_new, true) \
-    PER_FUNCTION_BLOCK(SSL_read, true) \
-    PER_FUNCTION_BLOCK(SSL_renegotiate_pending, true) \
-    PER_FUNCTION_BLOCK(SSL_set_accept_state, true) \
-    PER_FUNCTION_BLOCK(SSL_set_bio, true) \
-    PER_FUNCTION_BLOCK(SSL_set_connect_state, true) \
-    PER_FUNCTION_BLOCK(SSL_shutdown, true) \
-    PER_FUNCTION_BLOCK(SSL_state, true) \
-    PER_FUNCTION_BLOCK(SSLeay, true) \
-    PER_FUNCTION_BLOCK(SSLv23_method, true) \
-    PER_FUNCTION_BLOCK(SSL_write, true) \
-    PER_FUNCTION_BLOCK(TLSv1_1_method, true) \
-    PER_FUNCTION_BLOCK(TLSv1_2_method, true) \
-    PER_FUNCTION_BLOCK(TLSv1_method, true) \
-    PER_FUNCTION_BLOCK(X509_check_issued, true) \
-    PER_FUNCTION_BLOCK(X509_check_purpose, true) \
-    PER_FUNCTION_BLOCK(X509_CRL_free, true) \
-    PER_FUNCTION_BLOCK(X509_digest, true) \
-    PER_FUNCTION_BLOCK(X509_dup, true) \
-    PER_FUNCTION_BLOCK(X509_EXTENSION_create_by_OBJ, true) \
-    PER_FUNCTION_BLOCK(X509_EXTENSION_free, true) \
-    PER_FUNCTION_BLOCK(X509_EXTENSION_get_critical, true) \
-    PER_FUNCTION_BLOCK(X509_EXTENSION_get_data, true) \
-    PER_FUNCTION_BLOCK(X509_EXTENSION_get_object, true) \
-    PER_FUNCTION_BLOCK(X509_free, true) \
-    PER_FUNCTION_BLOCK(X509_get_default_cert_dir, true) \
-    PER_FUNCTION_BLOCK(X509_get_default_cert_dir_env, true) \
-    PER_FUNCTION_BLOCK(X509_get_default_cert_file, true) \
-    PER_FUNCTION_BLOCK(X509_get_default_cert_file_env, true) \
-    PER_FUNCTION_BLOCK(X509_get_ext, true) \
-    PER_FUNCTION_BLOCK(X509_get_ext_count, true) \
-    PER_FUNCTION_BLOCK(X509_get_ext_d2i, true) \
-    PER_FUNCTION_BLOCK(X509_get_issuer_name, true) \
-    PER_FUNCTION_BLOCK(X509_get_serialNumber, true) \
-    PER_FUNCTION_BLOCK(X509_get_subject_name, true) \
-    PER_FUNCTION_BLOCK(X509_issuer_name_hash, true) \
-    PER_FUNCTION_BLOCK(X509_NAME_entry_count, true) \
-    PER_FUNCTION_BLOCK(X509_NAME_ENTRY_get_data, true) \
-    PER_FUNCTION_BLOCK(X509_NAME_ENTRY_get_object, true) \
-    PER_FUNCTION_BLOCK(X509_NAME_free, true) \
-    PER_FUNCTION_BLOCK(X509_NAME_get_entry, true) \
-    PER_FUNCTION_BLOCK(X509_NAME_get_index_by_NID, true) \
-    PER_FUNCTION_BLOCK(X509_PUBKEY_get, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_add_cert, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_add_crl, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_free, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_get0_param, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_get1_chain, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_get_error, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_get_error_depth, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_init, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_new, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_set_flags, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_CTX_set_verify_cb, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_free, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_new, true) \
-    PER_FUNCTION_BLOCK(X509_STORE_set_flags, true) \
-    PER_FUNCTION_BLOCK(X509V3_EXT_print, true) \
-    PER_FUNCTION_BLOCK(X509_verify_cert, true) \
-    PER_FUNCTION_BLOCK(X509_verify_cert_error_string, true) \
-    PER_FUNCTION_BLOCK(X509_VERIFY_PARAM_set_time, true) \
-    PER_FUNCTION_BLOCK(EC_GF2m_simple_method, false) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GF2m, false) \
-    PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GF2m, false) \
-    PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GF2m, false) \
-    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false) \
+    REQUIRED_FUNCTION(ASN1_BIT_STRING_free) \
+    REQUIRED_FUNCTION(ASN1_INTEGER_get) \
+    REQUIRED_FUNCTION(ASN1_OBJECT_free) \
+    REQUIRED_FUNCTION(ASN1_OCTET_STRING_free) \
+    REQUIRED_FUNCTION(ASN1_OCTET_STRING_new) \
+    REQUIRED_FUNCTION(ASN1_OCTET_STRING_set) \
+    REQUIRED_FUNCTION(ASN1_STRING_free) \
+    REQUIRED_FUNCTION(ASN1_STRING_print_ex) \
+    REQUIRED_FUNCTION(BASIC_CONSTRAINTS_free) \
+    REQUIRED_FUNCTION(BIO_ctrl) \
+    REQUIRED_FUNCTION(BIO_ctrl_pending) \
+    REQUIRED_FUNCTION(BIO_free) \
+    REQUIRED_FUNCTION(BIO_gets) \
+    REQUIRED_FUNCTION(BIO_new) \
+    REQUIRED_FUNCTION(BIO_new_file) \
+    REQUIRED_FUNCTION(BIO_read) \
+    REQUIRED_FUNCTION(BIO_s_mem) \
+    REQUIRED_FUNCTION(BIO_write) \
+    REQUIRED_FUNCTION(BN_bin2bn) \
+    REQUIRED_FUNCTION(BN_bn2bin) \
+    REQUIRED_FUNCTION(BN_clear_free) \
+    REQUIRED_FUNCTION(BN_free) \
+    REQUIRED_FUNCTION(BN_new) \
+    REQUIRED_FUNCTION(BN_num_bits) \
+    LEGACY_FUNCTION(CRYPTO_add_lock) \
+    LEGACY_FUNCTION(CRYPTO_num_locks) \
+    LEGACY_FUNCTION(CRYPTO_set_locking_callback) \
+    REQUIRED_FUNCTION(d2i_ASN1_BIT_STRING) \
+    REQUIRED_FUNCTION(d2i_ASN1_OCTET_STRING) \
+    REQUIRED_FUNCTION(d2i_BASIC_CONSTRAINTS) \
+    REQUIRED_FUNCTION(d2i_EXTENDED_KEY_USAGE) \
+    REQUIRED_FUNCTION(d2i_PKCS12) \
+    REQUIRED_FUNCTION(d2i_PKCS12_bio) \
+    REQUIRED_FUNCTION(d2i_PKCS7) \
+    REQUIRED_FUNCTION(d2i_PKCS7_bio) \
+    REQUIRED_FUNCTION(d2i_RSAPublicKey) \
+    REQUIRED_FUNCTION(d2i_X509) \
+    REQUIRED_FUNCTION(d2i_X509_bio) \
+    REQUIRED_FUNCTION(d2i_X509_CRL) \
+    REQUIRED_FUNCTION(d2i_X509_NAME) \
+    REQUIRED_FUNCTION(DSA_free) \
+    REQUIRED_FUNCTION(DSA_generate_key) \
+    REQUIRED_FUNCTION(DSA_generate_parameters_ex) \
+    FALLBACK_FUNCTION(DSA_get0_key) \
+    FALLBACK_FUNCTION(DSA_get0_pqg) \
+    FALLBACK_FUNCTION(DSA_get_method) \
+    REQUIRED_FUNCTION(DSA_new) \
+    REQUIRED_FUNCTION(DSA_OpenSSL) \
+    FALLBACK_FUNCTION(DSA_set0_key) \
+    FALLBACK_FUNCTION(DSA_set0_pqg) \
+    REQUIRED_FUNCTION(DSA_sign) \
+    REQUIRED_FUNCTION(DSA_size) \
+    REQUIRED_FUNCTION(DSA_up_ref) \
+    REQUIRED_FUNCTION(DSA_verify) \
+    REQUIRED_FUNCTION(ECDSA_sign) \
+    REQUIRED_FUNCTION(ECDSA_size) \
+    REQUIRED_FUNCTION(ECDSA_verify) \
+    REQUIRED_FUNCTION(EC_GFp_mont_method) \
+    REQUIRED_FUNCTION(EC_GFp_simple_method) \
+    REQUIRED_FUNCTION(EC_GROUP_check) \
+    REQUIRED_FUNCTION(EC_GROUP_free) \
+    REQUIRED_FUNCTION(EC_GROUP_get0_generator) \
+    REQUIRED_FUNCTION(EC_GROUP_get0_seed) \
+    REQUIRED_FUNCTION(EC_GROUP_get_cofactor) \
+    REQUIRED_FUNCTION(EC_GROUP_get_curve_GFp) \
+    REQUIRED_FUNCTION(EC_GROUP_get_curve_name) \
+    REQUIRED_FUNCTION(EC_GROUP_get_degree) \
+    REQUIRED_FUNCTION(EC_GROUP_get_order) \
+    REQUIRED_FUNCTION(EC_GROUP_get_seed_len) \
+    REQUIRED_FUNCTION(EC_GROUP_method_of) \
+    REQUIRED_FUNCTION(EC_GROUP_new) \
+    REQUIRED_FUNCTION(EC_GROUP_set_curve_GFp) \
+    REQUIRED_FUNCTION(EC_GROUP_set_generator) \
+    REQUIRED_FUNCTION(EC_GROUP_set_seed) \
+    REQUIRED_FUNCTION(EC_KEY_check_key) \
+    REQUIRED_FUNCTION(EC_KEY_free) \
+    REQUIRED_FUNCTION(EC_KEY_generate_key) \
+    REQUIRED_FUNCTION(EC_KEY_get0_group) \
+    REQUIRED_FUNCTION(EC_KEY_get0_private_key) \
+    REQUIRED_FUNCTION(EC_KEY_get0_public_key) \
+    REQUIRED_FUNCTION(EC_KEY_new) \
+    REQUIRED_FUNCTION(EC_KEY_new_by_curve_name) \
+    REQUIRED_FUNCTION(EC_KEY_set_group) \
+    REQUIRED_FUNCTION(EC_KEY_set_private_key) \
+    REQUIRED_FUNCTION(EC_KEY_set_public_key_affine_coordinates) \
+    REQUIRED_FUNCTION(EC_KEY_up_ref) \
+    REQUIRED_FUNCTION(EC_METHOD_get_field_type) \
+    REQUIRED_FUNCTION(EC_POINT_free) \
+    REQUIRED_FUNCTION(EC_POINT_get_affine_coordinates_GFp) \
+    REQUIRED_FUNCTION(EC_POINT_new) \
+    REQUIRED_FUNCTION(EC_POINT_set_affine_coordinates_GFp) \
+    REQUIRED_FUNCTION(ERR_clear_error) \
+    REQUIRED_FUNCTION(ERR_error_string_n) \
+    REQUIRED_FUNCTION(ERR_get_error) \
+    LEGACY_FUNCTION(ERR_load_crypto_strings) \
+    REQUIRED_FUNCTION(ERR_put_error) \
+    REQUIRED_FUNCTION(ERR_peek_error) \
+    REQUIRED_FUNCTION(ERR_peek_last_error) \
+    REQUIRED_FUNCTION(ERR_reason_error_string) \
+    REQUIRED_FUNCTION(EVP_aes_128_cbc) \
+    REQUIRED_FUNCTION(EVP_aes_128_ccm) \
+    REQUIRED_FUNCTION(EVP_aes_128_ecb) \
+    REQUIRED_FUNCTION(EVP_aes_128_gcm) \
+    REQUIRED_FUNCTION(EVP_aes_192_cbc) \
+    REQUIRED_FUNCTION(EVP_aes_192_ccm) \
+    REQUIRED_FUNCTION(EVP_aes_192_ecb) \
+    REQUIRED_FUNCTION(EVP_aes_192_gcm) \
+    REQUIRED_FUNCTION(EVP_aes_256_cbc) \
+    REQUIRED_FUNCTION(EVP_aes_256_ccm) \
+    REQUIRED_FUNCTION(EVP_aes_256_ecb) \
+    REQUIRED_FUNCTION(EVP_aes_256_gcm) \
+    LEGACY_FUNCTION(EVP_CIPHER_CTX_cleanup) \
+    REQUIRED_FUNCTION(EVP_CIPHER_CTX_ctrl) \
+    FALLBACK_FUNCTION(EVP_CIPHER_CTX_free) \
+    LEGACY_FUNCTION(EVP_CIPHER_CTX_init) \
+    FALLBACK_FUNCTION(EVP_CIPHER_CTX_new) \
+    FALLBACK_FUNCTION(EVP_CIPHER_CTX_reset) \
+    REQUIRED_FUNCTION(EVP_CIPHER_CTX_set_key_length) \
+    REQUIRED_FUNCTION(EVP_CIPHER_CTX_set_padding) \
+    REQUIRED_FUNCTION(EVP_CipherFinal_ex) \
+    REQUIRED_FUNCTION(EVP_CipherInit_ex) \
+    REQUIRED_FUNCTION(EVP_CipherUpdate) \
+    REQUIRED_FUNCTION(EVP_des_cbc) \
+    REQUIRED_FUNCTION(EVP_des_ecb) \
+    REQUIRED_FUNCTION(EVP_des_ede3) \
+    REQUIRED_FUNCTION(EVP_des_ede3_cbc) \
+    REQUIRED_FUNCTION(EVP_DigestFinal_ex) \
+    REQUIRED_FUNCTION(EVP_DigestInit_ex) \
+    REQUIRED_FUNCTION(EVP_DigestUpdate) \
+    REQUIRED_FUNCTION(EVP_get_digestbyname) \
+    REQUIRED_FUNCTION(EVP_md5) \
+    LEGACY_FUNCTION(EVP_MD_CTX_create) \
+    LEGACY_FUNCTION(EVP_MD_CTX_destroy) \
+    REQUIRED_FUNCTION(EVP_MD_size) \
+    REQUIRED_FUNCTION(EVP_PKEY_CTX_free) \
+    REQUIRED_FUNCTION(EVP_PKEY_CTX_new) \
+    REQUIRED_FUNCTION(EVP_PKEY_derive_set_peer) \
+    REQUIRED_FUNCTION(EVP_PKEY_derive_init) \
+    REQUIRED_FUNCTION(EVP_PKEY_derive) \
+    REQUIRED_FUNCTION(EVP_PKEY_free) \
+    REQUIRED_FUNCTION(EVP_PKEY_get1_DSA) \
+    REQUIRED_FUNCTION(EVP_PKEY_get1_EC_KEY) \
+    REQUIRED_FUNCTION(EVP_PKEY_get1_RSA) \
+    REQUIRED_FUNCTION(EVP_PKEY_new) \
+    REQUIRED_FUNCTION(EVP_PKEY_set1_DSA) \
+    REQUIRED_FUNCTION(EVP_PKEY_set1_EC_KEY) \
+    REQUIRED_FUNCTION(EVP_PKEY_set1_RSA) \
+    FALLBACK_FUNCTION(EVP_PKEY_up_ref) \
+    REQUIRED_FUNCTION(EVP_rc2_cbc) \
+    REQUIRED_FUNCTION(EVP_rc2_ecb) \
+    REQUIRED_FUNCTION(EVP_sha1) \
+    REQUIRED_FUNCTION(EVP_sha256) \
+    REQUIRED_FUNCTION(EVP_sha384) \
+    REQUIRED_FUNCTION(EVP_sha512) \
+    REQUIRED_FUNCTION(EXTENDED_KEY_USAGE_free) \
+    REQUIRED_FUNCTION(GENERAL_NAMES_free) \
+    LEGACY_FUNCTION(HMAC_CTX_cleanup) \
+    FALLBACK_FUNCTION(HMAC_CTX_free) \
+    LEGACY_FUNCTION(HMAC_CTX_init) \
+    FALLBACK_FUNCTION(HMAC_CTX_new) \
+    REQUIRED_FUNCTION(HMAC_Final) \
+    REQUIRED_FUNCTION(HMAC_Init_ex) \
+    REQUIRED_FUNCTION(HMAC_Update) \
+    REQUIRED_FUNCTION(i2d_ASN1_INTEGER) \
+    REQUIRED_FUNCTION(i2d_ASN1_TYPE) \
+    REQUIRED_FUNCTION(i2d_PKCS12) \
+    REQUIRED_FUNCTION(i2d_PKCS7) \
+    REQUIRED_FUNCTION(i2d_X509) \
+    REQUIRED_FUNCTION(i2d_X509_PUBKEY) \
+    REQUIRED_FUNCTION(OBJ_ln2nid) \
+    REQUIRED_FUNCTION(OBJ_nid2ln) \
+    REQUIRED_FUNCTION(OBJ_nid2sn) \
+    REQUIRED_FUNCTION(OBJ_nid2obj) \
+    REQUIRED_FUNCTION(OBJ_obj2nid) \
+    REQUIRED_FUNCTION(OBJ_obj2txt) \
+    REQUIRED_FUNCTION(OBJ_sn2nid) \
+    REQUIRED_FUNCTION(OBJ_txt2nid) \
+    REQUIRED_FUNCTION(OBJ_txt2obj) \
+    LEGACY_FUNCTION(OPENSSL_add_all_algorithms_conf) \
+    REQUIRED_FUNCTION(OPENSSL_cleanse) \
+    NEW_REQUIRED_FUNCTION(OPENSSL_init_ssl) \
+    REQUIRED_FUNCTION(OPENSSL_sk_free) \
+    REQUIRED_FUNCTION(OPENSSL_sk_new_null) \
+    REQUIRED_FUNCTION(OPENSSL_sk_num) \
+    REQUIRED_FUNCTION(OPENSSL_sk_pop_free) \
+    REQUIRED_FUNCTION(OPENSSL_sk_push) \
+    REQUIRED_FUNCTION(OPENSSL_sk_value) \
+    FALLBACK_FUNCTION(OpenSSL_version_num) \
+    REQUIRED_FUNCTION(PEM_read_bio_PKCS7) \
+    REQUIRED_FUNCTION(PEM_read_bio_X509_AUX) \
+    REQUIRED_FUNCTION(PEM_read_bio_X509_CRL) \
+    REQUIRED_FUNCTION(PEM_write_bio_X509_CRL) \
+    REQUIRED_FUNCTION(PKCS12_create) \
+    REQUIRED_FUNCTION(PKCS12_free) \
+    REQUIRED_FUNCTION(PKCS12_parse) \
+    REQUIRED_FUNCTION(PKCS7_sign) \
+    REQUIRED_FUNCTION(PKCS7_free) \
+    REQUIRED_FUNCTION(RAND_bytes) \
+    REQUIRED_FUNCTION(RAND_poll) \
+    REQUIRED_FUNCTION(RSA_free) \
+    REQUIRED_FUNCTION(RSA_generate_key_ex) \
+    REQUIRED_FUNCTION(RSA_get_method) \
+    FALLBACK_FUNCTION(RSA_get0_crt_params) \
+    FALLBACK_FUNCTION(RSA_get0_factors) \
+    FALLBACK_FUNCTION(RSA_get0_key) \
+    FALLBACK_FUNCTION(RSA_meth_get_flags) \
+    REQUIRED_FUNCTION(RSA_new) \
+    REQUIRED_FUNCTION(RSA_private_decrypt) \
+    REQUIRED_FUNCTION(RSA_private_encrypt) \
+    REQUIRED_FUNCTION(RSA_public_decrypt) \
+    REQUIRED_FUNCTION(RSA_public_encrypt) \
+    FALLBACK_FUNCTION(RSA_set0_crt_params) \
+    FALLBACK_FUNCTION(RSA_set0_factors) \
+    FALLBACK_FUNCTION(RSA_set0_key) \
+    REQUIRED_FUNCTION(RSA_sign) \
+    REQUIRED_FUNCTION(RSA_size) \
+    REQUIRED_FUNCTION(RSA_up_ref) \
+    REQUIRED_FUNCTION(RSA_verify) \
+    LEGACY_FUNCTION(sk_free) \
+    LEGACY_FUNCTION(sk_new_null) \
+    LEGACY_FUNCTION(sk_num) \
+    LEGACY_FUNCTION(sk_pop_free) \
+    LEGACY_FUNCTION(sk_push) \
+    LEGACY_FUNCTION(sk_value) \
+    REQUIRED_FUNCTION(SSL_CIPHER_description) \
+    REQUIRED_FUNCTION(SSL_CIPHER_get_bits) \
+    REQUIRED_FUNCTION(SSL_ctrl) \
+    REQUIRED_FUNCTION(SSL_set_quiet_shutdown) \
+    REQUIRED_FUNCTION(SSL_CTX_check_private_key) \
+    REQUIRED_FUNCTION(SSL_CTX_ctrl) \
+    REQUIRED_FUNCTION(SSL_CTX_free) \
+    FALLBACK_FUNCTION(SSL_get_state) \
+    REQUIRED_FUNCTION(SSL_CTX_new) \
+    LIGHTUP_FUNCTION(SSL_CTX_set_alpn_protos) \
+    LIGHTUP_FUNCTION(SSL_CTX_set_alpn_select_cb) \
+    REQUIRED_FUNCTION(SSL_CTX_set_cert_verify_callback) \
+    REQUIRED_FUNCTION(SSL_CTX_set_cipher_list) \
+    REQUIRED_FUNCTION(SSL_CTX_set_client_cert_cb) \
+    REQUIRED_FUNCTION(SSL_CTX_set_quiet_shutdown) \
+    FALLBACK_FUNCTION(SSL_CTX_set_options) \
+    REQUIRED_FUNCTION(SSL_CTX_set_verify) \
+    REQUIRED_FUNCTION(SSL_CTX_use_certificate) \
+    REQUIRED_FUNCTION(SSL_CTX_use_PrivateKey) \
+    REQUIRED_FUNCTION(SSL_do_handshake) \
+    REQUIRED_FUNCTION(SSL_free) \
+    REQUIRED_FUNCTION(SSL_get_client_CA_list) \
+    REQUIRED_FUNCTION(SSL_get_current_cipher) \
+    REQUIRED_FUNCTION(SSL_get_error) \
+    REQUIRED_FUNCTION(SSL_get_finished) \
+    REQUIRED_FUNCTION(SSL_get_peer_cert_chain) \
+    REQUIRED_FUNCTION(SSL_get_peer_certificate) \
+    REQUIRED_FUNCTION(SSL_get_peer_finished) \
+    REQUIRED_FUNCTION(SSL_get_SSL_CTX) \
+    REQUIRED_FUNCTION(SSL_get_version) \
+    LIGHTUP_FUNCTION(SSL_get0_alpn_selected) \
+    LEGACY_FUNCTION(SSL_library_init) \
+    LEGACY_FUNCTION(SSL_load_error_strings) \
+    REQUIRED_FUNCTION(SSL_new) \
+    REQUIRED_FUNCTION(SSL_read) \
+    REQUIRED_FUNCTION(SSL_renegotiate_pending) \
+    FALLBACK_FUNCTION(SSL_session_reused) \
+    REQUIRED_FUNCTION(SSL_set_accept_state) \
+    REQUIRED_FUNCTION(SSL_set_bio) \
+    REQUIRED_FUNCTION(SSL_set_connect_state) \
+    REQUIRED_FUNCTION(SSL_shutdown) \
+    LEGACY_FUNCTION(SSL_state) \
+    LEGACY_FUNCTION(SSLeay) \
+    REQUIRED_FUNCTION(SSLv23_method) \
+    REQUIRED_FUNCTION(SSL_write) \
+    REQUIRED_FUNCTION(X509_check_issued) \
+    REQUIRED_FUNCTION(X509_check_purpose) \
+    REQUIRED_FUNCTION(X509_CRL_free) \
+    FALLBACK_FUNCTION(X509_CRL_get0_nextUpdate) \
+    REQUIRED_FUNCTION(X509_digest) \
+    REQUIRED_FUNCTION(X509_dup) \
+    REQUIRED_FUNCTION(X509_EXTENSION_create_by_OBJ) \
+    REQUIRED_FUNCTION(X509_EXTENSION_free) \
+    REQUIRED_FUNCTION(X509_EXTENSION_get_critical) \
+    REQUIRED_FUNCTION(X509_EXTENSION_get_data) \
+    REQUIRED_FUNCTION(X509_EXTENSION_get_object) \
+    REQUIRED_FUNCTION(X509_free) \
+    REQUIRED_FUNCTION(X509_get_default_cert_dir) \
+    REQUIRED_FUNCTION(X509_get_default_cert_dir_env) \
+    REQUIRED_FUNCTION(X509_get_default_cert_file) \
+    REQUIRED_FUNCTION(X509_get_default_cert_file_env) \
+    REQUIRED_FUNCTION(X509_get_ext) \
+    REQUIRED_FUNCTION(X509_get_ext_count) \
+    REQUIRED_FUNCTION(X509_get_ext_d2i) \
+    REQUIRED_FUNCTION(X509_get_issuer_name) \
+    REQUIRED_FUNCTION(X509_get_serialNumber) \
+    REQUIRED_FUNCTION(X509_get_subject_name) \
+    FALLBACK_FUNCTION(X509_get_version) \
+    FALLBACK_FUNCTION(X509_get_X509_PUBKEY) \
+    FALLBACK_FUNCTION(X509_get0_notBefore) \
+    FALLBACK_FUNCTION(X509_get0_notAfter) \
+    FALLBACK_FUNCTION(X509_get0_pubkey_bitstr) \
+    FALLBACK_FUNCTION(X509_get0_tbs_sigalg) \
+    REQUIRED_FUNCTION(X509_issuer_name_hash) \
+    REQUIRED_FUNCTION(X509_NAME_entry_count) \
+    REQUIRED_FUNCTION(X509_NAME_ENTRY_get_data) \
+    REQUIRED_FUNCTION(X509_NAME_ENTRY_get_object) \
+    REQUIRED_FUNCTION(X509_NAME_free) \
+    REQUIRED_FUNCTION(X509_NAME_get_entry) \
+    REQUIRED_FUNCTION(X509_NAME_get_index_by_NID) \
+    FALLBACK_FUNCTION(X509_NAME_get0_der) \
+    REQUIRED_FUNCTION(X509_PUBKEY_get) \
+    FALLBACK_FUNCTION(X509_PUBKEY_get0_param) \
+    REQUIRED_FUNCTION(X509_STORE_add_cert) \
+    REQUIRED_FUNCTION(X509_STORE_add_crl) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_free) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get_error) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get_error_depth) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_cert) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_untrusted) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_init) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_new) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_set_flags) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_set_verify_cb) \
+    REQUIRED_FUNCTION(X509_STORE_free) \
+    REQUIRED_FUNCTION(X509_STORE_new) \
+    REQUIRED_FUNCTION(X509_STORE_set_flags) \
+    REQUIRED_FUNCTION(X509V3_EXT_print) \
+    FALLBACK_FUNCTION(X509_up_ref) \
+    REQUIRED_FUNCTION(X509_verify_cert) \
+    REQUIRED_FUNCTION(X509_verify_cert_error_string) \
+    REQUIRED_FUNCTION(X509_VERIFY_PARAM_set_time) \
+    LIGHTUP_FUNCTION(EC_GF2m_simple_method) \
+    LIGHTUP_FUNCTION(EC_GROUP_get_curve_GF2m) \
+    LIGHTUP_FUNCTION(EC_GROUP_set_curve_GF2m) \
+    LIGHTUP_FUNCTION(EC_POINT_get_affine_coordinates_GF2m) \
+    LIGHTUP_FUNCTION(EC_POINT_set_affine_coordinates_GF2m) \
     
 // Declare pointers to all the used OpenSSL functions
-#define PER_FUNCTION_BLOCK(fn, isRequired) extern __typeof(fn)* fn##_ptr;
+#define REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
+#define NEW_REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
+#define LIGHTUP_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
+#define FALLBACK_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
+#define LEGACY_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
-#undef PER_FUNCTION_BLOCK
+#undef LEGACY_FUNCTION
+#undef FALLBACK_FUNCTION
+#undef LIGHTUP_FUNCTION
+#undef NEW_REQUIRED_FUNCTION
+#undef REQUIRED_FUNCTION
 
 // Redefine all calls to OpenSSL functions as calls through pointers that are set
 // to the functions from the libssl.so selected by the shim.
@@ -426,7 +507,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define CRYPTO_set_locking_callback CRYPTO_set_locking_callback_ptr
 #define d2i_ASN1_BIT_STRING d2i_ASN1_BIT_STRING_ptr
 #define d2i_ASN1_OCTET_STRING d2i_ASN1_OCTET_STRING_ptr
-#define d2i_ASN1_type_bytes d2i_ASN1_type_bytes_ptr
 #define d2i_BASIC_CONSTRAINTS d2i_BASIC_CONSTRAINTS_ptr
 #define d2i_EXTENDED_KEY_USAGE d2i_EXTENDED_KEY_USAGE_ptr
 #define d2i_PKCS12 d2i_PKCS12_ptr
@@ -441,8 +521,13 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define DSA_free DSA_free_ptr
 #define DSA_generate_key DSA_generate_key_ptr
 #define DSA_generate_parameters_ex DSA_generate_parameters_ex_ptr
+#define DSA_get0_key DSA_get0_key_ptr
+#define DSA_get0_pqg DSA_get0_pqg_ptr
+#define DSA_get_method DSA_get_method_ptr
 #define DSA_new DSA_new_ptr
 #define DSA_OpenSSL DSA_OpenSSL_ptr
+#define DSA_set0_key DSA_set0_key_ptr
+#define DSA_set0_pqg DSA_set0_pqg_ptr
 #define DSA_sign DSA_sign_ptr
 #define DSA_size DSA_size_ptr
 #define DSA_up_ref DSA_up_ref_ptr
@@ -506,7 +591,10 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_aes_256_ccm EVP_aes_256_ccm_ptr
 #define EVP_CIPHER_CTX_cleanup EVP_CIPHER_CTX_cleanup_ptr
 #define EVP_CIPHER_CTX_ctrl EVP_CIPHER_CTX_ctrl_ptr
+#define EVP_CIPHER_CTX_free EVP_CIPHER_CTX_free_ptr
 #define EVP_CIPHER_CTX_init EVP_CIPHER_CTX_init_ptr
+#define EVP_CIPHER_CTX_new EVP_CIPHER_CTX_new_ptr
+#define EVP_CIPHER_CTX_reset EVP_CIPHER_CTX_reset_ptr
 #define EVP_CIPHER_CTX_set_key_length EVP_CIPHER_CTX_set_key_length_ptr
 #define EVP_CIPHER_CTX_set_padding EVP_CIPHER_CTX_set_padding_ptr
 #define EVP_CipherFinal_ex EVP_CipherFinal_ex_ptr
@@ -537,6 +625,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_PKEY_set1_DSA EVP_PKEY_set1_DSA_ptr
 #define EVP_PKEY_set1_EC_KEY EVP_PKEY_set1_EC_KEY_ptr
 #define EVP_PKEY_set1_RSA EVP_PKEY_set1_RSA_ptr
+#define EVP_PKEY_up_ref EVP_PKEY_up_ref_ptr
 #define EVP_rc2_cbc EVP_rc2_cbc_ptr
 #define EVP_rc2_ecb EVP_rc2_ecb_ptr
 #define EVP_sha1 EVP_sha1_ptr
@@ -546,7 +635,9 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EXTENDED_KEY_USAGE_free EXTENDED_KEY_USAGE_free_ptr
 #define GENERAL_NAMES_free GENERAL_NAMES_free_ptr
 #define HMAC_CTX_cleanup HMAC_CTX_cleanup_ptr
+#define HMAC_CTX_free HMAC_CTX_free_ptr
 #define HMAC_CTX_init HMAC_CTX_init_ptr
+#define HMAC_CTX_new HMAC_CTX_new_ptr
 #define HMAC_Final HMAC_Final_ptr
 #define HMAC_Init_ex HMAC_Init_ex_ptr
 #define HMAC_Update HMAC_Update_ptr
@@ -567,6 +658,14 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define OBJ_txt2obj OBJ_txt2obj_ptr
 #define OPENSSL_add_all_algorithms_conf OPENSSL_add_all_algorithms_conf_ptr
 #define OPENSSL_cleanse OPENSSL_cleanse_ptr
+#define OPENSSL_init_ssl OPENSSL_init_ssl_ptr
+#define OPENSSL_sk_free OPENSSL_sk_free_ptr
+#define OPENSSL_sk_new_null OPENSSL_sk_new_null_ptr
+#define OPENSSL_sk_num OPENSSL_sk_num_ptr
+#define OPENSSL_sk_pop_free OPENSSL_sk_pop_free_ptr
+#define OPENSSL_sk_push OPENSSL_sk_push_ptr
+#define OPENSSL_sk_value OPENSSL_sk_value_ptr
+#define OpenSSL_version_num OpenSSL_version_num_ptr
 #define PEM_read_bio_PKCS7 PEM_read_bio_PKCS7_ptr
 #define PEM_read_bio_X509_AUX PEM_read_bio_X509_AUX_ptr
 #define PEM_read_bio_X509_CRL PEM_read_bio_X509_CRL_ptr
@@ -580,12 +679,19 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RAND_poll RAND_poll_ptr
 #define RSA_free RSA_free_ptr
 #define RSA_generate_key_ex RSA_generate_key_ex_ptr
+#define RSA_get0_crt_params RSA_get0_crt_params_ptr
+#define RSA_get0_factors RSA_get0_factors_ptr
+#define RSA_get0_key RSA_get0_key_ptr
 #define RSA_get_method RSA_get_method_ptr
+#define RSA_meth_get_flags RSA_meth_get_flags_ptr
 #define RSA_new RSA_new_ptr
 #define RSA_private_decrypt RSA_private_decrypt_ptr
 #define RSA_private_encrypt RSA_private_encrypt_ptr
 #define RSA_public_decrypt RSA_public_decrypt_ptr
 #define RSA_public_encrypt RSA_public_encrypt_ptr
+#define RSA_set0_crt_params RSA_set0_crt_params_ptr
+#define RSA_set0_factors RSA_set0_factors_ptr
+#define RSA_set0_key RSA_set0_key_ptr
 #define RSA_sign RSA_sign_ptr
 #define RSA_size RSA_size_ptr
 #define RSA_up_ref RSA_up_ref_ptr
@@ -596,6 +702,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define sk_pop_free sk_pop_free_ptr
 #define sk_push sk_push_ptr
 #define sk_value sk_value_ptr
+#define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
 #define SSL_CIPHER_description SSL_CIPHER_description_ptr
 #define SSL_ctrl SSL_ctrl_ptr
 #define SSL_set_quiet_shutdown SSL_set_quiet_shutdown_ptr
@@ -608,6 +715,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_CTX_set_cert_verify_callback SSL_CTX_set_cert_verify_callback_ptr
 #define SSL_CTX_set_cipher_list SSL_CTX_set_cipher_list_ptr
 #define SSL_CTX_set_client_cert_cb SSL_CTX_set_client_cert_cb_ptr
+#define SSL_CTX_set_options SSL_CTX_set_options_ptr
 #define SSL_CTX_set_quiet_shutdown SSL_CTX_set_quiet_shutdown_ptr
 #define SSL_CTX_set_verify SSL_CTX_set_verify_ptr
 #define SSL_CTX_use_certificate SSL_CTX_use_certificate_ptr
@@ -621,6 +729,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_get_peer_cert_chain SSL_get_peer_cert_chain_ptr
 #define SSL_get_peer_certificate SSL_get_peer_certificate_ptr
 #define SSL_get_peer_finished SSL_get_peer_finished_ptr
+#define SSL_get_state SSL_get_state_ptr
 #define SSL_get_SSL_CTX SSL_get_SSL_CTX_ptr
 #define SSL_get_version SSL_get_version_ptr
 #define SSL_get0_alpn_selected SSL_get0_alpn_selected_ptr
@@ -629,6 +738,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_new SSL_new_ptr
 #define SSL_read SSL_read_ptr
 #define SSL_renegotiate_pending SSL_renegotiate_pending_ptr
+#define SSL_session_reused SSL_session_reused_ptr
 #define SSL_set_accept_state SSL_set_accept_state_ptr
 #define SSL_set_bio SSL_set_bio_ptr
 #define SSL_set_connect_state SSL_set_connect_state_ptr
@@ -637,12 +747,10 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSLeay SSLeay_ptr
 #define SSLv23_method SSLv23_method_ptr
 #define SSL_write SSL_write_ptr
-#define TLSv1_1_method TLSv1_1_method_ptr
-#define TLSv1_2_method TLSv1_2_method_ptr
-#define TLSv1_method TLSv1_method_ptr
 #define X509_check_issued X509_check_issued_ptr
 #define X509_check_purpose X509_check_purpose_ptr
 #define X509_CRL_free X509_CRL_free_ptr
+#define X509_CRL_get0_nextUpdate X509_CRL_get0_nextUpdate_ptr
 #define X509_digest X509_digest_ptr
 #define X509_dup X509_dup_ptr
 #define X509_EXTENSION_create_by_OBJ X509_EXTENSION_create_by_OBJ_ptr
@@ -651,6 +759,10 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_EXTENSION_get_data X509_EXTENSION_get_data_ptr
 #define X509_EXTENSION_get_object X509_EXTENSION_get_object_ptr
 #define X509_free X509_free_ptr
+#define X509_get0_notAfter X509_get0_notAfter_ptr
+#define X509_get0_notBefore X509_get0_notBefore_ptr
+#define X509_get0_pubkey_bitstr X509_get0_pubkey_bitstr_ptr
+#define X509_get0_tbs_sigalg X509_get0_tbs_sigalg_ptr
 #define X509_get_default_cert_dir X509_get_default_cert_dir_ptr
 #define X509_get_default_cert_dir_env X509_get_default_cert_dir_env_ptr
 #define X509_get_default_cert_file X509_get_default_cert_file_ptr
@@ -661,18 +773,24 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get_issuer_name X509_get_issuer_name_ptr
 #define X509_get_serialNumber X509_get_serialNumber_ptr
 #define X509_get_subject_name X509_get_subject_name_ptr
+#define X509_get_X509_PUBKEY X509_get_X509_PUBKEY_ptr
+#define X509_get_version X509_get_version_ptr
 #define X509_issuer_name_hash X509_issuer_name_hash_ptr
 #define X509_NAME_entry_count X509_NAME_entry_count_ptr
 #define X509_NAME_ENTRY_get_data X509_NAME_ENTRY_get_data_ptr
 #define X509_NAME_ENTRY_get_object X509_NAME_ENTRY_get_object_ptr
 #define X509_NAME_free X509_NAME_free_ptr
+#define X509_NAME_get0_der X509_NAME_get0_der_ptr
 #define X509_NAME_get_entry X509_NAME_get_entry_ptr
 #define X509_NAME_get_index_by_NID X509_NAME_get_index_by_NID_ptr
+#define X509_PUBKEY_get0_param X509_PUBKEY_get0_param_ptr
 #define X509_PUBKEY_get X509_PUBKEY_get_ptr
 #define X509_STORE_add_cert X509_STORE_add_cert_ptr
 #define X509_STORE_add_crl X509_STORE_add_crl_ptr
 #define X509_STORE_CTX_free X509_STORE_CTX_free_ptr
+#define X509_STORE_CTX_get0_cert X509_STORE_CTX_get0_cert_ptr
 #define X509_STORE_CTX_get0_param X509_STORE_CTX_get0_param_ptr
+#define X509_STORE_CTX_get0_untrusted X509_STORE_CTX_get0_untrusted_ptr
 #define X509_STORE_CTX_get1_chain X509_STORE_CTX_get1_chain_ptr
 #define X509_STORE_CTX_get_error X509_STORE_CTX_get_error_ptr
 #define X509_STORE_CTX_get_error_depth X509_STORE_CTX_get_error_depth_ptr
@@ -684,6 +802,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_STORE_new X509_STORE_new_ptr
 #define X509_STORE_set_flags X509_STORE_set_flags_ptr
 #define X509V3_EXT_print X509V3_EXT_print_ptr
+#define X509_up_ref X509_up_ref_ptr
 #define X509_verify_cert X509_verify_cert_ptr
 #define X509_verify_cert_error_string X509_verify_cert_error_string_ptr
 #define X509_VERIFY_PARAM_set_time X509_VERIFY_PARAM_set_time_ptr

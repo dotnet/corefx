@@ -1304,6 +1304,10 @@ static void LockingCallback(int mode, int n, const char* file, int line)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wthread-safety-analysis"
 
+#ifndef CRYPTO_LOCK
+#define CRYPTO_LOCK 1
+#endif
+
     int result;
     if (mode & CRYPTO_LOCK)
     {
@@ -1467,7 +1471,16 @@ int32_t CryptoNative_EnsureOpenSslInitialized()
     // If portable then decide which OpenSSL we are, and call the right one.
     // If 1.0, call the 1.0 one.
     // Otherwise call the 1.1 one.
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+    if (API_EXISTS(SSL_state))
+    {
+        return EnsureOpenSsl10Initialized();
+    }
+    else
+    {
+        return EnsureOpenSsl11Initialized();
+    }
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
     return EnsureOpenSsl10Initialized();
 #else
     return EnsureOpenSsl11Initialized();

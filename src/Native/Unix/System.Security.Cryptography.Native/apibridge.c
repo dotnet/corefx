@@ -10,6 +10,15 @@
 
 #include "apibridge.h"
 
+// Minimally define the structs from 1.0.x which went opaque in 1.1.0 for the
+// portable build building against the 1.1.x headers
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#include "openssl_1_0_structs.h"
+
+#define CRYPTO_LOCK_X509 3
+#define CRYPTO_LOCK_EVP_PKEY 10
+#endif
+
 const ASN1_TIME* local_X509_get0_notBefore(const X509* x509)
 {
     if (x509 && x509->cert_info && x509->cert_info->validity)
@@ -32,9 +41,9 @@ const ASN1_TIME* local_X509_get0_notAfter(const X509* x509)
 
 const ASN1_TIME *local_X509_CRL_get0_nextUpdate(const X509_CRL *crl)
 {
-    if (crl)
+    if (crl && crl->crl)
     {
-        return X509_CRL_get_nextUpdate(crl);
+        return crl->crl->nextUpdate;
     }
 
     return NULL;
@@ -272,7 +281,7 @@ int32_t local_EVP_PKEY_up_ref(EVP_PKEY* pkey)
         return 0;
     }
 
-    return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
+    return CRYPTO_add_lock(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY, __FILE__, __LINE__);
 }
 
 EVP_CIPHER_CTX* local_EVP_CIPHER_CTX_new()
@@ -509,10 +518,30 @@ int32_t local_X509_up_ref(X509* x509)
 {
     if (x509 != NULL)
     {
-        return CRYPTO_add(&x509->references, 1, CRYPTO_LOCK_X509) > 1;
+        return CRYPTO_add_lock(&x509->references, 1, CRYPTO_LOCK_X509, __FILE__, __LINE__) > 1;
     }
 
     return 0;
+}
+
+unsigned long local_SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options)
+{
+#ifndef SSL_CTRL_OPTIONS
+#define SSL_CTRL_OPTIONS 32
+#endif
+
+    // SSL_CTX_ctrl is signed long in and signed long out; but SSL_CTX_set_options,
+    // which was a macro call to SSL_CTX_ctrl in 1.0, is unsigned/unsigned.
+    return (unsigned long)SSL_CTX_ctrl(ctx, SSL_CTRL_OPTIONS, (long)options, NULL);
+}
+
+int local_SSL_session_reused(SSL* ssl)
+{
+#ifndef SSL_CTRL_GET_SESSION_REUSED
+#define SSL_CTRL_GET_SESSION_REUSED 8
+#endif
+
+    return (int)SSL_ctrl(ssl, SSL_CTRL_GET_SESSION_REUSED, 0, NULL);
 }
 
 #endif

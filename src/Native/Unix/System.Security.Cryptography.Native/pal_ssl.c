@@ -32,7 +32,12 @@ void CryptoNative_EnsureLibSslInitialized()
     // If portable, call the 1.0 initializer when eeded.
     // If 1.0, call it statically.
     // In 1.1 no action is required, since EnsureOpenSslInitialized does both libraries.
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if FEATURE_DISTRO_AGNOSTIC_SSL
+    if (API_EXISTS(SSL_state))
+    {
+        EnsureLibSsl10Initialized();
+    }
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
     EnsureLibSsl10Initialized();
 #endif
 }
@@ -111,18 +116,14 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
     {
         protocolOptions |= SSL_OP_NO_TLSv1;
     }
-#if HAVE_TLS_V1_1
     if ((protocols & PAL_SSL_TLS11) != PAL_SSL_TLS11)
     {
         protocolOptions |= SSL_OP_NO_TLSv1_1;
     }
-#endif
-#if HAVE_TLS_V1_2
     if ((protocols & PAL_SSL_TLS12) != PAL_SSL_TLS12)
     {
         protocolOptions |= SSL_OP_NO_TLSv1_2;
     }
-#endif
 
     SSL_CTX_set_options(ctx, protocolOptions);
 }
