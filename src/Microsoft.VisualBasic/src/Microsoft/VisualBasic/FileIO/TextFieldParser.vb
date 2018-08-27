@@ -10,11 +10,8 @@ Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Globalization
 Imports System.IO
-Imports System.Security.Permissions
 Imports System.Text
 Imports System.Text.RegularExpressions
-Imports Microsoft.VisualBasic
-Imports Microsoft.VisualBasic.CompilerServices
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 
@@ -528,7 +525,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '==PROTECTED**************************************************************
 
         '''***********************************************************************
-        ''' ;Dispose
+        ''' Dispose
         ''' <summary>
         ''' Standard implementation of IDisposable.Dispose for non sealed classes. Classes derived from
         ''' TextFieldParser should override this method. After doing their own cleanup, they should call
@@ -546,7 +543,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;ValidateFieldTypeEnumValue
+        ''' ValidateFieldTypeEnumValue
         ''' <summary>
         ''' Validates that the value being passed as an AudioPlayMode enum is a legal value
         ''' </summary>

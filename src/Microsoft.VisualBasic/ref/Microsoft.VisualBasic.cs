@@ -478,8 +478,6 @@ namespace Microsoft.VisualBasic.FileIO
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Always)]
         public long LineNumber { get { throw null; } set { } }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        [System.Security.SecurityCriticalAttribute]
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }

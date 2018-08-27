@@ -12,17 +12,9 @@ Imports System.Collections
 Imports System.Collections.Specialized
 Imports System.ComponentModel
 Imports System.Diagnostics
-Imports System.Diagnostics.Debug
-Imports System.Globalization
-Imports System.Linq
-Imports System.Linq.Expressions
-Imports System.Resources.ResourceManager
-Imports System.Runtime
 Imports System.Runtime.InteropServices
 Imports System.Security
-Imports System.Security.Permissions
 Imports System.Text
-Imports System.Threading
 
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
@@ -31,7 +23,7 @@ Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Namespace Microsoft.VisualBasic.FileIO
 
     '''******************************************************************************
-    ''' ;FileSystem
+    ''' FileSystem
     ''' <summary>
     '''  This class represents the file system on a computer. It allows browsing the existing drives, special directories;
     '''  and also contains some commonly use methods for IO tasks.
@@ -66,7 +58,7 @@ Namespace Microsoft.VisualBasic.FileIO
             IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar, IO.Path.VolumeSeparatorChar}
 
         '''**************************************************************************
-        ''' ;CopyOrMove
+        ''' CopyOrMove
         ''' <summary>
         ''' Private enumeration: The operation is a Copy or Move.
         ''' </summary>
@@ -76,7 +68,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Enum
 
         '''**************************************************************************
-        ''' ;FileOrDirectory
+        ''' FileOrDirectory
         ''' <summary>
         ''' Private enumeration: Target of the operation is a File or Directory.
         ''' </summary>
@@ -87,7 +79,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Enum
 
         '''**************************************************************************
-        ''' ;SHFILEOPSTRUCT
+        ''' SHFILEOPSTRUCT
         ''' <summary>
         ''' Contains information that the SHFileOperation function uses to perform file operations
         ''' on 32-bit platforms.
@@ -113,7 +105,6 @@ Namespace Microsoft.VisualBasic.FileIO
         '''    LPVOID hNameMappings;
         '''    LPCTSTR lpszProgressTitle;
         ''' } SHFILEOPSTRUCT, *LPSHFILEOPSTRUCT;
-        ''' * VSWhidbey 321345, 321346: From KB151799 - The SHFILEOPSTRUCT is not double-word aligned.
         '''   If no steps are taken, the last 3 variables will not be passed correctly. Hence the Pack:=1.
         ''' </remarks>
         <StructLayout(LayoutKind.Sequential, Pack:=1, CharSet:=CharSet.Auto)>
@@ -129,7 +120,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Structure
 
         '''**************************************************************************
-        ''' ;MoveFileExFlags
+        ''' MoveFileExFlags
         ''' <summary>
         ''' Flags for MoveFileEx.
         ''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/movefileex.asp
@@ -145,7 +136,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
 
         '''**************************************************************************
-        ''' ;UIOptionInternal
+        ''' UIOptionInternal
         ''' <summary>
         ''' Private enumeration: Indicate the options of ShowUI to use internally.
         ''' This includes NoUI so that we can base the decision on 1 variable.
@@ -158,7 +149,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Enum
 
         '''**************************************************************************
-        ''' ;ShFileOperationFlags
+        ''' ShFileOperationFlags
         ''' <summary>
         ''' Flags that control the file operation. Used in SHFILEOPSTRUCT.
         ''' </summary>
@@ -222,7 +213,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Enum
 
         '''**************************************************************************
-        ''' ;SHFileOperationType
+        ''' SHFileOperationType
         ''' <summary>
         ''' Values that indicate which file operation to perform. Used in SHFILEOPSTRUCT
         ''' </summary>
@@ -234,7 +225,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Enum
 
         '''**************************************************************************
-        ''' ;CopyOrMoveDirectory
+        ''' CopyOrMoveDirectory
         ''' <summary>
         ''' Handles exception cases and calls shell or framework to copy / move directory.
         ''' </summary>
@@ -274,8 +265,6 @@ Namespace Microsoft.VisualBasic.FileIO
             'End If
             'DemandDirectoryPermission(SourceDirectoryFullPath, sourceAccess)
             ' Copy / Move Directory will create the target directory.
-            ' Therefore we also demand Read permission on target path. This will also fix VSWhidbey 421158.
-            'DemandDirectoryPermission(TargetDirectoryFullPath, FileIOPermissionAccess.Read Or FileIOPermissionAccess.Write)
 
             ' Throw if device path.
             ThrowIfDevicePath(SourceDirectoryFullPath)
@@ -310,7 +299,6 @@ Namespace Microsoft.VisualBasic.FileIO
                 SourceDirectoryFullPath, StringComparison.OrdinalIgnoreCase) Then
                 Debug.Assert(TargetDirectoryFullPath.Length > SourceDirectoryFullPath.Length, "Target path should be longer!!!")
 
-                ' Bug fix VSWhidbey 74249: don't throw in case Target = C:\Dir1\Dir2SomethingElse.
                 If TargetDirectoryFullPath.Chars(SourceDirectoryFullPath.Length) = IO.Path.DirectorySeparatorChar Then
                     Throw ExUtils.GetInvalidOperationException(SR.IO_CyclicOperation)
                 End If
@@ -320,7 +308,6 @@ Namespace Microsoft.VisualBasic.FileIO
 
             If showUI <> UIOptionInternal.NoUI AndAlso Environment.UserInteractive Then
 #If HaveUI Then
-                ' If ShowUI AND UserInteractive (VSWhidbey 230265), attempt to call Shell function.
                 ShellCopyOrMove(operation, FileOrDirectory.Directory, SourceDirectoryFullPath, TargetDirectoryFullPath, showUI, onUserCancel)
 #Else
                 Throw New PlatformNotSupportedException("No UI for ShellCopyOrMove(operation, FileOrDirectory.Directory, SourceDirectoryFullPath, TargetDirectoryFullPath, showUI, onUserCancel)")
@@ -332,7 +319,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''******************************************************************************
-        ''' ;CopyOrMoveDirectoryNode
+        ''' CopyOrMoveDirectoryNode
         ''' <summary>
         ''' Given a directory node, copy or move that directory tree.
         ''' </summary>
@@ -420,21 +407,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Dim sourceFileFullPath As String = NormalizeFilePath(sourceFileName, "sourceFileName")
             Dim destinationFileFullPath As String = NormalizeFilePath(destinationFileName, "destinationFileName")
 
-            ' Demand FileIOPermission on the given paths. (CONSIDER: Performance?)
-            ' We do it here instead of waiting for System.IO.File.Copy/Move to demand because
-            ' - Framework's code demand FileIOPermission firstly.
-            ' - We add the ability to move with overwrite flag, which leads to different behavior
-            '   if we don't demand (VSWhidbey 421322).
-            ' - Security reason.
-            ' SECURITY NOTE: We assert UnmanagedCodePermission to call MoveFileEx later if needed so make sure
-            '   we demand the appropriate FileIOPermission.
-            'Dim sourceAccess As FileIOPermissionAccess = FileIOPermissionAccess.Read
-            'If operation = CopyOrMove.Move Then
-            '    sourceAccess = sourceAccess Or FileIOPermissionAccess.Write
-            'End If
-            'Call (New FileIOPermission(sourceAccess, sourceFileFullPath)).Demand()
-            'Call (New FileIOPermission(FileIOPermissionAccess.Write, destinationFileFullPath)).Demand()
-
             ' Throw if device path.
             ThrowIfDevicePath(sourceFileFullPath)
             ThrowIfDevicePath(destinationFileFullPath)
@@ -465,34 +437,9 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Use Framework.
             If operation = CopyOrMove.Copy OrElse
                 sourceFileFullPath.Equals(destinationFileFullPath, StringComparison.OrdinalIgnoreCase) Then
-                ' Call IO.File.Copy if this is a copy operation.
-                ' In addition, if sourceFileFullPath is the same as destinationFileFullPath,
-                '   IO.File.Copy will throw, IO.File.Move will not (VSWhidbey334759).
-                '   Whatever overwrite flag is passed in, IO.File.Move should throw exception,
-                '   so call IO.File.Copy to get the exception as well.
                 IO.File.Copy(sourceFileFullPath, destinationFileFullPath, overwrite)
             Else ' MoveFile with support for overwrite flag.
                 If overwrite Then ' User wants to overwrite destination.
-                    ' Why not checking for destination existence: user may not have read permission / ACL,
-                    ' but have write permission / ACL thus cannot see but can delete / overwrite destination.
-
-                    'If Environment.OSVersion.Platform = PlatformID.Win32NT Then ' Platforms supporting MoveFileEx.
-                    '    ' SECURITY NOTE: We already demand permission at the start.
-                    '    'Call (New SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Assert()
-                    '    Try
-                    '        IO.File.Move(sourceFileName:=sourceFileFullPath, destFileName:=destinationFileFullPath)
-                    '        ' GetLastWin32Error has to be close to PInvoke call. FxCop rule.
-                    '        If Not succeed Then
-                    '            ThrowWinIOError(System.Runtime.InteropServices.Marshal.GetLastWin32Error())
-                    '        End If
-                    '    Catch
-                    '        Throw
-                    '    Finally
-                    '    End Try
-                    'Else ' Win95, Win98, WinME.
-                    ' IO.File.Delete will not throw if destinationFileFullPath does not exist
-                    ' (user may not have permission to discover this, but have permission to overwrite),
-                    ' so always delete the destination.
                     IO.File.Delete(destinationFileFullPath)
                     IO.File.Move(sourceFileFullPath, destinationFileFullPath)
                     'End If
@@ -505,7 +452,6 @@ Namespace Microsoft.VisualBasic.FileIO
         Private Shared Sub DeleteDirectoryInternal(ByVal directory As String, ByVal onDirectoryNotEmpty As DeleteDirectoryOption,
                     ByVal showUI As UIOptionInternal, ByVal recycle As RecycleOption, ByVal onUserCancel As UICancelOption)
 
-            ' Verify enums. VSWhidbey 522083.
             VerifyDeleteDirectoryOption("onDirectoryNotEmpty", onDirectoryNotEmpty)
             VerifyRecycleOption("recycle", recycle)
             VerifyUICancelOption("onUserCancel", onUserCancel)
@@ -523,13 +469,10 @@ Namespace Microsoft.VisualBasic.FileIO
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_DirectoryNotFound_Path, directory)
             End If
 
-            ' VsWhidbey 319809: Throw exception if deleting root directory.
             If IsRoot(directoryFullPath) Then
                 Throw ExUtils.GetIOException(SR.IO_DirectoryIsRoot_Path, directory)
             End If
 
-            ' If user want shell features (Progress, Recycle Bin), call shell operation.
-            ' We don't need to consider onDirectoryNotEmpty here (VSWhidbey 283409).
             If (showUI <> UIOptionInternal.NoUI) AndAlso Environment.UserInteractive Then
 #If HaveUI Then
                 ShellDelete(directoryFullPath, showUI, recycle, onUserCancel, FileOrDirectory.Directory)
@@ -592,7 +535,7 @@ Namespace Microsoft.VisualBasic.FileIO
         'End Sub
 
         '''**************************************************************************
-        ''' ;CopyOrMoveFile
+        ''' CopyOrMoveFile
         ''' <summary>
         ''' Copies or move files. This will be called from CopyFile and MoveFile.
         ''' </summary>
@@ -611,7 +554,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''   ArgumentException: If NewName contains path information.
         ''' </exception>
         '''**************************************************************************
-        ''' ;DeleteDirectory
+        ''' DeleteDirectory
         ''' <summary>
         ''' Delete the given directory, with options to recursively delete, show progress UI, send file to Recycle Bin, and whether to throw exception if user cancels.
         ''' </summary>
@@ -620,9 +563,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="recycle">SendToRecycleBin to delete to Recycle Bin. Otherwise DeletePermanently.</param>
         ''' <param name="onUserCancel">Throw exception when user cancel the UI operation or not.</param>
-        ''' <remarks>If user wants shell features, onDirectoryNotEmpty is ignored. (VSWhidbey 283409)</remarks>
         '''**************************************************************************
-        ''' ;DeleteFileInternal
+        ''' DeleteFileInternal
         ''' <summary>
         ''' Delete the given file, with options to show progress UI, send file to Recycle Bin, throw exception if user cancels.
         ''' </summary>
@@ -632,7 +574,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="onUserCancel">DoNothing or ThrowException</param>
         ''' <remarks></remarks>
         '''**************************************************************************
-        ''' ;DemandDirectoryPermission
+        ''' DemandDirectoryPermission
         ''' <summary>
         ''' Given a full directory path, demand the given access using FileIOPermission.
         ''' </summary>
@@ -640,7 +582,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="access">FileIOPermissionAccess value.</param>
         ''' <remarks>We add a \ to the end if needed to demand permission on the entire directory.</remarks>
         '''******************************************************************************
-        ''' ;EnsurePathNotExist
+        ''' EnsurePathNotExist
         ''' <summary>
         ''' Verify that a path does not refer to an existing directory or file. Throw exception otherwise.
         ''' </summary>
@@ -657,7 +599,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''******************************************************************************
-        ''' ;FileContainsText
+        ''' FileContainsText
         ''' <summary>
         ''' Determines if the given file in the path contains the given text.
         ''' </summary>
@@ -688,7 +630,6 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim ByteCount As Integer = 0
                 ByteCount = FileStream.Read(ByteBuffer, 0, ByteBuffer.Length)
                 If ByteCount > 0 Then
-                    ' Only take the number of bytes returned to avoid false detection. VSWhidbey 518893.
                     Dim MemoryStream As New IO.MemoryStream(ByteBuffer, 0, ByteCount)
                     Dim StreamReader As New IO.StreamReader(MemoryStream, DetectedEncoding, detectEncodingFromByteOrderMarks:=True)
                     StreamReader.ReadLine()
@@ -755,7 +696,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;FindFilesOrDirectories
+        ''' FindFilesOrDirectories
         ''' <summary>
         ''' Find files or directories in a directory and return them in a string collection.
         ''' </summary>
@@ -775,7 +716,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;FindFilesOrDirectories
+        ''' FindFilesOrDirectories
         ''' <summary>
         ''' Find files or directories in a directory and return them in a string collection.
         ''' </summary>
@@ -821,7 +762,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         ''' **************************************************************************
-        ''' ;FindPaths
+        ''' FindPaths
         ''' <summary>
         ''' Given a directory, a pattern, find the files or directories directly under the given directory that match the pattern.
         ''' </summary>
@@ -846,7 +787,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''******************************************************************************
-        ''' ;FxCopyOrMoveDirectory
+        ''' FxCopyOrMoveDirectory
         ''' <summary>
         ''' Copies or moves the directory using Framework.
         ''' </summary>
@@ -875,7 +816,6 @@ Namespace Microsoft.VisualBasic.FileIO
                     Exit Sub
                 Catch ex As IO.IOException
                 Catch ex As UnauthorizedAccessException
-                    ' VSWhidbey 289537: Ignore IO.Directory.Move specific exceptions here. Try to do as much as possible later.
                 End Try
             End If
 
@@ -898,7 +838,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''******************************************************************************
-        ''' ;GetFullPathFromNewName
+        ''' GetFullPathFromNewName
         ''' <summary>
         ''' Returns the fullpath from a directory path and a new name. Throws exception if the new name contains path information.
         ''' </summary>
@@ -936,7 +876,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''******************************************************************************
-        ''' ;GetLongPath
+        ''' GetLongPath
         ''' <summary>
         '''  Returns the given path in long format (v.s 8.3 format) if the path exists.
         ''' </summary>
@@ -993,7 +933,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''******************************************************************************
-        ''' ;GetOperationFlags
+        ''' GetOperationFlags
         ''' <summary>
         ''' Return the ShFileOperationFlags based on the ShowUI option.
         ''' </summary>
@@ -1058,7 +998,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''******************************************************************************
-        ''' ;GetShellOperationInfo
+        ''' GetShellOperationInfo
         ''' <summary>
         ''' Returns an SHFILEOPSTRUCT used by SHFileOperation based on the given parameters.
         ''' </summary>
@@ -1068,7 +1008,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="TargetPath">The target file / directory path. Nothing in case of delete.</param>
         ''' <returns>A fully initialized SHFILEOPSTRUCT.</returns>
         '''******************************************************************************
-        ''' ;GetShellOperationInfo
+        ''' GetShellOperationInfo
         ''' <summary>
         ''' Returns an SHFILEOPSTRUCT used by SHFileOperation based on the given parameters.
         ''' </summary>
@@ -1078,7 +1018,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="TargetPath">The target file / directory path. Nothing in case of delete.</param>
         ''' <returns>A fully initialized SHFILEOPSTRUCT.</returns>
         '''******************************************************************************
-        ''' ;GetShellPath
+        ''' GetShellPath
         ''' <summary>
         ''' Returns the special path format required for pFrom and pTo of SHFILEOPSTRUCT. See NativeMethod.
         ''' </summary>
@@ -1091,7 +1031,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''******************************************************************************
-        ''' ;GetShellPath
+        ''' GetShellPath
         ''' <summary>
         ''' Returns the special path format required for pFrom and pTo of SHFILEOPSTRUCT. See NativeMethod.
         ''' </summary>
@@ -1123,7 +1063,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''******************************************************************************
-        ''' ;IsOnSameDrive
+        ''' IsOnSameDrive
         ''' <summary>
         ''' Checks to see if the two paths is on the same drive.
         ''' </summary>
@@ -1140,7 +1080,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;IsRoot
+        ''' IsRoot
         ''' <summary>
         ''' Checks if the full path is a root path.
         ''' </summary>
@@ -1164,13 +1104,13 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;RemoveEndingSeparator
+        ''' RemoveEndingSeparator
         ''' <summary>
         ''' Removes all directory separators at the end of a path.
         ''' </summary>
         ''' <param name="Path">a full or relative path.</param>
         ''' <returns>If Path is a root path, the same value. Otherwise, removes any directory separators at the end.</returns>
-        ''' <remarks>We decided not to return path with separators at the end (VsWhidbey 54741).</remarks>
+        ''' <remarks>We decided not to return path with separators at the end.</remarks>
         Private Shared Function RemoveEndingSeparator(ByVal Path As String) As String
             If IO.Path.IsPathRooted(Path) Then
                 ' If the path is rooted, attempt to check if it is a root path.
@@ -1188,7 +1128,7 @@ Namespace Microsoft.VisualBasic.FileIO
 #If HaveUI Then
 
         '''******************************************************************************
-        ''' ;ShellCopyOrMove
+        ''' ShellCopyOrMove
         ''' <summary>
         ''' Sets relevant flags on the SHFILEOPSTRUCT and calls SHFileOperation to copy move file / directory.
         ''' </summary>
@@ -1257,7 +1197,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;ShellDelete
+        ''' ShellDelete
         ''' <summary>
         ''' Sets relevant flags on the SHFILEOPSTRUCT and calls into SHFileOperation to delete file / directory.
         ''' </summary>
@@ -1286,7 +1226,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;ShellFileOperation
+        ''' ShellFileOperation
         ''' <summary>
         ''' Calls NativeMethods.SHFileOperation with the given SHFILEOPSTRUCT, notifies the shell of change,
         ''' and throw exceptions if needed.
@@ -1315,8 +1255,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Dim UIPermission As New UIPermission(UIPermissionWindow.SafeSubWindows)
             UIPermission.Demand()
 
-            ' Demand FileIOPermission, defense in depth. VSWhidbey 427776. CONSIDER: Perf hit?
-            ' Demand permission on source path. Get the correct permission access based on operation type.
             Dim SourceIOPermissionAccess As FileIOPermissionAccess = FileIOPermissionAccess.NoAccess
             If OperationType = SHFileOperationType.FO_COPY Then
                 SourceIOPermissionAccess = FileIOPermissionAccess.Read
@@ -1367,7 +1305,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' If the operation was canceled, check OnUserCancel and throw OperationCanceledException if needed.
             ' Otherwise, check the result and throw the appropriate exception if there is an error code.
-            ' VSWhidbey 253382, 468577.
+
             If OperationInfo.fAnyOperationsAborted Then
                 If OnUserCancel = UICancelOption.ThrowException Then
                     Throw New OperationCanceledException()
@@ -1379,13 +1317,12 @@ Namespace Microsoft.VisualBasic.FileIO
 #End If
 
         '''**************************************************************************
-        ''' ;ThrowIfDevicePath
+        ''' ThrowIfDevicePath
         ''' <summary>
         ''' Throw an argument exception if the given path starts with "\\.\" (device path).
         ''' </summary>
         ''' <param name="path">The path to check.</param>
         ''' <remarks>
-        ''' VSWhidbey 230286.
         ''' FileStream already throws exception with device path, so our code only check for device path in Copy / Move / Delete / Rename.
         ''' </remarks>
         Private Shared Sub ThrowIfDevicePath(ByVal path As String)
@@ -1395,7 +1332,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         ''''**************************************************************************
-        '''' ;ThrowWinIOError
+        '''' ThrowWinIOError
         '''' <summary>
         '''' Given an error code from winerror.h, throw the appropriate exception.
         '''' </summary>
@@ -1432,13 +1369,10 @@ Namespace Microsoft.VisualBasic.FileIO
         'End Sub
 
         '''**************************************************************************
-        ''' ;ToUIOptionInternal
+        ''' ToUIOptionInternal
         ''' <summary>
         ''' Convert UIOption to UIOptionInternal to use internally.
         ''' </summary>
-        ''' <remarks>
-        ''' To fix common issues of VSWhidbey 474856, 499359; only accept valid UIOption values.
-        ''' </remarks>
         Private Shared Function ToUIOptionInternal(ByVal showUI As UIOption) As UIOptionInternal
             Select Case showUI
                 Case FileIO.UIOption.AllDialogs
@@ -1451,13 +1385,12 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;VerifyDeleteDirectoryOption
+        ''' VerifyDeleteDirectoryOption
         ''' <summary>
         ''' Verify that the given argument value is a valid DeleteDirectoryOption. If not, throw InvalidEnumArgumentException.
         ''' </summary>
         ''' <param name="argName">The argument name.</param>
         ''' <param name="argValue">The argument value.</param>
-        ''' <remarks>VSWhidbey 522083.</remarks>
         Private Shared Sub VerifyDeleteDirectoryOption(ByVal argName As String, ByVal argValue As DeleteDirectoryOption)
             If argValue = FileIO.DeleteDirectoryOption.DeleteAllContents OrElse
                 argValue = FileIO.DeleteDirectoryOption.ThrowIfDirectoryNonEmpty Then
@@ -1468,7 +1401,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;VerifyRecycleOption
+        ''' VerifyRecycleOption
         ''' <summary>
         ''' Verify that the given argument value is a valid RecycleOption. If not, throw InvalidEnumArgumentException.
         ''' </summary>
@@ -1484,7 +1417,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;VerifySearchOption
+        ''' VerifySearchOption
         ''' <summary>
         ''' Verify that the given argument value is a valid SearchOption. If not, throw InvalidEnumArgumentException.
         ''' </summary>
@@ -1500,7 +1433,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;VerifyUICancelOption
+        ''' VerifyUICancelOption
         ''' <summary>
         ''' Verify that the given argument value is a valid UICancelOption. If not, throw InvalidEnumArgumentException.
         ''' </summary>

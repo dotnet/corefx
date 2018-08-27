@@ -119,13 +119,13 @@ Namespace Microsoft.VisualBasic.Tests
         End Function
 
         '''**************************************************************************
-        ''' ;RemoveEndingSeparator
+        ''' RemoveEndingSeparator
         ''' <summary>
         ''' Removes all directory separators at the end of a path.
         ''' </summary>
         ''' <param name="Path">a full or relative path.</param>
         ''' <returns>If Path is a root path, the same value. Otherwise, removes any directory separators at the end.</returns>
-        ''' <remarks>We decided not to return path with separators at the end (VsWhidbey 54741).</remarks>
+        ''' <remarks>We decided not to return path with separators at the end.</remarks>
         Public Function RemoveEndingSeparator(ByVal Path As String) As String
             If IO.Path.IsPathRooted(Path) Then
                 ' If the path is rooted, attempt to check if it is a root path.

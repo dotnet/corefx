@@ -6,18 +6,14 @@ Option Strict On
 Option Explicit On
 
 Imports System
-Imports System.Diagnostics
 Imports System.Environment
-Imports System.Security.Permissions
-
-Imports Microsoft.VisualBasic.CompilerServices
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 Namespace Microsoft.VisualBasic.FileIO
 
     '''**************************************************************************
-    ''' ;SpecialDirectories
+    ''' SpecialDirectories
     ''' <summary>
     ''' This class contains properties that will return the Special Directories
     ''' specific to the current user (My Documents, My Music ...) and those specific
@@ -30,7 +26,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '= PUBLIC =============================================================
 
         '''**************************************************************************
-        ''' ;AllUsersApplicationData
+        ''' AllUsersApplicationData
         ''' <summary>
         ''' Returns the directory that serves as a common repository for data files
         ''' from your application used by all users.
@@ -49,7 +45,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''**************************************************************************
-        ''' ;CurrentUserApplicationData
+        ''' CurrentUserApplicationData
         ''' <summary>
         ''' Returns the directory that serves as a common repository for data files
         ''' from your application used only by the current user.
@@ -75,7 +71,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''**************************************************************************
-        ''' ;Desktop
+        ''' Desktop
         ''' <summary>
         ''' Return the current user's Desktop directory.
         ''' </summary>
@@ -88,7 +84,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''**************************************************************************
-        ''' ;MyDocuments
+        ''' MyDocuments
         ''' <summary>
         ''' Return the directory that serves as a common repository for user's personal documents.
         ''' </summary>
@@ -102,7 +98,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''**************************************************************************
-        ''' ;MyMusic
+        ''' MyMusic
         ''' <summary>
         ''' Return the "My Music" directory.
         ''' </summary>
@@ -116,7 +112,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''**************************************************************************
-        ''' ;MyPictures
+        ''' MyPictures
         ''' <summary>
         ''' Return the "My Pictures" directory.
         ''' </summary>
@@ -129,7 +125,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
         '''**************************************************************************
-        ''' ;ProgramFiles
+        ''' ProgramFiles
         ''' <summary>
         ''' Return the program files directory.
         ''' </summary>
@@ -142,7 +138,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''**************************************************************************
-        ''' ;Programs
+        ''' Programs
         ''' <summary>
         ''' Returns the directory used to store program shortcuts from Start Menu for current user.
         ''' </summary>
@@ -154,7 +150,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
         '''**************************************************************************
-        ''' ;Temp
+        ''' Temp
         ''' <summary>
         ''' Return the directory that contain temporary files for the current user.
         ''' </summary>
@@ -176,7 +172,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '= PRIVATE ============================================================
 
         '''**************************************************************************
-        ''' ;GetDirectoryPath
+        ''' GetDirectoryPath
         ''' <summary>
         ''' Return a normalized from a directory path and throw exception if directory path is "".
         ''' </summary>
@@ -184,7 +180,6 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="DirectoryNameResID">The resource ID of the special directory's localized name.</param>
         ''' <returns>A String containing the path to the special directory if success.</returns>
         Private Shared Function GetDirectoryPath(ByVal Directory As String, ByVal DirectoryNameResID As String) As String
-            ' CONSIDER: create the directory if not exist. VSWhidbey 163316.
             ' Only need to worry about Directory being "" since it comes from Framework.
             If Directory.Length = 0 Then
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(DirectoryNameResID))

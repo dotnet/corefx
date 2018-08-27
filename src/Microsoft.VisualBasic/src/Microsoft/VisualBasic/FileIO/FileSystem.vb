@@ -4,23 +4,16 @@
 
 Option Strict On
 Option Explicit On
-
-Imports Microsoft.VisualBasic.CompilerServices
-Imports Microsoft.VisualBasic.CompilerServices.Utils
 Imports System
 Imports System.Collections
-Imports System.Collections.Specialized
-Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Globalization
 Imports System.Runtime.Versioning
-Imports System.Security
-Imports System.Security.Permissions
 Imports System.Text
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 ' NOTE:
-' - All path returned by us will NOT have the Directory Separator Character ('\') at the end. (VSWhidbey 54741).
+' - All path returned by us will NOT have the Directory Separator Character ('\') at the end.
 ' - All path accepted by us will NOT consider the meaning of Directory Separator Character ('\') at the end.
 ' - Parameter accepting path will accept both relative and absolute paths unless specified.
 '       Relative paths will be resolved using the current working directory.
@@ -86,14 +79,14 @@ Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Namespace Microsoft.VisualBasic.FileIO
 
     '''**************************************************************************
-    ''' ;DeleteDirectoryOption
+    ''' DeleteDirectoryOption
     ''' <summary>
     ''' Specify the action to do when deleting a directory and it is not empty.
     ''' </summary>
     ''' <remarks>
-    ''' Again, avoid Integer values that VB Compiler will convert Boolean to (0 and -1). VSWhidbey 522083.
+    ''' Again, avoid Integer values that VB Compiler will convert Boolean to (0 and -1).
     ''' IMPORTANT: Change VerifyDeleteDirectoryOption if this enum is changed.
-    ''' Also, values in DeleteDirectoryOption must be different from UIOption. VSWhidbey 491042.
+    ''' Also, values in DeleteDirectoryOption must be different from UIOption.
     ''' </remarks>
     Public Enum DeleteDirectoryOption As Integer
         ThrowIfDirectoryNonEmpty = 4
@@ -101,7 +94,7 @@ Namespace Microsoft.VisualBasic.FileIO
     End Enum
 
     '''**************************************************************************
-    ''' ;RecycleOption
+    ''' RecycleOption
     ''' <summary>
     ''' Specify whether to delete a file / directory to Recycle Bin or not.
     ''' </summary>
@@ -111,7 +104,7 @@ Namespace Microsoft.VisualBasic.FileIO
     End Enum
 
     '''**************************************************************************
-    ''' ;SearchOption
+    ''' SearchOption
     ''' <summary>
     ''' Specify whether to perform the search for files/directories recursively or not.
     ''' </summary>
@@ -121,7 +114,7 @@ Namespace Microsoft.VisualBasic.FileIO
     End Enum
 
     '''**************************************************************************
-    ''' ;UICancelOption
+    ''' UICancelOption
     ''' <summary>
     ''' Defines option whether to throw exception when user cancels a UI operation or not.
     ''' </summary>
@@ -131,13 +124,12 @@ Namespace Microsoft.VisualBasic.FileIO
     End Enum
 
     '''**************************************************************************
-    ''' ;UIOption
+    ''' UIOption
     ''' <summary>
     ''' Specify which UI dialogs to show.
     ''' </summary>
     ''' <remarks>
-    ''' To fix common issues of VSWhidbey 474856, 499359; avoid Integer values that VB Compiler
-    ''' will convert Boolean to (0 and -1).
+    ''' Integer values that VB Compiler will convert Boolean to (0 and -1).
     ''' </remarks>
     Public Enum UIOption As Integer
         OnlyErrorDialogs = 2
@@ -145,7 +137,7 @@ Namespace Microsoft.VisualBasic.FileIO
     End Enum
 
     '''******************************************************************************
-    ''' ;FileSystem
+    ''' FileSystem
     ''' <summary>
     '''  This class represents the file system on a computer. It allows browsing the existing drives, special directories;
     '''  and also contains some commonly use methods for IO tasks.
@@ -161,7 +153,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '== PROPERTIES ========================================================
 
         '''**************************************************************************
-        ''' ;CurrentDirectory
+        ''' CurrentDirectory
         ''' <summary>
         ''' Get or set the current working directory.
         ''' </summary>
@@ -176,7 +168,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         '''******************************************************************************
-        ''' ;Drives
+        ''' Drives
         ''' <summary>
         ''' Return the names of all available drives on the computer.
         ''' </summary>
@@ -196,7 +188,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '== FUNCTIONS =========================================================
 
         ''' **************************************************************************
-        ''' ;AddToStringCollection
+        ''' AddToStringCollection
         ''' <summary>
         ''' Add an array of string into a Generic Collection of String.
         ''' </summary>
@@ -214,14 +206,14 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CheckFilePathTrailingSeparator
+        ''' CheckFilePathTrailingSeparator
         ''' <summary>
-        ''' Throw ArgumentException if the file path ends with a separator. (VSWhidbey 372980).
+        ''' Throw ArgumentException if the file path ends with a separator..
         ''' </summary>
         ''' <param name="path">The file path.</param>
         ''' <param name="paramName">The parameter name to include in ArgumentException.</param>
         Friend Shared Sub CheckFilePathTrailingSeparator(ByVal path As String, ByVal paramName As String)
-            If path.Length = 0 Then ' Check for argument null - VSWhidbey 452078.
+            If path.Length = 0 Then ' Check for argument null
                 Throw ExUtils.GetArgumentNullException(paramName)
             End If
             If path.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.Ordinal) Or
@@ -231,14 +223,13 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;NormalizeFilePath
+        ''' NormalizeFilePath
         ''' <summary>
         ''' Normalize the path, but throw exception if the path ends with separator.
         ''' </summary>
         ''' <param name="Path">The input path.</param>
         ''' <param name="ParamName">The parameter name to include in the exception if one is raised.</param>
         ''' <returns>The normalized path.</returns>
-        ''' <remarks>VSWhidbey 372980.</remarks>
         Friend Shared Function NormalizeFilePath(ByVal Path As String, ByVal ParamName As String) As String
             CheckFilePathTrailingSeparator(Path, ParamName)
             Return NormalizePath(Path)
@@ -246,7 +237,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
         '= FRIEND =============================================================
         '''**************************************************************************
-        ''' ;NormalizePath
+        ''' NormalizePath
         ''' <summary>
         ''' Get full path, get long format, and remove any pending separator.
         ''' </summary>
@@ -259,7 +250,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;CombinePath
+        ''' CombinePath
         ''' <summary>
         ''' Combines two path strings by adding a path separator.
         ''' </summary>
@@ -267,8 +258,6 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="relativePath">The second part of the path, must be a relative path.</param>
         ''' <returns>A String contains the combined path.</returns>
         Public Shared Function CombinePath(ByVal baseDirectory As String, ByVal relativePath As String) As String
-
-            ' VSWhidbey 258686.
             If baseDirectory.Length = 0 Then
                 Throw ExUtils.GetArgumentNullException("baseDirectory", SR.General_ArgumentEmptyOrNothing_Name, "baseDirectory")
             End If
@@ -282,7 +271,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;CopyDirectory
+        ''' CopyDirectory
         ''' <summary>
         ''' Copy an existing directory to a new directory,
         ''' throwing exception if there are existing files with the same name.
@@ -297,7 +286,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CopyDirectory
+        ''' CopyDirectory
         ''' <summary>
         ''' Copy an existing directory to a new directory,
         ''' overwriting existing files with the same name if specified.
@@ -313,7 +302,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CopyFile
+        ''' CopyFile
         ''' <summary>
         ''' Copy an existing file to a new file. Overwriting a file of the same name is not allowed.
         ''' </summary>
@@ -327,7 +316,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CopyFile
+        ''' CopyFile
         ''' <summary>
         ''' Copy an existing file to a new file. Overwriting a file of the same name if specified.
         ''' </summary>
@@ -342,7 +331,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CreateDirectory
+        ''' CreateDirectory
         ''' <summary>
         '''  Creates a directory from the given path (including all parent directories).
         ''' </summary>
@@ -351,7 +340,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Get the full path. GetFullPath will throw if invalid path.
             directory = IO.Path.GetFullPath(directory)
 
-            If IO.File.Exists(directory) Then ' CONSIDER: : Pending on VSWhidbey 104049.
+            If IO.File.Exists(directory) Then
                 Throw ExUtils.GetIOException(SR.IO_FileExists_Path, directory)
             End If
 
@@ -360,7 +349,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DeleteDirectory
+        ''' DeleteDirectory
         ''' <summary>
         ''' Delete the given directory, with options to recursively delete.
         ''' </summary>
@@ -374,7 +363,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DeleteFile
+        ''' DeleteFile
         ''' <summary>
         ''' Delete the given file.
         ''' </summary>
@@ -386,7 +375,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DirectoryExists
+        ''' DirectoryExists
         ''' <summary>
         '''  Determines whether the given path refers to an existing directory on disk.
         ''' </summary>
@@ -397,7 +386,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;FileExists
+        ''' FileExists
         ''' <summary>
         '''  Determines whether the given path refers to an existing file on disk.
         ''' </summary>
@@ -414,7 +403,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;FindInFiles
+        ''' FindInFiles
         ''' <summary>
         ''' Find files in the given folder that contain the given text.
         ''' </summary>
@@ -429,7 +418,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;FindInFiles
+        ''' FindInFiles
         ''' <summary>
         ''' Find files in the given folder that contain the given text.
         ''' </summary>
@@ -462,7 +451,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetDirectories
+        ''' GetDirectories
         ''' <summary>
         ''' Return the paths of sub directories found directly under a directory.
         ''' </summary>
@@ -474,7 +463,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetDirectories
+        ''' GetDirectories
         ''' <summary>
         ''' Return the paths of sub directories found under a directory with the specified name patterns.
         ''' </summary>
@@ -489,7 +478,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetDirectoryInfo
+        ''' GetDirectoryInfo
         ''' <summary>
         '''  Returns the information object about the specified directory.
         ''' </summary>
@@ -500,7 +489,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetDriveInfo
+        ''' GetDriveInfo
         ''' <summary>
         ''' Return the information about the specified drive. If
         ''' </summary>
@@ -511,7 +500,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetFileInfo
+        ''' GetFileInfo
         ''' <summary>
         '''  Returns the information about the specified file.
         ''' </summary>
@@ -523,7 +512,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetFiles
+        ''' GetFiles
         ''' <summary>
         ''' Return an unordered collection of file paths found directly under a directory.
         ''' </summary>
@@ -534,7 +523,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetFiles
+        ''' GetFiles
         ''' <summary>
         ''' Return an unordered collection of file paths found under a directory with the specified name patterns and containing the specified text.
         ''' </summary>
@@ -549,7 +538,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetName
+        ''' GetName
         ''' <summary>
         ''' Return the name (and extension) from the given path string.
         ''' </summary>
@@ -561,7 +550,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetParentPath
+        ''' GetParentPath
         ''' <summary>
         ''' Returns the parent directory's path from a specified path.
         ''' </summary>
@@ -588,7 +577,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;GetTempFileName
+        ''' GetTempFileName
         ''' <summary>
         ''' Create a uniquely named zero-byte temporary file on disk and return the full path to that file.
         ''' </summary>
@@ -598,7 +587,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;MoveDirectory
+        ''' MoveDirectory
         ''' <summary>
         ''' Move an existing directory to a new directory,
         ''' throwing exception if there are existing files with the same name.
@@ -613,7 +602,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveDirectory
+        ''' MoveDirectory
         ''' <summary>
         ''' Move an existing directory to a new directory,
         ''' overwriting existing files with the same name if specified.
@@ -628,7 +617,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveFile
+        ''' MoveFile
         ''' <summary>
         ''' Move an existing file to a new file. Overwriting a file of the same name is not allowed.
         ''' </summary>
@@ -642,7 +631,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveFile
+        ''' MoveFile
         ''' <summary>
         ''' Move an existing file to a new file. Overwriting a file of the same name if specified.
         ''' </summary>
@@ -657,7 +646,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;OpenTextFieldParser
+        ''' OpenTextFieldParser
         ''' <summary>
         ''' Return an instance of a TextFieldParser for the given file.
         ''' </summary>
@@ -668,7 +657,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;OpenTextFieldParser
+        ''' OpenTextFieldParser
         ''' <summary>
         ''' Return an instance of a TextFieldParser for the given file using the given delimiters.
         ''' </summary>
@@ -683,7 +672,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;OpenTextFieldParser
+        ''' OpenTextFieldParser
         ''' <summary>
         ''' Return an instance of a TextFieldParser for the given file using the given field widths.
         ''' </summary>
@@ -698,7 +687,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;OpenTextFieldParser
+        ''' OpenTextFieldParser
         ''' <summary>
         ''' Return a StreamReader for reading the given file using UTF-8 as preferred encoding.
         ''' </summary>
@@ -709,7 +698,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;OpenTextFileReader
+        ''' OpenTextFileReader
         ''' <summary>
         ''' Return a StreamReader for reading the given file using the given encoding as preferred encoding.
         ''' </summary>
@@ -723,7 +712,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;OpenTextFileWriter
+        ''' OpenTextFileWriter
         ''' <summary>
         ''' Return a StreamWriter for writing to the given file using UTF-8 encoding.
         ''' </summary>
@@ -735,7 +724,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;OpenTextFileWriter
+        ''' OpenTextFileWriter
         ''' <summary>
         ''' Return a StreamWriter for writing to the given file using the given encoding.
         ''' </summary>
@@ -751,7 +740,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;ReadAllBytes
+        ''' ReadAllBytes
         ''' <summary>
         ''' Read the whole content of a file into a byte array.
         ''' </summary>
@@ -764,7 +753,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;ReadAllText
+        ''' ReadAllText
         ''' <summary>
         ''' Read the whole content of a text file into a string using UTF-8 encoding.
         ''' </summary>
@@ -776,7 +765,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         '''**************************************************************************
-        ''' ;ReadAllText
+        ''' ReadAllText
         ''' <summary>
         ''' Read the whole content of a text file into a string using the given encoding.
         ''' </summary>
@@ -788,7 +777,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Return IO.File.ReadAllText(file, encoding)
         End Function
         '''**************************************************************************
-        ''' ;RenameDirectory
+        ''' RenameDirectory
         ''' <summary>
         ''' Rename a directory, does not act like a move.
         ''' </summary>
@@ -832,7 +821,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;RenameFile
+        ''' RenameFile
         ''' <summary>
         ''' Renames a file, does not change the file location.
         ''' </summary>
@@ -870,7 +859,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;WriteAllBytes
+        ''' WriteAllBytes
         ''' <summary>
         ''' Overwrites or appends the specified byte array to the specified file,
         ''' creating the file if it does not exist.
@@ -881,8 +870,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <exception cref="IO.FileStream">See FileStream constructor and Write: For other exceptions.</exception>
         Public Shared Sub WriteAllBytes(ByVal file As String, ByVal data() As Byte, ByVal append As Boolean)
 
-            ' VSWhidbey 445570: Cannot call through IO.File.WriteAllBytes (since they don't support append)
-            ' so only check for trailing separator as specified in VSWhidbey 372980.
+            ' Cannot call through IO.File.WriteAllBytes (since they don't support append)
+            ' so only check for trailing separator
             CheckFilePathTrailingSeparator(file, NameOf(file))
 
             Dim FileStream As IO.FileStream = Nothing
@@ -905,7 +894,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;WriteAllText
+        ''' WriteAllText
         ''' <summary>
         ''' Overwrites or appends the given text using UTF-8 encoding to the given file,
         ''' creating the file if it does not exist.
@@ -919,7 +908,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;WriteAllText
+        ''' WriteAllText
         ''' <summary>
         ''' Overwrites or appends the given text using the given encoding to the given file,
         ''' creating the file if it does not exist.
@@ -932,13 +921,13 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Shared Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean,
             ByVal encoding As Encoding)
 
-            ' VSWhidbey 445570: Cannot call through IO.File.WriteAllText (since they don't support: append, prefer current encoding than specified one)
-            ' so only check for trailing separator as specified in VSWhidbey 372980.
+            'Cannot call through IO.File.WriteAllText (since they don't support: append, prefer current encoding than specified one)
+            ' so only check for trailing separator.
             CheckFilePathTrailingSeparator(file, NameOf(file))
 
             Dim StreamWriter As IO.StreamWriter = Nothing
             Try
-                ' If appending to a file and it exists, attempt to detect the current encoding and use it (VSWhidbey 199224).
+                ' If appending to a file and it exists, attempt to detect the current encoding and use it.
                 If append AndAlso IO.File.Exists(file) Then
                     Dim StreamReader As IO.StreamReader = Nothing
                     Try
@@ -967,7 +956,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
 #If HaveUI Then
         '''**************************************************************************
-        ''' ;CopyDirectory
+        ''' CopyDirectory
         ''' <summary>
         ''' Copy an existing directory to a new directory,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -984,7 +973,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CopyDirectory
+        ''' CopyDirectory
         ''' <summary>
         ''' Copy an existing directory to a new directory,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1002,7 +991,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CopyFile
+        ''' CopyFile
         ''' <summary>
         ''' Copy an existing file to a new file,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1019,7 +1008,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;CopyFile
+        ''' CopyFile
         ''' <summary>
         ''' Copy an existing file to a new file,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1038,7 +1027,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DeleteDirectory
+        ''' DeleteDirectory
         ''' <summary>
         ''' Delete the given directory, with options to recursively delete, show progress UI, send file to Recycle Bin; throwing exception if user cancels.
         ''' </summary>
@@ -1053,7 +1042,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DeleteDirectory
+        ''' DeleteDirectory
         ''' <summary>
         ''' Delete the given directory, with options to recursively delete, show progress UI, send file to Recycle Bin, and whether to throw exception if user cancels.
         ''' </summary>
@@ -1070,7 +1059,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DeleteFile
+        ''' DeleteFile
         ''' <summary>
         ''' Delete the given file, with options to show progress UI, delete to recycle bin.
         ''' </summary>
@@ -1084,7 +1073,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;DeleteFile
+        ''' DeleteFile
         ''' <summary>
         ''' Delete the given file, with options to show progress UI, delete to recycle bin, and whether to throw exception if user cancels.
         ''' </summary>
@@ -1103,7 +1092,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveDirectory
+        ''' MoveDirectory
         ''' <summary>
         ''' Move an existing directory to a new directory,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1120,7 +1109,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveDirectory
+        ''' MoveDirectory
         ''' <summary>
         ''' Move an existing directory to a new directory,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1138,7 +1127,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveFile
+        ''' MoveFile
         ''' <summary>
         ''' Move an existing file to a new file,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1155,7 +1144,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         '''**************************************************************************
-        ''' ;MoveFile
+        ''' MoveFile
         ''' <summary>
         ''' Move an existing file to a new file,
         ''' displaying progress dialog and confirmation dialogs if specified,
@@ -1176,14 +1165,14 @@ Namespace Microsoft.VisualBasic.FileIO
 
         '= PRIVATE ============================================================
         '''**************************************************************************
-        ''' ;DirectoryNode
+        ''' DirectoryNode
         ''' <summary>
         ''' A simple tree node to build up the directory structure used for a snapshot in Copy / Move Directory.
         ''' </summary>
         Private Class DirectoryNode
 
             '''**************************************************************************
-            ''' ;New
+            ''' New
             ''' <summary>
             ''' Given a DirectoryPath, create the node and add the sub-directory nodes.
             ''' </summary>
@@ -1203,7 +1192,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End Sub
 
             '''**************************************************************************
-            ''' ;Path
+            ''' Path
             ''' <summary>
             ''' Return the Path of the current node.
             ''' </summary>
@@ -1211,7 +1200,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Friend ReadOnly Property Path() As String
 
             '''**************************************************************************
-            ''' ;SubDirs
+            ''' SubDirs
             ''' <summary>
             ''' Return the sub directories of the current node.
             ''' </summary>
@@ -1219,7 +1208,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Friend ReadOnly Property SubDirs() As ObjectModel.Collection(Of DirectoryNode)
 
             '''**************************************************************************
-            ''' ;TargetPath
+            ''' TargetPath
             ''' <summary>
             ''' Return the TargetPath for copy / move.
             ''' </summary>
@@ -1228,7 +1217,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Class 'Private Class DirectoryNode
 
         '''**************************************************************************
-        ''' ;TextSearchHelper
+        ''' TextSearchHelper
         ''' <summary>
         ''' Helper class to search for text in an array of byte using a specific Decoder.
         ''' </summary>
@@ -1256,7 +1245,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Private m_SearchText As String
 
             '''**************************************************************************
-            ''' ;New
+            ''' New
             ''' <summary>
             ''' No default constructor.
             ''' </summary>
@@ -1264,7 +1253,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End Sub
 
             '''**************************************************************************
-            ''' ;New
+            ''' New
             ''' <summary>
             ''' Constructs a new helper with a given encoding and a text to search for.
             ''' </summary>
@@ -1307,7 +1296,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End Function
 
             '''**************************************************************************
-            ''' ;IsTextFound
+            ''' IsTextFound
             ''' <summary>
             ''' Determines whether the text is found in the given byte array.
             ''' </summary>
@@ -1326,10 +1315,10 @@ Namespace Microsoft.VisualBasic.FileIO
                 If m_CheckPreamble Then
                     If BytesMatch(ByteBuffer, m_Preamble) Then
                         ByteBufferStartIndex = m_Preamble.Length
-                        Count -= m_Preamble.Length ' Reduce the valid byte count if ByteBuffer was shrinked (VSWhidbey 361409).
+                        Count -= m_Preamble.Length ' Reduce the valid byte count if ByteBuffer was shrinked.
                     End If
                     m_CheckPreamble = False
-                    ' In case of an empty file with BOM at the beginning (VSWhidbey 518893), return FALSE.
+                    ' In case of an empty file with BOM at the beginning return FALSE.
                     If Count <= 0 Then
                         Return False
                     End If

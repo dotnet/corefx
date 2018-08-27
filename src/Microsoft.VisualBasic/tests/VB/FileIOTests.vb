@@ -454,7 +454,7 @@ Namespace Microsoft.VisualBasic.Tests
                 Assert.True(info.LastAccessTime > Date.MinValue)
                 Assert.True(info.Name = IO.Path.GetFileName(TestBase.TestDirectory))
                 Assert.True(TestBase.RemoveEndingSeparator(info.Parent.ToString) = TestBase.RemoveEndingSeparator(IO.Path.GetTempPath()))
-                Assert.True(info.Root.Name = IO.Path.GetPathRoot(TestBase.TestDirectory))
+                Assert.True(info.Root.Name = IO.Path.GetPathRoot(TestBase.TestDirectory), $"info.Root.Name {info.Root.Name} = IO.Path.GetPathRoot(TestBase.TestDirectory){IO.Path.GetPathRoot(TestBase.TestDirectory)}")
             End Using
         End Sub
 
