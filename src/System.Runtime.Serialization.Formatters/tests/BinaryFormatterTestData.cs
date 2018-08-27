@@ -1363,7 +1363,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             // System.Drawing.Common
             // In UAP System.Drawing.Common is a not supported assembly, so this types throw PNSE.
-            if (!PlatformDetection.IsUap)
+            // Since this code paths use GDI+ we need to validate it is available
+            if (!PlatformDetection.IsUap && Helpers.GetGdiplusIsAvailable())
             {
                 const string InlineJpegImage = "/9j/4AAQSkZJRgABAQEAwADAAAD/4QAiRXhpZgAATU0AKgAAAAgAAQESAAMAAAABAAEAAAAAAAD/2wBDABALDA4MChAODQ4SERATGCkbGBYWGDIkJh4pOzQ+PTo0OThBSV5QQUVZRjg5Um9TWWFkaWppP09ze3Jmel5naWX/2wBDARESEhgVGDAbGzBlQzlDZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWX/wAARCAACAAIDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCpARJb/9k=";
                 byte[] rawInlineImageBytes = Convert.FromBase64String(InlineJpegImage);
@@ -1401,7 +1402,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 Icon icon = Icon.FromHandle(bitmapImage.GetHicon());
                 yield return new object[] { icon, new TypeSerializableValue[] { new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFhTeXN0ZW0uRHJhd2luZy5Db21tb24sIFZlcnNpb249NC4wLjEuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jYzdiMTNmZmNkMmRkZDUxDAMAAABRU3lzdGVtLkRyYXdpbmcsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iMDNmNWY3ZjExZDUwYTNhBQEAAAATU3lzdGVtLkRyYXdpbmcuSWNvbgIAAAAISWNvbkRhdGEISWNvblNpemUHBAITU3lzdGVtLkRyYXdpbmcuU2l6ZQMAAAACAAAACQQAAAAF+////xNTeXN0ZW0uRHJhd2luZy5TaXplAgAAAAV3aWR0aAZoZWlnaHQAAAgIAwAAAAAAAAAAAAAADwQAAACmAAAAAgAAAQABAAICEJAAAAAAkAAAABYAAAAoAAAAAgAAAAQAAAABAAQAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAgAAAAICAAIAAAACAAIAAgIAAAICAgADAwMAAAAD/AAD/AAAA//8A/wAAAP8A/wD//wAA////ALsAAAC7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL", TargetFrameworkMoniker.netcoreapp30), new TypeSerializableValue("AAEAAAD/////AQAAAAAAAAAMAgAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABNTeXN0ZW0uRHJhd2luZy5JY29uAgAAAAhJY29uRGF0YQhJY29uU2l6ZQcEAhNTeXN0ZW0uRHJhd2luZy5TaXplAgAAAAIAAAAJAwAAAAX8////E1N5c3RlbS5EcmF3aW5nLlNpemUCAAAABXdpZHRoBmhlaWdodAAACAgCAAAAAAAAAAAAAAAPAwAAAKYAAAACAAABAAEAAgIQAAAAAACQAAAAFgAAACgAAAACAAAABAAAAAEABAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AuwAAALsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAs=", TargetFrameworkMoniker.netfx472) } };
             }
-            
+
             // System.DirectoryServices, System.Security.Principal and System.Security.AccessControl are only available on Windows.
             // They are currently not supported on UAP
             if (PlatformDetection.IsWindows && !PlatformDetection.IsUap)
