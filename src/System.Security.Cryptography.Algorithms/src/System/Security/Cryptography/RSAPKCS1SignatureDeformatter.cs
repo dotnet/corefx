@@ -30,21 +30,13 @@ namespace System.Security.Cryptography
 
         public override void SetHashAlgorithm(string strName)
         {
-            try
+            // Verify the name
+            if (CryptoConfig.MapNameToOID(strName) != null)
             {
-                // Verify the name
-                if (CryptoConfig.MapNameToOID(strName) != null)
-                {
-                    // Uppercase known names as required for BCrypt
-                    _algName = HashAlgorithmNames.ToUpper(strName);
-                }
-                else
-                {
-                    // For desktop compat, exception is deferred until VerifySignature
-                    _algName = null;
-                }
+                // Uppercase known names as required for BCrypt
+                _algName = HashAlgorithmNames.ToUpper(strName);
             }
-            catch (CryptographicException)
+            else
             {
                 // For desktop compat, exception is deferred until VerifySignature
                 _algName = null;
