@@ -9,6 +9,30 @@
 
 #pragma once
 
+#ifdef DIDNT_WORK
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+
+#include <openssl/stack.h>
+
+#define OPENSSL_sk_free OPENSSL_sk_free_ptr
+#define OPENSSL_sk_new_null OPENSSL_sk_new_null_ptr
+#define OPENSSL_sk_num OPENSSL_sk_num_ptr
+#define OPENSSL_sk_pop_free OPENSSL_sk_pop_free_ptr
+#define OPENSSL_sk_push OPENSSL_sk_push_ptr
+#define OPENSSL_sk_value OPENSSL_sk_value_ptr
+
+#include <openssl/safestack.h>
+
+#undef OPENSSL_sk_free
+#undef OPENSSL_sk_new_null
+#undef OPENSSL_sk_num
+#undef OPENSSL_sk_pop_free
+#undef OPENSSL_sk_push
+#undef OPENSSL_sk_value
+
+#endif
+#endif
+
 // All the openssl includes need to be here to ensure that the APIs we use
 // are overriden to be called through our function pointers.
 #include <openssl/asn1.h>
