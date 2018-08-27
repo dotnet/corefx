@@ -58,6 +58,15 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
             }
         }
 
+        internal static TimeAsn Decode(ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
+        {
+            AsnReader reader = new AsnReader(encoded, ruleSet);
+            
+            Decode(reader, out TimeAsn decoded);
+            reader.ThrowIfNotEmpty();
+            return decoded;
+        }
+
         internal static void Decode(AsnReader reader, out TimeAsn decoded)
         {
             if (reader == null)

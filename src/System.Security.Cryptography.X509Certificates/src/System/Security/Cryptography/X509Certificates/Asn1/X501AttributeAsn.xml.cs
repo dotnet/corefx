@@ -33,6 +33,20 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
             writer.PopSequence(tag);
         }
 
+        internal static X501AttributeAsn Decode(ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
+        {
+            return Decode(Asn1Tag.Sequence, encoded, ruleSet);
+        }
+        
+        internal static X501AttributeAsn Decode(Asn1Tag expectedTag, ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
+        {
+            AsnReader reader = new AsnReader(encoded, ruleSet);
+            
+            Decode(reader, expectedTag, out X501AttributeAsn decoded);
+            reader.ThrowIfNotEmpty();
+            return decoded;
+        }
+
         internal static void Decode(AsnReader reader, out X501AttributeAsn decoded)
         {
             if (reader == null)

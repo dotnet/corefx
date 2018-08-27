@@ -86,7 +86,7 @@
               <xs:enumeration value="byte" />
               <xs:enumeration value="int" />
               <xs:enumeration value="BigInteger" />
-              <xs:enumeration value="ReadOnlyMemory&lt;byte&gt;" />
+              <xs:enumeration value="ReadOnlyMemory" />
             </xs:restriction>
           </xs:simpleType>
         </xs:attribute>
@@ -101,7 +101,7 @@
           <xs:enumeration value="byte" />
           <xs:enumeration value="int" />
           <xs:enumeration value="BigInteger" />
-          <xs:enumeration value="ReadOnlyMemory&lt;byte&gt;" />
+          <xs:enumeration value="ReadOnlyMemory" />
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>

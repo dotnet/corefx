@@ -483,7 +483,7 @@ namespace <xsl:value-of select="@namespace" />
   <xsl:template match="asn:Integer[not(@backingType)] | asn:Integer[@backingType = 'BigInteger']" mode="FieldDef">
         internal System.Numerics.BigInteger<xsl:if test="@optional | parent::asn:Choice">?</xsl:if> <xsl:value-of select="@name" />;</xsl:template>
   
-  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory&lt;byte&gt;']" mode="FieldDef">
+  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory']" mode="FieldDef">
         internal ReadOnlyMemory&lt;byte&gt;<xsl:if test="@optional | parent::asn:Choice">?</xsl:if> <xsl:value-of select="@name" />;</xsl:template>
 
   <xsl:template match="asn:Integer[@backingType = 'byte']" mode="FieldDef">
@@ -493,11 +493,11 @@ namespace <xsl:value-of select="@namespace" />
         internal int<xsl:if test="@optional | parent::asn:Choice">?</xsl:if> <xsl:value-of select="@name" />;</xsl:template>
 
   <xsl:template match="asn:Integer[not(@backingType)] | asn:Integer[@backingType = 'BigInteger']" mode="CollectionElementType">System.Numerics.BigInteger</xsl:template>
-  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory&lt;byte&gt;']" mode="CollectionElementType">ReadOnlyMemory&lt;byte&gt;</xsl:template>
+  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory']" mode="CollectionElementType">ReadOnlyMemory&lt;byte&gt;</xsl:template>
   <xsl:template match="asn:Integer[@backingType = 'byte']" mode="CollectionElementType">byte</xsl:template>
   <xsl:template match="asn:Integer[@backingType = 'int']" mode="CollectionElementType">int</xsl:template>
 
-  <xsl:template match="asn:Integer[not(@backingType = 'ReadOnlyMemory&lt;byte&gt;')]" mode="EncodeSimpleValue" xml:space="default">
+  <xsl:template match="asn:Integer[not(@backingType = 'ReadOnlyMemory')]" mode="EncodeSimpleValue" xml:space="default">
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
@@ -506,7 +506,7 @@ namespace <xsl:value-of select="@namespace" />
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteInteger(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:if>
   </xsl:template>
 
-  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory&lt;byte&gt;']" mode="EncodeSimpleValue" xml:space="default">
+  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory']" mode="EncodeSimpleValue" xml:space="default">
     <xsl:param name="writerName"/>
     <xsl:param name="indent" />
     <xsl:param name="name" select="@name"/>
@@ -523,7 +523,7 @@ namespace <xsl:value-of select="@namespace" />
             <xsl:value-of select="$indent"/><xsl:value-of select="$name"/> = <xsl:value-of select="$readerName"/>.GetInteger(<xsl:call-template name="MaybeImplicitCall0"/>);</xsl:if>
   </xsl:template>
 
-  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory&lt;byte&gt;']" mode="DecodeSimpleValue" xml:space="default">
+  <xsl:template match="asn:Integer[@backingType = 'ReadOnlyMemory']" mode="DecodeSimpleValue" xml:space="default">
     <xsl:param name="readerName" />
     <xsl:param name="indent" />
     <xsl:param name="name" select="concat('decoded.', @name)"/>
