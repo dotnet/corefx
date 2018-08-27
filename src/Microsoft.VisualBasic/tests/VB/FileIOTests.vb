@@ -389,7 +389,7 @@ Namespace Microsoft.VisualBasic.Tests
             DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory)
             Assert.True(DirectoryList.Count = 6)
             For i As Integer = 0 To 5
-                Assert.True(DirectoryList(i).Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")))
+                Assert.True(DirectoryList.Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")))
             Next
             IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory0", $"NewSubSubDirectory"))
             DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory)
@@ -429,7 +429,7 @@ Namespace Microsoft.VisualBasic.Tests
             DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
             Assert.True(DirectoryList.Count = 2)
             For i As Integer = 0 To 1
-                Assert.True(DirectoryList(i).Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")))
+                Assert.True(DirectoryList.Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")))
             Next
             IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory0", $"NewSubSubDirectory0"))
             DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0")
@@ -537,7 +537,7 @@ Namespace Microsoft.VisualBasic.Tests
             FileList = FileSystem.GetFiles(TestBase.TestDirectory)
             Assert.True(FileList.Count = 6)
             For i As Integer = 0 To 5
-                Assert.True(FileList(i).Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}")))
+                Assert.True(FileList.Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}")))
             Next
             IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, "NewSubDirectory"))
             CreateTestFile(TestBase, SourceData, PathFromBase:="NewSubDirectory", TestFileName:="NewFile")
@@ -557,7 +557,7 @@ Namespace Microsoft.VisualBasic.Tests
             FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly)
             Assert.True(FileList.Count = 6)
             For i As Integer = 0 To 5
-                Assert.True(FileList(i).Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}")))
+                Assert.True(FileList.Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}")))
             Next
             Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewSubDirectory")
             IO.Directory.CreateDirectory(NewSubDirectoryPath)
