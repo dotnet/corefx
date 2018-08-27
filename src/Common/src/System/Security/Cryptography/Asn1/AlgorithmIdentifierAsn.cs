@@ -85,5 +85,14 @@ namespace System.Security.Cryptography.Asn1
             ReadOnlyMemory<byte> value = reader.GetEncodedValue();
             decoded = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(value, reader.RuleSet);
         }
+
+        internal static AlgorithmIdentifierAsn Decode(ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
+        {
+            AsnReader reader = new AsnReader(encoded, ruleSet);
+
+            Decode(reader, out AlgorithmIdentifierAsn decoded);
+            reader.ThrowIfNotEmpty();
+            return decoded;
+        }
     }
 }

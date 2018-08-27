@@ -104,10 +104,7 @@ namespace Internal.Cryptography.Pal
                 out bool hasPathLengthConstraint,
                 out int pathLengthConstraint)
         {
-            BasicConstraintsAsn.Decode(
-                new AsnReader(encoded, AsnEncodingRules.BER),
-                out BasicConstraintsAsn constraints);
-
+            BasicConstraintsAsn constraints = BasicConstraintsAsn.Decode(encoded, AsnEncodingRules.BER);
             certificateAuthority = constraints.CA;
             hasPathLengthConstraint = constraints.PathLengthConstraint.HasValue;
             pathLengthConstraint = constraints.PathLengthConstraint.GetValueOrDefault();

@@ -77,7 +77,7 @@ namespace Internal.Cryptography.Pal
         {
 #endif
             RawData = rawData;
-            CertificateAsn.Decode(new AsnReader(rawData, AsnEncodingRules.DER), out certificate);
+            certificate = CertificateAsn.Decode(rawData, AsnEncodingRules.DER);
             certificate.TbsCertificate.ValidateVersion();
             Issuer = new X500DistinguishedName(certificate.TbsCertificate.Issuer.ToArray());
             Subject = new X500DistinguishedName(certificate.TbsCertificate.Subject.ToArray());
