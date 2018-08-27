@@ -343,12 +343,12 @@
 
   <!-- Specify the default constants for each target group -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants);uap</DefineConstants>
-    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants);netfx</DefineConstants>
-    <DefineConstants Condition="'$(TargetsNetStandard)' == 'true'">$(DefineConstants);netstandard</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants);netcoreapp20</DefineConstants>
+    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
+    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants),netfx</DefineConstants>
+    <DefineConstants Condition="'$(TargetsNetStandard)' == 'true'">$(DefineConstants),netstandard</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants),uapaot</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
