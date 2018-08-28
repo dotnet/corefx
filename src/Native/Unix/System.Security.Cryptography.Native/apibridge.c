@@ -101,9 +101,9 @@ int32_t local_X509_PUBKEY_get0_param(
 
 const X509_ALGOR* local_X509_get0_tbs_sigalg(const X509* x509)
 {
-    if (x509 && x509->cert_info && x509->cert_info->key)
+    if (x509 && x509->cert_info)
     {
-        return x509->cert_info->key->algor;
+        return x509->cert_info->signature;
     }
 
     return NULL;
