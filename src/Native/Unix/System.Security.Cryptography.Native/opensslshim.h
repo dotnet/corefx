@@ -89,8 +89,6 @@ void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char *f
 void ERR_load_crypto_strings(void);
 int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
 int EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *a);
-EVP_MD_CTX *EVP_MD_CTX_create(void);
-void EVP_MD_CTX_destroy(EVP_MD_CTX *ctx);
 void HMAC_CTX_cleanup(HMAC_CTX *ctx);
 void HMAC_CTX_init(HMAC_CTX *ctx);
 void OPENSSL_add_all_algorithms_conf(void);
@@ -251,8 +249,8 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(EVP_DigestUpdate) \
     REQUIRED_FUNCTION(EVP_get_digestbyname) \
     REQUIRED_FUNCTION(EVP_md5) \
-    LEGACY_FUNCTION(EVP_MD_CTX_create) \
-    LEGACY_FUNCTION(EVP_MD_CTX_destroy) \
+    RENAMED_FUNCTION(EVP_MD_CTX_free, EVP_MD_CTX_destroy) \
+    RENAMED_FUNCTION(EVP_MD_CTX_new, EVP_MD_CTX_create) \
     REQUIRED_FUNCTION(EVP_MD_size) \
     REQUIRED_FUNCTION(EVP_PKEY_CTX_free) \
     REQUIRED_FUNCTION(EVP_PKEY_CTX_new) \
@@ -596,8 +594,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EVP_DigestUpdate EVP_DigestUpdate_ptr
 #define EVP_get_digestbyname EVP_get_digestbyname_ptr
 #define EVP_md5 EVP_md5_ptr
-#define EVP_MD_CTX_create EVP_MD_CTX_create_ptr
-#define EVP_MD_CTX_destroy EVP_MD_CTX_destroy_ptr
+#define EVP_MD_CTX_free EVP_MD_CTX_free_ptr
+#define EVP_MD_CTX_new EVP_MD_CTX_new_ptr
 #define EVP_MD_size EVP_MD_size_ptr
 #define EVP_PKEY_CTX_free EVP_PKEY_CTX_free_ptr
 #define EVP_PKEY_CTX_new EVP_PKEY_CTX_new_ptr
