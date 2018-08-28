@@ -11,9 +11,15 @@ Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports Xunit
 ' Do not Imports System.IO
-
+#Const ManualTestsEnabled = False
 Namespace Microsoft.VisualBasic.Tests
     Public NotInheritable Class FileIOTests
+        Public Shared ReadOnly Property ManualTestsEnabled() As Boolean
+            Get
+                Return Not String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"))
+            End Get
+        End Property
+
         ReadOnly DestData() As Char = {"x"c, "X"c, "y"c}
         ReadOnly SourceData() As Char = {"a"c, "A"c, "b"c}
 
@@ -168,12 +174,12 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
 
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
 
         End Sub
@@ -244,12 +250,13 @@ Namespace Microsoft.VisualBasic.Tests
                 Assert.True(FileHasExpectedDate(testFileDest, SourceData))
             End Using
         End Sub
-        <Fact(Skip:="Not Implemented")>
+
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption()
 
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption_UICancelOption()
 
         End Sub
@@ -317,12 +324,12 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub DeleteDirectory_Directory_UIOption_RecycleOption()
 
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub DeleteDirectory_Directory_UIOption_RecycleOption_UICancelOption()
 
         End Sub
@@ -338,12 +345,12 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub DeleteFile_File_UIOption_RecycleOption()
 
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub DeleteFile_File_UIOption_RecycleOption_UICancelOption()
 
         End Sub
@@ -366,16 +373,6 @@ Namespace Microsoft.VisualBasic.Tests
                 IO.File.Delete(testFileSource)
                 Assert.False(FileSystem.FileExists(testFileSource))
             End Using
-        End Sub
-
-        <Fact>
-        Public Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchOption_FileWildcards()
-
-        End Sub
-
-        <Fact>
-        Public Sub FindInFiles_Directory_ContainsText_IgnoreCase_SearchType_SearchOption()
-
         End Sub
 
         <Fact>
@@ -614,12 +611,12 @@ Namespace Microsoft.VisualBasic.Tests
             IO.File.Delete(TempFile)
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub MoveDirectory_Sourc_eDirectoryName_DestinationDirectoryName_UIOption()
 
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
 
         End Sub
@@ -761,103 +758,13 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub MoveFile_SourceFileName_DestinationFileName_UIOption()
 
         End Sub
 
-        <Fact(Skip:="Not Implemented")>
+        <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub MoveFile_SourceFileNameDestinationFileName_UIOption_UICancelOption()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFieldParser_CSVFile()
-            'Const CSVData As String =
-            '"FIELD0,FIELD1,FIELD2,FIELD3,FIELD4,FIELD5,FIELD6,FIELD7,FIELD8,FIELD9" & vbCrLf &
-            '"   0,AAA,,AA000,,,,AAAAAAAAAA,000000-000000," & vbCrLf &
-            '"  10,BBB,000001,BB111,89,005206000000000000,,BBBBBBBBBB,111111-111111,""Variable 1""" & vbCrLf &
-            '" 100,CCC,000002,CC222,90,001150000000000000,,CCCCCCCCCC,222222-222222,""Variable 22""" & vbCrLf &
-            '"1000,DDD,000003,DD333,91,005245000000000000,,DDDDDDDDDD,333333-333333,""Variable 333"""
-
-            'While (Not System.Diagnostics.Debugger.IsAttached)
-            '    System.Threading.Thread.Sleep(1000)
-            'End While
-
-            'Using TestBase As New FileIOTestBase
-            'Dim TestFilePath As String = CreateTestFile(TestBase, CType(CSVData, Char()), TestFileName:="TestFile.CSV")
-            'Dim myReader As TextFieldParser = New TextFieldParser(TestFilePath) With {
-            '    .Delimiters = New String() {","},
-            '    .TextFieldType = FileIO.FieldType.Delimited,
-            '    .HasFieldsEnclosedInQuotes = True,
-            '    .TrimWhiteSpace = True
-            '}
-            'Dim currentRow As String()
-            'Dim headerRow As Integer = 0
-
-            'While Not myReader.EndOfData
-            '    Try
-            '        currentRow = myReader.ReadFields()
-            '        'Read Header
-            '        If (headerRow = 0) Then
-            '            Assert.True(currentRow.Count = 10)
-            '            For i As Integer = 1 To 10
-            '                Assert.True(currentRow(i) = $"FIELD{i}", "Header row does not match expected value")
-            '            Next
-            '            headerRow += 1
-            '        Else
-            '            'Do work for Data Row
-            '        End If
-
-            '    Catch ex As Exception
-            '        Dim errorline As String = myReader.ErrorLine
-            '    End Try
-            'End While
-            'myReader.Close()
-            'end using
-        End Sub
-
-        Public Sub OpenTextFieldParser_File_Delimiters()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFieldParser_File_FieldWidths()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFileReader_File()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFileReader_File_Encoding()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFileWriter_File_Append_Encoding()
-
-        End Sub
-
-        <Fact>
-        Public Sub OpenTextFileWriter_FileAppend()
-
-        End Sub
-
-        <Fact>
-        Public Sub ReadAllBytes_File()
-
-        End Sub
-
-        <Fact>
-        Public Sub ReadAllText_File()
-
-        End Sub
-
-        <Fact>
-        Public Sub ReadAllText_File_Encoding()
 
         End Sub
 
@@ -903,19 +810,5 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <Fact>
-        Public Sub WriteAllBytes_FileData_Append()
-
-        End Sub
-
-        <Fact>
-        Public Sub WriteAllText_File_Text_Append()
-
-        End Sub
-
-        <Fact>
-        Public Sub WriteAllText_File_Text_Append_Encoding()
-
-        End Sub
     End Class
 End Namespace

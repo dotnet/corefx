@@ -19,7 +19,7 @@ Imports System.Text
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 '''' IMPORTANT: Changes made to public interface of FileSystem should be reflected in FileSystemProxy.vb.
-
+#Const HaveUI = False
 Namespace Microsoft.VisualBasic.FileIO
 
     '''******************************************************************************
@@ -1251,38 +1251,34 @@ Namespace Microsoft.VisualBasic.FileIO
             Debug.Assert(FullSource.Length <> 0 AndAlso IO.Path.IsPathRooted(FullSource), "Invalid FullSource path!!!")
             Debug.Assert(OperationType = SHFileOperationType.FO_DELETE OrElse (FullTarget.Length <> 0 AndAlso IO.Path.IsPathRooted(FullTarget)), "Invalid FullTarget path!!!")
 
-            ' Demand the necessary permissions: UIPermission.
-            Dim UIPermission As New UIPermission(UIPermissionWindow.SafeSubWindows)
-            UIPermission.Demand()
-
-            Dim SourceIOPermissionAccess As FileIOPermissionAccess = FileIOPermissionAccess.NoAccess
-            If OperationType = SHFileOperationType.FO_COPY Then
-                SourceIOPermissionAccess = FileIOPermissionAccess.Read
-            ElseIf OperationType = SHFileOperationType.FO_MOVE Then
-                SourceIOPermissionAccess = FileIOPermissionAccess.Read Or FileIOPermissionAccess.Write
-            ElseIf OperationType = SHFileOperationType.FO_DELETE Then
-                SourceIOPermissionAccess = FileIOPermissionAccess.Write
-            End If
+            'Dim SourceIOPermissionAccess As FileIOPermissionAccess = FileIOPermissionAccess.NoAccess
+            'If OperationType = SHFileOperationType.FO_COPY Then
+            '    SourceIOPermissionAccess = FileIOPermissionAccess.Read
+            'ElseIf OperationType = SHFileOperationType.FO_MOVE Then
+            '    SourceIOPermissionAccess = FileIOPermissionAccess.Read Or FileIOPermissionAccess.Write
+            'ElseIf OperationType = SHFileOperationType.FO_DELETE Then
+            '    SourceIOPermissionAccess = FileIOPermissionAccess.Write
+            'End If
             ' FullSource might end with '\*' (for copying and moving) so normalize the path to the correct format to demand the permission.
             Dim CheckPermissionPath As String = FullSource
             If (OperationType = SHFileOperationType.FO_COPY OrElse OperationType = SHFileOperationType.FO_MOVE) _
                     AndAlso CheckPermissionPath.EndsWith("*", StringComparison.Ordinal) Then
                 CheckPermissionPath = RemoveEndingSeparator(FullSource.TrimEnd("*"c))
             End If
-            ' Demand the permission on source file or directory.
-            If FileOrDirectory = FileSystem.FileOrDirectory.Directory Then
-                DemandDirectoryPermission(CheckPermissionPath, SourceIOPermissionAccess)
-            Else
-                Call (New FileIOPermission(SourceIOPermissionAccess, CheckPermissionPath)).Demand()
-            End If
+            '' Demand the permission on source file or directory.
+            'If FileOrDirectory = FileSystem.FileOrDirectory.Directory Then
+            '    DemandDirectoryPermission(CheckPermissionPath, SourceIOPermissionAccess)
+            'Else
+            '    Call (New FileIOPermission(SourceIOPermissionAccess, CheckPermissionPath)).Demand()
+            'End If
             ' Demand permission on target file or directory. Only in copy / move.
-            If OperationType <> SHFileOperationType.FO_DELETE Then
-                If FileOrDirectory = FileSystem.FileOrDirectory.Directory Then
-                    DemandDirectoryPermission(FullTarget, FileIOPermissionAccess.Write)
-                Else
-                    Call (New FileIOPermission(FileIOPermissionAccess.Write, FullTarget)).Demand()
-                End If
-            End If
+            'If OperationType <> SHFileOperationType.FO_DELETE Then
+            '    If FileOrDirectory = FileSystem.FileOrDirectory.Directory Then
+            '        DemandDirectoryPermission(FullTarget, FileIOPermissionAccess.Write)
+            '    Else
+            '        Call (New FileIOPermission(FileIOPermissionAccess.Write, FullTarget)).Demand()
+            '    End If
+            'End If
 
             ' Get the SHFILEOPSTRUCT
             Dim OperationInfo As SHFILEOPSTRUCT = GetShellOperationInfo(OperationType, OperationFlags, FullSource, FullTarget)
@@ -1292,16 +1288,16 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Assert UnmanagedCodePermission to call Win32 methods.
             'Call (New SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Assert()
 
-            Try
-                Result = NativeMethods.SHFileOperation(OperationInfo)
-                ' Notify the shell in case some changes happened.
-                NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS,
-                    SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
-            Catch
-                Throw
-            Finally
-                CodeAccessPermission.RevertAssert()
-            End Try
+            'Try
+            '    Result = NativeMethods.SHFileOperation(OperationInfo)
+            '    ' Notify the shell in case some changes happened.
+            '    NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS,
+            '        SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
+            'Catch
+            '    Throw
+            'Finally
+            '    CodeAccessPermission.RevertAssert()
+            'End Try
 
             ' If the operation was canceled, check OnUserCancel and throw OperationCanceledException if needed.
             ' Otherwise, check the result and throw the appropriate exception if there is an error code.
