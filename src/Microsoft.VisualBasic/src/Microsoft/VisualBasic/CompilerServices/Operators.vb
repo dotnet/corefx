@@ -10,6 +10,7 @@ Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Globalization
 Imports System.Reflection
+Imports System.Runtime.CompilerServices
 
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Symbols
@@ -4584,6 +4585,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Throw GetNoValidOperatorException(UserDefinedOperator.Modulus, Left, Right)
         End Function
 
+        <MethodImpl(MethodImplOptions.NoInlining)> ' To work around https://github.com/dotnet/coreclr/issues/8648
         Private Shared Function ModSByte(ByVal left As SByte, ByVal right As SByte) As Object
             Return left Mod right
         End Function
