@@ -8,6 +8,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -157,7 +158,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        public void Kill_EntireProcessTree_False_OnlyRootProcessTerminated()
+        public async Task Kill_EntireProcessTree_False_OnlyRootProcessTerminated()
         {
             IReadOnlyList<Process> tree = null;
             try
@@ -166,6 +167,9 @@ namespace System.Diagnostics.Tests
                 Process parentProcess = tree.First();
 
                 parentProcess.Kill(entireProcessTree: false);
+
+                // Since Kill() is fire-and-forget, wait a moment for it to take effect
+                await Task.Delay(10);
 
                 var actual = tree.Select(p => p.HasExited).ToList();
                 Assert.Equal(new[] { true, false, false }, actual);
@@ -188,7 +192,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        public void Kill_EntireProcessTree_True_EntireTreeTerminated()
+        public async Task Kill_EntireProcessTree_True_EntireTreeTerminated()
         {
             IReadOnlyList<Process> tree = null;
             try
@@ -197,6 +201,9 @@ namespace System.Diagnostics.Tests
                 Process parentProcess = tree.First();
 
                 parentProcess.Kill(entireProcessTree: true);
+
+                // Since Kill() is fire-and-forget, wait a moment for it to take effect
+                await Task.Delay(10);
 
                 var actual = tree.Select(p => p.HasExited).ToList();
                 Assert.True(actual.All(x => x == true));
