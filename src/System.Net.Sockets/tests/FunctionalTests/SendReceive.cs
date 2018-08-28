@@ -1336,7 +1336,7 @@ namespace System.Net.Sockets.Tests
         }
     }
 
-    public class BlockingSendReceive : RemoteExecutorTestBase
+    public class BlockingSendReceive
     {
 
         private readonly ITestOutputHelper _log;
@@ -1349,51 +1349,41 @@ namespace System.Net.Sockets.Tests
 
         [Theory]
         [MemberData(nameof(Loopbacks))]
-        public void BlockingStreamRead_Close(IPAddress ipAddress)
+        public async Task BlockingStreamRead_Close(IPAddress ipAddress)
         {
-            // This test verifies blocking behavior. Always run it as remote task
-            // to isolate any possible failures.
-            RemoteInvoke((address) =>
+            // Test for #22564 when close is called while blocking read is pending.
+            using (var server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
             {
-                IPAddress listenAt = IPAddress.Parse(address);
+                server.BindToAnonymousPort(ipAddress);
+                server.Listen(1);
+                byte[] buffer = new byte[1];
+                buffer[0] = Convert.ToByte('a');
 
-                // Test for #22564 when close is called while blocking read is pending.
-                using (var server = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
-                using (var client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                Task clientTask = Task.Run(() =>
                 {
-                    server.BindToAnonymousPort(listenAt);
-                    server.Listen(1);
-                    byte[] buffer = new byte[1];
-                    buffer[0] = Convert.ToByte('a');
-
-                    Thread clientThread = new Thread(() =>
+                    client.Connect(server.LocalEndPoint);
+                    client.Send(buffer);
+                    // Blocking read.
+                    try
                     {
-                        client.Connect(server.LocalEndPoint);
-                        client.Send(buffer);
-                        // Blocking read.
-                        try
-                        {
-                            client.Receive(buffer);
-                        }
-                        catch (SocketException) { }
-                        catch (ObjectDisposedException) { }
-                    });
-                    clientThread.IsBackground = true;
-                    clientThread.Start();
-                    Socket s = server.Accept();
-                    // Try to receive something so we know client thread is running.
-                    s.Receive(buffer, 1, SocketFlags.None);
-                    // There is however race condition that if the Receive() is not started yet, this will simply
-                    // finish without hitting the test scenario.
-                    Thread.Sleep(500);
+                        client.Receive(buffer);
+                    }
+                    catch (SocketException) { }
+                    catch (ObjectDisposedException) { }
+                });
+                Socket s = server.Accept();
+                // Try to receive something so we know client thread is running.
+                s.Receive(buffer, 1, SocketFlags.None);
+                // There is however race condition that if the Receive() is not started yet, this will simply
+                // finish without hitting the test scenario.
+                await Task.Delay(500);
 
-                    // clientThread should be now blocked on Receive()
-                    // Close client socket from parent thread.
-                    client.Close();
-                    clientThread.Join();
-                }
-                return SuccessExitCode;
-            }, ipAddress.ToString()).Dispose();
+                // clientThread should be now blocked on Receive()
+                // Close client socket from parent thread.
+                client.Close();
+                clientTask.Wait(TestSettings.PassingTestTimeout);
+            }
         }
 
         [Theory]
@@ -1401,46 +1391,37 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(Loopbacks))]
         public void BlockingStreamAccept_Close(IPAddress ipAddress)
         {
-            // This test verifies blocking behavior. Always run it as remote task
-            // to isolate any possible failures.
-            RemoteInvoke((address) =>
+            // Test for #26034 when close is called while blocking accept is pending.
+            using (var server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
             {
-                IPAddress listenAt = IPAddress.Parse(address);
-
-                // Test for #26034 when close is called while blocking accept is pending.
-                using (var server = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
-                using (var client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                byte[] buffer = new byte[1];
+                buffer[0] = Convert.ToByte('a');
+                server.BindToAnonymousPort(ipAddress);
+                server.Listen(1);
+                Task clientTask = Task.Run(() =>
                 {
-                    byte[] buffer = new byte[1];
-                    buffer[0] = Convert.ToByte('a');
-                    server.BindToAnonymousPort(listenAt);
-                    server.Listen(1);
-                    Thread clientThread = new Thread(() =>
+                    try
                     {
-                        try
+                        // Each round will block until new connection is accepted.
+                        while (true)
                         {
-                            // Each round will block until new connection is accepted.
-                            while (true)
-                            {
-                                Socket serverSocket = server.Accept();
-                                serverSocket.Send(buffer);
-                            }
+                            Socket serverSocket = server.Accept();
+                            serverSocket.Send(buffer);
                         }
-                        catch (SocketException) { };
-                    });
-                    clientThread.IsBackground = true;
-                    clientThread.Start();
-                    // Make sure we can connect at least once
-                    client.Connect(server.LocalEndPoint);
-                    client.Receive(buffer, 1, SocketFlags.None);
-                    client.Close();
-                    // Now clientThread should be blocked waiting for another connect.
-                    // force Close on the socket from parent thread.
-                    server.Close();
-                    clientThread.Join();
-                }
-                return SuccessExitCode;
-            }, ipAddress.ToString()).Dispose();
+                    }
+                    catch (SocketException) { }
+                    catch (ObjectDisposedException) { }
+                });
+                // Make sure we can connect at least once
+                client.Connect(server.LocalEndPoint);
+                client.Receive(buffer, 1, SocketFlags.None);
+                client.Close();
+                // Now clientThread should be blocked waiting for another connect.
+                // force Close on the socket from parent thread.
+                server.Close();
+                clientTask.Wait(TestSettings.PassingTestTimeout);
+            }
         }
     }
 
