@@ -146,15 +146,12 @@ Returns 1 on success, 0 on failure, other values for invalid state.
 Output:
 pOSStatus: Receives the value from SSLSetALPNData()
 */
-DLLEXPORT int32_t AppleCryptoNative_SslCtxSetAlpnProtos(SSLContextRef sslContext,
-                                                     const uint8_t* protocols,
-                                                     int32_t len,
-                                                     int32_t* pOSStatus);
+DLLEXPORT int32_t AppleCryptoNative_SSLSetALPNProtocols(SSLContextRef sslContext, CFArrayRef protocols, int32_t* pOSStatus);
 
 /*
 Get negotiated protocol value from ServerHello.
 */
-DLLEXPORT int32_t AppleCryptoNative_SslGetAlpnSelected(SSLContextRef sslContext, const uint8_t** protocol, uint32_t* len);
+DLLEXPORT int32_t AppleCryptoNative_SslGetAlpnSelected(SSLContextRef sslContext, CFDataRef *protocol);
 
 /*
 Register the callbacks for reading and writing data to the SSL context.

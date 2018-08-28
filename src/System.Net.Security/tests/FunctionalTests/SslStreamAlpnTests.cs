@@ -24,6 +24,7 @@ namespace System.Net.Security.Tests
     public class SslStreamAlpnTests
     {
         private static bool BackendSupportsAlpn => PlatformDetection.SupportsAlpn;
+        private static bool ClientSupportsAlpn => PlatformDetection.SupportsClientAlpn;
         readonly ITestOutputHelper _output;
         public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
 
@@ -190,8 +191,7 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop("Uses external server")]
-        [PlatformSpecific(TestPlatforms.OSX)]
-        [Theory]
+        [ConditionalTheory(nameof(ClientSupportsAlpn))]
         [MemberData(nameof(Http2Servers))]
         public async Task SslStream_OSX_Alpn_Success(Uri server)
         {
@@ -204,8 +204,8 @@ namespace System.Net.Security.Tests
                     {
                         SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions
                         {
-                            ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http2 ,  SslApplicationProtocol.Http11 },
-                            TargetHost =  server.Host
+                            ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http2 , SslApplicationProtocol.Http11 },
+                            TargetHost = server.Host
                         };
 
                         await clientStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);

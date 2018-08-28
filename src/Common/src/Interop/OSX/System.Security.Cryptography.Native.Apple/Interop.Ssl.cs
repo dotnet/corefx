@@ -29,6 +29,17 @@ internal static partial class Interop
         // and set *dataLength to the number of bytes actually transferred.
         internal unsafe delegate int SSLWriteFunc(void* connection, byte* data, void** dataLength);
 
+        private static readonly SafeCreateHandle s_cfHttp2Str = CoreFoundation.CFStringCreateWithCString("h2");
+        private static readonly SafeCreateHandle s_cfHttp11Str = CoreFoundation.CFStringCreateWithCString("http/1.1");
+
+        private static readonly IntPtr[] s_cfAlpnHttp2Protocol = new IntPtr[] { s_cfHttp2Str.DangerousGetHandle() };
+        private static readonly IntPtr[] s_cfAlpnHttp11Protocol = new IntPtr[] { s_cfHttp11Str.DangerousGetHandle() };
+        private static readonly IntPtr[] s_cfAlpnHttp211Protocol = new IntPtr[] { s_cfHttp2Str.DangerousGetHandle(), s_cfHttp11Str.DangerousGetHandle() };
+
+        private static readonly SafeCreateHandle s_cfAlpnHttp11Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp11Protocol, (UIntPtr)1);
+        private static readonly SafeCreateHandle s_cfAlpnHttp2Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp2Protocol , (UIntPtr)1);
+        private static readonly SafeCreateHandle s_cfAlpnHttp211Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp211Protocol , (UIntPtr)2);
+
         internal enum PAL_TlsHandshakeState
         {
             Unknown,
@@ -390,11 +401,11 @@ internal static partial class Interop
             int cbTargetName,
             out int osStatus);
 
-        [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslCtxSetAlpnProtos")]
-        internal static extern int SslCtxSetAlpnProtos(SafeSslHandle ctx, IntPtr protos, int len, out int osStatus);
+        [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SSLSetALPNProtocols")]
+        internal static extern int SSLSetALPNProtocols(SafeSslHandle ctx, SafeCreateHandle cfProtocolsRefs, out int osStatus);
 
         [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslGetAlpnSelected")]
-        internal static extern int SslGetAlpnSelected(SafeSslHandle ssl, out IntPtr protocol, out int len);
+        internal static extern int SslGetAlpnSelected(SafeSslHandle ssl, out SafeCFDataHandle protocol);
 
         [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslHandshake")]
         internal static extern PAL_TlsHandshakeState SslHandshake(SafeSslHandle sslHandle);
@@ -579,56 +590,76 @@ internal static partial class Interop
 
         internal static unsafe void SslCtxSetAlpnProtos(SafeSslHandle ctx, List<SslApplicationProtocol> protocols)
         {
-            byte[] buffer = ConvertAlpnProtocolListToByteArray(protocols);
-            int osStatus;
-
-            fixed (byte* b = buffer)
+            SafeCreateHandle cfProtocolsRefs = null;
+            SafeCreateHandle[] cfProtocolRefs = null;
+            try
             {
-                int result = SslCtxSetAlpnProtos(ctx, (IntPtr)b, buffer.Length, out osStatus);
+               if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http2)
+                {
+                    cfProtocolsRefs = s_cfAlpnHttp211Protocols;
+                }
+                else if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http11)
+                {
+                    cfProtocolsRefs = s_cfAlpnHttp11Protocols;
+                }
+                else if (protocols.Count == 2 && protocols[0] == SslApplicationProtocol.Http2 && protocols[1] == SslApplicationProtocol.Http11)
+                {
+                    cfProtocolsRefs = s_cfAlpnHttp211Protocols;
+                }
+                else
+                {
+                    // we did not match common case. This is more expensive path allocating Core Foundation objects.
+                    cfProtocolRefs = new  SafeCreateHandle[protocols.Count];
+                    IntPtr[] protocolsPtr = new  System.IntPtr[protocols.Count];
+
+                    for (int i = 0; i < protocols.Count; i++)
+                    {
+                        cfProtocolRefs[i] = CoreFoundation.CFStringCreateWithCString(protocols[i].ToString());
+                        protocolsPtr[i] = cfProtocolRefs[i].DangerousGetHandle();
+                    }
+
+                    cfProtocolsRefs = CoreFoundation.CFArrayCreate(protocolsPtr, (UIntPtr)protocols.Count);
+                }
+
+                int osStatus;
+                int result = SSLSetALPNProtocols(ctx, cfProtocolsRefs, out osStatus);
                 if (result != 1)
                 {
                     throw CreateExceptionForOSStatus(osStatus);
+                }
+            }
+            finally
+            {
+                if (cfProtocolRefs != null)
+                {
+                    for (int i = 0; i < cfProtocolRefs.Length ; i++)
+                    {
+                        cfProtocolRefs[i]?.Dispose();
+                    }
+
+                    cfProtocolsRefs?.Dispose();
                 }
             }
         }
 
         internal static byte[] SslGetAlpnSelected(SafeSslHandle ssl)
         {
-            IntPtr protocol;
-            int len;
-            SslGetAlpnSelected(ssl, out protocol, out len);
+            SafeCFDataHandle protocol;
 
-            if (len == 0)
+            if (SslGetAlpnSelected(ssl, out protocol) != 1 || protocol == null)
+            {
                 return null;
-
-            byte[] result = new byte[len];
-            Marshal.Copy(protocol, result, 0, len);
-            return result;
-        }
-
-        internal static byte[] ConvertAlpnProtocolListToByteArray(List<SslApplicationProtocol> applicationProtocols)
-        {
-            int protocolSize = 0;
-            foreach (SslApplicationProtocol protocol in applicationProtocols)
-            {
-                if (protocol.Protocol.Length == 0 || protocol.Protocol.Length > byte.MaxValue)
-                {
-                    throw new ArgumentException(SR.net_ssl_app_protocols_invalid, nameof(applicationProtocols));
-                }
-
-                protocolSize += protocol.Protocol.Length + 1;
             }
 
-            byte[] buffer = new byte[protocolSize];
-            var offset = 0;
-            foreach (SslApplicationProtocol protocol in applicationProtocols)
+            try
             {
-                buffer[offset++] = (byte)(protocol.Protocol.Length);
-                protocol.Protocol.Span.CopyTo(new Span<byte>(buffer).Slice(offset));
-                offset += protocol.Protocol.Length;
+                byte[] result = Interop.CoreFoundation.CFGetData(protocol);
+                return result;
             }
-
-            return buffer;
+            finally
+            {
+                protocol.Dispose();
+            }
         }
 
         public static bool SslCheckHostnameMatch(SafeSslHandle handle, string hostName, DateTime notBefore)
