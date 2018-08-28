@@ -29,7 +29,7 @@ void CryptoNative_EnsureLibSslInitialized()
 {
     CryptoNative_EnsureOpenSslInitialized();
 
-    // If portable, call the 1.0 initializer when eeded.
+    // If portable, call the 1.0 initializer when needed.
     // If 1.0, call it statically.
     // In 1.1 no action is required, since EnsureOpenSslInitialized does both libraries.
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL

@@ -5,7 +5,16 @@
 // Definitions of structures from OpenSSL 1.0.2, modified as relevant to
 // building .NET Core.
 
-struct dsa_st {
+// The CRYPTO_EX_DATA struct is smaller in 1.1, which changes the packing of
+// dsa_st
+struct crypto_ex_data_10_st
+{
+    STACK_OF(void)* sk;
+    int dummy;
+};
+
+struct dsa_st
+{
     int _ignored0;
     long _ignored1;
     int _ignored2;
@@ -19,7 +28,7 @@ struct dsa_st {
     int _ignored5;
     const void* _ignored6;
     int _ignored7;
-    CRYPTO_EX_DATA ex_data;
+    struct crypto_ex_data_10_st ex_data;
     const DSA_METHOD *meth;
 };
 
