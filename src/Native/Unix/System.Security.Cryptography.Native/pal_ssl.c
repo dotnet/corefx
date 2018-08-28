@@ -44,7 +44,7 @@ void CryptoNative_EnsureLibSslInitialized()
 
 const SSL_METHOD* CryptoNative_SslV2_3Method()
 {
-    const SSL_METHOD* method = SSLv23_method();
+    const SSL_METHOD* method = TLS_method();
     assert(method != NULL);
     return method;
 }

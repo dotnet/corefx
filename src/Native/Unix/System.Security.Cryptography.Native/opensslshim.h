@@ -94,19 +94,10 @@ void EVP_MD_CTX_destroy(EVP_MD_CTX *ctx);
 void HMAC_CTX_cleanup(HMAC_CTX *ctx);
 void HMAC_CTX_init(HMAC_CTX *ctx);
 void OPENSSL_add_all_algorithms_conf(void);
-/*
-void sk_free(_STACK *);
-_STACK *sk_new_null(void);
-int sk_num(const _STACK *);
-void sk_pop_free(_STACK *st, void (*func) (void *));
-int sk_push(_STACK *st, void *data);
-void *sk_value(const _STACK *, int);
-*/
 int SSL_library_init(void);
 void SSL_load_error_strings(void);
 int SSL_state(const SSL *ssl);
 unsigned long SSLeay(void);
-const SSL_METHOD *SSLv23_method(void);
 #endif
 
 #if !HAVE_OPENSSL_ALPN
@@ -390,7 +381,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(SSL_shutdown) \
     LEGACY_FUNCTION(SSL_state) \
     LEGACY_FUNCTION(SSLeay) \
-    REQUIRED_FUNCTION(SSLv23_method) \
+    RENAMED_FUNCTION(TLS_method, SSLv23_method) \
     REQUIRED_FUNCTION(SSL_write) \
     REQUIRED_FUNCTION(X509_check_issued) \
     REQUIRED_FUNCTION(X509_check_purpose) \
@@ -741,8 +732,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_shutdown SSL_shutdown_ptr
 #define SSL_state SSL_state_ptr
 #define SSLeay SSLeay_ptr
-#define SSLv23_method SSLv23_method_ptr
 #define SSL_write SSL_write_ptr
+#define TLS_method TLS_method_ptr
 #define X509_check_issued X509_check_issued_ptr
 #define X509_check_purpose X509_check_purpose_ptr
 #define X509_CRL_free X509_CRL_free_ptr
