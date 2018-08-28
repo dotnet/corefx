@@ -122,7 +122,11 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
         protocolOptions |= SSL_OP_NO_TLSv1_2;
     }
 
+    // OpenSSL 1.0 calls this long, OpenSSL 1.1 calls it unsigned long.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
     SSL_CTX_set_options(ctx, protocolOptions);
+#pragma clang diagnostic pop
 }
 
 SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
