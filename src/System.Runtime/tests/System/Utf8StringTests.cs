@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
+using static System.Tests.Utf8TestUtilities;
+
 namespace System.Tests
 {
     public static unsafe class Utf8StringTests
@@ -37,7 +39,7 @@ namespace System.Tests
                 Assert.True(pA == pB);
             }
         }
-
+        
         [Fact]
         public static void GetPinnableReference_Empty()
         {
@@ -115,6 +117,39 @@ namespace System.Tests
         public static void Literal_SameInputs_ReturnsSameInstance()
         {
             Assert.Same(Utf8String.Literal("first"), Utf8String.Literal("first"));
+        }
+
+        [Theory]
+        [InlineData(null, null, true)]
+        [InlineData("", null, false)]
+        [InlineData(null, "", false)]
+        [InlineData("hello", null, false)]
+        [InlineData(null, "hello", false)]
+        [InlineData("hello", "hello", true)]
+        [InlineData("hello", "Hello", false)]
+        [InlineData("hello there", "hello", false)]
+        public static void Equality_Ordinal(string aString, string bString, bool expected)
+        {
+            Utf8String a = U(aString);
+            Utf8String b = U(bString);
+
+            // Operators
+
+            Assert.Equal(expected, a == b);
+            Assert.NotEqual(expected, a != b);
+
+            // Static methods
+
+            Assert.Equal(expected, Utf8String.Equals(a, b));
+            Assert.Equal(expected, Utf8String.Equals(a, b, StringComparison.Ordinal));
+
+            // Instance methods
+
+            if (a != null)
+            {
+                Assert.Equal(expected, a.Equals(b));
+                Assert.Equal(expected, a.Equals((object)b));
+            }
         }
 
         [Theory]
