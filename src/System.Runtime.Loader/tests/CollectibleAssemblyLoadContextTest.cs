@@ -26,8 +26,6 @@ namespace System.Runtime.Loader.Tests
 
             // Check that any attempt to load an assembly after an explicit Unload will fail
             Assert.Throws<InvalidOperationException>(() => alc.LoadFromAssemblyPath("none.dll"));
-
-            alc = null;
         }
 
         [Fact]
@@ -49,7 +47,7 @@ namespace System.Runtime.Loader.Tests
 
             var checker = new CollectibleChecker(1);
             // Create the ALC in another method to allow the finalizer to run
-            var weakRef = CreateCollectible(checker);
+            WeakReference<AssemblyLoadContext> weakRef = CreateCollectible(checker);
             checker.GcAndCheck();
 
             // Check that the ALC was also released
@@ -81,7 +79,7 @@ namespace System.Runtime.Loader.Tests
                 var asmName = new AssemblyName(TestAssembly);
                 _contexts[contextIndex] = new ResourceAssemblyLoadContext(true) { LoadBy = LoadBy.Path };
 
-                var asm = _contexts[contextIndex].LoadFromAssemblyName(asmName);
+                Assembly asm = _contexts[contextIndex].LoadFromAssemblyName(asmName);
 
                 Assert.NotNull(asm);
                 _testClassTypes[contextIndex] = asm.DefinedTypes.FirstOrDefault(t => t.Name == "TestClass");
@@ -128,8 +126,8 @@ namespace System.Runtime.Loader.Tests
             [MethodImpl(MethodImplOptions.NoInlining)]
             public void Execute()
             {
-                var instance = Activator.CreateInstance(_testClassTypes[0]);
-                var fieldReference = _testClassTypes[0].GetField("StaticObjectRef");
+                object instance = Activator.CreateInstance(_testClassTypes[0]);
+                FieldInfo fieldReference = _testClassTypes[0].GetField("StaticObjectRef");
                 Assert.NotNull(fieldReference);
                 // Set a static reference to an object of the loaded ALC
                 fieldReference.SetValue(null, instance);
@@ -188,7 +186,7 @@ namespace System.Runtime.Loader.Tests
             [MethodImpl(MethodImplOptions.NoInlining)]
             public void Execute()
             {
-                var instance = Activator.CreateInstance(_testClassTypes[0]);
+                object instance = Activator.CreateInstance(_testClassTypes[0]);
                 _testClassInstanceRef = new WeakReference(instance);
             }
 
@@ -281,7 +279,7 @@ namespace System.Runtime.Loader.Tests
             [MethodImpl(MethodImplOptions.NoInlining)]
             public void Execute()
             {
-                var instance = Activator.CreateInstance(_testClassTypes[0]);
+                object instance = Activator.CreateInstance(_testClassTypes[0]);
                 _handle = GCHandle.Alloc(instance);
             }
 
@@ -339,7 +337,7 @@ namespace System.Runtime.Loader.Tests
             {
                 var asmName = new AssemblyName(TestAssembly2);
                 _contexts[0].LoadBy = LoadBy.Path;
-                var asm = _contexts[0].LoadFromAssemblyName(asmName);
+                Assembly asm = _contexts[0].LoadFromAssemblyName(asmName);
                 Assert.NotEqual(_testClassTypes[0].Assembly, asm);
             }
         }
@@ -369,8 +367,8 @@ namespace System.Runtime.Loader.Tests
             public void Execute()
             {
                 _instance1 = Activator.CreateInstance(_testClassTypes[0]);
-                var instance2 = Activator.CreateInstance(_testClassTypes[1]);
-                var field = _instance1.GetType().GetField("Instance");
+                object instance2 = Activator.CreateInstance(_testClassTypes[1]);
+                FieldInfo field = _instance1.GetType().GetField("Instance");
                 Assert.NotNull(field);
 
                 field.SetValue(_instance1, instance2);
@@ -435,77 +433,22 @@ namespace System.Runtime.Loader.Tests
         {
             var asmName = new AssemblyName(TestAssemblyNotSupported);
             var alc = new ResourceAssemblyLoadContext(true) { LoadBy = LoadBy.Path };
-            var asm = alc.LoadFromAssemblyName(asmName);
+            Assembly asm = alc.LoadFromAssemblyName(asmName);
 
             Assert.NotNull(asm);
 
-            var exception = Assert.Throws<ReflectionTypeLoadException>(() => asm.DefinedTypes);
+            ReflectionTypeLoadException exception = Assert.Throws<ReflectionTypeLoadException>(() => asm.DefinedTypes);
+
+            // Expecting two exceptions:
+            //  Collectible type 'System.Runtime.Loader.Tests.TestClassNotSupported_ThreadStatic' may not have Thread or Context static members
+            //  Collectible type 'System.Runtime.Loader.Tests.TestClassNotSupported_FixedAddressValueType' has unsupported FixedAddressValueTypeAttribute applied to a field
             Assert.Equal(2, exception.LoaderExceptions.Length);
-            Assert.True(exception.LoaderExceptions.Any(exp => exp.Message.Contains("Collectible type 'System.Runtime.Loader.Tests.TestClassNotSupported_ThreadStatic' may not have Thread or Context static members")));
-            Assert.True(exception.LoaderExceptions.Any(exp => exp.Message.Contains("Collectible type 'System.Runtime.Loader.Tests.TestClassNotSupported_FixedAddressValueType' has unsupported FixedAddressValueTypeAttribute applied to a field")));
-        }
-
-        class DelegateMarshallingTest : TestBase
-        {
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            public void Execute()
-            {
-                var exception = Assert.Throws<TargetInvocationException>(() =>
-                {
-                    var methodReference = _testClassTypes[0].GetMethod("TestDelegateMarshalling");
-                    Assert.NotNull(methodReference);
-                    methodReference.Invoke(null, null);
-                });
-                Assert.True(exception.InnerException is NotSupportedException);
-                Assert.True(exception.InnerException.Message.Contains("Delegate marshaling for types within collectible assemblies is not supported."));
-            }
-        }
-
-        [Fact]
-        public static void Unsupported_DelegateMarshalling()
-        {
-            var test = new DelegateMarshallingTest();
-            test.CreateContextAndLoadAssembly();
-            test.Execute();
-            test.UnloadAndClearContext();
-            test.CheckContextUnloaded();
-        }
-
-
-        class COMInteropTest : TestBase
-        {
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            public void Execute()
-            {
-                var exception = Assert.Throws<NotSupportedException>(() =>
-                {
-                    Type contextMenuType = _testClassTypes[0].GetNestedType("COMClass");
-                    Assert.NotNull(contextMenuType);
-                    Assert.True(contextMenuType.IsCOMObject);
-                    var contextMenu = Activator.CreateInstance(contextMenuType);
-                    Assert.NotNull(contextMenu);
-                });
-                Assert.True(exception.Message.Contains("COM Interop is not supported for collectible types."));
-            }
-        }
-
-        [Fact]
-        public static void Unsupported_COMInterop()
-        {
-            var test = new COMInteropTest();
-            test.CreateContextAndLoadAssembly();
-            test.Execute();
-            test.UnloadAndClearContext();
-            test.CheckContextUnloaded();
+            Assert.True(exception.LoaderExceptions.All(exp => exp is TypeLoadException));
         }
 
         private class CollectibleChecker
         {
-            private const int MaxGCRetry = 10;
-            private const int MaxWaitTimePerGCRetryInMilli = 10;
-
             private readonly int _expectedCount;
-            private int _unloadCount;
             private WeakReference[] _alcWeakRefs = null;
 
             public CollectibleChecker(int expectedCount)
@@ -535,12 +478,7 @@ namespace System.Runtime.Loader.Tests
                     }
                 }
 
-                if (unloadCount > _unloadCount)
-                {
-                    _unloadCount = unloadCount;
-                }
-
-                Assert.Equal(overrideExpect >= 0 ? overrideExpect : _expectedCount, _unloadCount);
+                Assert.Equal(overrideExpect >= 0 ? overrideExpect : _expectedCount, unloadCount);
             }
         }
 
