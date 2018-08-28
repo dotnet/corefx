@@ -356,8 +356,6 @@ namespace System.Diagnostics
         /// </summary>
         private unsafe int? GetParentProcessId()
         {
-            // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
-            // For now just return null and worst case we will not kill some children.
             Interop.NtDll.PROCESS_BASIC_INFORMATION info = default;
 
             if (Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, &info, (uint)sizeof(Interop.NtDll.PROCESS_BASIC_INFORMATION), out _) == 0)
