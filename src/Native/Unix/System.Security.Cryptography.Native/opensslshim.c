@@ -15,9 +15,11 @@
 #define NEW_REQUIRED_FUNCTION(fn) __typeof(fn) fn##_ptr;
 #define LIGHTUP_FUNCTION(fn) __typeof(fn) fn##_ptr;
 #define FALLBACK_FUNCTION(fn) __typeof(fn) fn##_ptr;
+#define RENAMED_FUNCTION(fn,oldfn) __typeof(fn) fn##_ptr;
 #define LEGACY_FUNCTION(fn) __typeof(fn) fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
 #undef LEGACY_FUNCTION
+#undef RENAMED_FUNCTION
 #undef FALLBACK_FUNCTION
 #undef LIGHTUP_FUNCTION
 #undef NEW_REQUIRED_FUNCTION
@@ -102,11 +104,16 @@ static void InitializeOpenSSLShim()
 #define FALLBACK_FUNCTION(fn) \
     if (!(fn##_ptr = (__typeof(fn))(dlsym(libssl, #fn)))) { fn##_ptr = (__typeof(fn))local_##fn; }
 
+#define RENAMED_FUNCTION(fn,oldfn) \
+    if (!v1_0_sentinel && !(fn##_ptr = (__typeof(fn))(dlsym(libssl, #fn)))) { fprintf(stderr, "Cannot get required symbol " #fn " from libssl\n"); abort(); } \
+    if (v1_0_sentinel && !(fn##_ptr = (__typeof(fn))(dlsym(libssl, #oldfn)))) { fprintf(stderr, "Cannot get required symbol " #oldfn " from libssl\n"); abort(); }
+
 #define LEGACY_FUNCTION(fn) \
     if (v1_0_sentinel && !(fn##_ptr = (__typeof(fn))(dlsym(libssl, #fn)))) { fprintf(stderr, "Cannot get required symbol " #fn " from libssl\n"); abort(); }
 
     FOR_ALL_OPENSSL_FUNCTIONS
 #undef LEGACY_FUNCTION
+#undef RENAMED_FUNCTION
 #undef FALLBACK_FUNCTION
 #undef LIGHTUP_FUNCTION
 #undef NEW_REQUIRED_FUNCTION

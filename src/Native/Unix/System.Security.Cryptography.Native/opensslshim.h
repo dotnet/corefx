@@ -9,30 +9,6 @@
 
 #pragma once
 
-#ifdef DIDNT_WORK
-#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
-
-#include <openssl/stack.h>
-
-#define OPENSSL_sk_free OPENSSL_sk_free_ptr
-#define OPENSSL_sk_new_null OPENSSL_sk_new_null_ptr
-#define OPENSSL_sk_num OPENSSL_sk_num_ptr
-#define OPENSSL_sk_pop_free OPENSSL_sk_pop_free_ptr
-#define OPENSSL_sk_push OPENSSL_sk_push_ptr
-#define OPENSSL_sk_value OPENSSL_sk_value_ptr
-
-#include <openssl/safestack.h>
-
-#undef OPENSSL_sk_free
-#undef OPENSSL_sk_new_null
-#undef OPENSSL_sk_num
-#undef OPENSSL_sk_pop_free
-#undef OPENSSL_sk_push
-#undef OPENSSL_sk_value
-
-#endif
-#endif
-
 // All the openssl includes need to be here to ensure that the APIs we use
 // are overriden to be called through our function pointers.
 #include <openssl/asn1.h>
@@ -118,12 +94,14 @@ void EVP_MD_CTX_destroy(EVP_MD_CTX *ctx);
 void HMAC_CTX_cleanup(HMAC_CTX *ctx);
 void HMAC_CTX_init(HMAC_CTX *ctx);
 void OPENSSL_add_all_algorithms_conf(void);
+/*
 void sk_free(_STACK *);
 _STACK *sk_new_null(void);
 int sk_num(const _STACK *);
 void sk_pop_free(_STACK *st, void (*func) (void *));
 int sk_push(_STACK *st, void *data);
 void *sk_value(const _STACK *, int);
+*/
 int SSL_library_init(void);
 void SSL_load_error_strings(void);
 int SSL_state(const SSL *ssl);
@@ -332,12 +310,12 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LEGACY_FUNCTION(OPENSSL_add_all_algorithms_conf) \
     REQUIRED_FUNCTION(OPENSSL_cleanse) \
     NEW_REQUIRED_FUNCTION(OPENSSL_init_ssl) \
-    REQUIRED_FUNCTION(OPENSSL_sk_free) \
-    REQUIRED_FUNCTION(OPENSSL_sk_new_null) \
-    REQUIRED_FUNCTION(OPENSSL_sk_num) \
-    REQUIRED_FUNCTION(OPENSSL_sk_pop_free) \
-    REQUIRED_FUNCTION(OPENSSL_sk_push) \
-    REQUIRED_FUNCTION(OPENSSL_sk_value) \
+    RENAMED_FUNCTION(OPENSSL_sk_free, sk_free) \
+    RENAMED_FUNCTION(OPENSSL_sk_new_null, sk_new_null) \
+    RENAMED_FUNCTION(OPENSSL_sk_num, sk_num) \
+    RENAMED_FUNCTION(OPENSSL_sk_pop_free, sk_pop_free) \
+    RENAMED_FUNCTION(OPENSSL_sk_push, sk_push) \
+    RENAMED_FUNCTION(OPENSSL_sk_value, sk_value) \
     FALLBACK_FUNCTION(OpenSSL_version_num) \
     REQUIRED_FUNCTION(PEM_read_bio_PKCS7) \
     REQUIRED_FUNCTION(PEM_read_bio_X509_AUX) \
@@ -369,12 +347,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(RSA_size) \
     REQUIRED_FUNCTION(RSA_up_ref) \
     REQUIRED_FUNCTION(RSA_verify) \
-    LEGACY_FUNCTION(sk_free) \
-    LEGACY_FUNCTION(sk_new_null) \
-    LEGACY_FUNCTION(sk_num) \
-    LEGACY_FUNCTION(sk_pop_free) \
-    LEGACY_FUNCTION(sk_push) \
-    LEGACY_FUNCTION(sk_value) \
     REQUIRED_FUNCTION(SSL_CIPHER_description) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_bits) \
     REQUIRED_FUNCTION(SSL_ctrl) \
@@ -490,9 +462,11 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
 #define NEW_REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
 #define LIGHTUP_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
 #define FALLBACK_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
+#define RENAMED_FUNCTION(fn,oldfn) extern __typeof(fn)* fn##_ptr;
 #define LEGACY_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
 #undef LEGACY_FUNCTION
+#undef RENAMED_FUNCTION
 #undef FALLBACK_FUNCTION
 #undef LIGHTUP_FUNCTION
 #undef NEW_REQUIRED_FUNCTION
@@ -718,12 +692,12 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_size RSA_size_ptr
 #define RSA_up_ref RSA_up_ref_ptr
 #define RSA_verify RSA_verify_ptr
-#define sk_free sk_free_ptr
-#define sk_new_null sk_new_null_ptr
-#define sk_num sk_num_ptr
-#define sk_pop_free sk_pop_free_ptr
-#define sk_push sk_push_ptr
-#define sk_value sk_value_ptr
+#define sk_free OPENSSL_sk_free_ptr
+#define sk_new_null OPENSSL_sk_new_null_ptr
+#define sk_num OPENSSL_sk_num_ptr
+#define sk_pop_free OPENSSL_sk_pop_free_ptr
+#define sk_push OPENSSL_sk_push_ptr
+#define sk_value OPENSSL_sk_value_ptr
 #define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
 #define SSL_CIPHER_description SSL_CIPHER_description_ptr
 #define SSL_ctrl SSL_ctrl_ptr
@@ -833,6 +807,37 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EC_GROUP_set_curve_GF2m EC_GROUP_set_curve_GF2m_ptr
 #define EC_POINT_get_affine_coordinates_GF2m EC_POINT_get_affine_coordinates_GF2m_ptr
 #define EC_POINT_set_affine_coordinates_GF2m EC_POINT_set_affine_coordinates_GF2m_ptr
+
+
+// STACK_OF types will have been declared with inline functions to handle the pointer casting.
+// Since these inline functions are strongly bound to the OPENSSL_sk_* functions in 1.1 we need to
+// rebind things here.
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+// type-safe OPENSSL_sk_free
+#define sk_GENERAL_NAME_free(stack) OPENSSL_sk_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(GENERAL_NAME)*)0))
+
+// type-safe OPENSSL_sk_num
+#define sk_ASN1_OBJECT_num(stack) OPENSSL_sk_num((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(ASN1_OBJECT)*)0))
+#define sk_GENERAL_NAME_num(stack) OPENSSL_sk_num((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(GENERAL_NAME)*)0))
+#define sk_X509_NAME_num(stack) OPENSSL_sk_num((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(X509_NAME)*)0))
+#define sk_X509_num(stack) OPENSSL_sk_num((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(X509)*)0))
+
+// type-safe OPENSSL_sk_new_null
+#define sk_X509_new_null() (STACK_OF(X509)*)OPENSSL_sk_new_null()
+
+// type-safe OPENSSL_sk_push
+#define sk_X509_push(stack,value) OPENSSL_sk_push((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0), (const void*)(1 ? value : (X509*)0))
+
+// type-safe OPENSSL_sk_pop_free
+#define sk_X509_pop_free(stack, freefunc) OPENSSL_sk_pop_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0), (OPENSSL_sk_freefunc)(1 ? freefunc : (sk_X509_freefunc)0))
+
+// type-safe OPENSSL_sk_value
+#define sk_ASN1_OBJECT_value(stack, idx) (ASN1_OBJECT*)OPENSSL_sk_value((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(ASN1_OBJECT)*)0), idx)
+#define sk_GENERAL_NAME_value(stack, idx) (GENERAL_NAME*)OPENSSL_sk_value((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(GENERAL_NAME)*)0), idx)
+#define sk_X509_NAME_value(stack, idx) (X509_NAME*)OPENSSL_sk_value((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(X509_NAME)*)0), idx)
+#define sk_X509_value(stack, idx) (X509*)OPENSSL_sk_value((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(X509)*)0), idx)
+#endif
+
 
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
