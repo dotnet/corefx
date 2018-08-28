@@ -32,7 +32,7 @@ void CryptoNative_EnsureLibSslInitialized()
     // If portable, call the 1.0 initializer when eeded.
     // If 1.0, call it statically.
     // In 1.1 no action is required, since EnsureOpenSslInitialized does both libraries.
-#if FEATURE_DISTRO_AGNOSTIC_SSL
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
     if (API_EXISTS(SSL_state))
     {
         EnsureLibSsl10Initialized();
