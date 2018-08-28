@@ -550,8 +550,14 @@ namespace System.Tests
         public static void GetHashCode_StringComparison(StringComparison comparisonType)
         {
             Assert.Equal(StringComparer.FromComparison(comparisonType).GetHashCode("abc"), "abc".GetHashCode(comparisonType));
+            Assert.Equal(StringComparer.FromComparison(comparisonType).GetHashCode("abc"), string.GetHashCode("abc".AsSpan(), comparisonType));
         }
 
+        [Fact]
+        public static void GetHashCode_EmbeddedNull_AsSpan_ReturnsDifferentHashCodes()
+        {
+            Assert.NotEqual(string.GetHashCode("\0AAAAAAAAA".AsSpan()), string.GetHashCode("\0BBBBBBBBBBBB".AsSpan()));
+        }
 
         public static IEnumerable<object[]> GetHashCode_NoSuchStringComparison_ThrowsArgumentException_Data => new[]
         {
