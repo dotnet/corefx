@@ -137,13 +137,15 @@ namespace Internal.Cryptography
             AsnReader reader = new AsnReader(normalizedValue, AsnEncodingRules.DER);
             AsnReader sequenceReader = reader.ReadSequence();
             AsnReader setReader = sequenceReader.ReadSetOf();
-            List<AttributeAsn> decodedSet = new List<AttributeAsn>(setItems.Length);
+            AttributeAsn[] decodedSet = new AttributeAsn[setItems.Length];
+            int i = 0;
             while (setReader.HasData)
             {
                 AttributeAsn.Decode(setReader, out AttributeAsn item);
-                decodedSet.Add(item);
+                decodedSet[i] = item;
+                i++;
             }
-            return decodedSet.ToArray();
+            return decodedSet;
         }
 
         internal static byte[] EncodeContentInfo(

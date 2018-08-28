@@ -1071,7 +1071,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Argument_InvalidValue);
             }
 
-            return (int)iterationCount;
+            return iterationCount;
         }
     }
 }
