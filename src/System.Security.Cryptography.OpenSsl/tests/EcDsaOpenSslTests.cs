@@ -279,6 +279,14 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
             Assert.Equal("ECDSA_P521", param.Curve.Oid.FriendlyName); // OpenSsl maps secp521r1 to ECDSA_P521
             Assert.Equal(ECDSA_P521_OID_VALUE, param.Curve.Oid.Value);
         }
+
+        [Fact]
+        public static void IntentionallyFailableTest()
+        {
+            uint value = Interop.Crypto.OpenSslVersionNumber();
+
+            Assert.Equal("0x1", value.ToString("X8"));
+        }
     }
 }
 
@@ -294,5 +302,8 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcKeyDestroy")]
         internal static extern void EcKeyDestroy(IntPtr r);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_OpenSslVersionNumber")]
+        internal static extern uint OpenSslVersionNumber();
     }
 }
