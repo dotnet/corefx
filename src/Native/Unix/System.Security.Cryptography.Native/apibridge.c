@@ -264,7 +264,7 @@ int32_t local_EVP_PKEY_up_ref(EVP_PKEY* pkey)
         return 0;
     }
 
-    return CRYPTO_add_lock(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY, __FILE__, __LINE__);
+    return CRYPTO_add_lock(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY, __FILE__, __LINE__) > 1;
 }
 
 EVP_CIPHER_CTX* local_EVP_CIPHER_CTX_new()
