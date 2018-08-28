@@ -102,6 +102,7 @@
     <Compile Include="System\StringGetHashCodeTests.cs" />
     <Compile Include="System\String.SplitTests.cs" />
     <Compile Include="System\SystemExceptionTests.cs" />
+    <Compile Include="System\Text\UnicodeScalarTests.TestData.cs" />
     <Compile Include="System\Text\UnicodeScalarTests.cs" />
     <Compile Include="System\TimeSpanTests.cs" />
     <Compile Include="System\TimeZoneInfoTests.cs" />

@@ -9,8 +9,54 @@ using Xunit;
 
 namespace System.Text.Tests
 {
-    public static class UnicodeScalarTests
+    public static partial class UnicodeScalarTests
     {
+        [Theory]
+        [InlineData('0', '0', '0', "en-US")]
+        [InlineData('a', 'A', 'a', "en-US")]
+        [InlineData('i', 'I', 'i', "en-US")]
+        [InlineData('i', '\u0130', 'i', "tr-TR")]
+        [InlineData('z', 'Z', 'z', "en-US")]
+        [InlineData('A', 'A', 'a', "en-US")]
+        [InlineData('I', 'I', 'i', "en-US")]
+        [InlineData('I', 'I', '\u0131', "tr-TR")]
+        [InlineData('Z', 'Z', 'z', "en-US")]
+        [InlineData('\u00DF', '\u00DF', '\u00DF', "de-DE")] // U+00DF LATIN SMALL LETTER SHARP S -- n.b. ToUpper doesn't create the majuscule form
+        [InlineData('\u0130', '\u0130', 'i', "tr-TR")] // U+0130 LATIN CAPITAL LETTER I WITH DOT ABOVE
+        [InlineData('\u0131', 'I', '\u0131', "tr-TR")] // U+0131 LATIN SMALL LETTER DOTLESS I
+        [InlineData('\u1E9E', '\u1E9E', '\u00DF', "de-DE")] // U+1E9E LATIN CAPITAL LETTER SHARP S
+        [InlineData(0x10400, 0x10400, 0x10428, "en-US")] // U+10400 DESERET CAPITAL LETTER LONG I
+        [InlineData(0x10428, 0x10400, 0x10428, "en-US")] // U+10428 DESERET SMALL LETTER LONG I
+        public static void Casing_CultureAware(int original, int upper, int lower, string culture)
+        {
+            var scalar = new UnicodeScalar(original);
+            var cultureInfo = CultureInfo.GetCultureInfo(culture);
+            Assert.Equal(new UnicodeScalar(upper), UnicodeScalar.ToUpper(scalar, cultureInfo));
+            Assert.Equal(new UnicodeScalar(lower), UnicodeScalar.ToLower(scalar, cultureInfo));
+        }
+
+        // Invariant ToUpper / ToLower doesn't modify Turkish I or majuscule Eszett
+        [Theory]
+        [InlineData('0', '0', '0')]
+        [InlineData('a', 'A', 'a')]
+        [InlineData('i', 'I', 'i')]
+        [InlineData('z', 'Z', 'z')]
+        [InlineData('A', 'A', 'a')]
+        [InlineData('I', 'I', 'i')]
+        [InlineData('Z', 'Z', 'z')]
+        [InlineData('\u00DF', '\u00DF', '\u00DF')] // U+00DF LATIN SMALL LETTER SHARP S
+        [InlineData('\u0130', '\u0130', '\u0130')] // U+0130 LATIN CAPITAL LETTER I WITH DOT ABOVE
+        [InlineData('\u0131', '\u0131', '\u0131')] // U+0131 LATIN SMALL LETTER DOTLESS I
+        [InlineData('\u1E9E', '\u1E9E', '\u1E9E')] // U+1E9E LATIN CAPITAL LETTER SHARP S
+        [InlineData(0x10400, 0x10400, 0x10428)] // U+10400 DESERET CAPITAL LETTER LONG I
+        [InlineData(0x10428, 0x10400, 0x10428)] // U+10428 DESERET SMALL LETTER LONG I
+        public static void Casing_Invariant(int original, int upper, int lower)
+        {
+            var scalar = new UnicodeScalar(original);
+            Assert.Equal(new UnicodeScalar(upper), UnicodeScalar.ToUpperInvariant(scalar));
+            Assert.Equal(new UnicodeScalar(lower), UnicodeScalar.ToLowerInvariant(scalar));
+        }
+
         [Theory]
         [MemberData(nameof(GeneralTestData_BmpCodePoints_NoSurrogates))]
         public static void Ctor_Char_Valid(GeneralTestData testData)
@@ -122,10 +168,94 @@ namespace System.Text.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void GetNumericValue(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.NumericValue, UnicodeScalar.GetNumericValue(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsControl(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsControl, UnicodeScalar.IsControl(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsDigit(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsDigit, UnicodeScalar.IsDigit(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsLetter(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsLetter, UnicodeScalar.IsLetter(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsLetterOrDigit(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsLetterOrDigit, UnicodeScalar.IsLetterOrDigit(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsLower(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsLower, UnicodeScalar.IsLower(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsNumber(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsNumber, UnicodeScalar.IsNumber(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsPunctuation(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsPunctuation, UnicodeScalar.IsPunctuation(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsSeparator(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsSeparator, UnicodeScalar.IsSeparator(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsSymbol(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsSymbol, UnicodeScalar.IsSymbol(testData.ScalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsUpper(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsUpper, UnicodeScalar.IsUpper(testData.ScalarValue));
+        }
+
+        [Theory]
         [MemberData(nameof(IsValidTestData))]
         public static void IsValid(int scalarValue, bool expectedIsValid)
         {
             Assert.Equal(expectedIsValid, UnicodeScalar.IsValid(scalarValue));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnicodeInfoTestData_Latin1AndSelectOthers))]
+        public static void IsWhiteSpace(UnicodeInfoTestData testData)
+        {
+            Assert.Equal(testData.IsWhiteSpace, UnicodeScalar.IsWhiteSpace(testData.ScalarValue));
         }
 
         [Fact]
