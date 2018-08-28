@@ -17,6 +17,9 @@
 
 #define CRYPTO_LOCK_X509 3
 #define CRYPTO_LOCK_EVP_PKEY 10
+
+#define SSL_CTRL_GET_SESSION_REUSED 8
+#define SSL_CTRL_OPTIONS 32
 #endif
 
 const ASN1_TIME* local_X509_get0_notBefore(const X509* x509)
@@ -39,7 +42,7 @@ const ASN1_TIME* local_X509_get0_notAfter(const X509* x509)
     return NULL;
 }
 
-const ASN1_TIME *local_X509_CRL_get0_nextUpdate(const X509_CRL *crl)
+const ASN1_TIME* local_X509_CRL_get0_nextUpdate(const X509_CRL* crl)
 {
     if (crl && crl->crl)
     {
@@ -125,7 +128,7 @@ int32_t local_X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size
 
     if (pder)
     {
-        *pder = (unsigned char *)x509Name->bytes->data;
+        *pder = (unsigned char*)x509Name->bytes->data;
     }
 
     if (pderlen)
@@ -134,26 +137,6 @@ int32_t local_X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size
     }
 
     return 1;
-}
-
-X509_NAME* local_X509_get_issuer_name(const X509* x509)
-{
-    if (x509 && x509->cert_info)
-    {
-        return x509->cert_info->issuer;
-    }
-
-    return NULL;
-}
-
-X509_NAME* local_X509_get_subject_name(const X509* x509)
-{
-    if (x509 && x509->cert_info)
-    {
-        return x509->cert_info->subject;
-    }
-
-    return NULL;
 }
 
 long local_OpenSSL_version_num()
@@ -526,10 +509,6 @@ int32_t local_X509_up_ref(X509* x509)
 
 unsigned long local_SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options)
 {
-#ifndef SSL_CTRL_OPTIONS
-#define SSL_CTRL_OPTIONS 32
-#endif
-
     // SSL_CTX_ctrl is signed long in and signed long out; but SSL_CTX_set_options,
     // which was a macro call to SSL_CTX_ctrl in 1.0, is unsigned/unsigned.
     return (unsigned long)SSL_CTX_ctrl(ctx, SSL_CTRL_OPTIONS, (long)options, NULL);
@@ -537,10 +516,6 @@ unsigned long local_SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options)
 
 int local_SSL_session_reused(SSL* ssl)
 {
-#ifndef SSL_CTRL_GET_SESSION_REUSED
-#define SSL_CTRL_GET_SESSION_REUSED 8
-#endif
-
     return (int)SSL_ctrl(ssl, SSL_CTRL_GET_SESSION_REUSED, 0, NULL);
 }
 

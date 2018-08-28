@@ -83,19 +83,75 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 typedef struct stack_st _STACK;
-int CRYPTO_add_lock(int *pointer, int amount, int type, const char *file, int line);
+int CRYPTO_add_lock(int* pointer, int amount, int type, const char* file, int line);
 int CRYPTO_num_locks(void);
-void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char *file, int line));
+void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char* file, int line));
 void ERR_load_crypto_strings(void);
-int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
-int EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *a);
-void HMAC_CTX_cleanup(HMAC_CTX *ctx);
-void HMAC_CTX_init(HMAC_CTX *ctx);
+int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX* a);
+int EVP_CIPHER_CTX_init(EVP_CIPHER_CTX* a);
+void HMAC_CTX_cleanup(HMAC_CTX* ctx);
+void HMAC_CTX_init(HMAC_CTX* ctx);
 void OPENSSL_add_all_algorithms_conf(void);
 int SSL_library_init(void);
 void SSL_load_error_strings(void);
-int SSL_state(const SSL *ssl);
+int SSL_state(const SSL* ssl);
 unsigned long SSLeay(void);
+#else
+typedef struct ossl_init_settings_st OPENSSL_INIT_SETTINGS;
+typedef struct stack_st OPENSSL_STACK;
+
+#define OPENSSL_INIT_LOAD_CRYPTO_STRINGS 0x00000002L
+#define OPENSSL_INIT_ADD_ALL_CIPHERS 0x00000004L
+#define OPENSSL_INIT_ADD_ALL_DIGESTS 0x00000008L
+#define OPENSSL_INIT_LOAD_CONFIG 0x00000040L
+#define OPENSSL_INIT_LOAD_SSL_STRINGS 0x00200000L
+
+const BIGNUM* DSA_get0_key(const DSA* dsa, const BIGNUM** pubKey, const BIGNUM** privKey);
+void DSA_get0_pqg(const DSA* dsa, const BIGNUM** p, const BIGNUM** q, const BIGNUM** g);
+const DSA_METHOD* DSA_get_method(const DSA* dsa);
+int32_t DSA_set0_key(DSA* dsa, BIGNUM* bnY, BIGNUM* bnX);
+int32_t DSA_set0_pqg(DSA* dsa, BIGNUM* bnP, BIGNUM* bnQ, BIGNUM* bnG);
+void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX* ctx);
+EVP_CIPHER_CTX* EVP_CIPHER_CTX_new(void);
+int32_t EVP_CIPHER_CTX_reset(EVP_CIPHER_CTX* ctx);
+void EVP_MD_CTX_free(EVP_MD_CTX* ctx);
+EVP_MD_CTX* EVP_MD_CTX_new(void);
+int32_t EVP_PKEY_up_ref(EVP_PKEY* pkey);
+void HMAC_CTX_free(HMAC_CTX* ctx);
+HMAC_CTX* HMAC_CTX_new(void);
+int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings);
+void OPENSSL_sk_free(OPENSSL_STACK*);
+OPENSSL_STACK* OPENSSL_sk_new_null(void);
+int OPENSSL_sk_num(const OPENSSL_STACK* );
+void OPENSSL_sk_pop_free(OPENSSL_STACK* st, void (*func) (void*));
+int OPENSSL_sk_push(OPENSSL_STACK* st, const void* data);
+void* OPENSSL_sk_value(const OPENSSL_STACK* , int);
+long OpenSSL_version_num(void);
+void RSA_get0_crt_params(const RSA* rsa, const BIGNUM** dmp1, const BIGNUM** dmq1, const BIGNUM** iqmp);
+void RSA_get0_factors(const RSA* rsa, const BIGNUM** p, const BIGNUM** q);
+void RSA_get0_key(const RSA* rsa, const BIGNUM** n, const BIGNUM** e, const BIGNUM** d);
+int32_t RSA_meth_get_flags(const RSA_METHOD* meth);
+int32_t RSA_set0_crt_params(RSA* rsa, BIGNUM* dmp1, BIGNUM* dmq1, BIGNUM* iqmp);
+int32_t RSA_set0_factors(RSA* rsa, BIGNUM* p, BIGNUM* q);
+int32_t RSA_set0_key(RSA* rsa, BIGNUM* n, BIGNUM* e, BIGNUM* d);
+OSSL_HANDSHAKE_STATE SSL_get_state(SSL* ssl);
+#undef SSL_CTX_set_options
+unsigned long SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options);
+#undef SSL_session_reused
+int SSL_session_reused(SSL* ssl);
+const SSL_METHOD* TLS_method(void);
+const ASN1_TIME* X509_CRL_get0_nextUpdate(const X509_CRL* crl);
+int32_t X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size_t* pderlen);
+int32_t X509_PUBKEY_get0_param(ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
+X509* X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
+STACK_OF(X509)* X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+const ASN1_TIME* X509_get0_notAfter(const X509* x509);
+const ASN1_TIME* X509_get0_notBefore(const X509* x509);
+ASN1_BIT_STRING* X509_get0_pubkey_bitstr(const X509* x509);
+const X509_ALGOR* X509_get0_tbs_sigalg(const X509* x509);
+X509_PUBKEY* X509_get_X509_PUBKEY(const X509* x509);
+int32_t X509_get_version(const X509* x509);
+int32_t X509_up_ref(X509* x509);
 #endif
 
 #if !HAVE_OPENSSL_ALPN
@@ -867,10 +923,19 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get0_pubkey_bitstr local_X509_get0_pubkey_bitstr
 #define X509_get0_tbs_sigalg local_X509_get0_tbs_sigalg
 #define X509_get_X509_PUBKEY local_X509_get_X509_PUBKEY
-#define X509_get_issuer_name local_X509_get_issuer_name
-#define X509_get_subject_name local_X509_get_subject_name
 #define X509_get_version local_X509_get_version
 #define X509_up_ref local_X509_up_ref
+
+// Restore the old names for RENAMED_FUNCTION functions.
+#define EVP_MD_CTX_free EVP_MD_CTX_destroy
+#define EVP_MD_CTX_new EVP_MD_CTX_create
+#define OPENSSL_sk_free sk_free
+#define OPENSSL_sk_new_null sk_new_null
+#define OPENSSL_sk_num sk_num
+#define OPENSSL_sk_pop_free sk_pop_free
+#define OPENSSL_sk_push sk_push
+#define OPENSSL_sk_value sk_value
+#define TLS_method SSLv23_method
 
 #else // if OPENSSL_VERSION_NUMBER < 0x10100000L
 

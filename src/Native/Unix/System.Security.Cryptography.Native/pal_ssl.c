@@ -99,10 +99,7 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
         return;
     }
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-    unsigned
-#endif
-    long protocolOptions = 0;
+    unsigned long protocolOptions = 0;
 
     if ((protocols & PAL_SSL_SSL2) != PAL_SSL_SSL2)
     {

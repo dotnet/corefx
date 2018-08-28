@@ -28,10 +28,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 // x.x.x, considering the max number of decimal digits for each component
 #define MaxVersionStringLength 32
 #define SONAME_BASE "libssl.so."
-// A function defined in libcrypto.so.1.0.0/libssl.so.1.0.0 that is not defined in
-// libcrypto.so.1.1.0/libssl.so.1.1.0
-#define VERSION_1_0_SENTINEL SSL_state
-#define QUOTE(x) #x
 
 static void* libssl = NULL;
 
@@ -85,11 +81,13 @@ static void InitializeOpenSSLShim()
 {
     if (!OpenLibrary())
     {
-        fprintf(stderr, "No usable version of the libssl was found\n");
+        fprintf(stderr, "No usable version of libssl was found\n");
         abort();
     }
 
-    __typeof(VERSION_1_0_SENTINEL) v1_0_sentinel = (__typeof(VERSION_1_0_SENTINEL))dlsym(libssl, QUOTE(VERSION_1_0_SENTINEL));
+    // A function defined in libcrypto.so.1.0.0/libssl.so.1.0.0 that is not defined in
+    // libcrypto.so.1.1.0/libssl.so.1.1.0
+    const void* v1_0_sentinel = dlsym(libssl, "SSL_state");
 
     // Get pointers to all the functions that are needed
 #define REQUIRED_FUNCTION(fn) \
