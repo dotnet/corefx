@@ -368,7 +368,6 @@ namespace System.Diagnostics
             return null;
         }
 
-
         /// <summary>
         /// Makes a best-effort attempt to kill all descendant (child, grandchild, etc.) processes.
         /// </summary>
