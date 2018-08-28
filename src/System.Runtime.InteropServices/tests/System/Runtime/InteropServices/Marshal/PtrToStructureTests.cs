@@ -34,6 +34,7 @@ namespace System.Runtime.InteropServices.Tests
             }
             finally
             {
+                Marshal.DestroyStructure(ptr, structure.GetType());
                 Marshal.FreeHGlobal(ptr);
             }
         }
@@ -111,6 +112,7 @@ namespace System.Runtime.InteropServices.Tests
             }
             finally
             {
+                Marshal.DestroyStructure(ptr, structure.GetType());
                 Marshal.FreeHGlobal(ptr);
             }
         }

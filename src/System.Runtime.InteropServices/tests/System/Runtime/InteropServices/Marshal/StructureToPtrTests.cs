@@ -109,6 +109,7 @@ namespace System.Runtime.InteropServices.Tests
             }
             finally
             {
+                Marshal.DestroyStructure(memory, structure.GetType());
                 Marshal.FreeHGlobal(memory);
             }
         }

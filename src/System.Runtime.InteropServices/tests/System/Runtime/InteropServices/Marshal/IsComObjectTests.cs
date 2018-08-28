@@ -41,6 +41,17 @@ namespace System.Runtime.InteropServices.Tests
             Type collectibleType = typeBuilder.CreateType();
             object collectibleObject = Activator.CreateInstance(collectibleType);
             yield return new object[] { collectibleObject };
+            
+            ConstructorInfo comImportConstructor = typeof(ComImportAttribute).GetConstructor(new Type[0]);
+            var comImportAttributeBuilder = new CustomAttributeBuilder(comImportConstructor, new object[0]);
+
+            AssemblyBuilder comImportAssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
+            ModuleBuilder comImportModuleBuilder = comImportAssemblyBuilder.DefineDynamicModule("Module");
+            TypeBuilder comImportTypeBuilder = comImportModuleBuilder.DefineType("Type");
+            comImportTypeBuilder.SetCustomAttribute(comImportAttributeBuilder);
+
+            Type collectibleComImportObject = comImportTypeBuilder.CreateType();
+            yield return new object[] { collectibleComImportObject };
         }
 
         [Theory]

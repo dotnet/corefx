@@ -231,11 +231,18 @@ namespace System.Runtime.InteropServices.Tests
                 Marshal.GetNativeVariantForObject(obj, pNative);
 
                 Variant result = Marshal.PtrToStructure<Variant>(pNative);
-                Assert.Equal(VarEnum.VT_BSTR, (VarEnum)result.vt);
-                Assert.Equal(obj, Marshal.PtrToStringBSTR(result.bstrVal));
+                try
+                {
+                    Assert.Equal(VarEnum.VT_BSTR, (VarEnum)result.vt);
+                    Assert.Equal(obj, Marshal.PtrToStringBSTR(result.bstrVal));
 
-                object o = Marshal.GetObjectForNativeVariant(pNative);
-                Assert.Equal(obj, o);
+                    object o = Marshal.GetObjectForNativeVariant(pNative);
+                    Assert.Equal(obj, o);
+                }
+                finally
+                {
+                    Marshal.FreeBSTR(result.bstrVal);
+                }
             }
             finally
             {
@@ -463,18 +470,6 @@ namespace System.Runtime.InteropServices.Tests
             {
                 Marshal.FreeHGlobal(pNative);
             }
-        }
-
-        public struct Variant
-        {
-#pragma warning disable 0649
-            public ushort vt;
-            public ushort wReserved1;
-            public ushort wReserved2;
-            public ushort wReserved3;
-            public IntPtr bstrVal;
-            public IntPtr pRecInfo;
-#pragma warning restore 0649
         }
 
         public struct StructWithValue
