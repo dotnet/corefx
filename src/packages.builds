@@ -36,7 +36,7 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..\src\System.Drawing.Common\pkg\System.Drawing.Common.pkgproj">
+    <Project Include="$(MSBuildThisFileDirectory)System.Drawing.Common\pkg\System.Drawing.Common.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
