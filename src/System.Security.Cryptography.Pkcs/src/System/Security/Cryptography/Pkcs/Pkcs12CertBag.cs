@@ -87,6 +87,8 @@ namespace System.Security.Cryptography.Pkcs
         {
             if (certificateType == null)
                 throw new ArgumentNullException(nameof(certificateType));
+            if (certificateType.Value == null)
+                throw new CryptographicException(SR.Argument_InvalidOidValue);
 
             return EncodeBagValue(certificateType.Value, encodedCertificate);
         }

@@ -24,7 +24,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
         [Fact]
         public static void InvalidCertificateTypeVerifiedInCtor()
         {
-            Assert.ThrowsAny<ArgumentNullException>(
+            Assert.ThrowsAny<CryptographicException>(
                 () => new Pkcs12CertBag(new Oid(null, null), s_derNull));
         }
 
