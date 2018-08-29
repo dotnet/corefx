@@ -139,6 +139,7 @@ int32_t RSA_set0_key(RSA* rsa, BIGNUM* n, BIGNUM* e, BIGNUM* d);
 OSSL_HANDSHAKE_STATE SSL_get_state(SSL* ssl);
 #undef SSL_CTX_set_options
 unsigned long SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options);
+void SSL_CTX_set_security_level(SSL_CTX* ctx, int32_t level);
 #undef SSL_session_reused
 int SSL_session_reused(SSL* ssl);
 const SSL_METHOD* TLS_method(void);
@@ -410,6 +411,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(SSL_CTX_set_client_cert_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_quiet_shutdown) \
     FALLBACK_FUNCTION(SSL_CTX_set_options) \
+    FALLBACK_FUNCTION(SSL_CTX_set_security_level) \
     REQUIRED_FUNCTION(SSL_CTX_set_verify) \
     REQUIRED_FUNCTION(SSL_CTX_use_certificate) \
     REQUIRED_FUNCTION(SSL_CTX_use_PrivateKey) \
@@ -760,6 +762,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_CTX_set_client_cert_cb SSL_CTX_set_client_cert_cb_ptr
 #define SSL_CTX_set_options SSL_CTX_set_options_ptr
 #define SSL_CTX_set_quiet_shutdown SSL_CTX_set_quiet_shutdown_ptr
+#define SSL_CTX_set_security_level SSL_CTX_set_security_level_ptr
 #define SSL_CTX_set_verify SSL_CTX_set_verify_ptr
 #define SSL_CTX_use_certificate SSL_CTX_use_certificate_ptr
 #define SSL_CTX_use_PrivateKey SSL_CTX_use_PrivateKey_ptr
@@ -914,6 +917,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_set0_crt_params local_RSA_set0_crt_params
 #define RSA_set0_factors local_RSA_set0_factors
 #define RSA_set0_key local_RSA_set0_key
+#define SSL_CTX_set_security_level local_SSL_CTX_set_security_level
 #define SSL_get_state local_SSL_get_state
 #define X509_CRL_get0_nextUpdate local_X509_CRL_get0_nextUpdate
 #define X509_NAME_get0_der local_X509_NAME_get0_der

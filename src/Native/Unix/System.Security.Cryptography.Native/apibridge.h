@@ -28,6 +28,7 @@ int32_t local_RSA_set0_factors(RSA* rsa, BIGNUM* p, BIGNUM* q);
 int32_t local_RSA_set0_key(RSA* rsa, BIGNUM* n, BIGNUM* e, BIGNUM* d);
 OSSL_HANDSHAKE_STATE local_SSL_get_state(SSL* ssl);
 unsigned long local_SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options);
+void local_SSL_CTX_set_security_level(SSL_CTX* ctx, int32_t level);
 int local_SSL_session_reused(SSL* ssl);
 const ASN1_TIME* local_X509_CRL_get0_nextUpdate(const X509_CRL* crl);
 int32_t local_X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size_t* pderlen);

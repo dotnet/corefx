@@ -519,4 +519,9 @@ int local_SSL_session_reused(SSL* ssl)
     return (int)SSL_ctrl(ssl, SSL_CTRL_GET_SESSION_REUSED, 0, NULL);
 }
 
+void local_SSL_CTX_set_security_level(SSL_CTX* ctx, int32_t level)
+{
+    (void)ctx;
+    (void)level;
+}
 #endif
