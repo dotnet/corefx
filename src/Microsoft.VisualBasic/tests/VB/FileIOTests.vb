@@ -9,6 +9,7 @@ Imports System.Collections.ObjectModel
 Imports System.Linq
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
+Imports System.Text
 Imports Xunit
 ' Do not Imports System.IO
 #Const ManualTestsEnabled = False
@@ -71,6 +72,15 @@ Namespace Microsoft.VisualBasic.Tests
 
             Return TempFileNameWithPath
         End Function
+
+        Private Function DirectoryListToString(DirectoryList As ReadOnlyCollection(Of String)) As String
+            Dim S As New StringBuilder
+            For Each d As String In DirectoryList
+                S.Append($"{d} ")
+            Next
+            Return S.ToString
+        End Function
+
         Private Function FileHasExpectedDate(FileNameWithPath As String, ExpectedData() As Char) As Boolean
             Using stream As New IO.StreamReader(IO.File.OpenRead(FileNameWithPath))
                 Dim ReadData(ExpectedData.Length - 1) As Char
@@ -421,19 +431,19 @@ Namespace Microsoft.VisualBasic.Tests
                 Dim DirectoryList As ReadOnlyCollection(Of String) = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
                 Assert.True(DirectoryList.Count = 0)
                 For i As Integer = 0 To 5
-                    IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory{i}"))
+                    IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}"))
                 Next
                 DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
-                Assert.True(DirectoryList.Count = 2, $"Search count {DirectoryList.Count}")
+                Assert.True(DirectoryList.Count = 2, $"Search results Expected 2 Actual {DirectoryList.Count} {DirectoryListToString(DirectoryList)}")
                 For i As Integer = 0 To 1
-                    Dim DirectoryName As String = IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory{i}")
+                    Dim DirectoryName As String = IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")
                     Assert.True(DirectoryList.Contains(DirectoryName), $"{DirectoryName} Is missing from Wildcard Search")
                 Next
-                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectories_Directory_SearchOption_WildcardsNewSubDirectory0", $"NewSubSubDirectory0"))
+                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory0", $"NewSubSubDirectory0"))
                 DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0")
-                Assert.True(DirectoryList.Count = 1)
+                Assert.True(DirectoryList.Count = 1, $"Search results Expected 1 Actual {DirectoryList.Count} {DirectoryListToString(DirectoryList)}")
                 DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchAllSubDirectories, "*0")
-                Assert.True(DirectoryList.Count = 2)
+                Assert.True(DirectoryList.Count = 2, $"Search results Expected 2 Actual {DirectoryList.Count} {DirectoryListToString(DirectoryList)}")
             End Using
         End Sub
 
@@ -441,17 +451,18 @@ Namespace Microsoft.VisualBasic.Tests
         Public Sub GetDirectoryInfo_Directory()
             Using TestBase As New FileIOTestBase
                 For i As Integer = 0 To 5
-                    IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectoryInfo_DirectoryNewSubDirectory{i}"))
+                    IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}"))
                 Next
-                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"GetDirectoryInfo_DirectoryNewSubDirectory0", $"NewSubSubDirectory"))
+                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory0", $"NewSubSubDirectory"))
                 Dim info As IO.DirectoryInfo = FileSystem.GetDirectoryInfo(TestBase.TestDirectory)
-                Assert.True(info.CreationTime > Date.MinValue, "Creation Time = 0")
-                Assert.True(info.Extension = IO.Path.GetExtension(TestBase.TestDirectory), $"Extension {info.Extension} <> Path.Extension {IO.Path.GetExtension(TestBase.TestDirectory)}")
+                Dim infoFromIO As IO.DirectoryInfo = New IO.DirectoryInfo(TestBase.TestDirectory)
+                Assert.True(info.CreationTime = infoFromIO.CreationTime, $"Creation Time info ({info.CreationTime}) <> IO.DriveInfo.CreateTime {infoFromIO.CreationTime})")
+                Assert.True(info.Extension = infoFromIO.Extension, $"Extension {info.Extension} <> IO.DriveInfo.Extension {infoFromIO.Extension}")
                 Assert.True(info.FullName = TestBase.TestDirectory, $"Fullname {info.FullName} <> TestBase.TestDirectory {TestBase.TestDirectory}")
-                Assert.True(info.LastAccessTime > Date.MinValue)
-                Assert.True(info.Name = IO.Path.GetFileName(TestBase.TestDirectory))
-                Assert.True(TestBase.RemoveEndingSeparator(info.Parent.ToString) = TestBase.RemoveEndingSeparator(IO.Path.GetTempPath()))
-                Assert.True(info.Root.Name = IO.Path.GetPathRoot(TestBase.TestDirectory), $"info.Root.Name {info.Root.Name} = IO.Path.GetPathRoot(TestBase.TestDirectory){IO.Path.GetPathRoot(TestBase.TestDirectory)}")
+                Assert.True(info.LastAccessTime = infoFromIO.LastAccessTime)
+                Assert.True(info.Name = infoFromIO.Name, $"Name {info.Name} Doesn't match {infoFromIO.Name}")
+                Assert.True(TestBase.RemoveEndingSeparator(info.Parent.ToString) = TestBase.RemoveEndingSeparator(infoFromIO.Parent.ToString), "info.Parent<>infoFromIO.Parent")
+                Assert.True(info.Root.Name = infoFromIO.Root.Name, $"info.Root.Name {info.Root.Name} <> IO.DriveInfo.Root.Name){infoFromIO.Root.Name}")
             End Using
         End Sub
 
@@ -459,13 +470,14 @@ Namespace Microsoft.VisualBasic.Tests
         Public Sub GetDriveInfo_Drive()
             Using TestBase As New FileIOTestBase
                 Dim Rootname As String = FileSystem.GetDirectoryInfo(TestBase.TestDirectory).Root?.Name
-                Assert.NotNull(Rootname)
+                Assert.True(Rootname IsNot Nothing, "FileSystem.GetDirectoryInfo.Root.Name is Nothing")
                 Dim Info As IO.DriveInfo = Nothing
                 Try
                     Info = FileSystem.GetDriveInfo(Rootname)
                 Catch ex As Exception
                     If TypeOf (ex) Is UnauthorizedAccessException Then
                         Assert.Throws(Of UnauthorizedAccessException)(Function() New IO.DriveInfo(Rootname))
+                        Exit Sub
                     End If
                 End Try
 
