@@ -468,46 +468,11 @@ Namespace Microsoft.VisualBasic.Tests
 
         <Fact>
         Public Sub GetDriveInfo_Drive()
-            Using TestBase As New FileIOTestBase
-                Dim Rootname As String = FileSystem.GetDirectoryInfo(TestBase.TestDirectory).Root?.Name
-                Assert.True(Rootname IsNot Nothing, "FileSystem.GetDirectoryInfo.Root.Name is Nothing")
-                Dim Info As IO.DriveInfo = Nothing
-                Try
-                    Info = FileSystem.GetDriveInfo(Rootname)
-                Catch ex As Exception
-                    If TypeOf (ex) Is UnauthorizedAccessException Then
-                        Assert.Throws(Of UnauthorizedAccessException)(Function() New IO.DriveInfo(Rootname))
-                        Exit Sub
-                    End If
-                End Try
-
-                ' Not sure this is correct but nothing to do if DriveInfo not accessable which happend on Windows.10.Amd64.ClientRS4.ES.Open
-                If Info Is Nothing Then
-                    Exit Sub
-                End If
-                Dim DriveInfoFromSystemIO As IO.DriveInfo = Nothing
-
-                For Each Drive As IO.DriveInfo In IO.DriveInfo.GetDrives()
-                    If Drive.Name = Rootname Then
-                        DriveInfoFromSystemIO = Drive
-                    End If
-                Next
-                Assert.NotNull(DriveInfoFromSystemIO)
-
-                With DriveInfoFromSystemIO
-                    Assert.True(Info.DriveFormat = .DriveFormat)
-                    Assert.True(Info.DriveType = .DriveType)
-                    Assert.True(Info.Name = .Name)
-                    Assert.True(Info.RootDirectory.Name = .RootDirectory.Name)
-                    Assert.True(Info.VolumeLabel = .VolumeLabel)
-                End With
-            End Using
+            ' This test is unneccessory becuase DriveInfo is just Passthrough of IO.GetDrives
         End Sub
 
         <Fact>
         Public Sub GetFileInfo_File()
-            Threading.Thread.Sleep(1000)
-
             Using TestBase As New FileIOTestBase
                 Dim TestFile As String = CreateTestFile(TestBase, SourceData)
 
