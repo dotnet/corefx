@@ -21,7 +21,7 @@ namespace System.Drawing.Tests
             yield return new object[] { Helpers.GetTestBitmapPath("invalid.ico"), new Size(0, 0) };
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ActiveIssue(27361)] // Fixed in master: https://github.com/dotnet/corefx/pull/29148/commits/731bb441ac69357cf2fd983a781939a36fa69953
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Ctor_FileName_TestData))]
         public void Ctor_FileName(string fileName, Size size)
@@ -41,7 +41,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ActiveIssue(27361)] // Fixed in master: https://github.com/dotnet/corefx/pull/29148/commits/731bb441ac69357cf2fd983a781939a36fa69953
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(null, -1, -1)]
         [InlineData(typeof(ClassWithNoNamespace), -1, -1)]
@@ -63,7 +63,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ActiveIssue(27361)] // Fixed in master: https://github.com/dotnet/corefx/pull/29148/commits/731bb441ac69357cf2fd983a781939a36fa69953
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(null, null, -1, -1)]
         [InlineData(null, "invalid.ico", -1, -1)]
