@@ -1480,7 +1480,7 @@ int32_t CryptoNative_EnsureOpenSslInitialized()
     {
         return EnsureOpenSsl11Initialized();
     }
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+#elif OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
     return EnsureOpenSsl10Initialized();
 #else
     return EnsureOpenSsl11Initialized();

@@ -35,8 +35,10 @@
 #include <openssl/x509v3.h>
 
 #include "pal_crypto_config.h"
+#define OPENSSL_VERSION_1_1_0_RTM 0x10100000L
+#define OPENSSL_VERSION_1_0_2_RTM 0x10002000L
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
 // Remove problematic #defines
 #undef SSL_get_state
@@ -59,7 +61,7 @@ typedef enum
 #undef SSLv23_method
 #endif
 
-#if defined FEATURE_DISTRO_AGNOSTIC_SSL || OPENSSL_VERSION_NUMBER < 0x10100000L
+#if defined FEATURE_DISTRO_AGNOSTIC_SSL || OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 #include "apibridge.h"
 #endif
 
@@ -81,7 +83,7 @@ int EC_POINT_get_affine_coordinates_GF2m(const EC_GROUP *group,
 int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
         const BIGNUM *x, const BIGNUM *y, BN_CTX *ctx);
 #endif
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 typedef struct stack_st _STACK;
 int CRYPTO_add_lock(int* pointer, int amount, int type, const char* file, int line);
 int CRYPTO_num_locks(void);
@@ -857,7 +859,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 // STACK_OF types will have been declared with inline functions to handle the pointer casting.
 // Since these inline functions are strongly bound to the OPENSSL_sk_* functions in 1.1 we need to
 // rebind things here.
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 // type-safe OPENSSL_sk_free
 #define sk_GENERAL_NAME_free(stack) OPENSSL_sk_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(GENERAL_NAME)*)0))
 
@@ -888,7 +890,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 
 #define API_EXISTS(fn) true
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
 #define NEED_OPENSSL_1_0 true
 
@@ -937,7 +939,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define OPENSSL_sk_value sk_value
 #define TLS_method SSLv23_method
 
-#else // if OPENSSL_VERSION_NUMBER < 0x10100000L
+#else // if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
 #define NEED_OPENSSL_1_1 true
 

@@ -12,7 +12,7 @@
 
 // Minimally define the structs from 1.0.x which went opaque in 1.1.0 for the
 // portable build building against the 1.1.x headers
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 #include "openssl_1_0_structs.h"
 
 #define CRYPTO_LOCK_X509 3

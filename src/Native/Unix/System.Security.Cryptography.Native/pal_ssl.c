@@ -37,7 +37,7 @@ void CryptoNative_EnsureLibSslInitialized()
     {
         EnsureLibSsl10Initialized();
     }
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+#elif OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
     EnsureLibSsl10Initialized();
 #endif
 }
