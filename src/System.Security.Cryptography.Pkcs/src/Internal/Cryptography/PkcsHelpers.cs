@@ -119,14 +119,12 @@ namespace Internal.Cryptography
 
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                writer.PushSequence();
                 writer.PushSetOf();
                 foreach (AttributeAsn item in setItems)
                 {
                     item.Encode(writer);
                 }
                 writer.PopSetOf();
-                writer.PopSequence();
                 normalizedValue = writer.Encode();
                 if (encodedValueProcessor != null)
                 {
@@ -135,8 +133,7 @@ namespace Internal.Cryptography
             }
 
             AsnReader reader = new AsnReader(normalizedValue, AsnEncodingRules.DER);
-            AsnReader sequenceReader = reader.ReadSequence();
-            AsnReader setReader = sequenceReader.ReadSetOf();
+            AsnReader setReader = reader.ReadSetOf();
             AttributeAsn[] decodedSet = new AttributeAsn[setItems.Length];
             int i = 0;
             while (setReader.HasData)
