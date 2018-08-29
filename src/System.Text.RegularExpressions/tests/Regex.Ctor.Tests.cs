@@ -12,6 +12,14 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class RegexConstructorTests : RemoteExecutorTestBase
     {
+        [PlatformSpecific(TestPlatforms.Windows)] 
+        [Fact] 
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] 
+        public void VerifyingCiBehavior() 
+        {
+            throw new Exception();
+        }
+
         public static IEnumerable<object[]> Ctor_TestData()
         {
             yield return new object[] { "foo", RegexOptions.None, Timeout.InfiniteTimeSpan };
