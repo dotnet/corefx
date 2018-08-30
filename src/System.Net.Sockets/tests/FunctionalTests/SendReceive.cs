@@ -3,11 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
@@ -1340,6 +1342,95 @@ namespace System.Net.Sockets.Tests
                     }
                 }
             }).Dispose();
+        }
+    }
+
+    public class BlockingSendReceive
+    {
+
+        private readonly ITestOutputHelper _log;
+        public static readonly object[][] Loopbacks = MemberDatas.Loopbacks;
+
+        public BlockingSendReceive(ITestOutputHelper output)
+        {
+            _log = output;
+        }
+
+        [Theory]
+        [MemberData(nameof(Loopbacks))]
+        public async Task BlockingStreamRead_Close(IPAddress ipAddress)
+        {
+            // Test for #22564 when close is called while blocking read is pending.
+            using (var server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            {
+                server.BindToAnonymousPort(ipAddress);
+                server.Listen(1);
+                byte[] buffer = new byte[1];
+                buffer[0] = Convert.ToByte('a');
+
+                Task clientTask = Task.Run(() =>
+                {
+                    client.Connect(server.LocalEndPoint);
+                    client.Send(buffer);
+                    // Blocking read.
+                    try
+                    {
+                        client.Receive(buffer);
+                    }
+                    catch (SocketException) { }
+                    catch (ObjectDisposedException) { }
+                });
+                Socket s = server.Accept();
+                // Try to receive something so we know client thread is running.
+                s.Receive(buffer, 1, SocketFlags.None);
+                // There is however race condition that if the Receive() is not started yet, this will simply
+                // finish without hitting the test scenario.
+                await Task.Delay(500);
+
+                // clientThread should be now blocked on Receive()
+                // Close client socket from parent thread.
+                client.Close();
+                clientTask.Wait(TestSettings.PassingTestTimeout);
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(~TestPlatforms.OSX)]
+        [MemberData(nameof(Loopbacks))]
+        public void BlockingStreamAccept_Close(IPAddress ipAddress)
+        {
+            // Test for #26034 when close is called while blocking accept is pending.
+            using (var server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            {
+                byte[] buffer = new byte[1];
+                buffer[0] = Convert.ToByte('a');
+                server.BindToAnonymousPort(ipAddress);
+                server.Listen(1);
+                Task clientTask = Task.Run(() =>
+                {
+                    try
+                    {
+                        // Each round will block until new connection is accepted.
+                        while (true)
+                        {
+                            Socket serverSocket = server.Accept();
+                            serverSocket.Send(buffer);
+                        }
+                    }
+                    catch (SocketException) { }
+                    catch (ObjectDisposedException) { }
+                });
+                // Make sure we can connect at least once
+                client.Connect(server.LocalEndPoint);
+                client.Receive(buffer, 1, SocketFlags.None);
+                client.Close();
+                // Now clientThread should be blocked waiting for another connect.
+                // force Close on the socket from parent thread.
+                server.Close();
+                clientTask.Wait(TestSettings.PassingTestTimeout);
+            }
         }
     }
 

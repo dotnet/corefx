@@ -123,6 +123,10 @@ namespace System.Net.Sockets
             }
         }
 
+        // On Unix some blocking operations can be stuck forever and this callback tries
+        // to wake them up. That is not necessary so far on Windows.
+        private void UnblockSocket(InnerSafeCloseSocket innerSocket) {}
+
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid
         {
             private SocketError InnerReleaseHandle()

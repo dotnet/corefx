@@ -208,6 +208,15 @@ namespace System.Net.Sockets
             }
         }
 
+        private void UnblockSocket(InnerSafeCloseSocket innerSocket)
+        {
+            if ((AsyncContext == null || !AsyncContext.GetNonBlocking()) && innerSocket != null && !_underlyingHandleNonBlocking && !innerSocket.IsClosed && !innerSocket.IsInvalid)
+            {
+                // We only need to coll this for true blocking calls when there is chance they are stuck in OS system call.
+                Interop.Sys.Shutdown(innerSocket, SocketShutdown.Receive);
+            }
+        }
+
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid
         {
             private unsafe SocketError InnerReleaseHandle()
