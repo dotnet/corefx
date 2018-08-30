@@ -6,12 +6,40 @@
   <Import Project="$(PackagesDir)/$(FeedTasksPackage.ToLower())/$(FeedTasksPackageVersion)/build/$(FeedTasksPackage).targets" />
   <Import Project="$(PackagesDir)/$(PublishSymbolsPackage.ToLower())/$(PublishSymbolsPackageVersion)/build/PublishSymbols.targets" />
 
+  <UsingTask TaskName="UploadToAzure"                    AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <UsingTask TaskName="WriteItemsToJson"                 AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+
   <PropertyGroup>
     <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)\**\*.nupkg</PublishPattern>
+    
+    <!-- Copied in from upload-tests.proj for locating and pushing tests to transfer feed -->
+    <!-- Test builds consist of the tests that are platform specific in one root, plus others in AnyOS. -->
+    <AnyOSPlatformConfig>AnyOS.AnyCPU.$(ConfigurationGroup)</AnyOSPlatformConfig>
+    <AnyOsArchivesRoot>$(TestWorkingDir)$(AnyOSPlatformConfig)/archive/</AnyOsArchivesRoot>
+    <AnyOSTestArchivesRoot>$(AnyOsArchivesRoot)tests/</AnyOSTestArchivesRoot>
+
+    <!-- Additionally, *NIX variations may need to include their own root folders -->
+    <UnixPlatformConfig>Unix.$(Platform).$(ConfigurationGroup)</UnixPlatformConfig>
+    <UnixArchivesRoot>$(TestWorkingDir)$(UnixPlatformConfig)/archive/</UnixArchivesRoot>
+    <UnixTestArchivesRoot>$(UnixArchivesRoot)tests/</UnixTestArchivesRoot>
+
+    <!-- Finally, these archives represent the zips of tests that are OSPlatform specific 
+         This is used by CloudTest.Helix.Targets to generate relative blob paths for archives. -->
+    <ArchivesRoot>$(TestWorkingDir)$(OSPlatformConfig)/archive/</ArchivesRoot>
+    <TestArchivesRoot>$(ArchivesRoot)tests/</TestArchivesRoot>
+
+    <TestListFilename>$(TestArchivesRoot)TestList.json</TestListFilename>
   </PropertyGroup>
 
   <ItemGroup>
     <_PackagesToPublish Include="$(PublishPattern)" />
+  </ItemGroup>
+
+  <!-- Collect test archives for pushing to transfer feed -->
+  <ItemGroup>
+    <TestArchives Include="$(TestArchivesRoot)**/*.zip" />
+    <TestArchives Include="$(AnyOSTestArchivesRoot)**/*.zip" />
+    <TestArchives Condition="'$(TargetsUnix)' == 'true'" Include="$(UnixTestArchivesRoot)**/*.zip" />
   </ItemGroup>
 
   <Target Name="CreateContainerName"
@@ -22,9 +50,41 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="UploadTestsToAzure">
+    <PropertyGroup>
+      <AzureTestsRoot>$(ContainerName)-tests/</AzureTestsRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <TestArchives>
+        <WorkItemId>%(Filename)</WorkItemId>
+        <!-- TODO: Verify that the below will actually put the appropriate platform for a given build... -->
+        <!-- TODO: Determine best design for pushing tests, e.g., should the relative path be <build-id>/<arch>/<os>? -->
+        <RelativeBlobPath>$(AzureTestsRoot)$(RuntimeOS)/%(Filename)%(Extension)</RelativeBlobPath>
+      </TestArchives>
+      <TestArchives>
+        <PayloadUri>$(CloudDropAccountName).blob.core.Windows.net/$(ContainerName)/%(RelativeBlobPath)</PayloadUri>
+      </TestArchives> 
+    </ItemGroup>
+
+    <UploadToAzure
+      ConnectionString="$(CloudDropConnectionString)"
+      ContainerName="$(ContainerName)"
+      Items="@(TestArchives)"
+      Overwrite="true" />
+
+    <WriteItemsToJson JsonFileName="$(TestListFilename)" Items="@(TestArchives)" ForeJsonArray="true"/>
+
+    <ItemGroup>
+      <TestList Include="$(TestListFilename)">
+        <RelativeBlobPath>$(AzureTestsRoot)$(RuntimeOS)/%(Filename)%(Extension)</RelativeBlobPath>
+      </TestList>
+    </ItemGroup>
+  </Target>
+
   <Target Name="Build" DependsOnTargets="CreateContainerName">
     <!-- skip uploadToAzure when there are no nupkgs -->
     <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
+    <CallTarget Targets="UploadTestsToAzure" Condition="'@(TestArchives->Count())' != 0" />
   </Target>
 
   <PropertyGroup>
