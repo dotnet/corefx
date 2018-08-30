@@ -160,10 +160,10 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public async Task Kill_EntireProcessTree_False_OnlyRootProcessTerminated()
         {
-            IReadOnlyList<Process> tree = null;
+            IReadOnlyList<Process> tree = CreateProcessTree();
+
             try
             {
-                tree = CreateProcessTree();
                 Process parentProcess = tree.First();
 
                 parentProcess.Kill(entireProcessTree: false);
@@ -194,10 +194,10 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public async Task Kill_EntireProcessTree_True_EntireTreeTerminated()
         {
-            IReadOnlyList<Process> tree = null;
+            IReadOnlyList<Process> tree = CreateProcessTree();
+
             try
             {
-                tree = CreateProcessTree();
                 Process parentProcess = tree.First();
 
                 parentProcess.Kill(entireProcessTree: true);
