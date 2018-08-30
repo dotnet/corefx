@@ -17,7 +17,7 @@
     <ProjectNTfsTestILCCurrentRef>ccd922b62227c43ed2dac6bcb737321dd2b07be0</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>c520a2569b40fc53cf51e4f6970c3e7411adc173</StandardCurrentRef>
-    <BuildToolsCurrentRef>b2625eebc646deea5f4595ad6859096c9a08708c</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>361ae3698952f1a81cae996479cbc8a5fcdb9470</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -47,7 +47,7 @@
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0019</XunitPerfAnalysisPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
-    <XunitNetcoreExtensionsVersion>2.2.0-preview1-03115-03</XunitNetcoreExtensionsVersion>
+    <XunitNetcoreExtensionsVersion>2.2.0-preview1-03130-01</XunitNetcoreExtensionsVersion>
 
     <!-- Roslyn optimization data package version -->
     <OptimizationDataVersion>2.0.0-rc-61101-17</OptimizationDataVersion>
@@ -56,7 +56,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.2.0-preview1-03115-03</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.2.0-preview1-03130-01</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
