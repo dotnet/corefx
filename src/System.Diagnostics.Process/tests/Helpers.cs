@@ -8,7 +8,7 @@ namespace System.Diagnostics.Tests
 {
     internal static class Helpers
     {
-        public static async Task Retry(Action action, int delayInMilliseconds = 100, int times = 10)
+        public static async Task Retry(Action action, int delayInMilliseconds = 250, int times = 20)
         {
             for (; times > 0; times--)
             {
