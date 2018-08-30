@@ -46,7 +46,7 @@ namespace System.Security.Cryptography.Pkcs
 
             if (_signedAttributesMemory.HasValue)
             {
-                SignedAttributesSet signedSet = AsnSerializer.Deserialize<SignedAttributesSet>(
+                SignedAttributesSet signedSet = SignedAttributesSet.Decode(
                     _signedAttributesMemory.Value,
                     AsnEncodingRules.BER);
 

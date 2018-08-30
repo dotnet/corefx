@@ -12,7 +12,6 @@
     <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
-    <DefineConstants>$(DefineConstants);uap</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsOSX)' == 'true' ">
@@ -597,7 +596,7 @@
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
     <Compile Include="uap\System\Net\HttpClientHandler.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netcoreappaot' OR '$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />

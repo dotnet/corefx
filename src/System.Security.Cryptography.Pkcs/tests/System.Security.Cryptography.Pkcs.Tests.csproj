@@ -2,12 +2,8 @@
   <PropertyGroup>
     <ProjectGuid>{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)'=='netfx'">$(DefineConstants);netfx</DefineConstants>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
-  <!-- Don't delete these clauses even if they look useless. They tell the VS IDE that "Windows_Debug", etc., are
-       valid configuration for this project and stop it from trying to "fix up" the .sln file -->
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
       <Link>CommonTest\System\Security\Cryptography\ByteUtils.cs</Link>

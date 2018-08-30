@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>CoreFx.Private.TestUtilities</AssemblyName>
     <ProjectGuid>{EBDB0247-CA43-4226-B7A1-8FEF21061D09}</ProjectGuid>
@@ -9,7 +9,7 @@
     <EnablePInvokeAnalyzer>false</EnablePInvokeAnalyzer>
     <NoWarn Condition="'$(TargetGroup)' == 'netstandard'">$(NoWarn);CS3021</NoWarn>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">Test Utilities are not supported on this platform</GeneratePlatformNotSupportedAssemblyMessage>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Unix-Debug;netcoreapp2.0-Unix-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Unix-Debug;netcoreapp2.0-Unix-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netcoreappaot-Windows_NT-Debug;netcoreappaot-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="System\AdminHelpers.cs" />
@@ -19,11 +19,10 @@
     <Compile Include="System\TestEnvironment.cs" />
     <Compile Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netcoreapp2.0'" Include="System\Diagnostics\RemoteExecutorTestBase.netcore.cs" />
     <Compile Condition="'$(TargetGroup)' == 'netfx'" Include="System\Diagnostics\RemoteExecutorTestBase.netfx.cs" />
-    <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Diagnostics\RemoteExecutorTestBase.Process.cs" />
     <Compile Condition="'$(TargetGroup)' == 'uap'" Include="System\Diagnostics\RemoteExecutorTestBase.uap.cs" />
-    <Compile Condition="'$(TargetGroup)' == 'uapaot'" Include="System\Diagnostics\RemoteExecutorTestBase.uapaot.cs" />
+    <Compile Condition="'$(TargetsAOT)'=='true'" Include="System\Diagnostics\RemoteExecutorTestBase.aot.cs" />
     <Compile Condition="'$(TargetGroup)' == 'netfx'" Include="System\PlatformDetection.NetFx.cs" />
-    <Compile Condition="'$(TargetGroup)' != 'netfx'" Include="System\PlatformDetection.NonNetFx.cs" />
+    <Compile Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'" Include="System\PlatformDetection.NonNetFx.Windows.cs" />
     <Compile Include="System\PlatformDetection.cs" />
     <Compile Include="System\PlatformDetection.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
     <Compile Include="System\PlatformDetection.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
@@ -94,7 +93,7 @@
     <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.Runtime.InteropServices" />
     <ReferenceFromRuntime Include="xunit.core" />
-    <ReferenceFromRuntime Include="Xunit.NetCore.Extensions" />
+    <ReferenceFromRuntime Include="Microsoft.DotNet.XUnitExtensions" />
     <ReferenceFromRuntime Include="xunit.assert" />
     <ReferenceFromRuntime Condition="'$(TargetGroup)' != 'uapaot'" Include="Microsoft.DotNet.PlatformAbstractions" />
   </ItemGroup>

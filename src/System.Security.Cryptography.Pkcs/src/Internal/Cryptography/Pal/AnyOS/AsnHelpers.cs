@@ -65,7 +65,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                             break;
                         }
 
-                        Rc2CbcParameters rc2Params = AsnSerializer.Deserialize<Rc2CbcParameters>(
+                        Rc2CbcParameters rc2Params = Rc2CbcParameters.Decode(
                             asn.Parameters.Value,
                             AsnEncodingRules.BER);
 

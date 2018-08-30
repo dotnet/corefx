@@ -609,7 +609,7 @@ namespace System.Security.Cryptography
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Rc2CbcParameters rc2Parameters = AsnSerializer.Deserialize<Rc2CbcParameters>(
+                Rc2CbcParameters rc2Parameters = Rc2CbcParameters.Decode(
                     encryptionScheme.Parameters.Value,
                     AsnEncodingRules.BER);
 

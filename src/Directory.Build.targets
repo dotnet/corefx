@@ -11,10 +11,7 @@
   </PropertyGroup>
 
   <Import Project="..\Directory.Build.targets" />
-  
-  <Target Name="_CheckForInvalidConfigurationAndPlatform" />
-  <Target Name="_CheckForUnsupportedTargetFramework" />
-  <Target Name="RunResolvePackageDependencies" />
+
   <Target Name="AddSkipGetTargetFrameworkToProjectReferences" Condition="'@(ProjectReference)' != ''">
     <ItemGroup>
       <ProjectReference>
@@ -30,7 +27,7 @@
     -->
     <GenerateCompiledExpressionsTempFilePathForEditing></GenerateCompiledExpressionsTempFilePathForEditing>
   </PropertyGroup>
-  
+
   <!--
   Hack workaround for not restoring each project. Instead, we turn off all the targets
   that require a `project.assets.json`, since ours will be empty anyway.
@@ -58,9 +55,14 @@
     <Message Text="DumpTargets> $(OutputPath), C=[$(Configuration)], CG=[$(ConfigurationGroup)], OG=[$(OSGroup)], TG=[$(TargetGroup)]" Importance="Low" />
   </Target>
 
-  <PropertyGroup>
-    <!-- Workaround https://github.com/dotnet/project-system/issues/3670 by setting TargetFramework expicitly -->
-    <!-- This property is set late in the project evaluation so other properties don't try to use it. -->
-    <TargetFramework>$(TargetGroup)</TargetFramework>
-  </PropertyGroup>
-</Project> 
+  <!--
+    Harvesting supported versions can sometimes lead to unknown versions when harvesting a package
+    which has placeholders for older frameworks like net45. We should just exclude those from validation
+    since we cannot easily determine what they are without looking at each specific platform itself.
+  -->
+  <Target Name="ExcludeSupportedFrameworksWithUnknownVersion" BeforeTargets="ValidateLibraryPackage">
+    <ItemGroup>
+      <SupportedFramework Remove="@(SupportedFramework)" Condition="'%(SupportedFramework.Version)' == 'unknown'" />
+    </ItemGroup>
+  </Target>
+</Project>

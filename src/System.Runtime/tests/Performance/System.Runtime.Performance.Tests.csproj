@@ -2,9 +2,8 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
     <ProjectGuid>{E9560F70-79F5-453A-B518-0292CFE4A6AD}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Perf.Array.cs" />
@@ -14,7 +13,6 @@
     <Compile Include="Perf.Double.cs" />
     <Compile Include="Perf.Enum.cs" />
     <Compile Include="Perf.Guid.cs" />
-    <Compile Include="Perf.HashCode.cs" />
     <Compile Include="Perf.Int32.cs" />
     <Compile Include="Perf.Int64.cs" />
     <Compile Include="Perf.IntPtr.cs" />
@@ -30,6 +28,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="Perf.HashCode.netcoreapp.cs" />
     <Compile Include="Perf.String.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -37,8 +36,5 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>PerfRunner</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
 </Project>
