@@ -13,6 +13,43 @@ namespace System.Buffers.Text.Tests
         [Benchmark]
         [InlineData("True")]
         [InlineData("False")]
+        private static void BaselineStringToBool(string text)
+        {
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < TestHelper.LoadIterations; i++)
+                    {
+                        bool.TryParse(text, out bool value);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("True")]
+        [InlineData("False")]
+        private static void PrimitiveParserByteSpanToBool(string text)
+        {
+            byte[] utf8ByteArray = Text.Encoding.UTF8.GetBytes(text);
+            ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < TestHelper.LoadIterations; i++)
+                    {
+                        Utf8Parser.TryParse(utf8ByteSpan, out bool value, out int bytesConsumed);
+                    }
+                }
+            }
+        }
+
+
+        [Benchmark]
+        [InlineData("True")]
+        [InlineData("False")]
         private static void PrimitiveParserByteSpanToBool(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
