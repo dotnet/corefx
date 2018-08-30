@@ -777,25 +777,17 @@ namespace System.PrivateUri.Tests
             Assert.False(b);
         }
 
-        [Fact]
-        public static void TestIsWellFormedUriString()
+        [Theory]
+        [InlineData("http://www.contoso.com/path?name", true)]
+        [InlineData("http://www.contoso.com/path???/file name", false)]
+        [InlineData("c:\\directory\filename", false)]
+        [InlineData("file://c:/directory/filename", false)]
+        [InlineData("http:\\host/path/file", false)]
+        [InlineData("http://www.contoso.com/ sekä http://test.com", false)]
+        [InlineData("http://www.contoso.com/ sek http://test.com", false)]
+        public static void TestIsWellFormedUriString(string uriString, bool expected)
         {
-            bool b;
-
-            b = Uri.IsWellFormedUriString("http://www.contoso.com/path?name", UriKind.RelativeOrAbsolute);
-            Assert.True(b);
-
-            b = Uri.IsWellFormedUriString("http://www.contoso.com/path???/file name", UriKind.RelativeOrAbsolute);
-            Assert.False(b);
-
-            b = Uri.IsWellFormedUriString(@"c:\\directory\filename", UriKind.RelativeOrAbsolute);
-            Assert.False(b);
-
-            b = Uri.IsWellFormedUriString(@"file://c:/directory/filename", UriKind.RelativeOrAbsolute);
-            Assert.False(b);
-
-            b = Uri.IsWellFormedUriString(@"http:\\host/path/file", UriKind.RelativeOrAbsolute);
-            Assert.False(b);
+            Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, UriKind.RelativeOrAbsolute));
         }
 
         [Fact]

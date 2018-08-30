@@ -3495,6 +3495,7 @@ namespace System
             {
                 //means it's found as not completely escaped
                 cF |= Flags.E_PathNotCanonical;
+                nonCanonical = true;
             }
 
             if (_iriParsing && !nonCanonical & ((result & (Check.DisplayCanonical | Check.EscapedCanonical
