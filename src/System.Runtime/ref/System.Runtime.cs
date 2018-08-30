@@ -7740,8 +7740,9 @@ namespace System.Text
     }
     public readonly partial struct UnicodeScalar : IComparable<UnicodeScalar>, IEquatable<UnicodeScalar>
     {
-        public UnicodeScalar(char ch) { }
-        public UnicodeScalar(int scalarValue) { }
+        private readonly int _dummyPrimitive;
+        public UnicodeScalar(char ch) => throw null;
+        public UnicodeScalar(int scalarValue) => throw null;
         [CLSCompliant(false)]
         public UnicodeScalar(uint scalarValue) => throw null;
         public static bool operator ==(UnicodeScalar a, UnicodeScalar b) => throw null;
