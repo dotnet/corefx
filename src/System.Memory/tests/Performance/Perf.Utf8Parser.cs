@@ -10,42 +10,268 @@ namespace System.Buffers.Text.Tests
 {
     public static partial class Utf8ParserTests
     {
+        private static readonly string[] s_Int16TextArray = new string[13]
+        {
+            "21474",
+            "2",
+            "-21474",
+            "31484",
+            "-21",
+            "-2",
+            "214",
+            "2147",
+            "-2147",
+            "-9345",
+            "9345",
+            "1000",
+            "-214"
+        };
+
+
+        [Benchmark]
+        [InlineData("10737")] // standard parse
+        [InlineData("32767")] // max value
+        [InlineData("0")]
+        [InlineData("-32768")] // min value
+        [InlineData("2147")]
+        [InlineData("2")]
+        [InlineData("-21474")]
+        [InlineData("21474")]
+        [InlineData("-21")]
+        [InlineData("-2")]
+        [InlineData("214")]
+        [InlineData("2147")]
+        [InlineData("-2147")]
+        [InlineData("-48")]
+        [InlineData("48")]
+        [InlineData("483")]
+        [InlineData("21")]
+        [InlineData("-214")]
+        [InlineData("+21474")]
+        [InlineData("+21")]
+        [InlineData("+2")]
+        [InlineData("+214")]
+        [InlineData("+2147")]
+        [InlineData("+21475")]
+        [InlineData("+48")]
+        [InlineData("+483")]
+        [InlineData("+21437")]
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("2147abcdefghijklmnop")]
+        [InlineData("2abcdefghijklmnop")]
+        [InlineData("214abcdefghijklmnop")]
+        [InlineData("-2147abcdefghijklmnop")]
+        [InlineData("21474abcdefghijklmnop")]
+        [InlineData("-21abcdefghijklmnop")]
+        [InlineData("-2abcdefghijklmnop")]
+        [InlineData("487abcdefghijklmnop")]
+        [InlineData("-483abcdefghijklmnop")]
+        [InlineData("-4836abcdefghijklmnop")]
+        [InlineData("21abcdefghijklmnop")]
+        [InlineData("+000000000000000000001235abcdfg")]
+        [InlineData("+2147abcdefghijklmnop")]
+        [InlineData("+214abcdefghijklmnop")]
+        [InlineData("+21474abcdefghijklmnop")]
+        [InlineData("+2abcdefghijklmnop")]
+        [InlineData("+487abcdefghijklmnop")]
+        [InlineData("+483abcdefghijklmnop")]
+        [InlineData("+4836abcdefghijklmnop")]
+        [InlineData("+21abcdefghijklmnop")]
+        private static void PrimitiveParserByteSpanToInt16(string text)
+        {
+            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
+            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Utf8Parser.TryParse(utf8ByteSpan, out short value, out int consumed);
+                        TestHelpers.DoNotIgnore(value, consumed);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("10737")] // standard parse
+        [InlineData("32767")] // max value
+        [InlineData("0")]
+        [InlineData("-32768")] // min value
+        [InlineData("2147")]
+        [InlineData("2")]
+        [InlineData("-21474")]
+        [InlineData("21474")]
+        [InlineData("-21")]
+        [InlineData("-2")]
+        [InlineData("214")]
+        [InlineData("2147")]
+        [InlineData("-2147")]
+        [InlineData("-48")]
+        [InlineData("48")]
+        [InlineData("483")]
+        [InlineData("21")]
+        [InlineData("-214")]
+        [InlineData("+21474")]
+        [InlineData("+21")]
+        [InlineData("+2")]
+        [InlineData("+214")]
+        [InlineData("+2147")]
+        [InlineData("+21475")]
+        [InlineData("+48")]
+        [InlineData("+483")]
+        [InlineData("+21437")]
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("2147abcdefghijklmnop")]
+        [InlineData("2abcdefghijklmnop")]
+        [InlineData("214abcdefghijklmnop")]
+        [InlineData("-2147abcdefghijklmnop")]
+        [InlineData("21474abcdefghijklmnop")]
+        [InlineData("-21abcdefghijklmnop")]
+        [InlineData("-2abcdefghijklmnop")]
+        [InlineData("487abcdefghijklmnop")]
+        [InlineData("-483abcdefghijklmnop")]
+        [InlineData("-4836abcdefghijklmnop")]
+        [InlineData("21abcdefghijklmnop")]
+        [InlineData("+000000000000000000001235abcdfg")]
+        [InlineData("+2147abcdefghijklmnop")]
+        [InlineData("+214abcdefghijklmnop")]
+        [InlineData("+21474abcdefghijklmnop")]
+        [InlineData("+2abcdefghijklmnop")]
+        [InlineData("+487abcdefghijklmnop")]
+        [InlineData("+483abcdefghijklmnop")]
+        [InlineData("+4836abcdefghijklmnop")]
+        [InlineData("+21abcdefghijklmnop")]
+        private static void PrimitiveParserByteSpanToInt16_BytesConsumed(string text)
+        {
+            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
+            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Utf8Parser.TryParse(utf8ByteSpan, out short value, out int bytesConsumed);
+                        TestHelpers.DoNotIgnore(value, bytesConsumed);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        private static void PrimitiveParserByteSpanToInt16_BytesConsumed_VariableLength()
+        {
+            int textLength = s_Int16TextArray.Length;
+            byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
+            for (var i = 0; i < textLength; i++)
+            {
+                utf8ByteArray[i] = Encoding.UTF8.GetBytes(s_Int16TextArray[i]);
+            }
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray[i % textLength];
+                        Utf8Parser.TryParse(utf8ByteSpan, out short value, out int bytesConsumed);
+                        TestHelpers.DoNotIgnore(value, bytesConsumed);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("10737")] // standard parse
+        [InlineData("32767")] // max value
+        [InlineData("0")]
+        [InlineData("-32768")] // min value
+        [InlineData("2147")]
+        [InlineData("2")]
+        [InlineData("-21474")]
+        [InlineData("21474")]
+        [InlineData("-21")]
+        [InlineData("-2")]
+        [InlineData("214")]
+        [InlineData("2147")]
+        [InlineData("-2147")]
+        [InlineData("-48")]
+        [InlineData("48")]
+        [InlineData("483")]
+        [InlineData("21")]
+        [InlineData("-214")]
+        [InlineData("+21474")]
+        [InlineData("+21")]
+        [InlineData("+2")]
+        [InlineData("+214")]
+        [InlineData("+2147")]
+        [InlineData("+21475")]
+        [InlineData("+48")]
+        [InlineData("+483")]
+        [InlineData("+21437")]
+        [InlineData("000000000000000000001235")]
+        private static void PrimitiveParserByteSpanToInt16_BytesConsumed_Baseline(string text)
+        {
+            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
+            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        short.TryParse(text, out short value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        private static void PrimitiveParserByteSpanToInt16_BytesConsumed_VariableLength_Baseline()
+        {
+            int textLength = s_Int16TextArray.Length;
+            byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
+            for (var i = 0; i < textLength; i++)
+            {
+                utf8ByteArray[i] = Encoding.UTF8.GetBytes(s_Int16TextArray[i]);
+            }
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        short.TryParse(s_Int16TextArray[i % textLength], out short value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
         [Benchmark]
         [InlineData("True")]
         [InlineData("False")]
         private static void BaselineStringToBool(string text)
         {
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < TestHelper.LoadIterations; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         bool.TryParse(text, out bool value);
                     }
                 }
             }
         }
-
-        [Benchmark]
-        [InlineData("True")]
-        [InlineData("False")]
-        private static void PrimitiveParserByteSpanToBool(string text)
-        {
-            byte[] utf8ByteArray = Text.Encoding.UTF8.GetBytes(text);
-            ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < TestHelper.LoadIterations; i++)
-                    {
-                        Utf8Parser.TryParse(utf8ByteSpan, out bool value, out int bytesConsumed);
-                    }
-                }
-            }
-        }
-
 
         [Benchmark]
         [InlineData("True")]
