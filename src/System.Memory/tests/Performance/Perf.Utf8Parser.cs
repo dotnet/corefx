@@ -101,6 +101,105 @@ namespace System.Buffers.Text.Tests
 
         [Benchmark]
         [InlineData("2134567890")] // standard parse
+        [InlineData("18446744073709551615")] // max value
+        [InlineData("0")] // min value
+        private static void BaselineSimpleByteStarToUInt64(string text)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        ulong.TryParse(text, out ulong value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("2134567890")] // standard parse
+        [InlineData("18446744073709551615")] // max value
+        [InlineData("0")] // min value
+        private static void BaselineByteStarToUInt64(string text)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        ulong.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out ulong value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("abcdef")] // standard parse
+        [InlineData("ffffffffffffffff")] // max value
+        [InlineData("0")] // min value
+        private static void BaselineByteStarToUInt64Hex(string text)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        ulong.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out ulong value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("2134567890")] // standard parse
+        [InlineData("18446744073709551615")] // max value
+        [InlineData("0")] // min value
+        private static unsafe void PrimitiveParserByteSpanToUInt64_BytesConsumed(string text)
+        {
+            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
+            ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Utf8Parser.TryParse(utf8ByteSpan, out ulong value, out int bytesConsumed);
+                        TestHelpers.DoNotIgnore(value, bytesConsumed);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("abcdef")] // standard parse
+        [InlineData("ffffffffffffffff")] // max value
+        [InlineData("0")] // min value
+        private static unsafe void PrimitiveParserByteSpanToUInt64Hex_BytesConsumed(string text)
+        {
+            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
+            ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Utf8Parser.TryParse(utf8ByteSpan, out ulong value, out int bytesConsumed, 'X');
+                        TestHelpers.DoNotIgnore(value, bytesConsumed);
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [InlineData("2134567890")] // standard parse
         [InlineData("4294967295")] // max value
         [InlineData("0")] // min value
         private static void BaselineSimpleByteStarToUInt32(string text)
