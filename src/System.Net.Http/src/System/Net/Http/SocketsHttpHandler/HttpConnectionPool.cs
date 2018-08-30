@@ -284,7 +284,7 @@ namespace System.Net.Http
                 connection.Acquire();
                 try
                 {
-                    return await connection.SendAsync(request, doRequestAuth, cancellationToken).ConfigureAwait(false);
+                    return await SendWithNtConnectionAuthAsync((HttpConnection)connection, request, doRequestAuth, cancellationToken).ConfigureAwait(false);                    
                 }
                 catch (HttpRequestException e) when (!isNewConnection && e.InnerException is IOException && connection.CanRetry)
                 {
@@ -295,6 +295,26 @@ namespace System.Net.Http
                     connection.Release();
                 }
             }
+        }
+
+        private async Task<HttpResponseMessage> SendWithNtConnectionAuthAsync(HttpConnection connection, HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
+        {
+            if (doRequestAuth && Settings._credentials != null)
+            {
+                return await AuthenticationHelper.SendWithNtConnectionAuthAsync(request, Settings._credentials, connection, this, cancellationToken).ConfigureAwait(false);
+            }
+
+            return await SendWithNtProxyAuthAsync(connection, request, cancellationToken).ConfigureAwait(false);
+        }
+
+        public Task<HttpResponseMessage> SendWithNtProxyAuthAsync(HttpConnection connection, HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (AnyProxyKind && ProxyCredentials != null)
+            {
+                return AuthenticationHelper.SendWithNtProxyAuthAsync(request, ProxyUri, ProxyCredentials, connection, this, cancellationToken);
+            }
+
+            return connection.SendAsync(request, cancellationToken);
         }
 
         public Task<HttpResponseMessage> SendWithProxyAuthAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
@@ -318,7 +338,7 @@ namespace System.Net.Http
             return SendWithProxyAuthAsync(request, doRequestAuth, cancellationToken);
         }
 
-        private async ValueTask<(HttpConnection, HttpResponseMessage)> CreateConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        internal async ValueTask<(HttpConnection, HttpResponseMessage)> CreateConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // If a non-infinite connect timeout has been set, create and use a new CancellationToken that'll be canceled
             // when either the original token is canceled or a connect timeout occurs.
