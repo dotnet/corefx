@@ -168,11 +168,11 @@ namespace System.Diagnostics.Tests
 
                 parentProcess.Kill(entireProcessTree: false);
 
-                // Since Kill() is fire-and-forget, wait a moment for it to take effect
-                await Task.Delay(10);
-
-                var actual = tree.Select(p => p.HasExited).ToList();
-                Assert.Equal(new[] { true, false, false }, actual);
+                await Helpers.Retry(() =>
+                {
+                    var actual = tree.Select(p => p.HasExited).ToList();
+                    Assert.Equal(new[] { true, false, false }, actual);
+                });
             }
             finally
             {
@@ -202,11 +202,11 @@ namespace System.Diagnostics.Tests
 
                 parentProcess.Kill(entireProcessTree: true);
 
-                // Since Kill() is fire-and-forget, wait a moment for it to take effect
-                await Task.Delay(10);
-
-                var actual = tree.Select(p => p.HasExited).ToList();
-                Assert.True(actual.All(x => x == true));
+                await Helpers.Retry(() =>
+                {
+                    var actual = tree.Select(p => p.HasExited).ToList();
+                    Assert.True(actual.All(x => x == true));
+                });
             }
             finally
             {
