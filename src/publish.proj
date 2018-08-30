@@ -71,14 +71,6 @@
       ContainerName="$(ContainerName)"
       Items="@(TestArchives)"
       Overwrite="true" />
-
-    <WriteItemsToJson JsonFileName="$(TestListFilename)" Items="@(TestArchives)" ForeJsonArray="true"/>
-
-    <ItemGroup>
-      <TestList Include="$(TestListFilename)">
-        <RelativeBlobPath>$(AzureTestsRoot)$(RuntimeOS)/%(Filename)%(Extension)</RelativeBlobPath>
-      </TestList>
-    </ItemGroup>
   </Target>
 
   <Target Name="Build" DependsOnTargets="CreateContainerName">
