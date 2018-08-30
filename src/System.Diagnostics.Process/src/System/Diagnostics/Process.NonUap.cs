@@ -17,7 +17,7 @@ namespace System.Diagnostics
             else
             {
                 // Ensures that an InvalidOperationException is thrown if the process hasn't started yet -- present to mimic the behavior of Kill()
-                EnsureState(State.HaveId);
+                EnsureState(State.Associated);
 
                 KillTree();
             }
