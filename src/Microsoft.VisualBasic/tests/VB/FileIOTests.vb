@@ -428,13 +428,14 @@ Namespace Microsoft.VisualBasic.Tests
         <Fact>
         Public Sub GetDirectories_Directory_SearchOption_Wildcards()
             Using TestBase As New FileIOTestBase
-                Dim DirectoryList As ReadOnlyCollection(Of String) = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
+                Dim DirectoryList As ReadOnlyCollection(Of String) = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*")
                 Assert.True(DirectoryList.Count = 0)
+                Dim CreatedDirectories As New List(Of String)
                 For i As Integer = 0 To 5
-                    IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}"))
+                    CreatedDirectories.Add(IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")).Name)
                 Next
                 DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
-                Assert.True(DirectoryList.Count = 2, $"Search results Expected 2 Actual {DirectoryList.Count} {DirectoryListToString(DirectoryList)}")
+                Assert.True(DirectoryList.Count = 2, $"Search results Expected 2 Actual {DirectoryList.Count} DirectoryList = {DirectoryListToString(DirectoryList)} Created List = {DirectoryListToString(New ReadOnlyCollection(Of String)(CreatedDirectories))}")
                 For i As Integer = 0 To 1
                     Dim DirectoryName As String = IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")
                     Assert.True(DirectoryList.Contains(DirectoryName), $"{DirectoryName} Is missing from Wildcard Search")
