@@ -29,6 +29,8 @@
     <TestArchivesRoot>$(ArchivesRoot)tests/</TestArchivesRoot>
 
     <TestListFilename>$(TestArchivesRoot)TestList.json</TestListFilename>
+    
+    <CloudDropConnectionString    Condition="'$(CloudDropConnectionString)'==''"   >DefaultEndpointsProtocol=https;AccountName=$(CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net</CloudDropConnectionString>
   </PropertyGroup>
 
   <ItemGroup>
