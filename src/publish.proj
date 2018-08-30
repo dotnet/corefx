@@ -29,8 +29,11 @@
     <TestArchivesRoot>$(ArchivesRoot)tests/</TestArchivesRoot>
 
     <TestListFilename>$(TestArchivesRoot)TestList.json</TestListFilename>
-    
-    <CloudDropConnectionString    Condition="'$(CloudDropConnectionString)'==''"   >DefaultEndpointsProtocol=https;AccountName=$(CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net</CloudDropConnectionString>
+    <AzureTestsRoot>corefx-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)-tests/</AzureTestsRoot>
+
+    <TestArchivesPattern>$(TestArchivesRoot)**/*.zip</TestArchivesPattern>
+    <TestArchivesPattern>$(TestArchivePattern);$(AnyOSTestArchivesRoot)**/*.zip</TestArchivesPattern>
+    <TestArchivesPattern Condition="'$(TargetsUnix)' == 'true'">$(TestArchivePattern);$(UnixTestArchivesRoot)**/*.zip</TestArchivesPattern>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,20 +56,23 @@
   </Target>
 
   <Target Name="UploadTestsToAzure">
-    <PropertyGroup>
-      <AzureTestsRoot>$(ContainerName)-tests/</AzureTestsRoot>
-    </PropertyGroup>
+    <ItemGroup>
+      <TestArchives Include="$(TestArchivePattern)"/>
+    </ItemGroup>
+    <ItemGroup>
+      <!-- If we are in the publish phase, we never built the tests, so we need to grab the downloaded ones -->
+      <TestArchives Condition="'@(TestArchives->Count())' == 0" Include="$(FinalTestArchivesPattern)">
+    </ItemGroup>
     <ItemGroup>
       <TestArchives>
-        <WorkItemId>%(Filename)</WorkItemId>
-        <!-- TODO: Verify that the below will actually put the appropriate platform for a given build... -->
-        <!-- TODO: Determine best design for pushing tests, e.g., should the relative path be <build-id>/<arch>/<os>? -->
-        <RelativeBlobPath>$(AzureTestsRoot)$(RuntimeOS)/%(Filename)%(Extension)</RelativeBlobPath>
+        <RelativeBlobPath>$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
       </TestArchives>
-      <TestArchives>
-        <PayloadUri>$(CloudDropAccountName).blob.core.Windows.net/$(ContainerName)/%(RelativeBlobPath)</PayloadUri>
-      </TestArchives> 
     </ItemGroup>
+
+    <PropertyGroup>
+      <ContainerName Condition="'$(ContainerName)' == ''"></ContainerName>
+      <CloudDropConnectionString Condition="'$(CloudDropConnectionString)'==''">DefaultEndpointsProtocol=https;AccountName=$(CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net</CloudDropConnectionString>
+    </PropertyGroup>
 
     <UploadToAzure
       ConnectionString="$(CloudDropConnectionString)"
@@ -87,6 +93,7 @@
     <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
     <FinalPublishExperimentalPattern>$(PackageDownloadDirectory)\**\*Experimental*.nupkg</FinalPublishExperimentalPattern>
     <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
+    <FinalTestArchivesPattern>$(PackagesDir)AzureTransfer\$(AzureTestsRoot)\**\*.zip</FinalTestArchivesPattern>
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
   </PropertyGroup>
