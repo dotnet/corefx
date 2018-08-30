@@ -160,7 +160,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("18446744073709551615")] // max value
         [InlineData("0")] // min value
-        private static unsafe void PrimitiveParserByteSpanToUInt64_BytesConsumed(string text)
+        private static unsafe void ByteSpanToUInt64_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -181,7 +181,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("abcdef")] // standard parse
         [InlineData("ffffffffffffffff")] // max value
         [InlineData("0")] // min value
-        private static unsafe void PrimitiveParserByteSpanToUInt64Hex_BytesConsumed(string text)
+        private static unsafe void ByteSpanToUInt64Hex_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -218,7 +218,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void BaselineSimpleByteStarToUInt32_VariableLength()
+        private static void SimpleByteStarToUInt32_VariableLength()
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -307,7 +307,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("4294967295")] // max value
         [InlineData("0")] // min value
-        private static unsafe void PrimitiveParserByteSpanToUInt32_BytesConsumed(string text)
+        private static unsafe void ByteSpanToUInt32_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -325,7 +325,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static unsafe void PrimitiveParserByteSpanToUInt32_BytesConsumed_VariableLength()
+        private static unsafe void ByteSpanToUInt32_BytesConsumed_VariableLength()
         {
             int textLength = s_UInt32TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -351,7 +351,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("abcdef")] // standard parse
         [InlineData("ffffffff")] // max value
         [InlineData("0")] // min value
-        private static unsafe void PrimitiveParserByteSpanToUInt32Hex_BytesConsumed(string text)
+        private static unsafe void ByteSpanToUInt32Hex_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -369,7 +369,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static unsafe void PrimitiveParserByteSpanToUInt32Hex_BytesConsumed_VariableLength()
+        private static unsafe void ByteSpanToUInt32Hex_BytesConsumed_VariableLength()
         {
             int textLength = s_UInt32TextArrayHex.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -392,6 +392,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        #region Inline data
         [InlineData("107")] // standard parse
         [InlineData("127")] // max value
         [InlineData("0")]
@@ -419,7 +420,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+2abcdefghijklmnop")]
         [InlineData("+111abcdefghijklmnop")]
         [InlineData("+000000000000000000123abcdfg")]
-        private static void PrimitiveParserByteSpanToSByte_BytesConsumed(string text)
+        #endregion
+        private static void ByteSpanToSByte_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -438,7 +440,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void PrimitiveParserByteSpanToSByte_BytesConsumed_VariableLength()
+        private static void ByteSpanToSByte_BytesConsumed_VariableLength()
         {
             int textLength = s_SByteTextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -462,6 +464,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        #region Inline data
         [InlineData("107")] // standard parse
         [InlineData("127")] // max value
         [InlineData("0")]
@@ -479,7 +482,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+21")]
         [InlineData("+2")]
         [InlineData("00000000000000000000123")]
-        private static void PrimitiveParserByteSpanToSByte_BytesConsumed_Baseline(string text)
+        #endregion
+        private static void ByteSpanToSByte_BytesConsumed_Baseline(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -498,7 +502,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void PrimitiveParserByteSpanToSByte_BytesConsumed_VariableLength_Baseline()
+        private static void ByteSpanToSByte_BytesConsumed_VariableLength_Baseline()
         {
             int textLength = s_SByteTextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -519,8 +523,8 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-
         [Benchmark]
+        #region Inline data
         [InlineData("107374182")] // standard parse
         [InlineData("2147483647")] // max value
         [InlineData("0")]
@@ -582,7 +586,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+2147483abcdefghijklmnop")]
         [InlineData("+2147483647abcdefghijklmnop")]
         [InlineData("+214abcdefghijklmnop")]
-        private static void PrimitiveParserByteSpanToInt32_BytesConsumed(string text)
+        #endregion
+        private static void ByteSpanToInt32_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -601,7 +606,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void PrimitiveParserByteSpanToInt32_BytesConsumed_VariableLength()
+        private static void ByteSpanToInt32_BytesConsumed_VariableLength()
         {
             int textLength = s_Int32TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -625,6 +630,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        #region Inline data
         [InlineData("107374182")] // standard parse
         [InlineData("2147483647")] // max value
         [InlineData("0")]
@@ -686,7 +692,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+2147483abcdefghijklmnop")]
         [InlineData("+2147483647abcdefghijklmnop")]
         [InlineData("+214abcdefghijklmnop")]
-        private static void PrimitiveParserByteSpanToInt32_BytesConsumed_Baseline(string text)
+        #endregion
+        private static void ByteSpanToInt32_BytesConsumed_Baseline(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -705,7 +712,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void PrimitiveParserByteSpanToInt32_BytesConsumed_VariableLength_Baseline()
+        private static void ByteSpanToInt32_BytesConsumed_VariableLength_Baseline()
         {
             int textLength = s_Int32TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -728,6 +735,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        #region Inline data
         [InlineData("10737")] // standard parse
         [InlineData("32767")] // max value
         [InlineData("0")]
@@ -776,7 +784,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+483abcdefghijklmnop")]
         [InlineData("+4836abcdefghijklmnop")]
         [InlineData("+21abcdefghijklmnop")]
-        private static void PrimitiveParserByteSpanToInt16(string text)
+        #endregion
+        private static void ByteSpanToInt16(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -795,6 +804,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        #region Inline data
         [InlineData("10737")] // standard parse
         [InlineData("32767")] // max value
         [InlineData("0")]
@@ -843,7 +853,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+483abcdefghijklmnop")]
         [InlineData("+4836abcdefghijklmnop")]
         [InlineData("+21abcdefghijklmnop")]
-        private static void PrimitiveParserByteSpanToInt16_BytesConsumed(string text)
+        #endregion
+        private static void ByteSpanToInt16_BytesConsumed(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -862,7 +873,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void PrimitiveParserByteSpanToInt16_BytesConsumed_VariableLength()
+        private static void ByteSpanToInt16_BytesConsumed_VariableLength()
         {
             int textLength = s_Int16TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -886,6 +897,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        #region Inline data
         [InlineData("10737")] // standard parse
         [InlineData("32767")] // max value
         [InlineData("0")]
@@ -914,7 +926,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("+483")]
         [InlineData("+21437")]
         [InlineData("000000000000000000001235")]
-        private static void PrimitiveParserByteSpanToInt16_BytesConsumed_Baseline(string text)
+        #endregion
+        private static void ByteSpanToInt16_BytesConsumed_Baseline(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -933,7 +946,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        private static void PrimitiveParserByteSpanToInt16_BytesConsumed_VariableLength_Baseline()
+        private static void ByteSpanToInt16_BytesConsumed_VariableLength_Baseline()
         {
             int textLength = s_Int16TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -975,7 +988,7 @@ namespace System.Buffers.Text.Tests
         [Benchmark]
         [InlineData("True")]
         [InlineData("False")]
-        private static void PrimitiveParserByteSpanToBool(string text)
+        private static void ByteSpanToBool(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
