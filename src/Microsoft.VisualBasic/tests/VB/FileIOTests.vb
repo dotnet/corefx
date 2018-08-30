@@ -432,18 +432,18 @@ Namespace Microsoft.VisualBasic.Tests
                 Assert.True(DirectoryList.Count = 0)
                 Dim CreatedDirectories As New List(Of String)
                 For i As Integer = 0 To 5
-                    CreatedDirectories.Add(IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")).Name)
+                    CreatedDirectories.Add(IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory00{i}")).Name)
                 Next
-                DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0", "*1")
+                DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*000", "*001")
                 Assert.True(DirectoryList.Count = 2, $"Search results Expected 2 Actual {DirectoryList.Count} DirectoryList = {DirectoryListToString(DirectoryList)} Created List = {DirectoryListToString(New ReadOnlyCollection(Of String)(CreatedDirectories))}")
                 For i As Integer = 0 To 1
-                    Dim DirectoryName As String = IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}")
+                    Dim DirectoryName As String = IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory00{i}")
                     Assert.True(DirectoryList.Contains(DirectoryName), $"{DirectoryName} Is missing from Wildcard Search")
                 Next
-                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory0", $"NewSubSubDirectory0"))
-                DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*0")
+                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory000", $"NewSubSubDirectory000"))
+                DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*000")
                 Assert.True(DirectoryList.Count = 1, $"Search results Expected 1 Actual {DirectoryList.Count} {DirectoryListToString(DirectoryList)}")
-                DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchAllSubDirectories, "*0")
+                DirectoryList = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchAllSubDirectories, "*000")
                 Assert.True(DirectoryList.Count = 2, $"Search results Expected 2 Actual {DirectoryList.Count} {DirectoryListToString(DirectoryList)}")
             End Using
         End Sub
