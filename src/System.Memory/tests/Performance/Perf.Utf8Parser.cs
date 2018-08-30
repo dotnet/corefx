@@ -10,8 +10,6 @@ namespace System.Buffers.Text.Tests
 {
     public static partial class Utf8ParserTests
     {
-        private const int InnerCount = 100000;
-
         [Benchmark]
         [InlineData("True")]
         [InlineData("False")]
@@ -32,7 +30,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("42")] // standard parse
         [InlineData("-128")] // min value
         [InlineData("127")] // max value
@@ -54,7 +52,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("42")] // standard parse
         [InlineData("0")] // min value
         [InlineData("255")] // max value
@@ -76,7 +74,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("4212")] // standard parse
         [InlineData("-32768")] // min value
         [InlineData("32767")] // max value
@@ -98,7 +96,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("4212")] // standard parse
         [InlineData("0")] // min value
         [InlineData("65535")] // max value
@@ -120,7 +118,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("12837467")] // standard parse
         [InlineData("-2147483648")] // min value
         [InlineData("2147483647")] // max value
@@ -142,7 +140,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("12837467")] // standard parse
         [InlineData("0")] // min value
         [InlineData("4294967295")] // max value
@@ -164,7 +162,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("12837467")] // standard parse
         [InlineData("-9223372036854775808")] // min value
         [InlineData("9223372036854775807")] // max value
@@ -186,7 +184,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("12837467")] // standard parse
         [InlineData("0")] // min value
         [InlineData("18446744073709551615")] // max value
@@ -208,7 +206,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark]
         [InlineData("Fri, 30 Jun 2000 03:15:45 GMT")] // standard parse
         private static void ParserDateTimeOffsetR(string text)
         {
