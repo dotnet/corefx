@@ -785,6 +785,8 @@ namespace System.PrivateUri.Tests
         [InlineData("http:\\host/path/file", false)]
         [InlineData("http://www.contoso.com/ sekä http://test.com", false)]
         [InlineData("http://www.contoso.com/ sek http://test.com", false)]
+        // Bug hasn't been fixed yet on NetFramework
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void TestIsWellFormedUriString(string uriString, bool expected)
         {
             Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, UriKind.RelativeOrAbsolute));
