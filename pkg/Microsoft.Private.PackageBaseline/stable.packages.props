@@ -1500,5 +1500,13 @@
       <Version>4.0.1</Version>
     </StablePackage>
 
+    <!-- Servicing 1.0.13 wave -->
+    <StablePackage Include="System.Net.Http">
+      <Version>4.1.4</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Http.WinHttpHandler">
+      <Version>4.0.4</Version>
+    </StablePackage>
+
   </ItemGroup>
 </Project>
