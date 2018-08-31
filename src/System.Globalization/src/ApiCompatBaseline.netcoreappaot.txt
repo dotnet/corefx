@@ -1,0 +1,2 @@
+Compat issues with assembly System.Globalization:
+MembersMustExist : Member 'System.Globalization.CompareInfo.GetHashCode(System.ReadOnlySpan<System.Char>, System.Globalization.CompareOptions)' does not exist in the implementation but it does exist in the contract.
