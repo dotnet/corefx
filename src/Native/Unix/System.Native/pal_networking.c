@@ -1816,10 +1816,8 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
         // - not sharing      (SO_EXCLUSIVEADDRUSE=1, SO_REUSEADDR=0)
         // - explicit sharing (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=1)
         // - implicit sharing (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=0)
-        // On Unix we have two address sharing modes:
-        // - not sharing      (SO_REUSEPORT=0)
-        // - explicit sharing (SO_REUSEPORT=1)
-        // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT.
+        // On Unix we can share or not share, there is no implicit sharing.
+        // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT/SO_REUSEADDR.
         if (socketOptionName == SocketOptionName_SO_EXCLUSIVEADDRUSE || socketOptionName == SocketOptionName_SO_REUSEADDR)
         {
             if (optionLen != sizeof(int32_t))
@@ -1842,7 +1840,15 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
                 }
             }
 
+            // An application that sets SO_REUSEPORT/SO_REUSEADDR can share the with another application
+            // that sets the same option. If one application sets SO_REUSEPORT and another sets SO_REUSEADDR
+            // the second application will fail to bind the port. We set both options, this enables sharing
+            // with applications that set one or both options.
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &value, (socklen_t)optionLen);
+            if (err == 0)
+            {
+                err = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &value, (socklen_t)optionLen);
+            }
             return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
         }
     }
