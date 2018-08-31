@@ -191,20 +191,6 @@ namespace System.Threading.Threads.Tests
             }).Dispose();
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ApartmentState_NoAttributePresent_STA_Windows_Core()
-        {
-            DummyClass.RemoteInvoke(() =>
-            {
-                Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
-                Assert.Equal(ApartmentState.STA, Thread.CurrentThread.GetApartmentState());
-                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.MTA));
-            }).Dispose();
-        }
-
         // The Thread Apartment State is set to MTA if attribute is not specified on main function
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
