@@ -75,20 +75,24 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
 EVP_CIPHER_CTX*
 CryptoNative_EvpCipherCreatePartial(const EVP_CIPHER* type)
 {
-    EVP_CIPHER_CTX* ctx = (EVP_CIPHER_CTX*)malloc(sizeof(EVP_CIPHER_CTX));
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL)
     {
         // Allocation failed
         return NULL;
     }
 
-    EVP_CIPHER_CTX_init(ctx);
+    if (!EVP_CIPHER_CTX_reset(ctx))
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        return NULL;
+    }
 
     // Perform partial initialization so we can set the key lengths
     int ret = EVP_CipherInit_ex(ctx, type, NULL, NULL, NULL, 0);
     if (!ret)
     {
-        free(ctx);
+        EVP_CIPHER_CTX_free(ctx);
         return NULL;
     }
 
