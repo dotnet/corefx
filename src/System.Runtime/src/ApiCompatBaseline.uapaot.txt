@@ -2,3 +2,12 @@ Compat issues with assembly System.Runtime:
 TypeCannotChangeClassification : Type 'System.DateTimeOffset' is marked as readonly in the contract so it must also be marked readonly in the implementation.
 TypeCannotChangeClassification : Type 'System.TimeSpan' is marked as readonly in the contract so it must also be marked readonly in the implementation.
 TypeCannotChangeClassification : Type 'System.Runtime.Serialization.SerializationEntry' is marked as readonly in the contract so it must also be marked readonly in the implementation.
+MembersMustExist : Member 'System.String.GetHashCode(System.ReadOnlySpan<System.Char>)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.String.GetHashCode(System.ReadOnlySpan<System.Char>, System.StringComparison)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Utf8String' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Utf8StringSegment' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Globalization.CompareInfo.GetHashCode(System.ReadOnlySpan<System.Char>, System.Globalization.CompareOptions)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Runtime.CompilerServices.RuntimeHelpers.GetUtf8StringLiteral(System.String)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Text.InvalidSequenceBehavior' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Text.SequenceValidity' does not exist in the implementation but it does exist in the contract
+TypesMustExist : Type 'System.Text.UnicodeScalar' does not exist in the implementation but it does exist in the contract.
