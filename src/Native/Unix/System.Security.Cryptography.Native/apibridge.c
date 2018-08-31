@@ -20,6 +20,8 @@
 
 #define SSL_CTRL_GET_SESSION_REUSED 8
 #define SSL_CTRL_OPTIONS 32
+
+#define SSL_ST_OK 3
 #endif
 
 const ASN1_TIME* local_X509_get0_notBefore(const X509* x509)
@@ -481,10 +483,9 @@ int32_t local_RSA_set0_crt_params(RSA* rsa, BIGNUM* dmp1, BIGNUM* dmq1, BIGNUM* 
     return 1;
 }
 
-OSSL_HANDSHAKE_STATE local_SSL_get_state(SSL* ssl)
+int32_t local_SSL_is_init_finished(const SSL* ssl)
 {
-    int state = SSL_state(ssl);
-    return (OSSL_HANDSHAKE_STATE)state;
+    return SSL_state(ssl) == SSL_ST_OK;
 }
 
 X509Stack* local_X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx)

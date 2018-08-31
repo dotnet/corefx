@@ -501,7 +501,7 @@ int32_t CryptoNative_SslDoHandshake(SSL* ssl)
 
 int32_t CryptoNative_IsSslStateOK(SSL* ssl)
 {
-    return SSL_get_state(ssl) == TLS_ST_OK;
+    return SSL_is_init_finished(ssl);
 }
 
 X509* CryptoNative_SslGetPeerCertificate(SSL* ssl)

@@ -42,15 +42,9 @@
 
 // Remove problematic #defines
 #undef SSL_get_state
+#undef SSL_is_init_finished
 #undef X509_get_X509_PUBKEY
 #undef X509_get_version
-
-// Minimal forward definitions
-typedef enum
-{
-    TLS_ST_BEFORE,
-    TLS_ST_OK,
-} OSSL_HANDSHAKE_STATE;
 
 #endif
 
@@ -136,7 +130,7 @@ int32_t RSA_meth_get_flags(const RSA_METHOD* meth);
 int32_t RSA_set0_crt_params(RSA* rsa, BIGNUM* dmp1, BIGNUM* dmq1, BIGNUM* iqmp);
 int32_t RSA_set0_factors(RSA* rsa, BIGNUM* p, BIGNUM* q);
 int32_t RSA_set0_key(RSA* rsa, BIGNUM* n, BIGNUM* e, BIGNUM* d);
-OSSL_HANDSHAKE_STATE SSL_get_state(SSL* ssl);
+int32_t SSL_is_init_finished(SSL* ssl);
 #undef SSL_CTX_set_options
 unsigned long SSL_CTX_set_options(SSL_CTX* ctx, unsigned long options);
 void SSL_CTX_set_security_level(SSL_CTX* ctx, int32_t level);
@@ -402,7 +396,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(SSL_CTX_check_private_key) \
     REQUIRED_FUNCTION(SSL_CTX_ctrl) \
     REQUIRED_FUNCTION(SSL_CTX_free) \
-    FALLBACK_FUNCTION(SSL_get_state) \
+    FALLBACK_FUNCTION(SSL_is_init_finished) \
     REQUIRED_FUNCTION(SSL_CTX_new) \
     LIGHTUP_FUNCTION(SSL_CTX_set_alpn_protos) \
     LIGHTUP_FUNCTION(SSL_CTX_set_alpn_select_cb) \
@@ -775,10 +769,10 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_get_peer_cert_chain SSL_get_peer_cert_chain_ptr
 #define SSL_get_peer_certificate SSL_get_peer_certificate_ptr
 #define SSL_get_peer_finished SSL_get_peer_finished_ptr
-#define SSL_get_state SSL_get_state_ptr
 #define SSL_get_SSL_CTX SSL_get_SSL_CTX_ptr
 #define SSL_get_version SSL_get_version_ptr
 #define SSL_get0_alpn_selected SSL_get0_alpn_selected_ptr
+#define SSL_is_init_finished SSL_is_init_finished_ptr
 #define SSL_library_init SSL_library_init_ptr
 #define SSL_load_error_strings SSL_load_error_strings_ptr
 #define SSL_new SSL_new_ptr
@@ -918,7 +912,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_set0_factors local_RSA_set0_factors
 #define RSA_set0_key local_RSA_set0_key
 #define SSL_CTX_set_security_level local_SSL_CTX_set_security_level
-#define SSL_get_state local_SSL_get_state
+#define SSL_is_init_finished local_SSL_is_init_finished
 #define X509_CRL_get0_nextUpdate local_X509_CRL_get0_nextUpdate
 #define X509_NAME_get0_der local_X509_NAME_get0_der
 #define X509_PUBKEY_get0_param local_X509_PUBKEY_get0_param
