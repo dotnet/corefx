@@ -60,22 +60,14 @@
       <TestArchives Include="$(TestArchivePattern)"/>
     </ItemGroup>
     <ItemGroup>
-      <!-- If we are in the publish phase, we never built the tests, so we need to grab the downloaded ones -->
-      <TestArchives Condition="'@(TestArchives->Count())' == 0" Include="$(FinalTestArchivesPattern)">
-    </ItemGroup>
-    <ItemGroup>
       <TestArchives>
         <RelativeBlobPath>$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
       </TestArchives>
     </ItemGroup>
 
-    <PropertyGroup>
-      <ContainerName Condition="'$(ContainerName)' == ''"></ContainerName>
-      <CloudDropConnectionString Condition="'$(CloudDropConnectionString)'==''">DefaultEndpointsProtocol=https;AccountName=$(CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net</CloudDropConnectionString>
-    </PropertyGroup>
-
     <UploadToAzure
-      ConnectionString="$(CloudDropConnectionString)"
+      AccountKey="$(CloudDropAccountName)"
+      AccountKey="$(CloudDropAccessToken)"
       ContainerName="$(ContainerName)"
       Items="@(TestArchives)"
       Overwrite="true" />
