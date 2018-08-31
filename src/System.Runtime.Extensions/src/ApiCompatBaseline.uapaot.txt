@@ -5,3 +5,4 @@ MembersMustExist : Member 'System.IO.TextWriter.Write(System.Text.StringBuilder)
 MembersMustExist : Member 'System.IO.TextWriter.WriteAsync(System.Text.StringBuilder, System.Threading.CancellationToken)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.IO.TextWriter.WriteLine(System.Text.StringBuilder)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.Text.StringBuilder, System.Threading.CancellationToken)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Utf8StringComparer' does not exist in the implementation but it does exist in the contract.
