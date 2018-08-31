@@ -77,11 +77,6 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { typeof(int[]) };
             yield return new object[] { typeof(int[][]) };
             yield return new object[] { typeof(int[,]) };
-             AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
-            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
-            Type collectibleType = typeBuilder.CreateType();
-            yield return new object[] { collectibleType };
         }
         
         [Theory]
