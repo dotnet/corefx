@@ -122,6 +122,21 @@
                     ManifestCommit="$(ManifestCommit)" />
   </Target>
 
+  <Target Name="PublishTestsToAzureBlobFeed" AfterTargets="PublishToAzureBlobFeed">
+    <ItemGroup>
+      <ItemsToPush Include="$(FinalTestArchivesPattern)">
+        <RelativeBlobPath>%(RecursiveDir)</RelativeBlobPath>
+        <WorkItemId>%(Filename)</WorkItemId>
+        <PayloadUri>%(RecursiveDir)</PayloadUri>
+      </ItemsToPush>
+    </ItemGroup>
+    <Error Condition="'@(ItemsToPush->Count())' == 0" Text="ItemsToPush for tests is empty." />
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(ItemsToPush)"
+                    PublishFlatContainer="true"/>
+  </Target>
+
   <Target Name="PublishSymbolsToAzureBlobFeed" Condition="'$(PublishSymbols)' == 'true'" >
     <ItemGroup>
       <ItemsToPush Include="$(FinalSymbolsPackagesPattern)" />
