@@ -76,11 +76,7 @@ X509_PUBKEY* local_X509_get_X509_PUBKEY(const X509* x509)
 }
 
 int32_t local_X509_PUBKEY_get0_param(
-    ASN1_OBJECT** palgOid,
-    const uint8_t** pkeyBytes,
-    int* pkeyBytesLen,
-    X509_ALGOR** palg,
-    X509_PUBKEY* pubkey)
+    ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey)
 {
     if (palgOid)
     {
@@ -204,9 +200,7 @@ int32_t local_DSA_set0_pqg(DSA* dsa, BIGNUM* bnP, BIGNUM* bnQ, BIGNUM* bnG)
         return 0;
     }
 
-    if ((dsa->p == NULL && bnP == NULL) ||
-        (dsa->q == NULL && bnQ == NULL) ||
-        (dsa->g == NULL && bnG == NULL))
+    if ((dsa->p == NULL && bnP == NULL) || (dsa->q == NULL && bnQ == NULL) || (dsa->g == NULL && bnG == NULL))
     {
         return 0;
     }
@@ -393,8 +387,7 @@ int32_t local_RSA_set0_key(RSA* rsa, BIGNUM* n, BIGNUM* e, BIGNUM* d)
         return 0;
     }
 
-    if ((rsa->n == NULL && n == NULL) ||
-        (rsa->e == NULL && e == NULL))
+    if ((rsa->n == NULL && n == NULL) || (rsa->e == NULL && e == NULL))
     {
         return 0;
     }
@@ -427,8 +420,7 @@ int32_t local_RSA_set0_factors(RSA* rsa, BIGNUM* p, BIGNUM* q)
         return 0;
     }
 
-    if ((rsa->p == NULL && p == NULL) ||
-        (rsa->q == NULL && q == NULL))
+    if ((rsa->p == NULL && p == NULL) || (rsa->q == NULL && q == NULL))
     {
         return 0;
     }
@@ -455,8 +447,7 @@ int32_t local_RSA_set0_crt_params(RSA* rsa, BIGNUM* dmp1, BIGNUM* dmq1, BIGNUM* 
         return 0;
     }
 
-    if ((rsa->dmp1 == NULL && dmp1 == NULL) ||
-        (rsa->dmq1 == NULL && dmq1 == NULL) ||
+    if ((rsa->dmp1 == NULL && dmp1 == NULL) || (rsa->dmq1 == NULL && dmq1 == NULL) ||
         (rsa->iqmp == NULL && iqmp == NULL))
     {
         return 0;

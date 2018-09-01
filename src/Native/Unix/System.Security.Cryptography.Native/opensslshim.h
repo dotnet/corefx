@@ -16,8 +16,8 @@
 #include <openssl/bn.h>
 #include <openssl/crypto.h>
 #include <openssl/dsa.h>
-#include <openssl/ecdsa.h>
 #include <openssl/ec.h>
+#include <openssl/ecdsa.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -69,19 +69,18 @@
 // on the build OS. The shim will detect their presence at runtime.
 #undef HAVE_OPENSSL_EC2M
 #define HAVE_OPENSSL_EC2M 1
-const EC_METHOD *EC_GF2m_simple_method(void);
-int EC_GROUP_get_curve_GF2m(const EC_GROUP *group, BIGNUM *p, BIGNUM *a, BIGNUM *b, BN_CTX *ctx);
-int EC_GROUP_set_curve_GF2m(EC_GROUP *group, const BIGNUM *p, const BIGNUM *a, const BIGNUM *b, BN_CTX *ctx);
-int EC_POINT_get_affine_coordinates_GF2m(const EC_GROUP *group,
-        const EC_POINT *p, BIGNUM *x, BIGNUM *y, BN_CTX *ctx);
-int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
-        const BIGNUM *x, const BIGNUM *y, BN_CTX *ctx);
+const EC_METHOD* EC_GF2m_simple_method(void);
+int EC_GROUP_get_curve_GF2m(const EC_GROUP* group, BIGNUM* p, BIGNUM* a, BIGNUM* b, BN_CTX* ctx);
+int EC_GROUP_set_curve_GF2m(EC_GROUP* group, const BIGNUM* p, const BIGNUM* a, const BIGNUM* b, BN_CTX* ctx);
+int EC_POINT_get_affine_coordinates_GF2m(const EC_GROUP* group, const EC_POINT* p, BIGNUM* x, BIGNUM* y, BN_CTX* ctx);
+int EC_POINT_set_affine_coordinates_GF2m(
+    const EC_GROUP* group, EC_POINT* p, const BIGNUM* x, const BIGNUM* y, BN_CTX* ctx);
 #endif
 #if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 typedef struct stack_st _STACK;
 int CRYPTO_add_lock(int* pointer, int amount, int type, const char* file, int line);
 int CRYPTO_num_locks(void);
-void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char* file, int line));
+void CRYPTO_set_locking_callback(void (*func)(int mode, int type, const char* file, int line));
 void ERR_load_crypto_strings(void);
 int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX* a);
 int EVP_CIPHER_CTX_init(EVP_CIPHER_CTX* a);
@@ -118,10 +117,10 @@ HMAC_CTX* HMAC_CTX_new(void);
 int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings);
 void OPENSSL_sk_free(OPENSSL_STACK*);
 OPENSSL_STACK* OPENSSL_sk_new_null(void);
-int OPENSSL_sk_num(const OPENSSL_STACK* );
-void OPENSSL_sk_pop_free(OPENSSL_STACK* st, void (*func) (void*));
+int OPENSSL_sk_num(const OPENSSL_STACK*);
+void OPENSSL_sk_pop_free(OPENSSL_STACK* st, void (*func)(void*));
 int OPENSSL_sk_push(OPENSSL_STACK* st, const void* data);
-void* OPENSSL_sk_value(const OPENSSL_STACK* , int);
+void* OPENSSL_sk_value(const OPENSSL_STACK*, int);
 long OpenSSL_version_num(void);
 void RSA_get0_crt_params(const RSA* rsa, const BIGNUM** dmp1, const BIGNUM** dmq1, const BIGNUM** iqmp);
 void RSA_get0_factors(const RSA* rsa, const BIGNUM** p, const BIGNUM** q);
@@ -139,9 +138,10 @@ int SSL_session_reused(SSL* ssl);
 const SSL_METHOD* TLS_method(void);
 const ASN1_TIME* X509_CRL_get0_nextUpdate(const X509_CRL* crl);
 int32_t X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size_t* pderlen);
-int32_t X509_PUBKEY_get0_param(ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
+int32_t X509_PUBKEY_get0_param(
+    ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
 X509* X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
-STACK_OF(X509)* X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+STACK_OF(X509) * X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
 const ASN1_TIME* X509_get0_notAfter(const X509* x509);
 const ASN1_TIME* X509_get0_notBefore(const X509* x509);
 ASN1_BIT_STRING* X509_get0_pubkey_bitstr(const X509* x509);
@@ -155,12 +155,14 @@ int32_t X509_up_ref(X509* x509);
 #undef HAVE_OPENSSL_ALPN
 #define HAVE_OPENSSL_ALPN 1
 int SSL_CTX_set_alpn_protos(SSL_CTX* ctx, const unsigned char* protos, unsigned int protos_len);
-void SSL_CTX_set_alpn_select_cb(SSL_CTX* ctx, int (*cb) (SSL *ssl,
-                                            const unsigned char **out,
-                                            unsigned char *outlen,
-                                            const unsigned char *in,
-                                            unsigned int inlen,
-                                            void *arg), void *arg);
+void SSL_CTX_set_alpn_select_cb(SSL_CTX* ctx,
+                                int (*cb)(SSL* ssl,
+                                          const unsigned char** out,
+                                          unsigned char* outlen,
+                                          const unsigned char* in,
+                                          unsigned int inlen,
+                                          void* arg),
+                                void* arg);
 void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsigned int* len);
 #endif
 

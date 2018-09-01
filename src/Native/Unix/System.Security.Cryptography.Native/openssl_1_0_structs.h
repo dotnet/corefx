@@ -9,7 +9,7 @@
 // dsa_st
 struct crypto_ex_data_10_st
 {
-    STACK_OF(void)* sk;
+    STACK_OF(void) * sk;
     int dummy;
 };
 
@@ -29,7 +29,7 @@ struct dsa_st
     const void* _ignored6;
     int _ignored7;
     struct crypto_ex_data_10_st ex_data;
-    const DSA_METHOD *meth;
+    const DSA_METHOD* meth;
 };
 
 struct evp_cipher_ctx_st
@@ -54,7 +54,7 @@ struct hmac_ctx_st
 };
 
 struct rsa_meth_st
-{ 
+{
     const void* _ignored0;
     const void* _ignored1;
     const void* _ignored2;
@@ -71,16 +71,16 @@ struct rsa_st
 {
     int _ignored0;
     long _ignored1;
-    const RSA_METHOD *meth;
+    const RSA_METHOD* meth;
     const void* _ignored2;
-    BIGNUM *n;
-    BIGNUM *e;
-    BIGNUM *d;
-    BIGNUM *p;
-    BIGNUM *q;
-    BIGNUM *dmp1;
-    BIGNUM *dmq1;
-    BIGNUM *iqmp;
+    BIGNUM* n;
+    BIGNUM* e;
+    BIGNUM* d;
+    BIGNUM* p;
+    BIGNUM* q;
+    BIGNUM* dmp1;
+    BIGNUM* dmq1;
+    BIGNUM* iqmp;
 };
 
 struct x509_cinf_st
@@ -100,7 +100,7 @@ struct X509_crl_info_st
     const void* _ignored1;
     const void* _ignored2;
     const void* _ignored3;
-    ASN1_TIME *nextUpdate;
+    ASN1_TIME* nextUpdate;
 };
 
 struct X509_crl_st
@@ -110,7 +110,7 @@ struct X509_crl_st
 
 struct X509_name_st
 {
-    STACK_OF(X509_NAME_ENTRY) *entries;
+    STACK_OF(X509_NAME_ENTRY) * entries;
     int _ignored0;
     BUF_MEM* bytes;
 };

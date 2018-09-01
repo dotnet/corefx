@@ -166,7 +166,7 @@ int32_t CryptoNative_GetX509Version(X509* x509)
 {
     if (x509)
     {
-	return (int32_t)X509_get_version(x509);
+        return (int32_t)X509_get_version(x509);
     }
 
     return -1;
@@ -266,7 +266,7 @@ int32_t CryptoNative_GetX509PublicKeyParameterBytes(X509* x509, uint8_t* pBuf, i
         // If pBuf is non-NULL we're asking to fill the data, in which case we return 1.
         return pBuf != NULL;
     }
-    
+
     int len = i2d_ASN1_TYPE(parameter, NULL);
 
     if (cBuf < len)
@@ -467,7 +467,6 @@ BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32_t forIssue
     {
         return NULL;
     }
-
 
     // Algorithm behaviors (pseudocode).  When forIssuer is true, replace "Subject" with "Issuer" and
     // SAN (Subject Alternative Names) with IAN (Issuer Alternative Names).
@@ -847,8 +846,7 @@ int32_t CryptoNative_CheckX509Hostname(X509* x509, const char* hostname, int32_t
 
     int subjectNid = NID_commonName;
     int sanGenType = GEN_DNS;
-    GENERAL_NAMES* san = (GENERAL_NAMES*)(
-        X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL));
+    GENERAL_NAMES* san = (GENERAL_NAMES*)(X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL));
     char readSubject = 1;
     int success = 0;
 
@@ -1053,13 +1051,13 @@ Return values:
 1 on success.
 */
 int32_t CryptoNative_SetX509ChainVerifyTime(X509_STORE_CTX* ctx,
-                                                   int32_t year,
-                                                   int32_t month,
-                                                   int32_t day,
-                                                   int32_t hour,
-                                                   int32_t minute,
-                                                   int32_t second,
-                                                   int32_t isDst)
+                                            int32_t year,
+                                            int32_t month,
+                                            int32_t day,
+                                            int32_t hour,
+                                            int32_t minute,
+                                            int32_t second,
+                                            int32_t isDst)
 {
     if (!ctx)
     {
