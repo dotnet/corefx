@@ -7,7 +7,7 @@
     <Compile Include="System.Runtime.Extensions.cs" />
     <Compile Include="System.Runtime.Extensions.Manual.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' AND '$(TargetsAOT)'!='true'">
     <Compile Include="System.Runtime.Extensions.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
