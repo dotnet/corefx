@@ -150,7 +150,7 @@ namespace System.Tests
             // Single
             "-12.2364",
             "-12.23647",
-            "0",
+            "-0",
             "Infinity",
             "120",
             "-Infinity",
