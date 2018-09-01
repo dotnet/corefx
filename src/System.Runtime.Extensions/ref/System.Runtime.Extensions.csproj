@@ -7,6 +7,9 @@
     <Compile Include="System.Runtime.Extensions.cs" />
     <Compile Include="System.Runtime.Extensions.Manual.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System.Runtime.Extensions.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Security.Principal\ref\System.Security.Principal.csproj" />
