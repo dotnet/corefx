@@ -1,2 +1,6 @@
 # API is only for Debug purposes
 MembersMustExist : Member 'System.Text.RegularExpressions.RegexOptions System.Text.RegularExpressions.RegexOptions.Debug' does not exist in the reference but it does exist in the implementation.
+
+MembersMustExist : Member 'System.Text.RegularExpressions.Regex.CompileToAssembly(System.Text.RegularExpressions.RegexCompilationInfo[], System.Reflection.AssemblyName)' does not exist in the reference but it does exist in the implementation.
+MembersMustExist : Member 'System.Text.RegularExpressions.Regex.CompileToAssembly(System.Text.RegularExpressions.RegexCompilationInfo[], System.Reflection.AssemblyName, System.Reflection.Emit.CustomAttributeBuilder[])' does not exist in the reference but it does exist in the implementation.
+MembersMustExist : Member 'System.Text.RegularExpressions.Regex.CompileToAssembly(System.Text.RegularExpressions.RegexCompilationInfo[], System.Reflection.AssemblyName, System.Reflection.Emit.CustomAttributeBuilder[], System.String)' does not exist in the reference but it does exist in the implementation.
