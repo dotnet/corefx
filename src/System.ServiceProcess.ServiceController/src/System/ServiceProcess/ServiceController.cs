@@ -505,7 +505,7 @@ namespace System.ServiceProcess
                     throw new InvalidOperationException(SR.Format(SR.ServiceName, userGivenName, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
 
                 // Try it as a display name
-                string result = Interop.Advapi32.GetServiceKeyName(_serviceManagerHandle.DangerousGetHandle(), userGivenName);
+                string result = Interop.Advapi32.GetServiceKeyName(_serviceManagerHandle, userGivenName);
 
                 if (result != null)
                 {
@@ -517,7 +517,7 @@ namespace System.ServiceProcess
                 }
 
                 // Try it as a service name
-                result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle.DangerousGetHandle(), userGivenName);
+                result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, userGivenName);
 
                 if (result == null)
                 {
@@ -532,7 +532,7 @@ namespace System.ServiceProcess
             else if (_displayName.Length == 0)
             {
                 // We must have _name
-                string result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle.DangerousGetHandle(), _name);
+                string result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, _name);
 
                 if (result == null)
                 {

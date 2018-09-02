@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Buffers;
 using System.Runtime.InteropServices;
@@ -11,9 +12,9 @@ internal partial class Interop
     internal partial class Advapi32
     {
         [DllImport(Libraries.Advapi32, EntryPoint = "GetServiceDisplayNameW", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
-        private static extern bool GetServiceDisplayNamePrivate(IntPtr SCMHandle, string serviceName, char[] displayName, ref int displayNameLength);
+        private static extern bool GetServiceDisplayNamePrivate(SafeServiceHandle SCMHandle, string serviceName, char[] displayName, ref int displayNameLength);
 
-        public static string GetServiceDisplayName(IntPtr SCMHandle, string serviceName)
+        public static string GetServiceDisplayName(SafeServiceHandle SCMHandle, string serviceName)
         {
             // Get the size of buffer required
             int bufLen = 0;
