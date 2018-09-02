@@ -6,39 +6,37 @@ using Microsoft.Win32.SafeHandles;
 using System;
 using System.Buffers;
 using System.Runtime.InteropServices;
+using System.Text;
 
 internal partial class Interop
 {
     internal partial class Advapi32
     {
         [DllImport(Libraries.Advapi32, EntryPoint = "GetServiceKeyNameW", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
-        private static extern bool GetServiceKeyNamePrivate(SafeServiceHandle SCMHandle, string displayName, char[] shortName, ref int shortNameLength);
+        private static extern bool GetServiceKeyNamePrivate(SafeServiceHandle SCMHandle, string displayName, ref char KeyName, ref int KeyNameLength);
 
-        public static string GetServiceKeyName(SafeServiceHandle SCMHandle, string displayName)
+        public static unsafe string GetServiceKeyName(SafeServiceHandle SCMHandle, string displayName)
         {
-            // Get the size of buffer required
-            int bufLen = 0;
-            bool success = GetServiceKeyNamePrivate(SCMHandle, displayName, null, ref bufLen);
-            char[] buffer = null;
-
-            if (!success && Marshal.GetLastWin32Error() == Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
+            Span<char> initialBuffer = stackalloc char[256];
+            var builder = new ValueStringBuilder(initialBuffer);
+            int bufLen;
+            while (true)
             {
-                bufLen++; // Does not include null
-                buffer = ArrayPool<char>.Shared.Rent(bufLen);
+                bufLen = builder.Capacity;
+                if (GetServiceKeyNamePrivate(SCMHandle, displayName, ref builder.GetPinnableReference(), ref bufLen))
+                    break;
 
-                try
+                int lastError = Marshal.GetLastWin32Error();
+                if (lastError != Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
                 {
-                    success = GetServiceKeyNamePrivate(SCMHandle, displayName, buffer, ref bufLen);
-                    if (success)
-                        return new string(buffer, 0, bufLen);
+                    return null; // Caller may want to try something else
                 }
-                finally
-                {
-                    ArrayPool<char>.Shared.Return(buffer);
-                }
+
+                builder.EnsureCapacity(bufLen + 1); // Does not include null
             }
 
-            return null;
+            builder.Length = bufLen;
+            return builder.ToString();
         }
     }
 }
