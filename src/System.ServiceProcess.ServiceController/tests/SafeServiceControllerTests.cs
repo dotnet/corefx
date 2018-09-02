@@ -169,15 +169,21 @@ namespace System.ServiceProcess.Tests
         }
 
         [Fact]
-        public static void GetStatusByBothNames()
+        public static void InitializeServiceName_GetDisplayName()
         {
             var controller = new ServiceController(KeyIsoSvcName);
             Assert.Equal(KeyIsoSvcName, controller.ServiceName);
             Assert.NotEmpty(controller.DisplayName);
+        }
 
-            controller = new ServiceController(controller.DisplayName);
+        [Fact]
+        public static void InitializeDisplayName_GetServiceName()
+        {
+            var keyIsoDisplayName = new ServiceController(KeyIsoSvcName).DisplayName;
+
+            var controller = new ServiceController(keyIsoDisplayName);
             Assert.Equal(KeyIsoSvcName.ToLowerInvariant(), controller.ServiceName.ToLowerInvariant());
-            Assert.NotEmpty(controller.DisplayName);
+            Assert.Equal(keyIsoDisplayName, controller.DisplayName);
         }
 
         [Fact]
