@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -599,59 +600,61 @@ namespace System.ServiceProcess
             if (services == null || services.Length == 0)
                 throw new ArgumentException(SR.NoServices);
 
-            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();            
+            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();
 
-            IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * sizeOfSERVICE_TABLE_ENTRY));
-            SERVICE_TABLE_ENTRY[] entries = new SERVICE_TABLE_ENTRY[services.Length];
-            bool multipleServices = services.Length > 1;
-            IntPtr structPtr;
-
-            for (int index = 0; index < services.Length; ++index)
+            using (var entriesPointer = new SafeAllocHHandle(Marshal.AllocHGlobal(checked((services.Length + 1) * sizeOfSERVICE_TABLE_ENTRY))))
             {
-                services[index].Initialize(multipleServices);
-                entries[index] = services[index].GetEntry();
-                structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * index;
-                Marshal.StructureToPtr(entries[index], structPtr, fDeleteOld: false);
-            }
+                SERVICE_TABLE_ENTRY[] entries = new SERVICE_TABLE_ENTRY[services.Length];
+                bool multipleServices = services.Length > 1;
+                IntPtr structPtr;
 
-            SERVICE_TABLE_ENTRY lastEntry = new SERVICE_TABLE_ENTRY();
-
-            lastEntry.callback = null;
-            lastEntry.name = (IntPtr)0;
-            structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * services.Length;
-            Marshal.StructureToPtr(lastEntry, structPtr, fDeleteOld: false);
-
-            // While the service is running, this function will never return. It will return when the service
-            // is stopped.
-            // After it returns, SCM might terminate the process at any time
-            // (so subsequent code is not guaranteed to run).
-            bool res = StartServiceCtrlDispatcher(entriesPointer);
-
-            foreach (ServiceBase service in services)
-            {
-                if (service._startFailedException != null)
+                for (int index = 0; index < services.Length; ++index)
                 {
-                    // Propagate exceptions throw during OnStart.
-                    // Note that this same exception is also thrown from ServiceMainCallback
-                    // (so SCM can see it as well).
-                    service._startFailedException.Throw();
+                    services[index].Initialize(multipleServices);
+                    entries[index] = services[index].GetEntry();
+                    structPtr = entriesPointer.DangerousGetHandle() + sizeOfSERVICE_TABLE_ENTRY * index;
+                    Marshal.StructureToPtr(entries[index], structPtr, fDeleteOld: false);
                 }
-            }
 
-            string errorMessage = "";
+                SERVICE_TABLE_ENTRY lastEntry = new SERVICE_TABLE_ENTRY();
 
-            if (!res)
-            {
-                errorMessage = new Win32Exception().Message;
-                Console.WriteLine(SR.CantStartFromCommandLine);
-            }
+                lastEntry.callback = null;
+                lastEntry.name = (IntPtr)0;
+                structPtr = entriesPointer.DangerousGetHandle() + sizeOfSERVICE_TABLE_ENTRY * services.Length;
+                Marshal.StructureToPtr(lastEntry, structPtr, fDeleteOld: false);
 
-            foreach (ServiceBase service in services)
-            {
-                service.Dispose();
+                // While the service is running, this function will never return. It will return when the service
+                // is stopped.
+                // After it returns, SCM might terminate the process at any time
+                // (so subsequent code is not guaranteed to run).
+                bool res = StartServiceCtrlDispatcher(entriesPointer);
+
+                foreach (ServiceBase service in services)
+                {
+                    if (service._startFailedException != null)
+                    {
+                        // Propagate exceptions throw during OnStart.
+                        // Note that this same exception is also thrown from ServiceMainCallback
+                        // (so SCM can see it as well).
+                        service._startFailedException.Throw();
+                    }
+                }
+
+                string errorMessage = "";
+
                 if (!res)
                 {
-                    service.WriteLogEntry(SR.Format(SR.StartFailed, errorMessage), true);
+                    errorMessage = new Win32Exception().Message;
+                    Console.WriteLine(SR.CantStartFromCommandLine);
+                }
+
+                foreach (ServiceBase service in services)
+                {
+                    service.Dispose();
+                    if (!res)
+                    {
+                        service.WriteLogEntry(SR.Format(SR.StartFailed, errorMessage), true);
+                    }
                 }
             }
         }
