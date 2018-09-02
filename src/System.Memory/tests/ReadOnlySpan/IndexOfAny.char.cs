@@ -34,22 +34,18 @@ namespace System.SpanTests
             var span = raw.AsSpan();
             char[] searchFor = search.ToCharArray();
 
-            var index = -1;
+            var index = span.IndexOfAny(searchFor);
             if (searchFor.Length == 1)
             {
-                index = span.IndexOf(searchFor[0]);
+                Assert.Equal(index, span.IndexOf(searchFor[0]));
             }
             else if (searchFor.Length == 2)
             {
-                index = span.IndexOfAny(searchFor[0], searchFor[1]);
+                Assert.Equal(index, span.IndexOfAny(searchFor[0], searchFor[1]));
             }
             else if (searchFor.Length == 3)
             {
-                index = span.IndexOfAny(searchFor[0], searchFor[1], searchFor[2]);
-            }
-            else
-            {
-                index = span.IndexOfAny(searchFor);
+                Assert.Equal(index, span.IndexOfAny(searchFor[0], searchFor[1], searchFor[2]));
             }
 
             var found = span[index];
