@@ -19,7 +19,7 @@ namespace System.ServiceProcess
     /// and manipulate it or get information about it.
     public class ServiceController : Component
     {
-        private string _machineName = DefaultMachineName; // Never null, always a valid name
+        private string _machineName;
         private readonly ManualResetEvent _waitForStatusSignal = new ManualResetEvent(false);
         private const string DefaultMachineName = ".";
 
@@ -40,6 +40,7 @@ namespace System.ServiceProcess
 
         public ServiceController()
         {
+            _machineName = DefaultMachineName;
             _type = Interop.Advapi32.ServiceTypeOptions.SERVICE_TYPE_ALL;
         }
 
