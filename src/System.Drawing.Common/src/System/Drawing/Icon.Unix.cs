@@ -52,6 +52,10 @@ namespace System.Drawing
 #endif
     public sealed partial class Icon : MarshalByRefObject, ISerializable, ICloneable, IDisposable
     {
+        // The PNG signature is specified at http://www.w3.org/TR/PNG/#5PNG-file-signature
+        private const uint PNGSignature1 = 137 + ('P' << 8) + ('N' << 16) + ('G' << 24);
+        private const uint PNGSignature2 = 13 + (10 << 8) + (26 << 16) + (10 << 24);
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct IconDirEntry
         {
@@ -742,8 +746,7 @@ namespace System.Drawing
 
                 // Vista 256x256 icons points directly to a PNG bitmap
                 // 256x256 icons are decoded as 0x0 (width and height are encoded as BYTE)
-                // and we ignore them just like MS does (at least up to fx 2.0) 
-                // Added: storing data so it can be saved back
+                // We mark them as ignore and later on we just store the raw bytes to be able to save to a file.
                 if ((ide.width == 0) && (ide.height == 0))
                     ide.ignore = true;
                 else
@@ -765,14 +768,17 @@ namespace System.Drawing
             }
 
             // throw error if no valid entries found
-            int valid = 0;
+            bool valid = false;
             for (int i = 0; i < dirEntryCount; i++)
             {
-                if (!(iconDir.idEntries[i].ignore))
-                    valid++;
+                if (!iconDir.idEntries[i].ignore)
+                {
+                    valid = true;
+                    break;
+                }
             }
 
-            if (valid == 0)
+            if (!valid)
                 throw new Win32Exception(0, "No valid icon entry were found.");
 
             // if we havent found the best match, return the one with the
@@ -795,25 +801,28 @@ namespace System.Drawing
             //now read in the icon data
             for (int j = 0; j < dirEntryCount; j++)
             {
-                // process ignored into IconDump
-                if (iconDir.idEntries[j].ignore)
-                {
-                    IconDump id = new IconDump();
-                    stream.Seek(iconDir.idEntries[j].imageOffset, SeekOrigin.Begin);
-                    id.data = new byte[iconDir.idEntries[j].bytesInRes];
-                    stream.Read(id.data, 0, id.data.Length);
-                    imageData[j] = id;
-                    continue;
-                }
-                // standard image
-                IconImage iidata = new IconImage();
-                BitmapInfoHeader bih = new BitmapInfoHeader();
                 stream.Seek(iconDir.idEntries[j].imageOffset, SeekOrigin.Begin);
                 byte[] buffer = new byte[iconDir.idEntries[j].bytesInRes];
                 stream.Read(buffer, 0, buffer.Length);
                 BinaryReader bihReader = new BinaryReader(new MemoryStream(buffer));
-                bih.biSize = bihReader.ReadUInt32();
-                bih.biWidth = bihReader.ReadInt32();
+                uint headerSize = bihReader.ReadUInt32();
+                int headerWidth = bihReader.ReadInt32();
+
+                // process ignored and PNG images into IconDump
+                if (iconDir.idEntries[j].ignore || (headerSize == PNGSignature1 && headerWidth == (int)PNGSignature2))
+                {
+                    IconDump id = new IconDump();
+                    id.data = buffer;
+                    imageData[j] = id;
+                    iconDir.idEntries[j].ignore = true;
+                    continue;
+                }
+
+                // standard image
+                IconImage iidata = new IconImage();
+                BitmapInfoHeader bih = new BitmapInfoHeader();
+                bih.biSize = headerSize;
+                bih.biWidth = headerWidth;
                 bih.biHeight = bihReader.ReadInt32();
                 bih.biPlanes = bihReader.ReadUInt16();
                 bih.biBitCount = bihReader.ReadUInt16();
