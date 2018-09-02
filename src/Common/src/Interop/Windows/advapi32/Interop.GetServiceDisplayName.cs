@@ -5,6 +5,7 @@
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -15,7 +16,7 @@ internal partial class Interop
         [DllImport(Libraries.Advapi32, EntryPoint = "GetServiceDisplayNameW", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
         private static extern bool GetServiceDisplayNamePrivate(SafeServiceHandle SCMHandle, string serviceName, ref char displayName, ref int displayNameLength);
 
-        public static unsafe string GetServiceDisplayName(SafeServiceHandle SCMHandle, string serviceName)
+        public static unsafe string GetServiceDisplayName(SafeServiceHandle SCMHandle, string serviceName, bool throwOnError)
         {
             var builder = new ValueStringBuilder(4096);
             int bufLen;
@@ -28,6 +29,9 @@ internal partial class Interop
                 int lastError = Marshal.GetLastWin32Error();
                 if (lastError != Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
                 {
+                    if (throwOnError)
+                        throw new Win32Exception(lastError);
+
                     return null; // Caller may want to try something else
                 }
 

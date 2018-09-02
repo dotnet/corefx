@@ -464,7 +464,7 @@ namespace System.ServiceProcess
                     throw new InvalidOperationException(SR.Format(SR.ServiceName, userGivenName, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
 
                 // Try it as a display name
-                string result = Interop.Advapi32.GetServiceKeyName(_serviceManagerHandle, userGivenName);
+                string result = Interop.Advapi32.GetServiceKeyName(_serviceManagerHandle, userGivenName, throwOnError: false);
 
                 if (result != null)
                 {
@@ -476,12 +476,13 @@ namespace System.ServiceProcess
                 }
 
                 // Try it as a service name
-                result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, userGivenName);
-
-                if (result == null)
+                try
                 {
-                    Exception inner = new Win32Exception();
-                    throw new InvalidOperationException(SR.Format(SR.NoService, userGivenName, _machineName), inner);
+                    result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, userGivenName, throwOnError: true);
+                }
+                catch (Win32Exception ex)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.NoService, userGivenName, _machineName), ex);
                 }
 
                 _name = userGivenName;
@@ -491,12 +492,14 @@ namespace System.ServiceProcess
             else if (_displayName.Length == 0)
             {
                 // We must have _name
-                string result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, _name);
-
-                if (result == null)
+                string result;
+                try
                 {
-                    Exception inner = new Win32Exception();
-                    throw new InvalidOperationException(SR.Format(SR.NoService, _name, _machineName), inner);
+                    result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, _name, throwOnError: true);
+                }
+                catch (Win32Exception ex)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.NoService, _name, _machineName), ex);
                 }
 
                 _displayName = result;
