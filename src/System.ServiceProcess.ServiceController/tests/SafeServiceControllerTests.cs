@@ -69,6 +69,13 @@ namespace System.ServiceProcess.Tests
         }
 
         [Fact]
+        public static void Initialize_GetNames()
+        {
+            Assert.Throws<InvalidOperationException>(() => new ServiceController().ServiceName);
+            Assert.Throws<InvalidOperationException>(() => new ServiceController().DisplayName);
+        }
+
+        [Fact]
         public static void GetDevices()
         {
             ServiceController[] devices = ServiceController.GetDevices();
