@@ -38,8 +38,6 @@ namespace System.ServiceProcess
         private ServiceController[] _servicesDependedOn;
         private ServiceStartMode _startType;
 
-        private const int SERVICENAMEMAXLENGTH = 80;
-
         public ServiceController()
         {
             _type = Interop.Advapi32.ServiceTypeOptions.SERVICE_TYPE_ALL;
