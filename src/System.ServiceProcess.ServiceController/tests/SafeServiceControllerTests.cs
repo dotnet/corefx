@@ -69,6 +69,7 @@ namespace System.ServiceProcess.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not throw")]
         public static void Initialize_GetNames()
         {
             Assert.Throws<InvalidOperationException>(() => new ServiceController().ServiceName);
