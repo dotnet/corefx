@@ -84,9 +84,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.StartServiceCtrlDispatcher.cs">
       <Link>Common\Interop\Windows\Interop.StartServiceCtrlDispatcher.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeAllocHHandle.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeAllocHHandle.cs</Link>
-    </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeServiceHandle.cs" />
     <Compile Include="System\ServiceProcess\PowerBroadcastStatus.cs" />
     <Compile Include="System\ServiceProcess\ServiceBase.cs" />

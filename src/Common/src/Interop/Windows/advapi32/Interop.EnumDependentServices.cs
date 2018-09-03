@@ -14,7 +14,7 @@ internal partial class Interop
         internal extern static bool EnumDependentServices(
             SafeServiceHandle serviceHandle,
             int serviceState,
-            SafeAllocHHandle bufferOfENUM_SERVICE_STATUS,
+            IntPtr bufferOfENUM_SERVICE_STATUS,
             int bufSize,
             ref int bytesNeeded,
             ref int numEnumerated);

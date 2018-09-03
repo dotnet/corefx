@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -600,9 +599,10 @@ namespace System.ServiceProcess
             if (services == null || services.Length == 0)
                 throw new ArgumentException(SR.NoServices);
 
-            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();
+            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();            
 
-            using (var entriesPointer = new SafeAllocHHandle(Marshal.AllocHGlobal(checked((services.Length + 1) * sizeOfSERVICE_TABLE_ENTRY))))
+            IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * sizeOfSERVICE_TABLE_ENTRY));
+            try
             {
                 SERVICE_TABLE_ENTRY[] entries = new SERVICE_TABLE_ENTRY[services.Length];
                 bool multipleServices = services.Length > 1;
@@ -612,7 +612,7 @@ namespace System.ServiceProcess
                 {
                     services[index].Initialize(multipleServices);
                     entries[index] = services[index].GetEntry();
-                    structPtr = entriesPointer.DangerousGetHandle() + sizeOfSERVICE_TABLE_ENTRY * index;
+                    structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * index;
                     Marshal.StructureToPtr(entries[index], structPtr, fDeleteOld: false);
                 }
 
@@ -620,7 +620,7 @@ namespace System.ServiceProcess
 
                 lastEntry.callback = null;
                 lastEntry.name = (IntPtr)0;
-                structPtr = entriesPointer.DangerousGetHandle() + sizeOfSERVICE_TABLE_ENTRY * services.Length;
+                structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * services.Length;
                 Marshal.StructureToPtr(lastEntry, structPtr, fDeleteOld: false);
 
                 // While the service is running, this function will never return. It will return when the service
@@ -656,6 +656,10 @@ namespace System.ServiceProcess
                         service.WriteLogEntry(SR.Format(SR.StartFailed, errorMessage), true);
                     }
                 }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(entriesPointer);
             }
         }
 

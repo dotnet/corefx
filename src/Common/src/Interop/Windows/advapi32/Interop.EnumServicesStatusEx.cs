@@ -16,7 +16,7 @@ internal partial class Interop
             int infolevel,
             int serviceType,
             int serviceState,
-            SafeAllocHHandle status,
+            IntPtr status,
             int size,
             out int bytesNeeded,
             out int servicesReturned,
