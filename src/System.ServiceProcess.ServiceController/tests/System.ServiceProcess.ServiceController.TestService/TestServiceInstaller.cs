@@ -172,6 +172,11 @@ namespace System.ServiceProcess.Tests
                 {
                     if (serviceHandle.IsInvalid)
                         throw new Win32Exception($"Could not find service '{ServiceName}'");
+
+                    if (!Interop.Advapi32.DeleteService(serviceHandle))
+                    {
+                        throw new Win32Exception($"Could not delete service '{ServiceName}'");
+                    }
                 }
             }
         }
