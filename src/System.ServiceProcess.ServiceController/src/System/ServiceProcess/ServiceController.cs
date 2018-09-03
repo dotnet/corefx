@@ -457,7 +457,7 @@ namespace System.ServiceProcess
 
             if (String.IsNullOrEmpty(_name))
             {
-                // figure out the _name based on the information we have. 
+                // Figure out the _name based on the information we have. 
                 // We must either have _displayName or the constructor parameter _eitherName.
                 string userGivenName = String.IsNullOrEmpty(_eitherName) ? _displayName : _eitherName;
 
@@ -465,47 +465,101 @@ namespace System.ServiceProcess
                     throw new InvalidOperationException(SR.Format(SR.ServiceName, userGivenName, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
 
                 // Try it as a display name
-                string result = Interop.Advapi32.GetServiceKeyName(_serviceManagerHandle, userGivenName, throwOnError: false);
+                string result = GetServiceKeyName(_serviceManagerHandle, userGivenName);
 
                 if (result != null)
                 {
                     // Now we have both
                     _name = result;
                     _displayName = userGivenName;
-                    _eitherName = "";
+                    _eitherName = null;
                     return;
                 }
 
                 // Try it as a service name
-                try
+                result = GetServiceDisplayName(_serviceManagerHandle, userGivenName);
+
+                if (result == null)
                 {
-                    result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, userGivenName, throwOnError: true);
-                }
-                catch (Win32Exception ex)
-                {
-                    throw new InvalidOperationException(SR.Format(SR.NoService, userGivenName, _machineName), ex);
+                    throw new InvalidOperationException(SR.Format(SR.NoService, userGivenName, _machineName), new Win32Exception(Interop.Errors.ERROR_SERVICE_DOES_NOT_EXIST));
                 }
 
                 _name = userGivenName;
                 _displayName = result;
-                _eitherName = "";
+                _eitherName = null;
             }
             else if (String.IsNullOrEmpty(_displayName))
             {
                 // We must have _name
-                string result;
-                try
+                string result = GetServiceDisplayName(_serviceManagerHandle, _name);
+
+                if (result == null)
                 {
-                    result = Interop.Advapi32.GetServiceDisplayName(_serviceManagerHandle, _name, throwOnError: true);
-                }
-                catch (Win32Exception ex)
-                {
-                    throw new InvalidOperationException(SR.Format(SR.NoService, _name, _machineName), ex);
+                    throw new InvalidOperationException(SR.Format(SR.NoService, _name, _machineName), new Win32Exception(Interop.Errors.ERROR_SERVICE_DOES_NOT_EXIST));
                 }
 
                 _displayName = result;
-                _eitherName = "";
+                _eitherName = null;
             }
+        }
+
+        /// <summary>
+        /// Gets service name (key name) from service display name.
+        /// Returns null if service is not found.
+        /// </summary>
+        private string GetServiceKeyName(SafeServiceHandle SCMHandle, string serviceDisplayName)
+        {
+            Span<char> initialBuffer = stackalloc char[256];
+            var builder = new ValueStringBuilder(initialBuffer);
+            int bufLen;
+            while (true)
+            {
+                bufLen = builder.Capacity;
+                if (Interop.Advapi32.GetServiceKeyName(SCMHandle, serviceDisplayName, ref builder.GetPinnableReference(), ref bufLen))
+                    break;
+
+                int lastError = Marshal.GetLastWin32Error();
+                if (lastError == Interop.Errors.ERROR_SERVICE_DOES_NOT_EXIST)
+                {
+                    return null;
+                }
+                else if (lastError != Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.NoService, serviceDisplayName, _machineName), new Win32Exception(lastError));
+                }
+
+                builder.EnsureCapacity(bufLen + 1); // Does not include null
+            }
+
+            builder.Length = bufLen;
+            return builder.ToString();
+        }
+
+        private string GetServiceDisplayName(SafeServiceHandle SCMHandle, string serviceName)
+        {
+            var builder = new ValueStringBuilder(4096);
+            int bufLen;
+            while (true)
+            {
+                bufLen = builder.Capacity;
+                if (Interop.Advapi32.GetServiceDisplayName(SCMHandle, serviceName, ref builder.GetPinnableReference(), ref bufLen))
+                    break;
+
+                int lastError = Marshal.GetLastWin32Error();
+                if (lastError == Interop.Errors.ERROR_SERVICE_DOES_NOT_EXIST)
+                {
+                    return null;
+                }
+                else if (lastError != Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.NoService, serviceName, _machineName), new Win32Exception(lastError));
+                }
+
+                builder.EnsureCapacity(bufLen + 1); // Does not include null
+            }
+
+            builder.Length = bufLen;
+            return builder.ToString();
         }
 
         private static SafeServiceHandle GetDataBaseHandleWithAccess(string machineName, int serviceControlManagerAccess)
