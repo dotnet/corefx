@@ -19,13 +19,13 @@ namespace System.ServiceProcess
     /// and manipulate it or get information about it.
     public class ServiceController : Component
     {
-        private string _machineName;
+        private string _machineName; // Never null
         private readonly ManualResetEvent _waitForStatusSignal = new ManualResetEvent(false);
         private const string DefaultMachineName = ".";
 
-        private string _name = ""; // Never null
-        private string _eitherName = ""; // Never null
-        private string _displayName = ""; // Never null
+        private string _name;
+        private string _eitherName;
+        private string _displayName;
 
         private int _commandsAccepted;
         private bool _statusGenerated;
@@ -132,7 +132,7 @@ namespace System.ServiceProcess
         {
             get
             {
-                if (_displayName.Length == 0)
+                if (String.IsNullOrEmpty(_displayName))
                     GenerateNames();
                 return _displayName;
             }
@@ -235,7 +235,7 @@ namespace System.ServiceProcess
         {
             get
             {
-                if (_name.Length == 0)
+                if (String.IsNullOrEmpty(_name))
                     GenerateNames();
                 return _name;
             }
@@ -455,13 +455,13 @@ namespace System.ServiceProcess
         {
             GetDataBaseHandleWithConnectAccess();
 
-            if (_name.Length == 0)
+            if (String.IsNullOrEmpty(_name))
             {
                 // figure out the _name based on the information we have. 
                 // We must either have _displayName or the constructor parameter _eitherName.
-                string userGivenName = _eitherName.Length > 0 ? _eitherName : _displayName;
+                string userGivenName = String.IsNullOrEmpty(_eitherName) ? _displayName : _eitherName;
 
-                if (userGivenName.Length == 0)
+                if (String.IsNullOrEmpty(userGivenName))
                     throw new InvalidOperationException(SR.Format(SR.ServiceName, userGivenName, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
 
                 // Try it as a display name
@@ -490,7 +490,7 @@ namespace System.ServiceProcess
                 _displayName = result;
                 _eitherName = "";
             }
-            else if (_displayName.Length == 0)
+            else if (String.IsNullOrEmpty(_displayName))
             {
                 // We must have _name
                 string result;
