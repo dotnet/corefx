@@ -3252,6 +3252,12 @@ namespace System
             }
         }
 
+        // Cut trailing spaces
+        private void GetLengthWithoutTrailingSpaces(string str, ref ushort length ,int idx)
+        {                        
+            while (length > idx && UriHelper.IsLWS(str[length - 1])) --length;                         
+        }
+
         //
         //This method does:
         //  - Creates m_Info member
@@ -3284,14 +3290,7 @@ namespace System
 
             fixed (char* str = _string)
             {
-                // Cut trailing spaces in m_String
-                if (length > idx && UriHelper.IsLWS(str[length - 1]))
-                {
-                    --length;
-                    while (length != idx && UriHelper.IsLWS(str[--length]))
-                        ;
-                    ++length;
-                }
+                GetLengthWithoutTrailingSpaces(_string, ref length, idx);
 
                 if (IsImplicitFile)
                 {
@@ -3404,6 +3403,11 @@ namespace System
                 }
 
                 length = (ushort)_string.Length;
+                // We need to be sure that there isn't ? after path
+                if (_string == _originalUnicodeString)
+                {
+                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);
+                }
             }
 
             fixed (char* str = _string)
@@ -3495,7 +3499,6 @@ namespace System
             {
                 //means it's found as not completely escaped
                 cF |= Flags.E_PathNotCanonical;
-                nonCanonical = true;
             }
 
             if (_iriParsing && !nonCanonical & ((result & (Check.DisplayCanonical | Check.EscapedCanonical
@@ -3532,6 +3535,11 @@ namespace System
                     }
 
                     length = (ushort)_string.Length;
+                    // We need to be sure there isn't # after ?
+                    if (_string == _originalUnicodeString)
+                    {
+                        GetLengthWithoutTrailingSpaces(_string, ref length, idx);
+                    }
                 }
             }
 
@@ -3589,6 +3597,8 @@ namespace System
                     }
 
                     length = (ushort)_string.Length;
+                    // we don't need to check _originalUnicodeString == _string because # is last part
+                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);                    
                 }
             }
 
@@ -4644,10 +4654,23 @@ namespace System
                         res |= Check.DotSlashAttn;
                     }
                 }
-                else if (!needsEscaping && ((c <= '"' && c != '!') || (c >= '[' && c <= '^') || c == '>'
-                    || c == '<' || c == '`'))
+                else if (((c <= '"' && c != '!') || (c >= '[' && c <= '^') || c == '>'
+                        || c == '<' || c == '`'))
                 {
-                    needsEscaping = true;
+                    if (!needsEscaping) needsEscaping = true;
+
+                    // Check above validate only if we have valid Iri characters.
+                    // It's not enough to have valid canonical Iri uri.
+                    // If we have Iri uri(Flags.HasUnicode) we set Check.NotIriCanonical
+                    // also if current part(Path,Query,Fragment) has got valid Iri characters.
+                    // This will lead to invalidate Uri es.
+                    // "http://www.contoso.com/\u00E4/ path2/ param=val" is invalid Iri lead to E_PathNotCanonical
+                    // "http://www.contoso.com/\u00E4? param=val" is invalid Iri lead to E_QueryNotCanonical                    
+                    // "http://www.contoso.com/\u00E4?param=val# fragment" is invalid Iri lead to E_FragmentNotCanonical     
+                    if ((_flags & Flags.HasUnicode) != 0 && _iriParsing)
+                    {
+                        res |= Check.NotIriCanonical;
+                    }
                 }
                 else if (c == '%')
                 {
