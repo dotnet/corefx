@@ -214,7 +214,7 @@ namespace System.Security.Cryptography.Pkcs
             Debug.Assert(tokenInfo != null);
             // certId and certId2 are allowed to be null, they get checked in CertMatchesIds.
 
-            if (!CertMatchesIds(tsaCertificate, in certId, in certId2))
+            if (!CertMatchesIds(tsaCertificate, certId, certId2))
             {
                 return false;
             }
