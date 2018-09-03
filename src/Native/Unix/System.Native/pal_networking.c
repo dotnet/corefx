@@ -1840,10 +1840,10 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
                 }
             }
 
-            // An application that sets SO_REUSEPORT/SO_REUSEADDR can share the with another application
-            // that sets the same option. If one application sets SO_REUSEPORT and another sets SO_REUSEADDR
-            // the second application will fail to bind the port. We set both options, this enables sharing
-            // with applications that set one or both options.
+            // An application that sets SO_REUSEPORT/SO_REUSEADDR can share the endpoint with another
+            // application that sets the same option. If one application sets SO_REUSEPORT and another
+            // sets SO_REUSEADDR the second application will fail to bind. We set both options, this
+            // enables sharing with applications that set one or both options.
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &value, (socklen_t)optionLen);
             if (err == 0)
             {
