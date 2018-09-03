@@ -14,7 +14,7 @@
 
     CertPolicyId ::= OBJECT IDENTIFIER
   -->
-  <asn:ObjectIdentifier name="PolicyIdentifier" />
+  <asn:ObjectIdentifier name="PolicyIdentifier" backingType="string" />
   <asn:SequenceOf name="PolicyQualifiers" optional="true">
     <asn:AsnType typeName="System.Security.Cryptography.Pkcs.Asn1.PolicyQualifierInfo" />
   </asn:SequenceOf>

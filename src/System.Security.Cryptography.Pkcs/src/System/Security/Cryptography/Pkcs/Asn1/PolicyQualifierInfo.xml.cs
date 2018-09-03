@@ -8,7 +8,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct PolicyQualifierInfo
     {
-        internal Oid PolicyQualifierId;
+        internal string PolicyQualifierId;
         internal ReadOnlyMemory<byte> Qualifier;
       
         internal void Encode(AsnWriter writer)
@@ -55,7 +55,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
             decoded = default;
             AsnReader sequenceReader = reader.ReadSequence(expectedTag);
             
-            decoded.PolicyQualifierId = sequenceReader.ReadObjectIdentifier();
+            decoded.PolicyQualifierId = sequenceReader.ReadObjectIdentifierAsString();
             decoded.Qualifier = sequenceReader.GetEncodedValue();
 
             sequenceReader.ThrowIfNotEmpty();

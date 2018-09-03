@@ -88,9 +88,7 @@ namespace System.Security.Cryptography.Pkcs
                 AsnReader reader = new AsnReader(source, AsnEncodingRules.DER);
                 int localBytesRead = reader.PeekEncodedValue().Length;
 
-                Rfc3161TimeStampResp.Decode(
-                    reader,
-                    out resp);
+                Rfc3161TimeStampResp.Decode(reader, out resp);
                 bytesConsumed = localBytesRead;
             }
             catch (CryptographicException) when (!shouldThrow)

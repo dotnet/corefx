@@ -8,7 +8,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct OtherKeyAttributeAsn
     {
-        internal Oid KeyAttrId;
+        internal string KeyAttrId;
         internal ReadOnlyMemory<byte>? KeyAttr;
       
         internal void Encode(AsnWriter writer)
@@ -60,7 +60,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
             decoded = default;
             AsnReader sequenceReader = reader.ReadSequence(expectedTag);
             
-            decoded.KeyAttrId = sequenceReader.ReadObjectIdentifier();
+            decoded.KeyAttrId = sequenceReader.ReadObjectIdentifierAsString();
 
             if (sequenceReader.HasData)
             {

@@ -9,7 +9,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct PolicyInformation
     {
-        internal Oid PolicyIdentifier;
+        internal string PolicyIdentifier;
         internal System.Security.Cryptography.Pkcs.Asn1.PolicyQualifierInfo[] PolicyQualifiers;
       
         internal void Encode(AsnWriter writer)
@@ -69,7 +69,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
             AsnReader sequenceReader = reader.ReadSequence(expectedTag);
             AsnReader collectionReader;
             
-            decoded.PolicyIdentifier = sequenceReader.ReadObjectIdentifier();
+            decoded.PolicyIdentifier = sequenceReader.ReadObjectIdentifierAsString();
 
             if (sequenceReader.HasData && sequenceReader.PeekTag().HasSameClassAndValue(Asn1Tag.Sequence))
             {

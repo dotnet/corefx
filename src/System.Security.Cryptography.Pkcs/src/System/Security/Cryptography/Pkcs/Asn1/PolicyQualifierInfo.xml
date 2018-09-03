@@ -12,6 +12,6 @@
         qualifier          ANY DEFINED BY policyQualifierId
     }
   -->
-  <asn:ObjectIdentifier name="PolicyQualifierId" />
+  <asn:ObjectIdentifier name="PolicyQualifierId" backingType="string" />
   <asn:AnyValue name="Qualifier" />
 </asn:Sequence>
