@@ -66,7 +66,7 @@ namespace System.Security.Cryptography.Pkcs
                 }
 
                 // fieldSize = ceil(KeySizeBits / 8);
-                int fieldSize = ((key.KeySize - 1) / 8) + 1;
+                int fieldSize = checked((key.KeySize + 7) / 8);
                 int bufSize = 2 * fieldSize;
 
 #if netcoreapp
