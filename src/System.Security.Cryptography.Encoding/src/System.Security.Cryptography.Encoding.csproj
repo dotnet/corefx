@@ -93,17 +93,39 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.cs">
       <Link>Common\System\Security\Cryptography\Asn1V2.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.Serializer.cs">
-      <Link>Common\System\Security\Cryptography\Asn1V2.Serializer.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnReader.cs">
       <Link>Common\System\Security\Cryptography\AsnReader.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
       <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\GeneralNameAsn.cs">
-      <Link>Common\System\Security\Cryptography\Asn1\GeneralNameAsn.cs</Link>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\EdiPartyNameAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\EdiPartyNameAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\EdiPartyNameAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\EdiPartyNameAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\EdiPartyNameAsn.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\GeneralNameAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\GeneralNameAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\GeneralNameAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\GeneralNameAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\GeneralNameAsn.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\OtherNameAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\OtherNameAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\OtherNameAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\OtherNameAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\OtherNameAsn.xml</DependentUpon>
     </Compile>
     <Compile Include="Internal\Cryptography\AsnFormatter.OSX.cs" />
     <Compile Include="Internal\Cryptography\OidLookup.OSX.cs" />
