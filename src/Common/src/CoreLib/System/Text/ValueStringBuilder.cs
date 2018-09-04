@@ -56,7 +56,7 @@ namespace System.Text
         /// </summary>
         public ref char GetPinnableReference()
         {
-            return ref GetPinnableReference(terminate: false);
+            return ref MemoryMarshal.GetReference(_chars);
         }
 
         /// <summary>
