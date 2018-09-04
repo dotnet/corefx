@@ -19,10 +19,12 @@ namespace System.Security.Cryptography
         };
 
         internal static void FromPkcs1PrivateKey(
-            in RSAPrivateKeyAsn key,
+            ReadOnlyMemory<byte> keyData,
             in AlgorithmIdentifierAsn algId,
             out RSAParameters ret)
         {
+            RSAPrivateKeyAsn key = RSAPrivateKeyAsn.Decode(keyData, AsnEncodingRules.BER);
+
             if (!algId.HasNullEquivalentParameters())
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -57,10 +59,12 @@ namespace System.Security.Cryptography
         }
 
         internal static void ReadRsaPublicKey(
-            in RSAPublicKey key,
+            ReadOnlyMemory<byte> keyData,
             in AlgorithmIdentifierAsn algId,
             out RSAParameters ret)
         {
+            RSAPublicKeyAsn key = RSAPublicKeyAsn.Decode(keyData, AsnEncodingRules.BER);
+
             ret = new RSAParameters
             {
                 Modulus = key.Modulus.ToByteArray(isUnsigned: true, isBigEndian: true),
@@ -73,11 +77,10 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out RSAParameters key)
         {
-            KeyFormatHelper.ReadSubjectPublicKeyInfo<RSAParameters, RSAPublicKey>(
+            KeyFormatHelper.ReadSubjectPublicKeyInfo<RSAParameters>(
                 s_validOids,
                 source,
                 ReadRsaPublicKey,
-                AsnEncodingRules.BER,
                 out bytesRead,
                 out key);
         }
@@ -97,7 +100,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out RSAParameters key)
         {
-            KeyFormatHelper.ReadPkcs8<RSAParameters, RSAPrivateKeyAsn>(
+            KeyFormatHelper.ReadPkcs8<RSAParameters>(
                 s_validOids,
                 source,
                 FromPkcs1PrivateKey, 
@@ -121,7 +124,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out RSAParameters key)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<RSAParameters, RSAPrivateKeyAsn>(
+            KeyFormatHelper.ReadEncryptedPkcs8<RSAParameters>(
                 s_validOids,
                 source,
                 password,
@@ -136,7 +139,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out RSAParameters key)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<RSAParameters, RSAPrivateKeyAsn>(
+            KeyFormatHelper.ReadEncryptedPkcs8<RSAParameters>(
                 s_validOids,
                 source,
                 passwordBytes,

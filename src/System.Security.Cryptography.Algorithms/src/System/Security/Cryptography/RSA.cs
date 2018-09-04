@@ -500,13 +500,11 @@ namespace System.Security.Cryptography
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
-                    RSAPublicKey key = AsnSerializer.Deserialize<RSAPublicKey>(
-                        manager.Memory,
-                        AsnEncodingRules.BER,
-                        out int localRead);
+                    AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
+                    int localRead = reader.PeekEncodedValue().Length;
 
                     AlgorithmIdentifierAsn ignored = default;
-                    RSAKeyFormatHelper.ReadRsaPublicKey(key, ignored, out RSAParameters rsaParameters);
+                    RSAKeyFormatHelper.ReadRsaPublicKey(reader.PeekEncodedValue(), ignored, out RSAParameters rsaParameters);
 
                     ImportParameters(rsaParameters);
 
@@ -521,14 +519,11 @@ namespace System.Security.Cryptography
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
-                    RSAPrivateKeyAsn key =
-                        AsnSerializer.Deserialize<RSAPrivateKeyAsn>(
-                            manager.Memory,
-                            AsnEncodingRules.BER,
-                            out int localRead);
+                    AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
+                    int localRead = reader.PeekEncodedValue().Length;
 
                     AlgorithmIdentifierAsn ignored = default;
-                    RSAKeyFormatHelper.FromPkcs1PrivateKey(key, ignored, out RSAParameters rsaParameters);
+                    RSAKeyFormatHelper.FromPkcs1PrivateKey(reader.PeekEncodedValue(), ignored, out RSAParameters rsaParameters);
 
                     fixed (byte* dPin = rsaParameters.D)
                     fixed (byte* pPin = rsaParameters.P)

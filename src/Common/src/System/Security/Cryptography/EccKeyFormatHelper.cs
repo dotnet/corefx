@@ -23,11 +23,10 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out ECParameters key)
         {
-            KeyFormatHelper.ReadSubjectPublicKeyInfo<ECParameters, ReadOnlyMemory<byte>>(
+            KeyFormatHelper.ReadSubjectPublicKeyInfo<ECParameters>(
                 s_validOids,
                 source,
                 FromECPublicKey,
-                AsnEncodingRules.DER,
                 out bytesRead,
                 out key);
         }
@@ -38,7 +37,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out ECParameters key)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters, ECPrivateKey>(
+            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters>(
                 s_validOids,
                 source,
                 password,
@@ -53,7 +52,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out ECParameters key)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters, ECPrivateKey>(
+            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters>(
                 s_validOids,
                 source,
                 passwordBytes,
@@ -68,22 +67,22 @@ namespace System.Security.Cryptography
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, key.Length))
                 {
-                    ECPrivateKey parsedKey =
-                        AsnSerializer.Deserialize<ECPrivateKey>(manager.Memory, AsnEncodingRules.BER, out bytesRead);
-
-                    ECParameters ret;
+                    AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
                     AlgorithmIdentifierAsn algId = default;
-                    FromECPrivateKey(parsedKey, algId, out ret);
+                    FromECPrivateKey(reader.PeekEncodedValue(), algId, out ECParameters ret);
+                    bytesRead = reader.PeekEncodedValue().Length;
                     return ret;
                 }
             }
         }
 
         internal static void FromECPrivateKey(
-            in ECPrivateKey key,
+            ReadOnlyMemory<byte> keyData,
             in AlgorithmIdentifierAsn algId,
             out ECParameters ret)
         {
+            ECPrivateKey key = ECPrivateKey.Decode(keyData, AsnEncodingRules.BER);
+
             ValidateParameters(key.Parameters, algId);
 
             if (key.Version != 1)
@@ -125,9 +124,7 @@ namespace System.Security.Cryptography
             }
             else
             {
-                domainParameters = AsnSerializer.Deserialize<ECDomainParameters>(
-                    algId.Parameters.Value,
-                    AsnEncodingRules.DER);
+                domainParameters = ECDomainParameters.Decode(algId.Parameters.Value, AsnEncodingRules.DER);
             }
 
             ret = new ECParameters
@@ -145,7 +142,7 @@ namespace System.Security.Cryptography
         }
 
         internal static void FromECPublicKey(
-            in ReadOnlyMemory<byte> key,
+            ReadOnlyMemory<byte> key,
             in AlgorithmIdentifierAsn algId,
             out ECParameters ret)
         {
@@ -176,7 +173,7 @@ namespace System.Security.Cryptography
 
             int fieldWidth = publicKeyBytes.Length / 2;
 
-            ECDomainParameters domainParameters = AsnSerializer.Deserialize<ECDomainParameters>(
+            ECDomainParameters domainParameters = ECDomainParameters.Decode(
                 algId.Parameters.Value,
                 AsnEncodingRules.DER);
 
@@ -212,8 +209,9 @@ namespace System.Security.Cryptography
                     // X.509 SubjectPublicKeyInfo specifies DER encoding.
                     // RFC 5915 specifies DER encoding for EC Private Keys.
                     // So we can compare as DER.
-                    using (AsnWriter writer = AsnSerializer.Serialize(keyParameters.Value, AsnEncodingRules.DER))
+                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
                     {
+                        keyParameters.Value.Encode(writer);
                         if (!writer.TryEncode(verify, out int written) ||
                             written != algIdParameters.Length ||
                             !algIdParameters.SequenceEqual(verify.AsSpan(0, written)))

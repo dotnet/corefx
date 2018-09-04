@@ -19,7 +19,7 @@ namespace System.Security.Cryptography
         };
 
         internal static void ReadDsaPrivateKey(
-            in DsaPrivateKeyAsn key,
+            ReadOnlyMemory<byte> xBytes,
             in AlgorithmIdentifierAsn algId,
             out DSAParameters ret)
         {
@@ -28,8 +28,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            DssParms parms =
-                AsnSerializer.Deserialize<DssParms>(algId.Parameters.Value, AsnEncodingRules.BER);
+            DssParms parms = DssParms.Decode(algId.Parameters.Value, AsnEncodingRules.BER);
 
             ret = new DSAParameters
             {
@@ -39,8 +38,9 @@ namespace System.Security.Cryptography
 
             ret.G = parms.G.ExportKeyParameter(ret.P.Length);
 
-            // Force a positive interpretation because Windows sometimes writes negative numbers.
-            BigInteger x = new BigInteger(key.X.Value.Span, isUnsigned: true, isBigEndian: true);
+            AsnReader reader = new AsnReader(xBytes, AsnEncodingRules.DER);
+            BigInteger x = reader.GetInteger();
+            reader.ThrowIfNotEmpty();
             ret.X = x.ExportKeyParameter(ret.Q.Length);
 
             // The public key is not contained within the format, calculate it.
@@ -49,17 +49,20 @@ namespace System.Security.Cryptography
         }
 
         internal static void ReadDsaPublicKey(
-            in BigInteger y,
+            ReadOnlyMemory<byte> yBytes,
             in AlgorithmIdentifierAsn algId,
             out DSAParameters ret)
         {
+            AsnReader reader = new AsnReader(yBytes, AsnEncodingRules.DER);
+            BigInteger y = reader.GetInteger();
+            reader.ThrowIfNotEmpty();
+
             if (!algId.Parameters.HasValue)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            DssParms parms =
-                AsnSerializer.Deserialize<DssParms>(algId.Parameters.Value, AsnEncodingRules.BER);
+            DssParms parms = DssParms.Decode(algId.Parameters.Value, AsnEncodingRules.BER);
 
             ret = new DSAParameters
             {
@@ -76,11 +79,10 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out DSAParameters key)
         {
-            KeyFormatHelper.ReadSubjectPublicKeyInfo<DSAParameters, BigInteger>(
+            KeyFormatHelper.ReadSubjectPublicKeyInfo<DSAParameters>(
                 s_validOids,
                 source,
                 ReadDsaPublicKey,
-                AsnEncodingRules.DER,
                 out bytesRead,
                 out key);
         }
@@ -90,10 +92,10 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out DSAParameters key)
         {
-            KeyFormatHelper.ReadPkcs8<DSAParameters, DsaPrivateKeyAsn>(
+            KeyFormatHelper.ReadPkcs8<DSAParameters>(
                 s_validOids,
                 source,
-                ReadDsaPrivateKey, 
+                ReadDsaPrivateKey,
                 out bytesRead,
                 out key);
         }
@@ -104,7 +106,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out DSAParameters key)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<DSAParameters, DsaPrivateKeyAsn>(
+            KeyFormatHelper.ReadEncryptedPkcs8<DSAParameters>(
                 s_validOids,
                 source,
                 password,
@@ -119,7 +121,7 @@ namespace System.Security.Cryptography
             out int bytesRead,
             out DSAParameters key)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<DSAParameters, DsaPrivateKeyAsn>(
+            KeyFormatHelper.ReadEncryptedPkcs8<DSAParameters>(
                 s_validOids,
                 source,
                 passwordBytes,

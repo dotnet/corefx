@@ -118,12 +118,8 @@ namespace System.Security.Cryptography
 
                         if (sequenceReader.PeekTag().Equals(Asn1Tag.Integer))
                         {
-                            RSAPublicKey parsed = AsnSerializer.Deserialize<RSAPublicKey>(
-                                keyBlob,
-                                AsnEncodingRules.BER);
-
                             AlgorithmIdentifierAsn ignored = default;
-                            RSAKeyFormatHelper.ReadRsaPublicKey(parsed, ignored, out key);
+                            RSAKeyFormatHelper.ReadRsaPublicKey(keyBlob, ignored, out key);
                         }
                         else
                         {

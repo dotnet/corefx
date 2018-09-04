@@ -12,13 +12,12 @@ namespace System.Security.Cryptography
 {
     internal static class KeyFormatHelper
     {
-        internal delegate void KeyReader<TRet, TParsed>(in TParsed key, in AlgorithmIdentifierAsn algId, out TRet ret);
+        internal delegate void KeyReader<TRet>(ReadOnlyMemory<byte> key, in AlgorithmIdentifierAsn algId, out TRet ret);
 
-        internal static unsafe void ReadSubjectPublicKeyInfo<TRet, TParsed>(
+        internal static unsafe void ReadSubjectPublicKeyInfo<TRet>(
             string[] validOids,
             ReadOnlySpan<byte> source,
-            KeyReader<TRet, TParsed> keyReader,
-            AsnEncodingRules keyEncodingRules,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
@@ -26,7 +25,7 @@ namespace System.Security.Cryptography
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
-                    ReadSubjectPublicKeyInfo(validOids, manager.Memory, keyReader, keyEncodingRules, out bytesRead, out ret);
+                    ReadSubjectPublicKeyInfo(validOids, manager.Memory, keyReader, out bytesRead, out ret);
                 }
             }
         }
@@ -37,8 +36,9 @@ namespace System.Security.Cryptography
             out int bytesRead)
         {
             // X.509 SubjectPublicKeyInfo is described as DER.
-            SubjectPublicKeyInfoAsn spki =
-                AsnSerializer.Deserialize<SubjectPublicKeyInfoAsn>(source, AsnEncodingRules.DER, out int read);
+            AsnReader reader = new AsnReader(source, AsnEncodingRules.DER);
+            int read = reader.PeekEncodedValue().Length;
+            SubjectPublicKeyInfoAsn.Decode(reader, out SubjectPublicKeyInfoAsn spki);
 
             if (Array.IndexOf(validOids, spki.Algorithm.Algorithm.Value) < 0)
             {
@@ -49,46 +49,31 @@ namespace System.Security.Cryptography
             return spki.SubjectPublicKey;
         }
 
-        private static void ReadSubjectPublicKeyInfo<TRet, TParsed>(
+        private static void ReadSubjectPublicKeyInfo<TRet>(
             string[] validOids,
             ReadOnlyMemory<byte> source,
-            KeyReader<TRet, TParsed> keyReader,
-            AsnEncodingRules keyEncodingRules,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
             // X.509 SubjectPublicKeyInfo is described as DER.
-            SubjectPublicKeyInfoAsn spki =
-                AsnSerializer.Deserialize<SubjectPublicKeyInfoAsn>(source, AsnEncodingRules.DER, out int read);
+            AsnReader reader = new AsnReader(source, AsnEncodingRules.DER);
+            int read = reader.PeekEncodedValue().Length;
+            SubjectPublicKeyInfoAsn.Decode(reader, out SubjectPublicKeyInfoAsn spki);
 
             if (Array.IndexOf(validOids, spki.Algorithm.Algorithm.Value) < 0)
             {
                 throw new CryptographicException(SR.Cryptography_NotValidPublicOrPrivateKey);
             }
 
-            TParsed parsed;
-
-            if (typeof(TParsed) == typeof(ReadOnlyMemory<byte>))
-            {
-                ReadOnlyMemory<byte> tmp = spki.SubjectPublicKey;
-                parsed = (TParsed)(object)tmp;
-            }
-            else
-            {
-                // Fails if there are unconsumed bytes.
-                parsed = AsnSerializer.Deserialize<TParsed>(
-                    spki.SubjectPublicKey,
-                    keyEncodingRules);
-            }
-
-            keyReader(parsed, spki.Algorithm, out ret);
+            keyReader(spki.SubjectPublicKey, spki.Algorithm, out ret);
             bytesRead = read;
         }
 
-        internal static unsafe void ReadPkcs8<TRet, TParsed>(
+        internal static unsafe void ReadPkcs8<TRet>(
             string[] validOids,
             ReadOnlySpan<byte> source,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
@@ -106,8 +91,9 @@ namespace System.Security.Cryptography
             ReadOnlyMemory<byte> source,
             out int bytesRead)
         {
-            PrivateKeyInfoAsn privateKeyInfo =
-                AsnSerializer.Deserialize<PrivateKeyInfoAsn>(source, AsnEncodingRules.BER, out int read);
+            AsnReader reader = new AsnReader(source, AsnEncodingRules.BER);
+            int read = reader.PeekEncodedValue().Length;
+            PrivateKeyInfoAsn.Decode(reader, out PrivateKeyInfoAsn privateKeyInfo);
 
             if (Array.IndexOf(validOids, privateKeyInfo.PrivateKeyAlgorithm.Algorithm.Value) < 0)
             {
@@ -118,15 +104,16 @@ namespace System.Security.Cryptography
             return privateKeyInfo.PrivateKey;
         }
 
-        private static void ReadPkcs8<TRet, TParsed>(
+        private static void ReadPkcs8<TRet>(
             string[] validOids,
             ReadOnlyMemory<byte> source,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
-            PrivateKeyInfoAsn privateKeyInfo =
-                AsnSerializer.Deserialize<PrivateKeyInfoAsn>(source, AsnEncodingRules.BER, out int read);
+            AsnReader reader = new AsnReader(source, AsnEncodingRules.BER);
+            int read = reader.PeekEncodedValue().Length;
+            PrivateKeyInfoAsn.Decode(reader, out PrivateKeyInfoAsn privateKeyInfo);
 
             if (Array.IndexOf(validOids, privateKeyInfo.PrivateKeyAlgorithm.Algorithm.Value) < 0)
             {
@@ -134,19 +121,15 @@ namespace System.Security.Cryptography
             }
 
             // Fails if there are unconsumed bytes.
-            TParsed parsed = AsnSerializer.Deserialize<TParsed>(
-                privateKeyInfo.PrivateKey,
-                AsnEncodingRules.BER);
-
-            keyReader(parsed, privateKeyInfo.PrivateKeyAlgorithm, out ret);
+            keyReader(privateKeyInfo.PrivateKey, privateKeyInfo.PrivateKeyAlgorithm, out ret);
             bytesRead = read;
         }
 
-        internal static unsafe void ReadEncryptedPkcs8<TRet, TParsed>(
+        internal static unsafe void ReadEncryptedPkcs8<TRet>(
             string[] validOids,
             ReadOnlySpan<byte> source,
             ReadOnlySpan<char> password,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
@@ -159,11 +142,11 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static unsafe void ReadEncryptedPkcs8<TRet, TParsed>(
+        internal static unsafe void ReadEncryptedPkcs8<TRet>(
             string[] validOids,
             ReadOnlySpan<byte> source,
             ReadOnlySpan<byte> passwordBytes,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
@@ -176,11 +159,11 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static void ReadEncryptedPkcs8<TRet, TParsed>(
+        private static void ReadEncryptedPkcs8<TRet>(
             string[] validOids,
             ReadOnlyMemory<byte> source,
             ReadOnlySpan<char> password,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
@@ -194,11 +177,11 @@ namespace System.Security.Cryptography
                 out ret);
         }
 
-        private static void ReadEncryptedPkcs8<TRet, TParsed>(
+        private static void ReadEncryptedPkcs8<TRet>(
             string[] validOids,
             ReadOnlyMemory<byte> source,
             ReadOnlySpan<byte> passwordBytes,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
@@ -212,17 +195,18 @@ namespace System.Security.Cryptography
                 out ret);
         }
 
-        private static void ReadEncryptedPkcs8<TRet, TParsed>(
+        private static void ReadEncryptedPkcs8<TRet>(
             string[] validOids,
             ReadOnlyMemory<byte> source,
             ReadOnlySpan<char> password,
             ReadOnlySpan<byte> passwordBytes,
-            KeyReader<TRet, TParsed> keyReader,
+            KeyReader<TRet> keyReader,
             out int bytesRead,
             out TRet ret)
         {
-            EncryptedPrivateKeyInfoAsn epki =
-                AsnSerializer.Deserialize<EncryptedPrivateKeyInfoAsn>(source, AsnEncodingRules.BER, out int read);
+            AsnReader reader = new AsnReader(source, AsnEncodingRules.BER);
+            int read = reader.PeekEncodedValue().Length;
+            EncryptedPrivateKeyInfoAsn.Decode(reader, out EncryptedPrivateKeyInfoAsn epki);
 
             // No supported encryption algorithms produce more bytes of decryption output than there
             // were of decryption input.
@@ -449,8 +433,9 @@ namespace System.Security.Cryptography
             ReadOnlyMemory<byte> source,
             out int bytesRead)
         {
-            EncryptedPrivateKeyInfoAsn epki =
-                AsnSerializer.Deserialize<EncryptedPrivateKeyInfoAsn>(source, AsnEncodingRules.BER, out bytesRead);
+            AsnReader reader = new AsnReader(source, AsnEncodingRules.BER);
+            int localRead = reader.PeekEncodedValue().Length;
+            EncryptedPrivateKeyInfoAsn.Decode(reader, out EncryptedPrivateKeyInfoAsn epki);
 
             // No supported encryption algorithms produce more bytes of decryption output than there
             // were of decryption input.
@@ -464,6 +449,8 @@ namespace System.Security.Cryptography
                     inputPasswordBytes,
                     epki.EncryptedData.Span,
                     decrypted);
+
+                bytesRead = localRead;
 
                 return new ArraySegment<byte>(decrypted, 0, decryptedBytes);
             }

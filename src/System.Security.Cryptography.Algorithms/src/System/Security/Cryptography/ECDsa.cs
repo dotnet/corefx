@@ -354,7 +354,7 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters, ECPrivateKey>(
+            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters>(
                 s_validOids,
                 source,
                 passwordBytes,
@@ -381,7 +381,7 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
-            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters, ECPrivateKey>(
+            KeyFormatHelper.ReadEncryptedPkcs8<ECParameters>(
                 s_validOids,
                 source,
                 password,
@@ -407,7 +407,7 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
-            KeyFormatHelper.ReadPkcs8<ECParameters, ECPrivateKey>(
+            KeyFormatHelper.ReadPkcs8<ECParameters>(
                 s_validOids,
                 source,
                 EccKeyFormatHelper.FromECPrivateKey,
@@ -432,11 +432,10 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
-            KeyFormatHelper.ReadSubjectPublicKeyInfo<ECParameters, ReadOnlyMemory<byte>>(
+            KeyFormatHelper.ReadSubjectPublicKeyInfo<ECParameters>(
                 s_validOids,
                 source,
                 EccKeyFormatHelper.FromECPublicKey,
-                AsnEncodingRules.DER,
                 out int localRead,
                 out ECParameters key);
 

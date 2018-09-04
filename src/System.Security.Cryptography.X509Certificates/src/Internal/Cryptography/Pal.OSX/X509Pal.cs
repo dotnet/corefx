@@ -84,11 +84,9 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeRsaPublicKey(byte[] encodedKeyValue)
             {
-                RSAPublicKey publicKey = AsnSerializer.Deserialize<RSAPublicKey>(encodedKeyValue, AsnEncodingRules.BER);
-
                 AlgorithmIdentifierAsn ignored = default;
                 RSAKeyFormatHelper.ReadRsaPublicKey(
-                    publicKey,
+                    encodedKeyValue,
                     ignored,
                     out RSAParameters rsaParameters);
 
@@ -107,10 +105,8 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeDsaPublicKey(byte[] encodedKeyValue, byte[] encodedParameters)
             {
-                BigInteger y = AsnSerializer.Deserialize<BigInteger>(encodedKeyValue, AsnEncodingRules.DER);
-
                 DSAKeyFormatHelper.ReadDsaPublicKey(
-                    y,
+                    encodedKeyValue,
                     new AlgorithmIdentifierAsn { Parameters = encodedParameters },
                     out DSAParameters dsaParameters);
 
