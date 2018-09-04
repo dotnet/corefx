@@ -540,7 +540,7 @@ namespace System.ServiceProcess
             while (true)
             {
                 bufLen = builder.Capacity;
-                fixed (char* c = &builder.GetPinnableReference())
+                fixed (char* c = builder)
                 {
                     if (Interop.Advapi32.GetServiceKeyName(SCMHandle, serviceDisplayName, c, ref bufLen))
                         break;
@@ -570,7 +570,7 @@ namespace System.ServiceProcess
             while (true)
             {
                 bufLen = builder.Capacity;
-                fixed (char* c = &builder.GetPinnableReference())
+                fixed (char* c = builder)
                 {
                     if (Interop.Advapi32.GetServiceDisplayName(SCMHandle, serviceName, c, ref bufLen))
                         break;
