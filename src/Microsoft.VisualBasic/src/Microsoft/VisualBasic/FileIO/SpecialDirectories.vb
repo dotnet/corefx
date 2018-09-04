@@ -40,7 +40,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
-                Return GetDirectoryPath(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
+                Return GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
             End Get
         End Property
 
@@ -66,7 +66,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
-                Return GetDirectoryPath(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), SR.IO_SpecialDirectory_UserAppData)
+                Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.LocalApplicationData), SR.IO_SpecialDirectory_UserAppData)
             End Get
         End Property
 
