@@ -427,6 +427,13 @@ namespace System.ServiceProcess
             return !string.IsNullOrWhiteSpace(value) && value.IndexOf('\\') == -1;
         }
 
+        /// <summary>
+        /// Closes the handle to the service manager, but does not
+        /// mark the class as disposed.
+        /// </summary>
+        /// <remarks>
+        /// Violates design guidelines by not matching Dispose() -- matches .NET Framework
+        /// </remarks>
         public void Close()
         {
             if (_serviceManagerHandle != null)
@@ -440,7 +447,9 @@ namespace System.ServiceProcess
             _type = Interop.Advapi32.ServiceTypeOptions.SERVICE_TYPE_ALL;
         }
 
-        /// Disconnects this object from the service and frees any allocated resources.
+        /// <summary>
+        /// Closes the handle to the service manager, and disposes.
+        /// </summary>
         protected override void Dispose(bool disposing)
         {
             Close();
@@ -523,7 +532,7 @@ namespace System.ServiceProcess
         /// Gets service name (key name) from service display name.
         /// Returns null if service is not found.
         /// </summary>
-        private string GetServiceKeyName(SafeServiceHandle SCMHandle, string serviceDisplayName)
+        private unsafe string GetServiceKeyName(SafeServiceHandle SCMHandle, string serviceDisplayName)
         {
             Span<char> initialBuffer = stackalloc char[256];
             var builder = new ValueStringBuilder(initialBuffer);
@@ -531,8 +540,11 @@ namespace System.ServiceProcess
             while (true)
             {
                 bufLen = builder.Capacity;
-                if (Interop.Advapi32.GetServiceKeyName(SCMHandle, serviceDisplayName, ref builder.GetPinnableReference(), ref bufLen))
-                    break;
+                fixed (char* c = &builder.GetPinnableReference())
+                {
+                    if (Interop.Advapi32.GetServiceKeyName(SCMHandle, serviceDisplayName, c, ref bufLen))
+                        break;
+                }
 
                 int lastError = Marshal.GetLastWin32Error();
                 if (lastError == Interop.Errors.ERROR_SERVICE_DOES_NOT_EXIST)
@@ -551,15 +563,18 @@ namespace System.ServiceProcess
             return builder.ToString();
         }
 
-        private string GetServiceDisplayName(SafeServiceHandle SCMHandle, string serviceName)
+        private unsafe string GetServiceDisplayName(SafeServiceHandle SCMHandle, string serviceName)
         {
             var builder = new ValueStringBuilder(4096);
             int bufLen;
             while (true)
             {
                 bufLen = builder.Capacity;
-                if (Interop.Advapi32.GetServiceDisplayName(SCMHandle, serviceName, ref builder.GetPinnableReference(), ref bufLen))
-                    break;
+                fixed (char* c = &builder.GetPinnableReference())
+                {
+                    if (Interop.Advapi32.GetServiceDisplayName(SCMHandle, serviceName, c, ref bufLen))
+                        break;
+                }
 
                 int lastError = Marshal.GetLastWin32Error();
                 if (lastError == Interop.Errors.ERROR_SERVICE_DOES_NOT_EXIST)
@@ -733,7 +748,7 @@ namespace System.ServiceProcess
         public unsafe void Pause()
         {
             using (var serviceHandle = GetServiceHandle(Interop.Advapi32.ServiceOptions.SERVICE_PAUSE_CONTINUE))
-                {
+            {
                 Interop.Advapi32.SERVICE_STATUS status = new Interop.Advapi32.SERVICE_STATUS();
                 bool result = Interop.Advapi32.ControlService(serviceHandle, Interop.Advapi32.ControlOptions.CONTROL_PAUSE, &status);
                 if (!result)
