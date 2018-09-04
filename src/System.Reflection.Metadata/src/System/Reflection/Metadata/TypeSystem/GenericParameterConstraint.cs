@@ -16,6 +16,7 @@ namespace System.Reflection.Metadata
         internal GenericParameterConstraint(MetadataReader reader, GenericParameterConstraintHandle handle)
         {
             Debug.Assert(reader != null);
+            Debug.Assert(!handle.IsNil);
 
             _reader = reader;
             _rowId = handle.RowId;

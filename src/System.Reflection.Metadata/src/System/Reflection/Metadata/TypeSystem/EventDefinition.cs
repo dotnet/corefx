@@ -18,6 +18,7 @@ namespace System.Reflection.Metadata
         internal EventDefinition(MetadataReader reader, EventDefinitionHandle handle)
         {
             Debug.Assert(reader != null);
+            Debug.Assert(!handle.IsNil);
 
             _reader = reader;
             _rowId = handle.RowId;
