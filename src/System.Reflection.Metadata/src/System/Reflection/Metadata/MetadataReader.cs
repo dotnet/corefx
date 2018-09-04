@@ -12,7 +12,7 @@ using System.Text;
 namespace System.Reflection.Metadata
 {
     /// <summary>
-    /// Reads metadata as defined byte the ECMA 335 CLI specification.
+    /// Reads metadata as defined by the ECMA 335 CLI specification.
     /// </summary>
     public sealed partial class MetadataReader
     {
@@ -1120,12 +1120,12 @@ namespace System.Reflection.Metadata
         }
 
         public AssemblyReference GetAssemblyReference(AssemblyReferenceHandle handle)
-        {
+        {   
             return new AssemblyReference(this, handle.Value);
         }
 
         public TypeDefinition GetTypeDefinition(TypeDefinitionHandle handle)
-        {
+        {   
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new TypeDefinition(this, GetTypeDefTreatmentAndRowId(handle));
         }
@@ -1154,7 +1154,7 @@ namespace System.Reflection.Metadata
         }
 
         public TypeReference GetTypeReference(TypeReferenceHandle handle)
-        {
+        {   
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new TypeReference(this, GetTypeRefTreatmentAndRowId(handle));
         }
@@ -1171,7 +1171,7 @@ namespace System.Reflection.Metadata
         }
 
         public ExportedType GetExportedType(ExportedTypeHandle handle)
-        {
+        {   
             return new ExportedType(this, handle.RowId);
         }
 
@@ -1181,7 +1181,7 @@ namespace System.Reflection.Metadata
         }
 
         public CustomAttribute GetCustomAttribute(CustomAttributeHandle handle)
-        {
+        {   
             // PERF: This code pattern is JIT friendly and results in very efficient code.
             return new CustomAttribute(this, GetCustomAttributeTreatmentAndRowId(handle));
         }

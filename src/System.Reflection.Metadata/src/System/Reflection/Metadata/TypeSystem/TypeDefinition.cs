@@ -18,7 +18,6 @@ namespace System.Reflection.Metadata
         internal TypeDefinition(MetadataReader reader, uint treatmentAndRowId)
         {
             Debug.Assert(reader != null);
-            Debug.Assert(treatmentAndRowId != 0);
 
             _reader = reader;
             _treatmentAndRowId = treatmentAndRowId;

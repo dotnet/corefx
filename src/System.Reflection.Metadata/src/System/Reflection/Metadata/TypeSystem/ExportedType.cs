@@ -16,7 +16,6 @@ namespace System.Reflection.Metadata
         internal ExportedType(MetadataReader reader, int rowId)
         {
             Debug.Assert(reader != null);
-            Debug.Assert(rowId != 0);
 
             this.reader = reader;
             this.rowId = rowId;

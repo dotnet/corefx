@@ -17,7 +17,6 @@ namespace System.Reflection.Metadata
         internal DeclarativeSecurityAttribute(MetadataReader reader, int rowId)
         {
             Debug.Assert(reader != null);
-            Debug.Assert(rowId != 0);
 
             _reader = reader;
             _rowId = rowId;
