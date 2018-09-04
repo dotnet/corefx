@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{11AE73F7-3532-47B9-8FF6-B4F22D76456C}</ProjectGuid>
-    <Configurations>net45-Debug;net45-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Buffers.cs" />
