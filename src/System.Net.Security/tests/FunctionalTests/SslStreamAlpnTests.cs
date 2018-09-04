@@ -193,7 +193,7 @@ namespace System.Net.Security.Tests
         [OuterLoop("Uses external server")]
         [ConditionalTheory(nameof(ClientSupportsAlpn))]
         [MemberData(nameof(Http2Servers))]
-        public async Task SslStream_OSX_Alpn_Success(Uri server)
+        public async Task SslStream_Http2_Alpn_Success(Uri server)
         {
             using (TcpClient client = new TcpClient())
             {

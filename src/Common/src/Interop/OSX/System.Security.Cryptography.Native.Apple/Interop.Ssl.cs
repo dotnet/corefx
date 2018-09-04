@@ -37,7 +37,7 @@ internal static partial class Interop
         private static readonly IntPtr[] s_cfAlpnHttp211Protocol = new IntPtr[] { s_cfHttp2Str.DangerousGetHandle(), s_cfHttp11Str.DangerousGetHandle() };
 
         private static readonly SafeCreateHandle s_cfAlpnHttp11Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp11Protocol, (UIntPtr)1);
-        private static readonly SafeCreateHandle s_cfAlpnHttp2Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp2Protocol , (UIntPtr)1);
+        private static readonly SafeCreateHandle s_cfAlpnHttp2Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp2Protocol, (UIntPtr)1);
         private static readonly SafeCreateHandle s_cfAlpnHttp211Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp211Protocol , (UIntPtr)2);
 
         internal enum PAL_TlsHandshakeState
@@ -591,10 +591,10 @@ internal static partial class Interop
         internal static unsafe void SslCtxSetAlpnProtos(SafeSslHandle ctx, List<SslApplicationProtocol> protocols)
         {
             SafeCreateHandle cfProtocolsRefs = null;
-            SafeCreateHandle[] cfProtocolRefs = null;
+            SafeCreateHandle[] cfProtocolsArrayRef = null;
             try
             {
-               if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http2)
+                if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http2)
                 {
                     cfProtocolsRefs = s_cfAlpnHttp211Protocols;
                 }
@@ -609,13 +609,13 @@ internal static partial class Interop
                 else
                 {
                     // we did not match common case. This is more expensive path allocating Core Foundation objects.
-                    cfProtocolRefs = new  SafeCreateHandle[protocols.Count];
-                    IntPtr[] protocolsPtr = new  System.IntPtr[protocols.Count];
+                    cfProtocolsArrayRef = new SafeCreateHandle[protocols.Count];
+                    IntPtr[] protocolsPtr = new System.IntPtr[protocols.Count];
 
                     for (int i = 0; i < protocols.Count; i++)
                     {
-                        cfProtocolRefs[i] = CoreFoundation.CFStringCreateWithCString(protocols[i].ToString());
-                        protocolsPtr[i] = cfProtocolRefs[i].DangerousGetHandle();
+                        cfProtocolsArrayRef[i] = CoreFoundation.CFStringCreateWithCString(protocols[i].ToString());
+                        protocolsPtr[i] = cfProtocolsArrayRef[i].DangerousGetHandle();
                     }
 
                     cfProtocolsRefs = CoreFoundation.CFArrayCreate(protocolsPtr, (UIntPtr)protocols.Count);
@@ -630,11 +630,11 @@ internal static partial class Interop
             }
             finally
             {
-                if (cfProtocolRefs != null)
+                if (cfProtocolsArrayRef != null)
                 {
-                    for (int i = 0; i < cfProtocolRefs.Length ; i++)
+                    for (int i = 0; i < cfProtocolsArrayRef.Length ; i++)
                     {
-                        cfProtocolRefs[i]?.Dispose();
+                        cfProtocolsArrayRef[i]?.Dispose();
                     }
 
                     cfProtocolsRefs?.Dispose();
