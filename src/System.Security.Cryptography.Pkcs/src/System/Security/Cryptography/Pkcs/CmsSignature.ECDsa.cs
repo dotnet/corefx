@@ -65,8 +65,9 @@ namespace System.Security.Cryptography.Pkcs
                     return false;
                 }
 
-                // 2 * KeySizeBytes => 2 * KeySizeBits / 8 => KeySizeBits / 4
-                int bufSize = key.KeySize / 4;
+                // fieldSize = ceil(KeySizeBits / 8);
+                int fieldSize = ((key.KeySize - 1) / 8) + 1;
+                int bufSize = 2 * fieldSize;
 
 #if netcoreapp
                 ArrayPool<byte> pool = ArrayPool<byte>.Shared;
