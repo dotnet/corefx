@@ -42,7 +42,7 @@ extern "C" int32_t CryptoNative_ObjSn2Nid(const char* sn);
 /*
 Direct shim to OBJ_nid2obj.
 */
-extern "C" ASN1_OBJECT* CryptoNative_ObjNid2Obj(int32_t nid);
+extern "C" const ASN1_OBJECT* CryptoNative_ObjNid2Obj(int32_t nid);
 
 /*
 Direct shim to ASN1_OBJECT_free.

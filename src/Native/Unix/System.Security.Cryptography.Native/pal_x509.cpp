@@ -230,12 +230,22 @@ extern "C" X509Stack* CryptoNative_X509StoreCtxGetChain(X509_STORE_CTX* ctx)
 
 extern "C" X509Stack* CryptoNative_X509StoreCtxGetSharedUntrusted(X509_STORE_CTX* ctx)
 {
-    return ctx ? ctx->untrusted : nullptr;
+    if (ctx)
+    {
+        return X509_STORE_CTX_get0_untrusted(ctx);
+    }
+
+    return nullptr;
 }
 
 extern "C" X509* CryptoNative_X509StoreCtxGetTargetCert(X509_STORE_CTX* ctx)
 {
-    return ctx ? ctx->cert : nullptr;
+    if (ctx)
+    {
+        return X509_STORE_CTX_get0_cert(ctx);
+    }
+
+    return nullptr;
 }
 
 extern "C" X509VerifyStatusCode CryptoNative_X509StoreCtxGetError(X509_STORE_CTX* ctx)
@@ -302,7 +312,7 @@ extern "C" X509* CryptoNative_X509UpRef(X509* x509)
 {
     if (x509 != nullptr)
     {
-        CRYPTO_add(&x509->references, 1, CRYPTO_LOCK_X509);
+        X509_up_ref(x509);
     }
 
     return x509;

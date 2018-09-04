@@ -7,7 +7,6 @@
 #include "pal_hmac.h"
 
 #include <assert.h>
-#include <memory>
 
 extern "C" HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD* md)
 {
@@ -15,7 +14,7 @@ extern "C" HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen,
     assert(keyLen >= 0);
     assert(md != nullptr);
 
-    std::unique_ptr<HMAC_CTX> ctx(new (std::nothrow) HMAC_CTX);
+    HMAC_CTX* ctx = HMAC_CTX_new();
     if (ctx == nullptr)
     {
         // Allocation failed
@@ -28,23 +27,22 @@ extern "C" HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen,
     if (keyLen == 0)
         key = &_;
 
-    HMAC_CTX_init(ctx.get());
-    int ret = HMAC_Init_ex(ctx.get(), key, keyLen, md, nullptr);
+    int ret = HMAC_Init_ex(ctx, key, keyLen, md, nullptr);
 
     if (!ret)
     {
+        free(ctx);
         return nullptr;
     }
 
-    return ctx.release();
+    return ctx;
 }
 
 extern "C" void CryptoNative_HmacDestroy(HMAC_CTX* ctx)
 {
     if (ctx != nullptr)
     {
-        HMAC_CTX_cleanup(ctx);
-        delete ctx;
+        HMAC_CTX_free(ctx);
     }
 }
 
