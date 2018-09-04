@@ -159,7 +159,7 @@ int32_t AppleCryptoNative_SslSetTargetName(SSLContextRef sslContext,
     return *pOSStatus == noErr;
 }
 
-DLLEXPORT int32_t AppleCryptoNative_SSLSetALPNProtocols(SSLContextRef sslContext,
+int32_t AppleCryptoNative_SSLSetALPNProtocols(SSLContextRef sslContext,
                                                         CFArrayRef protocols,
                                                         int32_t* pOSStatus)
 {
@@ -177,7 +177,7 @@ DLLEXPORT int32_t AppleCryptoNative_SSLSetALPNProtocols(SSLContextRef sslContext
     return *pOSStatus == noErr;
 }
 
-DLLEXPORT int32_t AppleCryptoNative_SslGetAlpnSelected(SSLContextRef sslContext, CFDataRef* protocol)
+int32_t AppleCryptoNative_SslGetAlpnSelected(SSLContextRef sslContext, CFDataRef* protocol)
 {
     if (sslContext == NULL || protocol == NULL)
         return -1;

@@ -217,7 +217,6 @@ namespace System.Net.Security.Tests
                     // Failures to connect do not cause test failure.
                     _output.WriteLine("Unable to connect: {0}", e);
                 }
-
             }
         }
 

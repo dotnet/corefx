@@ -107,7 +107,6 @@ namespace System.Net.Security
                 return null;
 
             return Interop.AppleCrypto.SslGetAlpnSelected(((SafeDeleteSslContext)context).SslContext);
-
         }
 
         public static SecurityStatusPal EncryptMessage(
