@@ -182,15 +182,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(InStr_TestData_NullsAndEmpties))]
-        [InlineData(null, "a", 0)]
-        [InlineData("a", null, 1)]
-        [InlineData("a", "a", 1)]
-        [InlineData("aa", "a", 1)]
-        [InlineData("ab", "a", 1)]
-        [InlineData("ba", "a", 2)]
-        [InlineData("b", "a", 0)]
-        [InlineData("a", "ab", 0)]
-        [InlineData("ab", "ab", 1)]
+        [MemberData(nameof(InStr_FromBegin_TestData))]
         public void InStr_FromBegin(string string1, string string2, int expected)
         {
             Assert.Equal(expected, Strings.InStr(string1, string2));
@@ -199,14 +191,7 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(InStr_TestData_NullsAndEmpties))]
-        [InlineData(null, "a", 0)]
-        [InlineData("aa", null, 2)]
-        [InlineData("aa", "a", 2)]
-        [InlineData("aab", "a", 2)]
-        [InlineData("aba", "a", 3)]
-        [InlineData("ab", "a", 0)]
-        [InlineData("aa", "ab", 0)]
-        [InlineData("abab", "ab", 3)]
+        [MemberData(nameof(InStr_FromWithin_TestData))]
         public void InStr_FromWithin(string string1, string string2, int expected)
         {
             int startPos = 2;
@@ -254,33 +239,14 @@ namespace Microsoft.VisualBasic.Tests
 
         [Theory]
         [MemberData(nameof(InStr_TestData_NullsAndEmpties))]
-        [InlineData(null, "a", 0)]
-        [InlineData("a", null, 1)]
-        [InlineData("a", "a", 1)]
-        [InlineData("aa", "a", 2)]
-        [InlineData("ba", "a", 2)]
-        [InlineData("ab", "a", 1)]
-        [InlineData("b", "a", 0)]
-        [InlineData("a", "ab", 0)]
-        [InlineData("ab", "ab", 1)]
+        [MemberData(nameof(InStrRev_FromEnd_TestData))]
         public void InStrRev_FromEnd(string stringCheck, string stringMatch, int expected)
         {
             Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch));
         }
 
         [Theory]
-        [InlineData(null, null, 1, 0)]
-        [InlineData(null, "", 1, 0)]
-        [InlineData("", null, 1, 0)]
-        [InlineData("", "", 1, 0)]
-        [InlineData(null, "a", 1, 0)]
-        [InlineData("aa", null, 1, 1)]
-        [InlineData("aa", "a", 1, 1)]
-        [InlineData("baa", "a", 2, 2)]
-        [InlineData("aba", "a", 2, 1)]
-        [InlineData("ba", "a", 1, 0)]
-        [InlineData("aa", "ab", 1, 0)]
-        [InlineData("abab", "ab", 3, 1)]
+        [MemberData(nameof(InStrRev_FromWithin_TestData))]
         public void InStrRev_FromWithin(string stringCheck, string stringMatch, int start, int expected)
         {
             Assert.Equal(expected, Strings.InStrRev(stringCheck, stringMatch, start));
@@ -462,6 +428,60 @@ namespace Microsoft.VisualBasic.Tests
             {null, "", 0 },
             {"", null, 0 },
             {"", "", 0 },
+        };
+
+        public static TheoryData<string, string, int> InStr_FromBegin_TestData() => new TheoryData<string, string, int>
+        {
+            { null, "a", 0 },
+            { "a", null, 1 },
+            { "a", "a", 1 },
+            { "aa", "a", 1 },
+            { "ab", "a", 1 },
+            { "ba", "a", 2 },
+            { "b", "a", 0 },
+            { "a", "ab", 0 },
+            { "ab", "ab", 1 },
+        };
+
+        public static TheoryData<string, string, int> InStr_FromWithin_TestData() => new TheoryData<string, string, int>
+        {
+            { null, "a", 0 },
+            { "aa", null, 2 },
+            { "aa", "a", 2 },
+            { "aab", "a", 2 },
+            { "aba", "a", 3 },
+            { "ab", "a", 0 },
+            { "aa", "ab", 0 },
+            { "abab", "ab", 3 },
+        };
+
+        public static TheoryData<string, string, int> InStrRev_FromEnd_TestData() => new TheoryData<string, string, int>
+        {
+            { null, "a", 0 },
+            { "a", null, 1 },
+            { "a", "a", 1 },
+            { "aa", "a", 2 },
+            { "ba", "a", 2 },
+            { "ab", "a", 1 },
+            { "b", "a", 0 },
+            { "a", "ab", 0 },
+            { "ab", "ab", 1 },
+        };
+
+        public static TheoryData<string, string, int,int> InStrRev_FromWithin_TestData() => new TheoryData<string, string, int, int>
+        {
+            { null, null, 1, 0 },
+            { null, "", 1, 0 },
+            { "", null, 1, 0 },
+            { "", "", 1, 0 },
+            { null, "a", 1, 0 },
+            { "aa", null, 1, 1 },
+            { "aa", "a", 1, 1 },
+            { "baa", "a", 2, 2 },
+            { "aba", "a", 2, 1 },
+            { "ba", "a", 1, 0 },
+            { "aa", "ab", 1, 0 },
+            { "abab", "ab", 3, 1 },
         };
     }
 }
