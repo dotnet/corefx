@@ -457,10 +457,7 @@ EmptyMatchString:
             End If
 
             If TypeOf Expression Is ValueType Then
-                ' TOOD: Uncomment permission assertions and add references
-                'Call New ReflectionPermission(ReflectionPermissionFlag.MemberAccess).Assert()  'need this permission for System.Reflection.FieldInfo.GetValue()
                 Dim Length As Integer = StructUtils.GetRecordLength(Expression, 1)
-                ''System.Security.PermissionSet.RevertAssert() 'reverts all previous asserts for the current frame.  No need to finally block this - CLR removes asserts if an exception is thrown.
                 Return Length
             End If
 
