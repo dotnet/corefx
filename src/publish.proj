@@ -80,7 +80,7 @@
     <FinalTestArchivesPattern>$(PackagesDir)AzureTransfer\**\*.zip</FinalTestArchivesPattern>
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
-    <AzureFeedTestsRoot>tests\</AzureFeedTestsRoot>
+    <AzureFeedTestsRoot>tests/</AzureFeedTestsRoot>
   </PropertyGroup>
 
   <Target Name="GetPackagesToSign">
@@ -117,16 +117,19 @@
 
   <Target Name="PublishTestsToAzureBlobFeed" AfterTargets="PublishToAzureBlobFeed">
     <ItemGroup>
-      <ItemsToPush Include="$(FinalTestArchivesPattern)">
-        <RelativeBlobPath>$(AzureFeedTestsRoot)%(RecursiveDir)</RelativeBlobPath>
+      <TestsToPush Include="$(FinalTestArchivesPattern)" />
+    </ItemGroup>
+    <ItemGroup>
+      <TestsToPush>
+        <RelativeBlobPath>$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)</RelativeBlobPath>
         <WorkItemId>%(Filename)</WorkItemId>
-        <PayloadUri>$(AzureFeedTestsRoot)%(RecursiveDir)</PayloadUri>
-      </ItemsToPush>
+        <PayloadUri>$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)</PayloadUri>
+      </TestsToPush>
     </ItemGroup>
     <Error Condition="'@(ItemsToPush->Count())' == 0" Text="ItemsToPush for tests is empty." />
     <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
                     AccountKey="$(AccountKey)"
-                    ItemsToPush="@(ItemsToPush)"
+                    ItemsToPush="@(TestsToPush)"
                     PublishFlatContainer="true"/>
   </Target>
 
