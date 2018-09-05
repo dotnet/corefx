@@ -312,9 +312,10 @@ namespace System.Net.Http.HPack
                 {
                     // grab the next byte and push it over to make room for bits we have to borrow
                     byte workingByte = (byte)(sourceSpan[sourceIndex] << bitOffset);
-                    // borrow some bits if we need to
-                    if (bitOffset > 0)
-                        workingByte |= (byte)((sourceIndex < sourceSpan.Length - 1 ? sourceSpan[sourceIndex + 1] : 0) >> (8 - bitOffset));
+
+                    // borrow some bits if we need to and there is another byte to borrow from
+                    if (bitOffset > 0 && sourceIndex < sourceSpan.Length - 1)
+                        workingByte |= (byte)(sourceSpan[sourceIndex + 1] >> (8 - bitOffset));
 
                     // key into array
                     int decodedValue = decodingArray[arrayIndex, workingByte];
