@@ -16,9 +16,8 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Function Callback(ByVal FieldInfo As System.Reflection.FieldInfo, ByRef Value As Object) As Boolean
     End Interface
 
-    ' TODO: Change to Friend
     <System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)>
-    Public Class StructUtils
+    Friend Class StructUtils
         ' Prevent creation.
         Private Sub New()
         End Sub
@@ -68,8 +67,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Return Nothing
         End Function
 
-        ' Change to Friend
-        Public Shared Function GetRecordLength(ByVal o As Object, Optional ByVal PackSize As Integer = -1) As Integer
+        Friend Shared Function GetRecordLength(ByVal o As Object, Optional ByVal PackSize As Integer = -1) As Integer
             If o Is Nothing Then
                 Return 0
             End If
