@@ -338,7 +338,7 @@ namespace System.Drawing
         {
             // Jpeg loses data, so we don't want to use it to serialize...
             ImageFormat dest = RawFormat;
-            if (dest == ImageFormat.Jpeg)
+            if (dest.Guid == ImageFormat.Jpeg.Guid)
                 dest = ImageFormat.Png;
 
             // If we don't find an Encoder (for things like Icon), we just switch back to PNG...

@@ -59,7 +59,7 @@ namespace System.Drawing
 
             try
             {
-                InitializeFromStream(new MemoryStream(dat));
+                SetNativeImage(InitializeFromStream(new MemoryStream(dat)));
             }
             catch (ExternalException)
             {
