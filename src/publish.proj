@@ -28,7 +28,6 @@
     <ArchivesRoot>$(TestWorkingDir)$(OSPlatformConfig)/archive/</ArchivesRoot>
     <TestArchivesRoot>$(ArchivesRoot)tests/</TestArchivesRoot>
 
-    <TestListFilename>$(TestArchivesRoot)TestList.json</TestListFilename>
     <AzureTestsRoot>corefx-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)-tests/</AzureTestsRoot>
   </PropertyGroup>
 
@@ -81,6 +80,8 @@
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
     <AzureFeedTestsRoot>tests/</AzureFeedTestsRoot>
+    <TestListFilename>TestList.json</TestListFilename>
+    <TestListPath>$(PackagesDir)AzureTransfer\$(AzureTestsRoot)$(TestListFilename)</TestListPath>
   </PropertyGroup>
 
   <Target Name="GetPackagesToSign">
@@ -118,18 +119,45 @@
   <Target Name="PublishTestsToAzureBlobFeed" AfterTargets="PublishToAzureBlobFeed">
     <ItemGroup>
       <TestsToPush Include="$(FinalTestArchivesPattern)" />
-    </ItemGroup>
-    <ItemGroup>
       <TestsToPush>
-        <RelativeBlobPath>$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)</RelativeBlobPath>
-        <WorkItemId>%(Filename)</WorkItemId>
-        <PayloadUri>$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)</PayloadUri>
+        <RelativeBlobPath>$([System.String]::Copy('$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</RelativeBlobPath> 
       </TestsToPush>
     </ItemGroup>
+
     <Error Condition="'@(ItemsToPush->Count())' == 0" Text="ItemsToPush for tests is empty." />
+
     <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
                     AccountKey="$(AccountKey)"
                     ItemsToPush="@(TestsToPush)"
+                    PublishFlatContainer="true"/>
+
+    <PropertyGroup>
+      <!-- Regex used by BlobFeedAction to extract same information -->
+      <FeedStorageAccount>$([System.Text.RegularExpressions.Regex]::Match($(ExpectedFeedUrl), `(?'feedurl'https:\/\/(?'accountname'[^\.-]+)(?'domain'[^\/]*)\/((?'token'[a-zA-Z0-9+\/]*?\/\d{4}-\d{2}-\d{2})\/)?(?'containername'[^\/]+)\/(?'relativepath'.*\/)?)index\.json`).Groups["accountname"].value)</FeedStorageAccount>
+      <FeedContainerName>$([System.Text.RegularExpressions.Regex]::Match($(ExpectedFeedUrl), `(?'feedurl'https:\/\/(?'accountname'[^\.-]+)(?'domain'[^\/]*)\/((?'token'[a-zA-Z0-9+\/]*?\/\d{4}-\d{2}-\d{2})\/)?(?'containername'[^\/]+)\/(?'relativepath'.*\/)?)index\.json`).Groups["containername"].value)</FeedContainerName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- Add metadata for tests -->
+      <TestsToPush>
+        <WorkItemId>%(Filename)</WorkItemId>
+        <PayloadUri>$([System.String]::Copy('https://$(FeedStorageAccount).blob.core.windows.net/$(FeedContainerName)/$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</PayloadUri>
+      </TestsToPush>
+    </ItemGroup>
+    
+    <WriteItemsToJson JsonFileName="$(TestListPath)" Items="@(TestsToPush)" ForceJsonArray="true" />
+
+    <ItemGroup>
+      <TestList Include="$(TestListPath)" />
+      <TestList>
+        <!-- TODO: Fix this path to be the same relative path as the downloaded tests.  Right now, AzureTestsRoot will have 0s through it during the Publish phase... -->
+        <RelativeBlobPath>$(AzureFeedTestsRoot)$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
+      </TestList>
+    </ItemGroup>
+
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(TestList)"
                     PublishFlatContainer="true"/>
   </Target>
 
