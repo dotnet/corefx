@@ -12,7 +12,6 @@ Imports System.Runtime.InteropServices
 Imports System.Text
 Imports Xunit
 ' Do not Imports System.IO
-#Const ManualTestsEnabled = False
 Namespace Microsoft.VisualBasic.Tests
     Public NotInheritable Class FileIOTests
         Inherits IO.FileCleanupTestBase
@@ -210,6 +209,30 @@ Namespace Microsoft.VisualBasic.Tests
 
         <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
+
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                Assert.True(FileSystem.DirectoryExists(FullPathToTargetDirectory), $"Directory {FullPathToTargetDirectory} does exist")
+                Assert.False(FileSystem.FileExists(FullPathToTargetDirectory), $"File {FullPathToTargetDirectory} does exist")
+                Assert.True(IO.Directory.Exists(FullPathToTargetDirectory), $"Directory {FullPathToTargetDirectory} does exist")
+                Assert.False(IO.File.Exists(FullPathToTargetDirectory), $"File {FullPathToTargetDirectory} does exist")
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
+                    CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile{i}")
+                Next
+                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs)
+                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
+                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+                    ' Ensure copy transferred written data
+                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                Next
+            End Using
 
         End Sub
 
@@ -614,7 +637,7 @@ Namespace Microsoft.VisualBasic.Tests
         End Sub
 
         <ConditionalTheory(NameOf(ManualTestsEnabled))>
-        Public Sub MoveDirectory_Sourc_eDirectoryName_DestinationDirectoryName_UIOption()
+        Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption()
 
         End Sub
 
