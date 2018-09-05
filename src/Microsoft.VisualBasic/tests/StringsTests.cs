@@ -181,10 +181,7 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
-        [InlineData(null, null, 0)]
-        [InlineData(null, "", 0)]
-        [InlineData("", null, 0)]
-        [InlineData("", "", 0)]
+        [MemberData(nameof(InStr_TestData_NullsAndEmpties))]
         [InlineData(null, "a", 0)]
         [InlineData("a", null, 1)]
         [InlineData("a", "a", 1)]
@@ -201,10 +198,7 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
-        [InlineData(null, null, 0)]
-        [InlineData(null, "", 0)]
-        [InlineData("", null, 0)]
-        [InlineData("", "", 0)]
+        [MemberData(nameof(InStr_TestData_NullsAndEmpties))]
         [InlineData(null, "a", 0)]
         [InlineData("aa", null, 2)]
         [InlineData("aa", "a", 2)]
@@ -259,10 +253,7 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
-        [InlineData(null, null, 0)]
-        [InlineData(null, "", 0)]
-        [InlineData("", null, 0)]
-        [InlineData("", "", 0)]
+        [MemberData(nameof(InStr_TestData_NullsAndEmpties))]
         [InlineData(null, "a", 0)]
         [InlineData("a", null, 1)]
         [InlineData("a", "a", 1)]
@@ -464,5 +455,13 @@ namespace Microsoft.VisualBasic.Tests
             // Trims only space and \u3000 specifically
             Assert.Equal(expected, Strings.Trim(str));
         }
+
+        public static TheoryData<string, string, int> InStr_TestData_NullsAndEmpties() => new TheoryData<string, string, int>
+        {
+            {null, null, 0 },
+            {null, "", 0 },
+            {"", null, 0 },
+            {"", "", 0 },
+        };
     }
 }
