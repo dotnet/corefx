@@ -2237,6 +2237,7 @@
         "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.1.0": "4.3.0",
         "4.0.2.0": "4.4.0",
@@ -3608,6 +3609,7 @@
         "4.5.0",
         "4.5.1"
       ],
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.4.0": "4.5.0"
       }
@@ -4287,7 +4289,8 @@
         "4.0.0.0": "4.0.0",
         "4.0.1.0": "4.3.0",
         "4.0.2.0": "4.4.0",
-        "4.0.3.0": "4.5.0"
+        "4.0.3.0": "4.5.0",
+        "4.0.4.0": "4.5.1"
       }
     },
     "System.Security.Cryptography.Primitives": {
@@ -5003,10 +5006,10 @@
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
-        "monoandroid10": "Any",
-        "monotouch10": "Any",
         "netcoreapp2.0": "4.1.1.0",
         "netcoreapp2.1": "4.3.0.0",
+        "monoandroid10": "Any",
+        "monotouch10": "Any",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",
         "xamarintvos10": "Any",
