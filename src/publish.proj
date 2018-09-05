@@ -30,10 +30,6 @@
 
     <TestListFilename>$(TestArchivesRoot)TestList.json</TestListFilename>
     <AzureTestsRoot>corefx-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)-tests/</AzureTestsRoot>
-
-    <TestArchivesPattern>$(TestArchivesRoot)**/*.zip</TestArchivesPattern>
-    <TestArchivesPattern>$(TestArchivePattern);$(AnyOSTestArchivesRoot)**/*.zip</TestArchivesPattern>
-    <TestArchivesPattern Condition="'$(TargetsUnix)' == 'true'">$(TestArchivePattern);$(UnixTestArchivesRoot)**/*.zip</TestArchivesPattern>
   </PropertyGroup>
 
   <ItemGroup>
@@ -57,16 +53,12 @@
 
   <Target Name="UploadTestsToAzure">
     <ItemGroup>
-      <TestArchives Include="$(TestArchivePattern)"/>
-    </ItemGroup>
-    <ItemGroup>
       <TestArchives>
         <RelativeBlobPath>$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
       </TestArchives>
     </ItemGroup>
-
     <UploadToAzure
-      AccountKey="$(CloudDropAccountName)"
+      AccountName="$(CloudDropAccountName)"
       AccountKey="$(CloudDropAccessToken)"
       ContainerName="$(ContainerName)"
       Items="@(TestArchives)"
@@ -85,9 +77,10 @@
     <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
     <FinalPublishExperimentalPattern>$(PackageDownloadDirectory)\**\*Experimental*.nupkg</FinalPublishExperimentalPattern>
     <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
-    <FinalTestArchivesPattern>$(PackagesDir)AzureTransfer\$(AzureTestsRoot)\**\*.zip</FinalTestArchivesPattern>
+    <FinalTestArchivesPattern>$(PackagesDir)AzureTransfer\**\*.zip</FinalTestArchivesPattern>
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
+    <AzureFeedTestsRoot>tests\</AzureFeedTestsRoot>
   </PropertyGroup>
 
   <Target Name="GetPackagesToSign">
@@ -125,9 +118,9 @@
   <Target Name="PublishTestsToAzureBlobFeed" AfterTargets="PublishToAzureBlobFeed">
     <ItemGroup>
       <ItemsToPush Include="$(FinalTestArchivesPattern)">
-        <RelativeBlobPath>%(RecursiveDir)</RelativeBlobPath>
+        <RelativeBlobPath>$(AzureFeedTestsRoot)%(RecursiveDir)</RelativeBlobPath>
         <WorkItemId>%(Filename)</WorkItemId>
-        <PayloadUri>%(RecursiveDir)</PayloadUri>
+        <PayloadUri>$(AzureFeedTestsRoot)%(RecursiveDir)</PayloadUri>
       </ItemsToPush>
     </ItemGroup>
     <Error Condition="'@(ItemsToPush->Count())' == 0" Text="ItemsToPush for tests is empty." />
