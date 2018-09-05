@@ -5,8 +5,7 @@
 namespace System.Net.Http.HPack
 {
     internal class Huffman
-    {
-        // TODO: this can be constructed from _decodingTable
+    {   
         private static readonly (uint code, int bitLength)[] s_encodingTable = new (uint code, int bitLength)[]
         {
             (0b11111111_11000000_00000000_00000000, 13),
@@ -268,31 +267,8 @@ namespace System.Net.Http.HPack
             (0b11111111_11111111_11111111_11111100, 30)
         };
 
-        private static readonly (int codeLength, int[] codes)[] s_decodingTable = new[]
-        {
-            (5, new[] { 48, 49, 50, 97, 99, 101, 105, 111, 115, 116 }),
-            (6, new[] { 32, 37, 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 61, 65, 95, 98, 100, 102, 103, 104, 108, 109, 110, 112, 114, 117 }),
-            (7, new[] { 58, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 89, 106, 107, 113, 118, 119, 120, 121, 122 }),
-            (8, new[] { 38, 42, 44, 59, 88, 90 }),
-            (10, new[] { 33, 34, 40, 41, 63 }),
-            (11, new[] { 39, 43, 124 }),
-            (12, new[] { 35, 62 }),
-            (13, new[] { 0, 36, 64, 91, 93, 126 }),
-            (14, new[] { 94, 125 }),
-            (15, new[] { 60, 96, 123 }),
-            (19, new[] { 92, 195, 208 }),
-            (20, new[] { 128, 130, 131, 162, 184, 194, 224, 226 }),
-            (21, new[] { 153, 161, 167, 172, 176, 177, 179, 209, 216, 217, 227, 229, 230 }),
-            (22, new[] { 129, 132, 133, 134, 136, 146, 154, 156, 160, 163, 164, 169, 170, 173, 178, 181, 185, 186, 187, 189, 190, 196, 198, 228, 232, 233 }),
-            (23, new[] { 1, 135, 137, 138, 139, 140, 141, 143, 147, 149, 150, 151, 152, 155, 157, 158, 165, 166, 168, 174, 175, 180, 182, 183, 188, 191, 197, 231, 239 }),
-            (24, new[] { 9, 142, 144, 145, 148, 159, 171, 206, 215, 225, 236, 237 }),
-            (25, new[] { 199, 207, 234, 235 }),
-            (26, new[] { 192, 193, 200, 201, 202, 205, 210, 213, 218, 219, 238, 240, 242, 243, 255 }),
-            (27, new[] { 203, 204, 211, 212, 214, 221, 222, 223, 241, 244, 245, 246, 247, 248, 250, 251, 252, 253, 254 }),
-            (28, new[] { 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127, 220, 249 }),
-            (30, new[] { 10, 13, 22, 256 })
-        };
-
+        private static readonly Lazy<short[,]> s_decodingArrayLoader = new Lazy<short[,]>(() => BuildDecodingArray());
+        
         public static (uint encoded, int bitLength) Encode(int data)
         {
             return s_encodingTable[data];
@@ -306,126 +282,154 @@ namespace System.Net.Http.HPack
         /// <param name="count">The number of bytes to decode.</param>
         /// <param name="dst">The destination byte array to store the decoded data.</param>
         /// <returns>The number of decoded symbols.</returns>
-        public static int Decode(ReadOnlySpan<byte> src, Span<byte> dst)
+        public static int Decode(byte[] src, int offset, int count, byte[] dst)
         {
-            int i = 0;
-            int j = 0;
-            int lastDecodedBits = 0;
-            while (i < src.Length)
+            // input validation
+            if (src == null || count == 0)
+                return 0;
+
+            if (dst == null)
+                throw new ArgumentNullException(nameof(dst));
+
+            if ((uint)offset >= (uint)src.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            if ((uint)count > (uint)(src.Length - offset))
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            // let's narrow thing down to just the part of the source buffer that we've been asked to decode
+            var sourceSpan = new ReadOnlySpan<byte>(src, offset, count);
+            int sourceIndex = 0;
+            int destinationIndex = 0;
+            int bitOffset = 0;              // symbol bit patterns do not necessarily align to byte boundaries. need to keep track of our offset within a byte
+            var decodingArray = s_decodingArrayLoader.Value;
+            while (sourceIndex < sourceSpan.Length)
             {
-                // Note that if lastDecodeBits is 3 or more, then we will only get 5 bits (or less)
-                // from src[i]. Thus we need to read 5 bytes here to ensure that we always have 
-                // at least 30 bits available for decoding.
-                // TODO ISSUE 31751: Rework this as part of Huffman perf improvements
-                uint next = (uint)(src[i] << 24 + lastDecodedBits);
-                next |= (i + 1 < src.Length ? (uint)(src[i + 1] << 16 + lastDecodedBits) : 0);
-                next |= (i + 2 < src.Length ? (uint)(src[i + 2] << 8 + lastDecodedBits) : 0);
-                next |= (i + 3 < src.Length ? (uint)(src[i + 3] << lastDecodedBits) : 0);
-                next |= (i + 4 < src.Length ? (uint)(src[i + 4] >> (8 - lastDecodedBits)) : 0);
+                int arrayIndex = 0;         // index into the decoding array
+                int decodedBits = 0;
 
-                uint ones = (uint)(int.MinValue >> (8 - lastDecodedBits - 1));
-                if (i == src.Length - 1 && lastDecodedBits > 0 && (next & ones) == ones)
+                // decoding a symbol will take a maximum of four bytes (longest symbol is represented by a 30 bit pattern)
+                for (int i = 0; i <= 24; i += 8)
                 {
-                    // The remaining 7 or less bits are all 1, which is padding.
-                    // We specifically check that lastDecodedBits > 0 because padding
-                    // longer than 7 bits should be treated as a decoding error.
-                    // http://httpwg.org/specs/rfc7541.html#rfc.section.5.2
-                    break;
+                    // grab the next byte and push it over to make room for bits we have to borrow
+                    byte workingByte = (byte)(sourceSpan[sourceIndex] << bitOffset);
+                    // borrow some bits if we need to
+                    if (bitOffset > 0)
+                        workingByte |= (byte)((sourceIndex < sourceSpan.Length - 1 ? sourceSpan[sourceIndex + 1] : 0) >> (8 - bitOffset));
+
+                    // key into array
+                    int decodedValue = decodingArray[arrayIndex, workingByte];
+
+                    // negative values are a pointer to the next decoding array
+                    if (decodedValue < 0)
+                    {
+                        // move to the next source byte and prepare to key in again
+                        sourceIndex++;
+                        arrayIndex = -decodedValue;
+                    }
+                    else
+                    // we have decoded a character
+                    {
+                        decodedBits = decodedValue >> 8;    // length is in the second LSB
+                        decodedValue &= 0xFF;               // value is in the LSB
+
+                        // Destination is too small.
+                        if (destinationIndex == dst.Length)
+                            throw new HuffmanDecodingException();
+
+                        // store the decoded value and increment destinationIndex
+                        dst[destinationIndex++] = (byte)decodedValue;
+
+                        // if we decoded more bits than we are borrowing then advance to next byte
+                        if (decodedBits - i >= 8 - bitOffset)
+                            sourceIndex++;
+
+                        // calculate and re-align bitOffset
+                        bitOffset += decodedBits;
+                        bitOffset &= 7; // same as modulo 8
+
+                        break;
+                    }
                 }
 
-                // The longest possible symbol size is 30 bits. If we're at the last 4 bytes
-                // of the input, we need to make sure we pass the correct number of valid bits
-                // left, otherwise the trailing 0s in next may form a valid symbol.
-                int validBits = Math.Min(30, (8 - lastDecodedBits) + (src.Length - i - 1) * 8);
-                int ch = DecodeValue(next, validBits, out int decodedBits);
-
-                if (ch == -1)
-                {
-                    // No valid symbol could be decoded with the bits in next
+                // we checked four bytes did not come up with a valid bit pattern
+                if (decodedBits == 0)
                     throw new HuffmanDecodingException();
-                }
-                else if (ch == 256)
+
+                // check for padding in the last byte before we loop back around and try to decode again
+                if (sourceIndex == sourceSpan.Length - 1)
                 {
-                    // A Huffman-encoded string literal containing the EOS symbol MUST be treated as a decoding error.
-                    // http://httpwg.org/specs/rfc7541.html#rfc.section.5.2
-                    throw new HuffmanDecodingException();
+                    // see if all of the remaning bits are padding
+                    int paddingMask = (0x1 << (8 - bitOffset)) - 1;
+                    if ((sourceSpan[sourceIndex] & paddingMask) == paddingMask)
+                    {
+                        // if our bitOffset is zero then all of bits in this byte are set
+                        // "A padding strictly longer than 7 bits MUST be treated as a decoding error."
+                        // https://httpwg.org/specs/rfc7541.html#rfc.section.5.2
+                        if (bitOffset == 0)
+                            throw new HuffmanDecodingException();
+
+                        // otherwise (padding less than 8), just break out of the main loop because we are done
+                        break;
+                    }
                 }
-
-                if (j == dst.Length)
-                {
-                    // Destination is too small.
-                    throw new HuffmanDecodingException();
-                }
-
-                dst[j++] = (byte)ch;
-
-                // If we crossed a byte boundary, advance i so we start at the next byte that's not fully decoded.
-                lastDecodedBits += decodedBits;
-                i += lastDecodedBits / 8;
-
-                // Modulo 8 since we only care about how many bits were decoded in the last byte that we processed.
-                lastDecodedBits %= 8;
             }
 
-            return j;
+            return destinationIndex;    // destinationIndex is incremented each time a value is decoded, so it also represents total decoded byte count
         }
 
-        /// <summary>
-        /// Decodes a single symbol from a 32-bit word.
-        /// </summary>
-        /// <param name="data">A 32-bit word containing a Huffman encoded symbol.</param>
-        /// <param name="validBits">
-        /// The number of bits in <paramref name="data"/> that may contain an encoded symbol.
-        /// This is not the exact number of bits that encode the symbol. Instead, it prevents
-        /// decoding the lower bits of <paramref name="data"/> if they don't contain any
-        /// encoded data.
-        /// </param>
-        /// <param name="decodedBits">The number of bits decoded from <paramref name="data"/>.</param>
-        /// <returns>The decoded symbol.</returns>
-        private static int DecodeValue(uint data, int validBits, out int decodedBits)
+        private static short[,] BuildDecodingArray()
         {
-            // The code below implements the decoding logic for a canonical Huffman code.
-            //
-            // To decode a symbol, we scan the decoding table, which is sorted by ascending symbol bit length.
-            // For each bit length b, we determine the maximum b-bit encoded value, plus one (that is codeMax).
-            // This is done with the following logic:
-            //
-            // if we're at the first entry in the table,
-            //    codeMax = the # of symbols encoded in b bits
-            // else,
-            //    left-shift codeMax by the difference between b and the previous entry's bit length,
-            //    then increment codeMax by the # of symbols encoded in b bits
-            //
-            // Next, we look at the value v encoded in the highest b bits of data. If v is less than codeMax,
-            // those bits correspond to a Huffman encoded symbol. We find the corresponding decoded
-            // symbol in the list of values associated with bit length b in the decoding table by indexing it
-            // with codeMax - v.
+            var array = new short[15, 256];
 
-            int codeMax = 0;
-
-            for (int i = 0; i < s_decodingTable.Length && s_decodingTable[i].codeLength <= validBits; i++)
+            int nextAvailableSubIndex = 1;
+            // loop through each entry in the encoding table and create entries for it in our decoding array
+            // we're only going to 255. the EOS pattern of 256 (which will not fit into a byte) will be left out.
+            // trying to decode EOS should result in a decoding exception as per the RFC
+            // A Huffman-encoded string literal containing the EOS symbol MUST be treated as a decoding error.
+            // http://httpwg.org/specs/rfc7541.html#rfc.section.5.2
+            for (int i = 0; i < 256; i++)
             {
-                (int codeLength, int[] codes) = s_decodingTable[i];
+                var tableEntry = s_encodingTable[i];    // keep from having to do "s_encodingTable[i]" everywhere
+                int currentArrayIndex = 0;              // which array are we working with
 
-                if (i > 0)
+                // loop for however many bytes the value occupies
+                for (int j = 0; j <= Math.Ceiling(tableEntry.bitLength / 8.0); j++)
                 {
-                    codeMax <<= codeLength - s_decodingTable[i - 1].codeLength;
-                }
+                    int byteOffset = 8 * (3 - j);       // how many bits is the working byte offset from the right
+                    int totalLength = 8 * (j + 1);      // how many bits of the entry can we consume total so far
 
-                codeMax += codes.Length;
+                    uint codeByte = (tableEntry.code >> byteOffset) & 0xFF;  // extract the working byte and shift it all the way to the right
 
-                int mask = int.MinValue >> (codeLength - 1);
-                long masked = (data & mask) >> (32 - codeLength);
+                    // if we can finish the entry this time around then store the remaning bits and bail on the loop
+                    if (tableEntry.bitLength <= totalLength)
+                    {
+                        // we need to store all permutations of the bits that are beyond the length of the code
+                        int loopMax = 0x1 << (totalLength - tableEntry.bitLength); // have to create entries for all of these values
+                        short value = (short)((tableEntry.bitLength << 8) | i);    // store the length and value in two separate bytes
+                        for (uint k = 0; k < loopMax; k++)
+                            array[currentArrayIndex, codeByte + k] = value;   // each entry returns the same value
 
-                if (masked < codeMax)
-                {
-                    decodedBits = codeLength;
-                    return codes[codes.Length - (codeMax - masked)];
+                        break;  // we're done with this entry. bail on the loop
+                    }
+                    // else: we need to split the entry into one or more sub-arrays
+
+                    // let's see if anyone before us has already claimed a sub-array with our bit pattern
+                    int subArrayIndex = array[currentArrayIndex, codeByte];
+
+                    // negative values are used as pointers to the next array. zeros are unused. positive values are a successful decode
+                    if (subArrayIndex < 0)
+                        subArrayIndex = -subArrayIndex;
+                    else
+                    {
+                        subArrayIndex = nextAvailableSubIndex++;    // if no one has our bit battern then we'll stake our claim on the next available array
+                        array[currentArrayIndex, codeByte] = (short)-subArrayIndex;  // blaze the trail for the next guy
+                    }
+
+                    currentArrayIndex = subArrayIndex;  // we've left a pointer behind us and we're moving on to the next array
                 }
             }
 
-            decodedBits = 0;
-            return -1;
+            return array;
         }
     }
 }
