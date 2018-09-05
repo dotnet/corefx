@@ -169,10 +169,6 @@ namespace Microsoft.VisualBasic
         public static int Len(System.DateTime Expression) { throw null; }
         public static int Len(char Expression) { throw null; }
         public static int Len(string Expression) { throw null; }
-        // QUESTION:
-        // Why has this method an attribute in the reference file https://gist.github.com/danmosemsft/88da57da7f11a9a3345abb5ec508d5e7
-        // and no attribute in https://raw.githubusercontent.com/Microsoft/referencesource/master/Microsoft.VisualBasic/runtime/msvbalib/Strings.vb?
-        [System.Security.SecuritySafeCriticalAttribute]
         public static int Len(object Expression) { throw null; }
         public static string Left(string str, int Length) { throw null; }
         public static string LTrim(string str) { throw null; }
