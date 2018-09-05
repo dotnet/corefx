@@ -413,7 +413,7 @@ namespace System
 
                 //This will get all the offsets, a Host name will be checked separately below
                 EnsureParseRemaining();
-                
+
                 Flags nonCanonical = (_flags & (Flags.E_CannotDisplayCanonical | Flags.IriCanonical));
 
                 // Cleanup canonical IRI from nonCanonical
