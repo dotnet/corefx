@@ -4,6 +4,7 @@
 
 using System;
 using System.Text;
+using Microsoft.VisualBasic.CompilerServices.Tests;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
@@ -301,6 +302,13 @@ namespace Microsoft.VisualBasic.Tests
         public void Left_Valid(string str, int length, string expected)
         {
             Assert.Equal(expected, Strings.Left(str, length));
+        }
+
+        [Theory]
+        [MemberData(nameof(StructUtilsTestData.RecordsAndLength), MemberType = typeof(StructUtilsTestData))]
+        public void Len_Object(object o, int length)
+        {
+            Assert.Equal(length, Strings.Len(o));
         }
 
         [Theory]

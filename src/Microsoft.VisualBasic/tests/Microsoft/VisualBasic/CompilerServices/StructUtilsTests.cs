@@ -8,41 +8,33 @@ using Xunit;
 
 namespace Microsoft.VisualBasic.CompilerServices.Tests
 {
-    public class StructUtilsTests
+    public static class StructUtilsTestData
     {
-        [Theory]
-        [MemberData(nameof(GetRecordLengthData))]
-        public void GetRecordLength(object o, int expected)
+        public static TheoryData<object, int> RecordsAndLength() => new TheoryData<object, int>
         {
-            var packSize = 1;
-            Assert.Equal(expected, StructUtils.GetRecordLength(o, packSize));
-        }
-
-        public static IEnumerable<object[]> GetRecordLengthData()
-        {
-            yield return new object[] { null, 0 };
-            yield return new object[] { new Struct_Empty(), 0 };
-            yield return new object[] { new Struct_T<float>(), 4 };
-            yield return new object[] { new Struct_T<double>(), 8 };
-            yield return new object[] { new Struct_T<short>(), 2 };
-            yield return new object[] { new Struct_T<int>(), 4 };
-            yield return new object[] { new Struct_T<byte>(), 1 };
-            yield return new object[] { new Struct_T<long>(), 8 };
-            yield return new object[] { new Struct_T<DateTime>(), 8 };
-            yield return new object[] { new Struct_T<bool>(), 2 };
-            yield return new object[] { new Struct_T<decimal>(), 16 };
-            yield return new object[] { new Struct_T<char>(), 2 };
-            yield return new object[] { new Struct_T<string>(), 4 };
-            yield return new object[] { new Struct_ArrayT<byte>(elementCount: 10), 4 };
-            yield return new object[] { new Struct_ArrayT<int>(elementCount: 10), 4 };
-            yield return new object[] { new Struct_FixedArrayT10<byte>(), 11 };
-            yield return new object[] { new Struct_FixedArrayT10<int>(), 44 };
-            yield return new object[] { new Struct_FixedArrayT11To20<byte>(), 252 }; // Bug?
-            yield return new object[] { new Struct_FixedArrayT11To20<int>(), 1008 }; // Bug?
-            yield return new object[] { new Struct_FixedString10(), 10 };
-            yield return new object[] { new Struct_PrivateInt(), 0 };
-            yield return new object[] { new Struct_MultipleWithAlignment(), 22 }; // Bug?
-        }
+            { null, 0 },
+            { new Struct_Empty(), 0 },
+            { new Struct_T<float>(), 4 },
+            { new Struct_T<double>(), 8 },
+            { new Struct_T<short>(), 2 },
+            { new Struct_T<int>(), 4 },
+            { new Struct_T<byte>(), 1 },
+            { new Struct_T<long>(), 8 },
+            { new Struct_T<DateTime>(), 8 },
+            { new Struct_T<bool>(), 2 },
+            { new Struct_T<decimal>(), 16 },
+            { new Struct_T<char>(), 2 },
+            { new Struct_T<string>(), 4 },
+            { new Struct_ArrayT<byte>(elementCount: 10), 4 },
+            { new Struct_ArrayT<int>(elementCount: 10), 4 },
+            { new Struct_FixedArrayT10<byte>(), 11 },
+            { new Struct_FixedArrayT10<int>(), 44 },
+            { new Struct_FixedArrayT11To20<byte>(), 252 }, // Bug?
+            { new Struct_FixedArrayT11To20<int>(), 1008 }, // Bug?
+            { new Struct_FixedString10(), 10 },
+            { new Struct_PrivateInt(), 0 },
+            { new Struct_MultipleWithAlignment(), 22 }, // Bug?
+        };
 
         public struct Struct_Empty { }
         public struct Struct_T<T> { public T x; }
