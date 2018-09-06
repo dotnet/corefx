@@ -1,6 +1,7 @@
 ﻿Imports System
 Imports System.ComponentModel
 Imports System.Diagnostics
+Imports Microsoft.VisualBasic.CompilerServices
 #Const Windows = True
 Namespace Microsoft.VisualBasic.FileIO
     Partial Public Class FileSystem
@@ -134,10 +135,17 @@ Namespace Microsoft.VisualBasic.FileIO
             Dim OperationInfo As SHFILEOPSTRUCT = GetShellOperationInfo(OperationType, OperationFlags, FullSource, FullTarget)
 
             Dim Result As Integer
+            Try
+                Result = NativeMethods.SHFileOperation(OperationInfo)
+                ' Notify the shell in case some changes happened.
+                'NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS, SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
+            Catch
+                Throw
+            Finally
+            End Try
 
             ' If the operation was canceled, check OnUserCancel and throw OperationCanceledException if needed.
             ' Otherwise, check the result and throw the appropriate exception if there is an error code.
-
             If OperationInfo.fAnyOperationsAborted Then
                 If OnUserCancel = UICancelOption.ThrowException Then
                     Throw New OperationCanceledException()

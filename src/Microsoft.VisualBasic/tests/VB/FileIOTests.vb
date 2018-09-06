@@ -209,9 +209,9 @@ Namespace Microsoft.VisualBasic.Tests
 
         <ConditionalTheory(NameOf(ManualTestsEnabled))>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
-            'While (Not System.Diagnostics.Debugger.IsAttached)
-            '    System.Threading.Thread.Sleep(1000)
-            'End While
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
 
             Using TestBase As New FileIOTests
                 Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
