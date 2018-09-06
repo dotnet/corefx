@@ -392,54 +392,6 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
-        #region Inline data
-        [InlineData("107")] // standard parse
-        [InlineData("127")] // max value
-        [InlineData("0")]
-        [InlineData("-128")] // min value
-        [InlineData("147")]
-        [InlineData("2")]
-        [InlineData("105")]
-        [InlineData("-111")]
-        [InlineData("-21")]
-        [InlineData("-2")]
-        [InlineData("-13")]
-        [InlineData("-8")]
-        [InlineData("-83")]
-        [InlineData("+127")]
-        [InlineData("+21")]
-        [InlineData("+2")]
-        [InlineData("00000000000000000000123abcdfg")]
-        [InlineData("2abcdefghijklmnop")]
-        [InlineData("14abcdefghijklmnop")]
-        [InlineData("-14abcdefghijklmnop")]
-        [InlineData("-21abcdefghijklmnop")]
-        [InlineData("-2abcdefghijklmnop")]
-        [InlineData("+14abcdefghijklmnop")]
-        [InlineData("+21abcdefghijklmnop")]
-        [InlineData("+2abcdefghijklmnop")]
-        [InlineData("+111abcdefghijklmnop")]
-        [InlineData("+000000000000000000123abcdfg")]
-        #endregion
-        private static void ByteSpanToSByte_BytesConsumed(string text)
-        {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        Utf8Parser.TryParse(utf8ByteSpan, out sbyte value, out int bytesConsumed);
-                        TestHelpers.DoNotIgnore(value, bytesConsumed);
-                    }
-                }
-            }
-        }
-
-        [Benchmark]
         private static void ByteSpanToSByte_BytesConsumed_VariableLength()
         {
             int textLength = s_SByteTextArray.Length;
