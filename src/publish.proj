@@ -37,9 +37,12 @@
 
   <!-- Collect test archives for pushing to transfer feed -->
   <ItemGroup>
-    <TestArchives Include="$(TestArchivesRoot)**/*.zip" />
-    <TestArchives Include="$(AnyOSTestArchivesRoot)**/*.zip" />
-    <TestArchives Condition="'$(TargetsUnix)' == 'true'" Include="$(UnixTestArchivesRoot)**/*.zip" />
+    <TestArchive Include="$(TestArchivesRoot)**/*.zip" />
+    <TestArchive Include="$(AnyOSTestArchivesRoot)**/*.zip" />
+    <TestArchive Condition="'$(TargetsUnix)' == 'true'" Include="$(UnixTestArchivesRoot)**/*.zip" />
+    <TestArchive>
+      <RelativeBlobPath>$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
+    </TestArchive>
   </ItemGroup>
 
   <Target Name="CreateContainerName"
@@ -51,23 +54,18 @@
   </Target>
 
   <Target Name="UploadTestsToAzure">
-    <ItemGroup>
-      <TestArchives>
-        <RelativeBlobPath>$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
-      </TestArchives>
-    </ItemGroup>
     <UploadToAzure
       AccountName="$(CloudDropAccountName)"
       AccountKey="$(CloudDropAccessToken)"
       ContainerName="$(ContainerName)"
-      Items="@(TestArchives)"
+      Items="@(TestArchive)"
       Overwrite="true" />
   </Target>
 
   <Target Name="Build" DependsOnTargets="CreateContainerName">
     <!-- skip uploadToAzure when there are no nupkgs -->
     <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
-    <CallTarget Targets="UploadTestsToAzure" Condition="'@(TestArchives->Count())' != 0" />
+    <CallTarget Targets="UploadTestsToAzure" Condition="'@(TestArchive->Count())' != 0" />
   </Target>
 
   <PropertyGroup>
