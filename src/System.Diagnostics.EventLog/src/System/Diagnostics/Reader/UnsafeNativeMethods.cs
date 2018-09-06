@@ -7,7 +7,8 @@
 ** Class: UnsafeNativeMethods
 **
 ============================================================*/
-namespace Microsoft.Win32 {
+namespace Microsoft.Win32
+{
 
     using Microsoft.Win32;
     using Microsoft.Win32.SafeHandles;
@@ -27,52 +28,53 @@ namespace Microsoft.Win32 {
     using System.Diagnostics.Eventing.Reader;
 
     [SuppressUnmanagedCodeSecurityAttribute()]
-    internal static partial class UnsafeNativeMethods {
+    internal static partial class UnsafeNativeMethods
+    {
 
-        internal const String WEVTAPI  = "wevtapi.dll";
-     
+        internal const String WEVTAPI = "wevtapi.dll";
+
         // WinError.h codes:
 
-        internal const int ERROR_SUCCESS                 = 0x0;
-        internal const int ERROR_FILE_NOT_FOUND          = 0x2;
-        internal const int ERROR_PATH_NOT_FOUND          = 0x3;
-        internal const int ERROR_ACCESS_DENIED           = 0x5;
-        internal const int ERROR_INVALID_HANDLE          = 0x6;
+        internal const int ERROR_SUCCESS = 0x0;
+        internal const int ERROR_FILE_NOT_FOUND = 0x2;
+        internal const int ERROR_PATH_NOT_FOUND = 0x3;
+        internal const int ERROR_ACCESS_DENIED = 0x5;
+        internal const int ERROR_INVALID_HANDLE = 0x6;
 
         // Can occurs when filled buffers are trying to flush to disk, but disk IOs are not fast enough. 
         // This happens when the disk is slow and event traffic is heavy. 
         // Eventually, there are no more free (empty) buffers and the event is dropped.
-        internal const int ERROR_NOT_ENOUGH_MEMORY       = 0x8;
-        
-        internal const int ERROR_INVALID_DRIVE           = 0xF;
-        internal const int ERROR_NO_MORE_FILES           = 0x12;
-        internal const int ERROR_NOT_READY               = 0x15;
-        internal const int ERROR_BAD_LENGTH              = 0x18;
-        internal const int ERROR_SHARING_VIOLATION       = 0x20;
-        internal const int ERROR_LOCK_VIOLATION          = 0x21;  // 33
-        internal const int ERROR_HANDLE_EOF              = 0x26;  // 38
-        internal const int ERROR_FILE_EXISTS             = 0x50;
-        internal const int ERROR_INVALID_PARAMETER       = 0x57;  // 87
-        internal const int ERROR_BROKEN_PIPE             = 0x6D;  // 109
-        internal const int ERROR_INSUFFICIENT_BUFFER     = 0x7A;  // 122
-        internal const int ERROR_INVALID_NAME            = 0x7B;
-        internal const int ERROR_BAD_PATHNAME            = 0xA1;
-        internal const int ERROR_ALREADY_EXISTS          = 0xB7;        
-        internal const int ERROR_ENVVAR_NOT_FOUND        = 0xCB;
-        internal const int ERROR_FILENAME_EXCED_RANGE    = 0xCE;  // filename too long
-        internal const int ERROR_PIPE_BUSY               = 0xE7;  // 231
-        internal const int ERROR_NO_DATA                 = 0xE8;  // 232
-        internal const int ERROR_PIPE_NOT_CONNECTED      = 0xE9;  // 233
-        internal const int ERROR_MORE_DATA               = 0xEA;
-        internal const int ERROR_NO_MORE_ITEMS           = 0x103;  // 259
-        internal const int ERROR_PIPE_CONNECTED          = 0x217;  // 535
-        internal const int ERROR_PIPE_LISTENING          = 0x218;  // 536
-        internal const int ERROR_OPERATION_ABORTED       = 0x3E3;  // 995; For IO Cancellation
-        internal const int ERROR_IO_PENDING              = 0x3E5;  // 997
-        internal const int ERROR_NOT_FOUND               = 0x490;  // 1168      
-   
+        internal const int ERROR_NOT_ENOUGH_MEMORY = 0x8;
+
+        internal const int ERROR_INVALID_DRIVE = 0xF;
+        internal const int ERROR_NO_MORE_FILES = 0x12;
+        internal const int ERROR_NOT_READY = 0x15;
+        internal const int ERROR_BAD_LENGTH = 0x18;
+        internal const int ERROR_SHARING_VIOLATION = 0x20;
+        internal const int ERROR_LOCK_VIOLATION = 0x21;  // 33
+        internal const int ERROR_HANDLE_EOF = 0x26;  // 38
+        internal const int ERROR_FILE_EXISTS = 0x50;
+        internal const int ERROR_INVALID_PARAMETER = 0x57;  // 87
+        internal const int ERROR_BROKEN_PIPE = 0x6D;  // 109
+        internal const int ERROR_INSUFFICIENT_BUFFER = 0x7A;  // 122
+        internal const int ERROR_INVALID_NAME = 0x7B;
+        internal const int ERROR_BAD_PATHNAME = 0xA1;
+        internal const int ERROR_ALREADY_EXISTS = 0xB7;
+        internal const int ERROR_ENVVAR_NOT_FOUND = 0xCB;
+        internal const int ERROR_FILENAME_EXCED_RANGE = 0xCE;  // filename too long
+        internal const int ERROR_PIPE_BUSY = 0xE7;  // 231
+        internal const int ERROR_NO_DATA = 0xE8;  // 232
+        internal const int ERROR_PIPE_NOT_CONNECTED = 0xE9;  // 233
+        internal const int ERROR_MORE_DATA = 0xEA;
+        internal const int ERROR_NO_MORE_ITEMS = 0x103;  // 259
+        internal const int ERROR_PIPE_CONNECTED = 0x217;  // 535
+        internal const int ERROR_PIPE_LISTENING = 0x218;  // 536
+        internal const int ERROR_OPERATION_ABORTED = 0x3E3;  // 995; For IO Cancellation
+        internal const int ERROR_IO_PENDING = 0x3E5;  // 997
+        internal const int ERROR_NOT_FOUND = 0x490;  // 1168      
+
         // The event size is larger than the allowed maximum (64k - header).
-        internal const int ERROR_ARITHMETIC_OVERFLOW     = 0x216;  // 534
+        internal const int ERROR_ARITHMETIC_OVERFLOW = 0x216;  // 534
 
         internal const int ERROR_RESOURCE_LANG_NOT_FOUND = 0x717;  // 1815
 
@@ -87,7 +89,8 @@ namespace Microsoft.Win32 {
         internal const int ERROR_EVT_MESSAGE_LOCALE_NOT_FOUND = 15033;
         internal const int ERROR_MUI_FILE_NOT_FOUND = 15100;
 
-        internal enum EvtQueryFlags {
+        internal enum EvtQueryFlags
+        {
             EvtQueryChannelPath = 0x1,
             EvtQueryFilePath = 0x2,
             EvtQueryForwardDirection = 0x100,
@@ -96,18 +99,20 @@ namespace Microsoft.Win32 {
         }
 
         [Flags]
-        internal enum EvtSubscribeFlags {
+        internal enum EvtSubscribeFlags
+        {
             EvtSubscribeToFutureEvents = 1,
             EvtSubscribeStartAtOldestRecord = 2,
             EvtSubscribeStartAfterBookmark = 3,
             EvtSubscribeTolerateQueryErrors = 0x1000,
             EvtSubscribeStrict = 0x10000
         }
-        
+
         /// <summary>
         /// Evt Variant types
         /// </summary>
-        internal enum EvtVariantType {
+        internal enum EvtVariantType
+        {
             EvtVarTypeNull = 0,
             EvtVarTypeString = 1,
             EvtVarTypeAnsiString = 2,
@@ -138,13 +143,15 @@ namespace Microsoft.Win32 {
             EvtVarTypeUInt32Array = 136
         }
 
-        internal enum EvtMasks {
+        internal enum EvtMasks
+        {
             EVT_VARIANT_TYPE_MASK = 0x7f,
             EVT_VARIANT_TYPE_ARRAY = 128
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct SystemTime {
+        internal struct SystemTime
+        {
             [MarshalAs(UnmanagedType.U2)]
             public short Year;
             [MarshalAs(UnmanagedType.U2)]
@@ -167,7 +174,8 @@ namespace Microsoft.Win32 {
 #pragma warning disable 618 // Ssytem.Core still uses SecurityRuleSet.Level1
         [SecurityCritical(SecurityCriticalScope.Everything)]
 #pragma warning restore 618
-        internal struct EvtVariant {
+        internal struct EvtVariant
+        {
             [FieldOffset(0)]
             public UInt32 UInteger;
             [FieldOffset(0)]
@@ -189,7 +197,7 @@ namespace Microsoft.Win32 {
             [FieldOffset(0)]
             public Int64 Long;
             [FieldOffset(0)]
-            public Single Single;            
+            public Single Single;
             [FieldOffset(0)]
             public Double Double;
             [FieldOffset(0)]
@@ -218,7 +226,8 @@ namespace Microsoft.Win32 {
             public UInt32 Type;
         }
 
-        internal enum EvtEventPropertyId {
+        internal enum EvtEventPropertyId
+        {
             EvtEventQueryIDs = 0,
             EvtEventPath = 1
         }
@@ -226,7 +235,8 @@ namespace Microsoft.Win32 {
         /// <summary>
         /// The query flags to get information about query
         /// </summary>
-        internal enum EvtQueryPropertyId {
+        internal enum EvtQueryPropertyId
+        {
             EvtQueryNames = 0,   //String;   //Variant will be array of EvtVarTypeString
             EvtQueryStatuses = 1 //UInt32;   //Variant will be Array of EvtVarTypeUInt32
         }
@@ -234,7 +244,8 @@ namespace Microsoft.Win32 {
         /// <summary>
         /// Publisher Metadata properties
         /// </summary>
-        internal enum EvtPublisherMetadataPropertyId {
+        internal enum EvtPublisherMetadataPropertyId
+        {
             EvtPublisherMetadataPublisherGuid = 0,      // EvtVarTypeGuid
             EvtPublisherMetadataResourceFilePath = 1,       // EvtVarTypeString
             EvtPublisherMetadataParameterFilePath = 2,      // EvtVarTypeString
@@ -272,11 +283,13 @@ namespace Microsoft.Win32 {
             //EvtPublisherMetadataPropertyIdEND
         }
 
-        internal enum EvtChannelReferenceFlags {
+        internal enum EvtChannelReferenceFlags
+        {
             EvtChannelReferenceImported = 1
         }
 
-        internal enum EvtEventMetadataPropertyId {
+        internal enum EvtEventMetadataPropertyId
+        {
             EventMetadataEventID,       // EvtVarTypeUInt32
             EventMetadataEventVersion,  // EvtVarTypeUInt32
             EventMetadataEventChannel,  // EvtVarTypeUInt32
@@ -290,7 +303,8 @@ namespace Microsoft.Win32 {
         }
 
         //CHANNEL CONFIGURATION 
-        internal enum EvtChannelConfigPropertyId {
+        internal enum EvtChannelConfigPropertyId
+        {
             EvtChannelConfigEnabled = 0,            // EvtVarTypeBoolean
             EvtChannelConfigIsolation,              // EvtVarTypeUInt32, EVT_CHANNEL_ISOLATION_TYPE
             EvtChannelConfigType,                   // EvtVarTypeUInt32, EVT_CHANNEL_TYPE
@@ -315,7 +329,8 @@ namespace Microsoft.Win32 {
         }
 
         //LOG INFORMATION
-        internal enum EvtLogPropertyId {
+        internal enum EvtLogPropertyId
+        {
             EvtLogCreationTime = 0,             // EvtVarTypeFileTime
             EvtLogLastAccessTime,               // EvtVarTypeFileTime
             EvtLogLastWriteTime,                // EvtVarTypeFileTime
@@ -326,26 +341,30 @@ namespace Microsoft.Win32 {
             EvtLogFull,                         // EvtVarTypeBoolean
         }
 
-        internal enum EvtExportLogFlags {
+        internal enum EvtExportLogFlags
+        {
             EvtExportLogChannelPath = 1,
             EvtExportLogFilePath = 2,
             EvtExportLogTolerateQueryErrors = 0x1000
         }
 
         //RENDERING    
-        internal enum EvtRenderContextFlags {
+        internal enum EvtRenderContextFlags
+        {
             EvtRenderContextValues = 0,      // Render specific properties
             EvtRenderContextSystem = 1,      // Render all system properties (System)
             EvtRenderContextUser = 2         // Render all user properties (User/EventData)
         }
 
-        internal enum EvtRenderFlags {
+        internal enum EvtRenderFlags
+        {
             EvtRenderEventValues = 0,       // Variants
             EvtRenderEventXml = 1,          // XML
             EvtRenderBookmark = 2           // Bookmark
         }
 
-        internal enum EvtFormatMessageFlags {
+        internal enum EvtFormatMessageFlags
+        {
             EvtFormatMessageEvent = 1,
             EvtFormatMessageLevel = 2,
             EvtFormatMessageTask = 3,
@@ -357,7 +376,8 @@ namespace Microsoft.Win32 {
             EvtFormatMessageXml = 9
         }
 
-        internal enum EvtSystemPropertyId {
+        internal enum EvtSystemPropertyId
+        {
             EvtSystemProviderName = 0,          // EvtVarTypeString             
             EvtSystemProviderGuid,              // EvtVarTypeGuid  
             EvtSystemEventID,                   // EvtVarTypeUInt16  
@@ -380,12 +400,14 @@ namespace Microsoft.Win32 {
         }
 
         //SESSION
-        internal enum EvtLoginClass {
+        internal enum EvtLoginClass
+        {
             EvtRpcLogin = 1
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        internal struct EvtRpcLogin {
+        internal struct EvtRpcLogin
+        {
             [MarshalAs(UnmanagedType.LPWStr)]
             public string Server;
             [MarshalAs(UnmanagedType.LPWStr)]
@@ -395,417 +417,419 @@ namespace Microsoft.Win32 {
             [SecurityCritical]
             public CoTaskMemUnicodeSafeHandle Password;
             public int Flags;
-            }
+        }
 
 
-            //SEEK
-            [Flags]
-            internal enum EvtSeekFlags {
-                EvtSeekRelativeToFirst = 1,
-                EvtSeekRelativeToLast = 2,
-                EvtSeekRelativeToCurrent = 3,
-                EvtSeekRelativeToBookmark = 4,
-                EvtSeekOriginMask = 7,
-                EvtSeekStrict = 0x10000
-            }
+        //SEEK
+        [Flags]
+        internal enum EvtSeekFlags
+        {
+            EvtSeekRelativeToFirst = 1,
+            EvtSeekRelativeToLast = 2,
+            EvtSeekRelativeToCurrent = 3,
+            EvtSeekRelativeToBookmark = 4,
+            EvtSeekOriginMask = 7,
+            EvtSeekStrict = 0x10000
+        }
 
-            [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtQuery(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)]string path,
-                                [MarshalAs(UnmanagedType.LPWStr)]string query,
-                                int flags);
+        [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtQuery(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)]string path,
+                            [MarshalAs(UnmanagedType.LPWStr)]string query,
+                            int flags);
 
-            //SEEK
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtSeek(
-                                EventLogHandle resultSet,
-                                long position,
-                                EventLogHandle bookmark,
-                                int timeout,
-                                [MarshalAs(UnmanagedType.I4)]EvtSeekFlags flags
+        //SEEK
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtSeek(
+                            EventLogHandle resultSet,
+                            long position,
+                            EventLogHandle bookmark,
+                            int timeout,
+                            [MarshalAs(UnmanagedType.I4)]EvtSeekFlags flags
+                                        );
+
+        [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtSubscribe(
+                            EventLogHandle session,
+                            SafeWaitHandle signalEvent,
+                            [MarshalAs(UnmanagedType.LPWStr)]string path,
+                            [MarshalAs(UnmanagedType.LPWStr)]string query,
+                            EventLogHandle bookmark,
+                            IntPtr context,
+                            IntPtr callback,
+                            int flags);
+
+        [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtNext(
+                            EventLogHandle queryHandle,
+                            int eventSize,
+                            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] events,
+                            int timeout,
+                            int flags,
+                            ref int returned);
+
+        [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtCancel(EventLogHandle handle);
+
+        [DllImport(WEVTAPI)]
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtClose(IntPtr handle);
+
+        /*
+        [DllImport(WEVTAPI, EntryPoint = "EvtClose", SetLastError = true)]
+        public static extern bool EvtClose(
+                            IntPtr eventHandle
+                                           );
+         */
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetEventInfo(
+                            EventLogHandle eventHandle,
+                            //int propertyId
+                            [MarshalAs(UnmanagedType.I4)]EvtEventPropertyId propertyId,
+                            int bufferSize,
+                            IntPtr bufferPtr,
+                            out int bufferUsed
                                             );
 
-            [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtSubscribe(
-                                EventLogHandle session,
-                                SafeWaitHandle signalEvent,
-                                [MarshalAs(UnmanagedType.LPWStr)]string path,
-                                [MarshalAs(UnmanagedType.LPWStr)]string query,
-                                EventLogHandle bookmark,
-                                IntPtr context,
-                                IntPtr callback,
-                                int flags);
-
-            [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtNext(
-                                EventLogHandle queryHandle,
-                                int eventSize,
-                                [MarshalAs(UnmanagedType.LPArray)] IntPtr[] events,
-                                int timeout,
-                                int flags,
-                                ref int returned);
-
-            [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtCancel(EventLogHandle handle);
-
-            [DllImport(WEVTAPI)]
-            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtClose(IntPtr handle);
-
-            /*
-            [DllImport(WEVTAPI, EntryPoint = "EvtClose", SetLastError = true)]
-            public static extern bool EvtClose(
-                                IntPtr eventHandle
-                                               );
-             */
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetEventInfo(
-                                EventLogHandle eventHandle,
-                //int propertyId
-                                [MarshalAs(UnmanagedType.I4)]EvtEventPropertyId propertyId,
-                                int bufferSize,
-                                IntPtr bufferPtr,
-                                out int bufferUsed
-                                                );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetQueryInfo(
-                                EventLogHandle queryHandle,
-                                [MarshalAs(UnmanagedType.I4)]EvtQueryPropertyId propertyId,
-                                int bufferSize,
-                                IntPtr buffer,
-                                ref int bufferRequired
-                                                );
-
-            //PUBLISHER METADATA
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenPublisherMetadata(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)] string publisherId,
-                                [MarshalAs(UnmanagedType.LPWStr)] string logFilePath,
-                                int locale,
-                                int flags
-                                        );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetPublisherMetadataProperty(
-                                EventLogHandle publisherMetadataHandle,
-                                [MarshalAs(UnmanagedType.I4)] EvtPublisherMetadataPropertyId propertyId,
-                                int flags,
-                                int publisherMetadataPropertyBufferSize,
-                                IntPtr publisherMetadataPropertyBuffer,
-                                out int publisherMetadataPropertyBufferUsed
-                                        );
-
-            //NEW
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetObjectArraySize(
-                                EventLogHandle objectArray,
-                                out int objectArraySize
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetQueryInfo(
+                            EventLogHandle queryHandle,
+                            [MarshalAs(UnmanagedType.I4)]EvtQueryPropertyId propertyId,
+                            int bufferSize,
+                            IntPtr buffer,
+                            ref int bufferRequired
                                             );
 
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetObjectArrayProperty(
-                                EventLogHandle objectArray,
-                                int propertyId,
-                                int arrayIndex,
-                                int flags,
-                                int propertyValueBufferSize,
-                                IntPtr propertyValueBuffer,
-                                out int propertyValueBufferUsed
-                                                );
+        //PUBLISHER METADATA
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenPublisherMetadata(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)] string publisherId,
+                            [MarshalAs(UnmanagedType.LPWStr)] string logFilePath,
+                            int locale,
+                            int flags
+                                    );
 
-            //NEW 2
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenEventMetadataEnum(
-                                EventLogHandle publisherMetadata,
-                                int flags
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetPublisherMetadataProperty(
+                            EventLogHandle publisherMetadataHandle,
+                            [MarshalAs(UnmanagedType.I4)] EvtPublisherMetadataPropertyId propertyId,
+                            int flags,
+                            int publisherMetadataPropertyBufferSize,
+                            IntPtr publisherMetadataPropertyBuffer,
+                            out int publisherMetadataPropertyBufferUsed
+                                    );
+
+        //NEW
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetObjectArraySize(
+                            EventLogHandle objectArray,
+                            out int objectArraySize
                                         );
 
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            //public static extern IntPtr EvtNextEventMetadata(
-            internal static extern EventLogHandle EvtNextEventMetadata(
-                                EventLogHandle eventMetadataEnum,
-                                int flags
-                                        );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetEventMetadataProperty(
-                                EventLogHandle eventMetadata,
-                                [MarshalAs(UnmanagedType.I4)]  EvtEventMetadataPropertyId propertyId,
-                                int flags,
-                                int eventMetadataPropertyBufferSize,
-                                IntPtr eventMetadataPropertyBuffer,
-                                out int eventMetadataPropertyBufferUsed
-                                       );
-
-
-            //Channel Configuration Native Api
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenChannelEnum(
-                                EventLogHandle session,
-                                int flags
-                                        );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtNextChannelPath(
-                                EventLogHandle channelEnum,
-                                int channelPathBufferSize,
-                //StringBuilder channelPathBuffer,
-                                [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder channelPathBuffer,
-                                out int channelPathBufferUsed
-                                        );
-
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenPublisherEnum(
-                                EventLogHandle session,
-                                int flags
-                                        );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtNextPublisherId(
-                                EventLogHandle publisherEnum,
-                                int publisherIdBufferSize,
-                                [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder publisherIdBuffer,
-                                out int publisherIdBufferUsed
-                                        );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenChannelConfig(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)]String channelPath,
-                                int flags
-                                        );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtSaveChannelConfig(
-                                EventLogHandle channelConfig,
-                                int flags
-                                        );
-
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtSetChannelConfigProperty(
-                                EventLogHandle channelConfig,
-                                [MarshalAs(UnmanagedType.I4)]EvtChannelConfigPropertyId propertyId,
-                                int flags,
-                                ref EvtVariant propertyValue
-                                        );
-
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetChannelConfigProperty(
-                                EventLogHandle channelConfig,
-                                [MarshalAs(UnmanagedType.I4)]EvtChannelConfigPropertyId propertyId,
-                                int flags,
-                                int propertyValueBufferSize,
-                                IntPtr propertyValueBuffer,
-                                out int propertyValueBufferUsed
-                                       );
-
-            //Log Information Native Api
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenLog(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)] string path,
-                                [MarshalAs(UnmanagedType.I4)]PathType flags
-                                        );
-
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtGetLogInfo(
-                                EventLogHandle log,
-                                [MarshalAs(UnmanagedType.I4)]EvtLogPropertyId propertyId,
-                                int propertyValueBufferSize,
-                                IntPtr propertyValueBuffer,
-                                out int propertyValueBufferUsed
-                                        );
-
-            //LOG MANIPULATION
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtExportLog(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)]string channelPath,
-                                [MarshalAs(UnmanagedType.LPWStr)]string query,
-                                [MarshalAs(UnmanagedType.LPWStr)]string targetFilePath,
-                                int flags
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetObjectArrayProperty(
+                            EventLogHandle objectArray,
+                            int propertyId,
+                            int arrayIndex,
+                            int flags,
+                            int propertyValueBufferSize,
+                            IntPtr propertyValueBuffer,
+                            out int propertyValueBufferUsed
                                             );
 
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtArchiveExportedLog(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)]string logFilePath,
-                                int locale,
-                                int flags
-                                            );
+        //NEW 2
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenEventMetadataEnum(
+                            EventLogHandle publisherMetadata,
+                            int flags
+                                    );
 
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtClearLog(
-                                EventLogHandle session,
-                                [MarshalAs(UnmanagedType.LPWStr)]string channelPath,
-                                [MarshalAs(UnmanagedType.LPWStr)]string targetFilePath,
-                                int flags
-                                            );
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        //public static extern IntPtr EvtNextEventMetadata(
+        internal static extern EventLogHandle EvtNextEventMetadata(
+                            EventLogHandle eventMetadataEnum,
+                            int flags
+                                    );
 
-            //RENDERING
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtCreateRenderContext(
-                                Int32 valuePathsCount,
-                                [MarshalAs(UnmanagedType.LPArray,ArraySubType = UnmanagedType.LPWStr)]
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetEventMetadataProperty(
+                            EventLogHandle eventMetadata,
+                            [MarshalAs(UnmanagedType.I4)]  EvtEventMetadataPropertyId propertyId,
+                            int flags,
+                            int eventMetadataPropertyBufferSize,
+                            IntPtr eventMetadataPropertyBuffer,
+                            out int eventMetadataPropertyBufferUsed
+                                   );
+
+
+        //Channel Configuration Native Api
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenChannelEnum(
+                            EventLogHandle session,
+                            int flags
+                                    );
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtNextChannelPath(
+                            EventLogHandle channelEnum,
+                            int channelPathBufferSize,
+                            //StringBuilder channelPathBuffer,
+                            [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder channelPathBuffer,
+                            out int channelPathBufferUsed
+                                    );
+
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenPublisherEnum(
+                            EventLogHandle session,
+                            int flags
+                                    );
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtNextPublisherId(
+                            EventLogHandle publisherEnum,
+                            int publisherIdBufferSize,
+                            [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder publisherIdBuffer,
+                            out int publisherIdBufferUsed
+                                    );
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenChannelConfig(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)]String channelPath,
+                            int flags
+                                    );
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtSaveChannelConfig(
+                            EventLogHandle channelConfig,
+                            int flags
+                                    );
+
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtSetChannelConfigProperty(
+                            EventLogHandle channelConfig,
+                            [MarshalAs(UnmanagedType.I4)]EvtChannelConfigPropertyId propertyId,
+                            int flags,
+                            ref EvtVariant propertyValue
+                                    );
+
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetChannelConfigProperty(
+                            EventLogHandle channelConfig,
+                            [MarshalAs(UnmanagedType.I4)]EvtChannelConfigPropertyId propertyId,
+                            int flags,
+                            int propertyValueBufferSize,
+                            IntPtr propertyValueBuffer,
+                            out int propertyValueBufferUsed
+                                   );
+
+        //Log Information Native Api
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenLog(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)] string path,
+                            [MarshalAs(UnmanagedType.I4)]PathType flags
+                                    );
+
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtGetLogInfo(
+                            EventLogHandle log,
+                            [MarshalAs(UnmanagedType.I4)]EvtLogPropertyId propertyId,
+                            int propertyValueBufferSize,
+                            IntPtr propertyValueBuffer,
+                            out int propertyValueBufferUsed
+                                    );
+
+        //LOG MANIPULATION
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtExportLog(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)]string channelPath,
+                            [MarshalAs(UnmanagedType.LPWStr)]string query,
+                            [MarshalAs(UnmanagedType.LPWStr)]string targetFilePath,
+                            int flags
+                                        );
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtArchiveExportedLog(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)]string logFilePath,
+                            int locale,
+                            int flags
+                                        );
+
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtClearLog(
+                            EventLogHandle session,
+                            [MarshalAs(UnmanagedType.LPWStr)]string channelPath,
+                            [MarshalAs(UnmanagedType.LPWStr)]string targetFilePath,
+                            int flags
+                                        );
+
+        //RENDERING
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtCreateRenderContext(
+                            Int32 valuePathsCount,
+                            [MarshalAs(UnmanagedType.LPArray,ArraySubType = UnmanagedType.LPWStr)]
                                 String[] valuePaths,
-                                [MarshalAs(UnmanagedType.I4)]EvtRenderContextFlags flags
+                            [MarshalAs(UnmanagedType.I4)]EvtRenderContextFlags flags
+                                    );
+
+        [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtRender(
+                            EventLogHandle context,
+                            EventLogHandle eventHandle,
+                            EvtRenderFlags flags,
+                            int buffSize,
+                            [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder buffer,
+                            out int buffUsed,
+                            out int propCount
                                         );
 
-            [DllImport(WEVTAPI, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtRender(
-                                EventLogHandle context,
-                                EventLogHandle eventHandle,
-                                EvtRenderFlags flags,
-                                int buffSize,
-                                [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder buffer,
-                                out int buffUsed,
-                                out int propCount
-                                            );
+
+        [DllImport(WEVTAPI, EntryPoint = "EvtRender", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtRender(
+                            EventLogHandle context,
+                            EventLogHandle eventHandle,
+                            EvtRenderFlags flags,
+                            int buffSize,
+                            IntPtr buffer,
+                            out int buffUsed,
+                            out int propCount
+                                        );
 
 
-            [DllImport(WEVTAPI, EntryPoint = "EvtRender", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtRender(
-                                EventLogHandle context,
-                                EventLogHandle eventHandle,
-                                EvtRenderFlags flags,
-                                int buffSize,
-                                IntPtr buffer,
-                                out int buffUsed,
-                                out int propCount
-                                            );
+        [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Auto)]
+        internal struct EvtStringVariant
+        {
+            [MarshalAs(UnmanagedType.LPWStr), FieldOffset(0)]
+            public string StringVal;
+            [FieldOffset(8)]
+            public UInt32 Count;
+            [FieldOffset(12)]
+            public UInt32 Type;
+        };
 
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtFormatMessage(
+                             EventLogHandle publisherMetadataHandle,
+                             EventLogHandle eventHandle,
+                             uint messageId,
+                             int valueCount,
+                             EvtStringVariant[] values,
+                             [MarshalAs(UnmanagedType.I4)]EvtFormatMessageFlags flags,
+                             int bufferSize,
+                             [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder buffer,
+                             out int bufferUsed
+                                        );
 
-            [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Auto)]
-            internal struct EvtStringVariant {
-                [MarshalAs(UnmanagedType.LPWStr),FieldOffset(0)]
-                public string StringVal;
-                [FieldOffset(8)]
-                public UInt32 Count;
-                [FieldOffset(12)]
-                public UInt32 Type;
-            };
+        [DllImport(WEVTAPI, EntryPoint = "EvtFormatMessage", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtFormatMessageBuffer(
+                             EventLogHandle publisherMetadataHandle,
+                             EventLogHandle eventHandle,
+                             uint messageId,
+                             int valueCount,
+                             IntPtr values,
+                             [MarshalAs(UnmanagedType.I4)]EvtFormatMessageFlags flags,
+                             int bufferSize,
+                             IntPtr buffer,
+                             out int bufferUsed
+                                        );
 
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtFormatMessage(
-                                 EventLogHandle publisherMetadataHandle,
-                                 EventLogHandle eventHandle,
-                                 uint messageId,
-                                 int valueCount,
-                                 EvtStringVariant [] values,
-                                 [MarshalAs(UnmanagedType.I4)]EvtFormatMessageFlags flags,
-                                 int bufferSize,
-                                 [Out, MarshalAs(UnmanagedType.LPWStr)]StringBuilder buffer,
-                                 out int bufferUsed
-                                            );
+        //SESSION
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtOpenSession(
+                            [MarshalAs(UnmanagedType.I4)]EvtLoginClass loginClass,
+                            ref EvtRpcLogin login,
+                            int timeout,
+                            int flags
+                                        );
 
-            [DllImport(WEVTAPI, EntryPoint = "EvtFormatMessage", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtFormatMessageBuffer(
-                                 EventLogHandle publisherMetadataHandle,
-                                 EventLogHandle eventHandle,
-                                 uint messageId,
-                                 int valueCount,
-                                 IntPtr values,
-                                 [MarshalAs(UnmanagedType.I4)]EvtFormatMessageFlags flags,
-                                 int bufferSize,
-                                 IntPtr buffer,
-                                 out int bufferUsed
-                                            );
+        //BOOKMARK
+        [DllImport(WEVTAPI, EntryPoint = "EvtCreateBookmark", CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        internal static extern EventLogHandle EvtCreateBookmark(
+                            [MarshalAs(UnmanagedType.LPWStr)] string bookmarkXml
+                                        );
 
-            //SESSION
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtOpenSession(
-                                [MarshalAs(UnmanagedType.I4)]EvtLoginClass loginClass,
-                                ref EvtRpcLogin login,
-                                int timeout,
-                                int flags
-                                            );
-
-            //BOOKMARK
-            [DllImport(WEVTAPI, EntryPoint = "EvtCreateBookmark", CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            internal static extern EventLogHandle EvtCreateBookmark(
-                                [MarshalAs(UnmanagedType.LPWStr)] string bookmarkXml
-                                            );
-
-            [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
-            [SecurityCritical]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool EvtUpdateBookmark(
-                                EventLogHandle bookmark,
-                                EventLogHandle eventHandle
-                                            );
-            //
-            // EventLog
-            // 
+        [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
+        [SecurityCritical]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EvtUpdateBookmark(
+                            EventLogHandle bookmark,
+                            EventLogHandle eventHandle
+                                        );
+        //
+        // EventLog
+        // 
 
 
     }

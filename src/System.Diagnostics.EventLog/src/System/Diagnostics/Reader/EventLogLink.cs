@@ -52,11 +52,13 @@ namespace System.Diagnostics.Eventing.Reader
 
         private void PrepareData()
         {
-            if (_dataReady == true) return;
+            if (_dataReady == true)
+                return;
 
             lock (_syncObject)
             {
-                if (_dataReady == true) return;
+                if (_dataReady == true)
+                    return;
 
                 IEnumerable<EventLogLink> result = _pmReference.LogLinks;
 

@@ -44,7 +44,8 @@ namespace System.Diagnostics.Eventing.Reader
             public override bool Equals(object obj)
             {
                 ProviderMetadataId rhs = obj as ProviderMetadataId;
-                if (rhs == null) return false;
+                if (rhs == null)
+                    return false;
                 if (_providerName.Equals(rhs._providerName) && (_cultureInfo == rhs._cultureInfo))
                     return true;
                 return false;
