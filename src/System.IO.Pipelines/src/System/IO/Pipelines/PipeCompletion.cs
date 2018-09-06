@@ -13,25 +13,28 @@ namespace System.IO.Pipelines
     internal struct PipeCompletion
     {
         private static readonly ArrayPool<PipeCompletionCallback> s_completionCallbackPool = ArrayPool<PipeCompletionCallback>.Shared;
-        private static readonly Exception s_completedNoException = new Exception();
 
         private const int InitialCallbacksSize = 1;
 
-        private Exception _exception;
+        private bool _isCompleted;
+        private ExceptionDispatchInfo _exceptionInfo;
 
         private PipeCompletionCallback[] _callbacks;
         private int _callbackCount;
 
-        public bool IsCompleted => _exception != null;
+        public bool IsCompleted => _isCompleted;
 
-        public bool IsFaulted => IsCompleted && _exception != s_completedNoException;
+        public bool IsFaulted => _exceptionInfo != null;
 
         public PipeCompletionCallbacks TryComplete(Exception exception = null)
         {
-            if (_exception == null)
+            if (!_isCompleted)
             {
-                // Set the exception object to the exception passed in or a sentinel value
-                _exception = exception ?? s_completedNoException;
+                _isCompleted = true;
+                if (exception != null)
+                {
+                    _exceptionInfo = ExceptionDispatchInfo.Capture(exception);
+                }
             }
             return GetCallbacks();
         }
@@ -68,12 +71,12 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsCompletedOrThrow()
         {
-            if (_exception == null)
+            if (!_isCompleted)
             {
                 return false;
             }
 
-            if (_exception != s_completedNoException)
+            if (_exceptionInfo != null)
             {
                 ThrowLatchedException();
             }
@@ -91,7 +94,7 @@ namespace System.IO.Pipelines
 
             var callbacks = new PipeCompletionCallbacks(s_completionCallbackPool,
                 _callbackCount,
-                _exception == s_completedNoException ? null : _exception,
+                _exceptionInfo?.SourceException,
                 _callbacks);
 
             _callbacks = null;
@@ -103,13 +106,14 @@ namespace System.IO.Pipelines
         {
             Debug.Assert(IsCompleted);
             Debug.Assert(_callbacks == null);
-            _exception = null;
+            _isCompleted = false;
+            _exceptionInfo = null;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowLatchedException()
         {
-            ExceptionDispatchInfo.Capture(_exception).Throw();
+            _exceptionInfo.Throw();
         }
 
         public override string ToString()
