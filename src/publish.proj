@@ -150,7 +150,6 @@
     <ItemGroup>
       <TestList Include="$(TestListPath)" />
       <TestList>
-        <!-- TODO: Fix this path to be the same relative path as the downloaded tests.  Right now, AzureTestsRoot will have 0s through it during the Publish phase... -->
         <RelativeBlobPath>$(AzureFeedTestsRoot)$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
       </TestList>
     </ItemGroup>
