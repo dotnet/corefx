@@ -267,8 +267,13 @@ namespace System.Net.Http.HPack
             (0b11111111_11111111_11111111_11111100, 30)
         };
 
-        private static readonly Lazy<short[,]> s_decodingArrayLoader = new Lazy<short[,]>(() => BuildDecodingArray());
-        
+        private static readonly short[,] s_decodingArray;
+
+        static Huffman()
+        {
+            s_decodingArray = BuildDecodingArray();
+        }
+
         public static (uint encoded, int bitLength) Encode(int data)
         {
             return s_encodingTable[data];
@@ -301,7 +306,6 @@ namespace System.Net.Http.HPack
             int sourceIndex = 0;
             int destinationIndex = 0;
             int bitOffset = 0;              // symbol bit patterns do not necessarily align to byte boundaries. need to keep track of our offset within a byte
-            var decodingArray = s_decodingArrayLoader.Value;
             while (sourceIndex < sourceSpan.Length)
             {
                 int arrayIndex = 0;         // index into the decoding array
@@ -318,7 +322,7 @@ namespace System.Net.Http.HPack
                         workingByte |= (byte)(sourceSpan[sourceIndex + 1] >> (8 - bitOffset));
 
                     // key into array
-                    int decodedValue = decodingArray[arrayIndex, workingByte];
+                    int decodedValue = s_decodingArray[arrayIndex, workingByte];
 
                     // negative values are a pointer to the next decoding array
                     if (decodedValue < 0)
