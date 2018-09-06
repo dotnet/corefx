@@ -8,7 +8,7 @@ namespace System.Diagnostics.Tests
 {
     internal static class Helpers
     {
-        public static async Task Retry(Action action, int delayInMilliseconds = 250, int times = 20)
+        public static async Task RetryWithBackoff(Action action, int delayInMilliseconds = 10, int times = 10)
         {
             for (; times > 0; times--)
             {
@@ -20,6 +20,7 @@ namespace System.Diagnostics.Tests
                 catch (XunitException) when (times > 1)
                 {
                     await Task.Delay(delayInMilliseconds);
+                    delayInMilliseconds *= 2;
                 }
             }
         }

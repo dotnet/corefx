@@ -168,7 +168,7 @@ namespace System.Diagnostics.Tests
 
                 parentProcess.Kill(entireProcessTree: false);
 
-                await Helpers.Retry(() =>
+                await Helpers.RetryWithBackoff(() =>
                 {
                     var actual = tree.Select(p => p.HasExited).ToList();
                     Assert.Equal(new[] { true, false, false }, actual);
@@ -202,7 +202,7 @@ namespace System.Diagnostics.Tests
 
                 parentProcess.Kill(entireProcessTree: true);
 
-                await Helpers.Retry(() =>
+                await Helpers.RetryWithBackoff(() =>
                 {
                     var actual = tree.Select(p => p.HasExited).ToList();
                     Assert.True(actual.All(x => x == true));
