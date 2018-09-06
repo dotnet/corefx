@@ -47,7 +47,8 @@ namespace System.Diagnostics.Eventing.Reader
                 case 15012:
                     throw new EventLogReadingException(errorCode);
 
-                default: throw new EventLogException(errorCode);
+                default:
+                    throw new EventLogException(errorCode);
             }
         }
 

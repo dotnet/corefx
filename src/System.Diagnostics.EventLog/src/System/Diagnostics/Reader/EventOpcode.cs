@@ -49,7 +49,8 @@ namespace System.Diagnostics.Eventing.Reader
         {
             lock (_syncObject)
             {
-                if (_dataReady == true) return;
+                if (_dataReady == true)
+                    return;
 
                 // get the data
                 IEnumerable<EventOpcode> result = _pmReference.Opcodes;

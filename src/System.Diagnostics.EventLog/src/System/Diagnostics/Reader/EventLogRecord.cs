@@ -308,7 +308,8 @@ namespace System.Diagnostics.Eventing.Reader
 
         public override string FormatDescription(IEnumerable<object> values)
         {
-            if (values == null) return this.FormatDescription();
+            if (values == null)
+                return this.FormatDescription();
 
             //copy the value IEnumerable to an array.
             string[] theValues = new string[0];

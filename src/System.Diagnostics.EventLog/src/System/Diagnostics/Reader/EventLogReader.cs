@@ -145,7 +145,8 @@ namespace System.Diagnostics.Eventing.Reader
                 timeout = (int)ts.TotalMilliseconds;
 
             // batchSize was changed by user, reallocate buffer.
-            if (_batchSize != _eventsBuffer.Length) _eventsBuffer = new IntPtr[_batchSize];
+            if (_batchSize != _eventsBuffer.Length)
+                _eventsBuffer = new IntPtr[_batchSize];
 
             int newEventCount = 0;
             bool results = NativeWrapper.EvtNext(_handle, _batchSize, _eventsBuffer, timeout, 0, ref newEventCount);

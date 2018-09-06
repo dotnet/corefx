@@ -201,7 +201,8 @@ namespace System.Diagnostics.Eventing.Reader
                 do
                 {
                     string s = NativeWrapper.EvtNextPublisherId(ProviderEnum, ref finish);
-                    if (finish == false) namesList.Add(s);
+                    if (finish == false)
+                        namesList.Add(s);
                 }
                 while (finish == false);
 
@@ -221,7 +222,8 @@ namespace System.Diagnostics.Eventing.Reader
                 do
                 {
                     string s = NativeWrapper.EvtNextChannelPath(channelEnum, ref finish);
-                    if (finish == false) namesList.Add(s);
+                    if (finish == false)
+                        namesList.Add(s);
                 }
                 while (finish == false);
 

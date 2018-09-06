@@ -53,7 +53,8 @@ namespace System.Diagnostics.Eventing.Reader
         {
             lock (_syncObject)
             {
-                if (_dataReady == true) return;
+                if (_dataReady == true)
+                    return;
 
                 IEnumerable<EventTask> result = _pmReference.Tasks;
 

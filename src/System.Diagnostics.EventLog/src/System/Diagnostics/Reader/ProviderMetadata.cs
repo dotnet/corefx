@@ -191,8 +191,10 @@ namespace System.Diagnostics.Eventing.Reader
                             uint flag = (uint)NativeWrapper.EvtGetObjectArrayProperty(elHandle, index, (int)UnsafeNativeMethods.EvtPublisherMetadataPropertyId.EvtPublisherMetadataChannelReferenceFlags);
 
                             bool isImported;
-                            if (flag == (int)UnsafeNativeMethods.EvtChannelReferenceFlags.EvtChannelReferenceImported) isImported = true;
-                            else isImported = false;
+                            if (flag == (int)UnsafeNativeMethods.EvtChannelReferenceFlags.EvtChannelReferenceImported)
+                                isImported = true;
+                            else
+                                isImported = false;
 
                             int channelRefMessageId = unchecked((int)((uint)NativeWrapper.EvtGetObjectArrayProperty(elHandle, index, (int)UnsafeNativeMethods.EvtPublisherMetadataPropertyId.EvtPublisherMetadataChannelReferenceMessageID)));
                             string channelRefDisplayName;
