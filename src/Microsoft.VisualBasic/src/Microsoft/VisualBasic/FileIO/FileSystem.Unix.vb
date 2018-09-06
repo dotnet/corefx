@@ -2,7 +2,7 @@
 
 Namespace Microsoft.VisualBasic.FileIO
     Partial Public Class FileSystem
-#If Unix Then
+#If PLATFORM_UNIX Then
         Private Shared Sub ShellCopyOrMove(operation As CopyOrMove, directory As FileOrDirectory, sourceDirectoryFullPath As String, targetDirectoryFullPath As String, showUI As UIOptionInternal, onUserCancel As UICancelOption)
             Throw New PlatformNotSupportedException("No UI for ShellCopyOrMove(operation, FileOrDirectory.Directory, SourceDirectoryFullPath, TargetDirectoryFullPath, showUI, onUserCancel)")
         End Sub

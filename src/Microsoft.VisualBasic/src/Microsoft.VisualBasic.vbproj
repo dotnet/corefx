@@ -28,7 +28,7 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ExceptionUtils.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\IDOBinder.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\IncompleteInitialization.vb" />
-    <Compile Include="Microsoft\VisualBasic\CompilerServices\NativeMethods.vb" />
+    <Compile Include="Microsoft\VisualBasic\CompilerServices\NativeMethods.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\NewLateBinding.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ObjectFlowControl.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Operators.Resolution.vb" />
