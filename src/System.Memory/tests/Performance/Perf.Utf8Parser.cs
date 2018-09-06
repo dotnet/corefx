@@ -103,7 +103,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("18446744073709551615")] // max value
         [InlineData("0")] // min value
-        private static void BaselineStringToUInt64(string text)
+        private static void StringToUInt64(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
