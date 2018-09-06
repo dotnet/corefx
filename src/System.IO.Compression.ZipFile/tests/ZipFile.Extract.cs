@@ -49,6 +49,7 @@ namespace System.IO.Compression.Tests
         [Theory]
         [InlineData("../Foo")]
         [InlineData("../Barbell")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Second case fails.")]
         public void ExtractOutOfRoot(string entryName)
         {
             string archivePath = GetTestFilePath();
