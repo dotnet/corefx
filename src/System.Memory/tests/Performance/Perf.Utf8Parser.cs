@@ -552,7 +552,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("-127")]
         [InlineData("2147")]
         [InlineData("000000000000000000001235")]
-        private static void ByteSpanToInt16_Baseline(string text)
+        private static void StringToInt16_Baseline(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -613,7 +613,7 @@ namespace System.Buffers.Text.Tests
         [Benchmark]
         [InlineData("True")]
         [InlineData("False")]
-        private static void StringToBool(string text)
+        private static void BytesSpanToBool(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
