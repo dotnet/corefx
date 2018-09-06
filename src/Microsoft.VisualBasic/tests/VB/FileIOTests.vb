@@ -112,6 +112,7 @@ Namespace Microsoft.VisualBasic.Tests
             ' Otherwise, remove all separators at the end.
             Return Path.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)
         End Function
+
         <Fact>
         Public Sub CombinePathTest_BadBaseDirectory_RelativePath()
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
@@ -210,9 +211,10 @@ Namespace Microsoft.VisualBasic.Tests
         <ConditionalTheory(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
-            While (Not System.Diagnostics.Debugger.IsAttached)
-                System.Threading.Thread.Sleep(1000)
-            End While
+            ' Debugging code
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
 
             Using TestBase As New FileIOTests
                 Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
@@ -860,6 +862,8 @@ Namespace Microsoft.VisualBasic.Tests
                 Assert.False(IO.File.Exists(OrigFileWithPath))
                 ''' <exception cref="IO.IOException">If there's an existing directory or an existing file with the same name.</exception>
                 Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameFile(NewFileWithPath, "NewFile"))
+                IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, "NewFDirectory"))
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameFile(NewFileWithPath, "NewFDirectory"))
             End Using
         End Sub
 
