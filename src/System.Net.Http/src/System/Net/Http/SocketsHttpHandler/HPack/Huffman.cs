@@ -267,12 +267,7 @@ namespace System.Net.Http.HPack
             (0b11111111_11111111_11111111_11111100, 30)
         };
 
-        private static readonly short[,] s_decodingArray;
-
-        static Huffman()
-        {
-            s_decodingArray = BuildDecodingArray();
-        }
+        private static readonly short[,] s_decodingArray = BuildDecodingArray();
 
         public static (uint encoded, int bitLength) Encode(int data)
         {
