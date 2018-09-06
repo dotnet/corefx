@@ -958,6 +958,33 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark]
+        [InlineData("107")] // standard parse
+        [InlineData("127")] // max value
+        [InlineData("0")]
+        [InlineData("-128")] // min value
+        [InlineData("147")]
+        [InlineData("2")]
+        [InlineData("105")]
+        [InlineData("-111")]
+        [InlineData("-21")]
+        [InlineData("-2")]
+        [InlineData("-13")]
+        [InlineData("-8")]
+        [InlineData("-83")]
+        [InlineData("+127")]
+        [InlineData("+21")]
+        [InlineData("+2")]
+        [InlineData("00000000000000000000123abcdfg")]
+        [InlineData("2abcdefghijklmnop")]
+        [InlineData("14abcdefghijklmnop")]
+        [InlineData("-14abcdefghijklmnop")]
+        [InlineData("-21abcdefghijklmnop")]
+        [InlineData("-2abcdefghijklmnop")]
+        [InlineData("+14abcdefghijklmnop")]
+        [InlineData("+21abcdefghijklmnop")]
+        [InlineData("+2abcdefghijklmnop")]
+        [InlineData("+111abcdefghijklmnop")]
+        [InlineData("+000000000000000000123abcdfg")]
         [InlineData("42")] // standard parse
         [InlineData("-128")] // min value
         [InlineData("127")] // max value
