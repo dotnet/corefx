@@ -354,6 +354,10 @@ namespace System.Net.Http.HPack
 
                         break;
                     }
+
+                    // we've advanced sourceIndex to the end of the span
+                    if (sourceIndex == sourceSpan.Length)
+                        break;
                 }
 
                 // we checked four bytes did not come up with a valid bit pattern
@@ -398,10 +402,10 @@ namespace System.Net.Http.HPack
                 int currentArrayIndex = 0;              // which array are we working with
 
                 // loop for however many bytes the value occupies
-                for (int j = 0; j <= Math.Ceiling(tableEntry.bitLength / 8.0); j++)
+                for (int j = 0; j < tableEntry.bitLength; j += 8)
                 {
-                    int byteOffset = 8 * (3 - j);       // how many bits is the working byte offset from the right
-                    int totalLength = 8 * (j + 1);      // how many bits of the entry can we consume total so far
+                    int byteOffset = 24 - j;            // how many bits is the working byte offset from the right
+                    int totalLength = j + 8;            // how many bits of the entry can we consume total so far
 
                     uint codeByte = (tableEntry.code >> byteOffset) & 0xFF;  // extract the working byte and shift it all the way to the right
 
