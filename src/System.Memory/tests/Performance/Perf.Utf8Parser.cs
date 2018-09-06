@@ -554,9 +554,6 @@ namespace System.Buffers.Text.Tests
         [InlineData("000000000000000000001235")]
         private static void StringToInt16_Baseline(string text)
         {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
-
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
