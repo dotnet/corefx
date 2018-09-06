@@ -1,0 +1,2 @@
+Compat issues with assembly System.Runtime:
+TypesMustExist : Type 'System.Utf8StringComparer' does not exist in the implementation but it does exist in the contract.
