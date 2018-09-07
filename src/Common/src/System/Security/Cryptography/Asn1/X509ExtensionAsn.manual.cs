@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography.Asn1
 {
-	internal partial struct X509ExtensionAsn
+    internal partial struct X509ExtensionAsn
     {
         public X509ExtensionAsn(X509Extension extension)
         {
