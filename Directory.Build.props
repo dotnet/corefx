@@ -179,6 +179,7 @@
   <!-- set properties for each vertical -->
   <PropertyGroup>
     <BuildingNETCoreAppVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netcoreapp' OR '$(_bc_TargetGroup)'=='netcoreappaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETCoreAppVertical>
+    <BuildingNETStandardVertical Condition="'$(BuildingNETStandardVertical)' == '' AND ('$(_bc_TargetGroup)'=='netstandard' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETStandardVertical>
     <BuildingNETFxVertical Condition="'$(BuildingNETFxVertical)' == '' AND ('$(_bc_TargetGroup)'=='netfx' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETFxVertical>
     <BuildingUAPVertical Condition="'$(BuildingUAPVertical)' == '' AND ('$(_bc_TargetGroup)'=='uap' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPVertical>
     <BuildingUAPAOTVertical Condition="'$(BuildingUAPAOTVertical)' == '' AND ('$(_bc_TargetGroup)'=='uapaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPAOTVertical>
@@ -304,6 +305,7 @@
     <UAPAOTPackageRuntimePath>$(BinDir)pkg\uapaot\lib</UAPAOTPackageRuntimePath>
     <NetFxPackageRefPath>$(BinDir)pkg\netfx\ref</NetFxPackageRefPath>
     <NetFxPackageRuntimePath>$(BinDir)pkg\netfx\lib</NetFxPackageRuntimePath>
+    <NETStandardTestSuiteOutputPath>$(BinDir)NetStandardTestSuite\</NETStandardTestSuiteOutputPath>
 
     <!-- We add extra binplacing for the test shared framework until we can get hardlinking with the runtime directory working on all platforms -->
     <BinPlaceTestSharedFramework Condition="'$(_bc_TargetGroup)' == 'netcoreapp' AND '$(BuildTests)'!='false'">true</BinPlaceTestSharedFramework>
@@ -338,6 +340,16 @@
     <!-- Only enable multi-file for Release-x64 and Debug-x86 for now -->
     <!-- Temporarily disabling multifile test configurations. For more info, please check: https://github.com/dotnet/corefx/issues/22826
     <EnableMultiFileILCTests Condition="'$(ConfigurationGroup)|$(ArchGroup)' == 'Release|x64' Or '$(ConfigurationGroup)|$(ArchGroup)' == 'Debug|x86' Or '$(ConfigurationGroup)|$(ArchGroup)' == 'Release|arm'">true</EnableMultiFileILCTests> -->
+  </PropertyGroup>
+
+  <!-- Specify the default constants for each target group -->
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants),uap</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants),uapaot</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netfx'">$(DefineConstants),netfx</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants),netstandard</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

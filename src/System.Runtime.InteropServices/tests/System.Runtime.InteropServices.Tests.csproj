@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{A824F4CD-935B-4496-A1B2-C3664936DA7B}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
@@ -106,6 +105,7 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\ZeroFreeGlobalAllocUnicodeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Common\CommonTypes.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\Common\CommonTypes.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\Common\Variant.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\ByteTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\Int16Tests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\Int32Tests.cs" />
@@ -131,17 +131,10 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateGuidForTypeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateProgIdForTypeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetComObjectDataTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetDelegateForFunctionPointerTests.nonnetstandard.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionPointersTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetFunctionPointerForDelegateTests.nonnetstandard.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetHINSTANCETests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetIDispatchForObjectTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetTypedObjectForIUnknownTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\ByteTests.nonnetstandard.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\Int16Tests.nonnetstandard.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\Int32Tests.nonnetstandard.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\Int64Tests.nonnetstandard.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\ReadWrite\IntPtrTests.nonnetstandard.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\SetComObjectDataTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeLibFuncAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeLibImportClassAttributeTests.cs" />
