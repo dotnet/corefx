@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Numerics;
-
 using Internal.Runtime.CompilerServices;
 
 #if BIT64
@@ -16,7 +15,7 @@ using nuint = System.UInt32;
 
 namespace System
 {
-    internal static partial class SpanHelpers
+    internal static partial class SpanHelpers // .Byte
     {
         public static int IndexOf(ref byte searchSpace, int searchSpaceLength, ref byte value, int valueLength)
         {
@@ -94,6 +93,97 @@ namespace System
                     index = tempIndex;
             }
             return index;
+        }
+
+        // Code adapted from IndexOf(...)
+        public static unsafe bool Contains(ref byte searchSpace, byte value, int length)
+        {
+            Debug.Assert(length >= 0);
+
+            if (length == 0) return false;
+
+            uint uValue = value; // Use uint for comparisons to avoid unnecessary 8->32 extensions
+            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr nLength = (IntPtr)length;
+
+            if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
+            {
+                int unaligned = (int)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
+            }
+
+            SequentialScan:
+            while ((byte*)nLength >= (byte*)8)
+            {
+                nLength -= 8;
+
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 0) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 1) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 2) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 3) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 4) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 5) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 6) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 7))
+                {
+                    return true;
+                }
+
+                index += 8;
+            }
+
+            if ((byte*)nLength >= (byte*)4)
+            {
+                nLength -= 4;
+
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 0) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 1) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 2) ||
+                    uValue == Unsafe.AddByteOffset(ref searchSpace, index + 3))
+                {
+                    return true;
+                }
+
+                index += 4;
+            }
+
+            while ((byte*)nLength > (byte*)0)
+            {
+                nLength--;
+
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
+                    return true;
+
+                index++;
+            }
+
+            if (Vector.IsHardwareAccelerated && ((int)(byte*)index < length))
+            {
+                nLength = (IntPtr)((length - (int)(byte*)index) & ~(Vector<byte>.Count - 1));
+
+                // Get comparison Vector
+                Vector<byte> vComparison = new Vector<byte>(value);
+
+                while ((byte*)nLength > (byte*)index)
+                {
+                    var vMatches = Vector.Equals(vComparison, Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index)));
+                    if (Vector<byte>.Zero.Equals(vMatches))
+                    {
+                        index += Vector<byte>.Count;
+                        continue;
+                    }
+
+                    return true;
+                }
+
+                if ((int)(byte*)index < length)
+                {
+                    nLength = (IntPtr)(length - (int)(byte*)index);
+                    goto SequentialScan;
+                }
+            }
+
+            return false;
         }
 
         public static unsafe int IndexOf(ref byte searchSpace, byte value, int length)
