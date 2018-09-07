@@ -73,7 +73,7 @@ namespace System.Drawing.Drawing2D
             _disposed = true;
         }
 
-        ~CustomLineCap() => Dispose(false);
+        ~CustomLineCap() { Dispose(false); }
 
         public object Clone()
         {

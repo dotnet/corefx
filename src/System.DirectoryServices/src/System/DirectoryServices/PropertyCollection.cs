@@ -185,7 +185,7 @@ namespace System.DirectoryServices
                 _parentEntry = parent;
             }
 
-            ~PropertyEnumerator() => Dispose(true);
+            ~PropertyEnumerator() { Dispose(false); }
 
             public void Dispose()
             {

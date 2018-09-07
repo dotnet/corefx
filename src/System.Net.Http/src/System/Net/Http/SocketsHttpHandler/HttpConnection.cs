@@ -1598,6 +1598,6 @@ namespace System.Net.Http
 
         // This class is separated from HttpConnection so we only pay the price of having a finalizer
         // when it's actually needed, e.g. when MaxConnectionsPerServer is enabled.
-        ~HttpConnectionWithFinalizer() => Dispose(disposing: false);
+        ~HttpConnectionWithFinalizer() { Dispose(disposing: false); }
     }
 }

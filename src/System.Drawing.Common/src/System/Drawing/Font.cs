@@ -138,7 +138,7 @@ namespace System.Drawing
         /// <summary>
         /// Cleans up Windows resources for this <see cref='Font'/>.
         /// </summary>
-        ~Font() => Dispose(false);
+        ~Font() { Dispose(false); }
 
         /// <summary>
         /// Cleans up Windows resources for this <see cref='Font'/>.

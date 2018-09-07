@@ -93,7 +93,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region IDisposable
 
-        ~DomainController() => Dispose(false);
+        ~DomainController() { Dispose(false); }
 
         // private Dispose method
         protected override void Dispose(bool disposing)

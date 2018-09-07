@@ -394,7 +394,7 @@ namespace System.Drawing
             }
         }
 
-        ~Icon() => Dispose(false);
+        ~Icon() { Dispose(false); }
 
         public static Icon FromHandle(IntPtr handle) => new Icon(handle);
 

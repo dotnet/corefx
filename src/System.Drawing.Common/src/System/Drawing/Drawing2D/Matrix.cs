@@ -71,7 +71,7 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        ~Matrix() => Dispose(false);
+        ~Matrix() { Dispose(false); }
 
         public Matrix Clone()
         {

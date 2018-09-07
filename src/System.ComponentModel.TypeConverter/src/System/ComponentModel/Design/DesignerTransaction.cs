@@ -67,7 +67,7 @@ namespace System.ComponentModel.Design
         /// <summary>
         /// Overrides Object to commit this transaction in case the user forgot.
         /// </summary>
-        ~DesignerTransaction() => Dispose(false);
+        ~DesignerTransaction() { Dispose(false); }
 
         /// <summary>
         /// Private implementation of IDisaposable. When a transaction is disposed

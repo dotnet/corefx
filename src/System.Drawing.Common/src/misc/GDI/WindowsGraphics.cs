@@ -120,7 +120,7 @@ namespace System.Drawing.Internal
             return wg;
         }
 
-        ~WindowsGraphics() => Dispose(false);
+        ~WindowsGraphics() { Dispose(false); }
 
         public DeviceContext DeviceContext => _dc;
 

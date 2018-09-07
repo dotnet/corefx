@@ -126,7 +126,7 @@ namespace System.Drawing.Internal
             }
         }
 
-        ~WindowsRegion() => Dispose(false);
+        ~WindowsRegion() { Dispose(false); }
 
         /// <summary>
         /// The native region handle. 

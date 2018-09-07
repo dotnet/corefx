@@ -176,7 +176,7 @@ namespace System.Drawing
         /// <summary>
         /// Cleans up Windows resources for this <see cref='System.Drawing.Pen'/>.
         /// </summary>
-        ~Pen() => Dispose(false);
+        ~Pen() { Dispose(false); }
 
         /// <summary>
         /// Gets or sets the width of this <see cref='System.Drawing.Pen'/>.

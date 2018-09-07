@@ -115,7 +115,7 @@ namespace System.Drawing
             }
         }
 
-        ~Region() => Dispose(false);
+        ~Region() { Dispose(false); }
 
         public void MakeInfinite()
         {

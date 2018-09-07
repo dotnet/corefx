@@ -31,7 +31,7 @@ namespace System.ComponentModel
         {
         }
 
-        ~MarshalByValueComponent() => Dispose(false);
+        ~MarshalByValueComponent() { Dispose(false); }
 
         /// <summary>
         /// Adds an event handler to listen to the Disposed event on the component.
