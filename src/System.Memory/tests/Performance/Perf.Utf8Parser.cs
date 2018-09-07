@@ -355,11 +355,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("147")]
         [InlineData("-111")]
         [InlineData("00000000000000000000123")]
-        private static void ByteSpanToSByte_Baseline(string text)
+        private static void StringToSByte_Baseline(string text)
         {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
-
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
@@ -454,11 +451,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
         [InlineData("-21474abcdefghijklmnop")]
-        private static void ByteSpanToInt32_Baseline(string text)
+        private static void StringToInt32_Baseline(string text)
         {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
-
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
