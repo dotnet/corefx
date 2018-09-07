@@ -1650,6 +1650,14 @@ namespace System.Diagnostics.Tracing
 
         private static Guid GenerateGuidFromName(string name)
         {
+            if (namespaceBytes == null)
+            {
+                namespaceBytes = new byte[] {
+                    0x48, 0x2C, 0x2D, 0xB2, 0xC3, 0x90, 0x47, 0xC8,
+                    0x87, 0xF8, 0x1A, 0x15, 0xBF, 0xC1, 0x30, 0xFB,
+                };
+            }
+
             byte[] bytes = Encoding.BigEndianUnicode.GetBytes(name);
             var hash = new Sha1ForNonSecretPurposes();
             hash.Start();
@@ -1777,9 +1785,15 @@ namespace System.Diagnostics.Tracing
                     if (dataType.IsEnum())
                     {
                         dataType = Enum.GetUnderlyingType(dataType);
+#if ES_BUILD_PN
+                        int dataTypeSize = (int)dataType.TypeHandle.ToEETypePtr().ValueTypeSize;
+#else
+                        int dataTypeSize = System.Runtime.InteropServices.Marshal.SizeOf(dataType);
+#endif
+                        if (dataTypeSize < sizeof(int))
+                            dataType = typeof(int);
                         goto Again;
                     }
-
 
                     // Everything else is marshaled as a string.
                     // ETW strings are NULL-terminated, so marshal everything up to the first
@@ -1791,7 +1805,6 @@ namespace System.Diagnostics.Tracing
                     }
 
                     return new string((char *)dataPointer);
-
                 }
                 finally
                 {
@@ -3748,11 +3761,12 @@ namespace System.Diagnostics.Tracing
         internal const string s_ActivityStartSuffix = "Start";
         internal const string s_ActivityStopSuffix = "Stop";
 
+        // WARNING: Do not depend upon initialized statics during creation of EventSources, as it is possible for creation of an EventSource to trigger
+        // creation of yet another EventSource.  When this happens, these statics may not yet be initialized.
+        // Rather than depending on initialized statics, use lazy initialization to ensure that the statics are initialized exactly when they are needed.
+
         // used for generating GUID from eventsource name
-        private static readonly byte[] namespaceBytes = new byte[] {
-            0x48, 0x2C, 0x2D, 0xB2, 0xC3, 0x90, 0x47, 0xC8,
-            0x87, 0xF8, 0x1A, 0x15, 0xBF, 0xC1, 0x30, 0xFB,
-        };
+        private static byte[] namespaceBytes;
 
 #endregion
     }
@@ -3860,6 +3874,16 @@ namespace System.Diagnostics.Tracing
         /// the EventListener has enabled events.  
         /// </summary>
         public event EventHandler<EventWrittenEventArgs> EventWritten;
+
+        static EventListener()
+        {
+#if FEATURE_PERFTRACING
+            // Ensure that RuntimeEventSource is initialized so that EventListeners get an opportunity to subscribe to its events.
+            // This is required because RuntimeEventSource never emit events on its own, and thus will never be initialized
+            // in the normal way that EventSources are initialized.
+            GC.KeepAlive(RuntimeEventSource.Log);
+#endif // FEATURE_PERFTRACING
+        }
 
         /// <summary>
         /// Create a new EventListener in which all events start off turned off (use EnableEvents to turn
@@ -4102,9 +4126,24 @@ namespace System.Diagnostics.Tracing
                 }
                 newEventSource.m_id = newIndex;
 
-                // Add every existing dispatcher to the new EventSource
-                for (EventListener listener = s_Listeners; listener != null; listener = listener.m_Next)
-                    newEventSource.AddListener(listener);
+#if DEBUG
+                // Disable validation of EventSource/EventListener connections in case a call to EventSource.AddListener
+                // causes a recursive call into this method.
+                bool previousValue = s_ConnectingEventSourcesAndListener;
+                s_ConnectingEventSourcesAndListener = true;
+                try
+                {
+#endif
+                    // Add every existing dispatcher to the new EventSource
+                    for (EventListener listener = s_Listeners; listener != null; listener = listener.m_Next)
+                        newEventSource.AddListener(listener);
+#if DEBUG
+                }
+                finally
+                {
+                    s_ConnectingEventSourcesAndListener = previousValue;
+                }
+#endif
 
                 Validate();
             }
@@ -4185,6 +4224,14 @@ namespace System.Diagnostics.Tracing
         [Conditional("DEBUG")]
         internal static void Validate()
         {
+#if DEBUG
+            // Don't run validation code if we're in the middle of modifying the connections between EventSources and EventListeners.
+            if (s_ConnectingEventSourcesAndListener)
+            {
+                return;
+            }
+#endif
+
             lock (EventListenersLock)
             {
                 // Get all listeners 
@@ -4274,18 +4321,30 @@ namespace System.Diagnostics.Tracing
                     // is created.
                     WeakReference[] eventSourcesSnapshot = s_EventSources.ToArray();
 
-                    for (int i = 0; i < eventSourcesSnapshot.Length; i++)
+#if DEBUG
+                    bool previousValue = s_ConnectingEventSourcesAndListener;
+                    s_ConnectingEventSourcesAndListener = true;
+                    try
                     {
-                        WeakReference eventSourceRef = eventSourcesSnapshot[i];
-                        EventSource eventSource = eventSourceRef.Target as EventSource;
-                        if (eventSource != null)
+#endif
+                        for (int i = 0; i < eventSourcesSnapshot.Length; i++)
                         {
-                            EventSourceCreatedEventArgs args = new EventSourceCreatedEventArgs();
-                            args.EventSource = eventSource;
-                            callback(this, args);
+                            WeakReference eventSourceRef = eventSourcesSnapshot[i];
+                            EventSource eventSource = eventSourceRef.Target as EventSource;
+                            if (eventSource != null)
+                            {
+                                EventSourceCreatedEventArgs args = new EventSourceCreatedEventArgs();
+                                args.EventSource = eventSource;
+                                callback(this, args);
+                            }
                         }
+#if DEBUG
                     }
-
+                    finally
+                    {
+                        s_ConnectingEventSourcesAndListener = previousValue;
+                    }
+#endif
                     Validate();
                 }
                 finally
@@ -4318,6 +4377,16 @@ namespace System.Diagnostics.Tracing
         /// Used to disallow reentrancy.  
         /// </summary>
         private static bool s_CreatingListener = false;
+
+#if DEBUG
+        /// <summary>
+        /// Used to disable validation of EventSource and EventListener connectivity.
+        /// This is needed when an EventListener is in the middle of being published to all EventSources
+        /// and another EventSource is created as part of the process.
+        /// </summary>
+        [ThreadStatic]
+        private static bool s_ConnectingEventSourcesAndListener = false;
+#endif
 
         /// <summary>
         /// Used to register AD/Process shutdown callbacks.
@@ -4657,7 +4726,7 @@ namespace System.Diagnostics.Tracing
             internal set;
         }
 
-        #region private
+#region private
         internal EventWrittenEventArgs(EventSource eventSource)
         {
             m_eventSource = eventSource;
@@ -5505,28 +5574,37 @@ namespace System.Diagnostics.Tracing
 
                     // write out each enum value 
                     FieldInfo[] staticFields = enumType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
+                    bool anyValuesWritten = false;
                     foreach (FieldInfo staticField in staticFields)
                     {
                         object constantValObj = staticField.GetRawConstantValue();
+
                         if (constantValObj != null)
                         {
-                            long hexValue;
-                            if (constantValObj is int)
-                                hexValue = ((int)constantValObj);
-                            else if (constantValObj is long)
-                                hexValue = ((long)constantValObj);
-                            else
-                                continue;
+                            ulong hexValue;
+                            if (constantValObj is ulong)
+                                hexValue = (ulong)constantValObj;    // This is the only integer type that can't be represented by a long.  
+                            else 
+                                hexValue = (ulong) Convert.ToInt64(constantValObj); // Handles all integer types except ulong.  
 
                             // ETW requires all bitmap values to be powers of 2.  Skip the ones that are not. 
                             // TODO: Warn people about the dropping of values. 
                             if (isbitmap && ((hexValue & (hexValue - 1)) != 0 || hexValue == 0))
                                 continue;
-
                             sb.Append("   <map value=\"0x").Append(hexValue.ToString("x", CultureInfo.InvariantCulture)).Append("\"");
                             WriteMessageAttrib(sb, "map", enumType.Name + "." + staticField.Name, staticField.Name);
                             sb.Append("/>").AppendLine();
+                            anyValuesWritten = true;
                         }
+                    }
+
+                    // the OS requires that bitmaps and valuemaps have at least one value or it reject the whole manifest.
+                    // To avoid that put a 'None' entry if there are no other values.  
+                    if (!anyValuesWritten)
+                    {
+                        sb.Append("   <map value=\"0x0\"");
+                        WriteMessageAttrib(sb, "map", enumType.Name + "." + "None", "None");
+                        sb.Append("/>").AppendLine();
                     }
                     sb.Append("  </").Append(mapKind).Append(">").AppendLine();
                 }
@@ -5997,4 +6075,3 @@ namespace System.Diagnostics.Tracing
 
 #endregion
 }
-

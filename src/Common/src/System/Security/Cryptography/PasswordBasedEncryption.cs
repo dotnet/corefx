@@ -609,7 +609,7 @@ namespace System.Security.Cryptography
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Rc2CbcParameters rc2Parameters = AsnSerializer.Deserialize<Rc2CbcParameters>(
+                Rc2CbcParameters rc2Parameters = Rc2CbcParameters.Decode(
                     encryptionScheme.Parameters.Value,
                     AsnEncodingRules.BER);
 
@@ -1062,6 +1062,16 @@ namespace System.Security.Cryptography
             }
 
             return (int)iterationCount;
+        }
+
+        internal static int NormalizeIterationCount(int iterationCount)
+        {
+            if (iterationCount <= 0 || iterationCount > IterationLimit)
+            {
+                throw new CryptographicException(SR.Argument_InvalidValue);
+            }
+
+            return iterationCount;
         }
     }
 }
