@@ -805,7 +805,7 @@ namespace System.Security.Cryptography.Pkcs
 
         private static CryptographicAttributeObject MakeAttribute(AttributeAsn attribute)
         {
-            Oid type = new Oid(attribute.AttrType.Value, attribute.AttrType.Value);
+            Oid type = new Oid(attribute.AttrType);
 
             ReadOnlyMemory<byte> attrSetBytes = attribute.AttrValues;
 
