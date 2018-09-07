@@ -176,11 +176,11 @@ namespace System.Security.Cryptography.Tests.Asn1
             const string BmpInputHex = "1E0400480069";
             const string Utf8InputHex = "0C024869";
 
-            var ds1 = AsnSerializer.Deserialize<DirectoryStringAsn>(
+            var ds1 = AsnSerializer.Deserialize<DirectoryString>(
                 BmpInputHex.HexToByteArray(),
                 AsnEncodingRules.DER);
 
-            var ds2 = AsnSerializer.Deserialize<DirectoryStringAsn>(
+            var ds2 = AsnSerializer.Deserialize<DirectoryString>(
                 Utf8InputHex.HexToByteArray(),
                 AsnEncodingRules.DER);
 
@@ -705,11 +705,40 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
     }
 
+    // https://tools.ietf.org/html/rfc5280#section-4.1.2.4
+    //
+    // DirectoryString ::= CHOICE {
+    //     teletexString           TeletexString (SIZE (1..MAX)),
+    //     printableString         PrintableString (SIZE (1..MAX)),
+    //     universalString         UniversalString (SIZE (1..MAX)),
+    //     utf8String              UTF8String (SIZE (1..MAX)),
+    //     bmpString               BMPString (SIZE (1..MAX))
+    // }
+    [Choice]
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DirectoryString
+    {
+        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.TeletexString)]
+        internal ReadOnlyMemory<byte>? TeletexString;
+
+        [PrintableString]
+        internal string PrintableString;
+
+        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.UniversalString)]
+        internal ReadOnlyMemory<byte>? UniversalString;
+
+        [UTF8String]
+        internal string Utf8String;
+
+        [BMPString]
+        internal string BmpString;
+    }
+
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
     internal struct FlexibleString
     {
-        public DirectoryStringAsn? DirectoryString;
+        public DirectoryString? DirectoryString;
 
         [IA5String]
         public string Ascii;
@@ -741,7 +770,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal sealed class FlexibleStringClassHybrid
     {
-        public DirectoryStringAsn? DirectoryString;
+        public DirectoryString? DirectoryString;
 
         [IA5String]
         public string Ascii;
@@ -881,5 +910,36 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         [Integer]
         public ReadOnlyMemory<byte> Second;
+    }
+
+    // https://tools.ietf.org/html/rfc3280#section-4.1.1.2
+    //
+    // AlgorithmIdentifier  ::=  SEQUENCE  {
+    //   algorithm OBJECT IDENTIFIER,
+    //   parameters ANY DEFINED BY algorithm OPTIONAL  }
+    [StructLayout(LayoutKind.Sequential)]
+    internal partial struct AlgorithmIdentifierAsn
+    {
+        internal static readonly ReadOnlyMemory<byte> ExplicitDerNull = new byte[] { 0x05, 0x00 };
+
+        [ObjectIdentifier(PopulateFriendlyName = true)]
+        public Oid Algorithm;
+
+        [AnyValue, OptionalValue]
+        public ReadOnlyMemory<byte>? Parameters;
+    }
+
+    // https://tools.ietf.org/html/rfc3280#section-4.1
+    //
+    // SubjectPublicKeyInfo  ::=  SEQUENCE  {
+    //   algorithm            AlgorithmIdentifier,
+    //   subjectPublicKey     BIT STRING  }
+    [StructLayout(LayoutKind.Sequential)]
+    internal partial struct SubjectPublicKeyInfoAsn
+    {
+        internal AlgorithmIdentifierAsn Algorithm;
+
+        [BitString]
+        internal ReadOnlyMemory<byte> SubjectPublicKey;
     }
 }
