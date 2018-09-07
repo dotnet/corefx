@@ -603,7 +603,7 @@ namespace Internal.Cryptography.Pal
 
             while (sequenceReader.HasData)
             {
-                AccessDescriptionAsn.Decode(sequenceReader, AccessDescriptionAsn description);
+                AccessDescriptionAsn.Decode(sequenceReader, out AccessDescriptionAsn description);
                 if (StringComparer.Ordinal.Equals(description.AccessMethod, recordTypeOid))
                 {
                     GeneralNameAsn name = description.AccessLocation;

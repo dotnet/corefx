@@ -217,14 +217,14 @@ namespace Internal.Cryptography.Pal
 
             while (sequenceReader.HasData)
             {
-                DistributionPointAsn.Decode(sequenceReader, DistributionPointAsn distributionPoint);
+                DistributionPointAsn.Decode(sequenceReader, out DistributionPointAsn distributionPoint);
 
                 // Only distributionPoint is supported
                 // Only fullName is supported, nameRelativeToCRLIssuer is for LDAP-based lookup.
-                if (distributionPoint.DistributionPoint != null &&
-                    distributionPoint.DistributionPoint.FullName != null)
+                if (distributionPoint.DistributionPoint.HasValue &&
+                    distributionPoint.DistributionPoint.Value.FullName != null)
                 {
-                    foreach (GeneralNameAsn name in distributionPoint.DistributionPoint.FullName)
+                    foreach (GeneralNameAsn name in distributionPoint.DistributionPoint.Value.FullName)
                     {
                         if (name.Uri != null &&
                             Uri.TryCreate(name.Uri, UriKind.Absolute, out Uri uri) &&
