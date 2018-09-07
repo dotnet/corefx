@@ -69,8 +69,9 @@ namespace System.Security.Cryptography
                 {
                     AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
                     AlgorithmIdentifierAsn algId = default;
-                    FromECPrivateKey(reader.PeekEncodedValue(), algId, out ECParameters ret);
-                    bytesRead = reader.PeekEncodedValue().Length;
+                    ReadOnlyMemory<byte> firstValue = reader.PeekEncodedValue();
+                    FromECPrivateKey(firstValue, algId, out ECParameters ret);
+                    bytesRead = firstValue.Length;
                     return ret;
                 }
             }

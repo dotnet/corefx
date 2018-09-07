@@ -501,10 +501,11 @@ namespace System.Security.Cryptography
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
-                    int localRead = reader.PeekEncodedValue().Length;
+                    ReadOnlyMemory<byte> firstValue = reader.PeekEncodedValue();
+                    int localRead = firstValue.Length;
 
                     AlgorithmIdentifierAsn ignored = default;
-                    RSAKeyFormatHelper.ReadRsaPublicKey(reader.PeekEncodedValue(), ignored, out RSAParameters rsaParameters);
+                    RSAKeyFormatHelper.ReadRsaPublicKey(firstValue, ignored, out RSAParameters rsaParameters);
 
                     ImportParameters(rsaParameters);
 
@@ -520,10 +521,11 @@ namespace System.Security.Cryptography
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
-                    int localRead = reader.PeekEncodedValue().Length;
+                    ReadOnlyMemory<byte> firstValue = reader.PeekEncodedValue();
+                    int localRead = firstValue.Length;
 
                     AlgorithmIdentifierAsn ignored = default;
-                    RSAKeyFormatHelper.FromPkcs1PrivateKey(reader.PeekEncodedValue(), ignored, out RSAParameters rsaParameters);
+                    RSAKeyFormatHelper.FromPkcs1PrivateKey(firstValue, ignored, out RSAParameters rsaParameters);
 
                     fixed (byte* dPin = rsaParameters.D)
                     fixed (byte* pPin = rsaParameters.P)
@@ -625,7 +627,7 @@ namespace System.Security.Cryptography
             bytesRead = localRead;
         }
 
-        internal static void ClearPrivateParameters(in RSAParameters rsaParameters)
+        private static void ClearPrivateParameters(in RSAParameters rsaParameters)
         {
             CryptographicOperations.ZeroMemory(rsaParameters.D);
             CryptographicOperations.ZeroMemory(rsaParameters.P);
