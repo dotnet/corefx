@@ -3403,7 +3403,7 @@ namespace System
                 }
 
                 length = (ushort)_string.Length;
-                // We need to be sure that there isn't ? after path
+                // We need to be sure that there isn't a '?' separated from the path by spaces.
                 if (_string == _originalUnicodeString)
                 {
                     GetLengthWithoutTrailingSpaces(_string, ref length, idx);
@@ -3535,7 +3535,7 @@ namespace System
                     }
 
                     length = (ushort)_string.Length;
-                    // We need to be sure there isn't # after ?
+                    // We need to be sure that there isn't a '#' separated from the query by spaces.
                     if (_string == _originalUnicodeString)
                     {
                         GetLengthWithoutTrailingSpaces(_string, ref length, idx);
@@ -4659,14 +4659,10 @@ namespace System
                 {
                     if (!needsEscaping) needsEscaping = true;
 
-                    // Check above validate only if we have valid Iri characters.
-                    // It's not enough to have valid canonical Iri uri.
-                    // If we have Iri uri(Flags.HasUnicode) we set Check.NotIriCanonical
-                    // also if current part(Path,Query,Fragment) has got valid Iri characters.
-                    // This will lead to invalidate Uri es.
-                    // "http://www.contoso.com/\u00E4/ path2/ param=val" is invalid Iri lead to E_PathNotCanonical
-                    // "http://www.contoso.com/\u00E4? param=val" is invalid Iri lead to E_QueryNotCanonical                    
-                    // "http://www.contoso.com/\u00E4?param=val# fragment" is invalid Iri lead to E_FragmentNotCanonical     
+                    // The check above validates only that we have valid IRI characters, which is not enough to
+                    // conclude that we have a valid canonical IRI.
+                    // If we have an IRI with Flags.HasUnicode, we need to set Check.NotIriCanonical so that the 
+                    // path, query, and fragment will be validated.
                     if ((_flags & Flags.HasUnicode) != 0 && _iriParsing)
                     {
                         res |= Check.NotIriCanonical;
