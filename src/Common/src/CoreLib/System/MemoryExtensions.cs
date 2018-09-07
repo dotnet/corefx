@@ -182,26 +182,22 @@ namespace System
             return true;
         }
 
-        // TODO: Is this optimization required?
-        private static readonly Type s_byte = typeof(byte);
-        private static readonly Type s_char = typeof(char);
-
         /// <summary>
         /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
-        public static bool Contains<T>(this Span<T> span, T value)
+        public static bool Contains<T>(this Span<T> span, in T value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == s_byte)
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.Contains(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
 
-            if (typeof(T) == s_char)
+            if (typeof(T) == typeof(char))
                 return SpanHelpers.Contains(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, char>(ref value),
@@ -217,16 +213,16 @@ namespace System
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Contains<T>(this ReadOnlySpan<T> span, T value)
+        public static bool Contains<T>(this ReadOnlySpan<T> span, in T value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == s_byte)
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.Contains(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
 
-            if (typeof(T) == s_char)
+            if (typeof(T) == typeof(char))
                 return SpanHelpers.Contains(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, char>(ref value),
