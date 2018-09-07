@@ -399,6 +399,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("107374182")] // standard parse
         [InlineData("2147483647")] // max value
         [InlineData("-2147483648")] // min value
+        [InlineData("214748364")]
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
         [InlineData("-21474abcdefghijklmnop")]
