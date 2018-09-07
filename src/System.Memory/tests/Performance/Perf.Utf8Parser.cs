@@ -672,7 +672,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("4212")] // standard parse
         [InlineData("0")] // min value
         [InlineData("65535")] // max value
-        private static void ParserUInt16(string text)
+        private static void ByteSpanToUInt16(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
@@ -692,31 +692,9 @@ namespace System.Buffers.Text.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("12837467")] // standard parse
-        [InlineData("0")] // min value
-        [InlineData("4294967295")] // max value
-        private static void ParserUInt32(string text)
-        {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        Utf8Parser.TryParse(utf8ByteSpan, out uint value, out int bytesConsumed);
-                        TestHelpers.DoNotIgnore(value, bytesConsumed);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData("12837467")] // standard parse
         [InlineData("-9223372036854775808")] // min value
         [InlineData("9223372036854775807")] // max value
-        private static void ParserInt64(string text)
+        private static void ByteSpanToInt64(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
@@ -728,28 +706,6 @@ namespace System.Buffers.Text.Tests
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         Utf8Parser.TryParse(utf8ByteSpan, out long value, out int bytesConsumed);
-                        TestHelpers.DoNotIgnore(value, bytesConsumed);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData("12837467")] // standard parse
-        [InlineData("0")] // min value
-        [InlineData("18446744073709551615")] // max value
-        private static void ParserUInt64(string text)
-        {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        Utf8Parser.TryParse(utf8ByteSpan, out ulong value, out int bytesConsumed);
                         TestHelpers.DoNotIgnore(value, bytesConsumed);
                     }
                 }
