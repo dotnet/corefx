@@ -490,33 +490,6 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData("0")]
-        [InlineData("10737")] // standard parse
-        [InlineData("32767")] // max value
-        [InlineData("-32768")] // min value
-        [InlineData("000000000000000000001235abcdfg")]
-        [InlineData("214abcdefghijklmnop")]
-        [InlineData("-2147abcdefghijklmnop")]
-        [InlineData("21474abcdefghijklmnop")]
-        private static void ByteSpanToInt16(string text)
-        {
-            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-            var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        Utf8Parser.TryParse(utf8ByteSpan, out short value, out int consumed);
-                        TestHelpers.DoNotIgnore(value, consumed);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
         private static void ByteSpanToInt16_VariableLength()
         {
             int textLength = s_Int16TextArray.Length;
@@ -632,7 +605,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("-21abcdefghijklmnop")]
         [InlineData("21abcdefghijklmnop")]
         [InlineData("000000000000000000123abcdfg")]
-        private static void ParserSByte(string text)
+        private static void ByteSpanToSByte(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
@@ -654,7 +627,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("42")] // standard parse
         [InlineData("0")] // min value
         [InlineData("255")] // max value
-        private static void ParserByte(string text)
+        private static void ByteSpanToByte(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
@@ -677,7 +650,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("-32768")] // min value
         [InlineData("32767")] // max value
         [InlineData("000000000000000000001235abcdfg")]
-        private static void ParserInt16(string text)
+        private static void ByteSpanToInt16(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
