@@ -44,7 +44,7 @@ namespace System.DirectoryServices.ActiveDirectory
         #endregion constructors
 
         #region IDisposable
-        ~DirectoryServer() => Dispose(false);
+        ~DirectoryServer() { Dispose(false); }
 
         public void Dispose()
         {

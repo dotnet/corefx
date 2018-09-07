@@ -56,7 +56,7 @@ namespace System.DirectoryServices.Protocols
                 SafeWaitHandle = handle;
             }
 
-            ~LdapAsyncWaitHandle() => SafeWaitHandle = null;
+            ~LdapAsyncWaitHandle() { SafeWaitHandle = null; }
         }
     }
 

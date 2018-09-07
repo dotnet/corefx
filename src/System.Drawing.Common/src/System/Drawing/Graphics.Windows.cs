@@ -212,7 +212,7 @@ namespace System.Drawing
             }
         }
 
-        ~Graphics() => Dispose(false);
+        ~Graphics() { Dispose(false); }
 
         private void FlushCore()
         {

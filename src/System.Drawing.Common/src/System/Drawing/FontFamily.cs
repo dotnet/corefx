@@ -128,7 +128,7 @@ namespace System.Drawing
             SetNativeFamily(nativeFamily);
         }
 
-        ~FontFamily() => Dispose(false);
+        ~FontFamily() { Dispose(false); }
 
         internal IntPtr NativeFamily => _nativeFamily;
 

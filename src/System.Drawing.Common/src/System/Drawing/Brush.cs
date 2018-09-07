@@ -63,6 +63,6 @@ namespace System.Drawing
             }
         }
 
-        ~Brush() => Dispose(false);
+        ~Brush() { Dispose(false); }
     }
 }

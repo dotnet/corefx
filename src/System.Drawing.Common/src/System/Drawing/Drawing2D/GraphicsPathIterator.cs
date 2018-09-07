@@ -58,7 +58,7 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        ~GraphicsPathIterator() => Dispose(false);
+        ~GraphicsPathIterator() { Dispose(false); }
 
         public int NextSubpath(out int startIndex, out int endIndex, out bool isClosed)
         {

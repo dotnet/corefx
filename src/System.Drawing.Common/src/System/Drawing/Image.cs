@@ -74,7 +74,7 @@ namespace System.Drawing
         /// <summary>
         /// Cleans up Windows resources for this <see cref='Image'/>.
         /// </summary>
-        ~Image() => Dispose(false);
+        ~Image() { Dispose(false); }
 
         /// <summary>
         /// Saves this <see cref='Image'/> to the specified file.

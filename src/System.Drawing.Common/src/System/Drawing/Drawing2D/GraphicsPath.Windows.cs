@@ -112,7 +112,7 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        ~GraphicsPath() => Dispose(false);
+        ~GraphicsPath() { Dispose(false); }
 
         public void Reset()
         {

@@ -59,6 +59,6 @@ namespace System.Drawing.Text
             }
         }
 
-        ~FontCollection() => Dispose(false);
+        ~FontCollection() { Dispose(false); }
     }
 }

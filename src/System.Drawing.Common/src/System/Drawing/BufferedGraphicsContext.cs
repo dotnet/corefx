@@ -52,7 +52,7 @@ namespace System.Drawing
             }
         }
 
-        ~BufferedGraphicsContext() => Dispose(false);
+        ~BufferedGraphicsContext() { Dispose(false); }
 
         /// <summary>
         /// Returns a BufferedGraphics that is matched for the specified target Graphics object.

@@ -221,7 +221,7 @@ namespace System.Drawing.Internal
         /// </summary>
         public static DeviceContext FromHwnd(IntPtr hwnd) => new DeviceContext(hwnd);
 
-        ~DeviceContext() => Dispose(false);
+        ~DeviceContext() { Dispose(false); }
 
         public void Dispose()
         {

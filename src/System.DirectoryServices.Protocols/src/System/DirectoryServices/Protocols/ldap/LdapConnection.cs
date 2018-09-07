@@ -118,7 +118,7 @@ namespace System.DirectoryServices.Protocols
             _clientCertificateRoutine = new QUERYCLIENTCERT(ProcessClientCertificate);
         }
 
-        ~LdapConnection() => Dispose(false);
+        ~LdapConnection() { Dispose(false); }
 
         public override TimeSpan Timeout
         {

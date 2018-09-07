@@ -20,7 +20,7 @@ namespace System.ComponentModel
         private ISite _site;
         private EventHandlerList _events;
 
-        ~Component() => Dispose(false);
+        ~Component() { Dispose(false); }
 
         /// <summary>
         ///     This property returns true if the component is in a mode that supports

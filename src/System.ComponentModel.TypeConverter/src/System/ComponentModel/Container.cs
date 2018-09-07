@@ -17,7 +17,7 @@ namespace System.ComponentModel
 
         private readonly object _syncObj = new object();
 
-        ~Container() => Dispose(false);
+        ~Container() { Dispose(false); }
 
         /// <summary>
         /// Adds the specified component to the <see cref='System.ComponentModel.Container'/>

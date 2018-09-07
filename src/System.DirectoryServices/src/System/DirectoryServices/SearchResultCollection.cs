@@ -194,7 +194,7 @@ namespace System.DirectoryServices
             }
         }
 
-        ~SearchResultCollection() => Dispose(false);
+        ~SearchResultCollection() { Dispose(false); }
 
         public IEnumerator GetEnumerator()
         {
