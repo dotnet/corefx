@@ -323,7 +323,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]]
+        [Benchmark(InnerIterationCount = InnerCount)]
         private static void ByteSpanToSByte_VariableLength()
         {
             int textLength = s_SByteTextArray.Length;
