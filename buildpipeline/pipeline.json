@@ -196,6 +196,40 @@
             "Platform": "x86",
             "SubType": "netcoreapp"
           }
+        },        
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x86",
+            "PB_BuildArguments": "-framework=netcoreappaot -buildArch=x86 -$(PB_ConfigurationGroup) -- /p:SignType=$(PB_SignType) /p:RuntimeOS=win10 /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
+            "PB_BuildTestsArguments": "-framework=netcoreappaot -buildArch=x86 -$(PB_ConfigurationGroup) -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x86 /p:RuntimeOS=win10 /p:TargetGroup=netcoreappaot /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
+            "PB_TargetQueue": "Windows.10.Amd64.ClientRS4",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x86 /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Windows_NT /p:\"HelixJobType=test/functional/ilc/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86",
+            "SubType": "netcoreappaot"
+          }
+        },
+        {
+          "Name": "DotNet-CoreFx-Trusted-Windows",
+          "Parameters": {
+            "PB_Platform": "x64",
+            "PB_BuildArguments": "-framework=netcoreappaot -buildArch=x64 -$(PB_ConfigurationGroup) -- /p:SignType=$(PB_SignType) /p:RuntimeOS=win10 /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
+            "PB_BuildTestsArguments": "-framework=netcoreappaot -buildArch=x64 -$(PB_ConfigurationGroup) -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
+            "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:TargetGroup=netcoreappaot /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
+            "PB_TargetQueue": "Windows.10.Amd64.ClientRS4",
+            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Windows_NT /p:\"HelixJobType=test/functional/ilc/\""
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64",
+            "SubType": "netcoreappaot"
+          }
         },
         {
           "Name": "DotNet-CoreFx-Trusted-Windows",
