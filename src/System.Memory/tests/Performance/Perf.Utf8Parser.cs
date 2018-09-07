@@ -354,6 +354,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("-128")] // min value
         [InlineData("147")]
         [InlineData("-111")]
+        [InlineData("-21abcdefghijklmnop")]
+        [InlineData("21abcdefghijklmnop")]
         [InlineData("00000000000000000000123")]
         private static void StringToSByte_Baseline(string text)
         {
@@ -598,13 +600,14 @@ namespace System.Buffers.Text.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("0")]
-        [InlineData("105")]
         [InlineData("107")] // standard parse
         [InlineData("127")] // max value
         [InlineData("-128")] // min value
+        [InlineData("147")]
+        [InlineData("-111")]
         [InlineData("-21abcdefghijklmnop")]
         [InlineData("21abcdefghijklmnop")]
-        [InlineData("000000000000000000123abcdfg")]
+        [InlineData("00000000000000000000123")]
         private static void ByteSpanToSByte(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
@@ -714,7 +717,7 @@ namespace System.Buffers.Text.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("Fri, 30 Jun 2000 03:15:45 GMT")] // standard parse
-        private static void ParserDateTimeOffsetR(string text)
+        private static void ByteSpanToTimeOffsetR(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
