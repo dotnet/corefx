@@ -1937,7 +1937,7 @@ namespace System.Security.Cryptography.Asn1
         public Oid ReadObjectIdentifier(Asn1Tag expectedTag, bool skipFriendlyName=false)
         {
             string oidValue = ReadObjectIdentifierAsString(expectedTag, out int bytesRead);
-            Oid oid = skipFriendlyName ? new Oid(oidValue, oidValue) : new Oid(oidValue);
+            Oid oid = skipFriendlyName ? new Oid(oidValue, oidValue) : new Oid(oidValue, null);
 
             // Don't slice until the return object has been created.
             _data = _data.Slice(bytesRead);
