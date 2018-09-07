@@ -34,6 +34,26 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { d };
 
             yield return new object[] { new KeyValuePair<string, int>("key", 10) };
+
+#if !netstandard // TODO: Enable for netstandard2.1
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
+            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
+            Type collectibleType = typeBuilder.CreateType();
+            object collectibleObject = Activator.CreateInstance(collectibleType);
+            yield return new object[] { collectibleObject };
+            
+            ConstructorInfo comImportConstructor = typeof(ComImportAttribute).GetConstructor(new Type[0]);
+            var comImportAttributeBuilder = new CustomAttributeBuilder(comImportConstructor, new object[0]);
+
+            AssemblyBuilder comImportAssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
+            ModuleBuilder comImportModuleBuilder = comImportAssemblyBuilder.DefineDynamicModule("Module");
+            TypeBuilder comImportTypeBuilder = comImportModuleBuilder.DefineType("Type");
+            comImportTypeBuilder.SetCustomAttribute(comImportAttributeBuilder);
+
+            Type collectibleComImportObject = comImportTypeBuilder.CreateType();
+            yield return new object[] { collectibleComImportObject };
+#endif
         }
 
         [Theory]
