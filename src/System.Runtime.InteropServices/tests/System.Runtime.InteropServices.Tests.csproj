@@ -63,8 +63,6 @@
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateProgIdForTypeTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetComObjectDataTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetDelegateForFunctionPointerTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetEndComSlotTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetEndComSlotTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionCodeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionForHRTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetFunctionPointerForDelegateTests.cs" />
@@ -132,17 +130,15 @@
     <Compile Include="System\Runtime\InteropServices\AutomationProxyAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ImportedFromTypeLibAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ManagedToNativeComInteropStubAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\ChangeWrapperHandleStrengthTests.nonnetstandard.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateGuidForTypeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GenerateProgIdForTypeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetComObjectDataTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetEndComSlotTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetEndComSlotTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetExceptionPointersTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\GetHINSTANCETests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetIDispatchForObjectTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetNativeVariantForObjectTests.nonnetstandard.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\GetStartComSlotTests.nonnetstandard.cs" />
+    <Compile Include="System\Runtime\InteropServices\Marshal\GetIDispatchForObjectTests.cs" />    
     <Compile Include="System\Runtime\InteropServices\Marshal\GetTypedObjectForIUnknownTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\Marshal\IsComObjectTests.nonnetstandard.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsTypeVisibleFromComTests.cs" />
     <Compile Include="System\Runtime\InteropServices\Marshal\IsTypeVisibleFromComTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\Marshal\SetComObjectDataTests.cs" />
