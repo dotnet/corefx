@@ -39,9 +39,10 @@ namespace System.Security.Cryptography
             ret.G = parms.G.ExportKeyParameter(ret.P.Length);
 
             AsnReader reader = new AsnReader(xBytes, AsnEncodingRules.DER);
-            BigInteger x = reader.GetInteger();
-            reader.ThrowIfNotEmpty();
+            // Force a positive interpretation because Windows sometimes writes negative numbers.
+            BigInteger x = new BigInteger(reader.GetIntegerBytes().Span, isUnsigned: true, isBigEndian: true);
             ret.X = x.ExportKeyParameter(ret.Q.Length);
+            reader.ThrowIfNotEmpty();
 
             // The public key is not contained within the format, calculate it.
             BigInteger y = BigInteger.ModPow(parms.G, x, parms.P);
