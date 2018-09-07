@@ -83,19 +83,12 @@ namespace System
             return CompareInfo.EqualsOrdinalIgnoreCase(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), span.Length);
         }
 
-        // TODO https://github.com/dotnet/corefx/issues/27526
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool Contains(this ReadOnlySpan<char> source, char value)
-        {
-            for (int i = 0; i < source.Length; i++)
-            {
-                if (source[i] == value)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+            => SpanHelpers.Contains(
+                ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(source)),
+                Unsafe.As<T, char>(ref value),
+                source.Length);
 
         /// <summary>
         /// Compares the specified <paramref name="span"/> and <paramref name="other"/> using the specified <paramref name="comparisonType"/>,

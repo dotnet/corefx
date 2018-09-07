@@ -15,7 +15,7 @@ using System.Numerics;
 
 namespace System
 {
-    internal static partial class SpanHelpers
+    internal static partial class SpanHelpers // .Char
     {
         public static unsafe int SequenceCompareTo(ref char first, int firstLength, ref char second, int secondLength)
         {
@@ -79,6 +79,96 @@ namespace System
 
         Equal:
             return lengthDelta;
+        }
+
+        // Code adapted from IndexOf(...)
+        public static unsafe bool Contains(ref char searchSpace, char value, int length)
+        {
+            Debug.Assert(length >= 0);
+
+            if (length == 0) return false;
+
+            fixed (char* pChars = &searchSpace)
+            {
+                char* pCh = pChars;
+                char* pEndCh = pCh + length;
+
+#if !netstandard11
+                if (Vector.IsHardwareAccelerated && length >= Vector<ushort>.Count * 2)
+                {
+                    // Figure out how many characters to read sequentially until we are vector aligned
+                    // This is equivalent to:
+                    //         unaligned = ((int)pCh % Unsafe.SizeOf<Vector<ushort>>()) / elementsPerByte
+                    //         length = (Vector<ushort>.Count - unaligned) % Vector<ushort>.Count
+                    const int elementsPerByte = sizeof(ushort) / sizeof(byte);
+                    int unaligned = ((int)pCh & (Unsafe.SizeOf<Vector<ushort>>() - 1)) / elementsPerByte;
+                    length = (Vector<ushort>.Count - unaligned) & (Vector<ushort>.Count - 1);
+                }
+
+                SequentialScan:
+#endif
+                while (length >= 4)
+                {
+                    length -= 4;
+
+                    if (value == *pCh ||
+                        value == *(pCh + 1) ||
+                        value == *(pCh + 2) ||
+                        value == *(pCh + 3))
+                    {
+                        return true;
+                    }
+
+                    pCh += 4;
+                }
+
+                while (length > 0)
+                {
+                    length--;
+
+                    if (value == *pCh)
+                        return true;
+
+                    pCh++;
+                }
+
+#if !netstandard11
+                // We get past SequentialScan only if IsHardwareAccelerated is true. However, we still have the redundant check to allow
+                // the JIT to see that the code is unreachable and eliminate it when the platform does not have hardware accelerated.
+                if (Vector.IsHardwareAccelerated && pCh < pEndCh)
+                {
+                    // Get the highest multiple of Vector<ushort>.Count that is within the search space.
+                    // That will be how many times we iterate in the loop below.
+                    // This is equivalent to: length = Vector<ushort>.Count * ((int)(pEndCh - pCh) / Vector<ushort>.Count)
+                    length = (int)((pEndCh - pCh) & ~(Vector<ushort>.Count - 1));
+
+                    // Get comparison Vector
+                    Vector<ushort> vComparison = new Vector<ushort>(value);
+
+                    while (length > 0)
+                    {
+                        // Using Unsafe.Read instead of ReadUnaligned since the search space is pinned and pCh is always vector aligned
+                        Debug.Assert(((int)pCh & (Unsafe.SizeOf<Vector<ushort>>() - 1)) == 0);
+                        Vector<ushort> vMatches = Vector.Equals(vComparison, Unsafe.Read<Vector<ushort>>(pCh));
+                        if (Vector<ushort>.Zero.Equals(vMatches))
+                        {
+                            pCh += Vector<ushort>.Count;
+                            length -= Vector<ushort>.Count;
+                            continue;
+                        }
+
+                        return true;
+                    }
+
+                    if (pCh < pEndCh)
+                    {
+                        length = (int)(pEndCh - pCh);
+                        goto SequentialScan;
+                    }
+                }
+#endif
+                return false;
+            }
         }
 
         public static unsafe int IndexOf(ref char searchSpace, char value, int length)

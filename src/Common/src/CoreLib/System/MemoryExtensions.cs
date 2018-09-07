@@ -182,6 +182,59 @@ namespace System
             return true;
         }
 
+        // TODO: Is this optimization required?
+        private static readonly Type s_byte = typeof(byte);
+        private static readonly Type s_char = typeof(char);
+
+        /// <summary>
+        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        public static bool Contains<T>(this Span<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == s_byte)
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+
+            if (typeof(T) == s_char)
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
+                    span.Length);
+
+            return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<T>(this ReadOnlySpan<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == s_byte)
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+
+            if (typeof(T) == s_char)
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
+                    span.Length);
+            
+            return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
+        }
+
         /// <summary>
         /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
         /// </summary>
@@ -196,6 +249,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -238,6 +292,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -322,6 +377,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -364,6 +420,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
