@@ -329,6 +329,7 @@ namespace Internal.Cryptography.Pal
             AsnReader x500NameReader = new AsnReader(name.RawData, AsnEncodingRules.DER);
             AsnReader sequenceReader = x500NameReader.ReadSequence();
             var rdnReaders = new Stack<AsnReader>();
+            x500NameReader.ThrowIfNotEmpty();
 
             while (sequenceReader.HasData)
             {

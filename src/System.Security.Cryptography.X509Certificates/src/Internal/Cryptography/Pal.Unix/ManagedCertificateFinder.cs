@@ -137,6 +137,7 @@ namespace Internal.Cryptography.Pal
                         // Try a V1 template structure, just a string:
                         AsnReader reader = new AsnReader(ext.RawData, AsnEncodingRules.DER);
                         string decodedName = reader.ReadDirectoryString();
+                        reader.ThrowIfNotEmpty();
 
                         // If this doesn't match, maybe a V2 template will
                         if (StringComparer.OrdinalIgnoreCase.Equals(templateName, decodedName))

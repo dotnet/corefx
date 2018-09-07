@@ -83,8 +83,9 @@ namespace Internal.Cryptography.Pal
 
                 if (policy.PolicyMapping != null)
                 {
-                    foreach (CertificatePolicyMappingAsn mapping in policy.PolicyMapping)
+                    for (int iMapping = 0; iMapping < policy.PolicyMapping.Count; iMapping++)
                     {
+                        CertificatePolicyMappingAsn mapping = policy.PolicyMapping[iMapping];
                         if (StringComparer.Ordinal.Equals(mapping.IssuerDomainPolicy, oidToCheck))
                         {
                             nextOid = mapping.SubjectDomainPolicy;

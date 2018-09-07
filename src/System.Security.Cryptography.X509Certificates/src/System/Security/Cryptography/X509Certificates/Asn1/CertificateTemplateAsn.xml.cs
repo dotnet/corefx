@@ -10,7 +10,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     {
         internal string TemplateID;
         internal int TemplateMajorVersion;
-        internal int? templateMinorVersion;
+        internal int? TemplateMinorVersion;
       
         internal void Encode(AsnWriter writer)
         {
@@ -24,9 +24,9 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
             writer.WriteObjectIdentifier(TemplateID);
             writer.WriteInteger(TemplateMajorVersion);
 
-            if (templateMinorVersion.HasValue)
+            if (TemplateMinorVersion.HasValue)
             {
-                writer.WriteInteger(templateMinorVersion.Value);
+                writer.WriteInteger(TemplateMinorVersion.Value);
             }
 
             writer.PopSequence(tag);
@@ -73,9 +73,9 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
             if (sequenceReader.HasData && sequenceReader.PeekTag().HasSameClassAndValue(Asn1Tag.Integer))
             {
 
-                if (sequenceReader.TryReadInt32(out int tmptemplateMinorVersion))
+                if (sequenceReader.TryReadInt32(out int tmpTemplateMinorVersion))
                 {
-                    decoded.templateMinorVersion = tmptemplateMinorVersion;
+                    decoded.TemplateMinorVersion = tmpTemplateMinorVersion;
                 }
                 else
                 {

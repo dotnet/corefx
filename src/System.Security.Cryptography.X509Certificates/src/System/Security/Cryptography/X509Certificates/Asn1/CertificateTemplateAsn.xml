@@ -17,5 +17,5 @@
   -->
   <asn:ObjectIdentifier name="TemplateID" backingType="string" />
   <asn:Integer name="TemplateMajorVersion" backingType="int" />
-  <asn:Integer name="templateMinorVersion" backingType="int" optional="true" />
+  <asn:Integer name="TemplateMinorVersion" backingType="int" optional="true" />
 </asn:Sequence>
