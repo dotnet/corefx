@@ -7,6 +7,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO.Ports;
+using System.Net.Sockets;
 
 namespace System.IO.Ports
 {
@@ -26,6 +27,7 @@ namespace System.IO.Ports
         private bool _rtsEnable = false;
         private int _readTimeout = 0;
         private int _writeTimeout = 0;
+        private byte[] _tempBuf = new byte[1];
 
         // three different events, also wrapped by SerialPort.
         internal event SerialDataReceivedEventHandler DataReceived;     // called when one character is received.
@@ -41,13 +43,29 @@ namespace System.IO.Ports
         public override int ReadTimeout
         {
             get { return _readTimeout; }
-            set { _readTimeout = value; }
+            set
+            {
+                if (value < 0 && value != SerialPort.InfiniteTimeout)
+                    throw new ArgumentOutOfRangeException(nameof(ReadTimeout), SR.ArgumentOutOfRange_Timeout);
+                if (_handle == null) {
+                    throw new ObjectDisposedException(SR.Port_not_open);
+                }
+                _readTimeout = value;
+            }
         }
 
         public override int WriteTimeout
         {
             get { return _writeTimeout; }
-            set { _writeTimeout = value; }
+            set
+            {
+                if (value < 0 && value != SerialPort.InfiniteTimeout)
+                    throw new ArgumentOutOfRangeException(nameof(ReadTimeout), SR.ArgumentOutOfRange_Timeout);
+                if (_handle == null) {
+                    throw new ObjectDisposedException(SR.Port_not_open);
+                }
+                _writeTimeout = value;
+            }
         }
 
         public override bool CanRead
@@ -112,7 +130,13 @@ namespace System.IO.Ports
             get { return _inBreak; }
             set
             {
-                throw new System.PlatformNotSupportedException(SR.PlatformNotSupported_IOPorts);
+                if (value)
+                {
+                    // Unlike Windows, there is no infinite break and positive value is platform dependent.
+                    // As best guess, send break with default duration.
+                    Interop.Termios.TermiosSendBreak(_handle, 0);
+                }
+                _inBreak = value;
             }
         }
 
@@ -344,32 +368,10 @@ namespace System.IO.Ports
             return ReadByte(ReadTimeout);
         }
 
-        internal unsafe int ReadByte(int timeout)
+        internal int ReadByte(int timeout)
         {
-            if (_handle == null) throw new ObjectDisposedException(SR.Port_not_open);
-            if (timeout > 0)
-            {
-                Interop.Sys.Poll(_handle, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLERR, timeout, out Interop.Sys.PollEvents events);
-                if ((events & (Interop.Sys.PollEvents.POLLERR | Interop.Sys.PollEvents.POLLNVAL)) != 0)
-                {
-                    throw new IOException();
-                }
-
-                if ((events & Interop.Sys.PollEvents.POLLIN) == 0)
-                {
-                    throw new TimeoutException();
-                }
-            }
-
-            byte* tempBuf = stackalloc byte[1];
-
-            int numBytes = Interop.Sys.Read(_handle, tempBuf, 1);
-            if (numBytes != 1)
-            {
-                throw new IOException();
-            }
-
-            return tempBuf[0];
+            Read(_tempBuf, 0, 1, timeout);
+            return _tempBuf[0];
         }
 
         public override int Read(byte[] array, int offset, int count)
@@ -379,6 +381,7 @@ namespace System.IO.Ports
 
         internal unsafe int Read(byte[] array, int offset, int count, int timeout)
         {
+            if (_handle == null) throw new ObjectDisposedException(SR.Port_not_open);
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
             if (offset < 0)
@@ -389,7 +392,7 @@ namespace System.IO.Ports
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             if (count == 0) return 0; // return immediately if no bytes requested; no need for overhead.
 
-            if (timeout > 0)
+            if (timeout != 0)
             {
                 Interop.Sys.PollEvents events = Interop.Sys.PollEvents.POLLNONE;
                 Interop.Sys.Poll(_handle, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLERR, timeout,out events);
@@ -411,8 +414,14 @@ namespace System.IO.Ports
                 numBytes = Interop.Sys.Read(_handle, bufPtr + offset, count);
             }
 
-            if (numBytes == 0)
-                throw new TimeoutException();
+            if (numBytes < 0)
+            {
+                if (Interop.Error.EWOULDBLOCK == Interop.Sys.GetLastError())
+                {
+                    throw new TimeoutException();
+                }
+                throw new IOException();
+            }
 
             return numBytes;
         }
@@ -435,10 +444,9 @@ namespace System.IO.Ports
             if (count == 0) return; // no need to expend overhead in creating asyncResult, etc.
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
-            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, "Serial Stream Write - write timeout is " + timeout);
 
             // check for open handle, though the port is always supposed to be open
-            if (_handle == null) throw new IOException(); //InternalResources.FileNotOpen();
+            if (_handle == null) throw new ObjectDisposedException(SR.Port_not_open);
 
             int numBytes = 0;
 
@@ -539,10 +547,6 @@ namespace System.IO.Ports
                 {
                     RtsEnable = rtsEnable;
                 }
-
-                PinChanged = null;
-                ErrorReceived = null;
-                DataReceived = null;
             }
             catch
             {
@@ -565,8 +569,10 @@ namespace System.IO.Ports
             // Close() or not Dispose()
             if (_handle != null && !_handle.IsInvalid)
             {
+                   Interop.Sys.Shutdown(_handle, SocketShutdown.Both);
                    _handle.Close();
                     _handle = null;
+                    base.Dispose(disposing);
                     if (PinChanged != null || ErrorReceived != null || DataReceived != null)
                     {
                     }

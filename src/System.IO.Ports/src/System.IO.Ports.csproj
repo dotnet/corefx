@@ -27,7 +27,7 @@
   </ItemGroup>  
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="System\IO\Ports\InternalResources.cs" />
-    <Compile Include="System\IO\Ports\SerialStream.cs" />
+    <Compile Include="System\IO\Ports\SerialStream.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DCB.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.DCB.cs</Link>
     </Compile>
@@ -160,6 +160,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Poll.cs">
       <Link>Interop\Unix\System.Native\Interop.Poll.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Shutdown.cs">
+      <Link>Interop\Unix\System.Native\Interop.Shutdown.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
