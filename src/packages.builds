@@ -27,6 +27,9 @@
     <Project Include="$(MSBuildThisFileDirectory)System.Drawing.Common\pkg\System.Drawing.Common.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Security.Cryptography.Pkcs\pkg\System.Security.Cryptography.Pkcs.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
