@@ -248,7 +248,16 @@ namespace System.Security.Cryptography.Pkcs
             {
                 throw new CryptographicException(SR.Cryptography_Cms_Sign_Empty_Content);
             }
-            
+
+            if (signer.SignerIdentifierType != SubjectIdentifierType.NoSignature &&
+                signer.Certificate == null)
+            {
+                if (silent)
+                    throw new InvalidOperationException(SR.Cryptography_Cms_RecipientCertificateNotFound);
+                else
+                    throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
+            }
+
             // If we had content already, use that now.
             // (The second signer doesn't inherit edits to signedCms.ContentInfo.Content)
             ReadOnlyMemory<byte> content = _heldContent ?? ContentInfo.Content;

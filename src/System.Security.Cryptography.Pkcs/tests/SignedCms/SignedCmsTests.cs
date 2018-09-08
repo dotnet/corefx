@@ -687,6 +687,19 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        public static void CannotSignWithNoCertificate()
+        {
+            ContentInfo ci = new ContentInfo(new byte[1]);
+            SignedCms cms = new SignedCms(ci);
+
+            // Should throw when no certificate is specified
+            Assert.Throws<InvalidOperationException>(() => cms.ComputeSignature(new CmsSigner(SubjectIdentifierType.IssuerAndSerialNumber), true));
+
+            // Should not throw when no certificate is specified
+            cms.ComputeSignature(new CmsSigner(SubjectIdentifierType.NoSignature));
+        }
+
+        [Fact]
         public static void EncodeDoesNotPreserveOrder_DecodeDoes()
         {
             SignedCms cms = new SignedCms();
