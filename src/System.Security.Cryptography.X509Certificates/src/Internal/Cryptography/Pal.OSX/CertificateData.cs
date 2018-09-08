@@ -343,7 +343,7 @@ namespace Internal.Cryptography.Pal
                 {
                     AsnReader tavReader = rdnReader.ReadSequence();
                     string oid = tavReader.ReadObjectIdentifierAsString();
-                    string value = tavReader.ReadDirectoryString();
+                    string value = tavReader.ReadDirectoryOrIA5String();
                     yield return new KeyValuePair<string, string>(oid, value);
                 }
             }

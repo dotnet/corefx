@@ -212,7 +212,7 @@ namespace Internal.Cryptography
 
     internal static class DictionaryStringHelper
     {
-        internal static string ReadDirectoryString(this AsnReader tavReader)
+        internal static string ReadDirectoryOrIA5String(this AsnReader tavReader)
         {
             Asn1Tag tag = tavReader.PeekTag();
 
