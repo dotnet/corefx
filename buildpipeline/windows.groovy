@@ -46,7 +46,7 @@ simpleNode('windows.10.amd64.clientrs4.devex.open') {
         if (submitToHelix) {
             archiveTests = 'true'
         }
-        if (submitToHelix || params.TGroup == 'uapaot') {
+        if (submitToHelix || params.TGroup == 'uapaot' || params.TGroup == 'netcoreappaot') {
             additionalArgs += ' -SkipTests'
         }
         if (params.TGroup != 'all') {
