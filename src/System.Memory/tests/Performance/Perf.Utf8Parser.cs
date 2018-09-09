@@ -105,7 +105,9 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("18446744073709551615")] // max value
         [InlineData("0")] // min value
-        private static void BaselineStringToUInt64(string text)
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
+        private static void StringToUInt64_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -124,6 +126,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("18446744073709551615")] // max value
         [InlineData("0")] // min value
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
         private static void StringToUInt64(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -143,7 +147,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("abcdef")] // standard parse
         [InlineData("ffffffffffffffff")] // max value
         [InlineData("0")] // min value
-        private static void BaselineStringToUInt64Hex(string text)
+        private static void StringToUInt64Hex_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -162,6 +166,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("18446744073709551615")] // max value
         [InlineData("0")] // min value
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
         private static unsafe void ByteSpanToUInt64(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
@@ -204,7 +210,9 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("4294967295")] // max value
         [InlineData("0")] // min value
-        private static void BaselineStringToUInt32(string text)
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
+        private static void StringToUInt32_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -220,7 +228,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static void SimpleStringToUInt32_VariableLength()
+        private static void StringToUInt32_VariableLength()
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -239,6 +247,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("2134567890")] // standard parse
         [InlineData("4294967295")] // max value
         [InlineData("0")] // min value
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
         private static unsafe void ByteSpanToUInt32(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
@@ -450,7 +460,6 @@ namespace System.Buffers.Text.Tests
         [InlineData("107374182")] // standard parse
         [InlineData("2147483647")] // max value
         [InlineData("-2147483648")] // min value
-        [InlineData("214748364")]
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
         [InlineData("-21474abcdefghijklmnop")]
@@ -470,7 +479,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static void ByteSpanToInt32_VariableLength_Baseline()
+        private static void StringToInt32_VariableLength_Baseline()
         {
             int textLength = s_Int32TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -565,7 +574,7 @@ namespace System.Buffers.Text.Tests
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("True")]
         [InlineData("False")]
-        private static void BaselineStringToBool(string text)
+        private static void StringToBool_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
