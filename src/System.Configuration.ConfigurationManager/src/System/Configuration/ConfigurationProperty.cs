@@ -134,7 +134,7 @@ namespace System.Configuration
 
                 if (collectionAttribute != null)
                 {
-                    if (collectionAttribute.AddItemName.IndexOf(',') == -1) AddElementName = collectionAttribute.AddItemName;
+                    if (!collectionAttribute.AddItemName.Contains(',')) AddElementName = collectionAttribute.AddItemName;
                     RemoveElementName = collectionAttribute.RemoveItemName;
                     ClearElementName = collectionAttribute.ClearItemsName;
                 }

@@ -95,7 +95,7 @@ namespace System.Net
             if (lp.Host != "*" && lp.Host != "+" && Uri.CheckHostName(lp.Host) == UriHostNameType.Unknown)
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_listener_host);
 
-            if (lp.Path.IndexOf('%') != -1)
+            if (lp.Path.Contains('%'))
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)

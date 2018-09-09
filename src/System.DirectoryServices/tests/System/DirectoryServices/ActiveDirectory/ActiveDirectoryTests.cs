@@ -349,7 +349,7 @@ namespace System.DirectoryServices.Tests
                     Assert.NotNull(controller.SiteName);
 
                     Assert.True(controller.OSVersion.IndexOf("Windows", StringComparison.OrdinalIgnoreCase) >= 0);
-                    Assert.True(controller.IPAddress.IndexOf('.') >= 0);
+                    Assert.True(controller.IPAddress.Contains('.'));
                 }
             }
         }
@@ -386,7 +386,7 @@ namespace System.DirectoryServices.Tests
                     {
                         Assert.NotNull(ds.InboundConnections);
                         Assert.NotNull(ds.OutboundConnections);
-                        Assert.True(ds.IPAddress.IndexOf('.') >= 0);
+                        Assert.True(ds.IPAddress.Contains('.'));
                         Assert.Equal(s.Name, ds.SiteName);
 
                         Assert.True(ds.Partitions.Count > 0);

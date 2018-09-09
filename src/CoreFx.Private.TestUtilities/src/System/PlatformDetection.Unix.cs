@@ -130,7 +130,7 @@ namespace System
 
         static Version ToVersion(string versionString)
         {
-            if (versionString.IndexOf('.') != -1)
+            if (versionString.Contains('.'))
                 return new Version(versionString);
 
             // minor version is required by Version

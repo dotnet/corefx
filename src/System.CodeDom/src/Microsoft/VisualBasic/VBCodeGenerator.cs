@@ -866,7 +866,7 @@ namespace Microsoft.VisualBasic
                 string typeName = GetTypeOutput(e.CreateType);
                 Output.Write(typeName);
 
-                if (typeName.IndexOf('(') == -1)
+                if (!typeName.Contains('('))
                 {
                     Output.Write("()");
                 }

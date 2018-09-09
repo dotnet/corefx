@@ -311,7 +311,7 @@ namespace System.Net
                 {
                     _hostHasPort = true;
                 }
-                else if (value.IndexOf(':') == -1)
+                else if (!value.Contains(':'))
                 {
                     _hostHasPort = false;
                 }
