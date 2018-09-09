@@ -109,6 +109,20 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void SetUptoNanoSeconds()
+        {
+            string firstFile = GetTestFilePath();
+            File.WriteAllText(firstFile, "");
+
+            DateTime dateTime = DateTime.UtcNow;
+            File.SetLastWriteTimeUtc(firstFile, dateTime);
+            long ticks = File.GetLastWriteTimeUtc(firstFile).Ticks;
+
+            Assert.Equal(dateTime, File.GetLastWriteTimeUtc(firstFile));
+            Assert.True(dateTime.Ticks == ticks, $"First File Ticks\t{ticks}\nSecond File Ticks\t{dateTime.Ticks}");
+        }
+
+        [Fact]
         public void SetLastAccessTimeTicks()
         {
             string firstFile = GetTestFilePath();

@@ -204,7 +204,7 @@ namespace System.IO
             Span<Interop.Sys.TimeSpec> buf = stackalloc Interop.Sys.TimeSpec[2];
 
             long seconds = time.ToUnixTimeSeconds();
-            long nanoseconds = (time.ToUnixTimeMilliseconds() - seconds * 1000) * 1_000_000;
+            long nanoseconds = (time.UtcDateTime.Ticks - DateTimeOffset.UnixEpoch.Ticks) * NanosecondsPerTick - seconds * 1_000_000_000;
 
             if (isAccessTime)
             {
