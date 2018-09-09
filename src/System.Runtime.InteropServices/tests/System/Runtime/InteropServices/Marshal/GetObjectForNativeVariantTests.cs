@@ -44,6 +44,7 @@ namespace System.Runtime.InteropServices.Tests
             [FieldOffset(0)] internal IntPtr _pvarVal;
             [FieldOffset(0)] internal IntPtr _byref;
             [FieldOffset(0)] internal Record _record;
+            [FieldOffset(0)] internal IntPtr _parray;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -65,6 +66,7 @@ namespace System.Runtime.InteropServices.Tests
             public override string ToString() => "0x" + m_Variant.vt.ToString("X");
         }
 
+        // Taken from wtypes.h
         public const ushort VT_EMPTY = 0;
         public const ushort VT_NULL = 1;
         public const ushort VT_I2 = 2;
@@ -266,9 +268,10 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             // VT_DATE => DateTime.
+            DateTime maxDate = DateTime.MaxValue;
             yield return new object[]
             {
-                CreateVariant(VT_DATE, new UnionTypes { _date = 2958465.99999999 }),
+                CreateVariant(VT_DATE, new UnionTypes { _date = maxDate.ToOADate() }),
                 new DateTime(9999, 12, 31, 23, 59, 59, 999)
             };
 
@@ -302,12 +305,12 @@ namespace System.Runtime.InteropServices.Tests
                 new DateTime(1899, 06, 13)
             };
 
+            DateTime minDate = new DateTime(100, 01, 01, 23, 59, 59, 999);
             yield return new object[]
             {
-                CreateVariant(VT_DATE, new UnionTypes { _date = -657434.99999999 }),
-                new DateTime(100, 01, 01, 23, 59, 59, 999)
+                CreateVariant(VT_DATE, new UnionTypes { _date = minDate.ToOADate() }),
+                minDate
             };
-
 
             // VT_BSTR => string.
             yield return new object[]
@@ -352,6 +355,7 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             var obj = new object();
+#if !netstandard // Marshal.GetIDispatchForObject is not in netstandard2.0
             if (!PlatformDetection.IsNetCore)
             {
                 IntPtr dispatch = Marshal.GetIDispatchForObject(obj);
@@ -365,6 +369,7 @@ namespace System.Runtime.InteropServices.Tests
             {
                 Assert.Throws<PlatformNotSupportedException>(() => Marshal.GetIDispatchForObject(obj));
             }
+#endif
 
             // VT_ERROR => int.
             yield return new object[]
@@ -411,7 +416,7 @@ namespace System.Runtime.InteropServices.Tests
                 null
             };
 
-            IntPtr unknown = Marshal.GetIDispatchForObject(obj);
+            IntPtr unknown = Marshal.GetIUnknownForObject(obj);
             yield return new object[]
             {
                 CreateVariant(VT_UNKNOWN, new UnionTypes { _unknown = unknown }),
@@ -564,23 +569,34 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             // VT_EMPTY | VT_BYREF => zero.
+            object expectedZero;
+            if (IntPtr.Size == 8)
+            {
+                expectedZero = (ulong)0;
+            }
+            else
+            {
+                expectedZero = (uint)0;
+            }
             yield return new object[]
             {
                 CreateVariant(VT_EMPTY | VT_BYREF, new UnionTypes { _byref = IntPtr.Zero }),
-                IntPtr.Size == 8 ? (ulong)0 : (uint)0
+                expectedZero
             };
 
+            object expectedTen;
+            if (IntPtr.Size == 8)
+            {
+                expectedTen = (ulong)10;
+            }
+            else
+            {
+                expectedTen = (uint)10;
+            }
             yield return new object[]
             {
                 CreateVariant(VT_EMPTY | VT_BYREF, new UnionTypes { _byref = (IntPtr)10 }),
-                IntPtr.Size == 8 ? (ulong)10 : (uint)10
-            };
-
-            // VT_RECORD.
-            yield return new object[]
-            {
-                CreateVariant(VT_RECORD, new UnionTypes { _record = new Record { _record = IntPtr.Zero, _recordInfo = (IntPtr)1 } }),
-                null
+                expectedTen
             };
 
             // VT_RECORD.
@@ -597,7 +613,14 @@ namespace System.Runtime.InteropServices.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetObjectForNativeVariant_Normal_ReturnsExpected(Variant variant, object expected)
         {
-            Assert.Equal(expected, GetObjectForNativeVariant(variant));
+            try
+            {
+                Assert.Equal(expected, GetObjectForNativeVariant(variant));
+            }
+            finally
+            {
+                DeleteVariant(variant);
+            }
         }
 
         [Fact]
@@ -644,6 +667,7 @@ namespace System.Runtime.InteropServices.Tests
             }
             finally
             {
+                DeleteVariant(source);
                 Marshal.DestroyStructure<Variant>(ptr);
                 Marshal.FreeHGlobal(ptr);
             }
@@ -651,6 +675,7 @@ namespace System.Runtime.InteropServices.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(31480, TargetFrameworkMonikers.Netcoreapp)]
         public void GetObjectForNativeVariant_Record_ReturnsExpected()
         {
             int record = 10;
@@ -688,13 +713,20 @@ namespace System.Runtime.InteropServices.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public unsafe void GetObjectForNativeVariant_ByRef_ReturnsExpected(Variant source, object value)
         {
-            IntPtr ptr = new IntPtr(&source.m_Variant._unionTypes);
+            try
+            {
+                IntPtr ptr = new IntPtr(&source.m_Variant._unionTypes);
 
-            var variant = new Variant();
-            variant.m_Variant.vt = (ushort)(source.m_Variant.vt | VT_BYREF);
-            variant.m_Variant._unionTypes._byref = ptr;
+                var variant = new Variant();
+                variant.m_Variant.vt = (ushort)(source.m_Variant.vt | VT_BYREF);
+                variant.m_Variant._unionTypes._byref = ptr;
 
-            Assert.Equal(value, GetObjectForNativeVariant(variant));
+                Assert.Equal(value, GetObjectForNativeVariant(variant));
+            }
+            finally
+            {
+                DeleteVariant(source);
+            }
         }
 
         [Theory]
@@ -705,6 +737,23 @@ namespace System.Runtime.InteropServices.Tests
             IntPtr ptr = new IntPtr(&d);
             Variant variant = CreateVariant(VT_DECIMAL | VT_BYREF, new UnionTypes { _pvarVal = ptr });
             Assert.Equal(d, GetObjectForNativeVariant(variant));
+        }
+
+        public static IEnumerable<object[]> GetObjectForNativeVariant_Array_TestData()
+        {
+            yield return new object[]
+            {
+                CreateVariant(VT_ARRAY, new UnionTypes { _parray = IntPtr.Zero }),
+                null
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(GetObjectForNativeVariant_Array_TestData))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetObjectForNativeVariant_Array_ReturnsExpected(Variant source, object expected)
+        {
+            Assert.Equal(expected, GetObjectForNativeVariant(source));
         }
 
         [Fact]
@@ -951,6 +1000,14 @@ namespace System.Runtime.InteropServices.Tests
             }
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetObjectForNativeVariant_ArrayOfEmpty_ThrowsInvalidOleVariantTypeException()
+        {
+            Variant variant = CreateVariant(VT_ARRAY, new UnionTypes { _parray = (IntPtr)10 });
+            Assert.Throws<InvalidOleVariantTypeException>(() => GetObjectForNativeVariant(variant));
+        }
+
         private static object GetObjectForNativeVariant(Variant variant)
         {
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Variant>());
@@ -972,6 +1029,22 @@ namespace System.Runtime.InteropServices.Tests
             variant.m_Variant.vt = vt;
             variant.m_Variant._unionTypes = union;
             return variant;
+        }
+
+        private static void DeleteVariant(Variant variant)
+        {
+            if (variant.m_Variant.vt == VT_BSTR)
+            {
+                Marshal.FreeBSTR(variant.m_Variant._unionTypes._bstr);
+            }
+            else if (variant.m_Variant.vt == VT_UNKNOWN && variant.m_Variant._unionTypes._unknown != IntPtr.Zero)
+            {
+                Marshal.Release(variant.m_Variant._unionTypes._unknown);
+            }
+            else if (variant.m_Variant.vt == VT_DISPATCH && variant.m_Variant._unionTypes._dispatch != IntPtr.Zero)
+            {
+                Marshal.Release(variant.m_Variant._unionTypes._dispatch);
+            }
         }
 
         public class RecordInfo : IRecordInfo
@@ -1111,6 +1184,7 @@ namespace System.Runtime.InteropServices.Tests
             [MethodImpl(MethodImplOptions.InternalCall)]
             void RecordDestroy([In] IntPtr pvRecord);
         }
-#pragma warning restore 618
     }
 }
+
+#pragma warning restore 618
