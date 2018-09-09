@@ -317,7 +317,7 @@ namespace System.Data.SqlClient
                 }
             }
 
-            if (0 <= _attachDBFileName.IndexOf('|'))
+            if (_attachDBFileName.Contains('|'))
             {
                 throw ADP.InvalidConnectionOptionValue(KEY.AttachDBFilename);
             }

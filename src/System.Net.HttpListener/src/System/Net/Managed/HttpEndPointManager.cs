@@ -202,7 +202,7 @@ namespace System.Net
         private static void RemovePrefixInternal(string prefix, HttpListener listener)
         {
             ListenerPrefix lp = new ListenerPrefix(prefix);
-            if (lp.Path.IndexOf('%') != -1)
+            if (lp.Path.Contains('%'))
                 return;
 
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)

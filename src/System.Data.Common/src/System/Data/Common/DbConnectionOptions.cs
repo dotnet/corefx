@@ -106,7 +106,7 @@ namespace System.Data.Common
                     // <value> -> <value>
                     builder.Append(keyValue);
                 }
-                else if ((-1 != keyValue.IndexOf('\"')) && (!keyValue.Contains('\'')))
+                else if ((keyValue.Contains('\"')) && (!keyValue.Contains('\'')))
                 {
                     // <val"ue> -> <'val"ue'>
                     builder.Append('\'');

@@ -18,9 +18,9 @@ namespace System.PrivateUri.Tests
 
             string dns = test.DnsSafeHost;
 
-            Assert.True(dns.IndexOf('%') < 0, "% found");
-            Assert.True(test.AbsoluteUri.IndexOf('%') < 0, "% found: " + test.AbsoluteUri);
-            Assert.True(test.ToString().IndexOf('%') < 0, "% found: " + test.ToString());
+            Assert.False(dns.Contains('%'), "% found");
+            Assert.False(test.AbsoluteUri.Contains('%'), "% found: " + test.AbsoluteUri);
+            Assert.False(test.ToString().Contains('%'), "% found: " + test.ToString());
         }
 
         [Fact]
@@ -30,9 +30,9 @@ namespace System.PrivateUri.Tests
 
             string dns = test.DnsSafeHost;
 
-            Assert.True(dns.IndexOf('%') < 0, "% found");
-            Assert.True(test.AbsoluteUri.IndexOf('%') < 0, "% found: " + test.AbsoluteUri);
-            Assert.True(test.ToString().IndexOf('%') < 0, "% found: " + test.ToString());
+            Assert.False(dns.Contains('%'), "% found");
+            Assert.False(test.AbsoluteUri.Contains('%'), "% found: " + test.AbsoluteUri);
+            Assert.False(test.ToString().Contains('%'), "% found: " + test.ToString());
         }
 
         [Fact]

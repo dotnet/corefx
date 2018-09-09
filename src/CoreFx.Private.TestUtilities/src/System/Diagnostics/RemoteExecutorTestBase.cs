@@ -308,7 +308,7 @@ namespace System.Diagnostics
                 Type targetType = d.Target.GetType();
                 Assert.All(
                     targetType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                    fi => Assert.True(fi.Name.IndexOf('<') != -1, $"Field marshaling is not supported by {nameof(RemoteInvoke)}: {fi.Name}"));
+                    fi => Assert.True(fi.Name.Contains('<'), $"Field marshaling is not supported by {nameof(RemoteInvoke)}: {fi.Name}"));
             }
 
             return d.GetMethodInfo();

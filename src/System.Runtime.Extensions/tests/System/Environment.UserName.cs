@@ -28,7 +28,7 @@ namespace System.Tests
         {
             string name = Environment.UserName;
             Assert.False(string.IsNullOrWhiteSpace(name));
-            Assert.Equal(-1, name.IndexOf('\0'));
+            Assert.False(name.Contains('\0'));
         }
 
         [Fact]
