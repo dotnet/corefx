@@ -6634,6 +6634,7 @@ namespace System.Runtime.CompilerServices
     public enum MethodImplOptions
     {
         AggressiveInlining = 256,
+        AggressiveOptimization = 512,
         ForwardRef = 16,
         InternalCall = 4096,
         NoInlining = 8,
