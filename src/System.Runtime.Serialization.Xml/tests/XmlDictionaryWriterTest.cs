@@ -58,6 +58,7 @@ public static class XmlDictionaryWriterTest
             var sr = new StreamReader(ms);
             actual = sr.ReadToEnd();
         }
+        
         Assert.StrictEqual(expect, actual);
     }
 
