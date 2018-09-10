@@ -16,7 +16,7 @@ Note that it's possible that somebody else has already incremented the package v
 
 ## Determine AssemblyVersion
 
-Much like `PackageVersion`, each library package has a property called `AssemblyVersion`. This will be in either the `.csproj` or in `Directory.Build.Props`/`dir.props`. If your library's `.csproj` (inside the library's `src` directory) references `.NETStandard` or `.NETFramework`, the `AssemblyVersion` should have its patch version incremented by 1 (e.g. `4.0.0.0` -> `4.0.1.0`). If we don't update the AssemblyVersion, a user could run into a situation where two different dependencies of their application pull a version of your library with the same `AssemblyVersion` (`4.0.0.0`), but different `PackageVersion`. If the older package is loaded first, then the application will be using the older version of your library.
+Much like `PackageVersion`, each library package has a property called `AssemblyVersion`. This will be in either the `.csproj` or in `Directory.Build.Props`/`dir.props`. If your library's `.csproj` (inside the library's `src` directory) references `.NETStandard` or `.NETFramework`, the `AssemblyVersion` should have its revision incremented by 1 (e.g. `4.0.0.0` -> `4.0.0.1`). If we don't update the AssemblyVersion, a user could run into a situation where two different dependencies of their application pull a version of your library with the same `AssemblyVersion` (`4.0.0.0`), but different `PackageVersion`. If the older package is loaded first, then the application will be using the older version of your library.
 
 ## Add your package to packages.builds
 
