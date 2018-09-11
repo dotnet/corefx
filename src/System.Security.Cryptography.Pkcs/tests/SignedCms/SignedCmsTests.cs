@@ -691,12 +691,16 @@ namespace System.Security.Cryptography.Pkcs.Tests
         {
             ContentInfo ci = new ContentInfo(new byte[1]);
             SignedCms cms = new SignedCms(ci);
-
-            // Should throw when no certificate is specified
             Assert.Throws<InvalidOperationException>(() => cms.ComputeSignature(new CmsSigner(SubjectIdentifierType.IssuerAndSerialNumber), true));
+        }
 
-            // Should not throw when no certificate is specified
-            cms.ComputeSignature(new CmsSigner(SubjectIdentifierType.NoSignature));
+        [Fact]
+        [ActiveIssue(32187, TargetFrameworkMonikers.NetFramework)]
+        public static void CanSignWithNoCertificateAndNoSignature()
+        {
+            ContentInfo ci = new ContentInfo(new byte[1]);
+            SignedCms cms = new SignedCms(SubjectIdentifierType.NoSignature, ci);
+            cms.ComputeSignature();
         }
 
         [Fact]
@@ -982,6 +986,48 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 Assert.Equal(1, secondAttrSet.Values.Count);
                 Assert.Equal(Oids.MessageDigest, secondAttrSet.Values[0].Oid.Value);
             }
+        }
+
+        [Fact]
+        [ActiveIssue(32187, TargetFrameworkMonikers.NetFramework)]
+        public static void SignNoSignature()
+        {
+            ContentInfo ci = new ContentInfo(new byte[1]);
+            SignedCms cms = new SignedCms(ci);
+            CmsSigner signer = new CmsSigner(SubjectIdentifierType.NoSignature);
+            signer.DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1"); // SHA256
+            cms.ComputeSignature(signer);
+
+            // There are two possible outputs depending on whether the implementation
+            // emits explicit NULL value in AlgorithmIdentifier parameters. RFC 3370
+            // (Cryptographic Message Syntax Algorithms) and RFC 5754 (Using SHA2
+            // Algorithms with Cryptographic Message Syntax) both say that the NULL
+            // value SHOULD NOT be emitted, but it MUST be accepted when present.
+            //
+            // CoreFX correctly omits the NULL parameter, while NetFX emits it.
+            string[] validEncodedValues = new[]
+            {
+                // Implicit NULL in AlgorithmIdentifiers
+                "30819506092A864886F70D010702A08187308184020101310D300B0609608648" +
+                "016503040201301006092A864886F70D010701A003040100315E305C02010130" +
+                "1C3017311530130603550403130C44756D6D79205369676E6572020100300B06" +
+                "09608648016503040201300A06082B0601050507060204206E340B9CFFB37A98" +
+                "9CA544E6BB780A2C78901D3FB33738768511A30617AFA01D",
+                // Explict NULLs in AlgorithmIdentifiers
+                "30819B06092A864886F70D010702A0818D30818A020101310F300D0609608648" +
+                "0165030402010500301006092A864886F70D010701A003040100316230600201" +
+                "01301C3017311530130603550403130C44756D6D79205369676E657202010030" +
+                "0D06096086480165030402010500300C06082B06010505070602050004206E34" +
+                "0B9CFFB37A989CA544E6BB780A2C78901D3FB33738768511A30617AFA01D",
+            };
+
+            byte[] encoded = cms.Encode();
+            Assert.Contains(encoded.ByteArrayToHex(), validEncodedValues);
+
+            // Verify that we can parse the value back
+            cms = new SignedCms();
+            cms.Decode(encoded);
+            cms.SignerInfos[0].CheckHash();
         }
 
         [Theory]
