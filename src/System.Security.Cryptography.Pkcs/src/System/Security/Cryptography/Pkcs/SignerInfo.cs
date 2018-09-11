@@ -137,19 +137,11 @@ namespace System.Security.Cryptography.Pkcs
             if (existingAttribute == -1)
             {
                 // create a new attribute
-                AttributeAsn newUnsignedAttr;
-                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+                AttributeAsn newUnsignedAttr = new AttributeAsn
                 {
-                    writer.PushSetOf();
-                    writer.WriteEncodedValue(unsignedAttribute.RawData);
-                    writer.PopSetOf();
-
-                    newUnsignedAttr = new AttributeAsn
-                    {
-                        AttrType = new Oid(unsignedAttribute.Oid),
-                        AttrValues = writer.Encode(),
-                    };
-                }
+                    AttrType = new Oid(unsignedAttribute.Oid),
+                    AttrValues = new[] { new ReadOnlyMemory<byte>(unsignedAttribute.RawData) },
+                };
 
                 int newAttributeIdx;
 
@@ -170,27 +162,9 @@ namespace System.Security.Cryptography.Pkcs
             {
                 // merge with existing attribute
                 ref AttributeAsn modifiedAttr = ref mySigner.UnsignedAttributes[existingAttribute];
-
-                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
-                {
-                    writer.PushSetOf();
-
-                    AsnReader reader = new AsnReader(modifiedAttr.AttrValues, AsnEncodingRules.BER);
-                    AsnReader collReader = reader.ReadSetOf();
-
-                    reader.ThrowIfNotEmpty();
-
-                    // re-add old values
-                    while (collReader.HasData)
-                    {
-                        writer.WriteEncodedValue(collReader.GetEncodedValue());
-                    }
-
-                    writer.WriteEncodedValue(unsignedAttribute.RawData);
-
-                    writer.PopSetOf();
-                    modifiedAttr.AttrValues = writer.Encode();
-                }
+                int newIndex = modifiedAttr.AttrValues.Length;
+                Array.Resize(ref modifiedAttr.AttrValues, newIndex + 1);
+                modifiedAttr.AttrValues[newIndex] = unsignedAttribute.RawData;
             }
 
             // Re-normalize the document
@@ -239,14 +213,9 @@ namespace System.Security.Cryptography.Pkcs
             {
                 if (attributeAsn.AttrType.Value == Oids.CounterSigner)
                 {
-                    AsnReader reader = new AsnReader(attributeAsn.AttrValues, AsnEncodingRules.BER);
-                    AsnReader collReader = reader.ReadSetOf();
-
-                    reader.ThrowIfNotEmpty();
-
-                    while (collReader.HasData)
+                    foreach (ReadOnlyMemory<byte> attrValue in attributeAsn.AttrValues)
                     {
-                        SignerInfoAsn.Decode(collReader, out SignerInfoAsn parsedData);
+                        SignerInfoAsn parsedData = SignerInfoAsn.Decode(attrValue, AsnEncodingRules.BER);
 
                         SignerInfo signerInfo = new SignerInfo(ref parsedData, _document)
                         {
@@ -291,14 +260,12 @@ namespace System.Security.Cryptography.Pkcs
 
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                writer.PushSetOf();
                 newSignerInfo.Encode(writer);
-                writer.PopSetOf();
 
                 newUnsignedAttr = new AttributeAsn
                 {
                     AttrType = new Oid(Oids.CounterSigner, Oids.CounterSigner),
-                    AttrValues = writer.Encode(),
+                    AttrValues = new[] { new ReadOnlyMemory<byte>(writer.Encode()) },
                 };
             }
 
@@ -367,36 +334,18 @@ namespace System.Security.Cryptography.Pkcs
 
                 if (attributeAsn.AttrType.Value == Oids.CounterSigner)
                 {
-                    AsnReader reader = new AsnReader(attributeAsn.AttrValues, AsnEncodingRules.BER);
-                    AsnReader collReader = reader.ReadSetOf();
-
-                    reader.ThrowIfNotEmpty();
-
-                    int j = 0;
-
-                    while (collReader.HasData)
+                    if (index < csIndex + attributeAsn.AttrValues.Length)
                     {
-                        collReader.GetEncodedValue();
-
-                        if (csIndex == index)
+                        removeAttrIdx = i;
+                        removeValueIndex = index - csIndex;
+                        if (removeValueIndex == 0 && attributeAsn.AttrValues.Length == 1)
                         {
-                            removeAttrIdx = i;
-                            removeValueIndex = j;
+                            removeWholeAttr = true;
                         }
-
-                        csIndex++;
-                        j++;
-                    }
-
-                    if (removeValueIndex == 0 && j == 1)
-                    {
-                        removeWholeAttr = true;
-                    }
-
-                    if (removeAttrIdx >= 0)
-                    {
                         break;
                     }
+
+                    csIndex += attributeAsn.AttrValues.Length;
                 }
             }
 
@@ -806,20 +755,11 @@ namespace System.Security.Cryptography.Pkcs
         private static CryptographicAttributeObject MakeAttribute(AttributeAsn attribute)
         {
             Oid type = new Oid(attribute.AttrType);
-
-            ReadOnlyMemory<byte> attrSetBytes = attribute.AttrValues;
-
-            AsnReader reader = new AsnReader(attrSetBytes, AsnEncodingRules.BER);
-            AsnReader collReader = reader.ReadSetOf();
-
-            reader.ThrowIfNotEmpty();
-
             AsnEncodedDataCollection valueColl = new AsnEncodedDataCollection();
 
-            while (collReader.HasData)
+            foreach (ReadOnlyMemory<byte> attrValue in attribute.AttrValues)
             {
-                byte[] attrBytes = collReader.GetEncodedValue().ToArray();
-                valueColl.Add(PkcsHelpers.CreateBestPkcs9AttributeObjectAvailable(type, attrBytes));
+                valueColl.Add(PkcsHelpers.CreateBestPkcs9AttributeObjectAvailable(type, attrValue.ToArray()));
             }
 
             return new CryptographicAttributeObject(type, valueColl);
@@ -838,19 +778,14 @@ namespace System.Security.Cryptography.Pkcs
             return -1;
         }
 
-        private static int FindAttributeValueIndexByEncodedData(ReadOnlyMemory<byte> attributeValues, ReadOnlySpan<byte> asnEncodedData, out bool isOnlyValue)
+        private static int FindAttributeValueIndexByEncodedData(ReadOnlyMemory<byte>[] attributeValues, ReadOnlySpan<byte> asnEncodedData, out bool isOnlyValue)
         {
-            AsnReader reader = new AsnReader(attributeValues, AsnEncodingRules.BER);
-            AsnReader collReader = reader.ReadSetOf();
-
-            reader.ThrowIfNotEmpty();
-
-            for (int i = 0; collReader.HasData; i++)
+            for (int i = 0; i < attributeValues.Length; i++)
             {
-                ReadOnlySpan<byte> data = collReader.GetEncodedValue().Span;
+                ReadOnlySpan<byte> data = attributeValues[i].Span;
                 if (data.SequenceEqual(asnEncodedData))
                 {
-                    isOnlyValue = i == 0 && !collReader.HasData;
+                    isOnlyValue = attributeValues.Length == 1;
                     return i;
                 }
             }
@@ -883,32 +818,9 @@ namespace System.Security.Cryptography.Pkcs
 
         private static void RemoveAttributeValueWithoutIndexChecking(ref AttributeAsn modifiedAttr, int removeValueIndex)
         {
-            // Using BER rules to avoid resorting
-            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+            if (removeValueIndex < modifiedAttr.AttrValues.Length)
             {
-                writer.PushSetOf();
-
-                AsnReader reader = new AsnReader(modifiedAttr.AttrValues, writer.RuleSet);
-                AsnReader collReader = reader.ReadSetOf();
-
-                reader.ThrowIfNotEmpty();
-
-                int i = 0;
-
-                while (collReader.HasData)
-                {
-                    ReadOnlyMemory<byte> encodedValue = collReader.GetEncodedValue();
-
-                    if (i != removeValueIndex)
-                    {
-                        writer.WriteEncodedValue(encodedValue);
-                    }
-
-                    i++;
-                }
-
-                writer.PopSetOf();
-                modifiedAttr.AttrValues = writer.Encode();
+                PkcsHelpers.RemoveAt(ref modifiedAttr.AttrValues, removeValueIndex);
             }
         }
     }
