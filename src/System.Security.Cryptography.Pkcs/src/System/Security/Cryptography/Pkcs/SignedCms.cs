@@ -249,7 +249,7 @@ namespace System.Security.Cryptography.Pkcs
                 signer.Certificate == null)
             {
                 if (silent)
-                    throw new InvalidOperationException(SR.Cryptography_Cms_RecipientCertificateNotFound);
+                    throw new InvalidOperationException(SR.Cryptography_Cms_NoSignerCertSilent);
                 else
                     throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
             }
