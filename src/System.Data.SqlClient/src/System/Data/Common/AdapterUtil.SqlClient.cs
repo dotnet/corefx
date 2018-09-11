@@ -910,5 +910,17 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.ADP_InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity));
         }
+        internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndIntegratedSecurity()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity));
+        }
+        internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword));
+        }
+        internal static Exception InvalidMixedUsageOfCredentialAndAccessToken()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfCredentialAndAccessToken));
+        }
     }
 }

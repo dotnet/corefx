@@ -294,6 +294,10 @@ namespace System.Diagnostics.Tracing
         public System.Diagnostics.Tracing.EventTags Tags { get { throw null; } }
         public System.Diagnostics.Tracing.EventTask Task { get { throw null; } }
         public byte Version { get { throw null; } }
+#if FEATURE_EVENTLISTENERCONTEXT
+        public long OSThreadId { get { throw null; } }
+        public DateTime TimeStamp { get { throw null; } }
+#endif
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64))]
     public sealed partial class NonEventAttribute : System.Attribute

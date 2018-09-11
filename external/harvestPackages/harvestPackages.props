@@ -94,6 +94,7 @@
 <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
   <Version>4.5.1</Version>
 </PackageReference>
+</PackageReference>
 <PackageReference Include="System.Security.AccessControl">
   <Version>4.5.0</Version>
 </PackageReference>

@@ -23,10 +23,17 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.NETCoreApp\Microsoft.Private.CoreFx.NETCoreApp.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="$(MSBuildThisFileDirectory)System.Drawing.Common\pkg\System.Drawing.Common.pkgproj">
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)\System.Data.SqlClient\pkg\System.Data.SqlClient.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <!--
+      In general we are servicing 2.x library packages from release/2.1 branch so only add library packages
+      to this build if they contain unique 2.2 features. If they are added here you need to ensure their
+      versions are bumped higher then what has shipped in release/2.1.
+    -->
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
