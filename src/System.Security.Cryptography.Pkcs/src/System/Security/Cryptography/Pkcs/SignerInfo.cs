@@ -191,7 +191,7 @@ namespace System.Security.Cryptography.Pkcs
             }
             else
             {
-                RemoveAttributeValueWithoutIndexChecking(ref mySigner.UnsignedAttributes[outerIndex], innerIndex);
+                PkcsHelpers.RemoveAt(ref mySigner.UnsignedAttributes[outerIndex].AttrValues, innerIndex);
             }
 
             // Re-normalize the document
@@ -364,7 +364,7 @@ namespace System.Security.Cryptography.Pkcs
             }
             else
             {
-                RemoveAttributeValueWithoutIndexChecking(ref unsignedAttrs[removeAttrIdx], removeValueIndex);
+                PkcsHelpers.RemoveAt(ref unsignedAttrs[removeAttrIdx].AttrValues, removeValueIndex);
             }
         }
 
@@ -809,14 +809,6 @@ namespace System.Security.Cryptography.Pkcs
 
             isOnlyValue = false;
             return (-1, -1);
-        }
-
-        private static void RemoveAttributeValueWithoutIndexChecking(ref AttributeAsn modifiedAttr, int removeValueIndex)
-        {
-            if (removeValueIndex < modifiedAttr.AttrValues.Length)
-            {
-                PkcsHelpers.RemoveAt(ref modifiedAttr.AttrValues, removeValueIndex);
-            }
         }
     }
 }
