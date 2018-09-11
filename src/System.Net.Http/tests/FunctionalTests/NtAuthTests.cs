@@ -109,12 +109,12 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop]
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]    // HttpListener doesn't support nt auth on non-Windows platforms
         [InlineData(true, HttpStatusCode.OK)]
         [InlineData(true, HttpStatusCode.Unauthorized)]
         [InlineData(false, HttpStatusCode.OK)]
         [InlineData(false, HttpStatusCode.Unauthorized)]
-        public async Task GetAsync_NegotiateAuthServer_ExpectedStatusCode(bool ntlm, HttpStatusCode expectedStatusCode)
+        public async Task GetAsync_NtAuthServer_ExpectedStatusCode(bool ntlm, HttpStatusCode expectedStatusCode)
         {
             NtAuthServer server = ntlm ? _servers.NtlmServer : _servers.NegotiateServer;
 
