@@ -137,12 +137,7 @@ namespace System.Security.Cryptography.Pkcs
             if (existingAttribute == -1)
             {
                 // create a new attribute
-                AttributeAsn newUnsignedAttr = new AttributeAsn
-                {
-                    AttrType = new Oid(unsignedAttribute.Oid),
-                    AttrValues = new[] { new ReadOnlyMemory<byte>(unsignedAttribute.RawData) },
-                };
-
+                AttributeAsn newUnsignedAttr = new AttributeAsn(unsignedAttribute);
                 int newAttributeIdx;
 
                 if (mySigner.UnsignedAttributes == null)

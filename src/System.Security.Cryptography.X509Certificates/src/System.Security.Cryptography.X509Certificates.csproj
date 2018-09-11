@@ -195,11 +195,6 @@
       <DependentUpon>System\Security\Cryptography\X509Certificates\Asn1\ValidityAsn.xml</DependentUpon>
     </Compile>
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\ValidityAsn.manual.cs" />
-    <AsnXml Include="System\Security\Cryptography\X509Certificates\Asn1\X501AttributeAsn.xml" />
-    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\X501AttributeAsn.xml.cs">
-      <DependentUpon>System\Security\Cryptography\X509Certificates\Asn1\X501AttributeAsn.xml</DependentUpon>
-    </Compile>
-    <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\X501AttributeAsn.manual.cs" />
     <AsnXml Include="System\Security\Cryptography\X509Certificates\Asn1\AccessDescriptionAsn.xml" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\AccessDescriptionAsn.xml.cs">
       <DependentUpon>System\Security\Cryptography\X509Certificates\Asn1\AccessDescriptionAsn.xml</DependentUpon>
@@ -538,6 +533,10 @@
     </AsnXml>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.xml.cs">
       <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</DependentUpon>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.manual.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.manual.cs</Link>
       <DependentUpon>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</DependentUpon>
     </Compile>
     <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\CurveAsn.xml">
