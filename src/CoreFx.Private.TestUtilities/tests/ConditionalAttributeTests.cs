@@ -59,7 +59,7 @@ namespace CoreFx.Private.TestUtilities.Tests
                 where TTestCase : ITestCase
         {
             List<TTestCase> result = testCases.ToList();
-            result.Sort((x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.TestMethod.Method.Name, y.TestMethod.Method.Name));
+            result.Sort((x, y) => StringComparer.Ordinal.Compare(x.TestMethod.Method.Name, y.TestMethod.Method.Name));
             return result;
         }
     }
