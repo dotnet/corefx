@@ -35,6 +35,7 @@ namespace System.Net.Mail
     {
         private string _host;
         private int _port;
+        private string _clientDomain = null;
         private bool _inCall;
         private bool _cancelled;
         private bool _timedOut;
@@ -52,7 +53,6 @@ namespace System.Net.Mail
         private AsyncOperation _asyncOp = null;
         private static AsyncCallback s_contextSafeCompleteCallback = new AsyncCallback(ContextSafeCompleteCallback);
         private const int DefaultPort = 25;
-        internal string clientDomain = null;
         private bool _disposed = false;
         private ServicePoint _servicePoint;
         // (async only) For when only some recipients fail.  We still send the e-mail to the others.
@@ -127,7 +127,7 @@ namespace System.Net.Mail
             if (_targetName == null)
                 _targetName = "SMTPSVC/" + _host;
 
-            if (clientDomain == null)
+            if (_clientDomain == null)
             {
                 // We use the local host name as the default client domain
                 // for the client's EHLO or HELO message. This limits the
@@ -158,9 +158,9 @@ namespace System.Net.Mail
                         sb.Append(ch);
                 }
                 if (sb.Length > 0)
-                    clientDomain = sb.ToString();
+                    _clientDomain = sb.ToString();
                 else
-                    clientDomain = "LocalHost";
+                    _clientDomain = "LocalHost";
             }
         }
 
@@ -221,6 +221,18 @@ namespace System.Net.Mail
                     _port = value;
                     _servicePoint = null;
                 }
+            }
+        }
+        
+        public string ClientDomain
+        {
+            get
+            {
+                return _clientDomain;
+            }
+            set
+            {
+                _clientDomain = value;
             }
         }
 
