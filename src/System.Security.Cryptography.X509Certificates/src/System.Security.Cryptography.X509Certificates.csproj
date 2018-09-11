@@ -43,6 +43,17 @@
       <Link>Common\System\Security\Cryptography\Asn1\AlgorithmIdentifierAsn.manual.cs</Link>
       <DependentUpon>Common\System\Security\Cryptography\Asn1\AlgorithmIdentifierAsn.xml</DependentUpon>
     </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</DependentUpon>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.manual.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.manual.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</DependentUpon>
+    </Compile>
     <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml">
       <Link>Common\System\Security\Cryptography\Asn1\DirectoryStringAsn.xml</Link>
     </AsnXml>
@@ -527,17 +538,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\SecKeyPair.cs">
       <Link>Common\System\Security\Cryptography\SecKeyPair.cs</Link>
-    </Compile>
-    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.xml">
-      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</Link>
-    </AsnXml>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.xml.cs">
-      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml.cs</Link>
-      <DependentUpon>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</DependentUpon>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\AttributeAsn.manual.cs">
-      <Link>Common\System\Security\Cryptography\Asn1\AttributeAsn.manual.cs</Link>
-      <DependentUpon>Common\System\Security\Cryptography\Asn1\AttributeAsn.xml</DependentUpon>
     </Compile>
     <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\CurveAsn.xml">
       <Link>Common\System\Security\Cryptography\Asn1\CurveAsn.xml</Link>
