@@ -224,22 +224,30 @@ namespace System.Security.Cryptography.Pkcs
                 newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeAttributeSet(attrs.ToArray());
             }
 
-            bool signed = CmsSignature.Sign(
-                dataHash,
-                hashAlgorithmName,
-                Certificate,
-                PrivateKey,
-                silent,
-                out Oid signatureAlgorithm,
-                out ReadOnlyMemory<byte> signatureValue);
-
-            if (!signed)
+            if (SignerIdentifierType != SubjectIdentifierType.NoSignature)
             {
-                throw new CryptographicException(SR.Cryptography_Cms_CannotDetermineSignatureAlgorithm);
-            }
+                bool signed = CmsSignature.Sign(
+                    dataHash,
+                    hashAlgorithmName,
+                    Certificate,
+                    PrivateKey,
+                    silent,
+                    out Oid signatureAlgorithm,
+                    out ReadOnlyMemory<byte> signatureValue);
 
-            newSignerInfo.SignatureValue = signatureValue;
-            newSignerInfo.SignatureAlgorithm.Algorithm = signatureAlgorithm;
+                if (!signed)
+                {
+                    throw new CryptographicException(SR.Cryptography_Cms_CannotDetermineSignatureAlgorithm);
+                }
+
+                newSignerInfo.SignatureValue = signatureValue;
+                newSignerInfo.SignatureAlgorithm.Algorithm = signatureAlgorithm;
+            }
+            else
+            {
+                newSignerInfo.SignatureValue = dataHash;
+                newSignerInfo.SignatureAlgorithm.Algorithm = new Oid(Oids.NoSignature, null);
+            }
 
             X509Certificate2Collection certs = new X509Certificate2Collection();
             certs.AddRange(Certificates);

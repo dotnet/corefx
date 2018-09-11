@@ -148,6 +148,9 @@
   <data name="Cryptography_Cms_NoSignerCert" xml:space="preserve">
     <value>No signer certificate was provided. This platform does not implement the certificate picker UI.</value>
   </data>
+  <data name="Cryptography_Cms_NoSignerCertSilent" xml:space="preserve">
+    <value>No signer certificate was provided.</value>
+  </data>
   <data name="Cryptography_Cms_NoSignerAtIndex" xml:space="preserve">
     <value>The signed cryptographic message does not have a signer for the specified signer index.</value>
   </data>

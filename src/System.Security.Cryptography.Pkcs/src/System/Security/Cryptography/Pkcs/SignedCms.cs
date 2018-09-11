@@ -34,6 +34,10 @@ namespace System.Security.Cryptography.Pkcs
         // and thus we need to be reslilient against modification.
         private string _contentType;
 
+        // Holds the value from the constructor for use by the parameterless ComputeSignature
+        // method.
+        private SubjectIdentifierType _signerIdentifierType;
+
         public int Version { get; private set; }
         public ContentInfo ContentInfo { get; private set; }
         public bool Detached { get; private set; }
@@ -45,12 +49,7 @@ namespace System.Security.Cryptography.Pkcs
             if (contentInfo.Content == null)
                 throw new ArgumentNullException("contentInfo.Content");
 
-            // signerIdentifierType is ignored.
-            // In .NET Framework it is used for the signer type of a prompt-for-certificate signer.
-            // In .NET Core we don't support prompting.
-            //
-            // .NET Framework turned any unknown value into IssuerAndSerialNumber, so no exceptions
-            // are required, either.
+            _signerIdentifierType = signerIdentifierType;
 
             ContentInfo = contentInfo;
             Detached = detached;
@@ -227,10 +226,7 @@ namespace System.Security.Cryptography.Pkcs
             return wrappedContent;
         }
 
-        public void ComputeSignature()
-        {
-            throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
-        }
+        public void ComputeSignature() => ComputeSignature(new CmsSigner(_signerIdentifierType), true);
 
         public void ComputeSignature(CmsSigner signer) => ComputeSignature(signer, true);
 
@@ -248,7 +244,16 @@ namespace System.Security.Cryptography.Pkcs
             {
                 throw new CryptographicException(SR.Cryptography_Cms_Sign_Empty_Content);
             }
-            
+
+            if (signer.SignerIdentifierType != SubjectIdentifierType.NoSignature &&
+                signer.Certificate == null)
+            {
+                if (silent)
+                    throw new InvalidOperationException(SR.Cryptography_Cms_NoSignerCertSilent);
+                else
+                    throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
+            }
+
             // If we had content already, use that now.
             // (The second signer doesn't inherit edits to signedCms.ContentInfo.Content)
             ReadOnlyMemory<byte> content = _heldContent ?? ContentInfo.Content;
