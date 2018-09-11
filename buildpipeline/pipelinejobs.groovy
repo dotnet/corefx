@@ -31,7 +31,7 @@ def configurations = [
     ['TGroup':"netfx",      'Pipeline':winPipeline, 'Name':'NETFX', 'ForPR':"Release-x86"],
     ['TGroup':"uap",        'Pipeline':winPipeline, 'Name':'UWP CoreCLR', 'ForPR':"Debug-x64"],
     ['TGroup':"uapaot",     'Pipeline':winPipeline, 'Name':'UWP NETNative', 'ForPR':"Release-x86"],
-    ['TGroup':"netcoreappaot",'Pipeline':winPipeline, 'Name':'Windows NetCoreAppAOT', 'ForPR':"Release-x64", 'Arch':['x64']],
+    ['TGroup':"netcoreappaot",'Pipeline':winPipeline, 'Name':'Windows NetCoreAppAOT', 'ForPR':"", 'Arch':['x64']],
     ['TGroup':"all",        'Pipeline':winPipeline, 'Name':'Packaging All Configurations', 'ForPR':"Debug-x64"],
 ]
 
