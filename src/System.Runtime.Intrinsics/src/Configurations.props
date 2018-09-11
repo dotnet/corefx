@@ -3,8 +3,9 @@
   <PropertyGroup>
     <BuildConfigurations>
       netcoreapp-Windows_NT;
-      netcoreappaot-WebAssembly;
+      netcoreappaot-Windows_NT;
       netcoreapp-Unix;
+      netcoreappaot-WebAssembly;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
