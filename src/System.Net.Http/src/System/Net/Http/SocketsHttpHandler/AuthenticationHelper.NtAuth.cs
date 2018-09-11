@@ -56,6 +56,7 @@ namespace System.Net.Http
                     challenge.AuthenticationType == AuthenticationType.Ntlm)
                 {
                     bool isNewConnection = false;
+                    bool needDrain = true;
                     try
                     {
                         if (response.Headers.ConnectionClose.GetValueOrDefault())
@@ -70,10 +71,7 @@ namespace System.Net.Http
                             connectionPool.IncrementConnectionCount();
                             connection.Acquire();
                             isNewConnection = true;
-                        }
-                        else
-                        {
-                            await connection.DrainResponseAsync(response).ConfigureAwait(false);
+                            needDrain = false;
                         }
 
                         string challengeData = challenge.ChallengeData;
@@ -92,6 +90,11 @@ namespace System.Net.Http
                                     break;
                                 }
 
+                                if (needDrain)
+                                {
+                                    await connection.DrainResponseAsync(response).ConfigureAwait(false);
+                                }
+
                                 SetRequestAuthenticationHeaderValue(request, new AuthenticationHeaderValue(challenge.SchemeName, challengeResponse), isProxyAuth);
 
                                 response = await InnerSendAsync(request, isProxyAuth, connectionPool, connection, cancellationToken).ConfigureAwait(false);
@@ -100,7 +103,7 @@ namespace System.Net.Http
                                     break;
                                 }
 
-                                await connection.DrainResponseAsync(response).ConfigureAwait(false);
+                                needDrain = true;
                             }
                         }
                         finally
