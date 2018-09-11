@@ -14,7 +14,7 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(source));
             }
-
+            index = (index < 0) ? source.Count() + index : index;
             if (source is IPartition<TSource> partition)
             {
                 TSource element = partition.TryGetElementAt(index, out bool found);
@@ -56,7 +56,7 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(source));
             }
-
+            index = (index < 0) ? source.Count() + index : index;
             if (source is IPartition<TSource> partition)
             {
                 return partition.TryGetElementAt(index, out bool _);
