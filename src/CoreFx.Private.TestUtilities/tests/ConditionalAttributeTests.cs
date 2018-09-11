@@ -12,28 +12,22 @@ using Xunit.Sdk;
 namespace CoreFx.Private.TestUtilities.Tests
 {
     [TestCaseOrderer("CoreFx.Private.TestUtilities.Tests.AlphabeticalOrderer", "CoreFx.Private.TestUtilities.Tests")]
-    public class ConditionalAttributeTests : IClassFixture<ConditionalAttributeFixture>
+    public class ConditionalAttributeTests
     {
         // The tests under this class are to validate that ConditionalFact and ConditionalAttribute tests are being executed correctly
         // In the past we have had cases where infrastructure changes broke this feature and tests where not running in certain framework.
         // This test class is test order dependent so do not rename the tests.
         // If new tests need to be added, follow the same naming pattern ConditionalAttribute{LetterToOrderTest} and then add a Validate{TestName}.
 
-        // Private shared instance containing the shared properties used to validate the tests are running correctly.
-        private readonly ConditionalAttributeFixture _fixture;
+        private static bool s_conditionalFactExecuted;
+        private static int s_conditionalTheoryCount;
 
         public static bool AlwaysTrue => true;
-
-        // The fixture object is injected by xunit.
-        public ConditionalAttributeTests(ConditionalAttributeFixture fixture)
-        {
-            _fixture = fixture;
-        }
 
         [ConditionalFact(nameof(AlwaysTrue))]
         public void ConditionalAttributeA()
         {
-            _fixture.ConditionalFactExecuted = true;
+            s_conditionalFactExecuted = true;
         }
 
         [ConditionalTheory(nameof(AlwaysTrue))]
@@ -42,27 +36,20 @@ namespace CoreFx.Private.TestUtilities.Tests
         [InlineData(3)]
         public void ConditionalAttributeB(int _)
         {
-            _fixture.ConditionalTheoryCount++;
+            s_conditionalTheoryCount++;
         }
 
         [Fact]
         public void ValidateConditionalFact()
         {
-            Assert.True(_fixture.ConditionalFactExecuted);
+            Assert.True(s_conditionalFactExecuted);
         }
 
         [Fact]
         public void ValidateConditionalTheory()
         {
-            Assert.Equal(3, _fixture.ConditionalTheoryCount);
+            Assert.Equal(3, s_conditionalTheoryCount);
         }
-    }
-
-    // A shared instance of this class will get created and will be injected into ConditionalAttributeTests class for every test.
-    public class ConditionalAttributeFixture
-    {
-        public bool ConditionalFactExecuted { get; set; }
-        public int ConditionalTheoryCount { get; set; }
     }
 
     // We need this TestCaseOrderer in order to guarantee that the ConditionalAttributeTests are always executed in the same order.
