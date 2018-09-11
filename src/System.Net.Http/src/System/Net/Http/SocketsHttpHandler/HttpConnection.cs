@@ -697,24 +697,9 @@ namespace System.Net.Http
             }
         }
 
-        public Task<HttpResponseMessage> SendWithNtProxyAuthAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (_pool.AnyProxyKind && _pool.ProxyCredentials != null)
-            {
-                return AuthenticationHelper.SendWithNtProxyAuthAsync(request, _pool.ProxyUri, _pool.ProxyCredentials, this, cancellationToken);
-            }
-
             return SendAsyncCore(request, cancellationToken);
-        }
-
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
-        {
-            if (doRequestAuth && _pool.Settings._credentials != null)
-            {
-                return AuthenticationHelper.SendWithNtConnectionAuthAsync(request, _pool.Settings._credentials, this, cancellationToken);
-            }
-
-            return SendWithNtProxyAuthAsync(request, cancellationToken);
         }
 
         private HttpContentWriteStream CreateRequestContentStream(HttpRequestMessage request)
@@ -930,7 +915,8 @@ namespace System.Net.Http
             }
             else
             {
-                response.Headers.TryAddWithoutValidation(descriptor, headerValue);
+                // Request headers returned on the response must be treated as custom headers
+                response.Headers.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
             }
         }
 
