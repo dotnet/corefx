@@ -395,15 +395,27 @@ namespace System.IO.Pipelines
 
             lock (_sync)
             {
+                bool isEmpty = _readHead == null;
                 var examinedEverything = false;
-                if (examinedSegment == _commitHead)
+
+                if (examinedSegment != null)
                 {
-                    examinedEverything = _commitHead != null ? examinedIndex == _commitHeadIndex - _commitHead.Start : examinedIndex == 0;
+                    if (isEmpty)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
+                        return;
+                    }
+
+                    examinedEverything = examinedSegment == _commitHead && examinedIndex == _commitHeadIndex - _commitHead.Start;
+                }
+                else
+                {
+                    examinedEverything = isEmpty;
                 }
 
                 if (consumedSegment != null)
                 {
-                    if (_readHead == null)
+                    if (isEmpty)
                     {
                         ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
                         return;

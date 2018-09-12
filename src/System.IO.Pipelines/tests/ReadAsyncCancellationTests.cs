@@ -430,5 +430,26 @@ namespace System.IO.Pipelines.Tests
             Assert.Equal("Hello World", Encoding.ASCII.GetString(array));
             Pipe.Reader.AdvanceTo(buffer.End, buffer.End);
         }
+
+        [Fact]
+        public async Task AdvanceTo_AfterCancelledRead_ReadAsyncNotCompleted()
+        {
+           var pipe = new Pipe();
+            var b = new byte[100];
+            await pipe.Writer.WriteAsync(b);
+
+            var result = await pipe.Reader.ReadAsync();
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+
+            var read = pipe.Reader.ReadAsync();
+            pipe.Reader.CancelPendingRead();
+
+            result = await read;
+            var memory = pipe.Writer.GetMemory();
+
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+
+            Assert.False(pipe.Reader.ReadAsync().IsCompleted);
+        }
     }
 }
