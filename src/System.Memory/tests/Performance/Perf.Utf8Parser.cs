@@ -228,7 +228,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static void StringToUInt32_VariableLength()
+        private static void StringToUInt32_VariableLength_Baseline()
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
