@@ -13,15 +13,15 @@
     <AssemblyName>Microsoft.VisualBasic</AssemblyName>
     <NoStdLib>true</NoStdLib>
     <RootNamespace />
-    <Configurations>netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug</Configurations>
+    <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
-    <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-      <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
-      <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
-    </ItemGroup>
-    <ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />
     <Compile Include="Microsoft\VisualBasic\ApplicationServices\StartupEventArgs.vb" />
     <Compile Include="Microsoft\VisualBasic\ApplicationServices\StartupNextInstanceEventArgs.vb" />
@@ -50,7 +50,6 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Versioned.vb" />
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Portable.vb" />
-    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\Globals.vb" />
     <Compile Include="Microsoft\VisualBasic\Devices\NetworkAvailableEventArgs.vb" />
     <Compile Include="Microsoft\VisualBasic\ComClassAttribute.vb" />
