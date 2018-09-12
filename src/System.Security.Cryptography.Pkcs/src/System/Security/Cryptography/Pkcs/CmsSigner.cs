@@ -309,7 +309,9 @@ namespace System.Security.Cryptography.Pkcs
                 };
 
                 for (int i = 0; i < attributeObject.Values.Count; i++)
+                {
                     newAttr.AttrValues[i] = attributeObject.Values[i].RawData;
+                }
 
                 signedAttrs.Add(newAttr);
             }
