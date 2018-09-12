@@ -16,7 +16,7 @@
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="FakeDiagnosticListenerObserver.cs" />
     <Compile Include="SqlBulkCopyColumnMappingCollectionTest.cs" />
-    <Compile Include="SqlDataRecordTest.cs" /> 
+    <Compile Include="SqlDataRecordTest.cs" />
     <Compile Include="SqlMetaDataTest.cs" />
     <Compile Include="SqlParameterTest.cs" />
     <Compile Include="SqlClientFactoryTest.cs" />
