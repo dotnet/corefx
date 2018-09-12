@@ -107,27 +107,6 @@ namespace System.Buffers.Text.Tests
         [InlineData("0")] // min value
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
-        private static void StringToUInt64_Baseline(string text)
-        {
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ulong.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out ulong value);
-                        TestHelpers.DoNotIgnore(value, 0);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData("2134567890")] // standard parse
-        [InlineData("18446744073709551615")] // max value
-        [InlineData("0")] // min value
-        [InlineData("000000000000000000001235abcdfg")]
-        [InlineData("21474836abcdefghijklmnop")]
         private static void StringToUInt64(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -249,7 +228,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("0")] // min value
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
-        private static unsafe void ByteSpanToUInt32(string text)
+        private static void ByteSpanToUInt32(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -267,7 +246,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static unsafe void ByteSpanToUInt32_VariableLength()
+        private static void ByteSpanToUInt32_VariableLength()
         {
             int textLength = s_UInt32TextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
@@ -293,7 +272,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("abcdef")] // standard parse
         [InlineData("ffffffff")] // max value
         [InlineData("0")] // min value
-        private static unsafe void ByteSpanToUInt32Hex(string text)
+        private static void ByteSpanToUInt32Hex(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             var utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -311,7 +290,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static unsafe void ByteSpanToUInt32Hex_VariableLength()
+        private static void ByteSpanToUInt32Hex_VariableLength()
         {
             int textLength = s_UInt32TextArrayHex.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
