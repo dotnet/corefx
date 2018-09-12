@@ -758,6 +758,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 {
                     sign();
                     cms.CheckHash();
+                    Assert.ThrowsAny<CryptographicException>(() => cms.CheckSignature(true));
+                    firstSigner.CheckSignature(true);
                 }
             }
         }

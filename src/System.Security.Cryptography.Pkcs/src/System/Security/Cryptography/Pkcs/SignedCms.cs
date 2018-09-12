@@ -46,7 +46,11 @@ namespace System.Security.Cryptography.Pkcs
             if (contentInfo.Content == null)
                 throw new ArgumentNullException("contentInfo.Content");
 
-            // Normalize the subject identifier type
+            // Normalize the subject identifier type the same way as .NET Framework.
+            // This value is only used in the zero-argument ComputeSignature overload,
+            // where it controls whether it succeeds (NoSignature) or throws (anything else),
+            // but in case it ever applies to anything else, make sure we're storing it
+            // faithfully.
             switch (signerIdentifierType)
             {
                 case SubjectIdentifierType.NoSignature:
