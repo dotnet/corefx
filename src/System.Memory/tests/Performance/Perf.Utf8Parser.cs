@@ -223,6 +223,25 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData("abcdef")] // standard parse
+        [InlineData("ffffffff")] // max value
+        [InlineData("0")] // min value
+        private static void StringToUInt32Hex_Baseline(string text)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        uint.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("2134567890")] // standard parse
         [InlineData("4294967295")] // max value
         [InlineData("0")] // min value
