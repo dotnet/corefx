@@ -222,7 +222,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HEAD")]
         public async Task HttpRequest_BodylessMethod_NoContentLength(string method)
         {
-            if (IsWinHttpHandler)
+            if (IsWinHttpHandler || IsNetfxHandler || IsUapHandler)
             {
                 // WinHttp differ on some versions.
                 return;
