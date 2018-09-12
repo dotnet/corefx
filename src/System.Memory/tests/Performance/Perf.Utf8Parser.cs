@@ -383,7 +383,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static void ByteSpanToSByte_VariableLength_Baseline()
+        private static void StringToSByte_VariableLength_Baseline()
         {
             int textLength = s_SByteTextArray.Length;
             byte[][] utf8ByteArray = (byte[][])Array.CreateInstance(typeof(byte[]), textLength);
