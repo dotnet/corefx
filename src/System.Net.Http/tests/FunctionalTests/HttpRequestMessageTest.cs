@@ -220,7 +220,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("DELETE")]
         [InlineData("OPTIONS")]
         [InlineData("HEAD")]
-        public async Task HttpRequest_BodylessMethod_NoContentLenght(string method)
+        public async Task HttpRequest_BodylessMethod_NoContentLength(string method)
         {
             using (HttpClient client = new HttpClient())
             {
