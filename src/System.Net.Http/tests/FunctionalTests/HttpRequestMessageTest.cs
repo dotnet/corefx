@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -213,6 +214,37 @@ namespace System.Net.Http.Functional.Tests
                 "  Content-Type: text/plain; charset=utf-8\r\n" +
                 "  Custom-Content-Header: value2\r\n" +
                 "}", rm.ToString());
+        }
+
+        [Theory]
+        [InlineData("DELETE")]
+        [InlineData("OPTIONS")]
+        [InlineData("HEAD")]
+        public async Task HttpRequest_BodylessMethod_NoContentLenght(string method)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
+                {
+                    var request = new HttpRequestMessage();
+                    request.RequestUri = uri;
+                    request.Method = new HttpMethod(method);
+
+                    Task<HttpResponseMessage> requestTask = client.SendAsync(request);
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        var headers = await connection.ReadRequestHeaderAsync();
+                        foreach (string line in headers)
+                        {
+                            // There should be no Content-Length header.
+                            Assert.False(line.StartsWith("Content-length:", StringComparison.InvariantCultureIgnoreCase));
+                        }
+
+                        await connection.SendResponseAsync();
+                        await requestTask;
+                    });
+                });
+            }
         }
 
         #region Helper methods
