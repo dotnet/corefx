@@ -107,7 +107,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("0")] // min value
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
-        private static void StringToUInt64(string text)
+        private static void StringToUInt64_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
