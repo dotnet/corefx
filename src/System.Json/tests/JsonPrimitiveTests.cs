@@ -10,11 +10,7 @@ namespace System.Json.Tests
     public class JsonPrimitiveTests
     {
         [Theory]
-        [InlineData(1.1, "1.1")]
-        [InlineData(-1.1, "-1.1")]
-        [InlineData(1e-20, "1E-20")]
         [InlineData(1e+20, "1E+20")]
-        [InlineData(1e-30, "1E-30")]
         [InlineData(1e+30, "1E+30")]
         [InlineData(double.NaN, "\"NaN\"")]
         [InlineData(double.PositiveInfinity, "\"Infinity\"")]
@@ -26,10 +22,47 @@ namespace System.Json.Tests
 
         [Theory]
         [InlineData(1.1, "1.1")]
+        [InlineData(-1.1, "-1.1")]
+        [InlineData(1e-20, "1E-20")]
+        [InlineData(1e-30, "1E-30")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void ToString_Double_NetFramework(double value, string expected)
+        {
+            ToString(new JsonPrimitive(value), expected);
+        }
+
+        [Theory]
+        [InlineData(1.1, "1.1000000000000001")]
+        [InlineData(-1.1, "-1.1000000000000001")]
+        [InlineData(1e-20, "9.9999999999999995E-21")]
+        [InlineData(1e-30, "1.0000000000000001E-30")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void ToString_Double_NotNetFramework(double value, string expected)
+        {
+            ToString(new JsonPrimitive(value), expected);
+        }
+
+        [Theory]
         [InlineData(float.NaN, "\"NaN\"")]
         [InlineData(float.PositiveInfinity, "\"Infinity\"")]
         [InlineData(float.NegativeInfinity, "\"-Infinity\"")]
         public void ToString_Float(float value, string expected)
+        {
+            ToString(new JsonPrimitive(value), expected);
+        }
+
+        [Theory]
+        [InlineData(1.1, "1.1")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void ToString_Float_NetFramework(float value, string expected)
+        {
+            ToString(new JsonPrimitive(value), expected);
+        }
+
+        [Theory]
+        [InlineData(1.1, "1.10000002")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void ToString_Float_NotNetFramework(float value, string expected)
         {
             ToString(new JsonPrimitive(value), expected);
         }

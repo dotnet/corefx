@@ -30,11 +30,24 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        public static void ConvertTo_WithContext()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void ConvertTo_WithContext_NetFramework()
         {
             ConvertTo_WithContext(new object[2, 3]
                 {
-                    { (float)1.1, 1.1f.ToString(), null },
+                    { (float)1.1, "1.1", null },
+                    { (float)1.1, 1, CultureInfo.InvariantCulture }
+                },
+                SingleConverterTests.s_converter);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ConvertTo_WithContext_NotNetFramework()
+        {
+            ConvertTo_WithContext(new object[2, 3]
+                {
+                    { (float)1.1, "1.10000002", null },
                     { (float)1.1, 1, CultureInfo.InvariantCulture }
                 },
                 SingleConverterTests.s_converter);

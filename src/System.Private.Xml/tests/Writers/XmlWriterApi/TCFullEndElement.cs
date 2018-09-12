@@ -3243,7 +3243,8 @@ namespace System.Xml.Tests
             // Write multiple atomic values inside element
             [Theory]
             [XmlWriterInlineData]
-            public void writeValue_1(XmlWriterUtils utils)
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_1_NetFramework(XmlWriterUtils utils)
             {
                 using (XmlWriter w = utils.CreateWriter())
                 {
@@ -3256,10 +3257,28 @@ namespace System.Xml.Tests
                 Assert.True((utils.CompareReader("<Root>2true3.14</Root>")));
             }
 
+            // Write multiple atomic values inside element
+            [Theory]
+            [XmlWriterInlineData]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_1_NotNetFramework(XmlWriterUtils utils)
+            {
+                using (XmlWriter w = utils.CreateWriter())
+                {
+                    w.WriteStartElement("Root");
+                    w.WriteValue((int)2);
+                    w.WriteValue((bool)true);
+                    w.WriteValue((double)3.14);
+                    w.WriteEndElement();
+                }
+                Assert.True((utils.CompareReader("<Root>2true3.1400000000000001</Root>")));
+            }
+
             // Write multiple atomic values inside attribute
             [Theory]
             [XmlWriterInlineData]
-            public void writeValue_2(XmlWriterUtils utils)
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_2_NetFramework(XmlWriterUtils utils)
             {
                 using (XmlWriter w = utils.CreateWriter())
                 {
@@ -3273,10 +3292,29 @@ namespace System.Xml.Tests
                 Assert.True((utils.CompareReader("<Root attr=\"2true3.14\" />")));
             }
 
+            // Write multiple atomic values inside attribute
+            [Theory]
+            [XmlWriterInlineData]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_2_NotNetFramework(XmlWriterUtils utils)
+            {
+                using (XmlWriter w = utils.CreateWriter())
+                {
+                    w.WriteStartElement("Root");
+                    w.WriteStartAttribute("attr");
+                    w.WriteValue((int)2);
+                    w.WriteValue((bool)true);
+                    w.WriteValue((double)3.14);
+                    w.WriteEndElement();
+                }
+                Assert.True((utils.CompareReader("<Root attr=\"2true3.1400000000000001\" />")));
+            }
+
             // Write multiple atomic values inside element, separate by WriteWhitespace(' ')
             [Theory]
             [XmlWriterInlineData]
-            public void writeValue_3(XmlWriterUtils utils)
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_3_NetFramework(XmlWriterUtils utils)
             {
                 using (XmlWriter w = utils.CreateWriter())
                 {
@@ -3287,6 +3325,46 @@ namespace System.Xml.Tests
                     w.WriteWhitespace(" ");
                     w.WriteValue((double)3.14);
                     w.WriteWhitespace(" ");
+                    w.WriteEndElement();
+                }
+                Assert.True((utils.CompareReader("<Root>2 true 3.14 </Root>")));
+            }
+
+            // Write multiple atomic values inside element, separate by WriteWhitespace(' ')
+            [Theory]
+            [XmlWriterInlineData]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_3_NotNetFramework(XmlWriterUtils utils)
+            {
+                using (XmlWriter w = utils.CreateWriter())
+                {
+                    w.WriteStartElement("Root");
+                    w.WriteValue((int)2);
+                    w.WriteWhitespace(" ");
+                    w.WriteValue((bool)true);
+                    w.WriteWhitespace(" ");
+                    w.WriteValue((double)3.14);
+                    w.WriteWhitespace(" ");
+                    w.WriteEndElement();
+                }
+                Assert.True((utils.CompareReader("<Root>2 true 3.1400000000000001 </Root>")));
+            }
+
+            // Write multiple atomic values inside element, separate by WriteString(' ')
+            [Theory]
+            [XmlWriterInlineData]
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_4_NetFramework(XmlWriterUtils utils)
+            {
+                using (XmlWriter w = utils.CreateWriter())
+                {
+                    w.WriteStartElement("Root");
+                    w.WriteValue((int)2);
+                    w.WriteString(" ");
+                    w.WriteValue((bool)true);
+                    w.WriteString(" ");
+                    w.WriteValue((double)3.14);
+                    w.WriteString(" ");
                     w.WriteEndElement();
                 }
                 Assert.True((utils.CompareReader("<Root>2 true 3.14 </Root>")));
@@ -3295,7 +3373,8 @@ namespace System.Xml.Tests
             // Write multiple atomic values inside element, separate by WriteString(' ')
             [Theory]
             [XmlWriterInlineData]
-            public void writeValue_4(XmlWriterUtils utils)
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_4_NotNetFramework(XmlWriterUtils utils)
             {
                 using (XmlWriter w = utils.CreateWriter())
                 {
@@ -3308,13 +3387,14 @@ namespace System.Xml.Tests
                     w.WriteString(" ");
                     w.WriteEndElement();
                 }
-                Assert.True((utils.CompareReader("<Root>2 true 3.14 </Root>")));
+                Assert.True((utils.CompareReader("<Root>2 true 3.1400000000000001 </Root>")));
             }
 
             // Write multiple atomic values inside attribute, separate by WriteWhitespace(' ')
             [Theory]
             [XmlWriterInlineData]
-            public void writeValue_5(XmlWriterUtils utils)
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_5_NetFramework(XmlWriterUtils utils)
             {
                 using (XmlWriter w = utils.CreateWriter())
                 {
@@ -3339,10 +3419,40 @@ namespace System.Xml.Tests
                 Assert.True((utils.CompareReader("<Root attr=\"2 true 3.14 \" />")));
             }
 
+            // Write multiple atomic values inside attribute, separate by WriteWhitespace(' ')
+            [Theory]
+            [XmlWriterInlineData]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_5_NotNetFramework(XmlWriterUtils utils)
+            {
+                using (XmlWriter w = utils.CreateWriter())
+                {
+                    try
+                    {
+                        w.WriteStartElement("Root");
+                        w.WriteStartAttribute("attr");
+                        w.WriteValue((int)2);
+                        w.WriteWhitespace(" ");
+                        w.WriteValue((bool)true);
+                        w.WriteWhitespace(" ");
+                        w.WriteValue((double)3.14);
+                        w.WriteWhitespace(" ");
+                        w.WriteEndElement();
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        CError.WriteLine(e);
+                        Assert.True(false);
+                    }
+                }
+                Assert.True((utils.CompareReader("<Root attr=\"2 true 3.1400000000000001 \" />")));
+            }
+
             // Write multiple atomic values inside attribute, separate by WriteString(' ')
             [Theory]
             [XmlWriterInlineData]
-            public void writeValue_6(XmlWriterUtils utils)
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_6_NetFramework(XmlWriterUtils utils)
             {
                 using (XmlWriter w = utils.CreateWriter())
                 {
@@ -3357,6 +3467,27 @@ namespace System.Xml.Tests
                     w.WriteEndElement();
                 }
                 Assert.True((utils.CompareReader("<Root attr=\"2 true 3.14 \" />")));
+            }
+
+            // Write multiple atomic values inside attribute, separate by WriteString(' ')
+            [Theory]
+            [XmlWriterInlineData]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_6_NotNetFramework(XmlWriterUtils utils)
+            {
+                using (XmlWriter w = utils.CreateWriter())
+                {
+                    w.WriteStartElement("Root");
+                    w.WriteStartAttribute("attr");
+                    w.WriteValue((int)2);
+                    w.WriteString(" ");
+                    w.WriteValue((bool)true);
+                    w.WriteString(" ");
+                    w.WriteValue((double)3.14);
+                    w.WriteString(" ");
+                    w.WriteEndElement();
+                }
+                Assert.True((utils.CompareReader("<Root attr=\"2 true 3.1400000000000001 \" />")));
             }
 
             // WriteValue(long)
@@ -3545,7 +3676,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "Byte", "string", true, null )]
             [XmlWriterInlineData(1, "SByte", "string", true, null )]
             [XmlWriterInlineData(1, "Decimal", "string", true, null )]
-            [XmlWriterInlineData(1, "float", "string", true, null )]
             [XmlWriterInlineData(1, "object", "string", true, null )]
             [XmlWriterInlineData(1, "bool", "string", true, "false" )]
             [XmlWriterInlineData(1, "DateTime", "string", true, 1 )]
@@ -3555,7 +3685,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "TimeSpan", "string", true, "PT0S" )]
             [XmlWriterInlineData(1, "Uri", "string", true, null )]
             [XmlWriterInlineData(1, "Double", "string", true, "1.7976931348623157E+308" )]
-            [XmlWriterInlineData(1, "Single", "string", true, null )]
             [XmlWriterInlineData(1, "XmlQualifiedName", "string", true, null )]
             [XmlWriterInlineData(1, "string", "string", true, null )]
 
@@ -3752,7 +3881,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "Byte", "Decimal", true, null )]
             [XmlWriterInlineData(1, "SByte", "Decimal", true, null )]
             [XmlWriterInlineData(1, "Decimal", "Decimal", true, null )]
-            [XmlWriterInlineData(1, "float", "Decimal", true, null )]
             [XmlWriterInlineData(1, "object", "Decimal", true, null )]
             [XmlWriterInlineData(1, "bool", "Decimal", false, null )]
             [XmlWriterInlineData(1, "DateTime", "Decimal", false, null )]
@@ -3762,7 +3890,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "TimeSpan", "Decimal", false, null )]
             [XmlWriterInlineData(1, "Uri", "Decimal", false, null )]
             [XmlWriterInlineData(1, "Double", "Decimal", false, null )]
-            [XmlWriterInlineData(1, "Single", "Decimal", true, null )]
             [XmlWriterInlineData(1, "XmlQualifiedName", "Decimal", false, null )]
             [XmlWriterInlineData(1, "string", "Decimal", true, null )]
 
@@ -3890,7 +4017,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "Byte", "Uri", true, null )]
             [XmlWriterInlineData(1, "SByte", "Uri", true, null )]
             [XmlWriterInlineData(1, "Decimal", "Uri", true, null )]
-            [XmlWriterInlineData(1, "float", "Uri", true, null )]
             [XmlWriterInlineData(1, "object", "Uri", true, null )]
             [XmlWriterInlineData(1, "bool", "Uri", true, "false" )]
             [XmlWriterInlineData(1, "DateTime", "Uri", true, 1 )]
@@ -3900,7 +4026,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "TimeSpan", "Uri", true, "PT0S" )]
             [XmlWriterInlineData(1, "Uri", "Uri", true, null )]
             [XmlWriterInlineData(1, "Double", "Uri", true, "1.7976931348623157E+308" )]
-            [XmlWriterInlineData(1, "Single", "Uri", true, null )]
             [XmlWriterInlineData(1, "XmlQualifiedName", "Uri", true, null )]
             [XmlWriterInlineData(1, "string", "Uri", true, null )]
 
@@ -3913,7 +4038,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "Byte", "Double", true, null )]
             [XmlWriterInlineData(1, "SByte", "Double", true, null )]
             [XmlWriterInlineData(1, "Decimal", "Double", true, 7.92281625142643E+28D )]
-            [XmlWriterInlineData(1, "float", "Double", true, null )]
             [XmlWriterInlineData(1, "object", "Double", true, null )]
             [XmlWriterInlineData(1, "bool", "Double", false, null )]
             [XmlWriterInlineData(1, "DateTime", "Double", false, null )]
@@ -3959,7 +4083,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "Byte", "object", true, null )]
             [XmlWriterInlineData(1, "SByte", "object", true, null )]
             [XmlWriterInlineData(1, "Decimal", "object", true, null )]
-            [XmlWriterInlineData(1, "float", "object", true, null )]
             [XmlWriterInlineData(1, "object", "object", true, null )]
             [XmlWriterInlineData(1, "bool", "object", true, "false" )]
             [XmlWriterInlineData(1, "DateTime", "object", true, 1 )]
@@ -3969,7 +4092,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(1, "TimeSpan", "object", true, "PT0S" )]
             [XmlWriterInlineData(1, "Uri", "object", true, null )]
             [XmlWriterInlineData(1, "Double", "object", true, "1.7976931348623157E+308" )]
-            [XmlWriterInlineData(1, "Single", "object", true, null )]
             [XmlWriterInlineData(1, "XmlQualifiedName", "object", true, null )]
             [XmlWriterInlineData(1, "string", "object", true, null )]
 
@@ -4000,12 +4122,10 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(2, "Byte", "string", true, null )]
             [XmlWriterInlineData(2, "SByte", "string", true, null )]
             [XmlWriterInlineData(2, "Decimal", "string", true, null )]
-            [XmlWriterInlineData(2, "float", "string", true, null )]
             [XmlWriterInlineData(2, "object", "string", true, null )]
             [XmlWriterInlineData(2, "bool", "string", true, "False" )]
             [XmlWriterInlineData(2, "Uri", "string", true, null )]
             [XmlWriterInlineData(2, "Double", "string", true, null )]
-            [XmlWriterInlineData(2, "Single", "string", true, null )]
             [XmlWriterInlineData(2, "XmlQualifiedName", "string", true, null )]
             [XmlWriterInlineData(2, "string", "string", true, null )]
 
@@ -4118,7 +4238,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(2, "Byte", "Decimal", true, null )]
             [XmlWriterInlineData(2, "SByte", "Decimal", true, null )]
             [XmlWriterInlineData(2, "Decimal", "Decimal", true, null )]
-            [XmlWriterInlineData(2, "float", "Decimal", true, null )]
             [XmlWriterInlineData(2, "object", "Decimal", true, null )]
             [XmlWriterInlineData(21, "XmlQualifiedName", "Decimal", false, null )]
             [XmlWriterInlineData(2, "string", "Decimal", true, null )]
@@ -4192,12 +4311,10 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(2, "Byte", "Uri", true, null )]
             [XmlWriterInlineData(2, "SByte", "Uri", true, null )]
             [XmlWriterInlineData(2, "Decimal", "Uri", true, null )]
-            [XmlWriterInlineData(2, "float", "Uri", true, null )]
             [XmlWriterInlineData(2, "object", "Uri", true, null )]
             [XmlWriterInlineData(2, "bool", "Uri", true, "False" )]
             [XmlWriterInlineData(2, "Uri", "Uri", true, null )]
             [XmlWriterInlineData(2, "Double", "Uri", true, null )]
-            [XmlWriterInlineData(2, "Single", "Uri", true, null )]
             [XmlWriterInlineData(2, "XmlQualifiedName", "Uri", true, null )]
             [XmlWriterInlineData(2, "string", "Uri", true, null )]
 
@@ -4210,7 +4327,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(2, "Byte", "Double", true, null )]
             [XmlWriterInlineData(2, "SByte", "Double", true, null )]
             [XmlWriterInlineData(2, "Decimal", "Double", true, 7.92281625142643E+28D )]
-            [XmlWriterInlineData(2, "float", "Double", true, null )]
             [XmlWriterInlineData(2, "object", "Double", true, null )]
             [XmlWriterInlineData(2, "bool", "Double", false, null )]
             [XmlWriterInlineData(2, "Double", "Double", false, null )]
@@ -4239,7 +4355,6 @@ namespace System.Xml.Tests
             [XmlWriterInlineData(2, "Byte", "object", true, null )]
             [XmlWriterInlineData(2, "SByte", "object", true, null )]
             [XmlWriterInlineData(2, "Decimal", "object", true, null )]
-            [XmlWriterInlineData(2, "float", "object", true, null )]
             [XmlWriterInlineData(2, "object", "object", true, null )]
             [XmlWriterInlineData(2, "bool", "object", true, "False" )]
             [XmlWriterInlineData(2, "XmlQualifiedName", "object", true, null )]
@@ -4313,6 +4428,52 @@ namespace System.Xml.Tests
                     CultureInfo.CurrentCulture = origCulture;
                 }
                 Assert.True((isValid));
+            }
+
+            [Theory]
+            [XmlWriterInlineData(1, "float", "Double", true, null )]
+            [XmlWriterInlineData(1, "float", "Uri", true, null )]
+            [XmlWriterInlineData(1, "float", "object", true, null )]
+            [XmlWriterInlineData(1, "float", "string", true, null )]
+            [XmlWriterInlineData(1, "float", "Decimal", true, null )]
+            [XmlWriterInlineData(1, "Single", "Uri", true, null )]
+            [XmlWriterInlineData(1, "Single", "object", true, null )]
+            [XmlWriterInlineData(1, "Single", "string", true, null )]
+            [XmlWriterInlineData(1, "Single", "Decimal", true, null )]
+            [XmlWriterInlineData(2, "float", "Double", true, null )]
+            [XmlWriterInlineData(2, "float", "Uri", true, null )]
+            [XmlWriterInlineData(2, "float", "object", true, null )]
+            [XmlWriterInlineData(2, "float", "string", true, null )]
+            [XmlWriterInlineData(2, "float", "Decimal", true, null )]
+            [XmlWriterInlineData(2, "Single", "Uri", true, null )]
+            [XmlWriterInlineData(2, "Single", "string", true, null )]
+            [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_27_NetFramework(XmlWriterUtils utils, int param, string sourceStr, string destStr, bool isValid, object expVal)
+            {
+                writeValue_27(utils, param, sourceStr, destStr, isValid, expVal);
+            }
+
+            [Theory]
+            [XmlWriterInlineData(1, "float", "Double", true, "-4582.24023" )]
+            [XmlWriterInlineData(1, "float", "Uri", true, "-4582.24023" )]
+            [XmlWriterInlineData(1, "float", "object", true, "-4582.24023" )]
+            [XmlWriterInlineData(1, "float", "string", true, "-4582.24023" )]
+            [XmlWriterInlineData(1, "float", "Decimal", true, "-4582.24023" )]
+            [XmlWriterInlineData(1, "Single", "Uri", true, "-4582.2399999999998" )]
+            [XmlWriterInlineData(1, "Single", "object", true, "-4582.2399999999998" )]
+            [XmlWriterInlineData(1, "Single", "string", true, "-4582.2399999999998" )]
+            [XmlWriterInlineData(1, "Single", "Decimal", true, "-4582.2399999999998" )]
+            [XmlWriterInlineData(2, "float", "Double", true, "-4582.24" )]
+            [XmlWriterInlineData(2, "float", "Uri", true, "-4582.24" )]
+            [XmlWriterInlineData(2, "float", "object", true, "-4582.24" )]
+            [XmlWriterInlineData(2, "float", "string", true, "-4582.24" )]
+            [XmlWriterInlineData(2, "float", "Decimal", true, "-4582.24" )]
+            [XmlWriterInlineData(2, "Single", "Uri", true, "-4582.24" )]
+            [XmlWriterInlineData(2, "Single", "string", true, "-4582.24" )]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+            public void writeValue_27_NotNetFramework(XmlWriterUtils utils, int param, string sourceStr, string destStr, bool isValid, object expVal)
+            {
+                writeValue_27(utils, param, sourceStr, destStr, isValid, expVal);
             }
 
             [Theory]

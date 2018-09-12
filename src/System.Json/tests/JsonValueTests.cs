@@ -309,10 +309,23 @@ namespace System.Json.Tests
             Assert.Equal(ulong.MinValue, (ulong)JsonValue.Parse(new JsonPrimitive(ulong.MinValue).ToString()));
             Assert.Equal(ulong.MaxValue, (ulong)JsonValue.Parse(new JsonPrimitive(ulong.MaxValue).ToString()));
 
-            Assert.Equal("1E-30", JsonValue.Parse("1e-30").ToString());
             Assert.Equal("1E+30", JsonValue.Parse("1e+30").ToString());
         }
-        
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void JsonValue_Parse_MinMax_Integers_ViaJsonPrimitive_NetFramework()
+        {
+            Assert.Equal("1E-30", JsonValue.Parse("1e-30").ToString());
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void JsonValue_Parse_MinMax_Integers_ViaJsonPrimitive_NotNetFramework()
+        {
+            Assert.Equal("1.0000000000000001E-30", JsonValue.Parse("1e-30").ToString());
+        }
+
         [Theory]
         [InlineData("Fact\b\f\n\r\t\"\\/</\0x")]
         [InlineData("\ud800")]

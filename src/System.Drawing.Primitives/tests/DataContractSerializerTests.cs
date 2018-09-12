@@ -87,13 +87,47 @@ namespace System.Drawing.Primitives.Tests
             {
             new RectangleF(0, 0, 0, 0),
             new RectangleF(new PointF(1.5000f,2.5000f), new SizeF(1.5000f,2.5000f)),
-            new RectangleF(1.50001f, -2.5000f, 1.5000f, -2.5000f)
             };
             var serializedStrings = new string[]
             {
             @"<RectangleF xmlns=""http://schemas.datacontract.org/2004/07/System.Drawing"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><height>0</height><width>0</width><x>0</x><y>0</y></RectangleF>",
             @"<RectangleF xmlns=""http://schemas.datacontract.org/2004/07/System.Drawing"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><height>2.5</height><width>1.5</width><x>1.5</x><y>2.5</y></RectangleF>",
+            };
+            for (int i = 0; i < objs.Length; i++)
+            {
+                Assert.StrictEqual(DataContractSerializerHelper.SerializeAndDeserialize<RectangleF>(objs[i], serializedStrings[i]), objs[i]);
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void DCS_RectangleF_NetFramework()
+        {
+            var objs = new RectangleF[]
+            {
+            new RectangleF(1.50001f, -2.5000f, 1.5000f, -2.5000f)
+            };
+            var serializedStrings = new string[]
+            {
             @"<RectangleF xmlns=""http://schemas.datacontract.org/2004/07/System.Drawing"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><height>-2.5</height><width>1.5</width><x>1.50001</x><y>-2.5</y></RectangleF>"
+            };
+            for (int i = 0; i < objs.Length; i++)
+            {
+                Assert.StrictEqual(DataContractSerializerHelper.SerializeAndDeserialize<RectangleF>(objs[i], serializedStrings[i]), objs[i]);
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void DCS_RectangleF_NotNetFramework()
+        {
+            var objs = new RectangleF[]
+            {
+            new RectangleF(1.50001f, -2.5000f, 1.5000f, -2.5000f)
+            };
+            var serializedStrings = new string[]
+            {
+            @"<RectangleF xmlns=""http://schemas.datacontract.org/2004/07/System.Drawing"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><height>-2.5</height><width>1.5</width><x>1.50001001</x><y>-2.5</y></RectangleF>"
             };
             for (int i = 0; i < objs.Length; i++)
             {

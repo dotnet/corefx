@@ -516,10 +516,10 @@ namespace System.Xml.Tests
         //[Variation("ToString(float) - valid cases")]
         public int ToType34()
         {
-            CError.Compare(XmlConvert.ToString((float)(-4582.24)), "-4582.24", "float");
+            CError.Compare(XmlConvert.ToString((float)(-4582.24)), (-4582.24f).ToString("R", NumberFormatInfo.InvariantInfo), "float");
             CError.Compare(XmlConvert.ToString(float.PositiveInfinity), "INF", "float");
             CError.Compare(XmlConvert.ToString(float.NegativeInfinity), "-INF", "float");
-            CError.Compare(XmlConvert.ToString((float)2.646978e-23), "2.646978E-23", "float");
+            CError.Compare(XmlConvert.ToString((float)2.646978e-23), (2.646978e-23f).ToString("R", NumberFormatInfo.InvariantInfo), "float");
             CError.Compare(XmlConvert.ToString((float)0), "0", "float");
             CError.Compare(XmlConvert.ToString(float.NaN), "NaN", "float");
             CError.Compare(XmlConvert.ToString((float)-0), "0", "float");
@@ -530,10 +530,10 @@ namespace System.Xml.Tests
         public int ToType35()
         {
             // double
-            CError.Compare(XmlConvert.ToString(-4582.24), "-4582.24", "double");
+            CError.Compare(XmlConvert.ToString(-4582.24), (-4582.24).ToString("R", NumberFormatInfo.InvariantInfo), "double");
             CError.Compare(XmlConvert.ToString(double.PositiveInfinity), "INF", "double");
             CError.Compare(XmlConvert.ToString(double.NegativeInfinity), "-INF", "double");
-            CError.Compare(XmlConvert.ToString(243.657745094698e-23), "2.43657745094698E-21", "double");
+            CError.Compare(XmlConvert.ToString(243.657745094698e-23), (243.657745094698e-23).ToString("R", NumberFormatInfo.InvariantInfo), "double");
             CError.Compare(XmlConvert.ToString((double)0), "0", "double");
             CError.Compare(XmlConvert.ToString(double.NaN), "NaN", "double");
             CError.Compare(XmlConvert.ToString((double)-0), "0", "double");

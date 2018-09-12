@@ -122,9 +122,6 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(SerializeAndDeserialize<double>(0,
 @"<?xml version=""1.0""?>
 <double>0</double>"), 0);
-        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3,
-@"<?xml version=""1.0""?>
-<double>2.3</double>"), 2.3);
         Assert.StrictEqual(SerializeAndDeserialize<double>(double.MinValue,
 @"<?xml version=""1.0""?>
 <double>-1.7976931348623157E+308</double>"), double.MinValue);
@@ -134,23 +131,59 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void Xml_DoubleAsRoot_NetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3,
+@"<?xml version=""1.0""?>
+<double>2.3</double>"), 2.3);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void Xml_DoubleAsRoot_NotNetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3,
+@"<?xml version=""1.0""?>
+<double>2.2999999999999998</double>"), 2.3);
+    }    
+
+    [Fact]
     public static void Xml_FloatAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2,
-@"<?xml version=""1.0""?>
-<float>-1.2</float>"), (float)-1.2);
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)0,
 @"<?xml version=""1.0""?>
 <float>0</float>"), (float)0);
-        Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3,
-@"<?xml version=""1.0""?>
-<float>2.3</float>"), (float)2.3);
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue,
 @"<?xml version=""1.0""?>
 <float>-3.40282347E+38</float>"), float.MinValue);
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MaxValue,
 @"<?xml version=""1.0""?>
 <float>3.40282347E+38</float>"), float.MaxValue);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void Xml_FloatAsRoot_NetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2,
+@"<?xml version=""1.0""?>
+<float>-1.2</float>"), (float)-1.2);
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3,
+@"<?xml version=""1.0""?>
+<float>2.3</float>"), (float)2.3);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void Xml_FloatAsRoot_NotNetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2,
+@"<?xml version=""1.0""?>
+<float>-1.20000005</float>"), (float)-1.2);
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3,
+@"<?xml version=""1.0""?>
+<float>2.29999995</float>"), (float)2.3);
     }
 
     [Fact]

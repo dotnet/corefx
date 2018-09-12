@@ -2928,11 +2928,51 @@ namespace System.Xml.Tests
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
         [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
         [Theory]
-        public void AddExtObject22(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void AddExtObject22_NetFramework(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
         {
             string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result xmlns:myObj=""urn:my-object"">
 		Get A String:Hello world
 		Get A Double:22.41276
+		Get A True Boolean:true
+		Get A False Boolean:false
+		Get An Int:10
+		Get Other with ToString() Support:My Custom Object has a value of 22
+		Call function with no return type:</result>";
+
+            MyObject obj = new MyObject(22, _output);
+            m_xsltArg = new XsltArgumentList();
+
+            m_xsltArg.AddExtensionObject(szDefaultNS, obj);
+            if ((LoadXSL("MyObject_ReturnValidTypes.xsl", inputType, readerType) == 1) && (Transform_ArgList("fruits.xml", transformType, docType) == 1))
+            {
+                VerifyResult(expected);
+                return;
+            }
+            else
+                Assert.True(false);
+        }
+
+        //[Variation("Methods returning void and valid types")]
+        [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.Reader, DocType.XPathDocument)]
+        [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
+        [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
+        [InlineData(InputType.Reader, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
+        [InlineData(InputType.URI, ReaderType.XmlValidatingReader, TransformType.Reader, DocType.XPathDocument)]
+        [InlineData(InputType.URI, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
+        [InlineData(InputType.URI, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
+        [InlineData(InputType.URI, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
+        [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Reader, DocType.XPathDocument)]
+        [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Writer, DocType.XPathDocument)]
+        [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.Stream, DocType.XPathDocument)]
+        [InlineData(InputType.Navigator, ReaderType.XmlValidatingReader, TransformType.TextWriter, DocType.XPathDocument)]
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void AddExtObject22_NotNetFramework(InputType inputType, ReaderType readerType, TransformType transformType, DocType docType)
+        {
+            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result xmlns:myObj=""urn:my-object"">
+		Get A String:Hello world
+		Get A Double:22.412759999999999
 		Get A True Boolean:true
 		Get A False Boolean:false
 		Get An Int:10
