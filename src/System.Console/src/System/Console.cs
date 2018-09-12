@@ -161,10 +161,7 @@ namespace System
             set { ConsolePal.CursorSize = value; }
         }
 
-        public static bool NumberLock
-        {
-            get { return ConsolePal.NumberLock; }
-        }
+        public static bool NumberLock => ConsolePal.NumberLock;
 
         public static bool CapsLock
         {
