@@ -168,7 +168,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("0")] // min value
         [InlineData("000000000000000000001235abcdfg")]
         [InlineData("21474836abcdefghijklmnop")]
-        private static unsafe void ByteSpanToUInt64(string text)
+        private static void ByteSpanToUInt64(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -189,7 +189,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("abcdef")] // standard parse
         [InlineData("ffffffffffffffff")] // max value
         [InlineData("0")] // min value
-        private static unsafe void ByteSpanToUInt64Hex(string text)
+        private static void ByteSpanToUInt64Hex(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
             ReadOnlySpan<byte> utf8ByteSpan = new ReadOnlySpan<byte>(utf8ByteArray);
@@ -613,8 +613,6 @@ namespace System.Buffers.Text.Tests
         [InlineData("107")] // standard parse
         [InlineData("127")] // max value
         [InlineData("-128")] // min value
-        [InlineData("147")]
-        [InlineData("-111")]
         [InlineData("-21abcdefghijklmnop")]
         [InlineData("21abcdefghijklmnop")]
         [InlineData("00000000000000000000123")]
