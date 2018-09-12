@@ -11,19 +11,21 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel PCLMULQDQ hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Pclmulqdq
+    public abstract class Pclmulqdq : Sse2
     {
-        public static bool IsSupported { get => IsSupported; }
+        internal Pclmulqdq() { }
+
+        public new static bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m128i _mm_clmulepi64_si128 (__m128i a, __m128i b, const int imm8)
         ///   PCLMULQDQ xmm, xmm/m128, imm8
         /// </summary>
-        public static Vector128<long> CarryLessMultiply(Vector128<long> left, Vector128<long> right, byte control) => CarryLessMultiply(left, right, control);
+        public static Vector128<long> CarrylessMultiply(Vector128<long> left, Vector128<long> right, byte control) => CarrylessMultiply(left, right, control);
         /// <summary>
         /// __m128i _mm_clmulepi64_si128 (__m128i a, __m128i b, const int imm8)
         ///   PCLMULQDQ xmm, xmm/m128, imm8
         /// </summary>
-        public static Vector128<ulong> CarryLessMultiply(Vector128<ulong> left, Vector128<ulong> right, byte control) => CarryLessMultiply(left, right, control);
+        public static Vector128<ulong> CarrylessMultiply(Vector128<ulong> left, Vector128<ulong> right, byte control) => CarrylessMultiply(left, right, control);
     }
 }

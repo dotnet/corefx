@@ -186,6 +186,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NETFX has smaller size limits")]
         public async Task ReadAsStreamAsync_LargeContent_AllBytesRead()
         {
             var form = new MultipartFormDataContent();
@@ -308,27 +309,31 @@ namespace System.Net.Http.Functional.Tests
             using (Stream s = await mc.ReadAsStreamAsync())
             {
                 Assert.True(s.CanRead);
-                Assert.False(s.CanWrite);
+                Assert.Equal(PlatformDetection.IsFullFramework, s.CanWrite);
                 Assert.True(s.CanSeek);
 
-                AssertExtensions.Throws<ArgumentNullException>("buffer", () => s.Read(null, 0, 0));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", null, () => s.Read(null, 0, 0));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => s.Read(new byte[1], -1, 0));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Read(new byte[1], 0, -1));
-                AssertExtensions.Throws<ArgumentException>("buffer", () => s.Read(new byte[1], 1, 1));
+                AssertExtensions.Throws<ArgumentException>("buffer", null, () => s.Read(new byte[1], 1, 1));
 
-                AssertExtensions.Throws<ArgumentNullException>("buffer", () => { s.ReadAsync(null, 0, 0); });
+                AssertExtensions.Throws<ArgumentNullException>("buffer", null, () => { s.ReadAsync(null, 0, 0); });
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => { s.ReadAsync(new byte[1], -1, 0); });
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => { s.ReadAsync(new byte[1], 0, -1); });
-                AssertExtensions.Throws<ArgumentException>("buffer", () => { s.ReadAsync(new byte[1], 1, 1); });
+                AssertExtensions.Throws<ArgumentException>("buffer", null, () => { s.ReadAsync(new byte[1], 1, 1); });
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => s.Position = -1);
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => s.Seek(-1, SeekOrigin.Begin));
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("origin", () => s.Seek(0, (SeekOrigin)42));
 
-                Assert.Throws<NotSupportedException>(() => s.Write(new byte[1], 0, 0));
-                Assert.Throws<NotSupportedException>(() => s.Write(new Span<byte>(new byte[1], 0, 0)));
-                Assert.Throws<NotSupportedException>(() => { s.WriteAsync(new byte[1], 0, 0); });
-                Assert.Throws<NotSupportedException>(() => s.SetLength(1));
+                // NETFX is not throwing exceptions but probably should since the stream should be considered read-only.
+                if (!PlatformDetection.IsFullFramework)
+                {
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => s.Seek(-1, SeekOrigin.Begin));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("origin", () => s.Seek(0, (SeekOrigin)42));
+                    Assert.Throws<NotSupportedException>(() => s.Write(new byte[1], 0, 0));
+                    Assert.Throws<NotSupportedException>(() => s.Write(new Span<byte>(new byte[1], 0, 0)));
+                    Assert.Throws<NotSupportedException>(() => { s.WriteAsync(new byte[1], 0, 0); });
+                    Assert.Throws<NotSupportedException>(() => s.SetLength(1));
+                }
             }
         }
 
@@ -412,7 +417,9 @@ namespace System.Net.Http.Functional.Tests
 
             protected override bool TryComputeLength(out long length)
             {
-                throw new NotImplementedException();
+                length = 0;
+
+                return false;
             }
 
             protected override Task<Stream> CreateContentReadStreamAsync()

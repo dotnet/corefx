@@ -21,12 +21,19 @@
     <OfficialBuildRID Include="win-x86">
       <Platform>x86</Platform>
     </OfficialBuildRID>
+    <OfficialBuildRID Include="@(OfficialBuildRID->'%(Identity)-aot')" />
 
     <!-- The following RIDs are not officically supported and are not
          built during official builds, however we wish to include them
          in our runtime.json to enable others to provide them.  -->
     <OfficialBuildRID Include="tizen.4.0.0-armel">
       <Platform>armel</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="tizen.5.0.0-armel">
+      <Platform>armel</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="webassembly-wasm-aot">
+      <Platform>wasm</Platform>
     </OfficialBuildRID>
   </ItemGroup>
 </Project>

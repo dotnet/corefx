@@ -74,6 +74,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
         public static bool IsAccessTokenSetup() => string.IsNullOrEmpty(getAccessToken()) ? false : true;
+        
+        public static bool IsFileStreamSetup() => int.TryParse(Environment.GetEnvironmentVariable("TEST_FILESTREAM_SETUP"), out int result) ? result == 1 : false;
 
         // This method assumes dataSource parameter is in TCP connection string format.
         public static bool IsAzureSqlServer(string dataSource)
@@ -262,13 +264,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void RunNonQuery(string connectionString, string sql)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlCommand command = connection.CreateCommand())
             {
                 connection.Open();
-                using (SqlCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = sql;
-                    command.ExecuteNonQuery();
-                }
+                command.CommandText = sql;
+                command.ExecuteNonQuery();
             }
         }
 

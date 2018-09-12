@@ -3836,7 +3836,7 @@ public class ImplementDictionary : IDictionary
     public bool IsFixedSize { get { return false; } }
     public void Remove(object key)
     {
-        if (key == null) throw new ArgumentNullException("key");
+        if (key == null) throw new ArgumentNullException(nameof(key));
         int index;
         if (TryGetIndexOfKey(key, out index))
         {
@@ -4143,7 +4143,7 @@ public class MyArgumentException : Exception, ISerializable
     {
         if (info == null)
         {
-            throw new ArgumentNullException("info");
+            throw new ArgumentNullException(nameof(info));
         }
 
         base.GetObjectData(info, context);
@@ -4374,4 +4374,19 @@ public class TypeWithCollectionAndDateTimeOffset
 public class TypeWithPrimitiveKnownTypes : List<object>
 {
 
+}
+
+public enum TestEnum { Off, On, Both }
+public class EnumTestBase { }
+public class EnumTestDerived : EnumTestBase
+{
+    [XmlText]
+    public TestEnum Test { get; set; }
+}
+
+public class PrimiveAttributeTestBase { }
+public class PrimiveAttributeTestDerived : PrimiveAttributeTestBase
+{
+    [XmlText]
+    public int Number { get; set; }
 }

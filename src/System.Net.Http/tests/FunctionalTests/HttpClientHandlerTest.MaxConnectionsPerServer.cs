@@ -30,6 +30,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NETFX doesn't throw on invalid values")]
         public void Set_InvalidValues_Throws(int invalidValue)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())

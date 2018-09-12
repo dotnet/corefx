@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Security.Cryptography.Asn1;
+using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -306,11 +309,7 @@ namespace System.Security.Cryptography.X509Certificates
             Debug.Assert(_generator != null);
 
             byte[] serialNumber = new byte[8];
-
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(serialNumber);
-            }
+            RandomNumberGenerator.Fill(serialNumber);
 
             using (X509Certificate2 certificate = Create(
                 SubjectName,
@@ -457,7 +456,7 @@ namespace System.Security.Cryptography.X509Certificates
             {
                 switch (keyAlgorithm)
                 {
-                    case Oids.RsaRsa:
+                    case Oids.Rsa:
                         if (_rsaPadding == null)
                         {
                             throw new InvalidOperationException(SR.Cryptography_CertReq_RSAPaddingRequired);
@@ -467,7 +466,7 @@ namespace System.Security.Cryptography.X509Certificates
                         key = rsa;
                         generator = X509SignatureGenerator.CreateForRSA(rsa, _rsaPadding);
                         break;
-                    case Oids.Ecc:
+                    case Oids.EcPublicKey:
                         ECDsa ecdsa = issuerCertificate.GetECDsaPrivateKey();
                         key = ecdsa;
                         generator = X509SignatureGenerator.CreateForECDsa(ecdsa);
@@ -530,20 +529,101 @@ namespace System.Security.Cryptography.X509Certificates
             if (serialNumber == null || serialNumber.Length < 1)
                 throw new ArgumentException(SR.Arg_EmptyOrNullArray, nameof(serialNumber));
 
-            TbsCertificate tbsCertificate = new TbsCertificate
+            byte[] signatureAlgorithm = generator.GetSignatureAlgorithmIdentifier(HashAlgorithm);
+            AlgorithmIdentifierAsn signatureAlgorithmAsn;
+
+            // Deserialization also does validation of the value (except for Parameters, which have to be validated separately).
+            signatureAlgorithmAsn = AlgorithmIdentifierAsn.Decode(signatureAlgorithm, AsnEncodingRules.DER);
+            if (signatureAlgorithmAsn.Parameters.HasValue)
+            {
+                Helpers.ValidateDer(signatureAlgorithmAsn.Parameters.Value);
+            }
+
+            TbsCertificateAsn tbsCertificate = new TbsCertificateAsn
             {
                 Version = 2,
-                SerialNumber = serialNumber,
-                Issuer = issuerName,
-                PublicKey = PublicKey,
-                NotBefore = notBefore,
-                NotAfter = notAfter,
-                Subject = SubjectName,
+                SerialNumber = NormalizeSerialNumber(serialNumber),
+                SignatureAlgorithm = signatureAlgorithmAsn,
+                Issuer = issuerName.RawData,
+                SubjectPublicKeyInfo = new SubjectPublicKeyInfoAsn
+                {
+                    Algorithm = new AlgorithmIdentifierAsn
+                    {
+                        Algorithm = PublicKey.Oid,
+                        Parameters = PublicKey.EncodedParameters.RawData,
+                    },
+                    SubjectPublicKey = PublicKey.EncodedKeyValue.RawData,
+                },
+                Validity = new ValidityAsn(notBefore, notAfter),
+                Subject = SubjectName.RawData,
             };
 
-            tbsCertificate.Extensions.AddRange(CertificateExtensions);
+            if (CertificateExtensions.Count > 0)
+            {
+                HashSet<string> usedOids = new HashSet<string>(CertificateExtensions.Count);
+                List<X509ExtensionAsn> extensionAsns = new List<X509ExtensionAsn>(CertificateExtensions.Count);
 
-            return new X509Certificate2(tbsCertificate.Sign(generator, HashAlgorithm));
+                // An interesting quirk of skipping null values here is that
+                // Extensions.Count == 0 => no extensions
+                // Extensions.ContainsOnly(null) => empty extensions list
+
+                foreach (X509Extension extension in CertificateExtensions)
+                {
+                    if (extension == null)
+                    {
+                        continue;
+                    }
+
+                    if (!usedOids.Add(extension.Oid.Value))
+                    {
+                        throw new InvalidOperationException(
+                            SR.Format(SR.Cryptography_CertReq_DuplicateExtension, extension.Oid.Value));
+                    }
+
+                    extensionAsns.Add(new X509ExtensionAsn(extension));
+                }
+
+                tbsCertificate.Extensions = extensionAsns.ToArray();
+            }
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            using (AsnWriter signedWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                tbsCertificate.Encode(writer);
+
+                byte[] encodedTbsCertificate = writer.Encode();
+                CertificateAsn certificate = new CertificateAsn
+                {
+                    TbsCertificate = tbsCertificate,
+                    SignatureAlgorithm = signatureAlgorithmAsn,
+                    SignatureValue = generator.SignData(encodedTbsCertificate, HashAlgorithm),
+                };
+
+                certificate.Encode(signedWriter);
+                return new X509Certificate2(signedWriter.Encode());
+            }
+        }
+
+        private ReadOnlyMemory<byte> NormalizeSerialNumber(byte[] serialNumber)
+        {
+            if (serialNumber[0] >= 0x80)
+            {
+                // Keep the serial number unsigned by prepending a zero.
+                var newSerialNumber = new byte[serialNumber.Length + 1];
+                newSerialNumber[0] = 0;
+                serialNumber.CopyTo(newSerialNumber, 1);
+                return newSerialNumber;
+            }
+            else
+            {
+                // Strip any unnecessary zeros from the beginning.
+                int leadingZeros = 0;
+                while (leadingZeros < serialNumber.Length - 1 && serialNumber[leadingZeros] == 0 && serialNumber[leadingZeros + 1] < 0x80)
+                {
+                    leadingZeros++;
+                }
+                return new ReadOnlyMemory<byte>(serialNumber, leadingZeros, serialNumber.Length - leadingZeros);
+            }
         }
     }
 }

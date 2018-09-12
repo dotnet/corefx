@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>System.Private.DataContractSerialization</AssemblyName>
     <RootNamespace>System.Private.DataContractSerialization</RootNamespace>
@@ -11,16 +9,11 @@
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <DefineConstants Condition="'$(TargetsAOT)'=='true'">$(DefineConstants);uapaot</DefineConstants>
     <!-- We do not want to block reflection for this assembly -->
-    <BlockReflectionAttribute Condition="'$(TargetGroup)'=='uapaot'">false</BlockReflectionAttribute>
+    <BlockReflectionAttribute Condition="'$(TargetsAOT)'=='true'">false</BlockReflectionAttribute>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreappaot-Debug;netcoreappaot-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup>
     <RuntimeSerializationSources>System\Runtime\Serialization</RuntimeSerializationSources>
     <JsonSources>System\Runtime\Serialization\Json</JsonSources>
@@ -33,6 +26,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Runtime\CompilerServices\RemovableFeatureAttribute.cs">
+      <Link>System\Runtime\CompilerServices\RemovableFeatureAttribute</Link>
     </Compile>
     <Compile Include="$(RuntimeSerializationSources)\Attributes.cs" />
     <Compile Include="$(RuntimeSerializationSources)\CodeGenerator.cs" />
@@ -52,7 +48,7 @@
     <Compile Include="$(RuntimeSerializationSources)\Globals.cs" />
     <Compile Include="$(RuntimeSerializationSources)\GenericParameterDataContract.cs" />
     <Compile Include="$(RuntimeSerializationSources)\HybridObjectCache.cs" />
-    <Compile Include="$(RuntimeSerializationSources)\InvalidDataContract.cs" Condition="'$(TargetGroup)' == 'uapaot'" />
+    <Compile Include="$(RuntimeSerializationSources)\InvalidDataContract.cs" Condition="'$(TargetsAOT)'=='true'" />
     <Compile Include="$(RuntimeSerializationSources)\ObjectToIdCache.cs" />
     <Compile Include="$(RuntimeSerializationSources)\ObjectReferenceStack.cs" />
     <Compile Include="$(RuntimeSerializationSources)\PrimitiveDataContract.cs" />
@@ -76,7 +72,7 @@
     <Compile Include="$(RuntimeSerializationSources)\KnownTypeDataContractResolver.cs" />
     <Compile Include="$(RuntimeSerializationSources)\XmlObjectSerializerReadContextComplex.cs" />
     <Compile Include="$(RuntimeSerializationSources)\XmlObjectSerializerWriteContextComplex.cs" />
-    <Compile Include="$(RuntimeSerializationSources)\BitFlagsGenerator.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
+    <Compile Include="$(RuntimeSerializationSources)\BitFlagsGenerator.cs" Condition="'$(TargetsAOT)'!='true'" />
     <Compile Include="$(RuntimeSerializationSources)\DataContractSurrogateCaller.cs" />
     <Compile Include="$(RuntimeSerializationSources)\DataContractSerializerExtensions.cs" />
     <Compile Include="$(RuntimeSerializationSources)\XmlSerializableServices.cs" />
@@ -141,7 +137,7 @@
     <Compile Include="$(JsonSources)\IXmlJsonWriterInitializer.cs" />
     <Compile Include="$(JsonSources)\ByteArrayHelperWithString.cs" />
     <Compile Include="$(JsonSources)\JsonEncodingStreamWrapper.cs" />
-    <Compile Include="$(JsonSources)\JsonFormatGeneratorStatics.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
+    <Compile Include="$(JsonSources)\JsonFormatGeneratorStatics.cs" Condition="'$(TargetsAOT)'!='true'" />
     <Compile Include="System\Runtime\Serialization\AccessorBuilder.cs" />
     <Compile Include="$(CommonPath)\System\CodeDom\CodeTypeReference.cs" />
     <Compile Include="$(CommonPath)\System\CodeDom\CodeTypeReferenceCollection.cs" />
@@ -151,6 +147,7 @@
     <Compile Include="System\Runtime\Serialization\IExtensibleDataObject.cs" />
     <Compile Include="System\Runtime\Serialization\Json\ReflectionJsonFormatReader.cs" />
     <Compile Include="System\Runtime\Serialization\Json\ReflectionJsonFormatWriter.cs" />
+    <Compile Include="System\Runtime\Serialization\ReflectionFeature.cs" />
     <Compile Include="System\Runtime\Serialization\ReflectionReader.cs" />
     <Compile Include="System\Runtime\Serialization\ReflectionClassWriter.cs" />
     <Compile Include="System\Runtime\Serialization\ReflectionXmlFormatReader.cs" />
@@ -164,7 +161,7 @@
     <Compile Include="System\Xml\XmlCanonicalWriter.cs" />
     <Compile Include="System\Xml\XmlSigningNodeWriter.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+  <ItemGroup Condition="'$(TargetsAOT)'=='true'">
     <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -191,5 +188,4 @@
     <Reference Include="System.Xml.XDocument" />
     <Reference Include="System.Xml.XmlSerializer" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

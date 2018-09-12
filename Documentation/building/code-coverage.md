@@ -56,16 +56,16 @@ This will do the build and testing as with the normal ```build```, but it will r
 
 You can also build and test with code coverage for a particular test project rather than for the whole repo.  Normally to build and test a particular test suite, from the same directory as that test suite's .csproj, you'd run:
 
-    msbuild /t:BuildAndTest
+    dotnet msbuild /t:BuildAndTest
 
 To do so with code coverage, append the ```/p:Coverage=true``` argument:
 
-    msbuild /t:BuildAndTest /p:Coverage=true
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true
 
 The results for this one library will then show up in the aforementioned index.htm file. For example, to build, test, and get code coverage results for the System.Diagnostics.Debug library, from the root of the repo one can do:
 
     cd src\System.Diagnostics.Debug\tests\
-    msbuild /t:BuildAndTest /p:Coverage=true
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true
     
 And then once the run completes:
     
@@ -76,9 +76,36 @@ And then once the run completes:
 Some of the libraries for which contracts and tests live in the corefx repo are actually fully or partially implemented in the core runtime library in another repo, e.g. the implementation that backs the System.Runtime contract is in System.Private.CoreLib.dll in either the coreclr or corert repo. To run coverage reports for these projects, you need to build System.Private.CoreLib locally from the coreclr repo. To get coverage of System.Private.CoreLib while running the tests for a particular library:
 
 1. Follow the steps outlined at [Testing with Private CoreClr Bits](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md#testing-with-private-coreclr-bits).  Make sure to include the optional steps listed as being required for code coverage.
-2. Add /p:CodeCoverageAssemblies="System.Private.CoreLib" to the previously discussed msbuild command, e.g. msbuild /t:BuildAndTest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"
+2. Add /p:CodeCoverageAssemblies="System.Private.CoreLib" to the previously discussed dotnet msbuild command, e.g. dotnet msbuild /t:BuildAndTest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"
 
-Note that you will also want to copy the System.Private.CoreLib.pdb along with the System.Private.CoreLib.dll.  As of 10/2017 this PDB must be a windows PDB (Hopefully by early 2018 OpenCOver will directly support portable PDBs.  
-You can determine if it is a windows PDB by doing 'more System.Private.CoreLib.pdb.  If it begins with 'Microsoft C/C++ MSF 7.00' it is a windows PDB)  If you need a windows PDB the Pdb2Pdb tool will convert (or you can do a msbuild /t:rebuild /p:DebugType=full in the src\mscorlib)
+The build and test projects take care of copying assemblies and PDBs as needed for coverage runs. The resulting code coverage report should now also include details for System.Private.CoreLib.
 
-The resulting code coverage report should now also include details for System.Private.CoreLib.
+Note: as of 10/2017 OpenCover, the default coverage tool, requires PDBs to be Windows PDBs - the needed conversions are automatically performed by coverage runs. You can determine if it is a Windows PDB by doing 'more System.Private.CoreLib.pdb',  if it begins with 'Microsoft C/C++ MSF 7.00' it is a Windows PDB.  If you need a Windows PDB the Pdb2Pdb tool will convert (or you can do a dotnet msbuild /t:rebuild /p:DebugType=full).
+
+## Cross-platform Coverage 
+As of 07/2018 CoreFx is only able to get coverage information on Windows. To correct this we are experimenting with [coverlet](https://github.com/tonerdo/coverlet).
+
+### Know Issues ###
+
+1. Instrumenting "System.Private.CoreLib" is causing test to crash (both on Windows and Unix).
+
+### Windows Instructions ###
+On Windows by default coverage runs will use OpenCover instead of coverlet, use the build property `UseCoverlet` to change this default. Currently the use of `dotnet msbuild` is required to avoid a problem with one of the coverlet dependencies. Here is the command:
+
+```
+dotnet msbuild /t:RebuildAndTest /p:Coverage=True /p:UseCoverlet=True
+``` 
+
+### Unix Instructions ###
+On Unix just specifying `/p:Coverage=True` triggers the usage of coverlet. However, in order to generate the html report a few setup steps are needed.
+
+1. Install the [dotnet/cli global tool reportgenerator](https://www.nuget.org/packages/dotnet-reportgenerator-globaltool), add it to the PATH if not automatically added by dotnet/cli (it can be only for the current session)
+2. On Linux install the Arial font required for report generation: `sudo apt-get install ttf-mscorefonts-installer`
+
+After that you request a coverage run from a test folder, e.g.:
+
+```
+dotnet msbuild /t:RebuildAndTest /p:Coverage=True
+```
+
+Open index.htm located at bin/tests/coverage to see the results of the coverage run.

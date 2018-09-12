@@ -10,8 +10,14 @@ namespace System.IO.Tests
 {
     public abstract class BaseGetSetTimes<T> : FileSystemTest
     {
+        protected const string HFS = "hfs";
         public delegate void SetTime(T item, DateTime time);
         public delegate DateTime GetTime(T item);
+        // AppContainer restricts access to DriveFormat (::GetVolumeInformation)
+        private static string driveFormat = PlatformDetection.IsInAppContainer ? string.Empty : new DriveInfo(Path.GetTempPath()).DriveFormat;
+
+        protected static bool isHFS => driveFormat.Equals(HFS, StringComparison.InvariantCultureIgnoreCase);
+        protected static bool isNotHFS => !isHFS;
 
         public abstract T GetExistingItem();
         public abstract T GetMissingItem();
@@ -42,7 +48,8 @@ namespace System.IO.Tests
 
             Assert.All(TimeFunctions(requiresRoundtripping: true), (function) =>
             {
-                DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, function.Kind);
+                // Checking that milliseconds are not dropped after setter.
+                DateTime dt = new DateTime(2014, 12, 1, 12, 3, 3, isHFS ? 0 : 321, function.Kind);
                 function.Setter(item, dt);
                 DateTime result = function.Getter(item);
                 Assert.Equal(dt, result);
@@ -70,14 +77,10 @@ namespace System.IO.Tests
             ValidateSetTimes(item, beforeTime, afterTime);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Linux)] // Windows tested below, and OSX does not currently support millisec granularity
-        public void TimesIncludeMillisecondPart_Linux()
+        [ConditionalFact(nameof(isNotHFS))] // OSX HFS driver format does not support millisec granularity
+        public void TimesIncludeMillisecondPart()
         {
             T item = GetExistingItem();
-
-            string driveFormat = new DriveInfo(GetItemPath(item)).DriveFormat;
-
             Assert.All(TimeFunctions(), (function) =>
             {
                 var msec = 0;
@@ -85,7 +88,6 @@ namespace System.IO.Tests
                 {
                     DateTime time = function.Getter(item);
                     msec = time.Millisecond;
-
                     if (msec != 0)
                         break;
 
@@ -107,42 +109,11 @@ namespace System.IO.Tests
             });
         }
 
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // Breaking out Windows as it passes no problem there
-        public void TimesIncludeMillisecondPart_Windows()
+        [ConditionalFact(nameof(isHFS))]
+        public void TimesIncludeMillisecondPart_HFS()
         {
             T item = GetExistingItem();
-            Assert.All(TimeFunctions(), (function) =>
-            {
-                var msec = 0;
-                for (int i = 0; i < 5; i++)
-                {
-                    DateTime time = function.Getter(item);
-                    msec = time.Millisecond;
-                    if (msec != 0)
-                        break;
-
-                    // This case should only happen 1/1000 times, unless the OS/Filesystem does
-                    // not support millisecond granularity.
-
-                    // If it's 1/1000, or low granularity, this may help:
-                    Thread.Sleep(1234);
-
-                    item = GetExistingItem(); // try a new file/directory
-                }
-
-                Assert.NotEqual(0, msec);
-            });
-        }
-
-        [Fact]
-        // OSX does not currently support millisec granularity: use this test as a canary to flag
-        // if this ever changes so we can enable the actual test
-        [PlatformSpecific(TestPlatforms.OSX)]
-        public void TimesIncludeMillisecondPart_OSX()
-        {
-            T item = GetExistingItem();
+            // OSX HFS driver format does not support millisec granularity
             Assert.All(TimeFunctions(), (function) =>
             {
                 DateTime time = function.Getter(item);

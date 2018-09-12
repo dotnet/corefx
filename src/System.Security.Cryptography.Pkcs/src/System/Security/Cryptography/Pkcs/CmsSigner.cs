@@ -121,7 +121,7 @@ namespace System.Security.Cryptography.Pkcs
             bool silent,
             out X509Certificate2Collection chainCerts)
         {
-            HashAlgorithmName hashAlgorithmName = Helpers.GetDigestAlgorithm(DigestAlgorithm);
+            HashAlgorithmName hashAlgorithmName = PkcsHelpers.GetDigestAlgorithm(DigestAlgorithm);
             IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithmName);
 
             hasher.AppendData(data.Span);
@@ -169,13 +169,19 @@ namespace System.Security.Cryptography.Pkcs
                 }
 
                 // Use the serializer/deserializer to DER-normalize the attribute order.
-                newSignerInfo.SignedAttributes = Helpers.NormalizeSet(
+                SignedAttributesSet signedAttrsSet = new SignedAttributesSet();
+                signedAttrsSet.SignedAttributes = PkcsHelpers.NormalizeAttributeSet(
                     signedAttrs.ToArray(),
-                    normalized =>
-                    {
-                        AsnReader reader = new AsnReader(normalized, AsnEncodingRules.DER);
-                        hasher.AppendData(reader.PeekContentBytes().Span);
-                    });
+                    normalized => hasher.AppendData(normalized));
+
+                // Since this contains user data in a context where BER is permitted, use BER.
+                // There shouldn't be any observable difference here between BER and DER, though,
+                // since the top level fields were written by NormalizeSet.
+                using (AsnWriter attrsWriter = new AsnWriter(AsnEncodingRules.BER))
+                {
+                    signedAttrsSet.Encode(attrsWriter);
+                    newSignerInfo.SignedAttributes = attrsWriter.Encode();
+                }
 
                 dataHash = hasher.GetHashAndReset();
             }
@@ -195,7 +201,7 @@ namespace System.Security.Cryptography.Pkcs
                     newSignerInfo.Version = 1;
                     break;
                 case SubjectIdentifierType.SubjectKeyIdentifier:
-                    newSignerInfo.Sid.SubjectKeyIdentifier = Certificate.GetSubjectKeyIdentifier();
+                    newSignerInfo.Sid.SubjectKeyIdentifier = PkcsPal.Instance.GetSubjectKeyIdentifier(Certificate);
                     newSignerInfo.Version = 3;
                     break;
                 case SubjectIdentifierType.NoSignature:
@@ -215,7 +221,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 List<AttributeAsn> attrs = BuildAttributes(UnsignedAttributes);
 
-                newSignerInfo.UnsignedAttributes = Helpers.NormalizeSet(attrs.ToArray());
+                newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeAttributeSet(attrs.ToArray());
             }
 
             bool signed = CmsSignature.Sign(

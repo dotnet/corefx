@@ -13,7 +13,6 @@ namespace System.Reflection.Tests
     {
         [Theory]
         [MemberData(nameof(RefReturnInvokeTestData))]
-        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestRefReturnPropertyGetValue<T>(T value)
         {
             TestRefReturnInvoke<T>(value, (p, t) => p.GetValue(t));
@@ -21,21 +20,18 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(RefReturnInvokeTestData))]
-        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestRefReturnMethodInvoke<T>(T value)
         {
             TestRefReturnInvoke<T>(value, (p, t) => p.GetGetMethod().Invoke(t, Array.Empty<object>()));
         }
 
         [Fact]
-        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestRefReturnNullable()
         {
             TestRefReturnInvokeNullable<int>(42);
         }
 
         [Fact]
-        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestRefReturnNullableNoValue()
         {
             TestRefReturnInvokeNullable<int>(default(int?));
@@ -43,7 +39,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(RefReturnInvokeTestData))]
-        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestNullRefReturnInvoke<T>(T value)
         {
             TestClass<T> tc = new TestClass<T>(value);
@@ -53,7 +48,6 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static unsafe void TestRefReturnOfPointer()
         {
             int* expected = (int*)0x1122334455667788;
@@ -63,6 +57,37 @@ namespace System.Reflection.Tests
             Assert.True(rv is Pointer);
             int* actual = (int*)(Pointer.Unbox(rv));
             Assert.Equal((IntPtr)expected, (IntPtr)actual);
+        }
+        
+        [Fact]
+        public static unsafe void TestNullRefReturnOfPointer()
+        {
+            TestClassIntPointer tc = new TestClassIntPointer(null);
+
+            PropertyInfo p = typeof(TestClassIntPointer).GetProperty(nameof(TestClassIntPointer.NullRefReturningProp));
+            Assert.NotNull(p);
+            Assert.Throws<NullReferenceException>(() => p.GetValue(tc));
+        }
+        
+        [Fact]
+        public static unsafe void TestByRefLikeRefReturn()
+        {
+            ByRefLike brl = new ByRefLike();
+            ByRefLike* pBrl = &brl;
+            MethodInfo mi = typeof(TestClass<int>).GetMethod(nameof(TestClass<int>.ByRefLikeRefReturningMethod));
+            try
+            {
+                // Don't use Assert.Throws because that will make a lambda and invalidate the pointer
+                object o = mi.Invoke(null, new object[] { Pointer.Box(pBrl, typeof(ByRefLike*)) });
+                
+                // If this is reached, it means `o` is a boxed byref-like type. That's a GC hole right there.
+                throw new Xunit.Sdk.XunitException("Boxed a byref-like type.");
+            }
+            catch (NotSupportedException)
+            {
+                // We expect a NotSupportedException from the Invoke call. Methods returning byref-like types by reference
+                // are not reflection invokable.
+            }
         }
 
         public static IEnumerable<object[]> RefReturnInvokeTestData
@@ -81,9 +106,10 @@ namespace System.Reflection.Tests
                 yield return new object[] { 42L };
                 yield return new object[] { 43.67f };
                 yield return new object[] { 43.67 };
-                yield return new object[] { new IntPtr(42) };
-                yield return new object[] { new UIntPtr(42) };
-                yield return new object[] { 232953453454m };
+                // [ActiveIssue("https://github.com/xunit/xunit/issues/1771")]
+                //yield return new object[] { new IntPtr(42) };
+                //yield return new object[] { new UIntPtr(42) };
+                //yield return new object[] { 232953453454m }; 
                 yield return new object[] { BindingFlags.IgnoreCase };
                 yield return new object[] { "Hello" };
                 yield return new object[] { new object() };
@@ -132,6 +158,8 @@ namespace System.Reflection.Tests
             }
         }
 
+        public ref struct ByRefLike { }
+        
         private sealed class TestClass<T>
         {
             private T _value;
@@ -139,6 +167,7 @@ namespace System.Reflection.Tests
             public TestClass(T value) { _value = value; }
             public ref T RefReturningProp => ref _value;
             public unsafe ref T NullRefReturningProp => ref Unsafe.AsRef<T>((void*)null);
+            public static unsafe ref ByRefLike ByRefLikeRefReturningMethod(ByRefLike* a) => ref *a;
         }
 
         private sealed unsafe class TestClassIntPointer
@@ -147,6 +176,7 @@ namespace System.Reflection.Tests
 
             public TestClassIntPointer(int* value) { _value = value; }
             public ref int* RefReturningProp => ref _value;
+            public ref int* NullRefReturningProp => ref *(int**)null;
         }
     }
 }

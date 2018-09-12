@@ -344,9 +344,10 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug")]
         [InlineData(0)]
         [InlineData(1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug")]
+        [ActiveIssue(31977, TargetFrameworkMonikers.Uap)]
         public static void RemoveCounterSignature_EncodedInSingleAttribute(int indexToRemove)
         {
             SignedCms cms = new SignedCms();
@@ -562,6 +563,45 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not supported by crypt32")]
+        public static void AddCounterSignerToUnsortedAttributeSignature()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.DigiCertTimeStampToken);
+
+            // Assert.NoThrows
+            cms.CheckSignature(true);
+
+            SignerInfoCollection signers = cms.SignerInfos;
+            Assert.Equal(1, signers.Count);
+            SignerInfo signerInfo = signers[0];
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransferCapi1.TryGetCertificateWithPrivateKey())
+            {
+                signerInfo.ComputeCounterSignature(
+                    new CmsSigner(
+                        SubjectIdentifierType.IssuerAndSerialNumber,
+                        cert));
+
+                signerInfo.ComputeCounterSignature(
+                    new CmsSigner(
+                        SubjectIdentifierType.SubjectKeyIdentifier,
+                        cert));
+            }
+
+            // Assert.NoThrows
+            cms.CheckSignature(true);
+
+            byte[] exported = cms.Encode();
+            cms = new SignedCms();
+            cms.Decode(exported);
+
+            // Assert.NoThrows
+            cms.CheckSignature(true);
+        }
+
+        [Fact]
+        [ActiveIssue(31977, TargetFrameworkMonikers.Uap)]
         public static void AddCounterSigner_DSA()
         {
             SignedCms cms = new SignedCms();
@@ -692,6 +732,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(31977, TargetFrameworkMonikers.Uap)]
         public static void EnsureExtraCertsAdded()
         {
             SignedCms cms = new SignedCms();

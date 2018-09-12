@@ -24,7 +24,7 @@ namespace System
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public struct Double : IComparable, IConvertible, IFormattable, IComparable<double>, IEquatable<double>, ISpanFormattable
+    public readonly struct Double : IComparable, IConvertible, IFormattable, IComparable<double>, IEquatable<double>, ISpanFormattable
     {
         private readonly double m_value; // Do not rename (binary serialization)
 
@@ -76,8 +76,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNegative(double d)
         {
-            var bits = unchecked((ulong)BitConverter.DoubleToInt64Bits(d));
-            return (bits & 0x8000000000000000) == 0x8000000000000000;
+            return BitConverter.DoubleToInt64Bits(d) < 0;
         }
 
         /// <summary>Determines whether the specified value is negative infinity.</summary>

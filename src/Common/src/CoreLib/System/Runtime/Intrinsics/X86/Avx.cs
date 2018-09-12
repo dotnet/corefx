@@ -12,9 +12,11 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel AVX hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Avx
+    public abstract class Avx : Sse42
     {
-        public static bool IsSupported { get => IsSupported; }
+        internal Avx() { }
+
+        public new static bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m256 _mm256_add_ps (__m256 a, __m256 b)
@@ -241,6 +243,10 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static byte Extract(Vector256<byte> value, byte index)
         {
+            if (!IsSupported)
+            {
+                throw new PlatformNotSupportedException();
+            }
             return Unsafe.Add<byte>(ref Unsafe.As<Vector256<byte>, byte>(ref value), index & 0x1F);
         }
 
@@ -251,6 +257,10 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static ushort Extract(Vector256<ushort> value, byte index)
         {
+            if (!IsSupported)
+            {
+                throw new PlatformNotSupportedException();
+            }
             return Unsafe.Add<ushort>(ref Unsafe.As<Vector256<ushort>, ushort>(ref value), index & 0xF);
         }
 
@@ -260,6 +270,10 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static int Extract(Vector256<int> value, byte index)
         {
+            if (!IsSupported)
+            {
+                throw new PlatformNotSupportedException();
+            }
             return Unsafe.Add<int>(ref Unsafe.As<Vector256<int>, int>(ref value), index & 0x7);
         }
 
@@ -269,6 +283,10 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static uint Extract(Vector256<uint> value, byte index)
         {
+            if (!IsSupported)
+            {
+                throw new PlatformNotSupportedException();
+            }
             return Unsafe.Add<uint>(ref Unsafe.As<Vector256<uint>, uint>(ref value), index & 0x7);
         }
 
@@ -278,7 +296,7 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static long Extract(Vector256<long> value, byte index)
         {
-            if (IntPtr.Size != 8)
+            if (!IsSupported || (IntPtr.Size != 8))
             {
                 throw new PlatformNotSupportedException();
             }
@@ -291,7 +309,7 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static ulong Extract(Vector256<ulong> value, byte index)
         {
-            if (IntPtr.Size != 8)
+            if (!IsSupported || (IntPtr.Size != 8))
             {
                 throw new PlatformNotSupportedException();
             }
@@ -452,7 +470,7 @@ namespace System.Runtime.Intrinsics.X86
                 return LoadVector256(buffer);
             }
         }
-        
+
         /// <summary>
         /// __m256i _mm256_insert_epi16 (__m256i a, __int16 i, const int index)
         ///   HELPER
@@ -500,7 +518,7 @@ namespace System.Runtime.Intrinsics.X86
                 return LoadVector256(buffer);
             }
         }
-        
+
         /// <summary>
         /// __m256i _mm256_insert_epi32 (__m256i a, __int32 i, const int index)
         ///   HELPER
@@ -523,6 +541,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector256<long> Insert(Vector256<long> value, long data, byte index)
         {
+            if (IntPtr.Size != 8)
+            {
+                throw new PlatformNotSupportedException();
+            }
+
             unsafe
             {
                 index &= 0x3;
@@ -539,6 +562,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector256<ulong> Insert(Vector256<ulong> value, ulong data, byte index)
         {
+            if (IntPtr.Size != 8)
+            {
+                throw new PlatformNotSupportedException();
+            }
+
             unsafe
             {
                 index &= 0x3;
@@ -894,22 +922,22 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128 _mm_permutevar_ps (__m128 a, __m128i b)
         ///   VPERMILPS xmm, xmm, xmm/m128
         /// </summary>
-        public static Vector128<float> PermuteVar(Vector128<float> left, Vector128<float> mask) => PermuteVar(left, mask);
+        public static Vector128<float> PermuteVar(Vector128<float> left, Vector128<int> control) => PermuteVar(left, control);
         /// <summary>
         /// __m128d _mm_permutevar_pd (__m128d a, __m128i b)
         ///   VPERMILPD xmm, xmm, xmm/m128
         /// </summary>
-        public static Vector128<double> PermuteVar(Vector128<double> left, Vector128<double> mask) => PermuteVar(left, mask);
+        public static Vector128<double> PermuteVar(Vector128<double> left, Vector128<long> control) => PermuteVar(left, control);
         /// <summary>
         /// __m256 _mm256_permutevar_ps (__m256 a, __m256i b)
         ///   VPERMILPS ymm, ymm, ymm/m256
         /// </summary>
-        public static Vector256<float> PermuteVar(Vector256<float> left, Vector256<float> mask) => PermuteVar(left, mask);
+        public static Vector256<float> PermuteVar(Vector256<float> left, Vector256<int> control) => PermuteVar(left, control);
         /// <summary>
         /// __m256d _mm256_permutevar_pd (__m256d a, __m256i b)
         ///   VPERMILPD ymm, ymm, ymm/m256
         /// </summary>
-        public static Vector256<double> PermuteVar(Vector256<double> left, Vector256<double> mask) => PermuteVar(left, mask);
+        public static Vector256<double> PermuteVar(Vector256<double> left, Vector256<long> control) => PermuteVar(left, control);
 
         /// <summary>
         /// __m256 _mm256_rcp_ps (__m256 a)

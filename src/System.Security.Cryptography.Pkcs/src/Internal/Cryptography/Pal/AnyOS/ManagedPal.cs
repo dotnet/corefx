@@ -7,22 +7,23 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
-using System.Security.Cryptography.Pkcs.Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Internal.Cryptography.Pal.AnyOS
 {
     internal sealed partial class ManagedPkcsPal : PkcsPal
     {
+        internal new static readonly ManagedPkcsPal Instance = new ManagedPkcsPal();
+
         public override void AddCertsFromStoreForDecryption(X509Certificate2Collection certs)
         {
-            certs.AddRange(Helpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: false));
+            certs.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: false));
 
             try
             {
                 // This store exists on macOS, but not Linux
                 certs.AddRange(
-                    Helpers.GetStoreCertificates(StoreName.My, StoreLocation.LocalMachine, openExistingOnly: false));
+                    PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.LocalMachine, openExistingOnly: false));
             }
             catch (CryptographicException)
             {
@@ -31,7 +32,33 @@ namespace Internal.Cryptography.Pal.AnyOS
 
         public override byte[] GetSubjectKeyIdentifier(X509Certificate2 certificate)
         {
-            return certificate.GetSubjectKeyIdentifier();
+            Debug.Assert(certificate != null);
+
+            X509Extension extension = certificate.Extensions[Oids.SubjectKeyIdentifier];
+
+            if (extension == null)
+            {
+                // Construct the value from the public key info.
+                extension = new X509SubjectKeyIdentifierExtension(
+                    certificate.PublicKey,
+                    X509SubjectKeyIdentifierHashAlgorithm.CapiSha1,
+                    false);
+            }
+
+            // Certificates are DER encoded.
+            AsnReader reader = new AsnReader(extension.RawData, AsnEncodingRules.DER);
+
+            if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
+            {
+                reader.ThrowIfNotEmpty();
+                return contents.ToArray();
+            }
+
+            // TryGetPrimitiveOctetStringBytes will have thrown if the next tag wasn't
+            // Universal (primitive) OCTET STRING, since we're in DER mode.
+            // So there's really no way we can get here.
+            Debug.Fail($"TryGetPrimitiveOctetStringBytes returned false in DER mode");
+            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
 
         public override T GetPrivateKeyForSigning<T>(X509Certificate2 certificate, bool silent)
@@ -71,7 +98,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Rc2CbcParameters rc2Params = AsnSerializer.Deserialize<Rc2CbcParameters>(
+                Rc2CbcParameters rc2Params = Rc2CbcParameters.Decode(
                     contentEncryptionAlgorithm.Parameters.Value,
                     AsnEncodingRules.BER);
 

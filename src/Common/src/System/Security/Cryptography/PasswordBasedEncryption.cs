@@ -302,7 +302,7 @@ namespace System.Security.Cryptography
             byte[] destination,
             Span<byte> ivDest)
         {
-            byte[] pwdTmpBytes = isPkcs12 ? null : new byte[passwordBytes.Length];
+            byte[] pwdTmpBytes = null;
             byte[] derivedKey;
             byte[] iv = cipher.IV;
 
@@ -310,6 +310,23 @@ namespace System.Security.Cryptography
             int keySizeBytes = cipher.KeySize / 8;
             int iterationCount = pbeParameters.IterationCount;
             HashAlgorithmName prf = pbeParameters.HashAlgorithm;
+            System.Text.Encoding encoding = System.Text.Encoding.UTF8;
+
+            if (!isPkcs12)
+            {
+                if (passwordBytes.Length == 0 && password.Length > 0)
+                {
+                    pwdTmpBytes = new byte[encoding.GetByteCount(password)];
+                }
+                else if (passwordBytes.Length == 0)
+                {
+                    pwdTmpBytes = Array.Empty<byte>();
+                }
+                else
+                {
+                    pwdTmpBytes = new byte[passwordBytes.Length];
+                }
+            }
 
             fixed (byte* pkcs8RentPin = sourceRent)
             fixed (byte* pwdTmpBytesPtr = pwdTmpBytes)
@@ -340,7 +357,25 @@ namespace System.Security.Cryptography
                 }
                 else
                 {
-                    passwordBytes.CopyTo(pwdTmpBytes);
+                    if (passwordBytes.Length > 0)
+                    {
+                        Debug.Assert(pwdTmpBytes.Length == passwordBytes.Length);
+                        passwordBytes.CopyTo(pwdTmpBytes);
+                    }
+                    else if (password.Length > 0)
+                    {
+                        int length = encoding.GetBytes(password, pwdTmpBytes);
+
+                        if (length != pwdTmpBytes.Length)
+                        {
+                            Debug.Fail($"UTF-8 encoding size changed between GetByteCount and GetBytes");
+                            throw new CryptographicException();
+                        }
+                    }
+                    else
+                    {
+                        Debug.Assert(pwdTmpBytes.Length == 0);
+                    }
 
                     using (var pbkdf2 = new Rfc2898DeriveBytes(pwdTmpBytes, salt.ToArray(), iterationCount, prf))
                     {
@@ -452,8 +487,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            PBES2Params pbes2Params =
-                AsnSerializer.Deserialize<PBES2Params>(algorithmParameters.Value, AsnEncodingRules.BER);
+            PBES2Params pbes2Params = PBES2Params.Decode(algorithmParameters.Value, AsnEncodingRules.BER);
 
             if (pbes2Params.KeyDerivationFunc.Algorithm.Value != Oids.Pbkdf2)
             {
@@ -574,7 +608,7 @@ namespace System.Security.Cryptography
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Rc2CbcParameters rc2Parameters = AsnSerializer.Deserialize<Rc2CbcParameters>(
+                Rc2CbcParameters rc2Parameters = Rc2CbcParameters.Decode(
                     encryptionScheme.Parameters.Value,
                     AsnEncodingRules.BER);
 
@@ -643,8 +677,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            Pbkdf2Params pbkdf2Params =
-                AsnSerializer.Deserialize<Pbkdf2Params>(parameters.Value, AsnEncodingRules.BER);
+            Pbkdf2Params pbkdf2Params = Pbkdf2Params.Decode(parameters.Value, AsnEncodingRules.BER);
 
             // No OtherSource is defined in RFC 2898 or RFC 8018, so whatever
             // algorithm was requested isn't one we know.
@@ -744,8 +777,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            PBEParameter pbeParameters =
-                AsnSerializer.Deserialize<PBEParameter>(algorithmParameters.Value, AsnEncodingRules.BER);
+            PBEParameter pbeParameters = PBEParameter.Decode(algorithmParameters.Value, AsnEncodingRules.BER);
 
             if (pbeParameters.Salt.Length != 8)
             {
@@ -806,7 +838,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException();
             }
 
-            PBEParameter pbeParameters = AsnSerializer.Deserialize<PBEParameter>(
+            PBEParameter pbeParameters = PBEParameter.Decode(
                 algorithmIdentifier.Parameters.Value,
                 AsnEncodingRules.BER);
 
@@ -1019,7 +1051,7 @@ namespace System.Security.Cryptography
             writer.PopSequence();
         }
 
-        private static int NormalizeIterationCount(uint iterationCount)
+        internal static int NormalizeIterationCount(uint iterationCount)
         {
             if (iterationCount == 0 || iterationCount > IterationLimit)
             {
@@ -1027,6 +1059,16 @@ namespace System.Security.Cryptography
             }
 
             return (int)iterationCount;
+        }
+
+        internal static int NormalizeIterationCount(int iterationCount)
+        {
+            if (iterationCount <= 0 || iterationCount > IterationLimit)
+            {
+                throw new CryptographicException(SR.Argument_InvalidValue);
+            }
+
+            return iterationCount;
         }
     }
 }

@@ -9,12 +9,16 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    public class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
+    public partial class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
     {
         protected override IDictionary NonGenericIDictionaryFactory()
         {
             return new Dictionary<string, string>();
         }
+
+        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert | ModifyOperation.Clear;
+
+        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove;
 
         /// <summary>
         /// Creates an object that is dependent on the seed given. The object may be either
