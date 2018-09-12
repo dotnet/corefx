@@ -1281,27 +1281,27 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void Contains_Match_Char() // Adapted from IndexOf_Match_SingleLetter
+        public static void Contains_Match_Char()
         {
             Assert.False("".Contains('a'));
             Assert.False("".AsSpan().Contains('a'));
 
-            // Use a long enough length to incur vectorization code
+            // Use a long-enough string to incur vectorization code
             for (var length = 1; length < 250; length++)
             {
-                char[] a = new char[length];
+                char[] ca = new char[length];
                 for (int i = 0; i < length; i++)
                 {
-                    a[i] = (char)(i + 1);
+                    ca[i] = (char)(i + 1);
                 }
 
-                var str = new string(a);
-                var span = new Span<char>(a);
-                var ros = new ReadOnlySpan<char>(a);
+                var str = new string(ca);
+                var span = new Span<char>(ca);
+                var ros = new ReadOnlySpan<char>(ca);
 
                 for (var targetIndex = 0; targetIndex < length; targetIndex++)
                 {
-                    var target = a[targetIndex];
+                    char target = ca[targetIndex];
                     var found = str.Contains(target);
                     Assert.True(found);
 
