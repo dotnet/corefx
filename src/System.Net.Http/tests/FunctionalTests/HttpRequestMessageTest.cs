@@ -13,7 +13,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public class HttpRequestMessageTest
+    public class HttpRequestMessageTest : HttpClientTestBase
     {
         Version _expectedRequestMessageVersion = !PlatformDetection.IsFullFramework ? new Version(2,0) : new Version(1, 1);
 
@@ -222,6 +222,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HEAD")]
         public async Task HttpRequest_BodylessMethod_NoContentLength(string method)
         {
+            if (IsWinHttpHandler)
+            {
+                // WinHttp differ on some versions.
+                return;
+            }
+
             using (HttpClient client = new HttpClient())
             {
                 await LoopbackServer.CreateServerAsync(async (server, uri) =>
