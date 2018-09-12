@@ -309,11 +309,7 @@ namespace System.Security.Cryptography.X509Certificates
             Debug.Assert(_generator != null);
 
             byte[] serialNumber = new byte[8];
-
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(serialNumber);
-            }
+            RandomNumberGenerator.Fill(serialNumber);
 
             using (X509Certificate2 certificate = Create(
                 SubjectName,
@@ -584,7 +580,7 @@ namespace System.Security.Cryptography.X509Certificates
                             SR.Format(SR.Cryptography_CertReq_DuplicateExtension, extension.Oid.Value));
                     }
 
-                    extensionAsns.Add(new X509ExtensionAsn(extension, false));
+                    extensionAsns.Add(new X509ExtensionAsn(extension));
                 }
 
                 tbsCertificate.Extensions = extensionAsns.ToArray();
