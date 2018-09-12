@@ -208,13 +208,30 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <Fact>
+        <PlatformSpecific(TestPlatforms.AnyUnix)>
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOptionUnix()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
+                    CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile{i}")
+                Next
+                Assert.Throws(Of PlatformNotSupportedException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs))
+            End Using
+
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption()
-            ' Debugging code
-            'While (Not System.Diagnostics.Debugger.IsAttached)
-            '    System.Threading.Thread.Sleep(1000)
-            'End While
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOptionWindows()
+            'Debugging code
+            While (Not Diagnostics.Debugger.IsAttached)
+                Threading.Thread.Sleep(1000)
+            End While
 
             Using TestBase As New FileIOTests
                 Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
@@ -233,32 +250,6 @@ Namespace Microsoft.VisualBasic.Tests
                 Next
             End Using
 
-        End Sub
-
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
-
-        End Sub
-
-        <PlatformSpecific(TestPlatforms.AnyUnix)>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOptionUnix()
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
-                    CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile{i}")
-                Next
-                Assert.Throws(Of PlatformNotSupportedException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs))
-                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    ' Ensure copy failed
-                    Assert.True(FileHasExpectedDate(CurrentFile, DestData))
-                Next
-            End Using
         End Sub
 
         <Fact>
@@ -328,15 +319,9 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption()
-
-        End Sub
-
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption_UICancelOption()
 
         End Sub
 
@@ -403,13 +388,13 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteDirectory_Directory_UIOption_RecycleOption()
 
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteDirectory_Directory_UIOption_RecycleOption_UICancelOption()
 
@@ -426,13 +411,13 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteFile_File_UIOption_RecycleOption()
 
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteFile_File_UIOption_RecycleOption_UICancelOption()
 
@@ -662,13 +647,13 @@ Namespace Microsoft.VisualBasic.Tests
             IO.File.Delete(TempFile)
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption()
 
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
 
@@ -811,13 +796,13 @@ Namespace Microsoft.VisualBasic.Tests
             End Using
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveFile_SourceFileName_DestinationFileName_UIOption()
 
         End Sub
 
-        <ConditionalTheory(NameOf(ManualTestsEnabled))>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveFile_SourceFileNameDestinationFileName_UIOption_UICancelOption()
 

@@ -2,10 +2,8 @@
 Imports System.ComponentModel
 Imports System.Diagnostics
 Imports Microsoft.VisualBasic.CompilerServices
-#Const PLATFORM_WINDOWS = True
 Namespace Microsoft.VisualBasic.FileIO
     Partial Public Class FileSystem
-#If PLATFORM_WINDOWS Then
         ''' <summary>
         ''' Sets relevant flags on the SHFILEOPSTRUCT and calls SHFileOperation to copy move file / directory.
         ''' </summary>
@@ -202,6 +200,5 @@ Namespace Microsoft.VisualBasic.FileIO
             Friend Const ERROR_OPERATION_ABORTED As Integer = 995
             Friend Const ERROR_CANCELLED As Integer = 1223
         End Class
-#End If
     End Class
 End Namespace
