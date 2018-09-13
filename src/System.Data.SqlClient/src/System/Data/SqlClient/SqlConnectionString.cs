@@ -317,7 +317,8 @@ namespace System.Data.SqlClient
                 }
             }
 
-            if (_attachDBFileName.Contains('|'))
+            // string.Contains(char) is .NetCore2.1+ specific
+            if (0 <= _attachDBFileName.IndexOf('|'))
             {
                 throw ADP.InvalidConnectionOptionValue(KEY.AttachDBFilename);
             }
