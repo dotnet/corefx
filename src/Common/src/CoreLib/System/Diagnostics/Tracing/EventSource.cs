@@ -18,12 +18,12 @@
 //
 // PRINCIPLE: EventSource - ETW decoupling
 // 
-// Conceptually and EventSouce is something takes event logging data from the source methods 
-// To the EventListener that can subscribe them.  Note that CONCEPTUALLY EVENTSOURCES DON'T
-// KNOW ABOUT ETW!.   The MODEL of the system is that there is a special EventListener Which
+// Conceptually an EventSouce is something that takes event logging data from the source methods 
+// to the EventListener that can subscribe to them.  Note that CONCEPTUALLY EVENTSOURCES DON'T
+// KNOW ABOUT ETW!.   The MODEL of the system is that there is a special EventListener which
 // we will call the EtwEventListener, that forwards commands from ETW to EventSources and
-// listeners to the EventSources and forwards on those events to ETW.   THus the model should
-// be that you DON'T NEED ETW.    
+// listens to EventSources and forwards on those events to ETW.   Thus the model should
+// be that you DON'T NEED ETW.
 //
 // Now in actual practice, EventSouce have rather intimate knowledge of ETW and send events
 // to it directly, but this can be VIEWED AS AN OPTIMIZATION.  
@@ -33,20 +33,20 @@
 // There are two ways for event Data to enter the system
 //     1) WriteEvent* and friends.  This is called the 'contract' based approach because 
 //        you write a method per event which forms a contract that is know at compile time.
-//        In this scheme each event is given an EVENTID (small integer). which is its identity
+//        In this scheme each event is given an EVENTID (small integer), which is its identity
 //     2) Write<T> methods.   This is called the 'dynamic' approach because new events 
 //        can be created on the fly.  Event identity is determined by the event NAME, and these
 //        are not quite as efficient at runtime since you have at least a hash table lookup
 //        on every event write.  
 //
-// EventSource-EventListener transfer fully support both ways of writing events (either contract
-// based (WriteEvent*) or dynamic (Write<T>).   Both way fully support the same set of data
-// types.   It is suggested, however, that you use the contract based approach when the event scheme 
+// EventSource-EventListener transfer fully supports both ways of writing events (either contract
+// based (WriteEvent*) or dynamic (Write<T>)).   Both ways fully support the same set of data
+// types.   It is recommended, however, that you use the contract based approach when the event scheme 
 // is known at compile time (that is whenever possible).  It is more efficient, but more importantly
 // it makes the contract very explicit, and centralizes all policy about logging.  These are good 
-// things.    The Write<T> API is really meant for more ad-hoc 
+// things.    The Write<T> API is really meant for more ad-hoc cases.
 //
-// Allowed Data. 
+// Allowed Data:
 // 
 // Note that EventSource-EventListeners have a conceptual serialization-deserialization that happens
 // during the transfer.   In particular object identity is not preserved, some objects are morphed, 
@@ -57,7 +57,7 @@
 //   * IEnumerable<T> of valid types T (this include arrays)  (* New for V4.6)
 //   * Explicitly Opted in class or struct with public property Getters over Valid types.  (* New for V4.6)
 // 
-// This set of types is roughly a generalization of JSON support (Basically primitives, bags, and arrays).   
+// This set of types is roughly a generalization of JSON support (basically primitives, bags, and arrays).  
 //
 // Explicitly allowed structs include (* New for V4.6)
 //   * Marked with the EventData attribute
@@ -67,27 +67,27 @@
 // When classes are returned in an EventListener, what is returned is something that implements 
 // IDictionary<string, T>.  Thus when objects are passed to an EventSource they are transformed
 // into a key-value bag (the IDictionary<string, T>) for consumption in the listener.   These 
-// are obvious NOT the original objects.  
+// are obviously NOT the original objects.  
 // 
-// ETWserialization formats:
+// ETW serialization formats:
 // 
-// As mentioned conceptually EventSource's send data to EventListeners and there is a conceptual 
+// As mentioned, conceptually EventSources send data to EventListeners and there is a conceptual 
 // copy/morph of that data as described above.   In addition the .NET framework supports a conceptual
-// ETWListener that will send the data to then ETW stream.   If you use this feature, the data needs 
+// ETWListener that will send the data to the ETW stream.   If you use this feature, the data needs 
 // to be serialized in a way that ETW supports.  ETW supports the following serialization formats 
 // 
 //     1) Manifest Based serialization. 
 //     2) SelfDescribing serialization (TraceLogging style in the TraceLogging directory)
 //
-// A key factor is that the Write<T> method, which support on the fly definition of events, can't
+// A key factor is that the Write<T> method, which supports on the fly definition of events, can't
 // support the manifest based serialization because the manifest needs the schema of all events 
-// to be known before any events are emitted.  This implies the following
+// to be known before any events are emitted.  This implies the following:
 //
 // If you use Write<T> and the output goes to ETW it will use the SelfDescribing format.
 // If you use the EventSource(string) constructor for an eventSource (in which you don't
 // create a subclass), the default is also to use Self-Describing serialization.  In addition
 // you can use the EventSoruce(EventSourceSettings) constructor to also explicitly specify
-// Self-Describing serialization format.   These effect the WriteEvent* APIs going to ETW.  
+// Self-Describing serialization format.   These affect the WriteEvent* APIs going to ETW.  
 //
 // Note that none of this ETW serialization logic affects EventListeners.   Only the ETW listener.  
 // 
@@ -117,7 +117,7 @@
 //
 //       EventPayload is the internal type that implements the IDictionary<string, object> interface
 //       The EventListeners will pass back for serialized classes for nested object, but  
-//       WriteToAllListeners(NAME, Guid*, Guid*, EventPayload) unpacks this uses the fields as if they
+//       WriteToAllListeners(NAME, Guid*, Guid*, EventPayload) unpacks this and uses the fields as if they
 //       were parameters to a method.  
 // 
 //       The first two are used for the WriteEvent* case, and the later is used for the Write<T> case.  
@@ -129,7 +129,7 @@
 //          WriteMultiMerge(NAME, Options, Types, EventData*)
 //          WriteMultiMerge(NAME, Options, Types, object[])
 //          WriteImpl<T> has logic that knows how to serialize (like WriteMultiMerge) but also knows 
-//             will write it to 
+//             where it will write it to 
 //
 //    All ETW writes eventually call
 //      EventWriteTransfer (native PINVOKE wrapper)
@@ -146,7 +146,7 @@
 // since it is the TraceLoggingTypeInfo structure that knows how to do this.   Effectively for a type you
 // can call one of these 
 //      WriteMetadata - transforms the type T into serialization meta data blob for that type
-//      WriteObjectData - transforms an object of T into serialization meta data blob for that type
+//      WriteObjectData - transforms an object of T into serialization data blob for that instance
 //      GetData - transforms an object of T into its deserialized form suitable for passing to EventListener. 
 // The first two are used to serialize something for ETW.   The second one is used to transform the object 
 // for use by the EventListener.    We also have a 'DecodeObject' method that will take a EventData* and
@@ -1650,6 +1650,14 @@ namespace System.Diagnostics.Tracing
 
         private static Guid GenerateGuidFromName(string name)
         {
+            if (namespaceBytes == null)
+            {
+                namespaceBytes = new byte[] {
+                    0x48, 0x2C, 0x2D, 0xB2, 0xC3, 0x90, 0x47, 0xC8,
+                    0x87, 0xF8, 0x1A, 0x15, 0xBF, 0xC1, 0x30, 0xFB,
+                };
+            }
+
             byte[] bytes = Encoding.BigEndianUnicode.GetBytes(name);
             var hash = new Sha1ForNonSecretPurposes();
             hash.Start();
@@ -1777,9 +1785,15 @@ namespace System.Diagnostics.Tracing
                     if (dataType.IsEnum())
                     {
                         dataType = Enum.GetUnderlyingType(dataType);
+#if ES_BUILD_PN
+                        int dataTypeSize = (int)dataType.TypeHandle.ToEETypePtr().ValueTypeSize;
+#else
+                        int dataTypeSize = System.Runtime.InteropServices.Marshal.SizeOf(dataType);
+#endif
+                        if (dataTypeSize < sizeof(int))
+                            dataType = typeof(int);
                         goto Again;
                     }
-
 
                     // Everything else is marshaled as a string.
                     // ETW strings are NULL-terminated, so marshal everything up to the first
@@ -1791,7 +1805,6 @@ namespace System.Diagnostics.Tracing
                     }
 
                     return new string((char *)dataPointer);
-
                 }
                 finally
                 {
@@ -3748,11 +3761,12 @@ namespace System.Diagnostics.Tracing
         internal const string s_ActivityStartSuffix = "Start";
         internal const string s_ActivityStopSuffix = "Stop";
 
+        // WARNING: Do not depend upon initialized statics during creation of EventSources, as it is possible for creation of an EventSource to trigger
+        // creation of yet another EventSource.  When this happens, these statics may not yet be initialized.
+        // Rather than depending on initialized statics, use lazy initialization to ensure that the statics are initialized exactly when they are needed.
+
         // used for generating GUID from eventsource name
-        private static readonly byte[] namespaceBytes = new byte[] {
-            0x48, 0x2C, 0x2D, 0xB2, 0xC3, 0x90, 0x47, 0xC8,
-            0x87, 0xF8, 0x1A, 0x15, 0xBF, 0xC1, 0x30, 0xFB,
-        };
+        private static byte[] namespaceBytes;
 
 #endregion
     }
@@ -3860,6 +3874,16 @@ namespace System.Diagnostics.Tracing
         /// the EventListener has enabled events.  
         /// </summary>
         public event EventHandler<EventWrittenEventArgs> EventWritten;
+
+        static EventListener()
+        {
+#if FEATURE_PERFTRACING
+            // Ensure that RuntimeEventSource is initialized so that EventListeners get an opportunity to subscribe to its events.
+            // This is required because RuntimeEventSource never emit events on its own, and thus will never be initialized
+            // in the normal way that EventSources are initialized.
+            GC.KeepAlive(RuntimeEventSource.Log);
+#endif // FEATURE_PERFTRACING
+        }
 
         /// <summary>
         /// Create a new EventListener in which all events start off turned off (use EnableEvents to turn
@@ -4102,9 +4126,24 @@ namespace System.Diagnostics.Tracing
                 }
                 newEventSource.m_id = newIndex;
 
-                // Add every existing dispatcher to the new EventSource
-                for (EventListener listener = s_Listeners; listener != null; listener = listener.m_Next)
-                    newEventSource.AddListener(listener);
+#if DEBUG
+                // Disable validation of EventSource/EventListener connections in case a call to EventSource.AddListener
+                // causes a recursive call into this method.
+                bool previousValue = s_ConnectingEventSourcesAndListener;
+                s_ConnectingEventSourcesAndListener = true;
+                try
+                {
+#endif
+                    // Add every existing dispatcher to the new EventSource
+                    for (EventListener listener = s_Listeners; listener != null; listener = listener.m_Next)
+                        newEventSource.AddListener(listener);
+#if DEBUG
+                }
+                finally
+                {
+                    s_ConnectingEventSourcesAndListener = previousValue;
+                }
+#endif
 
                 Validate();
             }
@@ -4185,6 +4224,14 @@ namespace System.Diagnostics.Tracing
         [Conditional("DEBUG")]
         internal static void Validate()
         {
+#if DEBUG
+            // Don't run validation code if we're in the middle of modifying the connections between EventSources and EventListeners.
+            if (s_ConnectingEventSourcesAndListener)
+            {
+                return;
+            }
+#endif
+
             lock (EventListenersLock)
             {
                 // Get all listeners 
@@ -4274,18 +4321,30 @@ namespace System.Diagnostics.Tracing
                     // is created.
                     WeakReference[] eventSourcesSnapshot = s_EventSources.ToArray();
 
-                    for (int i = 0; i < eventSourcesSnapshot.Length; i++)
+#if DEBUG
+                    bool previousValue = s_ConnectingEventSourcesAndListener;
+                    s_ConnectingEventSourcesAndListener = true;
+                    try
                     {
-                        WeakReference eventSourceRef = eventSourcesSnapshot[i];
-                        EventSource eventSource = eventSourceRef.Target as EventSource;
-                        if (eventSource != null)
+#endif
+                        for (int i = 0; i < eventSourcesSnapshot.Length; i++)
                         {
-                            EventSourceCreatedEventArgs args = new EventSourceCreatedEventArgs();
-                            args.EventSource = eventSource;
-                            callback(this, args);
+                            WeakReference eventSourceRef = eventSourcesSnapshot[i];
+                            EventSource eventSource = eventSourceRef.Target as EventSource;
+                            if (eventSource != null)
+                            {
+                                EventSourceCreatedEventArgs args = new EventSourceCreatedEventArgs();
+                                args.EventSource = eventSource;
+                                callback(this, args);
+                            }
                         }
+#if DEBUG
                     }
-
+                    finally
+                    {
+                        s_ConnectingEventSourcesAndListener = previousValue;
+                    }
+#endif
                     Validate();
                 }
                 finally
@@ -4318,6 +4377,16 @@ namespace System.Diagnostics.Tracing
         /// Used to disallow reentrancy.  
         /// </summary>
         private static bool s_CreatingListener = false;
+
+#if DEBUG
+        /// <summary>
+        /// Used to disable validation of EventSource and EventListener connectivity.
+        /// This is needed when an EventListener is in the middle of being published to all EventSources
+        /// and another EventSource is created as part of the process.
+        /// </summary>
+        [ThreadStatic]
+        private static bool s_ConnectingEventSourcesAndListener = false;
+#endif
 
         /// <summary>
         /// Used to register AD/Process shutdown callbacks.
@@ -4657,7 +4726,7 @@ namespace System.Diagnostics.Tracing
             internal set;
         }
 
-        #region private
+#region private
         internal EventWrittenEventArgs(EventSource eventSource)
         {
             m_eventSource = eventSource;
@@ -5505,28 +5574,37 @@ namespace System.Diagnostics.Tracing
 
                     // write out each enum value 
                     FieldInfo[] staticFields = enumType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
+                    bool anyValuesWritten = false;
                     foreach (FieldInfo staticField in staticFields)
                     {
                         object constantValObj = staticField.GetRawConstantValue();
+
                         if (constantValObj != null)
                         {
-                            long hexValue;
-                            if (constantValObj is int)
-                                hexValue = ((int)constantValObj);
-                            else if (constantValObj is long)
-                                hexValue = ((long)constantValObj);
-                            else
-                                continue;
+                            ulong hexValue;
+                            if (constantValObj is ulong)
+                                hexValue = (ulong)constantValObj;    // This is the only integer type that can't be represented by a long.  
+                            else 
+                                hexValue = (ulong) Convert.ToInt64(constantValObj); // Handles all integer types except ulong.  
 
                             // ETW requires all bitmap values to be powers of 2.  Skip the ones that are not. 
                             // TODO: Warn people about the dropping of values. 
                             if (isbitmap && ((hexValue & (hexValue - 1)) != 0 || hexValue == 0))
                                 continue;
-
                             sb.Append("   <map value=\"0x").Append(hexValue.ToString("x", CultureInfo.InvariantCulture)).Append("\"");
                             WriteMessageAttrib(sb, "map", enumType.Name + "." + staticField.Name, staticField.Name);
                             sb.Append("/>").AppendLine();
+                            anyValuesWritten = true;
                         }
+                    }
+
+                    // the OS requires that bitmaps and valuemaps have at least one value or it reject the whole manifest.
+                    // To avoid that put a 'None' entry if there are no other values.  
+                    if (!anyValuesWritten)
+                    {
+                        sb.Append("   <map value=\"0x0\"");
+                        WriteMessageAttrib(sb, "map", enumType.Name + "." + "None", "None");
+                        sb.Append("/>").AppendLine();
                     }
                     sb.Append("  </").Append(mapKind).Append(">").AppendLine();
                 }
@@ -5997,4 +6075,3 @@ namespace System.Diagnostics.Tracing
 
 #endregion
 }
-

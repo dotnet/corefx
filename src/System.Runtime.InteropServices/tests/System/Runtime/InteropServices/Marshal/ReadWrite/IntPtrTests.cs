@@ -145,6 +145,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<AccessViolationException>(() => Marshal.ReadIntPtr(null, 2));
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void ReadIntPtr_NotReadable_ThrowsArgumentException()
         {
@@ -156,6 +157,7 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.ReadIntPtr(collectibleObject, 0));
         }
+#endif
 
         [Fact]
         public void WriteIntPtr_ZeroPointer_ThrowsException()
@@ -171,6 +173,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<AccessViolationException>(() => Marshal.WriteIntPtr(null, 2, (IntPtr)0));
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void WriteIntPtr_NotReadable_ThrowsArgumentException()
         {
@@ -182,6 +185,7 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.WriteIntPtr(collectibleObject, 0, IntPtr.Zero));
         }
+#endif
 
         public struct BlittableStruct
         {

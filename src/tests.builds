@@ -18,16 +18,23 @@
   </ItemGroup>
 
   <!-- For UAP we are using an APPX that is registered with a unique ID. Because of that we need to run tests sequentially -->
-  <PropertyGroup Condition="'$(BuildingUAPVertical)'=='true' and '$(SkipTests)' != 'true' " >
+  <PropertyGroup Condition="'$(BuildingUAPVertical)'=='true' and '$(SkipTests)' != 'true'">
     <SerializeProjects>true</SerializeProjects>
   </PropertyGroup>
 
   <Import Project="$(ToolsDir)tests.targets" Condition="Exists('$(ToolsDir)tests.targets')" />
   <Import Project="$(ToolsDir)VersionTools.targets" Condition="Exists('$(ToolsDir)VersionTools.targets')" />
 
+  <Target Name="BinPlaceXUnitRuntimeForNetstandardSuite" Condition="'$(TargetGroup)' == 'netstandard'" BeforeTargets="BuildAllProjects">
+    <!-- Ensure that we binplace all of the xunit assemblies on the netstandard runtime path in order to be able to build netstandard test suite -->
+    <MSBuild Projects="$(MSBuildThisFileDirectory)../external/test-runtime/XUnit.Runtime.depproj"
+             Properties="TargetGroup=$(TargetGroup)"
+             ContinueOnError="ErrorAndStop" />
+  </Target>
+
   <PropertyGroup>
-    <_ProjectPattern Condition="'$(Performance)'!='true'">.Tests</_ProjectPattern>
-    <_ProjectPattern Condition="'$(Performance)'=='true'">.Performance.Tests</_ProjectPattern>
+    <_ProjectPattern Condition="'$(Performance)' != 'true'">.Tests</_ProjectPattern>
+    <_ProjectPattern Condition="'$(Performance)' == 'true'">.Performance.Tests</_ProjectPattern>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(BuildAllConfigurations)' != 'true'">

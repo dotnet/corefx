@@ -14,12 +14,12 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <assert.h>
+#include <sys/time.h>
 #if HAVE_EPOLL
 #include <sys/epoll.h>
 #elif HAVE_KQUEUE
 #include <sys/types.h>
 #include <sys/event.h>
-#include <sys/time.h>
 #elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
@@ -31,11 +31,14 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#if HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <sys/un.h>
 #if defined(__APPLE__) && __APPLE__
 #include <sys/socketvar.h>
 #endif
-#if !HAVE_GETDOMAINNAME && HAVE_UNAME
+#if !HAVE_GETDOMAINNAME && HAVE_UTSNAME_DOMAINNAME
 #include <sys/utsname.h>
 #include <stdio.h>
 #endif
@@ -408,7 +411,7 @@ int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
 #endif
 
     return getdomainname((char*)name, namelen);
-#elif HAVE_UNAME
+#elif HAVE_UTSNAME_DOMAINNAME
     // On Android, there's no getdomainname but we can use uname to fetch the domain name
     // of the current device
     size_t namelen = (uint32_t)nameLength;
@@ -1740,6 +1743,7 @@ int32_t SystemNative_GetSockOpt(
                 return Error_EINVAL;
             }
 
+#ifdef SO_REUSEPORT
             socklen_t optLen = (socklen_t)*optionLen;
             // On Unix, SO_REUSEPORT controls the ability to bind multiple sockets to the same address.
             int err = getsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, &optLen);
@@ -1760,7 +1764,9 @@ int32_t SystemNative_GetSockOpt(
                 value = value == 0 ? 1 : 0;
             }
             *(int32_t*)optionValue = value;
-
+#else // !SO_REUSEPORT
+            *optionValue = 0;
+#endif
             return Error_SUCCESS;
         }
     }
@@ -1819,6 +1825,7 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
         // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT.
         if (socketOptionName == SocketOptionName_SO_EXCLUSIVEADDRUSE || socketOptionName == SocketOptionName_SO_REUSEADDR)
         {
+#ifdef SO_REUSEPORT
             if (optionLen != sizeof(int32_t))
             {
                 return Error_EINVAL;
@@ -1841,6 +1848,9 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
 
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &value, (socklen_t)optionLen);
             return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+#else // !SO_REUSEPORT
+            return Error_SUCCESS;
+#endif
         }
     }
 #ifdef IP_MTU_DISCOVER
@@ -1881,9 +1891,11 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
             *platformSocketType = SOCK_RAW;
             return true;
 
+#ifdef SOCK_RDM
         case SocketType_SOCK_RDM:
             *platformSocketType = SOCK_RDM;
             return true;
+#endif
 
         case SocketType_SOCK_SEQPACKET:
             *platformSocketType = SOCK_SEQPACKET;

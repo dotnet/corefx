@@ -41,7 +41,7 @@ Assuming that your repo is at `C:\corefx`:
 
 ```
 cd C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\netcoreapp1.0
-C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\netcoreapp1.0\CoreRun.exe xunit.console.netcore.exe System.Net.Sockets.Tests.dll -xml testResults.xml -notrait category=nonwindowstests -notrait category=OuterLoop -notrait category=failing
+C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\netcoreapp1.0\CoreRun.exe xunit.console.dll System.Net.Sockets.Tests.dll -xml testResults.xml -notrait category=nonwindowstests -notrait category=OuterLoop -notrait category=failing
 ```
 
 * If the test crashes or encounteres a `Debugger.Launch()` method call, WinDBG will automatically start and attach to the `CoreRun.exe` process 
@@ -173,4 +173,4 @@ Helper scripts are available at https://github.com/dotnet/corefx/tree/master/src
 * `*System.Threading.Tasks.Dataflow.DataflowEventSource {16F53577-E41D-43D4-B47E-C17025BF4025}`: Provides an event source for tracing Dataflow information.
 
 ## Notes 
-* You can find the test invocation command-line by looking at the logs generated after the `msbuild /t:rebuild,test` within the test folder.
+* You can find the test invocation command-line by looking at the logs generated after the `dotnet msbuild /t:rebuild,test` within the test folder.

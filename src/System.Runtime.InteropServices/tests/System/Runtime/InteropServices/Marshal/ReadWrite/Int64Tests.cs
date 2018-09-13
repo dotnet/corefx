@@ -150,6 +150,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<AccessViolationException>(() => Marshal.ReadInt64(null, 2));
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void ReadInt64_NotReadable_ThrowsArgumentException()
         {
@@ -161,6 +162,7 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.ReadInt64(collectibleObject, 0));
         }
+#endif
 
         [Fact]
         public void WriteInt64_ZeroPointer_ThrowsException()
@@ -176,6 +178,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<AccessViolationException>(() => Marshal.WriteInt64(null, 2, 0));
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void WriteInt64_NotReadable_ThrowsArgumentException()
         {
@@ -187,6 +190,7 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.WriteInt64(collectibleObject, 0, 0));
         }
+#endif
 
         public struct BlittableStruct
         {

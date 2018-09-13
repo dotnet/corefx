@@ -98,7 +98,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Rc2CbcParameters rc2Params = AsnSerializer.Deserialize<Rc2CbcParameters>(
+                Rc2CbcParameters rc2Params = Rc2CbcParameters.Decode(
                     contentEncryptionAlgorithm.Parameters.Value,
                     AsnEncodingRules.BER);
 

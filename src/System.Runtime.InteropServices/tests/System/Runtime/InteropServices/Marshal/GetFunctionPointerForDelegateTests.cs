@@ -30,6 +30,7 @@ namespace System.Runtime.InteropServices.Tests
             Delegate original = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(original);
             Delegate d = Marshal.GetDelegateForFunctionPointer<NonGenericDelegate>(ptr);
+            GC.KeepAlive(original);
 
             IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(d);
             IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(d);
@@ -57,7 +58,8 @@ namespace System.Runtime.InteropServices.Tests
             Delegate original = targetMethod.CreateDelegate(typeof(NonGenericDelegate));
             IntPtr ptr = Marshal.GetFunctionPointerForDelegate(original);
             NonGenericDelegate d = Marshal.GetDelegateForFunctionPointer<NonGenericDelegate>(ptr);
-
+            GC.KeepAlive(original);
+            
             IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(d);
             IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(d);
             Assert.NotEqual(IntPtr.Zero, pointer1);
@@ -86,6 +88,7 @@ namespace System.Runtime.InteropServices.Tests
             AssertExtensions.Throws<ArgumentException>("delegate", () => Marshal.GetFunctionPointerForDelegate(d));
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void GetFunctionPointerForDelegate_DelegateCollectible_ThrowsNotSupportedException()
         {
@@ -105,6 +108,7 @@ namespace System.Runtime.InteropServices.Tests
             Delegate d = targetMethod.CreateDelegate(type);
             Assert.Throws<NotSupportedException>(() => Marshal.GetFunctionPointerForDelegate(d));
         }
+#endif
 
         public delegate void GenericDelegate<T>(T t);
         public delegate void NonGenericDelegate(string t);

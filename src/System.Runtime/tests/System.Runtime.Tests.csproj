@@ -3,11 +3,9 @@
     <ProjectGuid>{B1BF7CE0-CAB5-4FA2-A39C-450B05D5DB1C}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)'=='uapaot'">$(DefineConstants);uapaot</DefineConstants>
     <!-- Please don't delete. We need App.config for netfx -->
     <NETFxTestRunnerAppConfig Condition="'$(TargetGroup)' == 'netfx'">$(MSBuildProjectDirectory)\App.config</NETFxTestRunnerAppConfig>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release;uapaot-Debug;uapaot-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release;uapaot-Debug;uapaot-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\EnumTypes.cs">
@@ -107,7 +105,6 @@
     <Compile Include="System\TimeZoneNotFoundExceptionTests.cs" />
     <Compile Include="System\TypeUnloadedExceptionTests.cs" />
     <Compile Include="System\TupleTests.cs" />
-    <Compile Include="System\TypeTests.cs" />
     <Compile Include="System\UInt16Tests.cs" />
     <Compile Include="System\UInt32Tests.cs" />
     <Compile Include="System\UInt64Tests.cs" />
@@ -177,11 +174,13 @@
     <Compile Include="System\Security\SecurityAttributeTests.cs" />
     <Compile Include="System\Text\StringBuilderTests.cs" />
     <Compile Include="System\Threading\WaitHandleTests.cs" />
+    <Compile Include="System\Type\TypePropertyTests.cs" />
+    <Compile Include="System\Type\TypeTests.cs" />
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
       <Link>Common\System\RandomDataGenerator.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'netstandard'">
     <Compile Include="System\HashCodeTests.netcoreapp.cs" />
     <Compile Include="Helpers.netcoreapp.cs" />
     <Compile Include="System\ActivatorTests.netcoreapp.cs" />
@@ -206,7 +205,6 @@
     <Compile Include="System\StringComparerTests.netcoreapp.cs" />
     <Compile Include="System\StringTests.netcoreapp.cs" />
     <Compile Include="System\TimeSpanTests.netcoreapp.cs" />
-    <Compile Include="System\TypeTests.netcoreapp.cs" />
     <Compile Include="System\TypedReferenceTests.cs" />
     <Compile Include="System\UIntPtrTests.netcoreapp.cs" />
     <Compile Include="System\UInt16Tests.netcoreapp.cs" />
@@ -229,13 +227,15 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
     <Compile Include="System\Runtime\ExceptionServices\ExceptionDispatchInfoTests.netcoreapp.cs" />
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
+    <Compile Include="System\Type\TypePropertyTests.netcoreapp.cs" />
+    <Compile Include="System\Type\TypeTests.netcoreapp.cs" />
     <Compile Include="System\DoubleTests.netcoreapp.cs" />
     <Compile Include="System\SingleTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="System\StringSplitExtensions.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'netstandard'">
     <Compile Include="$(CommonTestPath)\Tests\System\SpanExtensions.netstandard.cs">
       <Link>System\SpanExtensions.netstandard.cs</Link>
     </Compile>

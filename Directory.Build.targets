@@ -6,9 +6,9 @@
     For non-SDK projects that import this file and then import Microsoft.Common.targets,
     tell Microsoft.Common.targets not to import Directory.Build.targets again
     -->
-    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>  
+    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
   </PropertyGroup>
-  
+
   <Target Name="CheckForBuildTools">
     <Error Condition="!Exists('$(ToolsDir)') and '$(OverrideToolsDir)'=='true'"
            Text="The tools directory [$(ToolsDir)] does not exist. Please run sync in your repo to ensure the tools are installed before attempting to build an individual project." />
@@ -50,6 +50,11 @@
       <!-- enable trimming for any runtime project that's part of the shared framework and hasn't already set ILLinkTrimAssembly -->
       <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' AND '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
     </BinPlaceConfiguration>
+    <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreappaot-$(_bc_OSGroup)">
+      <PackageFileRuntimePath>$(NETCoreAppAotPackageRuntimePath)</PackageFileRuntimePath>
+      <!-- enable trimming for any runtime project that's part of the shared framework and hasn't already set ILLinkTrimAssembly -->
+      <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' AND '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
+    </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="'$(IsUAPRef)'=='true' AND ('$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true')" Include="uap-$(_bc_OSGroup)">
       <PackageFileRefPath>$(UAPPackageRefPath)</PackageFileRefPath>
     </BinPlaceConfiguration>
@@ -64,8 +69,11 @@
     <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
       <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)</RuntimePath>
     </BinPlaceConfiguration>
-    <!-- Setup the ILCInputFolder directory for testing uapaot -->
+    <!-- Setup the ILCInputFolder directory for testing aot -->
     <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="uapaot-$(_bc_OSGroup)">
+      <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
+    </BinPlaceConfiguration>
+    <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="netcoreappaot-$(_bc_OSGroup)">
       <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
     </BinPlaceConfiguration>
     <!-- And the UAP folder for the F5 (CoreCLR UAP-debugging) scenario -->
@@ -74,6 +82,11 @@
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="'$(BinPlaceNETFXRuntime)' == 'true'" Include="netfx-$(_bc_OSGroup)">
       <RuntimePath>$(TestHostRootPath)</RuntimePath>
+    </BinPlaceConfiguration>
+
+    <!-- binplace netstandard test suite -->
+    <BinPlaceConfiguration Condition="'$(BuildingNETStandardVertical)' == 'true' AND '$(IsTestProject)' == 'true'" Include="netstandard-$(_bc_OSGroup)">
+      <TestPath>$(NETStandardTestSuiteOutputPath)$(AssemblyName)/</TestPath>
     </BinPlaceConfiguration>
 
     <!-- binplace targeting packs which may be different from BuildConfiguration -->
@@ -122,6 +135,17 @@
     <!-- Temporarily suppress the message until we get a nuget version that knows about the mapping between netstandard1.7 and uapvNext -->
     <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
   </ItemGroup>
+
+  <!--
+    Import Test SDK props and targets.
+    This needs to happen here as the IsInvokableTestProject prop is required
+    which isn't available before Directory.Build.targets.
+    TODO: Fix VB test project reference to Test SDK.
+  -->
+  <Import Condition="'$(IncludeVSTestReferences)' == 'true' AND '$(Language)' != 'VB'" Project="$(PackagesDir)\microsoft.net.test.sdk\$(MicrosoftDotNetTestSdkVersion)\buildMultiTargeting\Microsoft.Net.Test.Sdk.props" />
+  <Import Condition="'$(IncludeVSTestReferences)' == 'true' AND ('$(BuildingNETCoreAppVertical)' == 'true' OR '$(BuildingNETFxVertical)' == 'true')" Project="$(PackagesDir)\microsoft.codecoverage\$(MicrosoftDotNetTestSdkVersion)\build\netstandard1.0\Microsoft.CodeCoverage.props" />
+  <Import Condition="'$(IncludeVSTestReferences)' == 'true' AND ('$(BuildingNETCoreAppVertical)' == 'true' OR '$(BuildingNETFxVertical)' == 'true') AND '$(Language)' != 'VB'" Project="$(PackagesDir)\microsoft.net.test.sdk\$(MicrosoftDotNetTestSdkVersion)\build\netcoreapp1.0\Microsoft.Net.Test.Sdk.targets" />
+  <Import Condition="'$(IncludeVSTestReferences)' == 'true' AND ('$(BuildingNETCoreAppVertical)' == 'true' OR '$(BuildingNETFxVertical)' == 'true')" Project="$(PackagesDir)\microsoft.codecoverage\$(MicrosoftDotNetTestSdkVersion)\build\netstandard1.0\Microsoft.CodeCoverage.targets" />
 
   <Target Name="ProducesPackageId"
           Returns="@(PackageIds)">

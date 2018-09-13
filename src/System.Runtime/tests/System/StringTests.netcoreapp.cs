@@ -249,6 +249,40 @@ namespace System.Tests
             }, str).Dispose();
         }
 
+        [Fact]
+        public static void Contains_Match_Char()
+        {
+            Assert.False("".Contains('a'));
+            Assert.False("".AsSpan().Contains('a'));
+
+            // Use a long-enough string to incur vectorization code
+            for (var length = 1; length < 250; length++)
+            {
+                char[] ca = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    ca[i] = (char)(i + 1);
+                }
+
+                var str = new string(ca);
+                var span = new Span<char>(ca);
+                var ros = new ReadOnlySpan<char>(ca);
+
+                for (var targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    char target = ca[targetIndex];
+                    var found = str.Contains(target);
+                    Assert.True(found);
+
+                    found = span.Contains(target);
+                    Assert.True(found);
+
+                    found = ros.Contains(target);
+                    Assert.True(found);
+                }
+            }
+        }
+
         [Theory]
         [InlineData(StringComparison.CurrentCulture)]
         [InlineData(StringComparison.CurrentCultureIgnoreCase)]
@@ -470,6 +504,11 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("aa", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
+                return SuccessExitCode;
+            }, src).Dispose();
+
+            RemoteInvoke((source) =>
+            {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
                 Assert.False("\u0069".Equals("\u0130", StringComparison.CurrentCultureIgnoreCase));
@@ -480,7 +519,7 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, src).Dispose();
+            }, src).Dispose();                            
         }
 
         public static IEnumerable<object[]> Replace_StringComparisonCulture_TestData()
