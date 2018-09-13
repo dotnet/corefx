@@ -134,7 +134,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public int ImportParameters(ECParameters parameters)
+        internal int ImportParameters(ECParameters parameters)
         {
             parameters.Validate();
 
@@ -202,7 +202,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public unsafe int ImportSubjectPublicKeyInfo(
+        internal unsafe int ImportSubjectPublicKeyInfo(
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
