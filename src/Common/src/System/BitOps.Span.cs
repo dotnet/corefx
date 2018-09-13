@@ -13,7 +13,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(ReadOnlySpan<byte> value, in uint offset)
+        public static bool ExtractBit(ReadOnlySpan<byte> value, uint offset)
         {
             var ix = (int)(offset >> 3); // div 8
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -29,7 +29,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(ReadOnlySpan<ushort> value, in uint offset)
+        public static bool ExtractBit(ReadOnlySpan<ushort> value, uint offset)
         {
             var ix = (int)(offset >> 4); // div 16
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -45,7 +45,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(ReadOnlySpan<uint> value, in uint offset)
+        public static bool ExtractBit(ReadOnlySpan<uint> value, uint offset)
         {
             var ix = (int)(offset >> 5); // div 32
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -61,7 +61,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(ReadOnlySpan<ulong> value, in uint offset)
+        public static bool ExtractBit(ReadOnlySpan<ulong> value, uint offset)
         {
             var ix = (int)(offset >> 6); // div 64
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -82,7 +82,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(Span<byte> value, in uint offset, in bool on)
+        public static bool InsertBit(Span<byte> value, uint offset, bool on)
         {
             var ix = (int)(offset >> 3); // div 8
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -99,7 +99,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(Span<ushort> value, in uint offset, in bool on)
+        public static bool InsertBit(Span<ushort> value, uint offset, bool on)
         {
             var ix = (int)(offset >> 4); // div 16
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -116,7 +116,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(Span<uint> value, in uint offset, in bool on)
+        public static bool InsertBit(Span<uint> value, uint offset, bool on)
         {
             var ix = (int)(offset >> 5); // div 32
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -133,7 +133,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(Span<ulong> value, in uint offset, in bool on)
+        public static bool InsertBit(Span<ulong> value, uint offset, bool on)
         {
             var ix = (int)(offset >> 6); // div 64
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -153,7 +153,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(Span<byte> value, in uint offset)
+        public static bool FlipBit(Span<byte> value, uint offset)
         {
             var ix = (int)(offset >> 3); // div 8
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -169,7 +169,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(Span<ushort> value, in uint offset)
+        public static bool FlipBit(Span<ushort> value, uint offset)
         {
             var ix = (int)(offset >> 4); // div 16
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -185,7 +185,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(Span<uint> value, in uint offset)
+        public static bool FlipBit(Span<uint> value, uint offset)
         {
             var ix = (int)(offset >> 5); // div 32
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -201,7 +201,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(Span<ulong> value, in uint offset)
+        public static bool FlipBit(Span<ulong> value, uint offset)
         {
             var ix = (int)(offset >> 6); // div 64
             if (ix >= value.Length) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -313,7 +313,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long LeadingCount(ReadOnlySpan<byte> value, in bool ones)
+        public static long LeadingCount(ReadOnlySpan<byte> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -332,7 +332,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long LeadingCount(ReadOnlySpan<ushort> value, in bool ones)
+        public static long LeadingCount(ReadOnlySpan<ushort> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -351,7 +351,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long LeadingCount(ReadOnlySpan<uint> value, in bool ones)
+        public static long LeadingCount(ReadOnlySpan<uint> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -370,7 +370,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long LeadingCount(ReadOnlySpan<ulong> value, in bool ones)
+        public static long LeadingCount(ReadOnlySpan<ulong> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -393,7 +393,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long TrailingCount(ReadOnlySpan<byte> value, in bool ones)
+        public static long TrailingCount(ReadOnlySpan<byte> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -413,7 +413,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long TrailingCount(ReadOnlySpan<ushort> value, in bool ones)
+        public static long TrailingCount(ReadOnlySpan<ushort> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -433,7 +433,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long TrailingCount(ReadOnlySpan<uint> value, in bool ones)
+        public static long TrailingCount(ReadOnlySpan<uint> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;
@@ -453,7 +453,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long TrailingCount(ReadOnlySpan<ulong> value, in bool ones)
+        public static long TrailingCount(ReadOnlySpan<ulong> value, bool ones)
         {
             if (value.Length == 0)
                 return 0;

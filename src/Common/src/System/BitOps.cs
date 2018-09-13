@@ -17,7 +17,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(in byte value, in byte offset)
+        public static bool ExtractBit(byte value, byte offset)
         {
             var shft = offset & 7; // mod 8: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -31,7 +31,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(in ushort value, in byte offset)
+        public static bool ExtractBit(ushort value, byte offset)
         {
             var shft = offset & 15; // mod 16: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -45,7 +45,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(in uint value, in byte offset)
+        public static bool ExtractBit(uint value, byte offset)
         {
             var shft = offset & 31; // mod 32: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -59,7 +59,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ExtractBit(in ulong value, in byte offset)
+        public static bool ExtractBit(ulong value, byte offset)
         {
             var shft = offset & 63; // mod 64: design choice ignores out-of-range values
             var mask = 1UL << shft;
@@ -78,7 +78,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(ref byte value, in byte offset, in bool on)
+        public static bool InsertBit(ref byte value, byte offset, bool on)
         {
             var shft = offset & 7; // mod 8: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -98,7 +98,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(ref ushort value, in byte offset, in bool on)
+        public static bool InsertBit(ref ushort value, byte offset, bool on)
         {
             var shft = offset & 15; // mod 16: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -118,7 +118,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(ref uint value, in byte offset, in bool on)
+        public static bool InsertBit(ref uint value, byte offset, bool on)
         {
             var shft = offset & 31; // mod 32: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -138,7 +138,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The ordinal position of the bit to write.</param>
         /// <param name="on">True to set the bit to 1, or false to set it to 0.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InsertBit(ref ulong value, in byte offset, in bool on)
+        public static bool InsertBit(ref ulong value, byte offset, bool on)
         {
             var shft = offset & 63; // mod 64: design choice ignores out-of-range values
             var mask = 1UL << shft;
@@ -173,7 +173,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(ref byte value, in byte offset)
+        public static bool FlipBit(ref byte value, byte offset)
         {
             var shft = offset & 7; // mod 8: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -191,7 +191,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(ref ushort value, in byte offset)
+        public static bool FlipBit(ref ushort value, byte offset)
         {
             var shft = offset & 15; // mod 16: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -209,7 +209,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(ref uint value, in byte offset)
+        public static bool FlipBit(ref uint value, byte offset)
         {
             var shft = offset & 31; // mod 32: design choice ignores out-of-range values
             var mask = 1U << shft;
@@ -227,7 +227,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="offset">The ordinal position of the bit to flip.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool FlipBit(ref ulong value, in byte offset)
+        public static bool FlipBit(ref ulong value, byte offset)
         {
             var shft = offset & 63; // mod 64: design choice ignores out-of-range values
             var mask = 1UL << shft;
@@ -250,7 +250,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte RotateLeft(in byte value, in byte offset)
+        public static byte RotateLeft(byte value, byte offset)
         {
             var shft = offset & 7; // mod 8 safely ignores boundary checks
             var val = (uint)value;
@@ -266,7 +266,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte RotateRight(in byte value, in byte offset)
+        public static byte RotateRight(byte value, byte offset)
         {
             var shft = offset & 7; // mod 8 safely ignores boundary checks
             var val = (uint)value;
@@ -282,7 +282,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort RotateLeft(in ushort value, in byte offset)
+        public static ushort RotateLeft(ushort value, byte offset)
         {
             var shft = offset & 15; // mod 16 safely ignores boundary checks
             var val = (uint)value;
@@ -298,7 +298,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort RotateRight(in ushort value, in byte offset)
+        public static ushort RotateRight(ushort value, byte offset)
         {
             var shft = offset & 15; // mod 16 safely ignores boundary checks
             var val = (uint)value;
@@ -314,7 +314,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint RotateLeft(in uint value, in byte offset)
+        public static uint RotateLeft(uint value, byte offset)
         {
             var shft = offset & 31; // mod 32 safely ignores boundary checks
 
@@ -330,7 +330,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint RotateRight(in uint value, in byte offset)
+        public static uint RotateRight(uint value, byte offset)
         {
             var shft = offset & 31; // mod 32 safely ignores boundary checks
 
@@ -346,7 +346,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong RotateLeft(in ulong value, in byte offset)
+        public static ulong RotateLeft(ulong value, byte offset)
         {
             var shft = offset & 63; // mod 64 safely ignores boundary checks
 
@@ -362,7 +362,7 @@ namespace System // No idea what namespace
         /// <param name="offset">The number of bits to rotate by.</param>
         /// <returns>The rotated value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong RotateRight(in ulong value, in byte offset)
+        public static ulong RotateRight(ulong value, byte offset)
         {
             var shft = offset & 63; // mod 64 safely ignores boundary checks
 
@@ -388,7 +388,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The mask.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int PopCount(in byte value)
+        public static int PopCount(byte value)
         {
             // 22 ops
             // TODO: Benchmark whether other algo is faster
@@ -410,7 +410,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The mask.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int PopCount(in ushort value)
+        public static int PopCount(ushort value)
             => PopCount((uint)value);
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The mask.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int PopCount(in uint value)
+        public static int PopCount(uint value)
         {
             // See truth table (1) above
             if (value <= 3)
@@ -447,7 +447,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The mask.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int PopCount(in ulong value)
+        public static int PopCount(ulong value)
         {
             // See truth table (1) above
             if (value <= 3)
@@ -481,7 +481,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int LeadingCount(in byte value, in bool ones)
+        public static int LeadingCount(byte value, bool ones)
         {
             if (value == 0)
                 return ones ? 0 : 8;
@@ -501,7 +501,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int LeadingCount(in ushort value, in bool ones)
+        public static int LeadingCount(ushort value, bool ones)
         {
             if (value == 0)
                 return ones ? 0 : 16;
@@ -521,7 +521,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int LeadingCount(in uint value, in bool ones)
+        public static int LeadingCount(uint value, bool ones)
         {
             if (value == 0)
                 return ones ? 0 : 32;
@@ -541,7 +541,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int LeadingCount(in ulong value, in bool ones)
+        public static int LeadingCount(ulong value, bool ones)
         {
             if (value == 0)
                 return ones ? 0 : 64;
@@ -585,7 +585,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TrailingCount(in byte value, in bool ones)
+        public static int TrailingCount(byte value, bool ones)
         {
             // If a trailing-ones operation, negate mask but remember to truncate carry-bits
             var val = ones ? (uint)(byte)~(uint)value : value;
@@ -640,7 +640,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TrailingCount(in ushort value, in bool ones)
+        public static int TrailingCount(ushort value, bool ones)
         {
             // If a trailing-ones operation, negate mask but remember to truncate carry-bits
             var val = ones ? (uint)(ushort)~(uint)value : value;
@@ -714,7 +714,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TrailingCount(in uint value, in bool ones)
+        public static int TrailingCount(uint value, bool ones)
         {
             // If a trailing-ones operation, negate mask
             var val = ones ? ~value : value;
@@ -736,7 +736,7 @@ namespace System // No idea what namespace
         /// <param name="value">The mask.</param>
         /// <param name="ones">True to count ones, or false to count zeros.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TrailingCount(in ulong value, in bool ones)
+        public static int TrailingCount(ulong value, bool ones)
         {
             if (value == 0)
                 return ones ? 0 : 64;
@@ -783,7 +783,7 @@ namespace System // No idea what namespace
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int FloorLog2Impl(in uint value)
+        private static int FloorLog2Impl(uint value)
         {
             // Perf: Do not use guard clauses; callers must be trusted
 
@@ -818,7 +818,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in byte value)
+        public static int FloorLog2(byte value)
         {
             if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -839,7 +839,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in sbyte value)
+        public static int FloorLog2(sbyte value)
         {
             if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -860,7 +860,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in ushort value)
+        public static int FloorLog2(ushort value)
         {
             if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -881,7 +881,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in short value)
+        public static int FloorLog2(short value)
         {
             if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -902,7 +902,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in uint value)
+        public static int FloorLog2(uint value)
         {
             if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -923,7 +923,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in int value)
+        public static int FloorLog2(int value)
         {
             if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -944,7 +944,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in ulong value)
+        public static int FloorLog2(ulong value)
         {
             if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
 
@@ -976,7 +976,7 @@ namespace System // No idea what namespace
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floor(log2) of the value.</returns>
-        public static int FloorLog2(in long value)
+        public static int FloorLog2(long value)
         {
             if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
 
