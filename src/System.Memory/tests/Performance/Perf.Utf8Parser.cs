@@ -742,6 +742,8 @@ namespace System.Buffers.Text.Tests
         [InlineData("12837467")] // standard parse
         [InlineData("-9223372036854775808")] // min value
         [InlineData("9223372036854775807")] // max value
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
         private static void ByteSpanToInt64(string text)
         {
             byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
@@ -755,6 +757,28 @@ namespace System.Buffers.Text.Tests
                     {
                         Utf8Parser.TryParse(utf8ByteSpan, out long value, out int bytesConsumed);
                         TestHelpers.DoNotIgnore(value, bytesConsumed);
+                    }
+                }
+            }
+        }
+
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData("12837467")] // standard parse
+        [InlineData("-9223372036854775808")] // min value
+        [InlineData("9223372036854775807")] // max value
+        [InlineData("000000000000000000001235abcdfg")]
+        [InlineData("21474836abcdefghijklmnop")]
+        private static void StringToInt64_Baseline(string text)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        long.TryParse(text, out long value);
+                        TestHelpers.DoNotIgnore(value, 0);
                     }
                 }
             }
