@@ -554,7 +554,7 @@ namespace System.Buffers.Text.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        short.TryParse(text, out short value);
+                        short.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out short value);
                         TestHelpers.DoNotIgnore(value, 0);
                     }
                 }
