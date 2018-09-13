@@ -130,7 +130,6 @@ namespace System
 
         static Version ToVersion(string versionString)
         {
-            // string.Contains(char) is .NetCore2.1+ specific
             if (versionString.IndexOf('.') != -1)
                 return new Version(versionString);
 
