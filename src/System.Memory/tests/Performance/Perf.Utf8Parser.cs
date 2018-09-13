@@ -546,9 +546,7 @@ namespace System.Buffers.Text.Tests
         [InlineData("10737")] // standard parse
         [InlineData("32767")] // max value
         [InlineData("-32768")] // min value
-        [InlineData("-127")]
-        [InlineData("2147")]
-        [InlineData("000000000000000000001235")]
+        [InlineData("000000000000000000001235abcdfg")]
         private static void StringToInt16_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -673,6 +671,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData("0")]
         [InlineData("4212")] // standard parse
         [InlineData("-32768")] // min value
         [InlineData("32767")] // max value
