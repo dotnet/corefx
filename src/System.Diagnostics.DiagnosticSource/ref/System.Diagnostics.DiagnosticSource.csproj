@@ -3,6 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{3DF9A5D5-3D4B-4378-9B55-CFA6AC0114D9}</ProjectGuid>
+    <!-- Must match version supported by frameworks which support 4.0.* inbox.
+         Can be removed when API is added and this assembly is versioned to 4.1.* -->
+    <AssemblyVersion Condition="'$(TargetsNetFx)' != 'true'">4.0.3.0</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'net45' OR '$(TargetGroup)' == 'netfx'">
      <DefineConstants>$(DefineConstants);ALLOW_PARTIALLY_TRUSTED_CALLERS</DefineConstants>
