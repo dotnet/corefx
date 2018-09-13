@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{18482C55-6B57-41E8-BBC4-383B9E2C7AA2}</ProjectGuid>
@@ -16,6 +16,7 @@
     <Compile Include="Perf.Span.BinaryReadAndWrite.cs" />
     <Compile Include="Perf.Span.BinarySearch.cs" />
     <Compile Include="Perf.Span.Clear.cs" />
+    <Compile Include="Perf.Span.Contains.cs" />
     <Compile Include="Perf.Span.Fill.cs" />
     <Compile Include="Perf.Span.IndexOf.cs" />
     <Compile Include="Perf.Span.IndexOfAny.cs" />
