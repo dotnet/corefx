@@ -169,7 +169,8 @@ namespace System.Xml.Tests
             {
                 if (DataReader.HasValue)
                 {
-                    if (DataReader.Value.Contains('\r'))
+                    // string.Contains(char) is .NetCore2.1+ specific
+                    if (DataReader.Value.IndexOf('\r') != -1)
                     {
                         CError.WriteLine("#xD found in node {0}, line {1} col {2}", DataReader.NodeType, DataReader.LineNumber, DataReader.LinePosition);
                         return TEST_FAIL;

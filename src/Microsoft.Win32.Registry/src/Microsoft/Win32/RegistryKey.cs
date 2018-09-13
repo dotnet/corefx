@@ -634,7 +634,9 @@ namespace Microsoft.Win32
         private static string FixupName(string name)
         {
             Debug.Assert(name != null, "[FixupName]name!=null");
-            if (!name.Contains('\\'))
+
+            // string.Contains(char) is .NetCore2.1+ specific
+            if (name.IndexOf('\\') == -1)
             {
                 return name;
             }

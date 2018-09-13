@@ -424,7 +424,8 @@ namespace System.ServiceProcess
 
         private static bool CheckMachineName(string value)
         {
-            return !string.IsNullOrWhiteSpace(value) && !value.Contains('\\');
+            // string.Contains(char) is .NetCore2.1+ specific
+            return !string.IsNullOrWhiteSpace(value) && value.IndexOf('\\') == -1;
         }
 
         /// <summary>
