@@ -199,7 +199,7 @@ namespace System.Security.Cryptography
                             manager.Memory,
                             out int localRead);
 
-                        SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead).ToArray(), false);
+                        SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead), false);
                         SetKey(SecKeyPair.PublicOnly(publicKey));
 
                         bytesRead = localRead;
@@ -770,25 +770,20 @@ namespace System.Security.Cryptography
 
             private static SafeSecKeyRefHandle ImportKey(RSAParameters parameters)
             {
-                bool isPrivateKey = parameters.D != null;
-                byte[] pkcs1Blob;
-
-                if (isPrivateKey)
+                if (parameters.D != null)
                 {
                     using (AsnWriter pkcs1PrivateKey = RSAKeyFormatHelper.WritePkcs1PrivateKey(parameters))
                     {
-                        pkcs1Blob = pkcs1PrivateKey.Encode();
+                        return Interop.AppleCrypto.ImportEphemeralKey(pkcs1PrivateKey.EncodeAsSpan(), true);
                     }
                 }
                 else
                 {
                     using (AsnWriter pkcs1PublicKey = RSAKeyFormatHelper.WriteSubjectPublicKeyInfo(parameters))
                     {
-                        pkcs1Blob = pkcs1PublicKey.Encode();
+                        return Interop.AppleCrypto.ImportEphemeralKey(pkcs1PublicKey.EncodeAsSpan(), false);
                     }
                 }
-
-                return Interop.AppleCrypto.ImportEphemeralKey(pkcs1Blob, isPrivateKey);
             }
         }
 

@@ -405,7 +405,7 @@ namespace System.Security.Cryptography
                     AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
                     ReadOnlyMemory<byte> firstElement = reader.PeekEncodedValue();
 
-                    SafeRsaHandle key = Interop.Crypto.DecodeRsaPublicKey(firstElement.ToArray(), firstElement.Length);
+                    SafeRsaHandle key = Interop.Crypto.DecodeRsaPublicKey(firstElement.Span);
 
                     Interop.Crypto.CheckValidOpenSslHandle(key);
 

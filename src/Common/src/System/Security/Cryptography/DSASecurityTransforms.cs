@@ -181,13 +181,8 @@ namespace System.Security.Cryptography
 
                 private static SafeSecKeyRefHandle ImportKey(DSAParameters parameters)
                 {
-                    bool hasPrivateKey = parameters.X != null;
-                    byte[] blob;
-                    
-                    if (hasPrivateKey)
+                    if (parameters.X != null)
                     {
-                        Debug.Assert(parameters.X != null);
-
                         // DSAPrivateKey ::= SEQUENCE(
                         //   version INTEGER,
                         //   p INTEGER,
@@ -207,18 +202,16 @@ namespace System.Security.Cryptography
                             privateKeyWriter.WriteKeyParameterInteger(parameters.Y);
                             privateKeyWriter.WriteKeyParameterInteger(parameters.X);
                             privateKeyWriter.PopSequence();
-                            blob = privateKeyWriter.Encode();
+                            return Interop.AppleCrypto.ImportEphemeralKey(privateKeyWriter.EncodeAsSpan(), true);
                         }
                     }
                     else
                     {
                         using (AsnWriter writer = DSAKeyFormatHelper.WriteSubjectPublicKeyInfo(parameters))
                         {
-                            blob = writer.Encode();
+                            return Interop.AppleCrypto.ImportEphemeralKey(writer.EncodeAsSpan(), false);
                         }
                     }
-
-                    return Interop.AppleCrypto.ImportEphemeralKey(blob, hasPrivateKey);
                 }
 
                 public override unsafe void ImportSubjectPublicKeyInfo(
@@ -234,7 +227,7 @@ namespace System.Security.Cryptography
                                 manager.Memory,
                                 out int localRead);
 
-                            SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead).ToArray(), false);
+                            SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead), false);
                             SetKey(SecKeyPair.PublicOnly(publicKey));
 
                             bytesRead = localRead;

@@ -186,25 +186,20 @@ namespace System.Security.Cryptography
 
         private static SafeSecKeyRefHandle ImportKey(ECParameters parameters)
         {
-            bool isPrivateKey = parameters.D != null;
-            byte[] blob;
-
-            if (isPrivateKey)
+            if (parameters.D != null)
             {
                 using (AsnWriter privateKey = EccKeyFormatHelper.WriteECPrivateKey(parameters))
                 {
-                    blob = privateKey.Encode();
+                    return Interop.AppleCrypto.ImportEphemeralKey(privateKey.EncodeAsSpan(), true);
                 }
             }
             else
             {
                 using (AsnWriter publicKey = EccKeyFormatHelper.WriteSubjectPublicKeyInfo(parameters))
                 {
-                    blob = publicKey.Encode();
+                    return Interop.AppleCrypto.ImportEphemeralKey(publicKey.EncodeAsSpan(), false);
                 }
             }
-
-            return Interop.AppleCrypto.ImportEphemeralKey(blob, isPrivateKey);
         }
 
         public unsafe int ImportSubjectPublicKeyInfo(
@@ -220,7 +215,7 @@ namespace System.Security.Cryptography
                         manager.Memory,
                         out int localRead);
 
-                    SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead).ToArray(), false);
+                    SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead), false);
                     SecKeyPair newKeys = SecKeyPair.PublicOnly(publicKey);
                     int size = GetKeySize(newKeys);
                     SetKey(newKeys);
