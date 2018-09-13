@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Test.Common;
@@ -224,7 +225,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (IsWinHttpHandler || IsNetfxHandler || IsUapHandler)
             {
-                // WinHttp differ on some versions.
+                // Some platform handlers differ but we don't take it as failure.
                 return;
             }
 
@@ -239,7 +240,7 @@ namespace System.Net.Http.Functional.Tests
                     Task<HttpResponseMessage> requestTask = client.SendAsync(request);
                     await server.AcceptConnectionAsync(async connection =>
                     {
-                        var headers = await connection.ReadRequestHeaderAsync();
+                        List<string> headers = await connection.ReadRequestHeaderAsync();
                         foreach (string line in headers)
                         {
                             // There should be no Content-Length header.
