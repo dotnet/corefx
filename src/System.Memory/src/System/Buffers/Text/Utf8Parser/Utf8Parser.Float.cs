@@ -110,11 +110,6 @@ namespace System.Buffers.Text
                 return false;
             }
 
-            if (number.Digits[0] == 0)
-            {
-                number.IsNegative = false;
-            }
-
             if (!Number.NumberBufferToDouble(ref number, out value))
             {
                 value = default;
