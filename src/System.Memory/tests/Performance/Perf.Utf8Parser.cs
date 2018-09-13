@@ -670,6 +670,29 @@ namespace System.Buffers.Text.Tests
             }
         }
 
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData("42")] // standard parse
+        [InlineData("0")] // min value
+        [InlineData("255")] // max value
+        private static void StringToByte_Baseline(string text)
+        {
+            byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
+            ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        byte.TryParse(text, out byte value);
+                        TestHelpers.DoNotIgnore(value, 0);
+                    }
+                }
+            }
+        }
+
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("0")]
         [InlineData("4212")] // standard parse
@@ -760,7 +783,7 @@ namespace System.Buffers.Text.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("Fri, 30 Jun 2000 03:15:45 GMT")] // standard parse
-        private static void StringToTimeOffsetR(string text)
+        private static void StringToTimeOffsetR_Baseline(string text)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
