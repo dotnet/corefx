@@ -28,7 +28,7 @@ namespace System.Tests
         {
             string name = Environment.UserDomainName;
             Assert.False(string.IsNullOrWhiteSpace(name));
-            Assert.Equal(-1, name.IndexOf('\0')); // string.Contains(char) is .NetCore2.1+ specific
+            Assert.Equal(-1, name.IndexOf('\0'));
         }
 
         [Fact]

@@ -18,7 +18,6 @@ namespace System.PrivateUri.Tests
 
             string dns = test.DnsSafeHost;
 
-            // string.Contains(char) is .NetCore2.1+ specific
             Assert.True(dns.IndexOf('%') < 0, "% found");
             Assert.True(test.AbsoluteUri.IndexOf('%') < 0, "% found: " + test.AbsoluteUri);
             Assert.True(test.ToString().IndexOf('%') < 0, "% found: " + test.ToString());
@@ -31,7 +30,6 @@ namespace System.PrivateUri.Tests
 
             string dns = test.DnsSafeHost;
 
-            // string.Contains(char) is .NetCore2.1+ specific
             Assert.True(dns.IndexOf('%') < 0, "% found");
             Assert.True(test.AbsoluteUri.IndexOf('%') < 0, "% found: " + test.AbsoluteUri);
             Assert.True(test.ToString().IndexOf('%') < 0, "% found: " + test.ToString());
