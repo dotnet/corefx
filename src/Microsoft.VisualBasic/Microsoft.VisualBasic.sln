@@ -33,8 +33,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{325260D6-D5DD-4E06-9DA2-9AF2AD9DE8C8}.Debug|Any CPU.ActiveCfg = netstandard-Windows_NT-Debug|Any CPU
 		{325260D6-D5DD-4E06-9DA2-9AF2AD9DE8C8}.Debug|Any CPU.Build.0 = netstandard-Windows_NT-Debug|Any CPU
-		{325260D6-D5DD-4E06-9DA2-9AF2AD9DE8C8}.Release|Any CPU.ActiveCfg = netstandard-Windows_NT-Release|Any CPU
-		{325260D6-D5DD-4E06-9DA2-9AF2AD9DE8C8}.Release|Any CPU.Build.0 = netstandard-Windows_NT-Release|Any CPU
+		{325260D6-D5DD-4E06-9DA2-9AF2AD9DE8C8}.Release|Any CPU.ActiveCfg = netstandard-Unix-Release|Any CPU
+		{325260D6-D5DD-4E06-9DA2-9AF2AD9DE8C8}.Release|Any CPU.Build.0 = netstandard-Unix-Release|Any CPU
 		{DA95454E-5F0E-4F8A-871A-25D1AB62867A}.Debug|Any CPU.ActiveCfg = netstandard-Windows_NT-Debug|Any CPU
 		{DA95454E-5F0E-4F8A-871A-25D1AB62867A}.Debug|Any CPU.Build.0 = netstandard-Windows_NT-Debug|Any CPU
 		{DA95454E-5F0E-4F8A-871A-25D1AB62867A}.Release|Any CPU.ActiveCfg = netstandard-Unix-Release|Any CPU

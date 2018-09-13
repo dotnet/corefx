@@ -9,9 +9,6 @@
     <Compile Include="FileIOTests.vb" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.VisualBasic.vbproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="netstandard" />
     <Reference Include="System" />
     <Reference Include="System.Collections" />

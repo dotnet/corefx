@@ -31,4 +31,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\Microsoft.VisualBasic.vbproj" />
+  </ItemGroup>
 </Project>
