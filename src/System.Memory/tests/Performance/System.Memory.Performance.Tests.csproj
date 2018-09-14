@@ -16,7 +16,7 @@
     <Compile Include="Perf.Span.BinaryReadAndWrite.cs" />
     <Compile Include="Perf.Span.BinarySearch.cs" />
     <Compile Include="Perf.Span.Clear.cs" />
-    <Compile Include="Perf.Span.Contains.cs" />
+    <None Include="Perf.Span.Contains.cs" />
     <Compile Include="Perf.Span.Fill.cs" />
     <Compile Include="Perf.Span.IndexOf.cs" />
     <Compile Include="Perf.Span.IndexOfAny.cs" />
