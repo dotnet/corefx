@@ -165,6 +165,22 @@ namespace System.Data
 
         internal bool HasRemoteAggregate => _hasRemoteAggregate;
 
+        internal delegate int ComparisonBySelector<TKey, TRow>(TKey key, TRow row) where TRow : DataRow;
+        
+        internal Range FindRecords<TKey, TRow>(ComparisonBySelector<TKey, TRow> comparison, TKey key) where TRow : DataRow
+        {
+            int x = _records.root;
+            while (IndexTree.NIL != x)
+            {
+                int c = comparison(key, (TRow)_table._recordManager[_records.Key(x)]);
+                if (c == 0)
+                    break;
+                
+                x = c < 0 ? _records.Left(x) : _records.Right(x) ;
+            }
+            return GetRangeFromNode(x);
+        }
+
         internal int ObjectID => _objectID;
 
         public DataViewRowState RecordStates => _recordStates;

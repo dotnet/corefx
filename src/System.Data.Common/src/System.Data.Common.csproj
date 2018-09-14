@@ -90,6 +90,8 @@
     <Compile Include="System\Data\DataViewManager.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="System\Data\DataSetUtil.cs" />
+    <Compile Include="System\Data\DataTableExtensions.cs" />
     <Compile Include="System\Data\DataViewManagerListItemTypeDescriptor.cs" />
     <Compile Include="System\Data\DataViewRowState.cs" />
     <Compile Include="System\Data\DataViewSetting.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="System\Data\DBConcurrencyException.cs" />
     <Compile Include="System\Data\DbType.cs" />
     <Compile Include="System\Data\DefaultValueTypeConverter.cs" />
+    <Compile Include="System\Data\EnumerableRowCollection.cs" />
     <Compile Include="System\Data\FillErrorEventArgs.cs" />
     <Compile Include="System\Data\FillErrorEventHandler.cs" />
     <Compile Include="System\Data\ForeignKeyConstraint.cs" />
@@ -116,6 +119,7 @@
     <Compile Include="System\Data\ITableMapping.cs" />
     <Compile Include="System\Data\ITableMappingCollection.cs" />
     <Compile Include="System\Data\KeyRestrictionBehavior.cs" />
+    <Compile Include="System\Data\LinqDataView.cs" />
     <Compile Include="System\Data\LoadOption.cs" />
     <Compile Include="System\Data\MappingType.cs" />
     <Compile Include="System\Data\MergeFailedEvent.cs" />
@@ -141,6 +145,7 @@
     <Compile Include="System\Data\Select.cs" />
     <Compile Include="System\Data\Selection.cs" />
     <Compile Include="System\Data\SimpleType.cs" />
+    <Compile Include="System\Data\SortExpressionBuilder.cs" />
     <Compile Include="System\Data\SqlDbType.cs" />
     <Compile Include="System\Data\StateChangeEvent.cs" />
     <Compile Include="System\Data\StateChangeEventHandler.cs" />
