@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\tools\common.props" />
+  <PropertyGroup>
+    <Description>.NET Core Type Loader</Description>
+    <!-- System.Reflection.TypeLoader.dll has two build configurations: NetCore and NetStandard. The functional difference is that the NetCore
+         version supports all of the new NetCore Reflection apis (IsSZArray, etc.) Apps built against NetCore should use the NetCore build
+         of TypeLoader.dll if possible. If they use the NetStandard version, they must refrain from calling NetCore-specific apis on Reflection
+         objects dispensed by TypeLoaders as these apis will not work.
+
+         Unfortunately, CoreFxLab does not have support for multiple-TFM builds and at the moment, our immediate prospects need NETFX 4.6 support
+         so we're building the inferior netstandard version.
+    -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>.NET Type Loader corefxlab</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants Condition="$(TargetFramework.StartsWith('netstandard'))">$(DefineConstants);netstandard</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryVersion)" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemCompilerServicesUnsafeVersion)" />
+  </ItemGroup>
+</Project>
