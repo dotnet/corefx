@@ -1338,7 +1338,6 @@ namespace System.Net.Sockets.Tests
 
     public class BlockingSendReceive
     {
-
         private readonly ITestOutputHelper _log;
         public static readonly object[][] Loopbacks = MemberDatas.Loopbacks;
 
@@ -1358,7 +1357,7 @@ namespace System.Net.Sockets.Tests
                 server.BindToAnonymousPort(ipAddress);
                 server.Listen(1);
                 byte[] buffer = new byte[1];
-                buffer[0] = Convert.ToByte('a');
+                buffer[0] = (byte)'a';
 
                 Task clientTask = Task.Run(() =>
                 {
