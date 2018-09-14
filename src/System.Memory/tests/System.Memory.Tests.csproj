@@ -96,7 +96,6 @@
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsSpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
-    <Compile Include="ReadOnlySpan\Contains.char.cs" />
     <Compile Include="ReadOnlySpan\Contains.byte.cs" />
     <Compile Include="ReadOnlySpan\Contains.T.cs" />    
     <Compile Include="ReadOnlySpan\CopyTo.cs" />

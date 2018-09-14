@@ -107,6 +107,9 @@ namespace System.Tests
         public static void Contains(string s, char value, bool expected)
         {
             Assert.Equal(expected, s.Contains(value));
+
+            var span = s.AsSpan();
+            Assert.Equal(expected, span.Contains(value));
         }
 
         [Theory]
@@ -280,6 +283,49 @@ namespace System.Tests
                     found = ros.Contains(target);
                     Assert.True(found);
                 }
+            }
+        }
+
+        [Fact]
+        public static void Contains_ZeroLength_Char()
+        {
+            ReadOnlySpan<char> sp = new ReadOnlySpan<char>(Array.Empty<char>());
+            bool found = sp.Contains((char)0);
+            Assert.False(found);
+        }
+
+        [Fact]
+        public static void Contains_MultipleMatches_Char()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+
+                a[length - 1] = (char)200;
+                a[length - 2] = (char)200;
+
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                bool found = span.Contains((char)200);
+                Assert.True(found);
+            }
+        }
+
+        [Fact]
+        public static void Contains_EnsureNoChecksGoOutOfRange_Char()
+        {
+            for (int length = 0; length < 100; length++)
+            {
+                char[] a = new char[length + 2];
+                a[0] = '9';
+                a[length + 1] = '9';
+
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a, 1, length);
+                bool found = span.Contains('9');
+                Assert.False(found);
             }
         }
 
