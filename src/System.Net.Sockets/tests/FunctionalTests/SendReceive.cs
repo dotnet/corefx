@@ -1398,7 +1398,7 @@ namespace System.Net.Sockets.Tests
                 buffer[0] = Convert.ToByte('a');
                 server.BindToAnonymousPort(ipAddress);
                 server.Listen(1);
-                Task clientTask = Task.Run(() =>
+                Task serverTask = Task.Run(() =>
                 {
                     try
                     {
@@ -1419,7 +1419,7 @@ namespace System.Net.Sockets.Tests
                 // Now clientThread should be blocked waiting for another connect.
                 // force Close on the socket from parent thread.
                 server.Close();
-                clientTask.Wait(TestSettings.PassingTestTimeout);
+                serverTask.Wait(TestSettings.PassingTestTimeout);
             }
         }
     }
