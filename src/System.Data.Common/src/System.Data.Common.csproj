@@ -127,6 +127,7 @@
     <Compile Include="System\Data\Merger.cs" />
     <Compile Include="System\Data\MissingMappingAction.cs" />
     <Compile Include="System\Data\MissingSchemaAction.cs" />
+    <Compile Include="System\Data\OrderedEnumerableRowCollection.cs" />
     <Compile Include="System\Data\ParameterDirection.cs" />
     <Compile Include="System\Data\PrimaryKeyTypeConverter.cs" />
     <Compile Include="System\Data\PropertyCollection.cs" />
@@ -138,6 +139,13 @@
     <Compile Include="System\Data\RelatedView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="System\Data\DataRowComparer.cs" />
+    <Compile Include="System\Data\DataRowExtensions.cs" />
+    <Compile Include="System\Data\EnumerableRowCollectionExtensions.cs" />
+    <Compile Include="System\Data\TypedTableBase.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Data\TypedTableBaseExtensions.cs" />
     <Compile Include="System\Data\RelationshipConverter.cs" />
     <Compile Include="System\Data\Rule.cs" />
     <Compile Include="System\Data\SchemaSerializationMode.cs" />

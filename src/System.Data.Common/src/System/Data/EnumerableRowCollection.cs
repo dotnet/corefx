@@ -13,7 +13,7 @@ namespace System.Data
     /// <summary>
     /// Provides an entry point so that Cast operator call can be intercepted within an extension method.
     /// </summary>
-    internal abstract class EnumerableRowCollection : IEnumerable
+    public abstract class EnumerableRowCollection : IEnumerable
     {
         internal abstract Type ElementType { get; }
         internal abstract DataTable Table { get; }
@@ -31,7 +31,7 @@ namespace System.Data
     /// <summary>
     /// This class provides a wrapper for DataTables to allow for querying via LINQ.
     /// </summary>
-    internal class EnumerableRowCollection<TRow> : EnumerableRowCollection, IEnumerable<TRow>
+    public class EnumerableRowCollection<TRow> : EnumerableRowCollection, IEnumerable<TRow>
     {
         private readonly DataTable _table;
         private readonly IEnumerable<TRow> _enumerableRows;
