@@ -583,7 +583,6 @@ namespace System.Data.SqlClient.SNI
             _dataSourceAfterTrimmingProtocol = (firstIndexOfColon > -1) && ConnectionProtocol != DataSource.Protocol.None
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
 
-            // string.Contains(char) is .NetCore2.1+ specific
             if (_dataSourceAfterTrimmingProtocol.Contains('/')) // Pipe paths only allow back slashes
             {
                 if (ConnectionProtocol == DataSource.Protocol.None)
