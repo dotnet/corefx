@@ -241,11 +241,7 @@ namespace System.Net.Http.Functional.Tests
                     await server.AcceptConnectionAsync(async connection =>
                     {
                         List<string> headers = await connection.ReadRequestHeaderAsync();
-                        foreach (string line in headers)
-                        {
-                            // There should be no Content-Length header.
-                            Assert.False(line.StartsWith("Content-length:", StringComparison.InvariantCultureIgnoreCase));
-                        }
+                        Assert.DoesNotContain(headers, line => line.StartsWith("Content-length"));
 
                         await connection.SendResponseAsync();
                         await requestTask;
