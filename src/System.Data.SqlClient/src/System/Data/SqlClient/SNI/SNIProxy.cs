@@ -779,7 +779,7 @@ namespace System.Data.SqlClient.SNI
             if (_dataSourceAfterTrimmingProtocol.StartsWith(PipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
                 // If the data source is "np:servername"
-                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator)) // Pipe paths only allow back slashes
+                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
                 {
                     PipeHostName = ServerName = _dataSourceAfterTrimmingProtocol;
                     InferLocalServerName();
