@@ -115,7 +115,7 @@ namespace System.Data
         {
             get
             {
-                //weak now that we have two dimensions
+                // weak now that we have two dimensions
                 Debug.Assert(_selectors.Count == _comparers.Count);
                 return _selectors.Count;
             }
@@ -140,7 +140,6 @@ namespace System.Data
                     builder._selectors.AddLast(selector);
                 }
             }
-
 
             foreach (Comparison<object> comparer in _comparers)
             {
@@ -176,7 +175,6 @@ namespace System.Data
                 }
             }
 
-
             foreach (Comparison<object> comparer in _comparers)
             {
                 if (comparer == _currentComparer.Value)
@@ -191,6 +189,5 @@ namespace System.Data
 
             return builder;
         }
-
     }
 }
