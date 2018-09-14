@@ -428,7 +428,7 @@ namespace System.Linq.Expressions
         protected internal override Expression VisitMemberInit(MemberInitExpression node)
         {
             if (node.NewExpression.ArgumentCount == 0 &&
-                node.NewExpression.Type.Name.Contains("<"))
+                node.NewExpression.Type.Name.Contains('<')) // string.Contains(char) is .NetCore2.1+ specific
             {
                 // anonymous type constructor
                 Out("new");
