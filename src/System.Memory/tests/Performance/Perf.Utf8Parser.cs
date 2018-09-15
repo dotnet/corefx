@@ -378,8 +378,6 @@ namespace System.Buffers.Text.Tests
         [InlineData("107")] // standard parse
         [InlineData("127")] // max value
         [InlineData("-128")] // min value
-        [InlineData("147")]
-        [InlineData("-111")]
         [InlineData("-21abcdefghijklmnop")]
         [InlineData("21abcdefghijklmnop")]
         [InlineData("00000000000000000000123")]
