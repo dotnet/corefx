@@ -108,7 +108,7 @@ namespace System.Tests
         {
             Assert.Equal(expected, s.Contains(value));
 
-            var span = s.AsSpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             Assert.Equal(expected, span.Contains(value));
         }
 
@@ -289,8 +289,11 @@ namespace System.Tests
         [Fact]
         public static void Contains_ZeroLength_Char()
         {
-            ReadOnlySpan<char> sp = new ReadOnlySpan<char>(Array.Empty<char>());
-            bool found = sp.Contains((char)0);
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
+            bool found = span.Contains((char)0);
+            Assert.False(found);
+
+            found = string.Empty.Contains((char)0);
             Assert.False(found);
         }
 
@@ -299,17 +302,21 @@ namespace System.Tests
         {
             for (int length = 2; length < 32; length++)
             {
-                char[] a = new char[length];
+                var ca = new char[length];
                 for (int i = 0; i < length; i++)
                 {
-                    a[i] = (char)(i + 1);
+                    ca[i] = (char)(i + 1);
                 }
 
-                a[length - 1] = (char)200;
-                a[length - 2] = (char)200;
+                ca[length - 1] = (char)200;
+                ca[length - 2] = (char)200;
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                var span = new ReadOnlySpan<char>(ca);
                 bool found = span.Contains((char)200);
+                Assert.True(found);
+
+                var str = new string(ca);
+                found = str.Contains((char)200);
                 Assert.True(found);
             }
         }

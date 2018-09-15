@@ -11,6 +11,8 @@
     <Compile Include="MemoryMarshal\AsReadOnlyRef.cs" />
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
+    <Compile Include="ReadOnlySpan\Contains.byte.cs" />
+    <Compile Include="ReadOnlySpan\Contains.T.cs" />
     <Compile Include="Span\Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -96,8 +98,6 @@
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsSpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
-    <None Include="ReadOnlySpan\Contains.byte.cs" />
-    <None Include="ReadOnlySpan\Contains.T.cs" />    
     <Compile Include="ReadOnlySpan\CopyTo.cs" />
     <Compile Include="ReadOnlySpan\CtorArray.cs" />
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
