@@ -16,9 +16,12 @@ namespace System.Memory.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(2000)]
         public void SpanContainsChar(int size)
         {
             Span<char> charSpan = new char[size];
@@ -43,9 +46,12 @@ namespace System.Memory.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(2000)]
         public void SpanIndexOfChar(int size)
         {
             Span<char> charSpan = new char[size];
@@ -70,9 +76,12 @@ namespace System.Memory.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(2000)]
         public void SpanContainsCharAsBytes(int size)
         {
             Span<char> charSpan = new char[size];
@@ -98,9 +107,12 @@ namespace System.Memory.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(2000)]
         public void StringContainsChar(int size)
         {
             string str = new string('0', size / 2) + "5";
@@ -128,9 +140,12 @@ namespace System.Memory.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(2000)]
         public void StringIndexOfChar(int size)
         {
             string str = new string('0', size / 2) + "5";
