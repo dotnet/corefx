@@ -131,7 +131,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong SpanContainsCharComparison_Span(string input, char value)
+        public ulong CharComparison_StringAsSpan(string input, char value)
         {
             var count = 0UL;
 
@@ -151,7 +151,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong SpanContainsCharComparison_String(string input, char value)
+        public ulong CharComparison_String(string input, char value)
         {
             var count = 0UL;
 
@@ -169,7 +169,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong SpanContainsCharComparison_Linq(string input, char value)
+        public ulong CharComparison_Linq(string input, char value)
         {
             var count = 0UL;
 
@@ -187,7 +187,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong SpanContainsCharComparison_IndexOf(string input, char value)
+        public ulong CharComparison_StringIndexOf(string input, char value)
         {
             var count = 0UL;
 
@@ -197,6 +197,30 @@ namespace System.Memory.Tests
                 {
                     if (input.IndexOf(value) >= 0)
                         count++;
+                }
+            }
+
+            return count;
+        }
+
+        [Benchmark]
+        [MemberData(nameof(s_indexTestData))]
+        public ulong CharComparison_Baseline(string input, char value)
+        {
+            var count = 0UL;
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (var i = 0; i < input.Length; i++)
+                    {
+                        if (input[i] == value)
+                        {
+                            count++;
+                            break;
+                        }
+                    }
                 }
             }
 
