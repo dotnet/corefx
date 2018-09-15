@@ -584,7 +584,7 @@ namespace System.Data.SqlClient.SNI
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
 
 #if netcoreapp
-            if (_dataSourceAfterTrimmingProtocol.Contains('/'))// string.Contains(char) is .NetCore2.1+ specific
+            if (_dataSourceAfterTrimmingProtocol.Contains('/')) // string.Contains(char) is .NetCore2.1+ specific
 #else
             if (_dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
 #endif
@@ -783,7 +783,11 @@ namespace System.Data.SqlClient.SNI
             if (_dataSourceAfterTrimmingProtocol.StartsWith(PipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
                 // If the data source is "np:servername"
-                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
+#if netcoreapp
+                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator)) // string.Contains(char) is .NetCore2.1+ specific
+#else
+                if (!System.Linq.Enumerable.Contains(_dataSourceAfterTrimmingProtocol, BackSlashSeparator))
+#endif
                 {
                     PipeHostName = ServerName = _dataSourceAfterTrimmingProtocol;
                     InferLocalServerName();
