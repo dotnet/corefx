@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Memory.Tests
 {
-    // Adpated from Perf.Span.IndexOf.cs
+    // Adapted from Perf.Span.IndexOf.cs
     public class Perf_Span_Contains
     {
         private const int InnerCount = 100_000;
@@ -52,7 +52,7 @@ namespace System.Memory.Tests
             charSpan[size / 2] = '5';
             Span<byte> byteSpan = MemoryMarshal.AsBytes(charSpan);
 
-            int index = 0;
+            bool found = true;
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -60,12 +60,13 @@ namespace System.Memory.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        if (charSpan.Contains('5')) // '5' = 53
-                            index |= (size / 2);
+                        if (!charSpan.Contains('5')) // '5' = 53
+                            found = false;
                     }
                 }
             }
-            Assert.Equal(size > 1 ? size : 0, index);
+
+            Assert.True(found);
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
@@ -81,7 +82,7 @@ namespace System.Memory.Tests
                 str += new string('0', size / 2 - 1);
             }
 
-            int index = 0;
+            bool found = true;
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -89,13 +90,13 @@ namespace System.Memory.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        if (str.Contains('5'))
-                            index |= (size / 2);
+                        if (!str.Contains('5'))
+                            found = false;
                     }
                 }
             }
 
-            Assert.Equal(size / 2, index);
+            Assert.True(found);
         }
 
         private static string GenerateInputString(char source, int count, char replaceChar, int replacePos)
