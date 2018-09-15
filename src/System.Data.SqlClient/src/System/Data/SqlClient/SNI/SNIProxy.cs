@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+#if !netcoreapp
+using System.Linq;
+#endif
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -583,10 +586,11 @@ namespace System.Data.SqlClient.SNI
             _dataSourceAfterTrimmingProtocol = (firstIndexOfColon > -1) && ConnectionProtocol != DataSource.Protocol.None
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
 
+            // Pipe paths only allow back slashes
 #if netcoreapp
             if (_dataSourceAfterTrimmingProtocol.Contains('/')) // string.Contains(char) is .NetCore2.1+ specific
 #else
-            if (_dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
+            if (_dataSourceAfterTrimmingProtocol.Contains("/"))
 #endif
             {
                 if (ConnectionProtocol == DataSource.Protocol.None)
@@ -783,11 +787,7 @@ namespace System.Data.SqlClient.SNI
             if (_dataSourceAfterTrimmingProtocol.StartsWith(PipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
                 // If the data source is "np:servername"
-#if netcoreapp
-                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator)) // string.Contains(char) is .NetCore2.1+ specific
-#else
-                if (!System.Linq.Enumerable.Contains(_dataSourceAfterTrimmingProtocol, BackSlashSeparator))
-#endif
+                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator)) // string.Contains(char) is .NetCore2.1+ specific. Else uses Linq (perf warning)
                 {
                     PipeHostName = ServerName = _dataSourceAfterTrimmingProtocol;
                     InferLocalServerName();
