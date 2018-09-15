@@ -132,7 +132,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong CharComparison_StringAsSpan(string input, char value)
+        public ulong ContainsChar_StringAsSpan(string input, char value)
         {
             var count = 0UL;
 
@@ -152,7 +152,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong CharComparison_String(string input, char value)
+        public ulong ContainsChar_String(string input, char value)
         {
             var count = 0UL;
 
@@ -170,7 +170,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong CharComparison_Linq(string input, char value)
+        public ulong ContainsChar_StringLinq(string input, char value)
         {
             var count = 0UL;
 
@@ -188,7 +188,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong CharComparison_StringIndexOf(string input, char value)
+        public ulong ContainsChar_StringIndexOf(string input, char value)
         {
             var count = 0UL;
 
@@ -206,7 +206,7 @@ namespace System.Memory.Tests
 
         [Benchmark]
         [MemberData(nameof(s_indexTestData))]
-        public ulong CharComparison_Baseline(string input, char value)
+        public ulong ContainsChar_Baseline(string input, char value)
         {
             var count = 0UL;
 
