@@ -46,6 +46,33 @@ namespace System.Memory.Tests
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        public void SpanIndexOfChar(int size)
+        {
+            Span<char> charSpan = new char[size];
+            charSpan[size / 2] = '5';
+
+            bool found = true;
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        if (charSpan.IndexOf('5') < 0)
+                            found = false;
+                    }
+                }
+            }
+
+            Assert.True(found);
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
         public void SpanContainsCharAsBytes(int size)
         {
             Span<char> charSpan = new char[size];
@@ -99,6 +126,36 @@ namespace System.Memory.Tests
             Assert.True(found);
         }
 
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        public void StringIndexOfChar(int size)
+        {
+            string str = new string('0', size / 2) + "5";
+            if (size > 1)
+            {
+                str += new string('0', size / 2 - 1);
+            }
+
+            bool found = true;
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        if (str.IndexOf('5') < 0)
+                            found = false;
+                    }
+                }
+            }
+
+            Assert.True(found);
+        }
+
         private static string GenerateInputString(char source, int count, char replaceChar, int replacePos)
         {
             char[] str = new char[count];
@@ -130,7 +187,7 @@ namespace System.Memory.Tests
             new object[] { GenerateInputString('\u3060', 100, '\u3059', 50), '\u3059' }
         };
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [MemberData(nameof(s_indexTestData))]
         public ulong ContainsChar_StringAsSpan(string input, char value)
         {
@@ -142,15 +199,18 @@ namespace System.Memory.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    if (inputSpan.Contains(value))
-                        count++;
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        if (inputSpan.Contains(value))
+                            count++;
+                    }
                 }
             }
 
             return count;
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [MemberData(nameof(s_indexTestData))]
         public ulong ContainsChar_String(string input, char value)
         {
@@ -160,15 +220,18 @@ namespace System.Memory.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    if (input.Contains(value))
-                        count++;
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        if (input.Contains(value))
+                            count++;
+                    }
                 }
             }
 
             return count;
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [MemberData(nameof(s_indexTestData))]
         public ulong ContainsChar_StringLinq(string input, char value)
         {
@@ -178,15 +241,18 @@ namespace System.Memory.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    if (Linq.Enumerable.Contains(input, value))
-                        count++;
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        if (Linq.Enumerable.Contains(input, value))
+                            count++;
+                    }
                 }
             }
 
             return count;
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [MemberData(nameof(s_indexTestData))]
         public ulong ContainsChar_StringIndexOf(string input, char value)
         {
@@ -196,15 +262,18 @@ namespace System.Memory.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    if (input.IndexOf(value) >= 0)
-                        count++;
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        if (input.IndexOf(value) >= 0)
+                            count++;
+                    }
                 }
             }
 
             return count;
         }
 
-        [Benchmark]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [MemberData(nameof(s_indexTestData))]
         public ulong ContainsChar_Baseline(string input, char value)
         {
@@ -214,12 +283,15 @@ namespace System.Memory.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (var i = 0; i < input.Length; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        if (input[i] == value)
+                        for (var j = 0; j < input.Length; j++)
                         {
-                            count++;
-                            break;
+                            if (input[j] == value)
+                            {
+                                count++;
+                                break;
+                            }
                         }
                     }
                 }
