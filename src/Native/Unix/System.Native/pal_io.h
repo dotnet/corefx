@@ -139,6 +139,7 @@ enum
     PAL_O_EXCL = 0x0040,    // When combined with CREAT, fails if file already exists
     PAL_O_TRUNC = 0x0080,   // Truncate file to length 0 if it already exists
     PAL_O_SYNC = 0x0100,    // Block writes call will block until physically written
+    PAL_O_DIRECT = 0x0200,  // Try to minimize cache effects of the I/O to and from file.
 };
 
 /**
