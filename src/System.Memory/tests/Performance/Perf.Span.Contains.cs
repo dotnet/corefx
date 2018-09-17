@@ -12,7 +12,7 @@ namespace System.Memory.Tests
     // Adapted from Perf.Span.IndexOf.cs
     public class Perf_Span_Contains
     {
-        private const int InnerCount = 100_000;
+        private const int InnerCount = 50_000;
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
