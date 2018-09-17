@@ -153,23 +153,25 @@ namespace System.Threading.Threads.Tests
         }
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [InlineData("STAMain.exe", "GetApartmentState")] 
-        [InlineData("STAMain.exe", "SetApartmentState")]
-        [InlineData("MTAMain.exe", "GetApartmentState")]
-        [InlineData("MTAMain.exe", "SetApartmentState")]
+        [InlineData("STAMain.exe", "GetApartmentStateTest")]
+        [InlineData("STAMain.exe", "SetApartmentStateTest")]
+        [InlineData("MTAMain.exe", "GetApartmentStateTest")]
+        [InlineData("MTAMain.exe", "SetApartmentStateTest")]
+        [InlineData("DefaultApartmentStateMain.exe", "GetApartmentStateTest")]
+        [InlineData("DefaultApartmentStateMain.exe", "SetApartmentStateTest")]
         [ActiveIssue(20766, TargetFrameworkMonikers.Uap)]
-        public static void ApartmentState_AttributePresent(string AppName, string mode)
+        public static void ApartmentState_AttributePresent(string appName, string testName)
         {
             var psi = new ProcessStartInfo();
             if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
             {
-                psi.FileName = AppName;
-                psi.Arguments = $"{mode}";
+                psi.FileName = appName;
+                psi.Arguments = $"{testName}";
             }
             else
             {
                 psi.FileName = DummyClass.HostRunnerTest;
-                psi.Arguments = $"{AppName} {mode}";
+                psi.Arguments = $"{appName} {testName}";
             }
             using (Process p = Process.Start(psi))
             {
