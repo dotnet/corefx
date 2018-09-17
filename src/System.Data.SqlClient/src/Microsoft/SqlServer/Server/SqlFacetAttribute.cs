@@ -20,7 +20,7 @@ namespace Microsoft.SqlServer.Server
 
         /// <summary>
         /// The maximum size of the field (in bytes or characters depending on the field type)
-        ///  or -1 if the size can be unlimited.
+        /// or -1 if the size can be unlimited.
         /// </summary>
         public int MaxSize
         {

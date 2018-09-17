@@ -7,7 +7,7 @@
 
 namespace Microsoft.SqlServer.Server
 {
-    [System.AttributeUsageAttribute((System.AttributeTargets)(10624), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue | System.AttributeTargets.Parameter, AllowMultiple=false, Inherited=false)]
     public partial class SqlFacetAttribute : System.Attribute
     {
         public SqlFacetAttribute() { }
