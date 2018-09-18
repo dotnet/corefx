@@ -2243,6 +2243,7 @@ namespace System
         public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2, Utf8String str3) => throw null;
         public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
+        public bool EndsWith(System.Text.UnicodeScalar value) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public static bool Equals(Utf8String a, Utf8String b) => throw null;
@@ -2256,6 +2257,7 @@ namespace System
         public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
+        public bool StartsWith(System.Text.UnicodeScalar value) => throw null;
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
