@@ -812,7 +812,7 @@ namespace System.Buffers.Text.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTimeOffset value);
+                        DateTimeOffset.TryParseExact(text, "r", null, DateTimeStyles.None, out DateTimeOffset value);
                         TestHelpers.DoNotIgnore(value, 0);
                     }
                 }
