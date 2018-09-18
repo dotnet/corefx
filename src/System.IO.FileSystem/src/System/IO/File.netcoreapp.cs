@@ -90,5 +90,16 @@ namespace System.IO
             }
         }
 #endif
+
+        public static void WriteAllTextUtf8(string path, Utf8String contents)
+        {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (path.Length == 0)
+                throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
+
+            // Utf8String.AsSpan() extension method below handles null inputs correctly.
+            InternalWriteAllBytes(path, contents.AsSpan());
+        }
     }
 }
