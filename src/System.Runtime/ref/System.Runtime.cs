@@ -2238,6 +2238,9 @@ namespace System
         public int Length => throw null;
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
+        public static Utf8String Concat(Utf8String str0, Utf8String str1) => throw null;
+        public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2) => throw null;
+        public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2, Utf8String str3) => throw null;
         public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public override bool Equals(object obj) => throw null;
