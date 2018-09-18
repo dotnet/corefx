@@ -58,7 +58,7 @@ namespace System
                         ref s_stdInReader,
                         () => SyncTextReader.GetSynchronizedTextReader(
                             new StdInReader(
-                                encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
+                                encoding: Console.InputEncoding.RemovePreamble(), // This ensures no prefix is written to the stream.
                                 bufferSize: DefaultBufferSize)));
             }
         }
@@ -74,7 +74,7 @@ namespace System
                     StreamReader.Null :
                     new StreamReader(
                         stream: inputStream,
-                        encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
+                        encoding: Console.InputEncoding.RemovePreamble(), // This ensures no prefix is written to the stream.
                         detectEncodingFromByteOrderMarks: false,
                         bufferSize: DefaultConsoleBufferSize,
                         leaveOpen: true)
@@ -609,6 +609,10 @@ namespace System
         private static Encoding GetConsoleEncoding()
         {
             Encoding enc = EncodingHelper.GetEncodingFromCharset();
+            if (enc != null)
+            {
+                enc = enc.RemovePreamble();
+            }
             return enc ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         }
 
