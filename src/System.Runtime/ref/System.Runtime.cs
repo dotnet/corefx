@@ -2296,13 +2296,20 @@ namespace System
         public static bool operator !=(StringSegment a, StringSegment b) => throw null;
         public bool IsEmpty => throw null;
         public int Length => throw null;
+        public ref readonly char this[int index] => throw null;
+        public bool Contains(char value) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(StringSegment value) => throw null;
         public static bool Equals(StringSegment a, StringSegment b, StringComparison comparisonType) => throw null;
         public string GetBuffer(out int offset, out int length) => throw null;
         public override int GetHashCode() => throw null;
         public int GetHashCode(StringComparison comparisonType) => throw null;
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("This type cannot be pinned because it may result in a char* without a null terminator.", error: true)]
+        public ref readonly char GetPinnableReference() => throw null;
+        public int IndexOf(char value) => throw null;
         public bool IsEmptyOrWhiteSpace() => throw null;
+        public int LastIndexOf(char value) => throw null;
         public StringSegment Substring(int startIndex) => throw null;
         public StringSegment Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
