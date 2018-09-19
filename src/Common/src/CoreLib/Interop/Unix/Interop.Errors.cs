@@ -102,7 +102,7 @@ internal static partial class Interop
         ENODATA          = 0x10071,           // No data available.
 
         // Custom Error codes to track errors beyond kernel interface.
-        EHOSTNFND        = 0x20001,             // Name lookup failed
+        EHOSTNOTFOUND    = 0x20001,           // Name lookup failed
 
         // POSIX permits these to have the same value and we make them always equal so
         // that CoreFX cannot introduce a dependency on distinguishing between them that

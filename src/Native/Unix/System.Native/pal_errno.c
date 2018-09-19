@@ -379,8 +379,8 @@ int32_t SystemNative_ConvertErrorPalToPlatform(int32_t error)
             return EHOSTDOWN;
         case Error_ENODATA:
             return ENODATA;
-        case Error_EHOSTNFND:
-            return -(Error_EHOSTNFND);
+        case Error_EHOSTNOTFOUND:
+            return -(Error_EHOSTNOTFOUND);
         case Error_ENONSTANDARD:
             break; // fall through to assert
     }
@@ -402,7 +402,7 @@ static int32_t SystemNative_ConvertErrorPalToGai(int32_t error)
 {
     switch (error)
     {
-        case -(Error_EHOSTNFND):
+        case -(Error_EHOSTNOTFOUND):
             return EAI_NONAME;
     }
     // Fall-through for unknown codes. gai_strerror() will handle that.
@@ -425,7 +425,7 @@ const char* SystemNative_StrErrorR(int32_t platformErrno, char* buffer, int32_t 
         // Not a system error
         SafeStringCopy(buffer, (size_t)bufferSize, gai_strerror(SystemNative_ConvertErrorPalToGai(platformErrno)));
         return buffer;
-   }
+    }
 
 // Note that we must use strerror_r because plain strerror is not
 // thread-safe.

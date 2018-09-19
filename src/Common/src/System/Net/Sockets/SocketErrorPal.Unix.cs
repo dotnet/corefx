@@ -97,7 +97,7 @@ namespace System.Net.Sockets
             { SocketError.Disconnecting, Interop.Error.ESHUTDOWN },
             { SocketError.Fault, Interop.Error.EFAULT },
             { SocketError.HostDown, Interop.Error.EHOSTDOWN },
-            { SocketError.HostNotFound, Interop.Error.EHOSTNFND },
+            { SocketError.HostNotFound, Interop.Error.EHOSTNOTFOUND },
             { SocketError.HostUnreachable, Interop.Error.EHOSTUNREACH },
             { SocketError.InProgress, Interop.Error.EINPROGRESS },
             { SocketError.Interrupted, Interop.Error.EINTR },
