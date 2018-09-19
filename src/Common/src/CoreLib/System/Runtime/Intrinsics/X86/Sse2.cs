@@ -12,9 +12,11 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel SSE2 hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Sse2
+    public abstract class Sse2 : Sse
     {
-        public static bool IsSupported { get => IsSupported; }
+        internal Sse2() { }
+
+        public new static bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m128i _mm_add_epi8 (__m128i a,  __m128i b)
@@ -610,11 +612,6 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector128<double> DivideScalar(Vector128<double> left, Vector128<double> right) => DivideScalar(left, right);
 
-        /// <summary>
-        /// int _mm_extract_epi16 (__m128i a,  int immediate)
-        ///   PEXTRW reg, xmm, imm8
-        /// </summary>
-        public static short Extract(Vector128<short> value, byte index) => Extract(value, index);
         /// <summary>
         /// int _mm_extract_epi16 (__m128i a,  int immediate)
         ///   PEXTRW reg, xmm, imm8

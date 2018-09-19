@@ -57,7 +57,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
 
             Assert.Equal(inputBytes, outBytes);
 
-            string inString = new String(Console.InputEncoding.GetChars(inputBytesNoBom));
+            string inString = new string(Console.InputEncoding.GetChars(inputBytesNoBom));
 
             string outString;
             using (MemoryStream ms = new MemoryStream(inputBytesNoBom, false))
@@ -79,7 +79,6 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/21483")]
     public void TestValidEncodings()
     {
         Action<Encoding> check = encoding =>

@@ -23,7 +23,7 @@ namespace System.Threading.Tests
         [Fact]
         public void Ctor_InvalidMode()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => new EventWaitHandle(true, (EventResetMode)12345));
+            AssertExtensions.Throws<ArgumentException>("mode", null, () => new EventWaitHandle(true, (EventResetMode)12345));
         }
 
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Full framework throws argument exception on long names")]
@@ -186,7 +186,6 @@ namespace System.Threading.Tests
         [Theory]
         [InlineData(EventResetMode.ManualReset)]
         [InlineData(EventResetMode.AutoReset)]
-        [ActiveIssue(21275, TargetFrameworkMonikers.Uap)]
         public void PingPong(EventResetMode mode)
         {
             // Create names for the two events

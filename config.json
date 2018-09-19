@@ -3,13 +3,13 @@
     "TargetGroup": {
       "description": "Sets the target framework for the BuildConfiguration you want to build.",
       "valueType": "property",
-      "values": ["netcoreapp", "netstandard", "netfx", "uap", "mono"],
+      "values": ["netcoreapp", "netcoreappaot", "netstandard", "netfx", "uap", "mono"],
       "defaultValue": "netcoreapp"
     },
     "OSGroup": {
       "description": "Sets the OS for the BuildConfigurtation you want to build.",
       "valueType": "property",
-      "values": ["Windows_NT", "Unix", "Linux", "OSX", "FreeBSD", "NetBSD"],
+      "values": ["Windows_NT", "Unix", "Linux", "OSX", "FreeBSD", "NetBSD", "WebAssembly"],
       "defaultValue": "${OSName}"
     },
     "ConfigurationGroup": {
@@ -21,7 +21,7 @@
     "ArchGroup": {
       "description": "Sets the architecture for the BuildConfiguration you want to build.",
       "valueType": "property",
-      "values": ["x64", "x86", "arm", "arm64"],
+      "values": ["x64", "x86", "arm", "arm64", "wasm"],
       "defaultValue": "x64"
     },
     "BuildAllConfigurations": {
@@ -159,7 +159,7 @@
     "BuildArchitecture": {
       "description": "Sets the value of the build architecture.",
       "valueType": "passThrough",
-      "values": ["x86", "arm", "armel", "x64", "arm64"],
+      "values": ["x86", "arm", "armel", "x64", "arm64", "wasm"],
       "defaultValue": "${CPUArch}"
     },
     "CmakeBuildType": {
@@ -197,12 +197,6 @@
       "valueType": "passThrough",
       "values": [],
       "defaultValue": ""
-    },
-    "ToolSetDir": {
-      "description": "Native toolset directory",
-      "valueType": "passThrough",
-      "values": [],
-      "defaultValue": "toolSetDir=c:\\tools\\clr"
     },
     "Sync": {
       "description": "MsBuild target that restores the packages.",
@@ -251,6 +245,12 @@
         "valueType": "property",
         "values": [],
         "defaultValue": ""
+    },
+    "Performance": {
+      "description": "Enables/Disables performance test execution.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": false
     },
   },
   "commands": {
@@ -340,14 +340,16 @@
         "tests": {
           "description": "Builds src and then builds and runs the tests for the given configuration.",
           "settings": {
-            "BuildTests": true
+            "BuildTests": true,
+            "Performance": "default"
           }
         },
         "testsOnly": {
           "description": "Builds and runs the tests for the given configuration.",
           "settings": {
             "Project": "src/tests.builds",
-            "MsBuildLogging":"/flp:v=normal;LogFile=build-tests.log"
+            "MsBuildLogging":"/flp:v=normal;LogFile=build-tests.log",
+            "Performance": "default"
           }
         },
         "debug": {
@@ -492,8 +494,7 @@
            "CmakeBuildType": "default",
            "HostOs": "default",
            "ProcessorCount": "default",
-           "AdditionalArgs": "-portable",
-           "ToolSetDir": "default"
+           "AdditionalArgs": "-portable"
          }
       }
     },
@@ -646,12 +647,12 @@
     "msbuild": {
       "osSpecific": {
         "windows": {
-          "defaultParameters": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /nodeReuse:false /l:BinClashLogger,Tools\\net46\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log",
-          "path": "Tools/msbuild.cmd"
+          "defaultParameters": "msbuild /nologo /verbosity:minimal /clp:Summary /maxcpucount /nodeReuse:false /l:BinClashLogger,Tools\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log",
+          "path": "Tools/dotnetcli/dotnet"
         },
         "unix": {
-          "defaultParameters": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log",
-          "path": "Tools/msbuild.sh"
+          "defaultParameters": "msbuild /nologo /verbosity:minimal /clp:Summary /maxcpucount /l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log",
+          "path": "Tools/dotnetcli/dotnet"
         }
       },
       "valueTypes": {

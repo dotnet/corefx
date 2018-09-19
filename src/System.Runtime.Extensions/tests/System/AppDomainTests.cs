@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class AppDomainTests : RemoteExecutorTestBase
+    public partial class AppDomainTests : RemoteExecutorTestBase
     {
         [Fact]
         public void CurrentDomain_Not_Null()
@@ -37,6 +37,16 @@ namespace System.Tests
         {
             Assert.Null(AppDomain.CurrentDomain.RelativeSearchPath);
         } 
+
+        [Fact]
+        public void TargetFrameworkTest()
+        {
+            // On Uap we use the Microsoft.DotNet.XUnitRunnerUap instead of the RemoteExecutorConsoleApp
+            string targetFrameworkName = PlatformDetection.IsUap ? ".NETCore,Version=v5.0" : "DUMMY-TFA";
+            RemoteInvoke((_targetFrameworkName) => {
+                Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
+            }, targetFrameworkName).Dispose();
+        }
 
         [Fact]
         public void UnhandledException_Add_Remove()
@@ -109,7 +119,7 @@ namespace System.Tests
             string expected = Assembly.GetEntryAssembly()?.GetName()?.Name;
 
             // GetEntryAssembly may be null (i.e. desktop)
-            if (expected == null)
+            if (expected == null || PlatformDetection.IsFullFramework)
                 expected = Assembly.GetExecutingAssembly().GetName().Name;
 
             Assert.Equal(expected, s);
@@ -263,7 +273,7 @@ namespace System.Tests
         {
             CopyTestAssemblies();
 
-            string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");
+            string name = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA.exe");
             AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AppDomain.CurrentDomain.ExecuteAssembly(null));
             Assert.Throws<FileNotFoundException>(() => AppDomain.CurrentDomain.ExecuteAssembly("NonExistentFile.exe"));
 
@@ -581,7 +591,7 @@ namespace System.Tests
             RemoteInvoke(() => {
                 ResolveEventHandler handler = (sender, e) =>
                 {
-                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll"));
+                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.exe"));
                 };
 
                 AppDomain.CurrentDomain.AssemblyResolve += handler;
@@ -599,12 +609,12 @@ namespace System.Tests
             CopyTestAssemblies();
 
             RemoteInvoke(() => {
-                Assembly a = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe"));
+                Assembly a = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA.exe"));
 
                 ResolveEventHandler handler = (sender, e) =>
                 {
                     Assert.Equal(e.RequestingAssembly, a);
-                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll"));
+                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.exe"));
                 };
 
                 AppDomain.CurrentDomain.AssemblyResolve += handler;

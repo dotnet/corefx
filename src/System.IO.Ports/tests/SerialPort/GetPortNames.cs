@@ -11,7 +11,6 @@ using Xunit;
 
 namespace System.IO.Ports.Tests
 {
-    [ActiveIssue("https://github.com/dotnet/corefx/issues/20588", TargetFrameworkMonikers.Uap)] // fails in both Uap and UapAot
     public class GetPortNames : PortsTest
     {
         #region Test Cases
@@ -20,6 +19,7 @@ namespace System.IO.Ports.Tests
         /// Check that all ports either open correctly or fail with UnauthorizedAccessException (which implies they're already open)
         /// </summary>
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop] // Occasionally flaky on UAP: https://github.com/dotnet/corefx/issues/32077
         private void OpenEveryPortName()
         {
             foreach (string portName in SerialPort.GetPortNames())

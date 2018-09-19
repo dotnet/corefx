@@ -1,5 +1,4 @@
-
-project(System.Security.Cryptography.Native)
+project(System.Security.Cryptography.Native C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -8,7 +7,7 @@ add_compile_options(-Wno-cast-align)
 add_compile_options(-Wno-reserved-id-macro)
 add_compile_options(-Wno-documentation)
 
-add_definitions(-DPIC=1)
+add_definitions(-DPIC=1 -DOPENSSL_API_COMPAT=0x10100000L)
 
 if(CMAKE_STATIC_LIB_LINK)
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -18,9 +17,9 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 set(NATIVECRYPTO_SOURCES
+    apibridge.c
     openssl.c
     pal_asn1.c
-    pal_asn1_print.c
     pal_bignum.c
     pal_bio.c
     pal_dsa.c

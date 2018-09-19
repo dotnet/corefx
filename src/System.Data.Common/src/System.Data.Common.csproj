@@ -1,26 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{29EF8D53-8E84-4E49-B90F-5950A2FE7D54}</ProjectGuid>
     <AssemblyName>System.Data.Common</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netfx'">$(DefineConstants);netfx</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\Data\Common\DbColumn.cs" />
-    <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Compile Include="System.Data.Common.TypeForwards.cs" />
     <Compile Include="System\HResults.cs" />
     <Compile Include="System\Xml\TreeIterator.cs" />
@@ -184,6 +170,7 @@
     <Compile Include="System\Data\Common\DataTableMappingCollection.cs" />
     <Compile Include="System\Data\Common\DateTimeOffsetStorage.cs" />
     <Compile Include="System\Data\Common\DateTimeStorage.cs" />
+    <Compile Include="System\Data\Common\DbColumn.cs" />
     <Compile Include="System\Data\Common\DbCommand.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -226,6 +213,7 @@
     <Compile Include="System\Data\Common\DoubleStorage.cs" />
     <Compile Include="System\Data\Common\FieldNameLookup.cs" />
     <Compile Include="System\Data\Common\Groupbybehavior.cs" />
+    <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
     <Compile Include="System\Data\Common\identifiercase.cs" />
     <Compile Include="System\Data\Common\Int16Storage.cs" />
     <Compile Include="System\Data\Common\Int32Storage.cs" />
@@ -304,14 +292,7 @@
     <Compile Include="System\Data\ProviderBase\DataReaderContainer.cs" />
     <Compile Include="System\Data\ProviderBase\SchemaMapping.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Transactions" />
-    <Compile Include="System\Data\Common\DbDataReaderExtensions.Facade.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup>
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />
@@ -336,7 +317,7 @@
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Transactions.Local" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Reference Include="System.Xml.ReaderWriter" />
     <Reference Include="System.Xml.XmlSerializer" />
   </ItemGroup>
@@ -346,5 +327,4 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

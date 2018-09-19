@@ -1,12 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{78452F3E-BA91-47E7-BB0F-02E8A5C116C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.OpenSsl</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard'">4.1.0.0</AssemblyVersion>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsUnix)' != 'true'">
     <GeneratePlatformNotSupportedAssemblyMessage>SR.PlatformNotSupported_CryptographyOpenSSL</GeneratePlatformNotSupportedAssemblyMessage>
@@ -15,12 +15,6 @@
     <PackageTargetRuntime>
     </PackageTargetRuntime>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="System\Security\Cryptography\DSAOpenSsl.cs" />
     <Compile Include="System\Security\Cryptography\ECDiffieHellmanOpenSsl.cs" />
@@ -104,11 +98,17 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEvpPKeyHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeEvpPKeyHandle.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerEncoder.cs">
-      <Link>Common\System\Security\Cryptography\DerEncoder.cs</Link>
+    <Compile Include="$(CommonPath)\System\Memory\PointerMemoryManager.cs">
+      <Link>Common\System\Memory\PointerMemoryManager.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
-      <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.cs">
+      <Link>Common\System\Security\Cryptography\Asn1V2.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnReader.cs">
+      <Link>Common\System\Security\Cryptography\AsnReader.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
+      <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\DSAOpenSsl.cs">
       <Link>Common\System\Security\Cryptography\DSAOpenSsl.cs</Link>
@@ -134,6 +134,9 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\ECOpenSsl.ImportExport.cs">
       <Link>Common\System\Security\Cryptography\ECOpenSsl.ImportExport.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyBlobHelpers.cs">
+      <Link>Common\System\Security\Cryptography\KeyBlobHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\RSAOpenSsl.cs">
       <Link>Common\System\Security\Cryptography\RSAOpenSsl.cs</Link>
     </Compile>
@@ -156,7 +159,7 @@
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Encoding" />
     <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

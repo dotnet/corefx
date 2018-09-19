@@ -43,7 +43,7 @@
     <RuntimeGroup Include="fedora">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>23;24;25;26;27;28</Versions>
+      <Versions>23;24;25;26;27;28;29</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
@@ -72,7 +72,7 @@
     <RuntimeGroup Include="ol">
       <Parent>rhel</Parent>
       <Architectures>x64</Architectures>
-      <Versions>7;7.0;7.1;7.2;7.3;7.4</Versions>
+      <Versions>7;7.0;7.1;7.2;7.3;7.4;7.5;7.6</Versions>
       <ApplyVersionsToParent>true</ApplyVersionsToParent>
     </RuntimeGroup>
 
@@ -80,14 +80,20 @@
     <RuntimeGroup Include="opensuse">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>13.2;42.1;42.2;42.3</Versions>
+      <Versions>13.2;15.0;42.1;42.2;42.3</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
     <RuntimeGroup Include="osx">
       <Parent>unix</Parent>
       <Architectures>x64</Architectures>
-      <Versions>10.10;10.11;10.12;10.13</Versions>
+      <Versions>10.10;10.11;10.12;10.13;10.14</Versions>
+    </RuntimeGroup>
+
+    <RuntimeGroup Include="freebsd">
+      <Parent>unix</Parent>
+      <Architectures>x64</Architectures>
+      <Versions>11;11.0;11.1;11.2</Versions>
     </RuntimeGroup>
 
     <!-- rhel 6 is independent -->
@@ -100,13 +106,13 @@
     <RuntimeGroup Include="rhel">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>7;7.0;7.1;7.2;7.3;7.4</Versions>
+      <Versions>7;7.0;7.1;7.2;7.3;7.4;7.5;7.6</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="sles">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>12;12.1;12.2;12.3</Versions>
+      <Versions>12;12.1;12.2;12.3;15</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="tizen">
@@ -124,7 +130,7 @@
     <RuntimeGroup Include="ubuntu">
       <Parent>debian</Parent>
       <Architectures>x64;x86;arm;arm64</Architectures>
-      <Versions>16.04;16.10;17.04;17.10;18.04</Versions>
+      <Versions>16.04;16.10;17.04;17.10;18.04;18.10</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
@@ -135,11 +141,8 @@
       <Architectures>x64;x86;arm;arm64</Architectures>
       <Versions>7;8;81;10</Versions>
     </RuntimeGroup>
-
     <!-- add corert to all RIDs -->
-    <RuntimeGroupWithQualifiers Include="@(RuntimeGroup)">
-      <AdditionalQualifiers>%(AdditionalQualifiers);corert</AdditionalQualifiers>
-    </RuntimeGroupWithQualifiers>
+    <RuntimeGroupWithQualifiers Include="@(RuntimeGroup)" />
 
     <!-- root RIDs -->
     <RuntimeGroupWithQualifiers Include="base" />
@@ -149,9 +152,6 @@
 
     <!-- qualifier RIDs -->
     <RuntimeGroupWithQualifiers Include="aot">
-      <Parent>any</Parent>
-    </RuntimeGroupWithQualifiers>
-    <RuntimeGroupWithQualifiers Include="corert">
       <Parent>any</Parent>
     </RuntimeGroupWithQualifiers>
   </ItemGroup>

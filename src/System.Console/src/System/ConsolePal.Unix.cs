@@ -240,13 +240,11 @@ namespace System
         public static int LargestWindowWidth
         {
             get { return WindowWidth; }
-            set { throw new PlatformNotSupportedException(); }
         }
 
         public static int LargestWindowHeight
         {
             get { return WindowHeight; }
-            set { throw new PlatformNotSupportedException(); }
         }
 
         public static int WindowLeft
@@ -332,6 +330,20 @@ namespace System
             }
         }
 
+        /// <summary>
+        /// Tracks whether we've ever successfully received a response to a cursor position request (CPR).
+        /// If we have, then we can be more aggressive about expecting a response to subsequent requests,
+        /// e.g. using a longer timeout.
+        /// </summary>
+        private static bool s_everReceivedCursorPositionResponse;
+
+        /// <summary>
+        /// Tracks if this is out first attempt to send a cursor posotion request. If it is, we start the
+        /// timer immediately (i.e. minChar = 0), but we use a slightly longer timeout to avoid the CPR response
+        /// being written to the console.
+        /// </summary>
+        private static bool s_firstCursorPositionRequest = true;
+
         /// <summary>Gets the current cursor position.  This involves both writing to stdout and reading stdin.</summary>
         private static unsafe void GetCursorPosition(out int left, out int top)
         {
@@ -358,7 +370,17 @@ namespace System
             // one thread's get_CursorLeft/Top from providing input to the other's Console.Read*.
             lock (StdInReader) 
             {
-                Interop.Sys.InitializeConsoleBeforeRead(minChars: 0, decisecondsTimeout: 10);
+                // Because the CPR request/response protocol involves blocking until we get a certain
+                // response from the terminal, we want to avoid doing so if we don't know the terminal
+                // will definitely respond.  As such, we start with minChars == 0, which causes the
+                // terminal's read timer to start immediately.  Once we've received a response for
+                // a request such that we know the terminal supports the protocol, we then specify
+                // minChars == 1.  With that, the timer won't start until the first character is
+                // received.  This makes the mechanism more reliable when there are high latencies
+                // involved in reading/writing, such as when accessing a remote system. We also extend
+                // the timeout on the very first request to 15 seconds, to account for potential latency
+                // before we know if we will receive a response.
+                Interop.Sys.InitializeConsoleBeforeRead(minChars: (byte)(s_everReceivedCursorPositionResponse ? 1 : 0), decisecondsTimeout: (byte)(s_firstCursorPositionRequest ? 100 : 10));
                 try
                 {
                     // Write out the cursor position report request.
@@ -425,10 +447,14 @@ namespace System
                     // else back into the StdInReader.
                     ReadRowOrCol(bracketPos, semiPos, r, readBytes, ref top);
                     ReadRowOrCol(semiPos, rPos, r, readBytes, ref left);
+
+                    // Mark that we've successfully received a CPR response at least once.
+                    s_everReceivedCursorPositionResponse = true;
                 }
                 finally
                 {
                     Interop.Sys.UninitializeConsoleAfterRead();
+                    s_firstCursorPositionRequest = false;
                 }
 
 

@@ -76,7 +76,7 @@ namespace System.Globalization
             FinishInitialization();
         }
 
-        void IDeserializationCallback.OnDeserialization(Object sender)
+        void IDeserializationCallback.OnDeserialization(object sender)
         {
             throw new PlatformNotSupportedException();
         }
@@ -302,7 +302,7 @@ namespace System.Globalization
                                     source.AsSpan(0, sourcePos).CopyTo(new Span<char>(pResult, sourcePos));
                                 }
 
-                                // And store the current character, upper-cased.
+                                // And store the current character, lower-cased.
                                 char* d = pResult + sourcePos;
                                 *d++ = (char)(c | 0x20);
                                 sourcePos++;
@@ -612,7 +612,7 @@ namespace System.Globalization
         //  or not object refers to the same CultureInfo as the current instance.
         //
         ////////////////////////////////////////////////////////////////////////
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             TextInfo that = obj as TextInfo;
 

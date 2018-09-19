@@ -9,13 +9,14 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Pipelines.Tests
 {
-    public class PipelineReaderWriterFacts : IDisposable
+    public partial class PipelineReaderWriterFacts : IDisposable
     {
         public PipelineReaderWriterFacts()
         {
@@ -152,42 +153,6 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task ResetAfterCompleteReaderAndWriterWithoutAdvancingClearsEverything()
-        {
-            _pipe.Writer.WriteEmpty(4094);
-            _pipe.Writer.WriteEmpty(4094);
-            await _pipe.Writer.FlushAsync();
-            ReadResult result = await _pipe.Reader.ReadAsync();
-            ReadOnlySequence<byte> buffer = result.Buffer;
-
-            SequenceMarshal.TryGetReadOnlySequenceSegment(
-                buffer,
-                out ReadOnlySequenceSegment<byte> start,
-                out int startIndex,
-                out ReadOnlySequenceSegment<byte> end,
-                out int endIndex);
-
-            var startSegment = (BufferSegment)start;
-            var endSegment = (BufferSegment)end;
-            Assert.NotNull(startSegment.MemoryOwner);
-            Assert.NotNull(endSegment.MemoryOwner);
-
-            _pipe.Reader.Complete();
-
-            // Nothing cleaned up
-            Assert.NotNull(startSegment.MemoryOwner);
-            Assert.NotNull(endSegment.MemoryOwner);
-
-            _pipe.Writer.Complete();
-
-            // Should be cleaned up now
-            Assert.Null(startSegment.MemoryOwner);
-            Assert.Null(endSegment.MemoryOwner);
-
-            _pipe.Reset();
-        }
-
-        [Fact]
         public async Task AdvanceAfterCompleteThrows()
         {
             await _pipe.Writer.WriteAsync(new byte[1]);
@@ -238,6 +203,8 @@ namespace System.IO.Pipelines.Tests
             invalidOperationException = await Assert.ThrowsAsync<InvalidOperationException>(async () => await _pipe.Writer.FlushAsync());
             Assert.Equal("Reader exception", invalidOperationException.Message);
             Assert.Contains("ThrowTestException", invalidOperationException.StackTrace);
+
+            Assert.Single(Regex.Matches(invalidOperationException.StackTrace, "Pipe.GetFlushResult"));
         }
 
         [Fact]
@@ -304,6 +271,8 @@ namespace System.IO.Pipelines.Tests
             invalidOperationException = await Assert.ThrowsAsync<InvalidOperationException>(async () => await _pipe.Reader.ReadAsync());
             Assert.Equal("Writer exception", invalidOperationException.Message);
             Assert.Contains("ThrowTestException", invalidOperationException.StackTrace);
+
+            Assert.Single(Regex.Matches(invalidOperationException.StackTrace, "Pipe.GetReadResult"));
         }
 
         [Fact]

@@ -22,7 +22,7 @@ namespace System.Runtime.InteropServices
         /// Thrown when <typeparamref name="T"/> contains pointers.
         /// </exception>
         /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
+        /// Thrown if the Length property of the new Span would exceed int.MaxValue.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsBytes<T>(Span<T> span)
@@ -45,7 +45,7 @@ namespace System.Runtime.InteropServices
         /// Thrown when <typeparamref name="T"/> contains pointers.
         /// </exception>
         /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
+        /// Thrown if the Length property of the new Span would exceed int.MaxValue.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<byte> AsBytes<T>(ReadOnlySpan<T> span)
@@ -102,7 +102,7 @@ namespace System.Runtime.InteropServices
         /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
         /// </summary>
         /// <remarks>
-        /// Supported only for platforms that support misaligned memory access.
+        /// Supported only for platforms that support misaligned memory access or when the memory block is aligned by other means.
         /// </remarks>
         /// <param name="span">The source slice, of type <typeparamref name="TFrom"/>.</param>
         /// <exception cref="System.ArgumentException">
@@ -157,7 +157,7 @@ namespace System.Runtime.InteropServices
         /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
         /// </summary>
         /// <remarks>
-        /// Supported only for platforms that support misaligned memory access.
+        /// Supported only for platforms that support misaligned memory access or when the memory block is aligned by other means.
         /// </remarks>
         /// <param name="span">The source slice, of type <typeparamref name="TFrom"/>.</param>
         /// <exception cref="System.ArgumentException">

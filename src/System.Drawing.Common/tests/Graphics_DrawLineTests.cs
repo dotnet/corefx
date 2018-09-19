@@ -7,6 +7,7 @@ namespace System.Drawing.Tests
 {
     public class Graphics_DrawLineTests : DrawingTest
     {
+        [ActiveIssue(30180, TestPlatforms.Linux)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawLines_Points()
         {
@@ -22,6 +23,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(30683, TargetFrameworkMonikers.Netcoreapp)]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawLines_PointFs()
         {

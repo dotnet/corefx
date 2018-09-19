@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1B528B61-14F9-4BFC-A79A-F0BDB3339150}</ProjectGuid>
     <AssemblyName>System.IO.FileSystem</AssemblyName>
@@ -8,16 +6,11 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <UWPCompatible Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">true</UWPCompatible>
     <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
     <NoWarn>$(NoWarn);414</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\IO\Enumeration\FileSystemEntry.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerable.cs" />
@@ -87,6 +80,9 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetVolumeInformation.cs">
+      <Link>Common\Interop\Windows\Interop.GetVolumeInformation.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
@@ -116,7 +112,7 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FILE_TIME.cs">
       <Link>Common\Interop\Windows\Interop.FILE_TIME.cs</Link>
-    </Compile>        
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs">
       <Link>Common\Interop\Windows\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs</Link>
     </Compile>
@@ -180,9 +176,13 @@
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
+    <Compile Include="System\IO\FileSystem.Win32.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EncryptDecrypt.cs">
+      <Link>Common\Interop\Windows\Interop.EncryptDecrypt.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
@@ -211,6 +211,7 @@
   </ItemGroup>
   <!-- Windows : UAP - Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' == 'true'">
+    <Compile Include="System\IO\FileSystem.WinRT.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.WinRT.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile2.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile2.cs</Link>
@@ -287,8 +288,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.RmDir.cs">
       <Link>Common\Interop\Unix\Interop.RmDir.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.UTime.cs">
-      <Link>Common\Interop\Unix\Interop.UTime.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.UTimensat.cs">
+      <Link>Common\Interop\Unix\Interop.UTimensat.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Unix.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Unix.cs</Link>
@@ -319,5 +320,4 @@
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

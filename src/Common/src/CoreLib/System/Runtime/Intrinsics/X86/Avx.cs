@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.Intrinsics;
-using System.Runtime.CompilerServices;
+using Internal.Runtime.CompilerServices;
 
 namespace System.Runtime.Intrinsics.X86
 {
@@ -12,9 +12,11 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel AVX hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Avx
+    public abstract class Avx : Sse42
     {
-        public static bool IsSupported { get => IsSupported; }
+        internal Avx() { }
+
+        public new static bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m256 _mm256_add_ps (__m256 a, __m256 b)
@@ -239,46 +241,15 @@ namespace System.Runtime.Intrinsics.X86
         /// __int8 _mm256_extract_epi8 (__m256i a, const int index)
         ///   HELPER
         /// </summary>
-        public static sbyte Extract(Vector256<sbyte> value, byte index)
-        {
-            unsafe
-            {
-                index &= 0x1F;
-                sbyte* buffer = stackalloc sbyte[32];
-                Store(buffer, value);
-                return buffer[index];
-            }
-        }
-
-        /// <summary>
-        /// __int8 _mm256_extract_epi8 (__m256i a, const int index)
-        ///   HELPER
-        /// </summary>
         public static byte Extract(Vector256<byte> value, byte index)
         {
-            unsafe
+            if (!IsSupported)
             {
-                index &= 0x1F;
-                byte* buffer = stackalloc byte[32];
-                Store(buffer, value);
-                return buffer[index];   
+                throw new PlatformNotSupportedException();
             }
+            return Unsafe.Add<byte>(ref Unsafe.As<Vector256<byte>, byte>(ref value), index & 0x1F);
         }
 
-        /// <summary>
-        /// __int16 _mm256_extract_epi16 (__m256i a, const int index)
-        ///   HELPER
-        /// </summary>
-        public static short Extract(Vector256<short> value, byte index)
-        {
-            unsafe
-            {
-                index &= 0xF;
-                short* buffer = stackalloc short[16];
-                Store(buffer, value);
-                return buffer[index];
-            }   
-        }
 
         /// <summary>
         /// __int16 _mm256_extract_epi16 (__m256i a, const int index)
@@ -286,13 +257,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static ushort Extract(Vector256<ushort> value, byte index)
         {
-            unsafe
+            if (!IsSupported)
             {
-                index &= 0xF;
-                ushort* buffer = stackalloc ushort[16];
-                Store(buffer, value);
-                return buffer[index];
+                throw new PlatformNotSupportedException();
             }
+            return Unsafe.Add<ushort>(ref Unsafe.As<Vector256<ushort>, ushort>(ref value), index & 0xF);
         }
 
         /// <summary>
@@ -301,13 +270,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static int Extract(Vector256<int> value, byte index)
         {
-            unsafe
+            if (!IsSupported)
             {
-                index &= 0x7;
-                int* buffer = stackalloc int[8];
-                Store(buffer, value);
-                return buffer[index];
+                throw new PlatformNotSupportedException();
             }
+            return Unsafe.Add<int>(ref Unsafe.As<Vector256<int>, int>(ref value), index & 0x7);
         }
 
         /// <summary>
@@ -316,13 +283,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static uint Extract(Vector256<uint> value, byte index)
         {
-            unsafe
+            if (!IsSupported)
             {
-                index &= 0x7;
-                uint* buffer = stackalloc uint[8];
-                Store(buffer, value);
-                return buffer[index];
+                throw new PlatformNotSupportedException();
             }
+            return Unsafe.Add<uint>(ref Unsafe.As<Vector256<uint>, uint>(ref value), index & 0x7);
         }
 
         /// <summary>
@@ -331,17 +296,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static long Extract(Vector256<long> value, byte index)
         {
-            if (IntPtr.Size != 8)
+            if (!IsSupported || (IntPtr.Size != 8))
             {
                 throw new PlatformNotSupportedException();
             }
-            unsafe
-            {
-                index &= 0x3;
-                long* buffer = stackalloc long[4];
-                Store(buffer, value);
-                return buffer[index];
-            }
+            return Unsafe.Add<long>(ref Unsafe.As<Vector256<long>, long>(ref value), index & 0x3);
         }
 
         /// <summary>
@@ -350,17 +309,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static ulong Extract(Vector256<ulong> value, byte index)
         {
-            if (IntPtr.Size != 8)
+            if (!IsSupported || (IntPtr.Size != 8))
             {
                 throw new PlatformNotSupportedException();
             }
-            unsafe
-            {
-                index &= 0x3;
-                ulong* buffer = stackalloc ulong[4];
-                Store(buffer, value);
-                return buffer[index];
-            }
+            return Unsafe.Add<ulong>(ref Unsafe.As<Vector256<ulong>, ulong>(ref value), index & 0x3);
         }
 
         /// <summary>
@@ -517,7 +470,7 @@ namespace System.Runtime.Intrinsics.X86
                 return LoadVector256(buffer);
             }
         }
-        
+
         /// <summary>
         /// __m256i _mm256_insert_epi16 (__m256i a, __int16 i, const int index)
         ///   HELPER
@@ -565,7 +518,7 @@ namespace System.Runtime.Intrinsics.X86
                 return LoadVector256(buffer);
             }
         }
-        
+
         /// <summary>
         /// __m256i _mm256_insert_epi32 (__m256i a, __int32 i, const int index)
         ///   HELPER
@@ -588,6 +541,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector256<long> Insert(Vector256<long> value, long data, byte index)
         {
+            if (IntPtr.Size != 8)
+            {
+                throw new PlatformNotSupportedException();
+            }
+
             unsafe
             {
                 index &= 0x3;
@@ -604,6 +562,11 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector256<ulong> Insert(Vector256<ulong> value, ulong data, byte index)
         {
+            if (IntPtr.Size != 8)
+            {
+                throw new PlatformNotSupportedException();
+            }
+
             unsafe
             {
                 index &= 0x3;
@@ -825,45 +788,45 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128 _mm_maskload_ps (float const * mem_addr, __m128i mask)
         ///   VMASKMOVPS xmm, xmm, m128
         /// </summary>
-        public static unsafe Vector128<float> MaskLoad(float* address, Vector128<uint> mask) => MaskLoad(address, mask);
+        public static unsafe Vector128<float> MaskLoad(float* address, Vector128<float> mask) => MaskLoad(address, mask);
         /// <summary>
         /// __m128d _mm_maskload_pd (double const * mem_addr, __m128i mask)
         ///   VMASKMOVPD xmm, xmm, m128
         /// </summary>
-        public static unsafe Vector128<double> MaskLoad(double* address, Vector128<ulong> mask) => MaskLoad(address, mask);
+        public static unsafe Vector128<double> MaskLoad(double* address, Vector128<double> mask) => MaskLoad(address, mask);
 
         /// <summary>
         /// __m256 _mm256_maskload_ps (float const * mem_addr, __m256i mask)
         ///   VMASKMOVPS ymm, ymm, m256
         /// </summary>
-        public static unsafe Vector256<float> MaskLoad(float* address, Vector256<uint> mask) => MaskLoad(address, mask);
+        public static unsafe Vector256<float> MaskLoad(float* address, Vector256<float> mask) => MaskLoad(address, mask);
         /// <summary>
         /// __m256d _mm256_maskload_pd (double const * mem_addr, __m256i mask)
         ///   VMASKMOVPD ymm, ymm, m256
         /// </summary>
-        public static unsafe Vector256<double> MaskLoad(double* address, Vector256<ulong> mask) => MaskLoad(address, mask);
+        public static unsafe Vector256<double> MaskLoad(double* address, Vector256<double> mask) => MaskLoad(address, mask);
 
         /// <summary>
         /// void _mm_maskstore_ps (float * mem_addr, __m128i mask, __m128 a)
         ///   VMASKMOVPS m128, xmm, xmm
         /// </summary>
-        public static unsafe void MaskStore(float* address, Vector128<float> mask, Vector128<uint> source) => MaskStore(address, mask, source);
+        public static unsafe void MaskStore(float* address, Vector128<float> mask, Vector128<float> source) => MaskStore(address, mask, source);
         /// <summary>
         /// void _mm_maskstore_pd (double * mem_addr, __m128i mask, __m128d a)
         ///   VMASKMOVPD m128, xmm, xmm
         /// </summary>
-        public static unsafe void MaskStore(double* address, Vector128<double> mask, Vector128<ulong> source) => MaskStore(address, mask, source);
+        public static unsafe void MaskStore(double* address, Vector128<double> mask, Vector128<double> source) => MaskStore(address, mask, source);
 
         /// <summary>
         /// void _mm256_maskstore_ps (float * mem_addr, __m256i mask, __m256 a)
         ///   VMASKMOVPS m256, ymm, ymm
         /// </summary>
-        public static unsafe void MaskStore(float* address, Vector256<float> mask, Vector256<uint> source) => MaskStore(address, mask, source);
+        public static unsafe void MaskStore(float* address, Vector256<float> mask, Vector256<float> source) => MaskStore(address, mask, source);
         /// <summary>
         /// void _mm256_maskstore_pd (double * mem_addr, __m256i mask, __m256d a)
         ///   VMASKMOVPD m256, ymm, ymm
         /// </summary>
-        public static unsafe void MaskStore(double* address, Vector256<double> mask, Vector256<ulong> source) => MaskStore(address, mask, source);
+        public static unsafe void MaskStore(double* address, Vector256<double> mask, Vector256<double> source) => MaskStore(address, mask, source);
 
         /// <summary>
         /// __m256 _mm256_max_ps (__m256 a, __m256 b)
@@ -959,22 +922,22 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128 _mm_permutevar_ps (__m128 a, __m128i b)
         ///   VPERMILPS xmm, xmm, xmm/m128
         /// </summary>
-        public static Vector128<float> PermuteVar(Vector128<float> left, Vector128<float> mask) => PermuteVar(left, mask);
+        public static Vector128<float> PermuteVar(Vector128<float> left, Vector128<int> control) => PermuteVar(left, control);
         /// <summary>
         /// __m128d _mm_permutevar_pd (__m128d a, __m128i b)
         ///   VPERMILPD xmm, xmm, xmm/m128
         /// </summary>
-        public static Vector128<double> PermuteVar(Vector128<double> left, Vector128<double> mask) => PermuteVar(left, mask);
+        public static Vector128<double> PermuteVar(Vector128<double> left, Vector128<long> control) => PermuteVar(left, control);
         /// <summary>
         /// __m256 _mm256_permutevar_ps (__m256 a, __m256i b)
         ///   VPERMILPS ymm, ymm, ymm/m256
         /// </summary>
-        public static Vector256<float> PermuteVar(Vector256<float> left, Vector256<float> mask) => PermuteVar(left, mask);
+        public static Vector256<float> PermuteVar(Vector256<float> left, Vector256<int> control) => PermuteVar(left, control);
         /// <summary>
         /// __m256d _mm256_permutevar_pd (__m256d a, __m256i b)
         ///   VPERMILPD ymm, ymm, ymm/m256
         /// </summary>
-        public static Vector256<double> PermuteVar(Vector256<double> left, Vector256<double> mask) => PermuteVar(left, mask);
+        public static Vector256<double> PermuteVar(Vector256<double> left, Vector256<long> control) => PermuteVar(left, control);
 
         /// <summary>
         /// __m256 _mm256_rcp_ps (__m256 a)

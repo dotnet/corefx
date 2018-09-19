@@ -5,6 +5,7 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+using System;
 
 namespace Microsoft.VisualBasic
 {
@@ -15,6 +16,53 @@ namespace Microsoft.VisualBasic
         Method = 1,
         Set = 8,
     }
+    public sealed partial class Collection : System.Collections.ICollection, System.Collections.IList
+    {
+        public Collection() { }
+        public int Count { get { throw null; } }
+        int System.Collections.ICollection.Count { get { throw null; } }
+        bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
+        object System.Collections.ICollection.SyncRoot { get { throw null; } }
+        bool System.Collections.IList.IsFixedSize { get { throw null; } }
+        bool System.Collections.IList.IsReadOnly { get { throw null; } }
+        object System.Collections.IList.this[int index] { get { throw null; } set { } }
+        public object this[int Index] { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        public object this[object Index] { get { throw null; } }
+        public object this[string Key] { get { throw null; } }
+        public void Add(object Item, string Key = null, object Before = null, object After = null) { }
+        public void Clear() { }
+        public bool Contains(string Key) { throw null; }
+        public System.Collections.IEnumerator GetEnumerator() { throw null; }
+        void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        int System.Collections.IList.Add(object value) { throw null; }
+        void System.Collections.IList.Clear() { }
+        bool System.Collections.IList.Contains(object value) { throw null; }
+        int System.Collections.IList.IndexOf(object value) { throw null; }
+        void System.Collections.IList.Insert(int index, object value) { }
+        void System.Collections.IList.Remove(object value) { }
+        void System.Collections.IList.RemoveAt(int index) { }
+        public void Remove(int Index) { }
+        public void Remove(string Key) { }
+    }
+    public enum CompareMethod
+    { 
+        Binary = 0,
+        Text = 1,
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    public sealed partial class ComClassAttribute : System.Attribute
+    {
+        public ComClassAttribute() { }
+        public ComClassAttribute(string _ClassID) { }
+        public ComClassAttribute(string _ClassID, string _InterfaceID) { }
+        public ComClassAttribute(string _ClassID, string _InterfaceID, string _EventId) { }
+        public string ClassID { get { throw null; } }
+        public string EventID { get { throw null; } }
+        public string InterfaceID { get { throw null; } }
+        public bool InterfaceShadows { get { throw null; } set { } }
+    }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Constants
     {
@@ -24,25 +72,157 @@ namespace Microsoft.VisualBasic
         public const string vbCrLf = "\r\n";
         public const string vbFormFeed = "\f";
         public const string vbLf = "\n";
-        [System.Obsolete("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
+        [System.ObsoleteAttribute("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
         public const string vbNewLine = "\r\n";
         public const string vbNullChar = "\0";
         public const string vbNullString = null;
         public const string vbTab = "\t";
         public const string vbVerticalTab = "\v";
+        public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
+        public const CompareMethod vbTextCompare = CompareMethod.Text;
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
+    public sealed partial class ControlChars
+    {
+        public const char Back = '\b';
+        public const char Cr = '\r';
+        public const string CrLf = "\r\n";
+        public const char FormFeed = '\f';
+        public const char Lf = '\n';
+        public const string NewLine = "\r\n";
+        public const char NullChar = '\0';
+        public const char Quote = '"';
+        public const char Tab = '\t';
+        public const char VerticalTab = '\v';
+        public ControlChars() { }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class DateAndTime
+    {
+        internal DateAndTime() { }
+        public static DateTime Now { get; }
+        public static DateTime Today { get; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class HideModuleNameAttribute : System.Attribute
     {
         public HideModuleNameAttribute() { }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public sealed partial class MyGroupCollectionAttribute : System.Attribute
+    {
+        public MyGroupCollectionAttribute(string typeToCollect, string createInstanceMethodName, string disposeInstanceMethodName, string defaultInstanceAlias) { }
+        public string CreateMethod { get { throw null; } }
+        public string DefaultInstanceAlias { get { throw null; } }
+        public string DisposeMethod { get { throw null; } }
+        public string MyGroupName { get { throw null; } }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Information
+    {
+        internal Information() { }
+        public static bool IsArray(object VarName) { throw null; }
+        public static bool IsDate(object Expression) { throw null; }
+        public static bool IsDBNull(object Expression) { throw null; }
+        public static bool IsError(object Expression) { throw null; }
+        public static bool IsNothing(object Expression) { throw null; }
+        public static bool IsNumeric(object Expression) { throw null; }
+        public static bool IsReference(object Expression) { throw null; }
+        public static int LBound(System.Array Array, int Rank = 1) { throw null; }
+        public static int QBColor(int Color) { throw null; }
+        public static int RGB(int Red, int Green, int Blue) { throw null; }
+        public static string SystemTypeName(string VbName) { throw null; }
+        public static int UBound(System.Array Array, int Rank = 1) { throw null; }
+        public static VariantType VarType(object VarName) { throw null; }
+        public static string VbTypeName(string UrtName) { throw null; }
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Strings
     {
         internal Strings() { }
+        public static int Asc(char String) { throw null; }
+        public static int Asc(string String) { throw null; }
         public static int AscW(char String) { throw null; }
         public static int AscW(string String) { throw null; }
+        public static char Chr(int CharCode) { throw null; }
         public static char ChrW(int CharCode) { throw null; }
+        public static string[] Filter(object[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute] CompareMethod Compare = CompareMethod.Binary) { throw null; }
+        public static string[] Filter(string[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute] CompareMethod Compare = CompareMethod.Binary) { throw null; }
+        public static string Left(string str, int Length) { throw null; }
+        public static string LTrim(string str) { throw null; }
+        public static string Mid(string str, int Start) { throw null; }
+        public static string Mid(string str, int Start, int Length) { throw null; }
+        public static string Right(string str, int Length) { throw null; }
+        public static string RTrim(string str) { throw null; }
+        public static string Trim(string str) { throw null; }
+    }
+    public enum VariantType
+    {
+        Array = 8192,
+        Boolean = 11,
+        Byte = 17,
+        Char = 18,
+        Currency = 6,
+        DataObject = 13,
+        Date = 7,
+        Decimal = 14,
+        Double = 5,
+        Empty = 0,
+        Error = 10,
+        Integer = 3,
+        Long = 20,
+        Null = 1,
+        Object = 9,
+        Short = 2,
+        Single = 4,
+        String = 8,
+        UserDefinedType = 36,
+        Variant = 12,
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    public sealed partial class VBFixedArrayAttribute : System.Attribute
+    {
+        public VBFixedArrayAttribute(int UpperBound1) { }
+        public VBFixedArrayAttribute(int UpperBound1, int UpperBound2) { }
+        public int[] Bounds { get { throw null; } }
+        public int Length { get { throw null; } }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    public sealed partial class VBFixedStringAttribute : System.Attribute
+    {
+        public VBFixedStringAttribute(int Length) { }
+        public int Length { get { throw null; } }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class VBMath
+    {
+        internal VBMath() { }
+        public static void Randomize() { }
+        public static void Randomize(double Number) { }
+        public static float Rnd() { throw null; }
+        public static float Rnd(float Number) { throw null; }
+    }
+}
+namespace Microsoft.VisualBasic.ApplicationServices
+{
+    public partial class StartupEventArgs : System.ComponentModel.CancelEventArgs
+    {
+        public StartupEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args) { }
+        public System.Collections.ObjectModel.ReadOnlyCollection<string> CommandLine { get { throw null; } }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public partial class StartupNextInstanceEventArgs : System.EventArgs
+    {
+        public StartupNextInstanceEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args, bool bringToForegroundFlag) { }
+        public bool BringToForeground { get { throw null; } set { } }
+        public System.Collections.ObjectModel.ReadOnlyCollection<string> CommandLine { get { throw null; } }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public partial class UnhandledExceptionEventArgs : System.Threading.ThreadExceptionEventArgs
+    {
+        public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
+        public bool ExitApplication { get { throw null; } set { } }
     }
 }
 namespace Microsoft.VisualBasic.CompilerServices
@@ -108,11 +288,40 @@ namespace Microsoft.VisualBasic.CompilerServices
         [System.CLSCompliantAttribute(false)]
         public static ushort ToUShort(string Value) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public sealed partial class BooleanType
+    {
+        internal BooleanType() { }
+        public static Boolean FromObject(object Value) { throw null; }
+        public static Boolean FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public sealed partial class DecimalType
+    {
+        internal DecimalType() { }
+        public static decimal FromBoolean(bool Value) { throw null; }
+        public static decimal FromObject(object Value) { throw null; }
+        public static decimal FromObject(object Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static decimal FromString(string Value) { throw null; }
+        public static decimal FromString(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static decimal Parse(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DesignerGeneratedAttribute : System.Attribute
     {
         public DesignerGeneratedAttribute() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public sealed partial class DoubleType
+    {
+        internal DoubleType() { }
+        public static double FromObject(object Value) { throw null; }
+        public static double FromObject(object Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static double FromString(string Value) { throw null; }
+        public static double FromString(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static double Parse(string Value) { throw null; }
+        public static double Parse(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class IncompleteInitialization : System.Exception
@@ -182,13 +391,13 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static object SubtractObject(object Left, object Right) { throw null; }
         public static object XorObject(object Left, object Right) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited=false, AllowMultiple=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionCompareAttribute : System.Attribute
     {
         public OptionCompareAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionTextAttribute : System.Attribute
     {
@@ -202,7 +411,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class StandardModuleAttribute : System.Attribute
     {
@@ -219,5 +428,21 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         internal Utils() { }
         public static System.Array CopyArray(System.Array arySrc, System.Array aryDest) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public sealed partial class Versioned
+    {
+        internal Versioned() { }
+        public static bool IsNumeric(object Expression) { throw null; }
+        public static string SystemTypeName(string VbName) { throw null; }
+        public static string VbTypeName(string SystemName) { throw null; }
+    }
+}
+namespace Microsoft.VisualBasic.Devices
+{
+    public partial class NetworkAvailableEventArgs : System.EventArgs
+    {
+        public NetworkAvailableEventArgs(bool networkAvailable) { }
+        public bool IsNetworkAvailable { get { throw null; } }
     }
 }

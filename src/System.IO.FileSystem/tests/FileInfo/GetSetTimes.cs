@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
@@ -15,6 +16,24 @@ namespace System.IO.Tests
             string path = GetTestFilePath();
             File.Create(path).Dispose();
             return new FileInfo(path);
+        }
+
+        public FileInfo GetNonZeroMilliSec()
+        {
+            FileInfo fileinfo = new FileInfo(GetTestFilePath());
+            for (int i = 0; i < 5; i++)
+            {
+                fileinfo.Create().Dispose();
+                if (fileinfo.LastWriteTime.Millisecond != 0)
+                    break;
+
+                // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                // not support millisecond granularity.
+
+                // If it's 1/1000, or low granularity, this may help:
+                Thread.Sleep(1234);
+            }
+            return fileinfo;
         }
 
         public override FileInfo GetMissingItem() => new FileInfo(GetTestFilePath());
@@ -64,6 +83,55 @@ namespace System.IO.Tests
                 ((testFile, time) => { testFile.LastWriteTimeUtc = time; }),
                 ((testFile) => testFile.LastWriteTimeUtc),
                 DateTimeKind.Utc);
+        }
+
+        [ConditionalFact(nameof(isNotHFS))]
+        public void CopyToMillisecondPresent()
+        {
+            FileInfo input = GetNonZeroMilliSec();
+            FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
+
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+
+            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+        }
+
+        [ConditionalFact(nameof(isHFS))]
+        public void MoveToMillisecondPresent_HFS()
+        {
+            FileInfo input = new FileInfo(GetTestFilePath());
+            input.Create().Dispose();
+
+            string dest = Path.Combine(input.DirectoryName, GetTestFileName());
+            input.MoveTo(dest);
+            FileInfo output = new FileInfo(dest);
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
+        }
+
+        [ConditionalFact(nameof(isNotHFS))]
+        public void MoveToMillisecondPresent()
+        {
+            FileInfo input = GetNonZeroMilliSec();
+            string dest = Path.Combine(input.DirectoryName, GetTestFileName());
+
+            input.MoveTo(dest);
+            FileInfo output = new FileInfo(dest);
+            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+        }
+
+        [ConditionalFact(nameof(isHFS))]
+        public void CopyToMillisecondPresent_HFS()
+        {
+            FileInfo input = new FileInfo(GetTestFilePath());
+            input.Create().Dispose();
+            FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+            Assert.Equal(0, input.LastWriteTime.Millisecond);
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
         }
 
         [Fact]

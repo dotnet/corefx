@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -94,6 +96,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 throw new ArgumentOutOfRangeException($"Type {obj} has no blobs to deserialize and test equality against. Blob: " +
                     BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full));
+            }
+
+            // Check if the passed in value in a serialization entry is assignable by the passed in type.
+            if (obj is ISerializable customSerializableObj && HasObjectTypeIntegrity(customSerializableObj))
+            {
+                CheckObjectTypeIntegrity(customSerializableObj);
             }
 
             SanityCheckBlob(obj, blobs);
@@ -532,11 +540,40 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(obj.GetType().GetGenericArguments()[0], objType.GetGenericArguments()[0]);
         }
 
+        private static bool HasObjectTypeIntegrity(ISerializable serializable)
+        {
+            return !PlatformDetection.IsFullFramework ||
+                !(serializable is NotFiniteNumberException);
+        }
+
+        private static void CheckObjectTypeIntegrity(ISerializable serializable)
+        {
+            SerializationInfo testData = new SerializationInfo(serializable.GetType(), new FormatterConverter());
+            serializable.GetObjectData(testData, new StreamingContext(StreamingContextStates.Other));
+
+            foreach (SerializationEntry entry in testData)
+            {
+                if (entry.Value != null)
+                {
+                    Assert.IsAssignableFrom(entry.ObjectType, entry.Value);
+                }
+            }
+        }
+
         private static void SanityCheckBlob(object obj, TypeSerializableValue[] blobs)
         {
             // These types are unstable during serialization and produce different blobs.
             if (obj is WeakReference<Point> ||
-                obj is Collections.Specialized.HybridDictionary)
+                obj is Collections.Specialized.HybridDictionary ||
+                obj is Color)
+            {
+                return;
+            }
+
+            // The blobs aren't identical because of different implementations on Unix vs. Windows.
+            if (obj is Bitmap ||
+                obj is Icon ||
+                obj is Metafile)
             {
                 return;
             }

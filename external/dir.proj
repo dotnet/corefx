@@ -1,5 +1,5 @@
-<Project ToolsVersion="14.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="../dir.props" />
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="../Directory.Build.props" />
 
   <PropertyGroup>
     <AdditionalBuildConfigurations>$(AdditionalBuildConfigurations);netstandard-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup)</AdditionalBuildConfigurations>
@@ -12,9 +12,10 @@
     <Project Include="netstandard/netstandard.depproj" />
     <Project Include="netfx/netfx.depproj" />
     <Project Include="runtime/runtime.depproj" />
+    <Project Include="tools/tools.depproj" />
     <Project Include="test-runtime/XUnit.Runtime.depproj"  Condition="'$(DotNetBuildFromSource)' != 'true'" />
     <Project Include="harvestPackages/harvestPackages.depproj" />
-    <Project Include="portable/portable.depproj" />
+    <Project Include="binplacePackages/binplacePackages.depproj" />
     <Project Include="docs/docs.depproj" Condition="'$(DotNetBuildFromSource)' != 'true'" />
     <Project Condition="'$(ILLinkTrimAssembly)' != 'false'" Include="ILLink/ILLink.depproj" />
   </ItemGroup>

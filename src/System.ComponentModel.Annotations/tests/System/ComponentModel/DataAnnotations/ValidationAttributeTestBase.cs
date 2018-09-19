@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
 {
-    public abstract class ValidationAttributeTestBase
+    public abstract class ValidationAttributeTestBase : RemoteExecutorTestBase
     {
         protected abstract IEnumerable<TestCase> ValidValues();
         protected abstract IEnumerable<TestCase> InvalidValues();
@@ -23,6 +24,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "EmailAddressAttribute in the .NET Framework has a bug with values that are null or not string type")]
         public void Validate_Invalid()
         {
             Assert.All(InvalidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, isValid: false));
@@ -58,6 +60,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "EmailAddressAttribute in the .NET Framework has a bug with values that are null or not string type")]
         public void ErrorMessage_Invalid_Throws()
         {
             if (InvalidValues().Count() == 0)
@@ -75,6 +78,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "EmailAddressAttribute in the .NET Framework has a bug with values that are null or not string type")]
         public void ErrorMessage_Valid()
         {
             if (!RespectsErrorMessage || InvalidValues().Count() == 0)

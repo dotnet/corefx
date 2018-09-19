@@ -66,7 +66,13 @@ namespace System.Net.Http
 
             if (proxyHelper.ManualSettingsOnly)
             {
+                if (NetEventSource.IsEnabled) NetEventSource.Info(proxyHelper, $"ManualSettingsUsed, {proxyHelper.Proxy}");
                 ParseProxyConfig(proxyHelper.Proxy, out _insecureProxyUri, out _secureProxyUri);
+                if (_insecureProxyUri == null && _secureProxyUri == null)
+                {
+                    // If advanced parsing by protocol fails, fall-back to simplified parsing.
+                    _insecureProxyUri = _secureProxyUri = GetUriFromString(proxyHelper.Proxy);
+                }
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
@@ -258,7 +264,7 @@ namespace System.Net.Http
             }
         }
 
-        private static int GetProxySubstringLength(String proxyString, int idx)
+        private static int GetProxySubstringLength(string proxyString, int idx)
         {
             int endOfProxy = proxyString.IndexOfAny(s_proxyDelimiters, idx);
             return (endOfProxy == -1) ? proxyString.Length - idx : endOfProxy - idx;
@@ -301,7 +307,7 @@ namespace System.Net.Http
                             }
                         }
                     }
-                    if (uri.HostNameType != UriHostNameType.IPv6 && uri.IdnHost.IndexOf('.') == -1)
+                    if (uri.HostNameType != UriHostNameType.IPv6 && !uri.IdnHost.Contains('.'))
                     {
                         // Not address and does not have a dot.
                         // Hosts without FQDN are considered local.

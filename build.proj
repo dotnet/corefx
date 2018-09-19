@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="dir.props" />
+  <Import Project="Directory.Build.props" />
 
   <!-- required to build the projects in their specified order -->
   <PropertyGroup>
@@ -18,20 +18,26 @@
     <Project Include="src\dirs.proj" />
     <Project Include="src\tests.builds" Condition="'$(BuildTests)'=='true'" />
     <!-- signing must happen before packaging -->
-    <Project Include="src\sign.builds" />
+    <Project Include="src\sign.proj" />
     <Project Include="src\packages.builds" Condition="'$(BuildPackages)'=='true'" />
   </ItemGroup>
 
-  <Import Project="dir.targets" />
+  <Import Project="Directory.Build.targets" />
 
   <Import Project="dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)clean.targets" />
 
   <PropertyGroup>
-    <TraversalBuildDependsOn>
+    <PrebuildSetupTargets>
       GenerateConfigurationProperties;
-      CreateOrUpdateCurrentVersionFile;
+      CreateOrUpdateCurrentVersionFile
+    </PrebuildSetupTargets>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TraversalBuildDependsOn>
+      $(PrebuildSetupTargets);
       $(TraversalBuildDependsOn);
     </TraversalBuildDependsOn>
   </PropertyGroup>
@@ -42,7 +48,7 @@
     <GenerateConfigurationProps Properties="@(Property)" PropertyValues="@(PropertyValue)" PropsFolder="$(BuildConfigurationFolder)" />
   </Target>
 
-  <Target Name="Sync" DependsOnTargets="GenerateConfigurationProperties">
+  <Target Name="Sync" DependsOnTargets="$(PrebuildSetupTargets)">
     <ItemGroup>
       <ExternalProject Include="external\dir.proj" />
     </ItemGroup>
@@ -58,7 +64,8 @@
       <_projectsToExcludeFromUpdate Include="$(MSBuildThisFileDirectory)src/SharedFrameworkValidation/**/*.csproj" />
       <_projectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*csproj" Exclude="@(_projectsToExcludeFromUpdate)" />
       <_projectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*ilproj" Exclude="@(_projectsToExcludeFromUpdate)" />
-      <_solutionsToUpdateFiles Include="$(MSBuildThisFileDirectory)src/*/dir.props" />
+      <_projectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*vbproj" Exclude="@(_projectsToExcludeFromUpdate)" />
+      <_solutionsToUpdateFiles Include="$(MSBuildThisFileDirectory)src/*/Directory.Build.props" />
       <_solutionsToUpdate Include="@(_solutionsToUpdateFiles->'%(RootDir)%(Directory)')" Exclude="@(_solutionsToExcludeFromUpdate)" />
     </ItemGroup>
     <UpdateVSConfigurations ProjectsToUpdate="@(_projectsToUpdate)" SolutionsToUpdate="@(_solutionsToUpdate)" />

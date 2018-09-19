@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -868,7 +869,11 @@ namespace System.Net.Sockets.Tests
                     Exception error = await Record.ExceptionAsync(() => send);
                     if (error != null)
                     {
-                        Assert.True(error is ObjectDisposedException || error is SocketException, error.ToString());
+                        Assert.True(
+                            error is ObjectDisposedException ||
+                            error is SocketException ||
+                            (error is SEHException && PlatformDetection.IsUap),
+                            error.ToString());
                     }
                 }
             }
@@ -903,7 +908,11 @@ namespace System.Net.Sockets.Tests
                     Exception error = await Record.ExceptionAsync(() => send);
                     if (error != null)
                     {
-                        Assert.True(error is ObjectDisposedException || error is SocketException, error.ToString());
+                        Assert.True(
+                            error is ObjectDisposedException ||
+                            error is SocketException ||
+                            (error is SEHException && PlatformDetection.IsUap),
+                            error.ToString());
                     }
                 }
             }

@@ -82,6 +82,14 @@ namespace System.Runtime.Serialization
             throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.NullValueReturnedForGetOnlyCollection, DataContract.GetClrTypeFullName(type))));
         }
 
+#if uapaot
+        // Referenced from generated code in .NET Native's SerializationAssemblyGenerator
+        internal static void ThrowNoDefaultConstructorForCollectionException(Type type)
+        {
+            throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.NoDefaultConstructorForCollection, DataContract.GetClrTypeFullName(type))));
+        }
+#endif
+
 #if USE_REFEMIT
         public static void ThrowArrayExceededSizeException(int arraySize, Type type)
 #else
@@ -523,14 +531,14 @@ namespace System.Runtime.Serialization
         {
             if (array.Length <= index)
             {
-                if (index == Int32.MaxValue)
+                if (index == int.MaxValue)
                 {
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(
                         XmlObjectSerializer.CreateSerializationException(
-                        SR.Format(SR.MaxArrayLengthExceeded, Int32.MaxValue,
+                        SR.Format(SR.MaxArrayLengthExceeded, int.MaxValue,
                         DataContract.GetClrTypeFullName(typeof(T)))));
                 }
-                int newSize = (index < Int32.MaxValue / 2) ? index * 2 : Int32.MaxValue;
+                int newSize = (index < int.MaxValue / 2) ? index * 2 : int.MaxValue;
                 T[] newArray = new T[newSize];
                 Array.Copy(array, 0, newArray, 0, array.Length);
                 array = newArray;
@@ -638,7 +646,7 @@ namespace System.Runtime.Serialization
                 if (attributes.Ref != Globals.NewObjectId)
                 {
                     xmlReader.Skip();
-                    value = GetExistingObject(attributes.Ref, null, name, String.Empty);
+                    value = GetExistingObject(attributes.Ref, null, name, string.Empty);
                 }
                 else if (attributes.XsiNil)
                 {
@@ -647,7 +655,7 @@ namespace System.Runtime.Serialization
                 }
                 else
                 {
-                    value = InternalDeserialize(xmlReader, Globals.TypeOfObject, name, String.Empty);
+                    value = InternalDeserialize(xmlReader, Globals.TypeOfObject, name, string.Empty);
                 }
 
                 serInfo.AddValue(name, value);
@@ -1028,8 +1036,8 @@ namespace System.Runtime.Serialization
                             elementNs = ns;
                         }
                         else
-                            couldBeCollectionData = (String.CompareOrdinal(elementName, name) == 0) &&
-                                (String.CompareOrdinal(elementNs, ns) == 0);
+                            couldBeCollectionData = (string.CompareOrdinal(elementName, name) == 0) &&
+                                (string.CompareOrdinal(elementNs, ns) == 0);
                     }
                 }
                 else if (xmlReader.EOF)

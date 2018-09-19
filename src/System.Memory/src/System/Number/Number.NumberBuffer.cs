@@ -5,12 +5,7 @@
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
-
-#if !netstandard
 using Internal.Runtime.CompilerServices;
-#else
-using System.Runtime.CompilerServices;
-#endif
 
 namespace System
 {
@@ -34,6 +29,7 @@ namespace System
         //    3.00m         => "300", Scale = 1 (this is important: trailing zeroes actually matter in Decimal)
         //
         public int Scale;
+        public NumberBufferKind Kind;
         public bool IsNegative;
 
         public unsafe Span<byte> Digits => new Span<byte>(Unsafe.AsPointer(ref _b0), BufferSize);
@@ -154,5 +150,13 @@ namespace System
         private byte _b48;
         private byte _b49;
         private byte _b50;
+    }
+
+    internal enum NumberBufferKind : byte
+    {
+        Unknown,
+        Integer,
+        Decimal,
+        Double
     }
 }

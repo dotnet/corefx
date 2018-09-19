@@ -11,10 +11,12 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel SSSE3 hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Ssse3
+    public abstract class Ssse3 : Sse3
     {
-        public static bool IsSupported { get { return false; } }
-        
+        internal Ssse3() { }
+
+        public new static bool IsSupported { get { return false; } }
+
         /// <summary>
         /// __m128i _mm_abs_epi8 (__m128i a)
         ///   PABSB xmm, xmm/m128
@@ -88,6 +90,12 @@ namespace System.Runtime.Intrinsics.X86
         ///   PSHUFB xmm, xmm/m128
         /// </summary>
         public static Vector128<sbyte> Shuffle(Vector128<sbyte> value, Vector128<sbyte> mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_shuffle_epi8 (__m128i a, __m128i b)
+        ///   PSHUFB xmm, xmm/m128
+        /// </summary>
+        public static Vector128<byte> Shuffle(Vector128<byte> value, Vector128<byte> mask) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_sign_epi8 (__m128i a, __m128i b)

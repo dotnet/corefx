@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition.Diagnostics;
+using System.Composition.Diagnostics;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
@@ -27,8 +27,11 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public AttributedPartCreationInfo(Type type, PartCreationPolicyAttribute partCreationPolicy, bool ignoreConstructorImports, ICompositionElement origin)
         {
-            Assumes.NotNull(type);
-            
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             _type = type;
             _ignoreConstructorImports = ignoreConstructorImports;
             _partCreationPolicy = partCreationPolicy;
@@ -152,7 +155,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             return isArityMatched;
         }
 
-string ICompositionElement.DisplayName
+        string ICompositionElement.DisplayName
         {
             get { return GetDisplayName(); }
         }
@@ -187,7 +190,10 @@ string ICompositionElement.DisplayName
 
         private static ConstructorInfo SelectPartConstructor(Type type)
         {
-            Assumes.NotNull(type);
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             if (type.IsAbstract)
             {
@@ -268,7 +274,7 @@ string ICompositionElement.DisplayName
             {
                 foreach (ExportAttribute exportAttribute in member.GetAttributes<ExportAttribute>())
                 {
-                    var attributedExportDefinition = CreateExportDefinition(member, exportAttribute);
+                    AttributedExportDefinition attributedExportDefinition = CreateExportDefinition(member, exportAttribute);
 
                     if (exportAttribute.GetType() == CompositionServices.InheritedExportAttributeType)
                     {
@@ -297,7 +303,7 @@ string ICompositionElement.DisplayName
             {
                 foreach (InheritedExportAttribute exportAttribute in type.GetAttributes<InheritedExportAttribute>())
                 {
-                    var attributedExportDefinition = CreateExportDefinition(type, exportAttribute);
+                    AttributedExportDefinition attributedExportDefinition = CreateExportDefinition(type, exportAttribute);
 
                     if (!_contractNamesOnNonInterfaces.Contains(attributedExportDefinition.ContractName))
                     {
@@ -341,7 +347,7 @@ string ICompositionElement.DisplayName
             }
 
             // Walk the fields 
-            foreach (var member in type.GetFields(flags))
+            foreach (FieldInfo member in type.GetFields(flags))
             {
                 if (IsExport(member))
                 {
@@ -350,7 +356,7 @@ string ICompositionElement.DisplayName
             }
 
             // Walk the properties 
-            foreach (var member in type.GetProperties(flags))
+            foreach (PropertyInfo member in type.GetProperties(flags))
             {
                 if (IsExport(member))
                 {
@@ -359,7 +365,7 @@ string ICompositionElement.DisplayName
             }
 
             // Walk the methods 
-            foreach (var member in type.GetMethods(flags))
+            foreach (MethodInfo member in type.GetMethods(flags))
             {
                 if (IsExport(member))
                 {
@@ -388,7 +394,7 @@ string ICompositionElement.DisplayName
             {
                 yield break;
             }
-            
+
             // Stopping at object instead of null to help with performance. It is a noticable performance
             // gain (~5%) if we don't have to try and pull the attributes we know don't exist on object.
             // We also need the null check in case we're passed a type that doesn't live in the runtime context.
@@ -430,7 +436,7 @@ string ICompositionElement.DisplayName
                 imports.Add(importDefinition);
             }
 
-            var constructor = GetConstructor();
+            ConstructorInfo constructor = GetConstructor();
 
             if (constructor != null)
             {
@@ -480,7 +486,7 @@ string ICompositionElement.DisplayName
             BindingFlags flags = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
             // Walk the fields 
-            foreach (var member in type.GetFields(flags))
+            foreach (FieldInfo member in type.GetFields(flags))
             {
                 if (IsImport(member))
                 {
@@ -489,7 +495,7 @@ string ICompositionElement.DisplayName
             }
 
             // Walk the properties 
-            foreach (var member in type.GetProperties(flags))
+            foreach (PropertyInfo member in type.GetProperties(flags))
             {
                 if (IsImport(member))
                 {

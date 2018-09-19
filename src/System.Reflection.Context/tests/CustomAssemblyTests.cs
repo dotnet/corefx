@@ -48,6 +48,7 @@ namespace System.Reflection.Context.Tests
         public void GetCustomAttributesDataTest()
         {
             IList<CustomAttributeData> customAttributesData = _customAssembly.GetCustomAttributesData();
+            Assert.NotEmpty(customAttributesData);
             Assert.All(customAttributesData,
                 cad => Assert.Equal(ProjectionConstants.ProjectingCustomAttributeData, cad.GetType().FullName));
         }
@@ -59,12 +60,6 @@ namespace System.Reflection.Context.Tests
             Assert.True(_customAssembly.IsDefined(typeof(TestAssemblyAttribute), false));
             Assert.False(_customAssembly.IsDefined(typeof(DataContractAttribute), true));
             Assert.False(_customAssembly.IsDefined(typeof(DataContractAttribute), false));
-        }
-
-        [Fact]
-        public void EntryPoint()
-        {
-            Assert.Null(_customAssembly.EntryPoint);
         }
 
         [Fact]
@@ -91,6 +86,7 @@ namespace System.Reflection.Context.Tests
         {
             IEnumerable<ManifestResourceInfo> manifestResourceInfos = _customAssembly.GetManifestResourceNames()
                 .Select(mrn => _customAssembly.GetManifestResourceInfo(mrn));
+            Assert.NotEmpty(manifestResourceInfos);
             Assert.All(manifestResourceInfos,
                 (mri) => Assert.Equal(ProjectionConstants.ProjectingManifestResourceInfo, mri.GetType().FullName));
         }
@@ -135,6 +131,7 @@ namespace System.Reflection.Context.Tests
         public void GetTypesTest()
         {
             Type[] types = _customAssembly.GetTypes();
+            Assert.NotEmpty(types);
             Assert.All(types,
                 (type) => Assert.Equal(ProjectionConstants.CustomType, type.GetType().FullName));
         }

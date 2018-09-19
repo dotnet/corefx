@@ -758,27 +758,30 @@ namespace System.Collections.Generic
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
             }
 
-            if (_buckets != null)
+            int[] buckets = _buckets;
+            Entry[] entries = _entries;
+            int collisionCount = 0;
+            if (buckets != null)
             {
                 int hashCode = (_comparer?.GetHashCode(key) ?? key.GetHashCode()) & 0x7FFFFFFF;
-                int bucket = hashCode % _buckets.Length;
+                int bucket = hashCode % buckets.Length;
                 int last = -1;
-                // Value in _buckets is 1-based
-                int i = _buckets[bucket] - 1;
+                // Value in buckets is 1-based
+                int i = buckets[bucket] - 1;
                 while (i >= 0)
                 {
-                    ref Entry entry = ref _entries[i];
+                    ref Entry entry = ref entries[i];
 
                     if (entry.hashCode == hashCode && (_comparer?.Equals(entry.key, key) ?? EqualityComparer<TKey>.Default.Equals(entry.key, key)))
                     {
                         if (last < 0)
                         {
-                            // Value in _buckets is 1-based
-                            _buckets[bucket] = entry.next + 1;
+                            // Value in buckets is 1-based
+                            buckets[bucket] = entry.next + 1;
                         }
                         else
                         {
-                            _entries[last].next = entry.next;
+                            entries[last].next = entry.next;
                         }
                         entry.hashCode = -1;
                         entry.next = _freeList;
@@ -793,12 +796,18 @@ namespace System.Collections.Generic
                         }
                         _freeList = i;
                         _freeCount++;
-                        _version++;
                         return true;
                     }
 
                     last = i;
                     i = entry.next;
+                    if (collisionCount >= entries.Length)
+                    {
+                        // The chain of entries forms a loop; which means a concurrent update has happened.
+                        // Break out of the loop and throw, rather than looping forever.
+                        ThrowHelper.ThrowInvalidOperationException_ConcurrentOperationsNotSupported();
+                    }
+                    collisionCount++;
                 }
             }
             return false;
@@ -814,27 +823,30 @@ namespace System.Collections.Generic
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
             }
 
-            if (_buckets != null)
+            int[] buckets = _buckets;
+            Entry[] entries = _entries;
+            int collisionCount = 0;
+            if (buckets != null)
             {
                 int hashCode = (_comparer?.GetHashCode(key) ?? key.GetHashCode()) & 0x7FFFFFFF;
-                int bucket = hashCode % _buckets.Length;
+                int bucket = hashCode % buckets.Length;
                 int last = -1;
-                // Value in _buckets is 1-based
-                int i = _buckets[bucket] - 1;
+                // Value in buckets is 1-based
+                int i = buckets[bucket] - 1;
                 while (i >= 0)
                 {
-                    ref Entry entry = ref _entries[i];
+                    ref Entry entry = ref entries[i];
 
                     if (entry.hashCode == hashCode && (_comparer?.Equals(entry.key, key) ?? EqualityComparer<TKey>.Default.Equals(entry.key, key)))
                     {
                         if (last < 0)
                         {
-                            // Value in _buckets is 1-based
-                            _buckets[bucket] = entry.next + 1;
+                            // Value in buckets is 1-based
+                            buckets[bucket] = entry.next + 1;
                         }
                         else
                         {
-                            _entries[last].next = entry.next;
+                            entries[last].next = entry.next;
                         }
 
                         value = entry.value;
@@ -852,12 +864,18 @@ namespace System.Collections.Generic
                         }
                         _freeList = i;
                         _freeCount++;
-                        _version++;
                         return true;
                     }
 
                     last = i;
                     i = entry.next;
+                    if (collisionCount >= entries.Length)
+                    {
+                        // The chain of entries forms a loop; which means a concurrent update has happened.
+                        // Break out of the loop and throw, rather than looping forever.
+                        ThrowHelper.ThrowInvalidOperationException_ConcurrentOperationsNotSupported();
+                    }
+                    collisionCount++;
                 }
             }
             value = default;
@@ -952,6 +970,7 @@ namespace System.Collections.Generic
             int currentCapacity = _entries == null ? 0 : _entries.Length;
             if (currentCapacity >= capacity)
                 return currentCapacity;
+            _version++;
             if (_buckets == null)
                 return Initialize(capacity);
             int newSize = HashHelpers.GetPrime(capacity);
@@ -991,6 +1010,7 @@ namespace System.Collections.Generic
                 return;
 
             int oldCount = _count;
+            _version++;
             Initialize(newSize);
             Entry[] entries = _entries;
             int[] buckets = _buckets;
@@ -1137,11 +1157,11 @@ namespace System.Collections.Generic
         public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>,
             IDictionaryEnumerator
         {
-            private Dictionary<TKey, TValue> _dictionary;
-            private int _version;
+            private readonly Dictionary<TKey, TValue> _dictionary;
+            private readonly int _version;
             private int _index;
             private KeyValuePair<TKey, TValue> _current;
-            private int _getEnumeratorRetType;  // What should Enumerator.Current return?
+            private readonly int _getEnumeratorRetType;  // What should Enumerator.Current return?
 
             internal const int DictEntry = 1;
             internal const int KeyValuePair = 2;
@@ -1163,7 +1183,7 @@ namespace System.Collections.Generic
                 }
 
                 // Use unsigned comparison since we set index to dictionary.count+1 when the enumeration ends.
-                // dictionary.count+1 could be negative if dictionary.count is Int32.MaxValue
+                // dictionary.count+1 could be negative if dictionary.count is int.MaxValue
                 while ((uint)_index < (uint)_dictionary._count)
                 {
                     ref Entry entry = ref _dictionary._entries[_index++];
@@ -1372,9 +1392,9 @@ namespace System.Collections.Generic
 
             public struct Enumerator : IEnumerator<TKey>, IEnumerator
             {
-                private Dictionary<TKey, TValue> _dictionary;
+                private readonly Dictionary<TKey, TValue> _dictionary;
                 private int _index;
-                private int _version;
+                private readonly int _version;
                 private TKey _currentKey;
 
                 internal Enumerator(Dictionary<TKey, TValue> dictionary)
@@ -1555,9 +1575,9 @@ namespace System.Collections.Generic
 
             public struct Enumerator : IEnumerator<TValue>, IEnumerator
             {
-                private Dictionary<TKey, TValue> _dictionary;
+                private readonly Dictionary<TKey, TValue> _dictionary;
                 private int _index;
-                private int _version;
+                private readonly int _version;
                 private TValue _currentValue;
 
                 internal Enumerator(Dictionary<TKey, TValue> dictionary)

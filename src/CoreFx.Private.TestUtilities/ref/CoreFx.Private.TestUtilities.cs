@@ -41,6 +41,8 @@ namespace System
     public static partial class PlatformDetection
     {
         public static bool IsReflectionEmitSupported;
+        public static bool SupportsAlpn { get { throw null; } }
+        public static bool SupportsClientAlpn { get { throw null; } }
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
@@ -66,6 +68,7 @@ namespace System
         public static bool IsNotArmProcess { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
+        public static bool IsNotNetNative { get { throw null; } }
         public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } }
         public static bool IsNotOneCoreUAP { get { throw null; } }
         public static bool IsNotWindows8x { get { throw null; } }
@@ -138,6 +141,10 @@ namespace System.Diagnostics
         protected static readonly string TestConsoleApp;
         protected RemoteExecutorTestBase() { }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string> method, string arg1, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string, string> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }

@@ -70,8 +70,17 @@
   <data name="Argument_InvalidOidValue" xml:space="preserve">
     <value>The OID value was invalid.</value>
   </data>
+  <data name="Argument_InvalidValue" xml:space="preserve">
+    <value>Value was invalid.</value>
+  </data>
   <data name="ArgumentOutOfRange_Index" xml:space="preserve">
     <value>Index was out of range. Must be non-negative and less than the size of the collection.</value>
+  </data>
+  <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+    <value>Positive number required.</value>
+  </data>
+  <data name="Cryptography_AlgKdfRequiresChars" xml:space="preserve">
+    <value>The KDF for algorithm '{0}' requires a char-based password input.</value>
   </data>
   <data name="Cryptography_Asn_EnumeratedValueRequiresNonFlagsEnum" xml:space="preserve">
     <value>ASN.1 Enumerated values only apply to enum types without the [Flags] attribute.</value>
@@ -87,63 +96,6 @@
   </data>
   <data name="Cryptography_Asn_UnusedBitCountRange" xml:space="preserve">
     <value>Unused bit count must be between 0 and 7, inclusive.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_AmbiguousFieldType" xml:space="preserve">
-    <value>Field '{0}' of type '{1}' has ambiguous type '{2}', an attribute derived from AsnTypeAttribute is required.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_AllowNullNonNullable" xml:space="preserve">
-    <value>[Choice].AllowNull=true is not valid because type '{0}' cannot have a null value.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_ConflictingTagMapping" xml:space="preserve">
-    <value>The tag ({0} {1}) for field '{2}' on type '{3}' already is associated in this context with field '{4}' on type '{5}'.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_DefaultValueDisallowed" xml:space="preserve">
-    <value>Field '{0}' on [Choice] type '{1}' has a default value, which is not permitted.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_NoChoiceWasMade" xml:space="preserve">
-    <value>An instance of [Choice] type '{0}' has no non-null fields.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_NonNullableField" xml:space="preserve">
-    <value>Field '{0}' on [Choice] type '{1}' can not be assigned a null value.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_TooManyValues" xml:space="preserve">
-    <value>Fields '{0}' and '{1}' on type '{2}' are both non-null when only one value is permitted.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Choice_TypeCycle" xml:space="preserve">
-    <value>Field '{0}' on [Choice] type '{1}' has introduced a type chain cycle.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_MultipleAsnTypeAttributes" xml:space="preserve">
-    <value>Field '{0}' on type '{1}' has multiple attributes deriving from '{2}' when at most one is permitted.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_NoJaggedArrays" xml:space="preserve">
-    <value>Type '{0}' cannot be serialized or deserialized because it is an array of arrays.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_NoMultiDimensionalArrays" xml:space="preserve">
-    <value>Type '{0}' cannot be serialized or deserialized because it is a multi-dimensional array.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_NoOpenTypes" xml:space="preserve">
-    <value>Type '{0}' cannot be serialized or deserialized because it is not sealed or has unbound generic parameters.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_Optional_NonNullableField" xml:space="preserve">
-    <value>Field '{0}' on type '{1}' is declared [OptionalValue], but it can not be assigned a null value.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_PopulateFriendlyNameOnString" xml:space="preserve">
-    <value>Field '{0}' on type '{1}' has [ObjectIdentifier].PopulateFriendlyName set to true, which is not applicable to a string.  Change the field to '{2}' or set PopulateFriendlyName to false.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_SetValueException" xml:space="preserve">
-    <value>Unable to set field {0} on type {1}.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_SpecificTagChoice" xml:space="preserve">
-    <value>Field '{0}' on type '{1}' has specified an implicit tag value via [ExpectedTag] for [Choice] type '{2}'. ExplicitTag must be true, or the [ExpectedTag] attribute removed.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_UnexpectedTypeForAttribute" xml:space="preserve">
-    <value>Field '{0}' of type '{1}' has an effective type of '{2}' when one of ({3}) was expected.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_UtcTimeTwoDigitYearMaxTooSmall" xml:space="preserve">
-    <value>Field '{0}' on type '{1}' has a [UtcTime] TwoDigitYearMax value ({2}) smaller than the minimum (99).</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_UnhandledType" xml:space="preserve">
-    <value>Could not determine how to serialize or deserialize type '{0}'.</value>
   </data>
   <data name="Cryptography_AsnWriter_EncodeUnbalancedStack" xml:space="preserve">
     <value>Encode cannot be called while a Sequence or SetOf is still open.</value>
@@ -196,6 +148,9 @@
   <data name="Cryptography_Cms_NoSignerCert" xml:space="preserve">
     <value>No signer certificate was provided. This platform does not implement the certificate picker UI.</value>
   </data>
+  <data name="Cryptography_Cms_NoSignerCertSilent" xml:space="preserve">
+    <value>No signer certificate was provided.</value>
+  </data>
   <data name="Cryptography_Cms_NoSignerAtIndex" xml:space="preserve">
     <value>The signed cryptographic message does not have a signer for the specified signer index.</value>
   </data>
@@ -207,6 +162,9 @@
   </data>
   <data name="Cryptography_Cms_Sign_Empty_Content" xml:space="preserve">
     <value>Cannot create CMS signature for empty content.</value>
+  </data>
+  <data name="Cryptography_Cms_Sign_No_Signature_First_Signer" xml:space="preserve">
+    <value>CmsSigner has to be the first signer with NoSignature.</value>
   </data>
   <data name="Cryptography_Cms_SignerNotFound" xml:space="preserve">
     <value>Cannot find the original signer.</value>
@@ -229,8 +187,38 @@
   <data name="Cryptography_Cms_WrongKeyUsage" xml:space="preserve">
     <value>The certificate is not valid for the requested usage.</value>
   </data>
+  <data name="Cryptography_NotValidPublicOrPrivateKey" xml:space="preserve">
+    <value>Key is not a valid public or private key.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_CannotProcessEncryptedSafeContents" xml:space="preserve">
+    <value>This operation is not valid on an encrypted or enveloped Pkcs12SafeContents.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_CertBagNotX509" xml:space="preserve">
+    <value>The Pkcs12CertBag contents are not an X.509 certificate.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_PfxIsSealed" xml:space="preserve">
+    <value>The Pkcs12Builder can no longer be modified because one of the Seal methods was already invoked.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_PfxMustBeSealed" xml:space="preserve">
+    <value>One of the Seal methods must be invoked on the Pkcs12Builder before invoking an Encode method.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_SafeContentsIsEncrypted" xml:space="preserve">
+    <value>Cannot enumerate the contents of an encrypted or enveloped Pkcs12SafeContents.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_SafeContentsIsReadOnly" xml:space="preserve">
+    <value>New Pkcs12SafeBag values cannot be added to a Pkcs12SafeContents that was read from existing data.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_WrongModeForDecrypt" xml:space="preserve">
+   <value>This decryption operation applies to 'Pkcs12ConfidentialityMode.{0}', but the target object is in 'Pkcs12ConfidentialityMode.{1}'.</value>
+  </data>
+  <data name="Cryptography_Pkcs12_WrongModeForVerify" xml:space="preserve">
+   <value>This verification operation applies to 'Pkcs12IntegrityMode.{0}', but the target object is in 'Pkcs12IntegrityMode.{1}'.</value>
+  </data>
   <data name="Cryptography_Pkcs_InvalidSignatureParameters" xml:space="preserve">
     <value>Invalid signature paramters.</value>
+  </data>
+  <data name="Cryptography_Pkcs8_EncryptedReadFailed" xml:space="preserve">
+    <value>The EncryptedPrivateKeyInfo structure was decoded but was not successfully interpreted, the password may be incorrect.</value>
   </data>
   <data name="Cryptography_Pkcs9_AttributeMismatch" xml:space="preserve">
     <value>The parameter should be a PKCS 9 attribute.</value>
@@ -282,6 +270,9 @@
   </data>
   <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
     <value>The string contains a character not in the 7 bit ASCII character set.</value>
+  </data>
+  <data name="Cryptography_UnknownAlgorithmIdentifier" xml:space="preserve">
+    <value>The algorithm identified by '{0}' is unknown, not valid for the requested usage, or was not handled.</value>
   </data>
   <data name="Cryptography_UnknownHashAlgorithm" xml:space="preserve">
     <value>'{0}' is not a known hash algorithm.</value>

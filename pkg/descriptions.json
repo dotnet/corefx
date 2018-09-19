@@ -64,6 +64,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.NETCore.Platforms.Future",
+    "Description": "Provides runtime information required to resolve target framework, platform, and runtime specific implementations of .NETCore packages.  This package represents future platforms not yet supported in .NETCore stable release and is subject to change.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.NETCore.Portable.Compatibility",
     "Description": "Enables compatibility with portable libraries targeting previous .NET releases like .NET Framework 4.0 and Silverlight.\nThis package supports retargeting references to classic reference assemblies (mscorlib.dll, system.dll, etc) to new contract assemblies (System.Runtime.dll, System.IO, etc).  It does this in a pay-for-play way to prevent consuming assemblies from having to reference all of the contracts that happen to overlap with mscorlib.  As such, when using this package you may encounter errors like\n\terror CS0012: The type 'WebRequest' is defined in an assembly that is not referenced. You must add a reference to assembly 'System.Net.Requests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.\nTo resolve these errors install the package with the same name as the missing assembly.",
     "CommonTypes": []
@@ -370,6 +375,18 @@
       "System.ComponentModel.Composition.Primitives.ExportDefinition",
       "System.ComponentModel.Composition.Primitives.ImportDefinition",
       "System.ComponentModel.Composition.ReflectionModel.ReflectionModelServices"
+    ]
+  },
+  {
+    "Name": "System.ComponentModel.Composition.Registration",
+    "Description": "This namespace provides classes that constitute the core of the Managed Extensibility Framework, or MEF.",
+    "CommonTypes": [
+      "System.ComponentModel.Composition.Registration.RegistrationBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder<T>",
+      "System.ComponentModel.Composition.Registration.ParameterImportBuilder",
+      "System.ComponentModel.Composition.Registration.ImportBuilder",
+      "System.ComponentModel.Composition.Registration.ExportBuilder"
     ]
   },
   {
@@ -719,6 +736,19 @@
       "System.Drawing.Font",
       "System.Drawing.Graphics",
       "System.Drawing.Icon"
+    ]
+  },
+  {
+    "Name": "System.Drawing.Design.Primitives",
+    "Description": "Contains classes that extend design-time user interface (UI) logic and drawing.",
+    "CommonTypes": [
+      "System.Drawing.Design.IPropertyValueUIService",
+      "System.Drawing.Design.PropertyValueUIHandler",
+      "System.Drawing.Design.PropertyValueUIItem",
+      "System.Drawing.Design.PropertyValueUIItemInvokeHandler",
+      "System.Drawing.Design.PaintValueEventArgs",
+      "System.Drawing.Design.UITypeEditor"
+      "System.Drawing.Design.UITypeEditorEditStyle"
     ]
   },
   {
@@ -1529,14 +1559,6 @@
     ]
   },
   {
-    "Name": "System.Runtime.Intrinsics.Experimental",
-    "Description": "Provides APIs to processor specific instructions.",
-    "CommonTypes": [
-        "System.Runtime.Intrinsics.Vector128<>",
-        "System.Runtime.Intrinsics.Vector256<>"
-    ]
-  },
-  {
     "Name": "System.Runtime.Loader",
     "Description": "Provides the System.Runtime.Loader.AssemblyLoadContext class, which provides members for loading assemblies.",
     "CommonTypes": [
@@ -2108,6 +2130,14 @@
     ]
   },
   {
+    "Name": "System.Windows.Extensions",
+    "Description": "Provides miscellaneous Windows-specific types",
+    "CommonTypes":[
+      "System.Security.Cryptography.X509Certificates.X509Certificate2UI",
+      "System.Security.Cryptography.X509Certificates.X509SelectionFlag"
+    ]
+  },
+  {
     "Name": "System.Private.Xml",
     "Description": "Provides a fast, non-cached, forward-only way to read and write Extensible Markup Language (XML) data.",
     "CommonTypes": [
@@ -2231,5 +2261,10 @@
     "CommonTypes": [
       "System.Xml.XPath.XmlDocumentExtensions"
     ]
+  },
+  {
+    "Name": "Microsoft.IO.Redist",
+    "Description": "Downlevel support package for System.IO classes.",
+    "CommonTypes": []
   }
 ]

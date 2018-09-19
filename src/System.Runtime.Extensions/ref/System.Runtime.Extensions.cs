@@ -8,7 +8,7 @@
 
 namespace System
 {
-    public partial class AppDomain : System.MarshalByRefObject
+    public sealed partial class AppDomain : System.MarshalByRefObject
     {
         private AppDomain() { }
         public static AppDomain CurrentDomain { get { throw null; } }
@@ -58,6 +58,7 @@ namespace System
         public void SetDynamicBase(string path) { }
         public void SetPrincipalPolicy(System.Security.Principal.PrincipalPolicy policy) { }
         public void SetThreadPrincipal(System.Security.Principal.IPrincipal principal) { }
+        public AppDomainSetup SetupInformation { get { throw null; } }
         public override string ToString() { throw null; }
         public static void Unload(System.AppDomain domain) { }
         public bool ShadowCopyFiles { get { throw null; } }
@@ -73,6 +74,25 @@ namespace System
         public void SetShadowCopyFiles() { }
         [Obsolete("AppDomain.SetShadowCopyPath has been deprecated. Please investigate the use of AppDomainSetup.ShadowCopyDirectories instead. http://go.microsoft.com/fwlink/?linkid=14202")]
         public void SetShadowCopyPath(string path) { }
+        public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName) { throw null; }
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
+    }
+
+    public sealed partial class AppDomainSetup
+    {
+        private AppDomainSetup() { }
+        public string ApplicationBase { get { throw null; } }
+        public string TargetFrameworkName { get { throw null; } }
     }
 
     public delegate System.Reflection.Assembly ResolveEventHandler(Object sender, ResolveEventArgs args);
@@ -1560,6 +1580,7 @@ namespace System.IO
         public virtual void Write(string format, object arg0, object arg1) { }
         public virtual void Write(string format, object arg0, object arg1, object arg2) { }
         public virtual void Write(string format, params object[] arg) { }
+        public virtual void Write(System.Text.StringBuilder value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void Write(uint value) { }
         [System.CLSCompliantAttribute(false)]
@@ -1570,6 +1591,7 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default) { throw null;  }
         public virtual void WriteLine() { }
         public virtual void WriteLine(bool value) { }
         public virtual void WriteLine(char value) { }
@@ -1586,6 +1608,7 @@ namespace System.IO
         public virtual void WriteLine(string format, object arg0, object arg1) { }
         public virtual void WriteLine(string format, object arg0, object arg1, object arg2) { }
         public virtual void WriteLine(string format, params object[] arg) { }
+        public virtual void WriteLine(System.Text.StringBuilder value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void WriteLine(uint value) { }
         [System.CLSCompliantAttribute(false)]
@@ -1597,6 +1620,7 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteLineAsync(char[] buffer, int index, int count) { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(string value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default) { throw null; }
     }
 }
 namespace System.Net
@@ -1731,6 +1755,14 @@ namespace System.Reflection
     {
         public AssemblyNameProxy() { }
         public System.Reflection.AssemblyName GetAssemblyName(System.String assemblyFile) { throw null; }
+    }
+}
+namespace System.Runtime
+{
+    public static class ProfileOptimization
+    {
+        public static void SetProfileRoot(string directoryPath) { throw null; }
+        public static void StartProfile(string profile) { throw null; }
     }
 }
 namespace System.Runtime.Versioning

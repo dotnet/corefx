@@ -1,18 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>System.IO.FileSystem.DriveInfo</RootNamespace>
     <AssemblyName>System.IO.FileSystem.DriveInfo</AssemblyName>
     <ProjectGuid>{29C14AD7-DC03-45DC-897D-8DACC762707E}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\IO\DriveInfo.cs" />
     <Compile Include="System\IO\DriveNotFoundException.cs" />
@@ -42,6 +35,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetDiskFreeSpaceEx.cs">
       <Link>Common\Interop\Windows\Interop.GetDiskFreeSpaceEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MaxLengths.cs">
+      <Link>Common\Interop\Windows\Interop.MaxLengths.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetVolumeLabel.cs">
       <Link>Common\Interop\Windows\Interop.SetVolumeLabel.cs</Link>
     </Compile>
@@ -59,6 +55,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\DisableMediaInsertionPrompt.cs">
+      <Link>Common\System\IO\DisableMediaInsertionPrompt.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
       <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
@@ -105,5 +104,4 @@
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -32,7 +32,7 @@ namespace System.Globalization
 
     internal partial class CalendarData
     {
-        private bool LoadCalendarDataFromSystem(String localeName, CalendarId calendarId)
+        private bool LoadCalendarDataFromSystem(string localeName, CalendarId calendarId)
         {
             bool result = true;
             result &= GetCalendarInfo(localeName, calendarId, CalendarDataType.NativeName, out this.sNativeName);
@@ -311,7 +311,7 @@ namespace System.Globalization
                         break;
                     default:
                         const string unsupportedDateFieldSymbols = "YuUrQqwWDFg";
-                        Debug.Assert(unsupportedDateFieldSymbols.IndexOf(input[index]) == -1,
+                        Debug.Assert(!unsupportedDateFieldSymbols.Contains(input[index]),
                             string.Format(CultureInfo.InvariantCulture,
                                 "Encountered an unexpected date field symbol '{0}' from ICU which has no known corresponding .NET equivalent.", 
                                 input[index]));

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
@@ -27,14 +27,14 @@
     <GetLastStablePackage
         LatestPackages="@(PackageReference)"
         PackageIndexes="$(PackageIndexFile)">
-        <Output  TaskParameter="LastStablePackages" ItemName="_NewPackageReferences" />
+        <Output TaskParameter="LastStablePackages" ItemName="_NewPackageReferences" />
     </GetLastStablePackage>
 
     <ItemGroup>
       <_Lines Include="&lt;Project xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;" />
       <_Lines Include="&lt;!-- The versions can be updated by running UpdateToLatestStablePackages target in harvestPackages.depproj --&gt;" />
       <_Lines Include="&lt;ItemGroup&gt;" />
-      <_Lines Include="&lt;PackageReference Include=&quot;%(_NewPackageReferences.Identity)&quot;&gt;&#13;  &lt;Version&gt;%(_NewPackageReferences.Version)&lt;/Version&gt;&#13;&lt;/PackageReference&gt;" />
+      <_Lines Include="&lt;PackageReference Include=&quot;%(_NewPackageReferences.Identity)&quot;&gt;&#13;&#10;  &lt;Version&gt;%(_NewPackageReferences.Version)&lt;/Version&gt;&#13;&#10;&lt;/PackageReference&gt;" />
       <_Lines Include="&lt;/ItemGroup&gt;" />
       <_Lines Include="&lt;/Project&gt;" />
     </ItemGroup>
