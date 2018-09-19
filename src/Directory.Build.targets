@@ -83,7 +83,7 @@
     &quot;xUnit.net Console&quot;: {
       &quot;commandName&quot;: &quot;Executable&quot;,
       &quot;executablePath&quot;: &quot;$(StartProgram.Replace('\', '\\'))&quot;,
-      &quot;commandLineArgs&quot;: &quot;$(StartArguments)&quot;,
+      &quot;commandLineArgs&quot;: &quot;$(StartArguments.Replace('\', '\\'))&quot;,
       &quot;workingDirectory&quot;: &quot;$(StartWorkingDirectory.Replace('\', '\\'))&quot;
     }
   }
