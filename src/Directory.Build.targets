@@ -12,11 +12,6 @@
 
   <Import Project="..\Directory.Build.targets" />
 
-  <PropertyGroup Condition="'$(IsInvokableTestProject)' == 'true'">
-    <LaunchSettingsOutputFileFullPath Condition="'$(LaunchSettingsOutputFileFullPath)' == ''">$(AppDesignerFolder)/launchSettings.json</LaunchSettingsOutputFileFullPath>
-    <LaunchSettingsInputFileFullPath Condition="'$(LaunchSettingsInputFileFullPath)' == ''">$(ToolsDir)tests.targets</LaunchSettingsInputFileFullPath>
-  </PropertyGroup>
-
   <Target Name="AddSkipGetTargetFrameworkToProjectReferences" Condition="'@(ProjectReference)' != ''">
     <ItemGroup>
       <ProjectReference>
@@ -60,7 +55,18 @@
     <Message Text="DumpTargets> $(OutputPath), C=[$(Configuration)], CG=[$(ConfigurationGroup)], OG=[$(OSGroup)], TG=[$(TargetGroup)]" Importance="Low" />
   </Target>
 
-  <Target Name="GenerateLaunchSettingsFiles"
+  <PropertyGroup Condition="'$(IsInvokableTestProject)' == 'true'">
+    <LaunchSettingsOutputFileFullPath Condition="'$(LaunchSettingsOutputFileFullPath)' == ''">$(AppDesignerFolder)/launchSettings.json</LaunchSettingsOutputFileFullPath>
+    <LaunchSettingsInputFileFullPath Condition="'$(LaunchSettingsInputFileFullPath)' == ''">$(ToolsDir)tests.targets</LaunchSettingsInputFileFullPath>
+
+    <CompileDependsOn>
+      GenerateLaunchSettingsFile;
+      $(CompileDependsOn);
+    </CompileDependsOn>
+  </PropertyGroup>
+
+  <!-- Create debug support files -->
+  <Target Name="GenerateLaunchSettingsFile"
           Condition="'$(LaunchSettingsOutputFileFullPath)' != '' AND '$(OmitLaunchSettings)' != 'true'"
           Inputs="$(LaunchSettingsInputFileFullPath)"
           Outputs="$(LaunchSettingsOutputFileFullPath)">
@@ -86,12 +92,5 @@
                       Overwrite="true" />
 
   </Target>
-
-  <PropertyGroup>
-    <CompileDependsOn>
-        GenerateLaunchSettingsFiles;
-        $(CompileDependsOn);
-    </CompileDependsOn>
-  </PropertyGroup>
 
 </Project>
