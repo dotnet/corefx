@@ -168,7 +168,7 @@ namespace System.Globalization.Tests
             DateTimeFormatInfo jpnFormat = new CultureInfo("ja-JP").DateTimeFormat;
             jpnFormat.Calendar = new JapaneseCalendar();
 
-            string pattern =  "gg yyyy'\u5E74' MM'\u6708' dd'\u65E5'"; // "gg yyyy'年' MM'月' dd'日'"
+            string pattern = "gg yyyy'\u5E74' MM'\u6708' dd'\u65E5'"; // "gg yyyy'年' MM'月' dd'日'"
             DateTime dt = new DateTime(1989, 01, 08); // Start of Heisei Era
 
             string formattedDate = dt.ToString(pattern, jpnFormat);
