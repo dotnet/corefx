@@ -63,11 +63,6 @@
       GenerateLaunchSettingsFile;
       $(PrepareForRunDependsOn);
     </PrepareForRunDependsOn>
-
-    <CleanDependsOn>
-      CleanLaunchSettingsFile;
-      $(CleanDependsOn);
-    </CleanDependsOn>
   </PropertyGroup>
 
   <!-- Create debug support files -->
@@ -96,10 +91,6 @@
                       Lines="$(LaunchSettingsFileContent)"
                       Overwrite="true" />
 
-  </Target>
-
-  <Target Name="CleanLaunchSettingsFile" Condition="Exists('$(LaunchSettingsOutputFileFullPath)')">
-    <Delete Files="$(LaunchSettingsOutputFileFullPath)" />
   </Target>
 
 </Project>
