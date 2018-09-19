@@ -34,9 +34,24 @@ namespace System.Net.NetworkInformation
 
         private bool GetIsForwardingEnabled()
         {
-            // /proc/sys/net/ipv4/conf/<name>/forwarding
-            string path = Path.Combine(NetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, NetworkFiles.ForwardingFileName);
-            return StringParsingHelpers.ParseRawIntFile(path) == 1;
+            try
+            {
+                // /proc/sys/net/ipv4/conf/<name>/forwarding
+                string path = Path.Combine(NetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, NetworkFiles.ForwardingFileName);
+                return StringParsingHelpers.ParseRawIntFile(path) == 1;
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+
+            try
+            {
+                // fall back to global forwarding config /proc/sys/net/ipv4/ip_forward
+                return StringParsingHelpers.ParseRawIntFile(NetworkFiles.Ipv4GlobalForwardingFile) == 1;
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+
+            return false;
         }
 
         private int GetMtu()
