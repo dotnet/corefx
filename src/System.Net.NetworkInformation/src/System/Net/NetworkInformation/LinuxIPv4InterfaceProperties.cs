@@ -34,25 +34,26 @@ namespace System.Net.NetworkInformation
 
         private bool GetIsForwardingEnabled()
         {
-            // Actual layout is specific to kernel version and it could change over time.
-            // If the kernel version we're running on doesn't have this files we don't want to fail, but instead continue. We've hit this exceptions in Windows Subsystem for Linux in the past.
-            // Also the /proc directory may not be mounted or accessible for other reasons. Therefore we catch these potential exceptions and return false instead.
-            try
+            string[] paths = new string[]
             {
                 // /proc/sys/net/ipv4/conf/<name>/forwarding
-                string path = Path.Join(NetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, NetworkFiles.ForwardingFileName);
-                return StringParsingHelpers.ParseRawIntFile(path) == 1;
-            }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
-
-            try
-            {
+                Path.Join(NetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, NetworkFiles.ForwardingFileName),
                 // Fall back to global forwarding config /proc/sys/net/ipv4/ip_forward
-                return StringParsingHelpers.ParseRawIntFile(NetworkFiles.Ipv4GlobalForwardingFile) == 1;
+                NetworkFiles.Ipv4GlobalForwardingFile
+            };
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                // Actual layout is specific to kernel version and it could change over time.
+                // If the kernel version we're running on doesn't have this files we don't want to fail, but instead continue. We've hit this exceptions in Windows Subsystem for Linux in the past.
+                // Also the /proc directory may not be mounted or accessible for other reasons. Therefore we catch these potential exceptions and return false instead.
+                try
+                {
+                    return StringParsingHelpers.ParseRawIntFile(paths[i]) == 1;
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
             }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
 
             return false;
         }
