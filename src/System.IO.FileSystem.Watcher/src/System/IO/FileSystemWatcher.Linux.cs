@@ -307,12 +307,28 @@ namespace System.IO
 
             internal void Start()
             {
-                // Schedule a task to read from the inotify queue and process the events.
-                Task.Factory.StartNew(obj => ((RunningInstance)obj).ProcessEvents(),
-                    this, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                // Don't capture the current ExecutionContext and its AsyncLocals onto the event loop causing them to live forever
+                bool restoreFlow = false;
+                try
+                {
+                    if (!ExecutionContext.IsFlowSuppressed())
+                    {
+                        ExecutionContext.SuppressFlow();
+                        restoreFlow = true;
+                    }
+                    // Schedule a task to read from the inotify queue and process the events.
+                    Task.Factory.StartNew(obj => ((RunningInstance)obj).ProcessEvents(),
+                        this, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-                // PERF: As needed, we can look into making this use async I/O rather than burning
-                // a thread that blocks in the read syscall.
+                    // PERF: As needed, we can look into making this use async I/O rather than burning
+                    // a thread that blocks in the read syscall.
+                }
+                finally
+                {
+                    // Restore the current ExecutionContext
+                    if (restoreFlow)
+                        ExecutionContext.RestoreFlow();
+                }
             }
 
             /// <summary>Object to use for synchronizing access to state when necessary.</summary>
