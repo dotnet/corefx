@@ -1231,7 +1231,7 @@ int32_t SystemNative_ReceiveMessage(intptr_t socket, MessageHeader* messageHeade
 
     assert((int32_t)header.msg_namelen <= messageHeader->SocketAddressLen);
     messageHeader->SocketAddressLen = Min((int32_t)header.msg_namelen, messageHeader->SocketAddressLen);
-    
+
     assert(header.msg_controllen <= (size_t)messageHeader->ControlBufferLen);
     messageHeader->ControlBufferLen = Min((int32_t)header.msg_controllen, messageHeader->ControlBufferLen);
 
@@ -1268,7 +1268,6 @@ int32_t SystemNative_SendMessage(intptr_t socket, MessageHeader* messageHeader, 
 
     ssize_t res;
     while ((res = sendmsg(fd, &header, socketFlags)) < 0 && errno == EINTR);
-
     if (res != -1)
     {
         *sent = res;
