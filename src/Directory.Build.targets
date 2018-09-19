@@ -59,10 +59,15 @@
     <LaunchSettingsOutputFileFullPath Condition="'$(LaunchSettingsOutputFileFullPath)' == ''">$(AppDesignerFolder)/launchSettings.json</LaunchSettingsOutputFileFullPath>
     <LaunchSettingsInputFileFullPath Condition="'$(LaunchSettingsInputFileFullPath)' == ''">$(ToolsDir)tests.targets</LaunchSettingsInputFileFullPath>
 
-    <CompileDependsOn>
+    <PrepareForRunDependsOn>
       GenerateLaunchSettingsFile;
-      $(CompileDependsOn);
-    </CompileDependsOn>
+      $(PrepareForRunDependsOn);
+    </PrepareForRunDependsOn>
+
+    <CleanDependsOn>
+      CleanLaunchSettingsFile;
+      $(CleanDependsOn);
+    </CleanDependsOn>
   </PropertyGroup>
 
   <!-- Create debug support files -->
@@ -86,11 +91,15 @@
       </LaunchSettingsFileContent>
     </PropertyGroup>
 
-    <MakeDir Directories="$(AppDesignerFolder)" />
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName($(LaunchSettingsOutputFileFullPath)))" />
     <WriteLinesToFile File="$(LaunchSettingsOutputFileFullPath)"
                       Lines="$(LaunchSettingsFileContent)"
                       Overwrite="true" />
 
+  </Target>
+
+  <Target Name="CleanLaunchSettingsFile" Condition="Exists('$(LaunchSettingsOutputFileFullPath)')">
+    <Delete Files="$(LaunchSettingsOutputFileFullPath)" />
   </Target>
 
 </Project>
