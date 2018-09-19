@@ -32,7 +32,7 @@ namespace System.IO.Tests
             Assert.Throws<PlatformNotSupportedException>(() => File.Decrypt(null));
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsHomeEdition))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "File encryption is not supported on this platform.")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EncryptDecrypt_Read()
