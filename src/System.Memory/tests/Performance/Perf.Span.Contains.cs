@@ -187,7 +187,7 @@ namespace System.Memory.Tests
         {
             new object[] { "string1", '1' },
             new object[] { "foobardzsdzs", 'z' },
-            new object[] { "StrIng", "I" },
+            new object[] { "StrIng", 'I' },
             new object[] { "\u3060", '\u305F' },
             new object[] { "ABCDE", 'c' },
             new object[] { "More Test's", '\'' },
