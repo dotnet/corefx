@@ -1692,7 +1692,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void DeserializeIEREFSIntoStringTest()
+    public static void DeserializeIDREFSIntoStringTest()
     {
         string xmlstring = @"<?xml version = ""1.0"" encoding = ""utf-8"" ?><Document xmlns = ""http://example.com"" id = ""ID1"" refs=""ID1 ID2 ID3"" ></Document>";
         Stream ms = GenerateStreamFromString(xmlstring);
