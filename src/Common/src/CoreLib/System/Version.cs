@@ -15,6 +15,7 @@ namespace System
     // specified component.
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class Version : ICloneable, IComparable, IComparable<Version>, IEquatable<Version>, ISpanFormattable
     {
         // AssemblyName depends on the order staying the same
@@ -340,7 +341,7 @@ namespace System
                 if (buildEnd != -1)
                 {
                     buildEnd += (minorEnd + 1);
-                    if (input.Slice(buildEnd + 1).IndexOf('.') != -1)
+                    if (input.Slice(buildEnd + 1).Contains('.'))
                     {
                         if (throwOnFailure) throw new ArgumentException(SR.Arg_VersionString, nameof(input));
                         return null;

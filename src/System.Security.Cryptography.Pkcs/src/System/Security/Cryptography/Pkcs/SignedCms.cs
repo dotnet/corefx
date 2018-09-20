@@ -17,6 +17,7 @@ namespace System.Security.Cryptography.Pkcs
     {
         private SignedDataAsn _signedData;
         private bool _hasData;
+        private SubjectIdentifierType _signerIdentifierType;
 
         // A defensive copy of the relevant portions of the data to Decode
         private Memory<byte> _heldData;
@@ -45,12 +46,22 @@ namespace System.Security.Cryptography.Pkcs
             if (contentInfo.Content == null)
                 throw new ArgumentNullException("contentInfo.Content");
 
-            // signerIdentifierType is ignored.
-            // In .NET Framework it is used for the signer type of a prompt-for-certificate signer.
-            // In .NET Core we don't support prompting.
-            //
-            // .NET Framework turned any unknown value into IssuerAndSerialNumber, so no exceptions
-            // are required, either.
+            // Normalize the subject identifier type the same way as .NET Framework.
+            // This value is only used in the zero-argument ComputeSignature overload,
+            // where it controls whether it succeeds (NoSignature) or throws (anything else),
+            // but in case it ever applies to anything else, make sure we're storing it
+            // faithfully.
+            switch (signerIdentifierType)
+            {
+                case SubjectIdentifierType.NoSignature:
+                case SubjectIdentifierType.IssuerAndSerialNumber:
+                case SubjectIdentifierType.SubjectKeyIdentifier:
+                    _signerIdentifierType = signerIdentifierType;
+                    break;
+                default:
+                    _signerIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
+                    break;
+            }
 
             ContentInfo = contentInfo;
             Detached = detached;
@@ -104,7 +115,11 @@ namespace System.Security.Cryptography.Pkcs
                 throw new InvalidOperationException(SR.Cryptography_Cms_MessageNotSigned);
             }
 
-            return PkcsHelpers.EncodeContentInfo(_signedData, Oids.Pkcs7Signed);
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                _signedData.Encode(writer);
+                return PkcsHelpers.EncodeContentInfo(writer.Encode(), Oids.Pkcs7Signed);
+            }
         }
 
         public void Decode(byte[] encodedMessage)
@@ -118,11 +133,10 @@ namespace System.Security.Cryptography.Pkcs
         internal void Decode(ReadOnlyMemory<byte> encodedMessage)
         { 
             // Windows (and thus NetFx) reads the leading data and ignores extra.
-            // So use the Deserialize overload which doesn't throw on extra data.
-            ContentInfoAsn contentInfo = AsnSerializer.Deserialize<ContentInfoAsn>(
-                encodedMessage,
-                AsnEncodingRules.BER,
-                out int bytesRead);
+            // So use the Decode overload which doesn't throw on extra data.
+            ContentInfoAsn.Decode(
+                new AsnReader(encodedMessage, AsnEncodingRules.BER),
+                out ContentInfoAsn contentInfo);
 
             if (contentInfo.ContentType != Oids.Pkcs7Signed)
             {
@@ -131,7 +145,7 @@ namespace System.Security.Cryptography.Pkcs
 
             // Hold a copy of the SignedData memory so we are protected against memory reuse by the caller.
             _heldData = contentInfo.Content.ToArray();
-            _signedData = AsnSerializer.Deserialize<SignedDataAsn>(_heldData, AsnEncodingRules.BER);
+            _signedData = SignedDataAsn.Decode(_heldData, AsnEncodingRules.BER);
             _contentType = _signedData.EncapContentInfo.ContentType;
             _hasPkcs7Content = false;
 
@@ -224,10 +238,7 @@ namespace System.Security.Cryptography.Pkcs
             return wrappedContent;
         }
 
-        public void ComputeSignature()
-        {
-            throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
-        }
+        public void ComputeSignature() => ComputeSignature(new CmsSigner(_signerIdentifierType), true);
 
         public void ComputeSignature(CmsSigner signer) => ComputeSignature(signer, true);
 
@@ -246,6 +257,32 @@ namespace System.Security.Cryptography.Pkcs
                 throw new CryptographicException(SR.Cryptography_Cms_Sign_Empty_Content);
             }
             
+            if (_hasData && signer.SignerIdentifierType == SubjectIdentifierType.NoSignature)
+            {
+                // Even if all signers have been removed, throw if doing a NoSignature signature
+                // on a loaded (from file, or from first signature) document.
+                //
+                // This matches the NetFX behavior.
+                throw new CryptographicException(SR.Cryptography_Cms_Sign_No_Signature_First_Signer);
+            }
+
+            if (signer.Certificate == null && signer.SignerIdentifierType != SubjectIdentifierType.NoSignature)
+            {
+                if (silent)
+                {
+                    // NetFX compatibility, silent disallows prompting, so throws InvalidOperationException
+                    // in this state.
+                    //
+                    // The message is different than on NetFX, because the resource string was for
+                    // enveloped CMS recipients (and the other site which would use that resource
+                    // is unreachable code due to CmsRecipient's ctor guarding against null certificates)
+                    throw new InvalidOperationException(SR.Cryptography_Cms_NoSignerCertSilent);
+                }
+
+                // Otherwise, PNSE. .NET Core doesn't support launching the cert picker UI.
+                throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
+            }
+
             // If we had content already, use that now.
             // (The second signer doesn't inherit edits to signedCms.ContentInfo.Content)
             ReadOnlyMemory<byte> content = _heldContent ?? ContentInfo.Content;

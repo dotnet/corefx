@@ -4,7 +4,9 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Runtime.Tests
 {
@@ -13,18 +15,40 @@ namespace System.Runtime.Tests
         [Fact]
         public void ProfileOptimization_CheckFileExists()
         {
-            string tmpProfileFilePath = GetTestFileName();
+            string profileFile = GetTestFileName();
 
-            RemoteInvoke(profileFilePath =>
+            RemoteInvoke((_profileFile) =>
             {
-                ProfileOptimization.SetProfileRoot(Path.GetDirectoryName(profileFilePath));
-                ProfileOptimization.StartProfile(Path.GetFileName(profileFilePath));
-                return 42;
-            }, tmpProfileFilePath).Dispose();
+                // tracking down why test sporadically fails on RedHat69
+                // write to the file first to check permissions
+                // See https://github.com/dotnet/corefx/issues/31792
+                File.WriteAllText(_profileFile, "42");
 
-            FileInfo fileInfo = new FileInfo(tmpProfileFilePath);
-            Assert.True(fileInfo.Exists);
-            Assert.True(fileInfo.Length > 0);
+                // Verify this write succeeded
+                Assert.True(File.Exists(_profileFile), $"'{_profileFile}' does not exist");
+                Assert.True(new FileInfo(_profileFile).Length > 0, $"'{_profileFile}' is empty");
+
+                // Delete the file and verify the delete
+                File.Delete(_profileFile);
+                Assert.True(!File.Exists(_profileFile), $"'{_profileFile} ought to not exist now");
+
+                // Perform the test work
+                ProfileOptimization.SetProfileRoot(Path.GetDirectoryName(_profileFile));
+                ProfileOptimization.StartProfile(Path.GetFileName(_profileFile));
+
+            }, profileFile).Dispose();
+
+            // profileFile should deterministically exist now -- if not, wait 5 seconds
+            bool existed = File.Exists(profileFile);
+            if (!existed)
+            {
+                Thread.Sleep(5000);
+            }
+
+            Assert.True(File.Exists(profileFile), $"'{profileFile}' does not exist");
+            Assert.True(new FileInfo(profileFile).Length > 0, $"'{profileFile}' is empty");
+
+            Assert.True(existed, $"'{profileFile}' did not immediately exist, but did exist 5 seconds later");
         }
     }
 }

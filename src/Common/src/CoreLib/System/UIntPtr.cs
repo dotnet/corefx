@@ -17,6 +17,7 @@ namespace System
 {
     [Serializable]
     [CLSCompliant(false)]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public readonly struct UIntPtr : IEquatable<UIntPtr>, ISerializable
     {
         private readonly unsafe void* _value; // Do not rename (binary serialization)
@@ -207,6 +208,9 @@ namespace System
 
         [Intrinsic]
         [NonVersionable]
+#if PROJECTN
+        [System.Runtime.CompilerServices.DependencyReductionRootAttribute]
+#endif
         public unsafe void* ToPointer()
         {
             return _value;

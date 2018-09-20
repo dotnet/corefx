@@ -16,6 +16,7 @@ using nint = System.Int32;
 namespace System
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public readonly struct IntPtr : IEquatable<IntPtr>, ISerializable
     {
         // WARNING: We allow diagnostic tools to directly inspect this member (_value). 
@@ -216,6 +217,9 @@ namespace System
         [CLSCompliant(false)]
         [Intrinsic]
         [NonVersionable]
+#if PROJECTN
+        [System.Runtime.CompilerServices.DependencyReductionRootAttribute]
+#endif
         public unsafe void* ToPointer()
         {
             return _value;

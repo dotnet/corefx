@@ -139,15 +139,12 @@ namespace System.Security.Cryptography.Pkcs
 
                 using (var writer = new AsnWriter(AsnEncodingRules.DER))
                 {
-                    writer.PushSetOf();
                     writer.WriteOctetString(dataHash);
-                    writer.PopSetOf();
-
                     signedAttrs.Add(
                         new AttributeAsn
                         {
                             AttrType = new Oid(Oids.MessageDigest, Oids.MessageDigest),
-                            AttrValues = writer.Encode(),
+                            AttrValues = new[] { new ReadOnlyMemory<byte>(writer.Encode()) },
                         });
                 }
 
@@ -155,28 +152,21 @@ namespace System.Security.Cryptography.Pkcs
                 {
                     using (var writer = new AsnWriter(AsnEncodingRules.DER))
                     {
-                        writer.PushSetOf();
                         writer.WriteObjectIdentifier(contentTypeOid);
-                        writer.PopSetOf();
-
                         signedAttrs.Add(
                             new AttributeAsn
                             {
                                 AttrType = new Oid(Oids.ContentType, Oids.ContentType),
-                                AttrValues = writer.Encode(),
+                                AttrValues = new[] { new ReadOnlyMemory<byte>(writer.Encode()) },
                             });
                     }
                 }
 
                 // Use the serializer/deserializer to DER-normalize the attribute order.
                 SignedAttributesSet signedAttrsSet = new SignedAttributesSet();
-                signedAttrsSet.SignedAttributes = PkcsHelpers.NormalizeSet(
+                signedAttrsSet.SignedAttributes = PkcsHelpers.NormalizeAttributeSet(
                     signedAttrs.ToArray(),
-                    normalized =>
-                    {
-                        AsnReader reader = new AsnReader(normalized, AsnEncodingRules.DER);
-                        hasher.AppendData(reader.PeekContentBytes().Span);
-                    });
+                    normalized => hasher.AppendData(normalized));
 
                 // Since this contains user data in a context where BER is permitted, use BER.
                 // There shouldn't be any observable difference here between BER and DER, though,
@@ -225,17 +215,30 @@ namespace System.Security.Cryptography.Pkcs
             {
                 List<AttributeAsn> attrs = BuildAttributes(UnsignedAttributes);
 
-                newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeSet(attrs.ToArray());
+                newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeAttributeSet(attrs.ToArray());
             }
 
-            bool signed = CmsSignature.Sign(
-                dataHash,
-                hashAlgorithmName,
-                Certificate,
-                PrivateKey,
-                silent,
-                out Oid signatureAlgorithm,
-                out ReadOnlyMemory<byte> signatureValue);
+            bool signed;
+            Oid signatureAlgorithm;
+            ReadOnlyMemory<byte> signatureValue;
+
+            if (SignerIdentifierType == SubjectIdentifierType.NoSignature)
+            {
+                signatureAlgorithm = new Oid(Oids.NoSignature, null);
+                signatureValue = dataHash;
+                signed = true;
+            }
+            else
+            {
+                signed = CmsSignature.Sign(
+                    dataHash,
+                    hashAlgorithmName,
+                    Certificate,
+                    PrivateKey,
+                    silent,
+                    out signatureAlgorithm,
+                    out signatureValue);
+            }
 
             if (!signed)
             {
@@ -312,25 +315,18 @@ namespace System.Security.Cryptography.Pkcs
 
             foreach (CryptographicAttributeObject attributeObject in attributes)
             {
-                using (var writer = new AsnWriter(AsnEncodingRules.DER))
+                AttributeAsn newAttr = new AttributeAsn
                 {
-                    writer.PushSetOf();
+                    AttrType = attributeObject.Oid,
+                    AttrValues = new ReadOnlyMemory<byte>[attributeObject.Values.Count],
+                };
 
-                    foreach (AsnEncodedData objectValue in attributeObject.Values)
-                    {
-                        writer.WriteEncodedValue(objectValue.RawData);
-                    }
-
-                    writer.PopSetOf();
-
-                    AttributeAsn newAttr = new AttributeAsn
-                    {
-                        AttrType = attributeObject.Oid,
-                        AttrValues = writer.Encode(),
-                    };
-
-                    signedAttrs.Add(newAttr);
+                for (int i = 0; i < attributeObject.Values.Count; i++)
+                {
+                    newAttr.AttrValues[i] = attributeObject.Values[i].RawData;
                 }
+
+                signedAttrs.Add(newAttr);
             }
 
             return signedAttrs;

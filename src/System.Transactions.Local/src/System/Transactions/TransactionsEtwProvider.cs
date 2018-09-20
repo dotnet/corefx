@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-//using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -1170,7 +1169,7 @@ namespace System.Transactions
         {
             Guid guid = Guid.Empty;
 
-            if (str.IndexOf('-') >= 0)
+            if (str.Contains('-'))
             { // GUID with dash
                 if (str.Length >= 36)
                 {

@@ -14,6 +14,7 @@ namespace System
     [StructLayout(LayoutKind.Sequential)]
     [Serializable]
     [Runtime.Versioning.NonVersionable] // This only applies to field layout
+    [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial struct Guid : IFormattable, IComparable, IComparable<Guid>, IEquatable<Guid>, ISpanFormattable
     {
         public static readonly Guid Empty = new Guid();
@@ -426,7 +427,7 @@ namespace System
             }
 
             // Check for dashes
-            bool dashesExistInString = guidString.IndexOf('-') >= 0;
+            bool dashesExistInString = guidString.Contains('-');
 
             if (dashesExistInString)
             {
@@ -448,7 +449,7 @@ namespace System
             }
 
             // Check for braces
-            bool bracesExistInString = (guidString.IndexOf('{') >= 0);
+            bool bracesExistInString = guidString.Contains('{');
 
             if (bracesExistInString)
             {
@@ -470,7 +471,7 @@ namespace System
             }
 
             // Check for parenthesis
-            bool parenthesisExistInString = (guidString.IndexOf('(') >= 0);
+            bool parenthesisExistInString = guidString.Contains('(');
 
             if (parenthesisExistInString)
             {

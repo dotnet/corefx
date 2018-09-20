@@ -4,8 +4,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Internal.Cryptography.Pal
@@ -82,14 +84,10 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeRsaPublicKey(byte[] encodedKeyValue)
             {
-                DerSequenceReader reader = new DerSequenceReader(encodedKeyValue);
-                RSAParameters rsaParameters = new RSAParameters();
-                reader.ReadPkcs1PublicBlob(ref rsaParameters);
-
                 RSA rsa = RSA.Create();
                 try
                 {
-                    rsa.ImportParameters(rsaParameters);
+                    rsa.ImportRSAPublicKey(encodedKeyValue.AsSpan(), out _);
                     return rsa;
                 }
                 catch (Exception)
@@ -101,21 +99,26 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeDsaPublicKey(byte[] encodedKeyValue, byte[] encodedParameters)
             {
-                DSAParameters dsaParameters = new DSAParameters();
-                DerSequenceReader parameterReader = new DerSequenceReader(encodedParameters);
-
-                parameterReader.ReadSubjectPublicKeyInfo(encodedKeyValue, ref dsaParameters);
-
-                DSA dsa = DSA.Create();
-                try
+                SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
                 {
-                    dsa.ImportParameters(dsaParameters);
-                    return dsa;
-                }
-                catch (Exception)
+                    Algorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(Oids.Dsa, null), Parameters = encodedParameters },
+                    SubjectPublicKey = encodedKeyValue,
+                };
+
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
                 {
-                    dsa.Dispose();
-                    throw;
+                    spki.Encode(writer);
+                    DSA dsa = DSA.Create();
+                    try
+                    {
+                        dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
+                        return dsa;
+                    }
+                    catch (Exception)
+                    {
+                        dsa.Dispose();
+                        throw;
+                    }
                 }
             }
 
