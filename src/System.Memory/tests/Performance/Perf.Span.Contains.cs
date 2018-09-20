@@ -196,7 +196,7 @@ namespace System.Memory.Tests
             new object[] { "Hello Worldbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbba!", 'y' },
             new object[] { GenerateInputString('A', 10, '5', 5), '5' },
             new object[] { GenerateInputString('A', 100, 'X', 70), 'x' },
-            new object[] { GenerateInputString('A', 1000, 'X', 500), 'X' },
+            new object[] { GenerateInputString('A', 1000, 'G', 500), 'G' },
             new object[] { GenerateInputString('\u3060', 1000, 'x', 500), 'x' },
             new object[] { GenerateInputString('\u3060', 100, '\u3059', 50), '\u3059' }
         };
