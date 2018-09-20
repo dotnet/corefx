@@ -2238,8 +2238,12 @@ namespace System
         public int Length => throw null;
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
+        public static Utf8String Concat(Utf8String str0, Utf8String str1) => throw null;
+        public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2) => throw null;
+        public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2, Utf8String str3) => throw null;
         public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
+        public bool EndsWith(System.Text.UnicodeScalar value) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public static bool Equals(Utf8String a, Utf8String b) => throw null;
@@ -2253,6 +2257,7 @@ namespace System
         public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
+        public bool StartsWith(System.Text.UnicodeScalar value) => throw null;
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
@@ -2284,6 +2289,38 @@ namespace System
         public Utf8StringSegment Trim() => throw null;
         public Utf8StringSegment TrimEnd() => throw null;
         public Utf8StringSegment TrimStart() => throw null;
+    }
+    public readonly partial struct StringSegment : IEquatable<StringSegment>
+    {
+        private readonly object _dummy;
+        public StringSegment(string value) => throw null;
+        public StringSegment(string value, int offset, int count) => throw null;
+        public static implicit operator ReadOnlySpan<char>(StringSegment value) => throw null;
+        public static implicit operator StringSegment(string value) => throw null;
+        public static bool operator ==(StringSegment a, StringSegment b) => throw null;
+        public static bool operator !=(StringSegment a, StringSegment b) => throw null;
+        public bool IsEmpty => throw null;
+        public int Length => throw null;
+        public ref readonly char this[int index] => throw null;
+        public bool Contains(char value) => throw null;
+        public override bool Equals(object obj) => throw null;
+        public bool Equals(StringSegment value) => throw null;
+        public static bool Equals(StringSegment a, StringSegment b, StringComparison comparisonType) => throw null;
+        public string GetBuffer(out int offset, out int length) => throw null;
+        public override int GetHashCode() => throw null;
+        public int GetHashCode(StringComparison comparisonType) => throw null;
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("This type cannot be pinned because it may result in a char* without a null terminator.", error: true)]
+        public ref readonly char GetPinnableReference() => throw null;
+        public int IndexOf(char value) => throw null;
+        public bool IsEmptyOrWhiteSpace() => throw null;
+        public int LastIndexOf(char value) => throw null;
+        public StringSegment Substring(int startIndex) => throw null;
+        public StringSegment Substring(int startIndex, int length) => throw null;
+        public override string ToString() => throw null;
+        public StringSegment Trim() => throw null;
+        public StringSegment TrimEnd() => throw null;
+        public StringSegment TrimStart() => throw null;
     }
     public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string>, System.IConvertible, System.IEquatable<string>
     {

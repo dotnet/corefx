@@ -12,6 +12,9 @@ namespace System
         public static System.ReadOnlyMemory<char> AsMemory(this string text) { throw null; }
         public static System.ReadOnlyMemory<char> AsMemory(this string text, int start) { throw null; }
         public static System.ReadOnlyMemory<char> AsMemory(this string text, int start, int length) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this StringSegment text) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this StringSegment text, int start) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this StringSegment text, int start, int length) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
@@ -21,6 +24,9 @@ namespace System
         public static System.ReadOnlySpan<char> AsSpan(this string text) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start, int length) { throw null; }
+        public static System.ReadOnlySpan<char> AsSpan(this StringSegment text) { throw null; }
+        public static System.ReadOnlySpan<char> AsSpan(this StringSegment text, int start) { throw null; }
+        public static System.ReadOnlySpan<char> AsSpan(this StringSegment text, int start, int length) { throw null; }
         public static System.ReadOnlySpan<byte> AsSpan(this Utf8String text) { throw null; }
         public static System.ReadOnlySpan<byte> AsSpan(this Utf8String text, int start) { throw null; }
         public static System.ReadOnlySpan<byte> AsSpan(this Utf8String text, int start, int length) { throw null; }

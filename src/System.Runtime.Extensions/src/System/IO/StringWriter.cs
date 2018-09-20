@@ -159,6 +159,23 @@ namespace System.IO
             }
         }
 
+        // Writes a string segment to the underlying string buffer. If the given string is
+        // null, nothing is written.
+        //
+        public override void Write(StringSegment value)
+        {
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+
+            if (!value.IsEmpty)
+            {
+                var buffer = value.GetBuffer(out int offset, out int length);
+                _sb.Append(buffer, offset, length);
+            }
+        }
+
         public override void Write(StringBuilder value)
         {
             if (GetType() != typeof(StringWriter))
@@ -276,6 +293,12 @@ namespace System.IO
         }
 
         public override Task WriteLineAsync(string value)
+        {
+            WriteLine(value);
+            return Task.CompletedTask;
+        }
+
+        public override Task WriteLineAsync(StringSegment value)
         {
             WriteLine(value);
             return Task.CompletedTask;

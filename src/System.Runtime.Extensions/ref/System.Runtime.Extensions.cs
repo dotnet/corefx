@@ -1576,11 +1576,14 @@ namespace System.IO
         public virtual void Write(object value) { }
         public virtual void Write(float value) { }
         public virtual void Write(string value) { }
+        public virtual void Write(StringSegment value) { }
         public virtual void Write(string format, object arg0) { }
         public virtual void Write(string format, object arg0, object arg1) { }
         public virtual void Write(string format, object arg0, object arg1, object arg2) { }
         public virtual void Write(string format, params object[] arg) { }
         public virtual void Write(System.Text.StringBuilder value) { }
+        public virtual void Write(Utf8String value) { }
+        public virtual void Write(Utf8StringSegment value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void Write(uint value) { }
         [System.CLSCompliantAttribute(false)]
@@ -1592,6 +1595,9 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default) { throw null;  }
+        public virtual System.Threading.Tasks.Task WriteAsync(StringSegment value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteAsync(Utf8String value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteAsync(Utf8StringSegment value) { throw null; }
         public virtual void WriteLine() { }
         public virtual void WriteLine(bool value) { }
         public virtual void WriteLine(char value) { }
@@ -1609,6 +1615,9 @@ namespace System.IO
         public virtual void WriteLine(string format, object arg0, object arg1, object arg2) { }
         public virtual void WriteLine(string format, params object[] arg) { }
         public virtual void WriteLine(System.Text.StringBuilder value) { }
+        public virtual void WriteLine(StringSegment value) { }
+        public virtual void WriteLine(Utf8String value) { }
+        public virtual void WriteLine(Utf8StringSegment value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void WriteLine(uint value) { }
         [System.CLSCompliantAttribute(false)]
@@ -1621,6 +1630,9 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteLineAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(string value) { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(StringSegment value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(Utf8String value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(Utf8StringSegment value) { throw null; }
     }
 }
 namespace System.Net

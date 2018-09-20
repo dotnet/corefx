@@ -23,4 +23,20 @@ namespace System
         public static Utf8StringComparer FromComparison(StringComparison comparisonType) { throw null; }
         public abstract int GetHashCode(Utf8String obj);
     }
+    public abstract partial class StringSegmentComparer : System.Collections.Generic.IComparer<StringSegment>, System.Collections.Generic.IEqualityComparer<StringSegment>
+    {
+        private StringSegmentComparer() { }
+        public static StringSegmentComparer CurrentCulture => throw null;
+        public static StringSegmentComparer CurrentCultureIgnoreCase => throw null;
+        public static StringSegmentComparer InvariantCulture => throw null;
+        public static StringSegmentComparer InvariantCultureIgnoreCase => throw null;
+        public static StringSegmentComparer Ordinal => throw null;
+        public static StringSegmentComparer OrdinalIgnoreCase => throw null;
+        public static StringSegmentComparer Create(System.Globalization.CultureInfo culture, bool ignoreCase) => throw null;
+        public static StringSegmentComparer Create(System.Globalization.CultureInfo culture, System.Globalization.CompareOptions options) => throw null;
+        public abstract int Compare(StringSegment x, StringSegment y);
+        public abstract bool Equals(StringSegment x, StringSegment y);
+        public static StringSegmentComparer FromComparison(StringComparison comparisonType) => throw null;
+        public abstract int GetHashCode(StringSegment obj);
+    }
 }

@@ -416,15 +416,14 @@ namespace System.IO
             InternalWriteAllBytes(path, bytes);
         }
 
-        private static void InternalWriteAllBytes(string path, byte[] bytes)
+        private static void InternalWriteAllBytes(string path, ReadOnlySpan<byte> bytes)
         {
             Debug.Assert(path != null);
             Debug.Assert(path.Length != 0);
-            Debug.Assert(bytes != null);
 
             using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                fs.Write(bytes, 0, bytes.Length);
+                fs.Write(bytes);
             }
         }
         public static string[] ReadAllLines(string path)

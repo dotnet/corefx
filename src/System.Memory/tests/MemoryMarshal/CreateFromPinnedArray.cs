@@ -43,6 +43,7 @@ namespace System.SpanTests
             pinnedMemory.Validate(93, 94, 95, 96, 97);
 
             TestMemory<int> testPinnedMemory = Unsafe.As<Memory<int>, TestMemory<int>>(ref pinnedMemory);
+            Assert.True(testPinnedMemory._index < 0); // high bit of _index should be set if using pre-pinned memory
 
             Memory<int> slice = pinnedMemory.Slice(0);
             TestMemory<int> testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
@@ -60,7 +61,7 @@ namespace System.SpanTests
             Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
             Assert.Equal(expectedLength, testSlice._length);
 
-            expectedLength = 2 | (1 << 31);
+            expectedLength = 2;
             slice = pinnedMemory.Slice(1, 2);
             testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
             Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
@@ -75,6 +76,7 @@ namespace System.SpanTests
             pinnedMemory.Validate(93, 94, 95, 96, 97);
 
             TestMemory<int> testPinnedMemory = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref pinnedMemory);
+            Assert.True(testPinnedMemory._index < 0); // high bit of _index should be set if using pre-pinned memory
 
             ReadOnlyMemory<int> slice = pinnedMemory.Slice(0);
             TestMemory<int> testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
@@ -92,7 +94,7 @@ namespace System.SpanTests
             Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
             Assert.Equal(expectedLength, testSlice._length);
 
-            expectedLength = 2 | (1 << 31);
+            expectedLength = 2;
             slice = pinnedMemory.Slice(1, 2);
             testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
             Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
