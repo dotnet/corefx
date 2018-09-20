@@ -328,10 +328,10 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task ReadAsyncReturnsDataAfterCancelledReadWasCompleted()
+        public async Task ReadAsyncReturnsDataAfterItWasWrittenDuringCancelledRead()
         {
-            var readTask = Pipe.Reader.ReadAsync();
-            var awaiter = readTask.GetAwaiter();
+            ValueTask<ReadResult> readTask = Pipe.Reader.ReadAsync();
+            ValueTaskAwaiter<ReadResult> awaiter = readTask.GetAwaiter();
             ReadResult result = default;
             awaiter.OnCompleted(
                 () =>
