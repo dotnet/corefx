@@ -190,19 +190,6 @@ namespace System.Collections.Tests
                     return false;
                 };
             }
-            if ((operations & ModifyOperation.Clear) == ModifyOperation.Clear)
-            {
-                yield return (IEnumerable<KeyValuePair<TKey, TValue>> enumerable) =>
-                {
-                    IDictionary<TKey, TValue> casted = ((IDictionary<TKey, TValue>)enumerable);
-                    if (casted.Count() > 0)
-                    {
-                        casted.Clear();
-                        return true;
-                    }
-                    return false;
-                };
-            }
             //throw new InvalidOperationException(string.Format("{0:G}", operations));
         }
 
