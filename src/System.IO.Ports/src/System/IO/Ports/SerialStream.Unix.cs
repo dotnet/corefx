@@ -516,7 +516,7 @@ namespace System.IO.Ports
                 }
                 else
                 {
-                    throw new ArgumentException(SR.Arg_InvalidSerialPort, nameof(portName));
+                    throw new ArgumentException(SR.Arg_InvalidSerialPortExtended, portName);
                 }
             }
 
