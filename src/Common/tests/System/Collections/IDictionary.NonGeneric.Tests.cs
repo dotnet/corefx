@@ -165,16 +165,16 @@ namespace System.Collections.Tests
             }
             if ((operations & ModifyOperation.Clear) == ModifyOperation.Clear)
             {
-                yield return (IEnumerable enumerable) =>
-                {
-                    IDictionary casted = ((IDictionary)enumerable);
-                    if (casted.Count > 0)
-                    {
-                        casted.Clear();
-                        return true;
-                    }
-                    return false;
-                };
+               yield return (IEnumerable enumerable) =>
+               {
+                   IDictionary casted = ((IDictionary)enumerable);
+                   if (casted.Count > 0)
+                   {
+                       casted.Clear();
+                       return true;
+                   }
+                   return false;
+               };
             }
         }
 
