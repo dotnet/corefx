@@ -2273,5 +2273,10 @@
     "Name": "Microsoft.IO.Redist",
     "Description": "Downlevel support package for System.IO classes.",
     "CommonTypes": []
+  },
+  {
+    "Name": "Microsoft.Reflection.TypeLoader",
+    "Description": "Provides functionality to reflect on assemblies with different architectures and without interferring with AppDomain contexts.",
+    "CommonTypes": []
   }
 ]

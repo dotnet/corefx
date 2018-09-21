@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{443B7659-B3FA-4B32-88BA-3A0517E21018}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ExternallyShipping>false</ExternallyShipping>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Even though the test assembly is targeting netcoreapp2.1, the System.Reflection.TypeLoader.dll we're building in corefxlab is
+         built against netstandard. As long as that's the case, you need to "#define netstandard" in the test project as well.
+         If you don't do that, the test project will assume it can invoke netcore-only Reflection apis on the Type objects it gets back
+         from the TypeLoader. But the configuration we're running (netstandard build of TypeLoader.dll running on CoreCLR) does not
+         permit that. Attempting to do so on such a combination will result in NotImplemented/NullReference exceptions and lots
+         of test failures.
+
+         All this confusion should get straightened out once the library moves to corefx. We're in this pickle here in corefxlab
+         because corefxlab does not support building for multiple target frameworks so we had to choose one.
+      -->
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+</Project>
