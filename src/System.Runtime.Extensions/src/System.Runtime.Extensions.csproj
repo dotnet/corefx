@@ -69,6 +69,9 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
     <Compile Include="System\Environment.WinRT.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\IO\StringWriter.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'uap'">
     <Compile Include="System\Environment.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\secur32\Interop.GetUserNameExW.cs">

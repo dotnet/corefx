@@ -11,7 +11,7 @@ namespace System.IO
 {
     // This class implements a text writer that writes to a string buffer and allows
     // the resulting sequence of characters to be presented as a string.
-    public class StringWriter : TextWriter
+    public partial class StringWriter : TextWriter
     {
         private static volatile UnicodeEncoding s_encoding = null;
 
@@ -158,24 +158,7 @@ namespace System.IO
                 _sb.Append(value);
             }
         }
-
-        // Writes a string segment to the underlying string buffer. If the given string is
-        // null, nothing is written.
-        //
-        public override void Write(StringSegment value)
-        {
-            if (!_isOpen)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
-            if (!value.IsEmpty)
-            {
-                var buffer = value.GetBuffer(out int offset, out int length);
-                _sb.Append(buffer, offset, length);
-            }
-        }
-
+        
         public override void Write(StringBuilder value)
         {
             if (GetType() != typeof(StringWriter))
@@ -297,13 +280,7 @@ namespace System.IO
             WriteLine(value);
             return Task.CompletedTask;
         }
-
-        public override Task WriteLineAsync(StringSegment value)
-        {
-            WriteLine(value);
-            return Task.CompletedTask;
-        }
-
+        
         public override Task WriteLineAsync(StringBuilder value, CancellationToken cancellationToken = default)
         {
             if (GetType() != typeof(StringWriter))

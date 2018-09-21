@@ -1,2 +1,3 @@
 Compat issues with assembly System.IO.FileSystem:
 MembersMustExist : Member 'System.IO.File.ReadAllTextUtf8(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.File.WriteAllTextUtf8(System.String, System.Utf8String)' does not exist in the implementation but it does exist in the contract.

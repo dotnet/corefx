@@ -40,3 +40,27 @@ namespace System
         public abstract int GetHashCode(StringSegment obj);
     }
 }
+
+namespace System.IO
+{
+    public partial class StringWriter : System.IO.TextWriter
+    {
+        public override void Write(StringSegment value) { }
+        public override System.Threading.Tasks.Task WriteLineAsync(StringSegment value) { throw null; }
+    }
+    public abstract partial class TextWriter : System.MarshalByRefObject, System.IDisposable
+    {
+        public virtual void Write(StringSegment value) { }
+        public virtual void Write(Utf8String value) { }
+        public virtual void Write(Utf8StringSegment value) { }
+        public virtual System.Threading.Tasks.Task WriteAsync(StringSegment value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteAsync(Utf8String value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteAsync(Utf8StringSegment value) { throw null; }
+        public virtual void WriteLine(StringSegment value) { }
+        public virtual void WriteLine(Utf8String value) { }
+        public virtual void WriteLine(Utf8StringSegment value) { }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(StringSegment value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(Utf8String value) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(Utf8StringSegment value) { throw null; }
+    }
+}
