@@ -6,3 +6,17 @@ MembersMustExist : Member 'System.IO.TextWriter.WriteAsync(System.Text.StringBui
 MembersMustExist : Member 'System.IO.TextWriter.WriteLine(System.Text.StringBuilder)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.Text.StringBuilder, System.Threading.CancellationToken)' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Utf8StringComparer' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.StringSegmentComparer' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StringWriter.Write(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StringWriter.WriteLineAsync(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.Write(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.Write(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.Write(System.Utf8StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteAsync(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteAsync(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteLine(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteLine(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteLine(System.Utf8StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.Utf8StringSegment)' does not exist in the implementation but it does exist in the contract.
