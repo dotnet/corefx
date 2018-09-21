@@ -38,22 +38,5 @@ internal partial class Interop
             }
             return count;
         }
-
-        internal static unsafe bool TryGetACPCodePage(out int codePage)
-        {
-            // Note: GetACP is not available in the Windows Store Profile, but calling
-            // GetCPInfoEx with the value CP_ACP (0) yields the same result.
-            CPINFOEXW cpInfo;
-            if (GetCPInfoExW(CP_ACP, 0, &cpInfo) != 0)
-            {
-                codePage = (int)cpInfo.CodePage;
-                return true;
-            }
-            else
-            {
-                codePage = 0;
-                return false;
-            }
-        }
     }
 }
