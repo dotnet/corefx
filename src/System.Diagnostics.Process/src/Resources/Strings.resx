@@ -207,6 +207,9 @@
   <data name="CantRedirectStreams" xml:space="preserve">
     <value>The Process object must have the UseShellExecute property set to false in order to redirect IO streams.</value>
   </data>
+  <data name="DirectoryNotValidAsInput" xml:space="preserve">
+    <value>The FileName property should not be a directory unless UseShellExecute is set.</value>
+  </data>
   <data name="PendingAsyncOperation" xml:space="preserve">
     <value>An async read operation has already been started on the stream.</value>
   </data>
@@ -228,11 +231,38 @@
   <data name="CantSetProcessStartInfo" xml:space="preserve">
     <value>Process is already associated with a real process, so the requested operation cannot be performed.</value>
   </data>
+  <data name="CantGetAllPids" xml:space="preserve">
+    <value>Could not get all running Process IDs.</value>
+  </data>
+  <data name="NegativePidNotSupported" xml:space="preserve">
+    <value>Process IDs cannot be negative.</value>
+  </data>
+  <data name="ProcessorAffinityNotSupported" xml:space="preserve">
+    <value>Processor affinity for processes or threads is not supported on this platform.</value>
+  </data>
   <data name="ProcessStartWithPasswordAndDomainNotSupported" xml:space="preserve">
     <value>Starting a process as another user with a specified password and domain is not supported on this platform.</value>
   </data>
   <data name="ProcessStartSingleFeatureNotSupported" xml:space="preserve">
     <value>The {0} property is not supported on this platform.</value>
+  </data>
+  <data name="RUsageFailure" xml:space="preserve">
+    <value>Failed to set or retrieve rusage information. See the error code for OS-specific error information.</value>
+  </data>
+  <data name="MinimumWorkingSetNotSupported" xml:space="preserve">
+    <value>Setting the minimum working set is not supported on this platform.</value>
+  </data>
+  <data name="OsxExternalProcessWorkingSetNotSupported" xml:space="preserve">
+    <value>Getting or setting the working set limits on other processes is not supported on this platform.</value>
+  </data>
+  <data name="ThreadPriorityNotSupported" xml:space="preserve">
+    <value>Getting or setting the thread priority is not supported on this platform.</value>
+  </data>
+  <data name="ProcessInformationUnavailable" xml:space="preserve">
+    <value>Unable to retrieve the specified information about the process or thread.  It may have exited or may be privileged.</value>
+  </data>
+  <data name="RemoteMachinesNotSupported" xml:space="preserve">
+    <value>Access to processes on remote machines is not supported on this platform.</value>
   </data>
   <data name="CantSetDuplicatePassword" xml:space="preserve">
     <value>ProcessStartInfo.Password and ProcessStartInfo.PasswordInClearText cannot both be set. Use only one of them.</value>
@@ -276,8 +306,14 @@
   <data name="UseShellExecuteNotSupported" xml:space="preserve">
     <value>UseShellExecute is not supported on this platform.</value>
   </data>
+  <data name="GetProcessInfoNotSupported" xml:space="preserve">
+    <value>Retrieving information about local processes is not supported on this platform.</value>
+  </data>
   <data name="StandardInputEncodingNotAllowed" xml:space="preserve">
     <value>StandardInputEncoding is only supported when standard input is redirected.</value>
+  </data>
+  <data name="UserDoesNotExist" xml:space="preserve">
+    <value>User with name '{0}' was not found.</value>
   </data>
   <data name="ArgumentAndArgumentListInitialized" xml:space="preserve">
     <value>Only one of Arguments or ArgumentList may be used.</value>
