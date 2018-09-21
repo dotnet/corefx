@@ -13,6 +13,17 @@ namespace System.IO
 {
     public static partial class File
     {
+        private static void InternalWriteAllBytes(string path, ReadOnlySpan<byte> bytes)
+        {
+            Debug.Assert(path != null);
+            Debug.Assert(path.Length != 0);
+
+            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                fs.Write(bytes);
+            }
+        }
+
         public static Utf8String ReadAllTextUtf8(string path)
         {
             // bufferSize == 1 used to avoid unnecessary buffer in FileStream
