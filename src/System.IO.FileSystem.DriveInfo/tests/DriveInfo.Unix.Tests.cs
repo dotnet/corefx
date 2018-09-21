@@ -84,13 +84,5 @@ namespace System.IO.FileSystem.DriveInfoTests
             var root = new DriveInfo("/");
             Assert.Throws<PlatformNotSupportedException>(() => root.VolumeLabel = root.Name);
         }
-
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsSubsystemForLinux))]
-        public void DriveFormatOnWsl()
-        {
-            DriveInfo di = new DriveInfo(Path.GetTempPath());
-            Assert.Equal("rootfs", di.DriveFormat);
-            Assert.Equal(DriveType.Ram, di.DriveType);
-        }
     }
 }
