@@ -86,7 +86,7 @@ namespace System.IO.FileSystem.DriveInfoTests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsSubsystemForLinux))]
-        public void DriveFormatOnWSl()
+        public void DriveFormatOnWsl()
         {
             DriveInfo di = new DriveInfo(Path.GetTempPath());
             Assert.Equal("rootfs", di.DriveFormat);
