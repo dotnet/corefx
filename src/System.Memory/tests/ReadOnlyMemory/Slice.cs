@@ -31,11 +31,14 @@ namespace System.MemoryTests
         {
             int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 };
             ReadOnlyMemory<int> memory = new ReadOnlyMemory<int>(a).Slice(a.Length);
-            memory.Span.ValidateNullEmpty();
+            Assert.Equal(0, memory.Length);
+            Assert.True(Unsafe.AreSame(ref a[a.Length - 1], ref Unsafe.Subtract(ref Unsafe.AsRef(in MemoryMarshal.GetReference(memory.Span)), 1)));
 
             MemoryManager<int> manager = new CustomMemoryForTest<int>(a);
             ReadOnlyMemory<int> memoryFromManager = ((ReadOnlyMemory<int>)manager.Memory).Slice(a.Length);
-            memoryFromManager.Span.ValidateNullEmpty();
+
+            Assert.Equal(0, memoryFromManager.Length);
+            Assert.True(Unsafe.AreSame(ref a[a.Length - 1], ref Unsafe.Subtract(ref Unsafe.AsRef(in MemoryMarshal.GetReference(memoryFromManager.Span)), 1)));
         }
 
         [Fact]
@@ -73,11 +76,14 @@ namespace System.MemoryTests
         {
             int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 };
             ReadOnlyMemory<int> memory = new ReadOnlyMemory<int>(a).Slice(a.Length, 0);
-            memory.Span.ValidateNullEmpty();
+            Assert.Equal(0, memory.Length);
+            Assert.True(Unsafe.AreSame(ref a[a.Length - 1], ref Unsafe.Subtract(ref Unsafe.AsRef(in MemoryMarshal.GetReference(memory.Span)), 1)));
 
             MemoryManager<int> manager = new CustomMemoryForTest<int>(a);
             ReadOnlyMemory<int> memoryFromManager = ((ReadOnlyMemory<int>)manager.Memory).Slice(a.Length, 0);
-            memoryFromManager.Span.ValidateNullEmpty();
+
+            Assert.Equal(0, memoryFromManager.Length);
+            Assert.True(Unsafe.AreSame(ref a[a.Length - 1], ref Unsafe.Subtract(ref Unsafe.AsRef(in MemoryMarshal.GetReference(memoryFromManager.Span)), 1)));
         }
 
         [Fact]

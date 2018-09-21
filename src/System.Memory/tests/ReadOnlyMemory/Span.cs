@@ -95,10 +95,10 @@ namespace System.MemoryTests
             ReadOnlyMemory<int> memory;
 
             memory = new ReadOnlyMemory<int>(empty);
-            memory.Span.ValidateNullEmpty();
+            memory.Span.ValidateNonNullEmpty();
 
             memory = new ReadOnlyMemory<int>(empty, 0, empty.Length);
-            memory.Span.ValidateNullEmpty();
+            memory.Span.ValidateNonNullEmpty();
 
             MemoryManager<int> manager = new CustomMemoryForTest<int>(empty);
             ((ReadOnlyMemory<int>)manager.Memory).Span.Validate();

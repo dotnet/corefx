@@ -96,10 +96,10 @@ namespace System.MemoryTests
             Memory<int> memory;
 
             memory = new Memory<int>(empty);
-            memory.Span.ValidateNullEmpty();
+            memory.Span.ValidateNonNullEmpty();
 
             memory = new Memory<int>(empty, 0, empty.Length);
-            memory.Span.ValidateNullEmpty();
+            memory.Span.ValidateNonNullEmpty();
 
             MemoryManager<int> manager = new CustomMemoryForTest<int>(empty);
             manager.Memory.Span.Validate();
