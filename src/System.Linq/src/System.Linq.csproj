@@ -6,6 +6,9 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Linq\ChunkBy.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ContractProject Include="..\ref\System.Linq.csproj">
       <TargetGroup>netcoreapp</TargetGroup>
     </ContractProject>
