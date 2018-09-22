@@ -62,6 +62,8 @@ To instead configure the feed using a custom config file, drop a file named `NuG
 
 You'll need to modify your `.csproj` file manually to reference the new runtime version. Merge the contents of the snippet below with those of your `.csproj` file, replacing the `RuntimeFrameworkVersion` element as appropriate.
 
+When you copy over the snippet, be sure to replace the `RuntimeFrameworkVersion` element with the latest version listed at https://github.com/dotnet/corefx/blob/feature/utf8string/Documentation/utf8string/version_history.md. This will ensure you're using an up-to-date build of the `Utf8String` feature work.
+
 ```xml
 <PropertyGroup>
   <OutputType>Exe</OutputType>
