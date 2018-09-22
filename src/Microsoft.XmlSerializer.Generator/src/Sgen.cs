@@ -565,9 +565,14 @@ namespace Microsoft.XmlSerializer.Generator
                     return null;
                 }
 
-                if(s_referencedic.ContainsKey(assemblyname))
+                if (s_referencedic.ContainsKey(assemblyname))
                 {
                     string reference = s_referencedic[assemblyname];
+
+                    //for System.ServiceModel.Primitives, we need to load its execution assembly rather than reference assembly
+                    if (assemblyname.Equals("System.ServiceModel.Primitives"))
+                        reference = reference.Replace("ref", "lib");
+
                     if (!string.IsNullOrEmpty(reference))
                     {
                         if (File.Exists(reference))
