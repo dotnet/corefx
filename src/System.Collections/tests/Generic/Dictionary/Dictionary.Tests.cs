@@ -16,9 +16,9 @@ namespace System.Collections.Tests
             return new Dictionary<string, string>();
         }
 
-        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert;
+        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert | ModifyOperation.Clear;
 
-        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove | ModifyOperation.Clear;
+        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove;
 
         /// <summary>
         /// Creates an object that is dependent on the seed given. The object may be either
@@ -253,12 +253,16 @@ namespace System.Collections.Tests
         [Fact]
         public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            var valuesEnum = dictionary.GetEnumerator();
+            if (PlatformDetection.IsFullFramework)
+            {
+                Dictionary<string, string> dictionary = new Dictionary<string, string>();
+                var valuesEnum = dictionary.GetEnumerator();
 
-            dictionary.Clear();
-            Assert.Empty(dictionary);
-            valuesEnum.MoveNext();
+                dictionary.Clear();
+                Assert.Empty(dictionary);
+                valuesEnum.MoveNext();
+            }
+            
         }
 
         [Fact]
