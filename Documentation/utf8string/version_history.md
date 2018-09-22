@@ -4,6 +4,6 @@ To use any of the below versions, set your `.csproj`'s `RuntimeFrameworkVersion`
 
 # Version history
 
-## 3.0.0-alphautf8string-26922-01
+## 3.0.0-alphautf8string-26922-02
 
 Initial prototype release. Includes skeleton `Utf8String` APIs and ancillary helper types like `System.Text.UnicodeScalar`.
