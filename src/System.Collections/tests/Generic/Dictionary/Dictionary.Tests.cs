@@ -250,6 +250,29 @@ namespace System.Collections.Tests
             }
         }
 
+        [Fact]
+        public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
+        {
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            var valuesEnum = dictionary.GetEnumerator();
+
+            dictionary.Clear();
+            Assert.Empty(dictionary);
+            valuesEnum.MoveNext();
+        }
+
+        [Fact]
+        public void Unsuccessful_TryAdd_DoesNotInvalidateEnumerator()
+        {
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            dictionary.Add("a", "b");
+
+            var valuesEnum = dictionary.GetEnumerator();
+            Assert.False(dictionary.TryAdd("a", "c")); 
+
+            valuesEnum.MoveNext();
+        }
+
         [Theory]
         [MemberData(nameof(CopyConstructorInt32Data))]
         public void CopyConstructorInt32(int size, Func<int, int> keyValueSelector, Func<IDictionary<int, int>, IDictionary<int, int>> dictionarySelector)
