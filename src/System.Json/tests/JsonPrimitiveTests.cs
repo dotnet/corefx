@@ -41,6 +41,34 @@ namespace System.Json.Tests
             ToString(new JsonPrimitive(value), expected);
         }
 
+        [Theory]
+        [InlineData("00000000-0000-0000-0000-000000000000", "\"00000000-0000-0000-0000-000000000000\"")]
+        public void ToString_Guid(string value, string expected)
+        {
+            ToString(new JsonPrimitive(Guid.Parse(value)), expected);
+        }
+
+        [Theory]
+        [InlineData("1/1/0001 12:00:00 AM +00:00", "\"1/1/0001 12:00:00 AM +00:00\"")]
+        public void ToString_DateTimeOffset(string value, string expected)
+        {
+            ToString(new JsonPrimitive(DateTimeOffset.Parse(value)), expected);
+        }
+
+        [Theory]
+        [InlineData("00:00:00", "\"00:00:00\"")]
+        public void ToString_TimeSpan(string value, string expected)
+        {
+            ToString(new JsonPrimitive(TimeSpan.Parse(value)), expected);
+        }
+
+        [Theory]
+        [InlineData("https://github.com/dotnet/corefx", "\"https://github.com/dotnet/corefx\"")]
+        public void ToString_Uri(string value, string expected)
+        {
+            ToString(new JsonPrimitive(Uri.Parse(value)), expected);
+        }
+
         [Fact]
         public void ToString_Null_WorksDependingOnOverload()
         {
