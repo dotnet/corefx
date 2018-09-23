@@ -67,7 +67,7 @@ namespace System.Json.Tests
         [InlineData("https://github.com/dotnet/corefx", "\"https://github.com/dotnet/corefx\"")]
         public void ToString_Uri(string value, string expected)
         {
-            ToString(new JsonPrimitive(Uri.Parse(value)), expected);
+            ToString(new JsonPrimitive(new Uri(value)), expected);
         }
 
         [Fact]
