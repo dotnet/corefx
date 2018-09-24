@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Xunit;
 
@@ -327,6 +328,47 @@ namespace System.Net.Sockets.Tests
                 receiver.BindToAnonymousPort(IPAddress.Loopback);
 
                 Assert.False(receiver.Poll(SelectTimeout, SelectMode.SelectError));
+            }
+        }
+
+        [Fact]
+        public async Task Poll_Close_Success()
+        {
+            // Test for #31368 when Dispose is called while poll() is pending.
+            using (var server = new Socket(IPAddress.Loopback.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(IPAddress.Loopback.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            {
+                server.BindToAnonymousPort(IPAddress.Loopback);
+                server.Listen(1);
+                byte[] buffer = new byte[1];
+                buffer[0] = (byte)'a';
+
+
+                client.Connect(server.LocalEndPoint);
+                Socket newSocket = server.Accept();
+
+                Task clientTask = Task.Run(() =>
+                {
+                    // Ping server to help with thread coordination.
+                    client.Send(buffer);
+                    try
+                    {
+                        // Blocking Poll.
+                        client.Poll(-1, SelectMode.SelectRead);
+                    }
+                    catch (SocketException) { }
+                    catch (ObjectDisposedException) { }
+                });
+                // Try to receive something so we know client thread is running.
+                newSocket.Receive(buffer, 1, SocketFlags.None);
+                // There is however race condition that if the Poll() is not started yet, this will simply
+                // finish without hitting the test scenario.
+                await Task.Delay(500);
+
+                // Close client socket from parent thread. This should not block.
+                client.Close();
+                newSocket.Dispose();
+                clientTask.Wait(TestSettings.PassingTestTimeout);
             }
         }
     }
