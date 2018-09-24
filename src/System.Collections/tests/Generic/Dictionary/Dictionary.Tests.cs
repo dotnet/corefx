@@ -126,7 +126,6 @@ namespace System.Collections.Tests
             }
         }
 
-
         [Fact]
         public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
         {
