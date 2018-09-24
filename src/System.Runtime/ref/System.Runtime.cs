@@ -3858,6 +3858,13 @@ namespace System.Buffers
         protected internal virtual bool TryGetArray(out System.ArraySegment<T> segment) { throw null; }
         public abstract void Unpin();
     }
+    public enum OperationStatus
+    {
+        DestinationTooSmall = 1,
+        Done = 0,
+        InvalidData = 3,
+        NeedMoreData = 2,
+    }
     public delegate void ReadOnlySpanAction<T, in TArg>(System.ReadOnlySpan<T> span, TArg arg);
     public delegate void SpanAction<T, in TArg>(System.Span<T> span, TArg arg);
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4BBC8F69-D03E-4432-AA8A-D458FA5B235A}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -15,7 +15,6 @@
     <Compile Include="System\Buffers\BuffersExtensions.cs" />
     <Compile Include="System\Buffers\IBufferWriter.cs" />
     <Compile Include="System\Buffers\MemoryPool.cs" />
-    <Compile Include="System\Buffers\OperationStatus.cs" />
     <Compile Include="System\Buffers\ReadOnlySequence.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceDebugView.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceSegment.cs" />
@@ -28,6 +27,10 @@
     <Compile Include="System\Buffers\Text\Base64Decoder.cs" />
     <Compile Include="System\Buffers\Text\Base64Encoder.cs" />
     <Compile Include="System\Runtime\InteropServices\SequenceMarshal.cs" />
+  </ItemGroup>
+  <!-- This type was forwarded to System.Runtime in netcoreapp and uap, so only netcoreappaot needs it. -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreappaot'">
+    <Compile Include="System\Buffers\OperationStatus.cs" />
   </ItemGroup>
   <!-- Utf8 Formatter/Parser -->
   <ItemGroup>
