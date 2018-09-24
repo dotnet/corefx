@@ -240,7 +240,7 @@ namespace System.Diagnostics.Tests
                             SendMessage(child2.Id.ToString(), c1hs);
 
                             return WaitForever();
-                        }, child1PipeHandleString);
+                        }, child1PipeHandleString, autoDispose: false);
 
                         child1.Start();
 
@@ -252,7 +252,7 @@ namespace System.Diagnostics.Tests
                     SendMessage($"{child1ProcessId};{child2ProcessId}", rhs);
 
                     return WaitForever();
-                }, rootPipeHandleString);
+                }, rootPipeHandleString, autoDispose: false);
 
                 root.Start();
 
@@ -283,8 +283,8 @@ namespace System.Diagnostics.Tests
                 {
                     using (var sw = new StreamWriter(client))
                     {
-                        sw.AutoFlush = true;
                         sw.WriteLine(message);
+                        client.WaitForPipeDrain();
                     }
                 }
             }
