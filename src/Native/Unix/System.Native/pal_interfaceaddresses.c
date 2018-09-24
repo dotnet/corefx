@@ -117,10 +117,10 @@ int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
 
                 if (sall->sll_halen > sizeof(sall->sll_addr))
                 {
-                    // sockaddr_ll->sll_addr has a maximum capacity of 8 bytes (unsinged char sll_addr[8])
+                    // sockaddr_ll->sll_addr has a maximum capacity of 8 bytes (unsigned char sll_addr[8])
                     // so if we get a address length greater than that, we truncate it to 8 bytes.
-                    // this is following the kernel docs where they always treat physical addresses with a maximum of 8 bytes
-                    // however in WSL we hit an issue where sll_halen was 16 bytes so the memcpy_s below would fail because it was greater
+                    // This is following the kernel docs where they always treat physical addresses with a maximum of 8 bytes.
+                    // However in WSL we hit an issue where sll_halen was 16 bytes so the memcpy_s below would fail because it was greater.
                     sall->sll_halen = sizeof(sall->sll_addr);
                 }
 
