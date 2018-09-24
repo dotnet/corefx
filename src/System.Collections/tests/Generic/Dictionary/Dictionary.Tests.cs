@@ -271,7 +271,7 @@ namespace System.Collections.Tests
             var dictionary = new Dictionary<string, string>();
             dictionary.Add("a", "b");
 
-            var valuesEnum = dictionary.GetEnumerator();
+            IEnumerator valuesEnum = dictionary.GetEnumerator();
             Assert.False(dictionary.TryAdd("a", "c"));
 
             valuesEnum.MoveNext();
