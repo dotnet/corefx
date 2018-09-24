@@ -13,8 +13,14 @@
     <AssemblyName>Microsoft.VisualBasic</AssemblyName>
     <NoStdLib>true</NoStdLib>
     <RootNamespace />
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />
     <Compile Include="Microsoft\VisualBasic\Collection.vb" />
@@ -29,6 +35,7 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ExceptionUtils.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\IDOBinder.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\IncompleteInitialization.vb" />
+    <Compile Include="Microsoft\VisualBasic\CompilerServices\NativeMethods.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\NewLateBinding.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ObjectFlowControl.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Operators.Resolution.vb" />
@@ -43,6 +50,8 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.LateBinder.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Versioned.vb" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Portable.vb" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.vb" />
     <Compile Include="Microsoft\VisualBasic\Globals.vb" />
     <Compile Include="Microsoft\VisualBasic\Devices\NetworkAvailableEventArgs.vb" />
     <Compile Include="Microsoft\VisualBasic\ComClassAttribute.vb" />
@@ -51,6 +60,9 @@
     <Compile Include="Microsoft\VisualBasic\Helpers\ForEachEnum.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\DoubleType.vb" />
     <Compile Include="Microsoft\VisualBasic\DateAndTime.vb" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\MalformedLineException.vb" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\SpecialDirectories.vb" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\TextFieldParser.vb" />
     <Compile Include="Microsoft\VisualBasic\HideModuleNameAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\Information.vb" />
     <Compile Include="Microsoft\VisualBasic\Interaction.vb" />
@@ -62,21 +74,24 @@
     <Compile Include="Microsoft\VisualBasic\VBMath.vb" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3'">
-    <Reference Include="System.Runtime" />
+    <Reference Include="System" />
     <Reference Include="System.Collections" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Reflection" />
+    <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.Dynamic.Runtime" />
-    <Reference Include="System.Linq.Expressions" />
-    <Reference Include="System.Reflection.TypeExtensions" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.ObjectModel" />
-    <Reference Include="System.Reflection.Primitives" />
     <Reference Include="System.Linq" />
+    <Reference Include="System.Linq.Expressions" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Reflection" />
     <Reference Include="System.Reflection.Extensions" />
+    <Reference Include="System.Reflection.Primitives" />
+    <Reference Include="System.Reflection.TypeExtensions" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Text" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
 </Project>

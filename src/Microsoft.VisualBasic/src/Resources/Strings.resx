@@ -1047,4 +1047,7 @@
   <data name="WebNotSupportedOnThisSKU" xml:space="preserve">
     <value>Current target framework does not support web operations.</value>
   </data>
+  <data name="InvalidEnumArgument" xml:space="preserve">
+    <value>The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.</value>
+  </data>
 </root>

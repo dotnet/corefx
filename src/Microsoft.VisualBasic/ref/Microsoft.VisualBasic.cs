@@ -47,11 +47,11 @@ namespace Microsoft.VisualBasic
         public void Remove(string Key) { }
     }
     public enum CompareMethod
-    { 
+    {
         Binary = 0,
         Text = 1,
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
     public sealed partial class ComClassAttribute : System.Attribute
     {
         public ComClassAttribute() { }
@@ -102,13 +102,13 @@ namespace Microsoft.VisualBasic
         public static DateTime Now { get; }
         public static DateTime Today { get; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class HideModuleNameAttribute : System.Attribute
     {
         public HideModuleNameAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public sealed partial class MyGroupCollectionAttribute : System.Attribute
     {
@@ -180,7 +180,7 @@ namespace Microsoft.VisualBasic
         UserDefinedType = 36,
         Variant = 12,
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited = false, AllowMultiple = false)]
     public sealed partial class VBFixedArrayAttribute : System.Attribute
     {
         public VBFixedArrayAttribute(int UpperBound1) { }
@@ -188,7 +188,7 @@ namespace Microsoft.VisualBasic
         public int[] Bounds { get { throw null; } }
         public int Length { get { throw null; } }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(256), Inherited = false, AllowMultiple = false)]
     public sealed partial class VBFixedStringAttribute : System.Attribute
     {
         public VBFixedStringAttribute(int Length) { }
@@ -221,7 +221,7 @@ namespace Microsoft.VisualBasic.ApplicationServices
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public partial class UnhandledExceptionEventArgs : System.Threading.ThreadExceptionEventArgs
     {
-        public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
+        public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base(default(System.Exception)) { }
         public bool ExitApplication { get { throw null; } set { } }
     }
 }
@@ -306,7 +306,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static decimal FromString(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         public static decimal Parse(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = false, Inherited = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DesignerGeneratedAttribute : System.Attribute
     {
@@ -391,13 +391,13 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static object SubtractObject(object Left, object Right) { throw null; }
         public static object XorObject(object Left, object Right) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false, AllowMultiple = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionCompareAttribute : System.Attribute
     {
         public OptionCompareAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionTextAttribute : System.Attribute
     {
@@ -411,7 +411,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = false, AllowMultiple = false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class StandardModuleAttribute : System.Attribute
     {
@@ -444,5 +444,161 @@ namespace Microsoft.VisualBasic.Devices
     {
         public NetworkAvailableEventArgs(bool networkAvailable) { }
         public bool IsNetworkAvailable { get { throw null; } }
+    }
+}
+namespace Microsoft.VisualBasic.FileIO
+{
+    public enum DeleteDirectoryOption
+    {
+        DeleteAllContents = 5,
+        ThrowIfDirectoryNonEmpty = 4,
+    }
+    public enum FieldType
+    {
+        Delimited = 0,
+        FixedWidth = 1,
+    }
+    public partial class FileSystem
+    {
+        public FileSystem() { }
+        public static string CurrentDirectory { get { throw null; } set { } }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<System.IO.DriveInfo> Drives { get { throw null; } }
+        public static string CombinePath(string baseDirectory, string relativePath) { throw null; }
+        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName) { }
+        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, bool overwrite) { }
+        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
+        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }        public static void CopyFile(string sourceFileName, string destinationFileName) { }
+        public static void CopyFile(string sourceFileName, string destinationFileName, bool overwrite) { }
+        public static void CopyFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
+        public static void CopyFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void CreateDirectory(string directory) { }
+        public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.DeleteDirectoryOption onDirectoryNotEmpty) { }
+        public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle) { }
+        public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void DeleteFile(string file) { }
+        public static void DeleteFile(string file, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle) { }
+        public static void DeleteFile(string file, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static bool DirectoryExists(string directory) { throw null; }
+        public static bool FileExists(string file) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> FindInFiles(string directory, string containsText, bool ignoreCase, Microsoft.VisualBasic.FileIO.SearchOption searchType) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> FindInFiles(string directory, string containsText, bool ignoreCase, Microsoft.VisualBasic.FileIO.SearchOption searchType, params string[] fileWildcards) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetDirectories(string directory) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetDirectories(string directory, Microsoft.VisualBasic.FileIO.SearchOption searchType, params string[] wildcards) { throw null; }
+        public static System.IO.DirectoryInfo GetDirectoryInfo(string directory) { throw null; }
+        public static System.IO.DriveInfo GetDriveInfo(string drive) { throw null; }
+        public static System.IO.FileInfo GetFileInfo(string file) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetFiles(string directory) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetFiles(string directory, Microsoft.VisualBasic.FileIO.SearchOption searchType, params string[] wildcards) { throw null; }
+        public static string GetName(string path) { throw null; }
+        public static string GetParentPath(string path) { throw null; }
+        public static string GetTempFileName() { throw null; }
+        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName) { }
+        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, bool overwrite) { }
+        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
+        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void MoveFile(string sourceFileName, string destinationFileName) { }
+        public static void MoveFile(string sourceFileName, string destinationFileName, bool overwrite) { }
+        public static void MoveFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
+        public static void MoveFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file) { throw null; }
+        public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file, params int[] fieldWidths) { throw null; }
+        public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file, params string[] delimiters) { throw null; }
+        public static System.IO.StreamReader OpenTextFileReader(string file) { throw null; }
+        public static System.IO.StreamReader OpenTextFileReader(string file, System.Text.Encoding encoding) { throw null; }
+        public static System.IO.StreamWriter OpenTextFileWriter(string file, bool append) { throw null; }
+        public static System.IO.StreamWriter OpenTextFileWriter(string file, bool append, System.Text.Encoding encoding) { throw null; }
+        public static byte[] ReadAllBytes(string file) { throw null; }
+        public static string ReadAllText(string file) { throw null; }
+        public static string ReadAllText(string file, System.Text.Encoding encoding) { throw null; }
+        public static void RenameDirectory(string directory, string newName) { }
+        public static void RenameFile(string file, string newName) { }
+        public static void WriteAllBytes(string file, byte[] data, bool append) { }
+        public static void WriteAllText(string file, string text, bool append) { }
+        public static void WriteAllText(string file, string text, bool append, System.Text.Encoding encoding) { }
+    }
+    public partial class MalformedLineException : System.Exception
+    {
+        public MalformedLineException() { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        protected MalformedLineException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public MalformedLineException(string message) { }
+        public MalformedLineException(string message, System.Exception innerException) { }
+        public MalformedLineException(string message, long lineNumber) { }
+        public MalformedLineException(string message, long lineNumber, System.Exception innerException) { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Always)]
+        public long LineNumber { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public override string ToString() { throw null; }
+    }
+    public enum RecycleOption
+    {
+        DeletePermanently = 2,
+        SendToRecycleBin = 3,
+    }
+    public enum SearchOption
+    {
+        SearchAllSubDirectories = 3,
+        SearchTopLevelOnly = 2,
+    }
+    public sealed partial class SpecialDirectories
+    {
+        public SpecialDirectories() { }
+        public static string AllUsersApplicationData { get { throw null; } }
+        public static string CurrentUserApplicationData { get { throw null; } }
+        public static string Desktop { get { throw null; } }
+        public static string MyDocuments { get { throw null; } }
+        public static string MyMusic { get { throw null; } }
+        public static string MyPictures { get { throw null; } }
+        public static string ProgramFiles { get { throw null; } }
+        public static string Programs { get { throw null; } }
+        public static string Temp { get { throw null; } }
+    }
+    public partial class TextFieldParser : IDisposable
+    {
+        public TextFieldParser(System.IO.Stream stream) { }
+        public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding) { }
+        public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding, bool detectEncoding) { }
+        public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding, bool detectEncoding, bool leaveOpen) { }
+        public TextFieldParser(System.IO.TextReader reader) { }
+        public TextFieldParser(string path) { }
+        public TextFieldParser(string path, System.Text.Encoding defaultEncoding) { }
+        public TextFieldParser(string path, System.Text.Encoding defaultEncoding, bool detectEncoding) { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public string[] CommentTokens { get { throw null; } set { } }
+        public string[] Delimiters { get { throw null; } set { } }
+        public bool EndOfData { get { throw null; } }
+        public string ErrorLine { get { throw null; } }
+        public long ErrorLineNumber { get { throw null; } }
+        public int[] FieldWidths { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public bool HasFieldsEnclosedInQuotes { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public long LineNumber { get { throw null; } }
+        public Microsoft.VisualBasic.FileIO.FieldType TextFieldType { get { throw null; } set { } }
+        public bool TrimWhiteSpace { get { throw null; } set { } }
+        public void Close() { }
+        void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
+        ~TextFieldParser() { }
+        public string PeekChars(int numberOfChars) { throw null; }
+        public string[] ReadFields() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public string ReadLine() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public string ReadToEnd() { throw null; }
+        public void SetDelimiters(params string[] delimiters) { }
+        public void SetFieldWidths(params int[] fieldWidths) { }
+        void IDisposable.Dispose() { }
+    }
+    public enum UIOption
+    {
+        OnlyErrorDialogs = 2,
+        AllDialogs = 3
+    }
+    public enum UICancelOption
+    {
+        DoNothing = 2,
+        ThrowException = 3
     }
 }
