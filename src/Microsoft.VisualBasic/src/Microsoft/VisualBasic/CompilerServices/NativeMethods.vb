@@ -2,7 +2,6 @@
 Imports System.Runtime.InteropServices
 Imports Microsoft.VisualBasic.FileIO.FileSystem
 
-#Const PLATFORM_WINDOWS = True
 Namespace Microsoft.VisualBasic.CompilerServices
 
     <ComVisible(False)>
