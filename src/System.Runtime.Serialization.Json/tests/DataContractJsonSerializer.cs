@@ -145,19 +145,46 @@ public static partial class DataContractJsonSerializerTests
     {
         Assert.StrictEqual(SerializeAndDeserialize<double>(-1.2, "-1.2"), -1.2);
         Assert.StrictEqual(SerializeAndDeserialize<double>(0, "0"), 0);
-        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3, "2.3"), 2.3);
         Assert.StrictEqual(SerializeAndDeserialize<double>(double.MinValue, "-1.7976931348623157E+308"), double.MinValue);
         Assert.StrictEqual(SerializeAndDeserialize<double>(double.MaxValue, "1.7976931348623157E+308"), double.MaxValue);
     }
 
     [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_DoubleAsRoot_NetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3, "2.3"), 2.3);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_DoubleAsRoot_NotNetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3, "2.2999999999999998"), 2.3);
+    }
+
+    [Fact]
     public static void DCJS_FloatAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2, "-1.2"), (float)-1.2);
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)0, "0"), (float)0);
-        Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3, "2.3"), (float)2.3);
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue, "-3.40282347E+38"), float.MinValue);
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MaxValue, "3.40282347E+38"), float.MaxValue);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_FloatAsRoot_NetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2, "-1.2"), (float)-1.2);
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3, "2.3"), (float)2.3);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_FloatAsRoot_NotNetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2, "-1.20000005"), (float)-1.2);
+        Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3, "2.29999995"), (float)2.3);
     }
 
     [Fact]
@@ -1649,7 +1676,8 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_GenericTypeWithNestedGenerics()
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_GenericTypeWithNestedGenerics_NetFramework()
     {
         GenericTypeWithNestedGenerics<int>.InnerGeneric<double> value = new GenericTypeWithNestedGenerics<int>.InnerGeneric<double>()
         {
@@ -1657,6 +1685,20 @@ public static partial class DataContractJsonSerializerTests
             data2 = 4.56
         };
         var deserializedValue = SerializeAndDeserialize<GenericTypeWithNestedGenerics<int>.InnerGeneric<double>>(value, @"{""data1"":123,""data2"":4.56}");
+        Assert.StrictEqual(value.data1, deserializedValue.data1);
+        Assert.StrictEqual(value.data2, deserializedValue.data2);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_GenericTypeWithNestedGenerics_NotNetFramework()
+    {
+        GenericTypeWithNestedGenerics<int>.InnerGeneric<double> value = new GenericTypeWithNestedGenerics<int>.InnerGeneric<double>()
+        {
+            data1 = 123,
+            data2 = 4.56
+        };
+        var deserializedValue = SerializeAndDeserialize<GenericTypeWithNestedGenerics<int>.InnerGeneric<double>>(value, @"{""data1"":123,""data2"":4.5599999999999996}");
         Assert.StrictEqual(value.data1, deserializedValue.data1);
         Assert.StrictEqual(value.data2, deserializedValue.data2);
     }
@@ -1957,7 +1999,8 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_TypeWithAllPrimitiveProperties()
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_TypeWithAllPrimitiveProperties_NetFramework()
     {
         TypeWithAllPrimitiveProperties x = new TypeWithAllPrimitiveProperties
         {
@@ -1974,6 +2017,37 @@ public static partial class DataContractJsonSerializerTests
             IntMember = 123
         };
         TypeWithAllPrimitiveProperties y = SerializeAndDeserialize<TypeWithAllPrimitiveProperties>(x, "{\"BooleanMember\":true,\"CharMember\":\"C\",\"DateTimeMember\":\"\\/Date(1467969011000)\\/\",\"DecimalMember\":-14554481076115341312123,\"DoubleMember\":123.456,\"FloatMember\":456.789,\"GuidMember\":\"2054fd3e-e118-476a-9962-1a882be51860\",\"IntMember\":123,\"StringMember\":\"abc\"}");
+        Assert.StrictEqual(x.BooleanMember, y.BooleanMember);
+        //Assert.StrictEqual(x.ByteArrayMember, y.ByteArrayMember);
+        Assert.StrictEqual(x.CharMember, y.CharMember);
+        Assert.StrictEqual(x.DateTimeMember, y.DateTimeMember);
+        Assert.StrictEqual(x.DecimalMember, y.DecimalMember);
+        Assert.StrictEqual(x.DoubleMember, y.DoubleMember);
+        Assert.StrictEqual(x.FloatMember, y.FloatMember);
+        Assert.StrictEqual(x.GuidMember, y.GuidMember);
+        Assert.StrictEqual(x.StringMember, y.StringMember);
+        Assert.StrictEqual(x.IntMember, y.IntMember);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_TypeWithAllPrimitiveProperties_NotNetFramework()
+    {
+        TypeWithAllPrimitiveProperties x = new TypeWithAllPrimitiveProperties
+        {
+            BooleanMember = true,
+            //ByteArrayMember = new byte[] { 1, 2, 3, 4 },
+            CharMember = 'C',
+            DateTimeMember = new DateTime(2016, 7, 8, 9, 10, 11, DateTimeKind.Utc),
+            DecimalMember = new decimal(123, 456, 789, true, 0),
+            DoubleMember = 123.456,
+            FloatMember = 456.789f,
+            GuidMember = Guid.Parse("2054fd3e-e118-476a-9962-1a882be51860"),
+            //public byte[] HexBinaryMember 
+            StringMember = "abc",
+            IntMember = 123
+        };
+        TypeWithAllPrimitiveProperties y = SerializeAndDeserialize<TypeWithAllPrimitiveProperties>(x, "{\"BooleanMember\":true,\"CharMember\":\"C\",\"DateTimeMember\":\"\\/Date(1467969011000)\\/\",\"DecimalMember\":-14554481076115341312123,\"DoubleMember\":123.456,\"FloatMember\":456.789001,\"GuidMember\":\"2054fd3e-e118-476a-9962-1a882be51860\",\"IntMember\":123,\"StringMember\":\"abc\"}");
         Assert.StrictEqual(x.BooleanMember, y.BooleanMember);
         //Assert.StrictEqual(x.ByteArrayMember, y.ByteArrayMember);
         Assert.StrictEqual(x.CharMember, y.CharMember);
@@ -2034,7 +2108,8 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_ArrayOfSingle()
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_ArrayOfSingle_NetFramework()
     {
         var value = new float[] { 1.23f, 4.56f, 7.89f };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
@@ -2043,10 +2118,31 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_ArrayOfDouble()
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_ArrayOfSingle_NotNetFramework()
+    {
+        var value = new float[] { 1.23f, 4.56f, 7.89f };
+        var deserialized = SerializeAndDeserialize(value, "[1.23000002,4.55999994,7.88999987]");
+        Assert.StrictEqual(value.Length, deserialized.Length);
+        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_ArrayOfDouble_NetFramework()
     {
         var value = new double[] { 1.23, 4.56, 7.89 };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
+        Assert.StrictEqual(value.Length, deserialized.Length);
+        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_ArrayOfDouble_NotNetFramework()
+    {
+        var value = new double[] { 1.23, 4.56, 7.89 };
+        var deserialized = SerializeAndDeserialize(value, "[1.23,4.5599999999999996,7.8899999999999997]");
         Assert.StrictEqual(value.Length, deserialized.Length);
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
     }
@@ -2116,7 +2212,8 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_GenericICollectionOfSingle()
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_GenericICollectionOfSingle_NetFramework()
     {
         var value = new TypeImplementsGenericICollection<float>() { 1.23f, 4.56f, 7.89f };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
@@ -2125,10 +2222,31 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_GenericICollectionOfDouble()
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_GenericICollectionOfSingle_NotNetFramework()
+    {
+        var value = new TypeImplementsGenericICollection<float>() { 1.23f, 4.56f, 7.89f };
+        var deserialized = SerializeAndDeserialize(value, "[1.23000002,4.55999994,7.88999987]");
+        Assert.StrictEqual(value.Count, deserialized.Count);
+        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_GenericICollectionOfDouble_NetFramework()
     {
         var value = new TypeImplementsGenericICollection<double>() { 1.23, 4.56, 7.89 };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
+        Assert.StrictEqual(value.Count, deserialized.Count);
+        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_GenericICollectionOfDouble_NotNetFramework()
+    {
+        var value = new TypeImplementsGenericICollection<double>() { 1.23, 4.56, 7.89 };
+        var deserialized = SerializeAndDeserialize(value, "[1.23,4.5599999999999996,7.8899999999999997]");
         Assert.StrictEqual(value.Count, deserialized.Count);
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
     }
@@ -2798,7 +2916,8 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCJS_VerifyIndentation()
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_VerifyIndentation_NetFramework()
     {
         var testClass = new TestClass()
         {
@@ -2846,6 +2965,80 @@ public static partial class DataContractJsonSerializerTests
         var value3 = VerifyIndentationOfSerializedXml(
           emptyList,
           "{\r\n  \"floatNum\": 2.3,\r\n  \"intList\": [ ]\r\n}",
+          spaceChars,
+          dcjsSettings);
+        Assert.NotNull(value3);
+        Assert.True(value3.floatNum == 2.3f);
+        Assert.True(value3.intList.Count == 0);
+
+        var jsonTypes = new JsonTypes();
+        dcjsSettings = new DataContractJsonSerializerSettings()
+        {
+            DateTimeFormat = null,
+            UseSimpleDictionaryFormat = true,
+            EmitTypeInformation = EmitTypeInformation.AsNeeded,
+            KnownTypes = new List<Type>() { typeof(Dictionary<string, string>), typeof(List<object>), typeof(int[]) }
+        };
+        spaceChars = "  ";
+        var value4 = VerifyIndentationOfSerializedXml(
+           jsonTypes.ObjectList,
+           "[\r\n  [\r\n    {\r\n      \"__type\": \"KeyValuePairOfstringstring:#System.Collections.Generic\",\r\n      \"key\": \"Title\",\r\n      \"value\": \"Sherlocl Kholmes\"\r\n    }\r\n  ],\r\n  [\r\n    1,\r\n    2,\r\n    3\r\n  ],\r\n  [\r\n    \"hi\",\r\n    1,\r\n    \"there\"\r\n  ]\r\n]",
+           spaceChars,
+           dcjsSettings);
+        Assert.NotNull(value4);
+        Assert.True(value4.Count == 3);
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    public static void DCJS_VerifyIndentation_NotNetFramework()
+    {
+        var testClass = new TestClass()
+        {
+            floatNum = 2.3f,
+            intList = new List<int>() { 2, 3, 4 }
+        };
+
+        string spaceChars = "    ";
+        var dcjsSettings = new DataContractJsonSerializerSettings()
+        {
+            DateTimeFormat = null,
+            UseSimpleDictionaryFormat = false,
+            EmitTypeInformation = EmitTypeInformation.AsNeeded,
+            KnownTypes = new List<Type>()
+        };
+        var value = VerifyIndentationOfSerializedXml(
+            testClass,
+            "{\r\n    \"floatNum\": 2.29999995,\r\n    \"intList\": [\r\n        2,\r\n        3,\r\n        4\r\n    ]\r\n}",
+            spaceChars,
+            dcjsSettings);
+        Assert.NotNull(value);
+        Assert.True(value.floatNum == 2.3f);
+        Assert.True(value.intList[0] == 2);
+        Assert.True(value.intList[1] == 3);
+        Assert.True(value.intList[2] == 4);
+
+        spaceChars = "\n";
+        var value2 = VerifyIndentationOfSerializedXml(
+            testClass,
+            "{\r\n\n\"floatNum\": 2.29999995,\r\n\n\"intList\": [\r\n\n\n2,\r\n\n\n3,\r\n\n\n4\r\n\n]\r\n}",
+            spaceChars,
+            dcjsSettings);
+        Assert.NotNull(value2);
+        Assert.True(value2.floatNum == 2.3f);
+        Assert.True(value2.intList[0] == 2);
+        Assert.True(value2.intList[1] == 3);
+        Assert.True(value2.intList[2] == 4);
+
+        var emptyList = new TestClass()
+        {
+            floatNum = 2.3f,
+            intList = new List<int>()
+        };
+        spaceChars = "  ";
+        var value3 = VerifyIndentationOfSerializedXml(
+          emptyList,
+          "{\r\n  \"floatNum\": 2.29999995,\r\n  \"intList\": [ ]\r\n}",
           spaceChars,
           dcjsSettings);
         Assert.NotNull(value3);

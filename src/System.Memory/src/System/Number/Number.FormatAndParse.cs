@@ -26,12 +26,6 @@ namespace System
                 return false;
             }
 
-            if (d == 0.0)
-            {
-                // normalize -0.0 to 0.0
-                d = 0.0;
-            }
-
             value = d;
             return true;
         }
@@ -388,7 +382,7 @@ namespace System
             }
 
             if (remaining == 0)
-                return 0;
+                return number.IsNegative ? -0.0 : 0.0;
 
             count = Math.Min(remaining, 9);
             remaining -= count;
