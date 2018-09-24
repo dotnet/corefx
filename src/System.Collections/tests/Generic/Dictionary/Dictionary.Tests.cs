@@ -130,7 +130,7 @@ namespace System.Collections.Tests
         [Fact]
         public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
         {
-            if(ModifyEnumeratorAllowed.HasFlag(ModifyOperation.Clear))
+            if (ModifyEnumeratorAllowed.HasFlag(ModifyOperation.Clear))
             {
                 IDictionary dictionary = new Dictionary<string, string>();
                 IEnumerator valuesEnum = dictionary.GetEnumerator();
@@ -272,7 +272,7 @@ namespace System.Collections.Tests
             dictionary.Add("a", "b");
 
             var valuesEnum = dictionary.GetEnumerator();
-            Assert.False(dictionary.TryAdd("a", "c")); 
+            Assert.False(dictionary.TryAdd("a", "c"));
 
             valuesEnum.MoveNext();
         }
