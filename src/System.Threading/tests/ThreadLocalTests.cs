@@ -225,6 +225,7 @@ namespace System.Threading.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "This test requires precise stack scanning")]
         public static void RunThreadLocalTest8_Values()
         {
             // Test adding values and updating values
