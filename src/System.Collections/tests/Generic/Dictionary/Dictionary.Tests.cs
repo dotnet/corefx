@@ -16,9 +16,9 @@ namespace System.Collections.Tests
             return new Dictionary<string, string>();
         }
 
-        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert | ModifyOperation.Clear;
+        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert;
 
-        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove;
+        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove | ModifyOperation.Clear;
 
         /// <summary>
         /// Creates an object that is dependent on the seed given. The object may be either
@@ -123,6 +123,21 @@ namespace System.Collections.Tests
             {
                 IDictionary dictionary = new Dictionary<string, int>();
                 Assert.False(dictionary.Contains(1));
+            }
+        }
+
+
+        [Fact]
+        public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
+        {
+            if(ModifyEnumeratorAllowed.HasFlag(ModifyOperation.Clear))
+            {
+                IDictionary dictionary = new Dictionary<string, string>();
+                IEnumerator valuesEnum = dictionary.GetEnumerator();
+
+                dictionary.Clear();
+                Assert.Empty(dictionary);
+                valuesEnum.MoveNext();
             }
         }
 
@@ -251,24 +266,9 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
-        {
-            if (PlatformDetection.IsFullFramework)
-            {
-                Dictionary<string, string> dictionary = new Dictionary<string, string>();
-                var valuesEnum = dictionary.GetEnumerator();
-
-                dictionary.Clear();
-                Assert.Empty(dictionary);
-                valuesEnum.MoveNext();
-            }
-            
-        }
-
-        [Fact]
         public void Unsuccessful_TryAdd_DoesNotInvalidateEnumerator()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            var dictionary = new Dictionary<string, string>();
             dictionary.Add("a", "b");
 
             var valuesEnum = dictionary.GetEnumerator();
