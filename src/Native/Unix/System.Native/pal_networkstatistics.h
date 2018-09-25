@@ -139,6 +139,7 @@ typedef struct
     uint64_t OutMulticastPackets;
     uint64_t InDrops;
     uint64_t InNoProto;
+    uint64_t Flags;
 } NativeIPInterfaceStatistics;
 
 DLLEXPORT int32_t SystemNative_GetTcpGlobalStatistics(TcpGlobalStatistics* retStats);

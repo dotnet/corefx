@@ -38,6 +38,12 @@
 #include <netinet/icmp6.h>
 #include <netinet/icmp_var.h>
 
+
+enum {
+    InteropInterfaceUp = 0x1,
+    InteropSupportsMulticast = 0x2
+};
+
 int32_t SystemNative_GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
 {
     size_t oldlenp;
@@ -482,6 +488,18 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
             retStats->OutMulticastPackets = systemStats.ifi_omcasts;
             retStats->InDrops = systemStats.ifi_iqdrops;
             retStats->InNoProto = systemStats.ifi_noproto;
+
+            retStats->Flags = 0;
+            if (ifHdr->ifm_flags & IFF_UP)
+            {
+                retStats->Flags |= InteropInterfaceUp;
+            }
+
+            if (ifHdr->ifm_flags & (IFF_MULTICAST | IFF_ALLMULTI))
+            {
+                retStats->Flags |= InteropSupportsMulticast;
+            }
+
             free(buffer);
             return 0;
         }
