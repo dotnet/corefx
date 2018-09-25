@@ -136,7 +136,7 @@ namespace System.Collections.Tests
 
                 dictionary.Clear();
                 Assert.Empty(dictionary);
-                valuesEnum.MoveNext();
+                Assert.False(valuesEnum.MoveNext());
             }
         }
 
@@ -265,7 +265,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void Unsuccessful_TryAdd_DoesNotInvalidateEnumerator()
+        public void TryAdd_ItemAlreadyExists_DoesNotInvalidateEnumerator()
         {
             var dictionary = new Dictionary<string, string>();
             dictionary.Add("a", "b");
@@ -273,7 +273,7 @@ namespace System.Collections.Tests
             IEnumerator valuesEnum = dictionary.GetEnumerator();
             Assert.False(dictionary.TryAdd("a", "c"));
 
-            valuesEnum.MoveNext();
+            Assert.True(valuesEnum.MoveNext());
         }
 
         [Theory]
