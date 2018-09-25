@@ -3254,8 +3254,11 @@ namespace System
 
         // Cut trailing spaces
         private void GetLengthWithoutTrailingSpaces(string str, ref ushort length ,int idx)
-        {                        
-            while (length > idx && UriHelper.IsLWS(str[length - 1])) --length;                         
+        {
+            // to avoid dereferencing ref length parameter for every update
+            ushort local = length;
+            while (local > idx && UriHelper.IsLWS(str[local - 1])) --local;
+            length = local;
         }
 
         //
