@@ -2,9 +2,12 @@ This document will be kept up-to-date as new builds are made available. See http
 
 To use any of the below versions, set your `.csproj`'s `RuntimeFrameworkVersion` element to the version listed.
 
+We integrate coreclr / corefx `master` into `feature/utf8string` regularly. Any commits to `master` (bug fixes, new JIT features, and so on) will generally make their way to `feature/utf8string` within a few days. This allows developers who are early adopters of the Utf8String feature to also take advantage of other new features of .NET Core 3.
+
 # Version history
 
 ## 3.0.0-alphautf8string-26922-02
+_Sep. 22, 2018_
 
 Initial prototype release. Includes skeleton `Utf8String` APIs and ancillary helper types like `System.Text.UnicodeScalar`.
 
