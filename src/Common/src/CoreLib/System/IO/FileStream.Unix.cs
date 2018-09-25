@@ -179,12 +179,17 @@ namespace System.IO
             // - Encrypted: No equivalent on Unix and is ignored
             // - RandomAccess: Implemented after open if posix_fadvise is available
             // - SequentialScan: Implemented after open if posix_fadvise is available
-            // - WriteThrough: Handled here
+            // - WriteThrough & NoBuffering: Handled here
             if ((options & FileOptions.WriteThrough) != 0)
             {
                 flags |= Interop.Sys.OpenFlags.O_SYNC;
             }
 
+            if ((options & FileOptions.NoBuffering) != 0)
+            {
+                flags |= Interop.Sys.OpenFlags.O_DIRECT;
+            }
+            
             return flags;
         }
 
