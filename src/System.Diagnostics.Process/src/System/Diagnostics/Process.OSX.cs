@@ -54,8 +54,8 @@ namespace System.Diagnostics
                 }
 
                 // usually seconds will be negative
-                double seconds = (((long) info.ri_proc_start_abstime - (long)absoluteTime) * (double)numer / denom) / NanoSecondToSecondFactor;
-                return  DateTime.UtcNow.AddSeconds(seconds).ToLocalTime();
+                double seconds = (((long)info.ri_proc_start_abstime - (long)absoluteTime) * (double)numer / denom) / NanoSecondToSecondFactor;
+                return DateTime.UtcNow.AddSeconds(seconds).ToLocalTime();
             }
         }
 

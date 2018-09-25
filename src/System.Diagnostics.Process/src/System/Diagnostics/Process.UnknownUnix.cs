@@ -47,7 +47,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets parent process ID</summary>
-		private int GetParentProcessId =>
+        private int GetParentProcessId =>
             throw new PlatformNotSupportedException();
 
         /// <summary>

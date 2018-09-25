@@ -88,8 +88,9 @@ namespace System.Diagnostics
                 }
                 catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
                 {
-                    // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
-                    return;
+                    // Made a best attempt which failed (likely because the process is dead or we do not have the necessary permissions). 
+                    // However, there is still a chance that it is possible to terminate the process's children, so suppress the exception 
+                    // and keep going.
                 }
 
                 IReadOnlyList<Process> children = GetChildProcesses();
@@ -101,8 +102,9 @@ namespace System.Diagnostics
                 }
                 catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
                 {
-                    // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
-                    return;
+                    // Made a best attempt which failed (likely because the process is dead or we do not have the necessary permissions). 
+                    // However, there is still a chance that it is possible to terminate the process's children, so suppress the exception 
+                    // and keep going.
                 }
 
                 KillChildren(children);
@@ -308,7 +310,7 @@ namespace System.Diagnostics
 
             foreach (Process possibleChildProcess in GetProcesses())
             {
-                var keep = false;
+                bool keep = false;
 
                 try
                 {

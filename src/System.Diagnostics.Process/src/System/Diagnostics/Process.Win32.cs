@@ -422,7 +422,7 @@ namespace System.Diagnostics
 
             foreach (Process possibleChildProcess in GetProcesses())
             {
-                var keep = false;
+                bool keep = false;
 
                 try
                 {
