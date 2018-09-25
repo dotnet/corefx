@@ -4,6 +4,7 @@ TypesMustExist : Type 'System.Runtime.CompilerServices.TupleElementNamesAttribut
 Compat issues with assembly netstandard:
 TypeCannotChangeClassification : Type 'System.RuntimeArgumentHandle' is a 'ref struct' in the implementation but is a 'struct' in the contract.
 TypeCannotChangeClassification : Type 'System.TypedReference' is a 'ref struct' in the implementation but is a 'struct' in the contract.
+TypesMustExist : Type 'System.Buffers.OperationStatus' does not exist in the implementation but it does exist in the contract.
 Compat issues with assembly System.Core:
 TypesMustExist : Type 'System.Security.Cryptography.ECCurve' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.Cryptography.ECParameters' does not exist in the implementation but it does exist in the contract.
