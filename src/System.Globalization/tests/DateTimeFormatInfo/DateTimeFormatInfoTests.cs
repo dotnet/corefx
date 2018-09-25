@@ -172,7 +172,7 @@ namespace System.Globalization.Tests
             DateTime dt = new DateTime(1989, 01, 08); // Start of Heisei Era
 
             string formattedDate = dt.ToString(pattern, jpnFormat);
-            if (PlatformDetection.IsNetCore)
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsNetNative)
             {
                 Assert.True(formattedDate.IndexOf("\u5143" /* 元 */, StringComparison.Ordinal) >= 0,
                             "Expected the first year of the era be formatted with 元");
