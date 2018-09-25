@@ -36,7 +36,6 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [ActiveIssue(30925, TestPlatforms.AnyUnix)]
         public void GetHINSTANCE_NonRuntimeModule_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("m", "Module must be a runtime Module object.", () => Marshal.GetHINSTANCE(new NonRuntimeModule()));
