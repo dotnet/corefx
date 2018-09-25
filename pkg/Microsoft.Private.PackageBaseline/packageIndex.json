@@ -3538,16 +3538,14 @@
     },
     "System.Reflection.TypeLoader": {
       "StableVersions": [
-        "1.0.0"
+        "4.0.0"
       ],
-      "BaselineVersion": "1.0.0",
+      "BaselineVersion": "4.0.0",
       "InboxOn": {
-        "netcoreapp2.1": "4.1.1.0",
-        "net461": "4.0.1.0",
-        "netstandard2.0": "4.0.1.0",
+        "netcoreapp3.0": "4.0.0.0"
       },
       "AssemblyVersionInPackageVersion": {
-        "1.0.0.0": "1.0.0"
+        "4.0.0.0": "4.0.0"
       }
     },
     "System.Resources.Reader": {

@@ -68,7 +68,10 @@ namespace System.Reflection.TypeLoading
         }
 
         // Apis to retrieve public types physically defined in this module.
-        public sealed override Type[] GetExportedTypes() => ExportedTypes.ToArray();
+        public sealed override Type[] GetExportedTypes() {
+            List<Type> list = new List<Type>(ExportedTypes);
+            return list.ToArray();
+        } // todo: ExportedTypes.ToArray();
         public sealed override IEnumerable<Type> ExportedTypes
         {
             get

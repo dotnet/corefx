@@ -29,7 +29,9 @@ namespace System.Reflection.TypeLoading
 
         public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> enumeration)
         {
-            return new ReadOnlyCollection<T>(enumeration.ToArray());
+            //todo: return new ReadOnlyCollection<T>(enumeration.ToArray());
+            List<T> list = new List<T>(enumeration);
+            return new ReadOnlyCollection<T>(list.ToArray());
         }
 
         public static int GetTokenRowNumber(this int token) => token & 0x00ffffff;

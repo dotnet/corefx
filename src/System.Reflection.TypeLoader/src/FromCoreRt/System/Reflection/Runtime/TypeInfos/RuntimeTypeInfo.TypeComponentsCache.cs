@@ -8,7 +8,8 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Reflection.Runtime.BindingFlagSupport;
 
-using Unsafe = System.Runtime.CompilerServices.Unsafe;
+using Unsafe = Internal.Runtime.CompilerServices.Unsafe; //todo System.Runtime.CompilerServices.Unsafe;
+
 using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.TypeLoading
