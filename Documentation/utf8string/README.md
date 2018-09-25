@@ -30,7 +30,7 @@ There are some restrictions on `Utf8String` due to its early preview state.
 * Debugging tools such as sos do not know how to show these values properly.
 * `Utf8String` instances cannot be wrapped by `Memory<T>` or `ReadOnlyMemory<T>`. (Workaround: use the temporary `Utf8StringSegment` type.)
 * There is no indexer on `Utf8String`. Instead, you can call the `AsSpan()` extension method and use the indexer on the returned `ReadOnlySpan<byte>`.
-* Many APIs are missing or incomplete. More on this below.
+* Many APIs are missing or incomplete. Additionally, the names and shapes of APIs are fluid. Some APIs have placeholder names so that we can expose the API behavior early to testers and receive feedback quickly without worrying about polishing the prototype.
 
 # Getting started with Utf8String builds
 
