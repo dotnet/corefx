@@ -7783,6 +7783,21 @@ namespace System.Text
         public override string ToString() { throw null; }
         public string ToString(int startIndex, int length) { throw null; }
     }
+    public static partial class Utf8
+    {
+        public static bool Contains(ReadOnlySpan<byte> source, UnicodeScalar scalar) => throw null;
+        public static bool Contains(ReadOnlySpan<byte> source, UnicodeScalar scalar, StringComparison comparison) => throw null;
+        public static int IndexOf(ReadOnlySpan<byte> source, UnicodeScalar scalar) => throw null;
+        public static int IndexOf(ReadOnlySpan<byte> source, UnicodeScalar scalar, StringComparison comparison, out int matchLength) => throw null;
+        public static int ToLower(ReadOnlySpan<byte> source, Span<byte> destination, System.Globalization.CultureInfo culture) => throw null;
+        public static System.Buffers.OperationStatus ToLower(ReadOnlySpan<byte> source, Span<byte> destination, System.Globalization.CultureInfo culture, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten) => throw null;
+        public static int ToLowerInvariant(ReadOnlySpan<byte> source, Span<byte> destination) => throw null;
+        public static System.Buffers.OperationStatus ToLowerInvariant(ReadOnlySpan<byte> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten) => throw null;
+        public static int ToUpper(ReadOnlySpan<byte> source, Span<byte> destination, System.Globalization.CultureInfo culture) => throw null;
+        public static System.Buffers.OperationStatus ToUpper(ReadOnlySpan<byte> source, Span<byte> destination, System.Globalization.CultureInfo culture, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten) => throw null;
+        public static int ToUpperInvariant(ReadOnlySpan<byte> source, Span<byte> destination) => throw null;
+        public static System.Buffers.OperationStatus ToUpperInvariant(ReadOnlySpan<byte> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten) => throw null;
+    }
     public readonly partial struct UnicodeScalar : IComparable<UnicodeScalar>, IEquatable<UnicodeScalar>
     {
         private readonly int _dummyPrimitive;
@@ -7836,6 +7851,11 @@ namespace System.Text
         public static UnicodeScalar ToLowerInvariant(UnicodeScalar s) => throw null;
         public static UnicodeScalar ToUpper(UnicodeScalar s, System.Globalization.CultureInfo culture) => throw null;
         public static UnicodeScalar ToUpperInvariant(UnicodeScalar s) => throw null;
+    }
+    public static partial class Unicode
+    {
+        public static System.Buffers.OperationStatus TranscodeUtf8ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int charsWritten) => throw null;
+        public static System.Buffers.OperationStatus TranscodeUtf16ToUtf8(ReadOnlySpan<char> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int charsConsumed, out int bytesWritten) => throw null;
     }
 }
 namespace System.Threading

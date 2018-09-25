@@ -8,6 +8,15 @@
 
 namespace System
 {
+    public static partial class BitConverter
+    {
+        [CLSCompliant(false)]
+        public static ushort ByteSwap(ushort value) => throw null;
+        [CLSCompliant(false)]
+        public static uint ByteSwap(uint value) => throw null;
+        [CLSCompliant(false)]
+        public static ulong ByteSwap(ulong value) => throw null;
+    }
     public abstract partial class Utf8StringComparer : System.Collections.Generic.IEqualityComparer<Utf8String>
     {
         private Utf8StringComparer() { }

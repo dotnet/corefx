@@ -18,8 +18,7 @@
     <Compile Include="System\Buffers\ReadOnlySequence.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceDebugView.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceSegment.cs" />
-    <Compile Include="System\Buffers\ReadOnlySequence_helpers.cs" />
-    <Compile Include="System\Buffers\Binary\Reader.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequence_helpers.cs" />    
     <Compile Include="System\Buffers\Binary\ReaderBigEndian.cs" />
     <Compile Include="System\Buffers\Binary\ReaderLittleEndian.cs" />
     <Compile Include="System\Buffers\Binary\WriterBigEndian.cs" />
@@ -27,6 +26,12 @@
     <Compile Include="System\Buffers\Text\Base64Decoder.cs" />
     <Compile Include="System\Buffers\Text\Base64Encoder.cs" />
     <Compile Include="System\Runtime\InteropServices\SequenceMarshal.cs" />
+  </ItemGroup>
+  <!-- Choose implementation of ReverseEndianness based on whether we're targeting a runtime with BSWAP support. -->
+  <ItemGroup>
+    <Compile Include="System\Buffers\Binary\ReverseEndianness.cs" />
+    <Compile Include="System\Buffers\Binary\ReverseEndianness.Fast.cs" Condition="'$(TargetGroup)' != 'netcoreappaot'"/>
+    <Compile Include="System\Buffers\Binary\ReverseEndianness.Portable.cs" Condition="'$(TargetGroup)' == 'netcoreappaot'"/>
   </ItemGroup>
   <!-- This type was forwarded to System.Runtime in netcoreapp and uap, so only netcoreappaot needs it. -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreappaot'">
