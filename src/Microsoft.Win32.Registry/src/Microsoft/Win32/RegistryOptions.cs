@@ -7,12 +7,7 @@ using System;
 namespace Microsoft.Win32
 {
     [Flags]
-#if REGISTRY_ASSEMBLY
-    public
-#else
-    internal
-#endif
-    enum RegistryOptions
+    public enum RegistryOptions
     {
         None = Interop.Advapi32.RegistryOptions.REG_OPTION_NON_VOLATILE,       // 0x0000
         Volatile = Interop.Advapi32.RegistryOptions.REG_OPTION_VOLATILE,      // 0x0001
