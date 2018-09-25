@@ -26,6 +26,10 @@
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#if HAVE_NET_IFMEDIA_H
+#include <net/if_media.h>
+#include <sys/ioctl.h>
+#endif
 #include <sys/socketvar.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
@@ -37,12 +41,6 @@
 #include <netinet/udp_var.h>
 #include <netinet/icmp6.h>
 #include <netinet/icmp_var.h>
-
-
-enum {
-    InteropInterfaceUp = 0x1,
-    InteropSupportsMulticast = 0x2
-};
 
 int32_t SystemNative_GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
 {
@@ -441,7 +439,7 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
         return -1;
     }
 
-    int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0};
+    int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, (int)interfaceIndex};
 
     size_t len;
     // Get estimated data length
@@ -492,12 +490,48 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
             retStats->Flags = 0;
             if (ifHdr->ifm_flags & IFF_UP)
             {
-                retStats->Flags |= InteropInterfaceUp;
+                retStats->Flags |= InterfaceUp;
+#if HAVE_NET_IFMEDIA_H
+                int fd =  socket(AF_INET, SOCK_DGRAM, 0);
+                if (fd < 0) {
+                    retStats->Flags |= InterfaceError;
+                }
+                else
+                {
+                    struct ifmediareq ifmr;
+                    memset(&ifmr, 0, sizeof(ifmr));
+                    strncpy(ifmr.ifm_name, interfaceName, sizeof(ifmr.ifm_name));
+
+                    if ((ioctl(fd, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0) || ((ifmr.ifm_status & IFM_AVALID) == 0))
+                    {
+                        if (errno == EOPNOTSUPP)
+                        {
+                            // Virtual interfaces like loopback do not have media.
+                            // Assume they are up when administrative state is up.
+                            retStats->Flags |= InterfaceHasLink;
+                        }
+                        else
+                        {
+                            retStats->Flags |= InterfaceError;
+                        }
+                    }
+                    else
+                    {
+                        if (ifmr.ifm_status & IFM_ACTIVE)
+                        {
+                            retStats->Flags |= InterfaceHasLink;
+                        }
+                    }
+                    close(fd);
+                }
+#else
+                retStats->Flags |= InterfaceError;
+#endif
             }
 
             if (ifHdr->ifm_flags & (IFF_MULTICAST | IFF_ALLMULTI))
             {
-                retStats->Flags |= InteropSupportsMulticast;
+                retStats->Flags |= InterfaceSupportsMulticast;
             }
 
             free(buffer);

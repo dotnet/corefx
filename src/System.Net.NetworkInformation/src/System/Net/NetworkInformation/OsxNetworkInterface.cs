@@ -22,9 +22,16 @@ namespace System.Net.NetworkInformation
                 throw new NetworkInformationException(SR.net_PInvokeError);
             }
 
-            _operationalStatus = (nativeStats.Flags & (ulong)Interop.Sys.InterfaceFlags.InterfaceUp) != 0 ?  OperationalStatus.Up : OperationalStatus.Down;
-            _supportsMulticast = (nativeStats.Flags & (ulong)Interop.Sys.InterfaceFlags.SupportsMulticast) != 0;
+            if ((nativeStats.Flags & (ulong)Interop.Sys.InterfaceFlags.InterfaceError) != 0)
+            {
+                _operationalStatus = OperationalStatus.Unknown;
+            }
+            else
+            {
+                _operationalStatus = (nativeStats.Flags & (ulong)Interop.Sys.InterfaceFlags.InterfaceHasLink) != 0 ?  OperationalStatus.Up : OperationalStatus.Down;
+            }
 
+            _supportsMulticast = (nativeStats.Flags & (ulong)Interop.Sys.InterfaceFlags.InterfaceSupportsMulticast) != 0;
             _speed = (long)nativeStats.Speed;
             _ipProperties = new OsxIpInterfaceProperties(this, (int)nativeStats.Mtu);
         }

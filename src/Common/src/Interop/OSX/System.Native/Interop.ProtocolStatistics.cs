@@ -14,7 +14,9 @@ internal static partial class Interop
         internal enum InterfaceFlags
         {
             InterfaceUp = 0x01,
-            SupportsMulticast = 0x02,
+            InterfaceSupportsMulticast = 0x02,
+            InterfaceHasLink = 0x04,
+            InterfaceError = 0x08,
         }
 
         [StructLayoutAttribute(LayoutKind.Sequential)]
