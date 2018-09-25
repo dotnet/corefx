@@ -78,32 +78,32 @@ namespace System.Diagnostics
         /// </summary>
         private void KillTree()
         {
-            try
-            {
-                // Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
-                // so that its children can be enumerated.
-                Stop();
-            }
-            catch
-            {
-                // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
-                return;
-            }
+                try
+                {
+                    // Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
+                    // so that its children can be enumerated.
+                    Stop();
+                }
+                catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
+                {
+                    // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
+                    return;
+                }
 
-            IReadOnlyList<Process> children = GetChildProcesses();
+                IReadOnlyList<Process> children = GetChildProcesses();
 
-            try
-            {
-                // Since the process's children have been enumerated, it can now be terminated.
-                Kill();
-            }
-            catch
-            {
-                // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
-                return;
-            }
+                try
+                {
+                    // Since the process's children have been enumerated, it can now be terminated.
+                    Kill();
+                }
+                catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
+                {
+                    // Making a best attempt. If it fails (perhaps because the process is already dead), give up.
+                    return;
+                }
 
-            KillChildren(children);
+                KillChildren(children);
         }
 
         /// <summary>Discards any information about the associated process.</summary>
@@ -441,7 +441,8 @@ namespace System.Diagnostics
             {
                 Debug.Assert(stdinFd >= 0);
                 _standardInput = new StreamWriter(OpenStream(stdinFd, FileAccess.Write),
-                    startInfo.StandardInputEncoding ?? s_utf8NoBom, StreamBufferSize) { AutoFlush = true };
+                    startInfo.StandardInputEncoding ?? s_utf8NoBom, StreamBufferSize)
+                { AutoFlush = true };
             }
             if (startInfo.RedirectStandardOutput)
             {

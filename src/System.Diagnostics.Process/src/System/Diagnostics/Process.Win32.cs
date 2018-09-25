@@ -376,14 +376,22 @@ namespace System.Diagnostics
                 // Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
                 // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
                 OpenProcessHandle();
+            }
+            catch (Exception e) when (e is ObjectDisposedException || e is InvalidOperationException || e is Win32Exception)
+            {
+                // If obtaining a handle fails, we can't do anything further related to this process.
+                return;
+            }
 
+            try
+            {
                 // Kill the process, so that no further children can be created.
                 Kill();
             }
-            catch
+            catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
             {
-                // Made a best-effort attempt which failed (perhaps because the process is already dead), so give up.
-                return;
+                // Made a best-effort attempt which failed (perhaps because the process is already dead).
+                // However, since it still might be possible to terminate the process's children, suppress the failure and keep going.
             }
 
             KillChildren(GetChildProcesses());
@@ -404,12 +412,11 @@ namespace System.Diagnostics
                 {
                     try
                     {
-                        // Force the process object to hold a handle to the process. Ensures that if the process dies while we're working
-                        // with it, it won't be reused. This way, any process we pass back is guaranteed to be an actual child, not a 
-                        // reference to a new process that happens to have the same id as a deceased child.
+                        // Causes the instance to hold a handle to the process. While held, the process's PID won't be reused 
+                        // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
                         possibleChildProcess.OpenProcessHandle();
                     }
-                    catch
+                    catch (Exception e) when (e is ObjectDisposedException || e is InvalidOperationException || e is Win32Exception)
                     {
                         // Made a best-effort attempt which failed (perhaps because the process is already dead).
                         continue;
