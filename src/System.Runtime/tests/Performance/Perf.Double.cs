@@ -16,6 +16,7 @@ namespace System.Tests
         private volatile string _string;
         private volatile bool _bool;
 
+        // Reenable commented out test cases when https://github.com/xunit/xunit/issues/1822 is fixed.
         [Benchmark]
         [InlineData(double.NegativeInfinity, 10_000_000)]   // Negative Infinity
         [InlineData(double.MinValue, 100_000)]              // Min Negative Normal
@@ -161,17 +162,17 @@ namespace System.Tests
 
             foreach (string format in formats)
             {
-                foreach (float testValue in specialTestValues)
+                foreach (double testValue in specialTestValues)
                 {
                     yield return new object[] { format, testValue, 10_000_000 };
                 }
 
-                foreach (float testValue in normalTestValues)
+                foreach (double testValue in normalTestValues)
                 {
                     yield return new object[] { format, testValue, 1_000_000 };
                 }
 
-                foreach (float testValue in edgeTestValues)
+                foreach (double testValue in edgeTestValues)
                 {
                     yield return new object[] { format, testValue, 100_000 };
                 }

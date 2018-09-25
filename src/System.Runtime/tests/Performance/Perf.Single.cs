@@ -16,6 +16,7 @@ namespace System.Tests
         private volatile string _string;
         private volatile bool _bool;
 
+        // Reenable commented out test cases when https://github.com/xunit/xunit/issues/1822 is fixed.
         [Benchmark]
         [InlineData(float.NegativeInfinity, 10_000_000)]    // Negative Infinity
         [InlineData(float.MinValue, 100_000)]               // Min Negative Normal
