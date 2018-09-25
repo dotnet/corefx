@@ -6,6 +6,41 @@ We integrate coreclr / corefx `master` into `feature/utf8string` regularly. Any 
 
 # Version history
 
+## 3.0.0-alphautf8string-26925-04
+_Sep. 25, 2018_
+
+Adds `OperationStatus`-based APIs that work with spans and allow operating on chunks of UTF-8 data.
+
+```cs
+namespace System {
+    public static class BitConverter {
+        public static ushort ByteSwap(ushort value);
+        public static uint ByteSwap(uint value);
+        public static ulong ByteSwap(ulong value);
+    }
+}
+namespace System.Text {
+    public static class Unicode {
+        public static OperationStatus TranscodeUtf16ToUtf8(ReadOnlySpan<char> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int charsConsumed, out int bytesWritten);
+        public static OperationStatus TranscodeUtf8ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int charsWritten);
+    }
+    public static class Utf8 {
+        public static bool Contains(ReadOnlySpan<byte> source, UnicodeScalar scalar);
+        public static bool Contains(ReadOnlySpan<byte> source, UnicodeScalar scalar, StringComparison comparison);
+        public static int IndexOf(ReadOnlySpan<byte> source, UnicodeScalar scalar);
+        public static int IndexOf(ReadOnlySpan<byte> source, UnicodeScalar scalar, StringComparison comparison, out int matchLength);
+        public static int ToLower(ReadOnlySpan<byte> source, Span<byte> destination, CultureInfo culture);
+        public static OperationStatus ToLower(ReadOnlySpan<byte> source, Span<byte> destination, CultureInfo culture, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten);
+        public static int ToLowerInvariant(ReadOnlySpan<byte> source, Span<byte> destination);
+        public static OperationStatus ToLowerInvariant(ReadOnlySpan<byte> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten);
+        public static int ToUpper(ReadOnlySpan<byte> source, Span<byte> destination, CultureInfo culture);
+        public static OperationStatus ToUpper(ReadOnlySpan<byte> source, Span<byte> destination, CultureInfo culture, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten);
+        public static int ToUpperInvariant(ReadOnlySpan<byte> source, Span<byte> destination);
+        public static OperationStatus ToUpperInvariant(ReadOnlySpan<byte> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten);
+    }
+}
+```
+
 ## 3.0.0-alphautf8string-26922-02
 _Sep. 22, 2018_
 
