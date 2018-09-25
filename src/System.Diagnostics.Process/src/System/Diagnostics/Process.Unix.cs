@@ -78,6 +78,8 @@ namespace System.Diagnostics
         /// </summary>
         private void KillTree()
         {
+            try
+            {
                 try
                 {
                     // Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
@@ -104,6 +106,20 @@ namespace System.Diagnostics
                 }
 
                 KillChildren(children);
+            }
+            catch (Exception e)
+            {
+                // This method is to be fail-safe so exceptions should not escape from it. 
+                //
+                // Some exceptions that could be encountered will only be thrown in race or difficult to simulate situations, making 
+                // it impractical to use tests to trigger these exceptions and verify that they are caught. Without such tests, it's possible 
+                // that code changes elsewhere could change the list of exceptions this method might encounter this method being updated. 
+                //
+                // To ensure this method honors its 'fail-safe' contract, it catches all exceptions when in production. In development, 
+                // unexpected exceptions cause failures, encouraging the developer to update the explicit catches, as appropriate.
+
+                Debug.Fail("Unexpected exception encountered", e.ToString());
+            }
         }
 
         /// <summary>Discards any information about the associated process.</summary>

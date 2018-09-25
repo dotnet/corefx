@@ -373,28 +373,44 @@ namespace System.Diagnostics
         {
             try
             {
-                // Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
-                // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
-                OpenProcessHandle();
-            }
-            catch (Exception e) when (e is ObjectDisposedException || e is InvalidOperationException || e is Win32Exception)
-            {
-                // If obtaining a handle fails, we can't do anything further related to this process.
-                return;
-            }
+                try
+                {
+                    // Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
+                    // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
+                    OpenProcessHandle();
+                }
+                catch (Exception e) when (e is ObjectDisposedException || e is InvalidOperationException || e is Win32Exception)
+                {
+                    // If obtaining a handle fails, we can't do anything further related to this process.
+                    return;
+                }
 
-            try
-            {
-                // Kill the process, so that no further children can be created.
-                Kill();
-            }
-            catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
-            {
-                // Made a best-effort attempt which failed (perhaps because the process is already dead).
-                // However, since it still might be possible to terminate the process's children, suppress the failure and keep going.
-            }
+                try
+                {
+                    // Kill the process, so that no further children can be created.
+                    Kill();
+                }
+                catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
+                {
+                    // Made a best-effort attempt which failed (perhaps because the process is already dead).
+                    // However, since it still might be possible to terminate the process's children, suppress the failure and keep going.
+                }
 
-            KillChildren(GetChildProcesses());
+                KillChildren(GetChildProcesses());
+            }
+            catch (Exception e)
+            {
+                // This method is to be fail-safe so exceptions should not escape from it. 
+                //
+                // Some exceptions that could be encountered will only be thrown in race or difficult to simulate situations, making 
+                // it impractical to use tests to trigger these exceptions and verify that they are caught. Without such tests, it's possible 
+                // that code changes elsewhere could change the list of exceptions this method might encounter this method being updated. 
+                //
+                // To ensure this method honors its 'fail-safe' contract, it catches all exceptions when in production. In development, 
+                // unexpected exceptions cause failures, encouraging the developer to update the explicit catches, as appropriate.
+
+                Debug.Fail("Unexpected exception encountered", e.ToString());
+            }
         }
 
         /// <summary>
