@@ -579,6 +579,25 @@ namespace System.Collections.Concurrent
             }
         }
 
+
+        public IEnumerable<TValue> RemoveAll() 
+        {
+            IEnumerable<TValue> values; 
+            int locksAcquired = 0;
+            try
+            {
+                AcquireAllLocks(ref locksAcquired);
+                values = Values;
+                Clear();
+            }
+            finally
+            {
+                ReleaseLocks(0, locksAcquired);
+            }
+            return values;
+        }
+
+
         /// <summary>
         /// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection"/> to an array of
         /// type <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>, starting at the
