@@ -580,11 +580,9 @@ namespace System.Collections.Concurrent
 
         private void InternalClear()
         {
-
             Tables newTables = new Tables(new Node[DefaultCapacity], _tables._locks, new int[_tables._countPerLock.Length]);
-                    _tables = newTables;
-                    _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
-
+            _tables = newTables;
+            _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
         }
 
 
