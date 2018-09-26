@@ -568,16 +568,41 @@ namespace System.Collections.Concurrent
             try
             {
                 AcquireAllLocks(ref locksAcquired);
-
-                Tables newTables = new Tables(new Node[DefaultCapacity], _tables._locks, new int[_tables._countPerLock.Length]);
-                _tables = newTables;
-                _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
+                InternalClear();
+       
             }
             finally
             {
                 ReleaseLocks(0, locksAcquired);
             }
         }
+
+
+        private void InternalClear()
+        {
+            Tables newTables = new Tables(new Node[DefaultCapacity], _tables._locks, new int[_tables._countPerLock.Length]);
+            _tables = newTables;
+            _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
+        }
+
+
+        public IEnumerable<TValue> RemoveAll() 
+        {
+            IEnumerable<TValue> values; 
+            int locksAcquired = 0;
+            try
+            {
+                AcquireAllLocks(ref locksAcquired);
+                values = Values;
+                InternalClear();
+            }
+            finally
+            {
+                ReleaseLocks(0, locksAcquired);
+            }
+            return values;
+        }
+
 
         /// <summary>
         /// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection"/> to an array of
