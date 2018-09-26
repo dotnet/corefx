@@ -688,6 +688,20 @@ namespace System.Net.Sockets.Tests
             Assert.True(new UdpReceiveResult(buffer1, ep1) != new UdpReceiveResult(buffer1, ep3));
         }
 
+        [Fact]
+        public void BeginSend_IPv6Socket_IPv4Dns_Success()
+        {
+            using (var receiver = new UdpClient("127.0.0.1", 0))
+            using (var sender = new UdpClient(AddressFamily.InterNetworkV6))
+            {
+                sender.Client.DualMode = true;
+                for (int i = 0; i < TestSettings.UDPRedundancy; i++)
+                {
+                    sender.Send(new byte[1], 1, "127.0.0.1", ((IPEndPoint)receiver.Client.LocalEndPoint).Port);
+                }
+            }
+        }
+
         private sealed class DerivedUdpClient : UdpClient
         {
             public DerivedUdpClient() { }
