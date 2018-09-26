@@ -6,6 +6,7 @@
     <TargetExt>.exe</TargetExt>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

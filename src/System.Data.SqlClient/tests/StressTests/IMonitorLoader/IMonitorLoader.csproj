@@ -4,10 +4,10 @@
     <RootNamespace>Monitoring</RootNamespace>
     <AssemblyName>Monitoring</AssemblyName>
     <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="IMonitorLoader.cs" />
     <Compile Include="MonitorMetrics.cs" />
   </ItemGroup>
-  <!--Import the targets-->
 </Project>

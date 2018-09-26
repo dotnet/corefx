@@ -4,6 +4,7 @@
     <AssemblyName>XDocument.Common</AssemblyName>
     <RootNamespace>CoreXml.Test.XLinq</RootNamespace>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BridgeHelpers.cs" />

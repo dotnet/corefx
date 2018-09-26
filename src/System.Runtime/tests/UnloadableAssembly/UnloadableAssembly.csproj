@@ -3,6 +3,7 @@
     <ProjectGuid>{CA43AAD6-59A6-4BEB-AC9E-52DC9FD04B8B}</ProjectGuid>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="UnloadableAssembly.cs" />

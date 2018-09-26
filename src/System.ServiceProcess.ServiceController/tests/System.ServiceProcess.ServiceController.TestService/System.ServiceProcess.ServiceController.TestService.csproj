@@ -50,7 +50,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="System.ServiceProcess.ServiceController.TestService.runtimeconfig.json">
+    <Content Condition="'$(TargetsNetCoreApp)' == 'true'" Include="System.ServiceProcess.ServiceController.TestService.runtimeconfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Condition="'$(TargetsNetFx)' == 'true'" Include="System.ServiceProcess.ServiceController.TestService.exe.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

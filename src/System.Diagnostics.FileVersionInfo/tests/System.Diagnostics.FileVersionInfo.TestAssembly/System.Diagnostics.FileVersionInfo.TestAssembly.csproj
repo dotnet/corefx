@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <IsTestAssembly>false</IsTestAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assembly1.cs" />

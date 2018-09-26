@@ -6,15 +6,18 @@
     <TargetExt>.exe</TargetExt>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="VoidMainWithExitCodeApp.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="AssemblyAttributes.cs" />
+  </ItemGroup>
+  <ItemGroup>    
     <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAssemblyAttribute.cs">
       <Link>Common\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAssemblyAttribute.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="VoidMainWithExitCodeApp.runtimeconfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
