@@ -25,12 +25,11 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/coreclr/issues/7829")]
-        public void Initialize_NumBytesTimesSizeOfEachElement_ThrowsOverflowException()
+        public void Initialize_NumBytesTimesSizeOfEachElement_ThrowsArgumentOutOfRangeException()
         {
             var buffer = new SubBuffer(true);
-            Assert.Throws<OverflowException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
-            Assert.Throws<OverflowException>(() => buffer.Initialize<int>(uint.MaxValue));
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Initialize<int>(uint.MaxValue));
         }
 
         [Fact]
