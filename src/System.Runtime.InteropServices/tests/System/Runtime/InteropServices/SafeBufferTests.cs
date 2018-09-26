@@ -28,8 +28,8 @@ namespace System.Runtime.InteropServices.Tests
         public void Initialize_NumBytesTimesSizeOfEachElement_ThrowsArgumentOutOfRangeException()
         {
             var buffer = new SubBuffer(true);
-            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
-            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Initialize<int>(uint.MaxValue));
+            AssertExtensions.Throws<ArgumentOutOfRangeException, OverflowException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
+            AssertExtensions.Throws<ArgumentOutOfRangeException, OverflowException>(() => buffer.Initialize<int>(uint.MaxValue));
         }
 
         [Fact]
