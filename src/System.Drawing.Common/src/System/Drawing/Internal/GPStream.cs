@@ -103,7 +103,7 @@ namespace System.Drawing.Internal
 
             // Stream Span API isn't available in 2.0
 #if netcoreapp20
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(Math.Max(DefaultBufferSize, checked((int)cb)));
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(checked((int)cb));
             int read = _dataStream.Read(buffer, 0, checked((int)cb));
             Marshal.Copy(buffer, 0, (IntPtr)pv, read);
             ArrayPool<byte>.Shared.Return(buffer);
@@ -214,7 +214,7 @@ namespace System.Drawing.Internal
 #if netcoreapp20
             byte[] buffer = ArrayPool<byte>.Shared.Rent(checked((int)cb));
             Marshal.Copy((IntPtr)pv, buffer, 0, checked((int)cb));
-            _dataStream.Write(buffer, 0, (int)cb);
+            _dataStream.Write(buffer, 0, checked((int)cb));
             ArrayPool<byte>.Shared.Return(buffer);
 #else
             Span<byte> buffer = new Span<byte>(pv, checked((int)cb));
