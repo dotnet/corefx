@@ -121,8 +121,8 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)buildtools/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(BuildToolsCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Include="IbcData">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)optimization/$(DependencyBranch)</BuildInfoPath>
+    <RemoteDependencyBuildInfo Include="CoreFxOptimizationData">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)optimization/$(DependencyBranch)/IBC</BuildInfoPath>
       <CurrentRef>$(CoreFxOptimizationDataCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
 
@@ -206,7 +206,7 @@
        <ElementName>FeedTasksPackageVersion</ElementName>
        <PackageId>$(FeedTasksPackage)</PackageId>
      </XmlUpdateStep>
-    <XmlUpdateStep Include="IbcData">
+    <XmlUpdateStep Include="CoreFxOptimizationData">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>CoreFxOptimizationDataVersion</ElementName>
       <PackageId>optimization.IBC.CoreFx</PackageId>
