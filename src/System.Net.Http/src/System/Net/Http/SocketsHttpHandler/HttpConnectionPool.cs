@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -28,7 +29,7 @@ namespace System.Net.Http
         private readonly Uri _proxyUri;
 
         /// <summary>List of idle connections stored in the pool.</summary>
-        private readonly List<CachedConnection> _idleConnections = new List<CachedConnection>();
+        private readonly ConcurrentQueue<CachedConnection> _idleConnections = new ConcurrentQueue<CachedConnection>();
         /// <summary>The maximum number of connections allowed to be associated with the pool.</summary>
         private readonly int _maxConnections;
 
@@ -225,32 +226,35 @@ namespace System.Net.Http
             TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
             TimeSpan pooledConnectionIdleTimeout = _poolManager.Settings._pooledConnectionIdleTimeout;
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            List<CachedConnection> list = _idleConnections;
-            lock (SyncObj)
+
+            // Try to return a cached connection.  We need to loop in case a connection
+            // we get from the list is unusable.  _idleConnections itself is thread-safe,
+            // so we don't need to take the lock on this fast path where hopefully
+            // an existing connection will be found.
+            while (_idleConnections.TryDequeue(out CachedConnection cachedConnection))
             {
-                // Try to return a cached connection.  We need to loop in case the connection
-                // we get from the list is unusable.
-                while (list.Count > 0)
+                HttpConnection conn = cachedConnection._connection;
+
+                if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout) &&
+                    !conn.EnsureReadAheadAndPollRead())
                 {
-                    CachedConnection cachedConnection = list[list.Count - 1];
-                    HttpConnection conn = cachedConnection._connection;
-
-                    list.RemoveAt(list.Count - 1);
-                    if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout) &&
-                        !conn.EnsureReadAheadAndPollRead())
-                    {
-                        // We found a valid connection.  Return it.
-                        if (NetEventSource.IsEnabled) conn.Trace("Found usable connection in pool.");
-                        return new ValueTask<(HttpConnectionBase, bool, HttpResponseMessage)>((conn, false, null));
-                    }
-
-                    // We got a connection, but it was already closed by the server or the
-                    // server sent unexpected data or the connection is too old.  In any case,
-                    // we can't use the connection, so get rid of it and try again.
-                    if (NetEventSource.IsEnabled) conn.Trace("Found invalid connection in pool.");
-                    conn.Dispose();
+                    // We found a valid connection.  Return it.
+                    if (NetEventSource.IsEnabled) conn.Trace("Found usable connection in pool.");
+                    return new ValueTask<(HttpConnectionBase, bool, HttpResponseMessage)>((conn, false, null));
                 }
 
+                // We got a connection, but it was already closed by the server or the
+                // server sent unexpected data or the connection is too old.  In any case,
+                // we can't use the connection, so get rid of it and try again.
+                if (NetEventSource.IsEnabled) conn.Trace("Found invalid connection in pool.");
+                conn.Dispose();
+            }
+
+            // We were unable to find a cached connection. At this point we're going to be
+            // manipulating more than just the queue of cached connections, so take the lock
+            // protecting all of the pool's state.
+            lock (SyncObj)
+            {
                 // No valid cached connections, so we need to create a new one.  If
                 // there's no limit on the number of connections associated with this
                 // pool, or if we haven't reached such a limit, simply create a new
@@ -778,7 +782,7 @@ namespace System.Net.Http
                 {
                     // There's at least one waiter to which we should try to logically transfer
                     // the associated count.  Get the waiter.
-                    Debug.Assert(_idleConnections.Count == 0, $"With {_idleConnections} connections, we shouldn't have a waiter.");
+                    Debug.Assert(_idleConnections.IsEmpty, $"With > 0 connections, we shouldn't have a waiter.");
                     ConnectionWaiter waiter = DequeueWaiter();
                     Debug.Assert(waiter != null, "Expected non-null waiter");
                     Debug.Assert(waiter.Task.Status == TaskStatus.WaitingForActivation, $"Expected {waiter.Task.Status} == {nameof(TaskStatus.WaitingForActivation)}");
@@ -839,10 +843,9 @@ namespace System.Net.Http
         /// <param name="connection">The connection to return.</param>
         public void ReturnConnection(HttpConnection connection)
         {
-            List<CachedConnection> list = _idleConnections;
             lock (SyncObj)
             {
-                Debug.Assert(list.Count <= _maxConnections, $"Expected {list.Count} <= {_maxConnections}");
+                Debug.Assert(_idleConnections.Count <= _maxConnections, $"Expected {_idleConnections.Count} <= {_maxConnections}");
 
                 // Mark the pool as still being active.
                 _usedSinceLastCleanup = true;
@@ -899,7 +902,7 @@ namespace System.Net.Http
                 }
 
                 // Pool the connection by adding it to the list.
-                list.Add(new CachedConnection(connection));
+                _idleConnections.Enqueue(new CachedConnection(connection));
                 if (NetEventSource.IsEnabled) connection.Trace("Stored connection in pool.");
             }
         }
@@ -916,15 +919,16 @@ namespace System.Net.Http
         /// </summary>
         public void Dispose()
         {
-            List<CachedConnection> list = _idleConnections;
             lock (SyncObj)
             {
                 if (!_disposed)
                 {
                     if (NetEventSource.IsEnabled) Trace("Disposing pool.");
                     _disposed = true;
-                    list.ForEach(c => c._connection.Dispose());
-                    list.Clear();
+                    while (_idleConnections.TryDequeue(out CachedConnection cc))
+                    {
+                        cc._connection.Dispose();
+                    }
 
                     if (_http2Connection != null)
                     {
@@ -932,7 +936,6 @@ namespace System.Net.Http
                         _http2Connection = null;
                     }
                 }
-                Debug.Assert(list.Count == 0, $"Expected {nameof(list)}.{nameof(list.Count)} == 0");
             }
         }
 
@@ -948,7 +951,6 @@ namespace System.Net.Http
             TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
             TimeSpan pooledConnectionIdleTimeout = _poolManager.Settings._pooledConnectionIdleTimeout;
 
-            List<CachedConnection> list = _idleConnections;
             List<HttpConnection> toDispose = null;
             bool tookLock = false;
             try
@@ -960,57 +962,41 @@ namespace System.Net.Http
                 // time to determine whether a connection is too old and should be closed.
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
-                // Find the first item which needs to be removed.
-                int freeIndex = 0;
-                while (freeIndex < list.Count && list[freeIndex].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
+                // If there are any connections in the pool, loop through each to see if it's usable.
+                // The looping is accomplished by dequeueing and re-enqueueing, in order to avoid needing
+                // additional synchronization with the fast path of dequeueing when an incoming
+                // request needs a connection.  In order to know when we're done, then, we snapshot the
+                // initial count of the list, and since we're holding the lock that's required in order
+                // to add to the list, if we iterate that many times, we're guaranteed to visit every
+                // connection.  It's possible we may visit the same connection multiple times if after
+                // capturing the count one or more concurrent requests removes a connection from the pool,
+                // but there's no functionally negative impact to such duplicated checks, they should be rare,
+                // and the extra overhead is relatively small.
+                if (!_idleConnections.IsEmpty)
                 {
-                    freeIndex++;
+                    int maxConnectionsToExamine = _idleConnections.Count;
+                    for (int i = 0; i < maxConnectionsToExamine && _idleConnections.TryDequeue(out CachedConnection cc); i++)
+                    {
+                        if (cc.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
+                        {
+                            _idleConnections.Enqueue(cc);
+                        }
+                        else
+                        {
+                            (toDispose ?? (toDispose = new List<HttpConnection>())).Add(cc._connection);
+                        }
+                    }
                 }
 
-                // If freeIndex == list.Count, nothing needs to be removed.
-                // But if it's < list.Count, at least one connection needs to be purged.
-                if (freeIndex < list.Count)
+                // If there are now no connections associated with this pool, we can dispose of it. We
+                // avoid aggressively cleaning up pools that have recently been used but currently aren't;
+                // if a pool was used since the last time we cleaned up, give it another chance. New pools
+                // start out saying they've recently been used, to give them a bit of breathing room and time
+                // for the initial collection to be added to it.
+                if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup)
                 {
-                    // We know the connection at freeIndex is unusable, so dispose of it.
-                    toDispose = new List<HttpConnection> { list[freeIndex]._connection };
-
-                    // Find the first item after the one to be removed that should be kept.
-                    int current = freeIndex + 1;
-                    while (current < list.Count)
-                    {
-                        // Look for the first item to be kept.  Along the way, any
-                        // that shouldn't be kept are disposed of.
-                        while (current < list.Count && !list[current].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
-                        {
-                            toDispose.Add(list[current]._connection);
-                            current++;
-                        }
-
-                        // If we found something to keep, copy it down to the known free slot.
-                        if (current < list.Count)
-                        {
-                            // copy item to the free slot
-                            list[freeIndex++] = list[current++];
-                        }
-
-                        // Keep going until there are no more good items.
-                    }
-
-                    // At this point, good connections have been moved below freeIndex, and garbage connections have
-                    // been added to the dispose list, so clear the end of the list past freeIndex.
-                    list.RemoveRange(freeIndex, list.Count - freeIndex);
-
-                    // If there are now no connections associated with this pool, we can dispose of it. We
-                    // avoid aggressively cleaning up pools that have recently been used but currently aren't;
-                    // if a pool was used since the last time we cleaned up, give it another chance. New pools
-                    // start out saying they've recently been used, to give them a bit of breathing room and time
-                    // for the initial collection to be added to it.
-                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup)
-                    {
-                        Debug.Assert(list.Count == 0, $"Expected {nameof(list)}.{nameof(list.Count)} == 0");
-                        _disposed = true;
-                        return true; // Pool is disposed of.  It should be removed.
-                    }
+                    _disposed = true;
+                    return true; // Pool is disposed of.  It should be removed.
                 }
 
                 // Reset the cleanup flag.  Any pools that are empty and not used since the last cleanup
