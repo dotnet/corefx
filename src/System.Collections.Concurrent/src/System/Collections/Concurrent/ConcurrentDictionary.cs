@@ -568,15 +568,23 @@ namespace System.Collections.Concurrent
             try
             {
                 AcquireAllLocks(ref locksAcquired);
-
-                Tables newTables = new Tables(new Node[DefaultCapacity], _tables._locks, new int[_tables._countPerLock.Length]);
-                _tables = newTables;
-                _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
+                InternalClear();
+       
             }
             finally
             {
                 ReleaseLocks(0, locksAcquired);
             }
+        }
+
+
+        private void InternalClear()
+        {
+
+            Tables newTables = new Tables(new Node[DefaultCapacity], _tables._locks, new int[_tables._countPerLock.Length]);
+                    _tables = newTables;
+                    _budget = Math.Max(1, newTables._buckets.Length / newTables._locks.Length);
+
         }
 
 
@@ -588,7 +596,7 @@ namespace System.Collections.Concurrent
             {
                 AcquireAllLocks(ref locksAcquired);
                 values = Values;
-                Clear();
+                InternalClear();
             }
             finally
             {
