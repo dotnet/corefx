@@ -140,6 +140,14 @@ namespace System.Diagnostics.Tests
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void VerifyingCiBehavior2()
+        {
+            throw new Exception();
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
         public void Kill_EntireProcessTree_ThrowsPlatformNotSupportedException()
         {
