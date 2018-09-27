@@ -221,16 +221,16 @@ namespace System
 
         private static unsafe int GetWindowsMinorVersion()
         {
-            var osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
+            var osvi = new Interop.NtDll.RTL_OSVERSIONINFOEX();
+            osvi.dwOSVersionInfoSize = (uint)sizeof(Interop.NtDll.RTL_OSVERSIONINFOEX);
             Assert.Equal(0, RtlGetVersion(ref osvi));
             return (int)osvi.dwMinorVersion;
         }
 
         private static unsafe int GetWindowsBuildNumber()
         {
-            var osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
+            var osvi = new Interop.NtDll.RTL_OSVERSIONINFOEX();
+            osvi.dwOSVersionInfoSize = (uint)sizeof(Interop.NtDll.RTL_OSVERSIONINFOEX);
             Assert.Equal(0, RtlGetVersion(ref osvi));
             return (int)osvi.dwBuildNumber;
         }
@@ -269,23 +269,12 @@ namespace System
         );
 
         [DllImport("ntdll.dll", ExactSpelling=true)]
-        private static extern int RtlGetVersion(ref RTL_OSVERSIONINFOEX lpVersionInformation);
-
-        [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
-        private unsafe struct RTL_OSVERSIONINFOEX
-        {
-            internal uint dwOSVersionInfoSize;
-            internal uint dwMajorVersion;
-            internal uint dwMinorVersion;
-            internal uint dwBuildNumber;
-            internal uint dwPlatformId;
-            internal fixed char szCSDVersion[128];
-        }
+        private static extern int RtlGetVersion(ref Interop.NtDll.RTL_OSVERSIONINFOEX lpVersionInformation);
 
         private static unsafe int GetWindowsVersion()
         {
-            var osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
+            var osvi = new Interop.NtDll.RTL_OSVERSIONINFOEX();
+            osvi.dwOSVersionInfoSize = (uint)sizeof(Interop.NtDll.RTL_OSVERSIONINFOEX);
             Assert.Equal(0, RtlGetVersion(ref osvi));
             return (int)osvi.dwMajorVersion;
         }
