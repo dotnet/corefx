@@ -103,7 +103,8 @@ namespace System.Diagnostics
 
                 // Returns null if permissions do not allow querying the specified process
                 Interop.libproc.proc_taskallinfo? info = Interop.libproc.GetProcessInfoById(Id);
-                return (info.HasValue) ? Convert.ToInt32(info.Value.pbsd.pbi_ppid) : null;
+
+                return (info.HasValue)? (int?)Convert.ToInt32(info.Value.pbsd.pbi_ppid) : null;
             }
         }
 
