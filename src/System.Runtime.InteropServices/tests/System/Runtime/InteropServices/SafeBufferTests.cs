@@ -25,11 +25,20 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        public void Initialize_NumBytesTimesSizeOfEachElement_ThrowsArgumentOutOfRangeException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Initialize_NumBytesTimesSizeOfEachElement_NetFramework_ThrowsOverflowException()
         {
             var buffer = new SubBuffer(true);
-            AssertExtensions.Throws<ArgumentOutOfRangeException, OverflowException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
-            AssertExtensions.Throws<ArgumentOutOfRangeException, OverflowException>(() => buffer.Initialize<int>(uint.MaxValue));
+            AssertExtensions.Throws<OverflowException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
+            AssertExtensions.Throws<OverflowException>(() => buffer.Initialize<int>(uint.MaxValue));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Initialize_NumBytesTimesSizeOfEachElement_ThrowsArgumentOutOfRangeExceptionIfNot64Bit()
+        {
+            AssertExtensions.ThrowsIf<ArgumentOutOfRangeException>(!Environment.Is64BitProcess, () => buffer.Initialize(uint.MaxValue, uint.MaxValue));
+            AssertExtensions.ThrowsIf<ArgumentOutOfRangeException>(!Environment.Is64BitProcess, () => buffer.Initialize<int>(uint.MaxValue));
         }
 
         [Fact]
