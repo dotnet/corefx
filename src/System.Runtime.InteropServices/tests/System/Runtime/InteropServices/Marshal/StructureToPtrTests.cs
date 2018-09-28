@@ -190,6 +190,34 @@ namespace System.Runtime.InteropServices.Tests
             }
         }
 
+        [Fact]
+        public unsafe void StructureToPtr_StructWithFixedBuffer_In_NonBlittable_Success()
+        {
+            var str = default(NonBlittableContainingBuffer);
+
+            // Assign values to the bytes.
+            byte* ptr = (byte*)&str.bufferStruct;
+            for (int i = 0; i < sizeof(HasFixedBuffer); i++)
+                ptr[i] = (byte)(0x11 * (i + 1));
+
+            HasFixedBuffer* original = (HasFixedBuffer*)ptr;
+            
+            // Marshal the parent struct.
+            var parentStructIntPtr = Marshal.AllocHGlobal(Marshal.SizeOf<NonBlittableContainingBuffer>());
+            Marshal.StructureToPtr(str, parentStructIntPtr, false);
+            try
+            {
+                HasFixedBuffer* bufferStructPtr = (HasFixedBuffer*)parentStructIntPtr.ToPointer();
+                Assert.Equal(original->buffer[0], original->buffer[0]);
+                Assert.Equal(original->buffer[1], original->buffer[1]);
+            }
+            finally
+            {
+                Marshal.DestroyStructure<NonBlittableContainingBuffer>(parentStructIntPtr);
+                Marshal.FreeHGlobal(parentStructIntPtr);
+            }
+        }
+
         public struct StructWithIntField
         {
             public int value;
@@ -217,6 +245,22 @@ namespace System.Runtime.InteropServices.Tests
         public struct SomeTestStruct_Auto
         {
             public int i;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public unsafe struct HasFixedBuffer
+        {
+            public short member;
+            public fixed byte buffer[2];
+            public short member2;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct NonBlittableContainingBuffer
+        {
+            public HasFixedBuffer bufferStruct;
+            public string str;
+            public IntPtr intPtr;
         }
     }
 }
