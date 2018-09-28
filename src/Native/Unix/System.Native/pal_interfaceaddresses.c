@@ -22,7 +22,11 @@
 #endif
 
 #if defined(AF_PACKET)
+#if defined(_WASM_)
+#include <netpacket/packet.h>
+#else // _WASM_
 #include <linux/if_packet.h>
+#endif // _WASM_
 #elif defined(AF_LINK)
 #include <net/if_dl.h>
 #include <net/if_types.h>
@@ -110,6 +114,15 @@ int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             if (onLinkLayerFound != NULL)
             {
                 struct sockaddr_ll* sall = (struct sockaddr_ll*)current->ifa_addr;
+
+                if (sall->sll_halen > sizeof(sall->sll_addr))
+                {
+                    // sockaddr_ll->sll_addr has a maximum capacity of 8 bytes (unsigned char sll_addr[8])
+                    // so if we get a address length greater than that, we truncate it to 8 bytes.
+                    // This is following the kernel docs where they always treat physical addresses with a maximum of 8 bytes.
+                    // However in WSL we hit an issue where sll_halen was 16 bytes so the memcpy_s below would fail because it was greater.
+                    sall->sll_halen = sizeof(sall->sll_addr);
+                }
 
                 LinkLayerAddressInfo lla;
                 memset(&lla, 0, sizeof(LinkLayerAddressInfo));

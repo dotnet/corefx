@@ -299,7 +299,7 @@ namespace System.Net
                 }
 
                 Uri hostUri;
-                if ((value.IndexOf('/') != -1) || (!TryGetHostUri(value, out hostUri)))
+                if ((value.Contains('/')) || (!TryGetHostUri(value, out hostUri)))
                 {
                     throw new ArgumentException(SR.net_invalid_host, nameof(value));
                 }
@@ -311,7 +311,7 @@ namespace System.Net
                 {
                     _hostHasPort = true;
                 }
-                else if (value.IndexOf(':') == -1)
+                else if (!value.Contains(':'))
                 {
                     _hostHasPort = false;
                 }
@@ -1133,11 +1133,22 @@ namespace System.Net
 
                 Debug.Assert(handler.UseProxy); // Default of handler.UseProxy is true.
                 Debug.Assert(handler.Proxy == null); // Default of handler.Proxy is null.
+
+                // HttpClientHandler default is to use a proxy which is the system proxy.
+                // This is indicated by the properties 'UseProxy == true' and 'Proxy == null'.
+                //
+                // However, HttpWebRequest doesn't have a separate 'UseProxy' property. Instead,
+                // the default of the 'Proxy' property is a non-null IWebProxy object which is the
+                // system default proxy object. If the 'Proxy' property were actually null, then
+                // that means don't use any proxy. 
+                //
+                // So, we need to map the desired HttpWebRequest proxy settings to equivalent
+                // HttpClientHandler settings.
                 if (_proxy == null)
                 {
                     handler.UseProxy = false;
                 }
-                else
+                else if (!object.ReferenceEquals(_proxy, WebRequest.GetSystemWebProxy()))
                 {
                     handler.Proxy = _proxy;
                 }

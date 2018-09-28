@@ -5,14 +5,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.Cryptography.Asn1;
+using System.Security.Cryptography.X509Certificates.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.X509Certificates
 {
     internal class Pkcs10CertificationRequestInfo
     {
-        private static readonly byte[][] s_encodedVersion = DerEncoder.SegmentedEncodeUnsignedInteger(new byte[1]);
-
         internal X500DistinguishedName Subject { get; set; }
         internal PublicKey PublicKey { get; set; }
         internal Collection<X501Attribute> Attributes { get; } = new Collection<X501Attribute>();
@@ -36,29 +37,6 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
-        private byte[] Encode()
-        {
-            // CertificationRequestInfo::= SEQUENCE {
-            //   version INTEGER { v1(0) } (v1,...),
-            //   subject Name,
-            //   subjectPKInfo SubjectPublicKeyInfo{ { PKInfoAlgorithms } },
-            //   attributes[0] Attributes{ { CRIAttributes } }
-            // }
-            //
-            // Attributes { ATTRIBUTE:IOSet } ::= SET OF Attribute{{ IOSet }}
-
-            byte[][] attrSet = Attributes.SegmentedEncodeAttributeSet();
-
-            // Replace the tag with ContextSpecific0.
-            attrSet[0][0] = DerSequenceReader.ContextSpecificConstructedTag0;
-
-            return DerEncoder.ConstructSequence(
-                s_encodedVersion,
-                Subject.RawData.WrapAsSegmentedForSequence(),
-                PublicKey.SegmentedEncodeSubjectPublicKeyInfo(),
-                attrSet);
-        }
-
         internal byte[] ToPkcs10Request(X509SignatureGenerator signatureGenerator, HashAlgorithmName hashAlgorithm)
         {
             // State validation should be runtime checks if/when this becomes public API
@@ -66,22 +44,44 @@ namespace System.Security.Cryptography.X509Certificates
             Debug.Assert(Subject != null);
             Debug.Assert(PublicKey != null);
 
-            // CertificationRequest ::= SEQUENCE {
-            //   certificationRequestInfo CertificationRequestInfo,
-            //   signatureAlgorithm AlgorithmIdentifier{ { SignatureAlgorithms } },
-            //   signature BIT STRING
-            //  }
-
-            byte[] encoded = Encode();
-            byte[] signature = signatureGenerator.SignData(encoded, hashAlgorithm);
             byte[] signatureAlgorithm = signatureGenerator.GetSignatureAlgorithmIdentifier(hashAlgorithm);
+            AlgorithmIdentifierAsn signatureAlgorithmAsn;
 
-            EncodingHelpers.ValidateSignatureAlgorithm(signatureAlgorithm);
+            // Deserialization also does validation of the value (except for Parameters, which have to be validated separately).
+            signatureAlgorithmAsn = AlgorithmIdentifierAsn.Decode(signatureAlgorithm, AsnEncodingRules.DER);
+            if (signatureAlgorithmAsn.Parameters.HasValue)
+            {
+                Helpers.ValidateDer(signatureAlgorithmAsn.Parameters.Value);
+            }
 
-            return DerEncoder.ConstructSequence(
-                encoded.WrapAsSegmentedForSequence(),
-                signatureAlgorithm.WrapAsSegmentedForSequence(),
-                DerEncoder.SegmentedEncodeBitString(signature));
+            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn();
+            spki.Algorithm = new AlgorithmIdentifierAsn { Algorithm = PublicKey.Oid, Parameters = PublicKey.EncodedParameters.RawData };
+            spki.SubjectPublicKey = PublicKey.EncodedKeyValue.RawData;
+
+            CertificationRequestInfoAsn requestInfo = new CertificationRequestInfoAsn
+            {
+                Version = 0,
+                Subject = this.Subject.RawData,
+                SubjectPublicKeyInfo = spki,
+                Attributes = Attributes.Select(a => new AttributeAsn(a)).ToArray(),
+            };
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            using (AsnWriter signedWriter = new AsnWriter(AsnEncodingRules.DER))
+            {
+                requestInfo.Encode(writer);
+
+                byte[] encodedRequestInfo = writer.Encode();
+                CertificationRequestAsn certificationRequest = new CertificationRequestAsn
+                {
+                    CertificationRequestInfo = requestInfo,
+                    SignatureAlgorithm = signatureAlgorithmAsn,
+                    SignatureValue = signatureGenerator.SignData(encodedRequestInfo, hashAlgorithm),
+                };
+
+                certificationRequest.Encode(signedWriter);
+                return signedWriter.Encode();
+            }
         }
     }
 }

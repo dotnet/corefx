@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -28,31 +27,18 @@ namespace System.ServiceModel
 
         private struct Section
         {
-            private int _offset;
-            private int _size;
-            private XmlDictionaryReaderQuotas _quotas;
-
             public Section(int offset, int size, XmlDictionaryReaderQuotas quotas)
             {
-                _offset = offset;
-                _size = size;
-                _quotas = quotas;
+                Offset = offset;
+                Size = size;
+                Quotas = quotas;
             }
 
-            public int Offset
-            {
-                get { return _offset; }
-            }
+            public int Offset { get; }
 
-            public int Size
-            {
-                get { return _size; }
-            }
+            public int Size { get; }
 
-            public XmlDictionaryReaderQuotas Quotas
-            {
-                get { return _quotas; }
-            }
+            public XmlDictionaryReaderQuotas Quotas { get; }
         }
 
         public XmlBuffer(int maxBufferSize)
@@ -65,18 +51,9 @@ namespace System.ServiceModel
             _sections = new List<Section>(1);
         }
 
-        public int BufferSize
-        {
-            get
-            {
-                return _buffer.Length;
-            }
-        }
+        public int BufferSize => _buffer.Length;
 
-        public int SectionCount
-        {
-            get { return _sections.Count; }
-        }
+        public int SectionCount => _sections.Count;
 
         public XmlDictionaryWriter OpenSection(XmlDictionaryReaderQuotas quotas)
         {
@@ -116,11 +93,7 @@ namespace System.ServiceModel
             _stream = null;
         }
 
-        private Exception CreateInvalidStateException()
-        {
-            return new InvalidOperationException(SR.XmlBufferInInvalidState);
-        }
-
+        private Exception CreateInvalidStateException() => new InvalidOperationException(SR.XmlBufferInInvalidState);
 
         public XmlDictionaryReader GetReader(int sectionIndex)
         {

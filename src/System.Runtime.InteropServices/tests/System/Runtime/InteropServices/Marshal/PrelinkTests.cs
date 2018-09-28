@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Xunit;
@@ -36,7 +35,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void Prelink_NonRuntimeMethod_ThrowsArgumentException()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Marshal.Prelink(new NonRuntimeMethodInfo()));
+            AssertExtensions.Throws<ArgumentException>("m", null, () => Marshal.Prelink(new NonRuntimeMethodInfo()));
         }
         
         public class NonRuntimeMethodInfo : MethodInfo

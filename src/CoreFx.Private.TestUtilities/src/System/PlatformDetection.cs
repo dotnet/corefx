@@ -31,6 +31,7 @@ namespace System
         public static bool IsNotWindowsNanoServer => !IsWindowsNanoServer;
         public static bool IsNotWindowsServerCore => !IsWindowsServerCore;
         public static bool IsNotWindowsIoTCore => !IsWindowsIoTCore;
+        public static bool IsNotWindowsHomeEdition => !IsWindowsHomeEdition;
         public static bool IsDrawingSupported => (IsNotWindowsNanoServer && IsNotWindowsIoTCore);
         public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
         public static bool IsNotArmProcess => !IsArmProcess;
@@ -43,6 +44,15 @@ namespace System
         public static bool IsDomainJoinedMachine => !Environment.MachineName.Equals(Environment.UserDomainName, StringComparison.OrdinalIgnoreCase);
 
         public static bool IsNotNetNative => !IsNetNative;
+
+        // Windows - Schannel supports alpn from win8.1/2012 R2 and higher.
+        // Linux - OpenSsl supports alpn from openssl 1.0.2 and higher.
+        // OSX - SecureTransport doesn't expose alpn APIs. #30492
+        public static bool SupportsAlpn => (IsWindows && !IsWindows7) ||
+            (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
+            (OpenSslVersion.Major >= 1 && (OpenSslVersion.Minor >= 1 || OpenSslVersion.Build >= 2)));
+        public static bool SupportsClientAlpn => SupportsAlpn ||
+            (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && PlatformDetection.OSXVersion > new Version(10, 12));
 
         // Officially, .Net Native only supports processes running in an AppContainer. However, the majority of tests still work fine
         // in a normal Win32 process and we often do so as running in an AppContainer imposes a substantial tax in debuggability

@@ -12,9 +12,11 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel AVX hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Avx
+    public abstract class Avx : Sse42
     {
-        public static bool IsSupported { get => IsSupported; }
+        internal Avx() { }
+
+        public new static bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m256 _mm256_add_ps (__m256 a, __m256 b)
@@ -468,7 +470,7 @@ namespace System.Runtime.Intrinsics.X86
                 return LoadVector256(buffer);
             }
         }
-        
+
         /// <summary>
         /// __m256i _mm256_insert_epi16 (__m256i a, __int16 i, const int index)
         ///   HELPER
@@ -516,7 +518,7 @@ namespace System.Runtime.Intrinsics.X86
                 return LoadVector256(buffer);
             }
         }
-        
+
         /// <summary>
         /// __m256i _mm256_insert_epi32 (__m256i a, __int32 i, const int index)
         ///   HELPER
@@ -920,22 +922,22 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128 _mm_permutevar_ps (__m128 a, __m128i b)
         ///   VPERMILPS xmm, xmm, xmm/m128
         /// </summary>
-        public static Vector128<float> PermuteVar(Vector128<float> left, Vector128<float> mask) => PermuteVar(left, mask);
+        public static Vector128<float> PermuteVar(Vector128<float> left, Vector128<int> control) => PermuteVar(left, control);
         /// <summary>
         /// __m128d _mm_permutevar_pd (__m128d a, __m128i b)
         ///   VPERMILPD xmm, xmm, xmm/m128
         /// </summary>
-        public static Vector128<double> PermuteVar(Vector128<double> left, Vector128<double> mask) => PermuteVar(left, mask);
+        public static Vector128<double> PermuteVar(Vector128<double> left, Vector128<long> control) => PermuteVar(left, control);
         /// <summary>
         /// __m256 _mm256_permutevar_ps (__m256 a, __m256i b)
         ///   VPERMILPS ymm, ymm, ymm/m256
         /// </summary>
-        public static Vector256<float> PermuteVar(Vector256<float> left, Vector256<float> mask) => PermuteVar(left, mask);
+        public static Vector256<float> PermuteVar(Vector256<float> left, Vector256<int> control) => PermuteVar(left, control);
         /// <summary>
         /// __m256d _mm256_permutevar_pd (__m256d a, __m256i b)
         ///   VPERMILPD ymm, ymm, ymm/m256
         /// </summary>
-        public static Vector256<double> PermuteVar(Vector256<double> left, Vector256<double> mask) => PermuteVar(left, mask);
+        public static Vector256<double> PermuteVar(Vector256<double> left, Vector256<long> control) => PermuteVar(left, control);
 
         /// <summary>
         /// __m256 _mm256_rcp_ps (__m256 a)

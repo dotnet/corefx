@@ -76,7 +76,7 @@ namespace System.Drawing
         }
 
         // Used for serialization
-        private void InitializeFromStream(Stream stream)
+        private IntPtr InitializeFromStream(Stream stream)
         {
             IntPtr image = IntPtr.Zero;
 
@@ -89,6 +89,7 @@ namespace System.Drawing
 
             Gdip.CheckStatus(Gdip.GdipGetImageType(new HandleRef(this, nativeImage), out type));
             EnsureSave(this, null, stream);
+            return image;
         }
 
         internal Image(IntPtr nativeImage) => SetNativeImage(nativeImage);
@@ -265,11 +266,11 @@ namespace System.Drawing
             }
         }
 
-        internal void Save(MemoryStream stream)
+        private void Save(MemoryStream stream)
         {
             // Jpeg loses data, so we don't want to use it to serialize...
             ImageFormat dest = RawFormat;
-            if (dest == ImageFormat.Jpeg)
+            if (dest.Guid == ImageFormat.Jpeg.Guid)
                 dest = ImageFormat.Png;
 
             // If we don't find an Encoder (for things like Icon), we just switch back to PNG...
@@ -328,7 +329,7 @@ namespace System.Drawing
                 {
                     Gdip.CheckStatus(Gdip.GdipSaveImageToStream(
                         new HandleRef(this, nativeImage),
-                        new UnsafeNativeMethods.ComStreamFromDataStream(stream),
+                        new GPStream(stream),
                         ref g,
                         new HandleRef(encoderParams, encoderParamsMemory)));
                 }
@@ -476,48 +477,6 @@ namespace System.Drawing
                 callbackData));
 
             return CreateImageObject(thumbImage);
-        }
-
-        // Multi-frame support
-
-        /// <summary>
-        /// Gets an array of GUIDs that represent the dimensions of frames within this <see cref='Image'/>.
-        /// </summary>
-        [Browsable(false)]
-        public Guid[] FrameDimensionsList
-        {
-            get
-            {
-                Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(this, nativeImage), out int count));
-
-                Debug.Assert(count >= 0, "FrameDimensionsList returns bad count");
-                if (count <= 0)
-                    return Array.Empty<Guid>();
-
-                int size = Marshal.SizeOf(typeof(Guid));
-
-                IntPtr buffer = Marshal.AllocHGlobal(checked(size * count));
-                if (buffer == IntPtr.Zero)
-                    throw Gdip.StatusException(Gdip.OutOfMemory);
-
-                Guid[] guids = new Guid[count];
-
-                try
-                {
-                    Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(this, nativeImage), buffer, count));
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        guids[i] = (Guid)Marshal.PtrToStructure((IntPtr)((long)buffer + size * i), typeof(Guid));
-                    }
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(buffer);
-                }
-
-                return guids;
-            }
         }
 
         /// <summary>

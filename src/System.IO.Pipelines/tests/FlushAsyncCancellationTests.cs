@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -324,6 +325,28 @@ namespace System.IO.Pipelines.Tests
 
             Assert.True(task.IsCompleted);
             Assert.True(task.Result.IsCompleted);
+        }
+
+        [Fact]
+        public async Task ReadAsyncReturnsDataAfterItWasWrittenDuringCancelledRead()
+        {
+            ValueTask<ReadResult> readTask = Pipe.Reader.ReadAsync();
+            ValueTaskAwaiter<ReadResult> awaiter = readTask.GetAwaiter();
+            ReadResult result = default;
+            awaiter.OnCompleted(
+                () =>
+                {
+                    Pipe.Writer.WriteAsync(new byte[] { 1 }).AsTask().Wait();
+                    result = awaiter.GetResult();
+                });
+
+            Pipe.Reader.CancelPendingRead();
+
+            Assert.True(result.IsCanceled);
+
+            result = await Pipe.Reader.ReadAsync();
+            Assert.False(result.IsCanceled);
+            Assert.Equal(new byte[] { 1 }, result.Buffer.ToArray());
         }
     }
 

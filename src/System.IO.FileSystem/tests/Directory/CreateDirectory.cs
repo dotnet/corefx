@@ -251,7 +251,7 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void PathWithInvalidColons_ThrowsNotSupportedException_Desktop(string invalidPath)
+        public void PathWithInvalidColons_Throws_Desktop(string invalidPath)
         {
             if (PathFeatures.IsUsingLegacyPathNormalization())
             {
@@ -259,7 +259,10 @@ namespace System.IO.Tests
             }
             else
             {
-                Assert.Throws<NotSupportedException>(() => Create(invalidPath));
+                if (invalidPath.Contains('|'))
+                    Assert.Throws<ArgumentException>(() => Create(invalidPath));
+                else
+                    Assert.Throws<NotSupportedException>(() => Create(invalidPath));
             }
         }
 
@@ -275,6 +278,7 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(32167, TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path succeeds
         public void DirectoryLongerThanMaxPath_Succeeds()
         {
@@ -336,6 +340,7 @@ namespace System.IO.Tests
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [ActiveIssue(20117, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(32167, TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path succeeds
         public void DirectoryLongerThanMaxDirectoryAsPath_Succeeds()
         {

@@ -8,9 +8,9 @@
 // TestOuter - If true, runs outerloop, if false runs just innerloop
 
 def submittedHelixJson = null
-def submitToHelix = (params.TGroup == 'netcoreapp' || params.TGroup == 'netfx')
+def submitToHelix = (params.TGroup == 'netcoreapp' || params.TGroup == 'netfx' || params.TGroup == 'uap')
 
-simpleNode('Windows_NT','latest') {
+simpleNode('windows.10.amd64.clientrs4.devex.open') {
     stage ('Checkout source') {
         checkoutRepo()
     }
@@ -46,13 +46,14 @@ simpleNode('Windows_NT','latest') {
         if (submitToHelix) {
             archiveTests = 'true'
         }
-        if (submitToHelix || params.TGroup == 'uap' || params.TGroup == 'uapaot') {
+        if (submitToHelix || params.TGroup == 'uapaot') {
             additionalArgs += ' -SkipTests'
         }
         if (params.TGroup != 'all') {
             bat ".\\build-tests.cmd ${framework} -buildArch=${params.AGroup} -${params.CGroup}${additionalArgs} -- /p:RuntimeOS=win10 /p:ArchiveTests=${archiveTests} /p:EnableDumpling=true"
         }
         else {
+            bat ".\\build-tests.cmd -framework:netstandard -buildArch=${params.AGroup} -${params.CGroup} -SkipTests"
             bat ".\\build-tests.cmd ${framework} -${params.CGroup}${additionalArgs}"
         }
     }
@@ -82,7 +83,7 @@ simpleNode('Windows_NT','latest') {
                     targetHelixQueues = ['Windows.10.Amd64.ClientRS4.Open']
                 }
 
-                bat "\"%VS140COMNTOOLS%\\VsDevCmd.bat\" && msbuild src\\upload-tests.proj /p:TargetGroup=${params.TGroup} /p:ArchGroup=${params.AGroup} /p:ConfigurationGroup=${params.CGroup} /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Windows_NT /p:HelixJobType=test/functional/cli/ /p:HelixSource=${helixSource} /p:BuildMoniker=${helixBuild} /p:HelixCreator=${helixCreator} /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken=%CloudDropAccessToken% /p:CloudResultsAccessToken=%OutputCloudResultsAccessToken% /p:HelixApiEndpoint=https://helix.dot.net/api/2017-04-14/jobs /p:TargetQueues=\"${targetHelixQueues.join(',')}\" /p:HelixLogFolder= /p:HelixLogFolder=${WORKSPACE}\\${logFolder}\\ /p:HelixCorrelationInfoFileName=SubmittedHelixRuns.txt"
+                bat "buildpipeline\\setup-vs-tools.cmd && msbuild src\\upload-tests.proj /p:TargetGroup=${params.TGroup} /p:ArchGroup=${params.AGroup} /p:ConfigurationGroup=${params.CGroup} /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Windows_NT /p:HelixJobType=test/functional/cli/ /p:HelixSource=${helixSource} /p:BuildMoniker=${helixBuild} /p:HelixCreator=${helixCreator} /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken=%CloudDropAccessToken% /p:CloudResultsAccessToken=%OutputCloudResultsAccessToken% /p:HelixApiEndpoint=https://helix.dot.net/api/2017-04-14/jobs /p:TargetQueues=\"${targetHelixQueues.join(',')}\" /p:HelixLogFolder= /p:HelixLogFolder=${WORKSPACE}\\${logFolder}\\ /p:HelixCorrelationInfoFileName=SubmittedHelixRuns.txt /p:MaxRetryCount=3"
 
                 submittedHelixJson = readJSON file: "${logFolder}\\SubmittedHelixRuns.txt"
             }

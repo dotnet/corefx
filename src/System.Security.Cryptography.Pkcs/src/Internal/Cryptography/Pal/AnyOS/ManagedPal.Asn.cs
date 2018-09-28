@@ -62,10 +62,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     data = contents.Span;
                 }
 
-                if (reader.HasData)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
+                reader.ThrowIfNotEmpty();
 
                 return data.ToArray();
             }
@@ -114,12 +111,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             // Read using BER because the CMS specification says the encoding is BER.
             AsnReader reader = new AsnReader(encodedUtcTime, AsnEncodingRules.BER);
             DateTimeOffset value = reader.GetUtcTime();
-
-            if (reader.HasData)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
+            reader.ThrowIfNotEmpty();
             return value.UtcDateTime;
         }
 
@@ -134,12 +126,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             // Read using BER because the CMS specification says the encoding is BER.
             AsnReader reader = new AsnReader(encodedOid, AsnEncodingRules.BER);
             string value = reader.ReadObjectIdentifierAsString();
-
-            if (reader.HasData)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
+            reader.ThrowIfNotEmpty();
             return value;
         }
 
@@ -147,9 +134,7 @@ namespace Internal.Cryptography.Pal.AnyOS
         {
             AsnReader reader = new AsnReader(encodedMessage, AsnEncodingRules.BER);
 
-            ContentInfoAsn contentInfo = AsnSerializer.Deserialize<ContentInfoAsn>(
-                reader.GetEncodedValue(),
-                AsnEncodingRules.BER);
+            ContentInfoAsn.Decode(reader, out ContentInfoAsn contentInfo);
 
             switch (contentInfo.ContentType)
             {

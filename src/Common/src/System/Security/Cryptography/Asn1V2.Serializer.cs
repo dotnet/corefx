@@ -398,6 +398,7 @@ namespace System.Security.Cryptography.Asn1
 
         private static Deserializer DefaultValueDeserializer(
             Deserializer valueDeserializer,
+            Deserializer literalValueDeserializer,
             bool isOptional,
             byte[] defaultContents,
             Asn1Tag? expectedTag)
@@ -407,6 +408,7 @@ namespace System.Security.Cryptography.Asn1
                     reader,
                     expectedTag,
                     valueDeserializer,
+                    literalValueDeserializer,
                     defaultContents,
                     isOptional);
         }
@@ -415,6 +417,7 @@ namespace System.Security.Cryptography.Asn1
             AsnReader reader,
             Asn1Tag? expectedTag,
             Deserializer valueDeserializer,
+            Deserializer literalValueDeserializer,
             byte[] defaultContents,
             bool isOptional)
         {
@@ -437,7 +440,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (defaultContents != null)
             {
-                return DefaultValue(defaultContents, valueDeserializer);
+                return DefaultValue(defaultContents, literalValueDeserializer);
             }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -762,6 +765,7 @@ namespace System.Security.Cryptography.Asn1
 
                 deserializer = DefaultValueDeserializer(
                     deserializer,
+                    literalValueDeserializer,
                     fieldData.IsOptional,
                     fieldData.DefaultContents,
                     expectedTag);
@@ -935,8 +939,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (typeT == typeof(Oid))
             {
-                bool skipFriendlyName = !fieldData.PopulateOidFriendlyName.GetValueOrDefault();
-                return reader => reader.ReadObjectIdentifier(expectedTag, skipFriendlyName);
+                return reader => reader.ReadObjectIdentifier(expectedTag);
             }
 
             if (typeT.IsArray)
@@ -1107,19 +1110,8 @@ namespace System.Security.Cryptography.Asn1
                 }
                 else if (attr is ObjectIdentifierAttribute oid)
                 {
-                    serializerFieldData.PopulateOidFriendlyName = oid.PopulateFriendlyName;
                     expectedTypes = new[] { typeof(Oid), typeof(string) };
                     serializerFieldData.TagType = UniversalTagNumber.ObjectIdentifier;
-
-                    if (oid.PopulateFriendlyName && unpackedType == typeof(string))
-                    {
-                        throw new AsnSerializationConstraintException(
-                            SR.Format(
-                                SR.Cryptography_AsnSerializer_PopulateFriendlyNameOnString,
-                                fieldInfo.Name,
-                                fieldInfo.DeclaringType.FullName,
-                                typeof(Oid).FullName));
-                    }
                 }
                 else if (attr is BMPStringAttribute)
                 {
@@ -1536,7 +1528,6 @@ namespace System.Security.Cryptography.Asn1
         {
             internal bool WasCustomized;
             internal UniversalTagNumber? TagType;
-            internal bool? PopulateOidFriendlyName;
             internal bool IsAny;
             internal bool IsCollection;
             internal byte[] DefaultContents;
@@ -1603,8 +1594,6 @@ namespace System.Security.Cryptography.Asn1
         public ObjectIdentifierAttribute()
         {
         }
-
-        public bool PopulateFriendlyName { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Field)]

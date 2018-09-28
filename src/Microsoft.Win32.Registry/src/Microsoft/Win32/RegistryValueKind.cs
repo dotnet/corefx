@@ -4,12 +4,7 @@
 
 namespace Microsoft.Win32
 {
-#if REGISTRY_ASSEMBLY
-    public
-#else
-    internal
-#endif
-    enum RegistryValueKind
+    public enum RegistryValueKind
     {
         String = Interop.Advapi32.RegistryValues.REG_SZ,
         ExpandString = Interop.Advapi32.RegistryValues.REG_EXPAND_SZ,
@@ -19,5 +14,5 @@ namespace Microsoft.Win32
         QWord = Interop.Advapi32.RegistryValues.REG_QWORD,
         Unknown = 0,                          // REG_NONE is defined as zero but BCL
         None = unchecked((int)0xFFFFFFFF), //  mistakenly overrode this value.  
-    }   // Now instead of using Interop.Advapi32.RegistryValues.REG_NONE we use "-1".
+    }   // Now instead of using Interop.Kernel32.RegistryValues.REG_NONE we use "-1".
 }

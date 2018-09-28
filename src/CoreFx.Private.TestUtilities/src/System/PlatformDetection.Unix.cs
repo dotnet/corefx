@@ -14,6 +14,7 @@ namespace System
     public static partial class PlatformDetection
     {
         public static bool IsWindowsIoTCore => false;
+        public static bool IsWindowsHomeEdition => false;
         public static bool IsWindows => false;
         public static bool IsWindows7 => false;
         public static bool IsWindows8x => false;
@@ -51,6 +52,12 @@ namespace System
         public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion(7);
         public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
 
+        public static bool TargetsNetFx452OrLower => false;
+        public static bool IsNetfx462OrNewer => false;
+        public static bool IsNetfx470OrNewer => false;
+        public static bool IsNetfx471OrNewer => false;
+        public static bool IsNetfx472OrNewer => false;
+
         public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
 
         public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Interop.OpenSsl.OpenSslVersion : throw new PlatformNotSupportedException();
@@ -65,6 +72,44 @@ namespace System
             DistroInfo v = GetDistroInfo();
 
             return "Distro=" + v.Id + " VersionId=" + v.VersionId;
+        }
+
+        /// <summary>
+        /// If gnulibc is available, returns the release, such as "stable".
+        /// Otherwise returns "glibc_not_found".
+        /// </summary>
+        public static string LibcRelease
+        {
+            get
+            {
+                try
+                {
+                    return Marshal.PtrToStringUTF8(gnu_get_libc_release());
+                }
+                catch (Exception e) when (e is DllNotFoundException || e is EntryPointNotFoundException)
+                {
+                    return "glibc_not_found";
+                }
+            }
+        }
+
+        /// <summary>
+        /// If gnulibc is available, returns the version, such as "2.22".
+        /// Otherwise returns "glibc_not_found". (In future could run "ldd -version" for musl)
+        /// </summary>
+        public static string LibcVersion
+        {
+            get
+            {
+                try
+                {
+                    return Marshal.PtrToStringUTF8(gnu_get_libc_version());
+                }
+                catch (Exception e) when (e is DllNotFoundException || e is EntryPointNotFoundException)
+                {
+                    return "glibc_not_found";
+                }
+            }
         }
 
         private static readonly Version s_osxProductVersion = GetOSXProductVersion();
@@ -229,6 +274,12 @@ namespace System
 
         [DllImport("libc", SetLastError = true)]
         internal static extern unsafe uint geteuid();
+
+        [DllImport("libc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr gnu_get_libc_release();
+
+        [DllImport("libc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr gnu_get_libc_version();
 
         [DllImport("System.Globalization.Native", SetLastError = true)]
         private static extern int GlobalizationNative_GetICUVersion();

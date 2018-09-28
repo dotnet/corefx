@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Security.Tests
 {
@@ -22,12 +23,16 @@ namespace System.Net.Security.Tests
 
     public class SslStreamAlpnTests
     {
-        // Windows - Schannel supports alpn from win8 and higher.
-        // Linux - OpenSsl supports alpn from openssl 1.0.2 and higher.
-        // OSX - SecureTransport doesn't expose alpn APIs.
-        private static bool BackendSupportsAlpn => (PlatformDetection.IsWindows && !PlatformDetection.IsWindows7) ||
-            (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
-            (PlatformDetection.OpenSslVersion.Major >= 1 && (PlatformDetection.OpenSslVersion.Minor >= 1 || PlatformDetection.OpenSslVersion.Build >= 2)));
+        private static bool BackendSupportsAlpn => PlatformDetection.SupportsAlpn;
+        private static bool ClientSupportsAlpn => PlatformDetection.SupportsClientAlpn;
+        readonly ITestOutputHelper _output;
+        public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
+
+        public SslStreamAlpnTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
 
         private async Task DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
         {
@@ -182,6 +187,36 @@ namespace System.Net.Security.Tests
             finally
             {
                 listener.Stop();
+            }
+        }
+
+        [OuterLoop("Uses external server")]
+        [ConditionalTheory(nameof(ClientSupportsAlpn))]
+        [MemberData(nameof(Http2Servers))]
+        public async Task SslStream_Http2_Alpn_Success(Uri server)
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                try
+                {
+                    await client.ConnectAsync(server.Host, server.Port);
+                    using (SslStream clientStream = new SslStream(client.GetStream(), leaveInnerStreamOpen: false))
+                    {
+                        SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions
+                        {
+                            ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http2 , SslApplicationProtocol.Http11 },
+                            TargetHost = server.Host
+                        };
+
+                        await clientStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);
+                        Assert.Equal("h2", clientStream.NegotiatedApplicationProtocol.ToString());
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Failures to connect do not cause test failure.
+                    _output.WriteLine("Unable to connect: {0}", e);
+                }
             }
         }
 

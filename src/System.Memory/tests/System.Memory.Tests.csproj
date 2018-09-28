@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{15DB0DCC-68B4-4CFB-8BD2-F26BCCAF5A3F}</ProjectGuid>
@@ -7,8 +7,12 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(IncludePartialFacadeTests)' == 'true'">
     <!-- Tests specific to the fast span -->
+    <Compile Include="MemoryMarshal\AsRef.cs" />
+    <Compile Include="MemoryMarshal\AsReadOnlyRef.cs" />
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
+    <Compile Include="ReadOnlySpan\Contains.byte.cs" />
+    <Compile Include="ReadOnlySpan\Contains.T.cs" />
     <Compile Include="Span\Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +48,7 @@
     <Compile Include="Span\IndexOf.char.cs" />
     <Compile Include="Span\IndexOf.T.cs" />
     <Compile Include="Span\IndexOfAny.byte.cs" />
+    <Compile Include="Span\IndexOfAny.char.cs" />
     <Compile Include="Span\IndexOfAny.T.cs" />
     <Compile Include="Span\IndexOfSequence.byte.cs" />
     <Compile Include="Span\IndexOfSequence.char.cs" />
@@ -111,6 +116,7 @@
     <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.byte.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfAny.char.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
@@ -231,6 +237,11 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
       <Link>Common\System\MutableDecimal.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Compile Include="$(CommonTestPath)\Tests\System\SpanExtensions.netstandard.cs">
+      <Link>System\SpanExtensions.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

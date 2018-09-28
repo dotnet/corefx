@@ -6,19 +6,13 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if !netstandard
 using Internal.Runtime.CompilerServices;
-#endif
 
-#if netstandard
-using nuint = System.NUInt;
-#else
 #if BIT64
 using nuint = System.UInt64;
 #else
 using nuint = System.UInt32;
 #endif // BIT64
-#endif // netstandard
 
 namespace System
 {
@@ -32,7 +26,19 @@ namespace System
         /// </summary>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span)
         {
-            return span.TrimStart().TrimEnd();
+            int start = 0;
+            for (; start < span.Length; start++)
+            {
+                if (!char.IsWhiteSpace(span[start]))
+                    break;
+            }
+            int end = span.Length - 1;
+            for (; end >= start; end--)
+            {
+                if (!char.IsWhiteSpace(span[end]))
+                    break;
+            }
+            return span.Slice(start, end - start + 1);
         }
 
         /// <summary>
@@ -70,7 +76,19 @@ namespace System
         /// <param name="trimChar">The specified character to look for and remove.</param>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, char trimChar)
         {
-            return span.TrimStart(trimChar).TrimEnd(trimChar);
+            int start = 0;
+            for (; start < span.Length; start++)
+            {
+                if (span[start] != trimChar)
+                    break;
+            }
+            int end = span.Length - 1;
+            for (; end >= start; end--)
+            {
+                if (span[end] != trimChar)
+                    break;
+            }
+            return span.Slice(start, end - start + 1);
         }
 
         /// <summary>
@@ -189,6 +207,56 @@ namespace System
         }
 
         /// <summary>
+        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<T>(this Span<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
+                    span.Length);
+
+            return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<T>(this ReadOnlySpan<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.Contains(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
+                    span.Length);
+
+            return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
+        }
+
+        /// <summary>
         /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
         /// </summary>
         /// <param name="span">The span to search.</param>
@@ -202,6 +270,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -244,6 +313,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -328,6 +398,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -370,6 +441,7 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+
             if (typeof(T) == typeof(char))
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
@@ -1360,26 +1432,25 @@ namespace System
         {
             if (typeof(T) == typeof(byte) || typeof(T) == typeof(sbyte))
             {
-                // The cast to nuint is not redundant on netstandard. Do not remove it.
-                size = (nuint)sizeof(byte);
+                size = sizeof(byte);
                 return true;
             }
 
             if (typeof(T) == typeof(char) || typeof(T) == typeof(short) || typeof(T) == typeof(ushort))
             {
-                size = (nuint)sizeof(char);
+                size = sizeof(char);
                 return true;
             }
 
             if (typeof(T) == typeof(int) || typeof(T) == typeof(uint))
             {
-                size = (nuint)sizeof(int);
+                size = sizeof(int);
                 return true;
             }
 
             if (typeof(T) == typeof(long) || typeof(T) == typeof(ulong))
             {
-                size = (nuint)sizeof(long);
+                size = sizeof(long);
                 return true;
             }
 

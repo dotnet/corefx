@@ -11,10 +11,12 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel SSE4.1 hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Sse41
+    public abstract class Sse41 : Ssse3
     {
-        public static bool IsSupported { get => IsSupported; }
-        
+        internal Sse41() { }
+
+        public new static bool IsSupported { get => IsSupported; }
+
         /// <summary>
         /// __m128i _mm_blend_epi16 (__m128i a, __m128i b, const int imm8)
         ///   PBLENDW xmm, xmm/m128 imm8
@@ -49,6 +51,42 @@ namespace System.Runtime.Intrinsics.X86
         ///   PBLENDVB xmm, xmm/m128, xmm
         /// </summary>
         public static Vector128<byte> BlendVariable(Vector128<byte> left, Vector128<byte> right, Vector128<byte> mask) => BlendVariable(left, right, mask);
+        /// <summary>
+        /// __m128i _mm_blendv_epi8 (__m128i a, __m128i b, __m128i mask)
+        ///   PBLENDVB xmm, xmm/m128, xmm
+        /// This intrinsic generates PBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector128<short> BlendVariable(Vector128<short> left, Vector128<short> right, Vector128<short> mask) => BlendVariable(left, right, mask);
+        /// <summary>
+        /// __m128i _mm_blendv_epi8 (__m128i a, __m128i b, __m128i mask)
+        ///   PBLENDVB xmm, xmm/m128, xmm
+        /// This intrinsic generates PBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector128<ushort> BlendVariable(Vector128<ushort> left, Vector128<ushort> right, Vector128<ushort> mask) => BlendVariable(left, right, mask);
+        /// <summary>
+        /// __m128i _mm_blendv_epi8 (__m128i a, __m128i b, __m128i mask)
+        ///   PBLENDVB xmm, xmm/m128, xmm
+        /// This intrinsic generates PBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector128<int> BlendVariable(Vector128<int> left, Vector128<int> right, Vector128<int> mask) => BlendVariable(left, right, mask);
+        /// <summary>
+        /// __m128i _mm_blendv_epi8 (__m128i a, __m128i b, __m128i mask)
+        ///   PBLENDVB xmm, xmm/m128, xmm
+        /// This intrinsic generates PBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector128<uint> BlendVariable(Vector128<uint> left, Vector128<uint> right, Vector128<uint> mask) => BlendVariable(left, right, mask);
+        /// <summary>
+        /// __m128i _mm_blendv_epi8 (__m128i a, __m128i b, __m128i mask)
+        ///   PBLENDVB xmm, xmm/m128, xmm
+        /// This intrinsic generates PBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector128<long> BlendVariable(Vector128<long> left, Vector128<long> right, Vector128<long> mask) => BlendVariable(left, right, mask);
+        /// <summary>
+        /// __m128i _mm_blendv_epi8 (__m128i a, __m128i b, __m128i mask)
+        ///   PBLENDVB xmm, xmm/m128, xmm
+        /// This intrinsic generates PBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector128<ulong> BlendVariable(Vector128<ulong> left, Vector128<ulong> right, Vector128<ulong> mask) => BlendVariable(left, right, mask);
         /// <summary>
         /// __m128 _mm_blendv_ps (__m128 a, __m128 b, __m128 mask)
         ///   BLENDVPS xmm, xmm/m128, xmm0
@@ -345,6 +383,11 @@ namespace System.Runtime.Intrinsics.X86
         ///   PMULLD xmm, xmm/m128
         /// </summary>
         public static Vector128<int> MultiplyLow(Vector128<int> left, Vector128<int> right) => MultiplyLow(left, right);
+        /// <summary>
+        /// __m128i _mm_mullo_epi32 (__m128i a, __m128i b)
+        ///   PMULLD xmm, xmm/m128
+        /// </summary>
+        public static Vector128<uint> MultiplyLow(Vector128<uint> left, Vector128<uint> right) => MultiplyLow(left, right);
 
         /// <summary>
         /// __m128i _mm_packus_epi32 (__m128i a, __m128i b)

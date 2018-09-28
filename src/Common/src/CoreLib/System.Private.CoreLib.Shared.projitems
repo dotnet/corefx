@@ -116,6 +116,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\DateTimeOffset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DayOfWeek.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DBNull.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Decimal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Decimal.DecCalc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DefaultBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Diagnostics\CodeAnalysis\SuppressMessageAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Diagnostics\ConditionalAttribute.cs" />
@@ -275,8 +277,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\NonSerializedAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\NotSupportedException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Nullable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Number.BigInteger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Number.DiyFp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Number.Dragon4.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Number.Formatting.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Number.Grisu3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Number.NumberBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Number.NumberToDouble.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Number.Parsing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\NullReferenceException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\ObjectDisposedException.cs" />
@@ -336,6 +343,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\Emit\StackBehaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\EventAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\EventInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\ExceptionHandlingClause.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\ExceptionHandlingClauseOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\FieldAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\FieldInfo.cs" />
@@ -347,12 +355,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\InvalidFilterCriteriaException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\IReflect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\IReflectableType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\LocalVariableInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\ManifestResourceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MemberFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MemberInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MemberTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MethodAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MethodBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MethodBody.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MethodImplAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MethodInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Reflection\MethodInfo.Internal.cs" />
@@ -398,6 +408,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Resources\MissingSatelliteAssemblyException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Resources\NeutralResourcesLanguageAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Resources\ResourceFallbackManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Resources\ResourceReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Resources\ResourceSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Resources\ResourceTypeCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Resources\RuntimeResourceSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Resources\SatelliteContractVersionAttribute.cs" />
@@ -482,6 +494,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\MarshalDirectiveException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\MemoryMarshal.Fast.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\MemoryMarshal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\NativeCallableAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\OptionalAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\OutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\PreserveSigAttribute.cs" />
@@ -601,8 +614,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\SemaphoreFullException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\SemaphoreSlim.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\SendOrPostCallback.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Threading\SpinLock.cs" />    
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\SpinWait.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\SynchronizationLockException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ThreadLocal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\ConcurrentExclusiveSchedulerPair.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\TaskCanceledException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\TaskCompletionSource.cs" />
@@ -753,8 +768,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.OutputDebugString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.ReadFile_SafeHandle_IntPtr.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.ReadFile_SafeHandle_NativeOverlapped.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.RegistryValues.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.RegistryView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.SECURITY_ATTRIBUTES.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.SecurityOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.SetEndOfFile.cs" />
@@ -774,8 +787,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Internal\IO\File.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\RegistryValueKind.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\RegistryView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CalendarData.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CompareInfo.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CultureData.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
@@ -797,17 +808,33 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Security\SecureString.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetsWindows) and '$(EnableWinRT)' != 'true'">
-    <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.Win32.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\TimeZoneInfo.Win32.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.FreeLibrary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\Win32\RegistryKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegCloseKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegCreateKeyEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegDeleteKeyEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegDeleteValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegEnumKeyEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegEnumValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegFlushKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegistryConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegOpenKeyEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegQueryInfoKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegQueryValueEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Advapi32\Interop.RegSetValueEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.CreateFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.FreeLibrary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.MUI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.TimeZone.Registry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\NtDll\NtQueryInformationFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\User32\Interop.Constants.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\User32\Interop.SendMessageTimeout.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\User32\Interop.LoadString.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\User32\Interop.SendMessageTimeout.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.Win32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\TimeZoneInfo.Win32.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetsWindows) and '$(EnableWinRT)' == 'true'">
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.WinRT.cs" />

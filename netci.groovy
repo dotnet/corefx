@@ -55,7 +55,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
         def isLocal = (localType == 'local')
 
         def newJobName = 'code_coverage_windows'
-        def batchCommand = 'call build.cmd && call build-tests.cmd -coverage -outerloop -- /p:IsCIBuild=true /p:CodeCoverageAssemblies="System.Private.CoreLib"'
+        def batchCommand = 'call build.cmd && call build-tests.cmd -coverage -outerloop -- /p:IsCIBuild=true'
         if (isLocal) {
             newJobName = "${newJobName}_local"
             batchCommand = "${batchCommand}"
@@ -75,7 +75,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
         // Archive results.
         Utilities.addArchival(newJob, '**/coverage/*,msbuild.log')
         // Timeout. Code coverage runs take longer, so we set the timeout to be longer.
-        Utilities.setJobTimeout(newJob, 300)
+        Utilities.setJobTimeout(newJob, 720)
         // Set triggers
         if (isPR) {
             if (!isLocal) {

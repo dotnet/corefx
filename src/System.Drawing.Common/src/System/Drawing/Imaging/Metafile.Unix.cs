@@ -36,13 +36,14 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Gdip = System.Drawing.SafeNativeMethods.Gdip;
+using System.Runtime.Serialization;
 
 namespace System.Drawing.Imaging
 {
 #if !NETCORE
-    [Serializable]
     [Editor ("System.Drawing.Design.MetafileEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
 #endif
+    [Serializable]
     public sealed class Metafile : Image
     {
 
@@ -60,12 +61,15 @@ namespace System.Drawing.Imaging
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            int status;
             // With libgdiplus we use a custom API for this, because there's no easy way
             // to get the Stream down to libgdiplus. So, we wrap the stream with a set of delegates.
             GdiPlusStreamHelper sh = new GdiPlusStreamHelper(stream, false);
-            status = Gdip.GdipCreateMetafileFromDelegate_linux(sh.GetHeaderDelegate, sh.GetBytesDelegate,
+            int status = Gdip.GdipCreateMetafileFromDelegate_linux(sh.GetHeaderDelegate, sh.GetBytesDelegate,
                 sh.PutBytesDelegate, sh.SeekDelegate, sh.CloseDelegate, sh.SizeDelegate, out nativeImage);
+
+            // Since we're just passing to native code the delegates inside the wrapper, we need to keep sh alive
+            // to avoid the object being collected and therefore the delegates would be collected as well.
+            GC.KeepAlive(sh);
             Gdip.CheckStatus(status);
         }
 
@@ -262,13 +266,16 @@ namespace System.Drawing.Imaging
             if (stream == null)
                 throw new NullReferenceException(nameof(stream));
 
-            int status = Gdip.NotImplemented;
             // With libgdiplus we use a custom API for this, because there's no easy way
             // to get the Stream down to libgdiplus. So, we wrap the stream with a set of delegates.
             GdiPlusStreamHelper sh = new GdiPlusStreamHelper(stream, false);
-            status = Gdip.GdipRecordMetafileFromDelegateI_linux(sh.GetHeaderDelegate, sh.GetBytesDelegate,
+            int status = Gdip.GdipRecordMetafileFromDelegateI_linux(sh.GetHeaderDelegate, sh.GetBytesDelegate,
                 sh.PutBytesDelegate, sh.SeekDelegate, sh.CloseDelegate, sh.SizeDelegate, referenceHdc,
                 type, ref frameRect, frameUnit, description, out nativeImage);
+
+            // Since we're just passing to native code the delegates inside the wrapper, we need to keep sh alive
+            // to avoid the object being collected and therefore the delegates would be collected as well.
+            GC.KeepAlive(sh);
             Gdip.CheckStatus(status);
         }
 
@@ -277,14 +284,17 @@ namespace System.Drawing.Imaging
         {
             if (stream == null)
                 throw new NullReferenceException(nameof(stream));
-
-            int status = Gdip.NotImplemented;
+            
             // With libgdiplus we use a custom API for this, because there's no easy way
             // to get the Stream down to libgdiplus. So, we wrap the stream with a set of delegates.
             GdiPlusStreamHelper sh = new GdiPlusStreamHelper(stream, false);
-            status = Gdip.GdipRecordMetafileFromDelegate_linux(sh.GetHeaderDelegate, sh.GetBytesDelegate,
+            int status = Gdip.GdipRecordMetafileFromDelegate_linux(sh.GetHeaderDelegate, sh.GetBytesDelegate,
                 sh.PutBytesDelegate, sh.SeekDelegate, sh.CloseDelegate, sh.SizeDelegate, referenceHdc,
                 type, ref frameRect, frameUnit, description, out nativeImage);
+
+            // Since we're just passing to native code the delegates inside the wrapper, we need to keep sh alive
+            // to avoid the object being collected and therefore the delegates would be collected as well.
+            GC.KeepAlive(sh);
             Gdip.CheckStatus(status);
         }
 
@@ -308,6 +318,10 @@ namespace System.Drawing.Imaging
             int status = Gdip.GdipRecordMetafileFileName(fileName, referenceHdc, type, ref frameRect, frameUnit,
                 description, out nativeImage);
             Gdip.CheckStatus(status);
+        }
+
+        private Metafile(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
 
         // methods
@@ -355,13 +369,16 @@ namespace System.Drawing.Imaging
             IntPtr header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MetafileHeader)));
             try
             {
-                int status;
                 // With libgdiplus we use a custom API for this, because there's no easy way
                 // to get the Stream down to libgdiplus. So, we wrap the stream with a set of delegates.
                 GdiPlusStreamHelper sh = new GdiPlusStreamHelper(stream, false);
-                status = Gdip.GdipGetMetafileHeaderFromDelegate_linux(sh.GetHeaderDelegate,
+                int status = Gdip.GdipGetMetafileHeaderFromDelegate_linux(sh.GetHeaderDelegate,
                     sh.GetBytesDelegate, sh.PutBytesDelegate, sh.SeekDelegate, sh.CloseDelegate,
                     sh.SizeDelegate, header);
+
+                // Since we're just passing to native code the delegates inside the wrapper, we need to keep sh alive
+                // to avoid the object being collected and therefore the delegates would be collected as well.
+                GC.KeepAlive(sh);
                 Gdip.CheckStatus(status);
                 return new MetafileHeader(header);
             }

@@ -9,12 +9,16 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    public class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
+    public partial class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
     {
         protected override IDictionary NonGenericIDictionaryFactory()
         {
             return new Dictionary<string, string>();
         }
+
+        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert;
+
+        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove | ModifyOperation.Clear;
 
         /// <summary>
         /// Creates an object that is dependent on the seed given. The object may be either
@@ -119,6 +123,20 @@ namespace System.Collections.Tests
             {
                 IDictionary dictionary = new Dictionary<string, int>();
                 Assert.False(dictionary.Contains(1));
+            }
+        }
+
+        [Fact]
+        public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
+        {
+            if (ModifyEnumeratorAllowed.HasFlag(ModifyOperation.Clear))
+            {
+                IDictionary dictionary = new Dictionary<string, string>();
+                IEnumerator valuesEnum = dictionary.GetEnumerator();
+
+                dictionary.Clear();
+                Assert.Empty(dictionary);
+                Assert.False(valuesEnum.MoveNext());
             }
         }
 
@@ -244,6 +262,18 @@ namespace System.Collections.Tests
                 if (dictionary.Remove(key + SubKey))
                     break;
             }
+        }
+
+        [Fact]
+        public void TryAdd_ItemAlreadyExists_DoesNotInvalidateEnumerator()
+        {
+            var dictionary = new Dictionary<string, string>();
+            dictionary.Add("a", "b");
+
+            IEnumerator valuesEnum = dictionary.GetEnumerator();
+            Assert.False(dictionary.TryAdd("a", "c"));
+
+            Assert.True(valuesEnum.MoveNext());
         }
 
         [Theory]

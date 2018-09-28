@@ -12,9 +12,11 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel SSE2 hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Sse2
+    public abstract class Sse2 : Sse
     {
-        public static bool IsSupported { get => IsSupported; }
+        internal Sse2() { }
+
+        public new static bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m128i _mm_add_epi8 (__m128i a,  __m128i b)
@@ -892,13 +894,18 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm_madd_epi16 (__m128i a,  __m128i b)
         ///   PMADDWD xmm, xmm/m128
         /// </summary>
-        public static Vector128<int> MultiplyHorizontalAdd(Vector128<short> left, Vector128<short> right) => MultiplyHorizontalAdd(left, right);
+        public static Vector128<int> MultiplyAddAdjacent(Vector128<short> left, Vector128<short> right) => MultiplyAddAdjacent(left, right);
 
         /// <summary>
         /// __m128i _mm_mullo_epi16 (__m128i a,  __m128i b)
         ///   PMULLW xmm, xmm/m128
         /// </summary>
         public static Vector128<short> MultiplyLow(Vector128<short> left, Vector128<short> right) => MultiplyLow(left, right);
+        /// <summary>
+        /// __m128i _mm_mullo_epi16 (__m128i a,  __m128i b)
+        ///   PMULLW xmm, xmm/m128
+        /// </summary>
+        public static Vector128<ushort> MultiplyLow(Vector128<ushort> left, Vector128<ushort> right) => MultiplyLow(left, right);
 
         /// <summary>
         /// __m128i _mm_or_si128 (__m128i a,  __m128i b)
@@ -1311,7 +1318,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm_sad_epu8 (__m128i a,  __m128i b)
         ///   PSADBW xmm, xmm/m128
         /// </summary>
-        public static Vector128<long> SumAbsoluteDifferences(Vector128<byte> left, Vector128<byte> right) => SumAbsoluteDifferences(left, right);
+        public static Vector128<ushort> SumAbsoluteDifferences(Vector128<byte> left, Vector128<byte> right) => SumAbsoluteDifferences(left, right);
 
         /// <summary>
         /// __m128i _mm_shuffle_epi32 (__m128i a,  int immediate)

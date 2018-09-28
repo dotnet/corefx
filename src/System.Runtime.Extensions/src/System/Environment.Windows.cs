@@ -30,7 +30,7 @@ namespace System
                 builder.Length = (int)length;
 
                 // If we have a tilde in the path, make an attempt to expand 8.3 filenames
-                return builder.AsSpan().IndexOf('~') >= 0
+                return builder.AsSpan().Contains('~')
                     ? PathHelper.TryExpandShortFileName(ref builder, null)
                     : builder.ToString();
             }
@@ -96,7 +96,7 @@ namespace System
             }
         }
 
-        private static unsafe Lazy<OperatingSystem> s_osVersion = new Lazy<OperatingSystem>(() =>
+        private static readonly unsafe Lazy<OperatingSystem> s_osVersion = new Lazy<OperatingSystem>(() =>
         {
             var version = new Interop.Kernel32.OSVERSIONINFOEX { dwOSVersionInfoSize = sizeof(Interop.Kernel32.OSVERSIONINFOEX) };
             if (!Interop.Kernel32.GetVersionExW(ref version))

@@ -10,19 +10,21 @@ namespace System.Runtime.Intrinsics.X86
     /// This class provides access to Intel POPCNT hardware instructions via intrinsics
     /// </summary>
     [CLSCompliant(false)]
-    public static class Popcnt
+    public abstract class Popcnt : Sse42
     {
-        public static bool IsSupported { get { return false; } }
+        internal Popcnt() { }
+
+        public new static bool IsSupported { get { return false; } }
 
         /// <summary>
         /// int _mm_popcnt_u32 (unsigned int a)
         ///   POPCNT reg, reg/m32
         /// </summary>
-        public static int PopCount(uint value) { throw new PlatformNotSupportedException(); }
+        public static uint PopCount(uint value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __int64 _mm_popcnt_u64 (unsigned __int64 a)
         ///   POPCNT reg64, reg/m64
         /// </summary>
-        public static long PopCount(ulong value) { throw new PlatformNotSupportedException(); }
+        public static ulong PopCount(ulong value) { throw new PlatformNotSupportedException(); }
     }
 }

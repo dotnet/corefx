@@ -176,7 +176,7 @@ namespace System.Threading
         /// to nonsignaled.</param>
         public ManualResetEventSlim(bool initialState)
         {
-            // Specify the defualt spin count, and use default spin if we're
+            // Specify the default spin count, and use default spin if we're
             // on a multi-processor machine. Otherwise, we won't.
             Initialize(initialState, SpinWait.SpinCountforSpinBeforeWait);
         }
@@ -551,7 +551,7 @@ namespace System.Threading
                 var spinner = new SpinWait();
                 while (spinner.Count < spinCount)
                 {
-                    spinner.SpinOnce(SpinWait.Sleep1ThresholdForSpinBeforeWait);
+                    spinner.SpinOnce(SpinWait.Sleep1ThresholdForLongSpinBeforeWait);
 
                     if (IsSet)
                     {

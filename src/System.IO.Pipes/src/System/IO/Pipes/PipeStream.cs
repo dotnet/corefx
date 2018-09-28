@@ -374,6 +374,19 @@ namespace System.IO.Pipes
             }
         }
 
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                Flush();
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException(ex);
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             try
