@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+#if netcoreapp
+using System.Text;
+#endif
 using Xunit;
 using Microsoft.Xunit.Performance;
 
@@ -46,6 +49,7 @@ namespace System.ComponentModel.Tests
         [InlineData(typeof(ClassIDerived), typeof(IBaseConverter))]
         [InlineData(typeof(Uri), typeof(UriTypeConverter))]
 #if netcoreapp
+        [InlineData(typeof(Encoding), typeof(EncodingConverter))]
         [InlineData(typeof(Version), typeof(VersionConverter))]
 #endif
         public static void GetConverter(Type typeToConvert, Type expectedConverter)

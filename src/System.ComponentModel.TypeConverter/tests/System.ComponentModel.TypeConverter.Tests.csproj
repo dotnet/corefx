@@ -112,6 +112,7 @@
       <DependentUpon>TestResx.resx</DependentUpon>
     </Compile>
     <Compile Include="SampleClasses.cs" />
+    <Compile Include="EncodingConverterTests.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="SByteConverterTests.cs" />
     <Compile Include="SingleConverterTests.cs" />
     <Compile Include="StringConverterTests.cs" />

@@ -21,6 +21,7 @@
     <Compile Include="System\ComponentModel\DateTimeOffsetConverter.cs" />
     <Compile Include="System\ComponentModel\DecimalConverter.cs" />
     <Compile Include="System\ComponentModel\DoubleConverter.cs" />
+    <Compile Include="System\ComponentModel\EncodingConverter.cs" />
     <Compile Include="System\ComponentModel\EnumConverter.cs" />
     <Compile Include="System\ComponentModel\GuidConverter.cs" />
     <Compile Include="System\ComponentModel\Int16Converter.cs" />
