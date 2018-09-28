@@ -29,14 +29,15 @@ namespace System.Runtime.InteropServices.Tests
         public void Initialize_NumBytesTimesSizeOfEachElement_NetFramework_ThrowsOverflowException()
         {
             var buffer = new SubBuffer(true);
-            AssertExtensions.Throws<OverflowException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
-            AssertExtensions.Throws<OverflowException>(() => buffer.Initialize<int>(uint.MaxValue));
+            Assert.Throws<OverflowException>(() => buffer.Initialize(uint.MaxValue, uint.MaxValue));
+            Assert.Throws<OverflowException>(() => buffer.Initialize<int>(uint.MaxValue));
         }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Initialize_NumBytesTimesSizeOfEachElement_ThrowsArgumentOutOfRangeExceptionIfNot64Bit()
         {
+            var buffer = new SubBuffer(true);
             AssertExtensions.ThrowsIf<ArgumentOutOfRangeException>(!Environment.Is64BitProcess, () => buffer.Initialize(uint.MaxValue, uint.MaxValue));
             AssertExtensions.ThrowsIf<ArgumentOutOfRangeException>(!Environment.Is64BitProcess, () => buffer.Initialize<int>(uint.MaxValue));
         }
