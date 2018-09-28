@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 namespace System.ComponentModel
@@ -123,6 +124,7 @@ namespace System.ComponentModel
             [typeof(DateTime)] = typeof(DateTimeConverter),
             [typeof(DateTimeOffset)] = typeof(DateTimeOffsetConverter),
             [typeof(decimal)] = typeof(DecimalConverter),
+            [typeof(Encoding)] = typeof(EncodingConverter),
             [typeof(TimeSpan)] = typeof(TimeSpanConverter),
             [typeof(Guid)] = typeof(GuidConverter),
             [typeof(Uri)] = typeof(UriTypeConverter),

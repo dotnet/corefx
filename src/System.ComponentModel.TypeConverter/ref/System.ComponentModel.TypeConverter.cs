@@ -177,6 +177,14 @@ namespace System.ComponentModel
     {
         public DoubleConverter() { }
     }
+    public partial class EncodingConverter : System.ComponentModel.TypeConverter
+    {
+        public EncodingConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, System.Type destinationType) { throw null; }
+    }
     public partial class EnumConverter : System.ComponentModel.TypeConverter
     {
         public EnumConverter(System.Type type) { }
