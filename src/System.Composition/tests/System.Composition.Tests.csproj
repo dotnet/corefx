@@ -4,6 +4,7 @@
     <RootNamespace>System.Composition.Lightweight.UnitTests</RootNamespace>
     <AssemblyName>System.Composition.Tests</AssemblyName>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <AssemblyBeingTestedName Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'netstandard'">System.Private.CoreLib</AssemblyBeingTestedName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ActivationEventOrderingTests.cs" />

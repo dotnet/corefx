@@ -6,6 +6,7 @@
     <IgnoreArchitectureMismatches>true</IgnoreArchitectureMismatches>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <AssemblyBeingTestedName Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'netstandard'">System.Private.CoreLib</AssemblyBeingTestedName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DebuggerTypeProxyAttributeTests.cs" />
