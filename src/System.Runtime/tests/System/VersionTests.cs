@@ -259,6 +259,9 @@ namespace System.Tests
             yield return new object[] { "1.-2.3.4", typeof(ArgumentOutOfRangeException) };
             yield return new object[] { "1.2.-3.4", typeof(ArgumentOutOfRangeException) };
             yield return new object[] { "1.2.3.-4", typeof(ArgumentOutOfRangeException) };
+
+            // Input contains invalid separator
+            yield return new object[] { "1,2,3,4", typeof(ArgumentException) };
         }
 
         [Theory]
