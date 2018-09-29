@@ -81,7 +81,7 @@
       <DestinationFolder>$(TestToolsDir)</DestinationFolder>
     </TestSupportFiles>
     <TestSupportFiles Include="props\Directory.Build.props">
-      <DestinationFolder>$(TestDir)Directory.Build.props</DestinationFolder>
+      <DestinationFolder>$(TestDir)</DestinationFolder>
     </TestSupportFiles>
     <TestSupportFiles Include="**\*.targets">
       <DestinationFolder>$(TestDir)%(RecursiveDir)</DestinationFolder>
