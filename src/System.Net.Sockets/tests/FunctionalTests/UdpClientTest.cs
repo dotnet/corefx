@@ -15,6 +15,8 @@ namespace System.Net.Sockets.Tests
         // Port 8 is unassigned as per https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
         private const int UnusedPort = 8;
 
+        private const int DiscardPort = 9;
+
         private ManualResetEvent _waitHandle = new ManualResetEvent(false);
 
         [Theory]
@@ -689,16 +691,43 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void BeginSend_IPv6Socket_IPv4Dns_Success()
         {
-            using (var receiver = new UdpClient("127.0.0.1", 0))
+            using (var receiver = new UdpClient("127.0.0.1", DiscardPort))
             using (var sender = new UdpClient(AddressFamily.InterNetworkV6))
             {
                 sender.Client.DualMode = true;
-                for (int i = 0; i < TestSettings.UDPRedundancy; i++)
+                if (sender.Client.AddressFamily == AddressFamily.InterNetworkV6 && sender.Client.DualMode)
                 {
                     sender.Send(new byte[1], 1, "127.0.0.1", ((IPEndPoint)receiver.Client.LocalEndPoint).Port);
                 }
+            }
+        }
+
+        [Fact]
+        public async void BeginSend_IPv6Socket_IPv4Address_Multicast_Success()
+        {
+            var port = 2222;
+            var ipAddress = IPAddress.Parse("239.0.0.222");
+            var remoteEP = new IPEndPoint(ipAddress, port);
+            var localEP = new IPEndPoint(IPAddress.IPv6Any, port);
+
+            using (var receiver = new UdpClient(localEP))
+            using (var sender = new UdpClient(AddressFamily.InterNetworkV6))
+            {
+                receiver.Client.DualMode = true;
+                sender.Client.DualMode = true;
+                receiver.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 5000);
+
+                receiver.JoinMulticastGroup(ipAddress);
+                await sender.SendAsync(new byte[1], 1, remoteEP);
+
+                UdpReceiveResult result = await receiver.ReceiveAsync();
+                Assert.NotNull(result);
+                Assert.NotNull(result.RemoteEndPoint);
+                Assert.NotNull(result.Buffer);
+                Assert.InRange(result.Buffer.Length, 1, int.MaxValue);
             }
         }
 

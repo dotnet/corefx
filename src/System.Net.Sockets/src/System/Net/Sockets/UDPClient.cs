@@ -229,7 +229,7 @@ namespace System.Net.Sockets
             {
                 return true;
             }
-            
+
             if (family == AddressFamily.InterNetwork)
             {
                 return _family == AddressFamily.InterNetworkV6 && _clientSocket.DualMode;
