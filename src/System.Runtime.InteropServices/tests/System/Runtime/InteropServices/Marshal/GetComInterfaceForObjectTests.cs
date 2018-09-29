@@ -204,6 +204,7 @@ namespace System.Runtime.InteropServices.Tests
             AssertExtensions.Throws<ArgumentException>("o", () => Marshal.GetComInterfaceForObject<object, NonGenericInterface>(o));
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetComInterfaceForObject_ObjectNotCollectible_ThrowsNotSupportedException()
@@ -218,6 +219,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<NotSupportedException>(() => Marshal.GetComInterfaceForObject(o, typeof(NonGenericInterface), CustomQueryInterfaceMode.Allow));
             Assert.Throws<NotSupportedException>(() => Marshal.GetComInterfaceForObject<object, NonGenericInterface>(o));
         }
+#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]

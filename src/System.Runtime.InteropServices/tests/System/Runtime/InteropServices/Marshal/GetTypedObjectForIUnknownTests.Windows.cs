@@ -48,7 +48,6 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [MemberData(nameof(GetTypedObjectForIUnknownTypeUncastableComObject_TestData))]
         public void GetTypedObjectForIUnknown_UncastableComObject_ThrowsInvalidCastException(object o, Type type)
         {

@@ -30,7 +30,6 @@ namespace System.Runtime.InteropServices.Tests
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(ChangeWrapperHandleStrength_ComObject_TestData))]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void ChangeWrapperHandleStrength_ComObject_ReturnsExpected(object o)
         {
             ChangeWrapperHandleStrength_ValidObject_Success(o);
