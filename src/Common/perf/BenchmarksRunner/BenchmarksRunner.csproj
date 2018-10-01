@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F5E941C8-AF2F-47AB-A066-FF25470CE382}</ProjectGuid>
+    <ProjectGuid>{013324FD-A4CE-4E56-B127-29474EA26FC}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <!-- To be consistent between netfx and others we override the SDK behavior which defaults to .dll -->
     <TargetExt>.exe</TargetExt>
-    <RootNamespace>PerfRunner</RootNamespace>
-    <AssemblyName>PerfRunner</AssemblyName>
+    <RootNamespace>BenchmarksRunner</RootNamespace>
+    <AssemblyName>BenchmarksRunner</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <NoWarn>0436</NoWarn>
@@ -14,7 +14,7 @@
     <Configurations>netstandard-Debug;netstandard-Release;netstandard1.3-Debug;netstandard1.3-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PerfRunner.cs" />
+    <Compile Include="BenchmarksRunner.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="AssemblyAttributes.cs" />
