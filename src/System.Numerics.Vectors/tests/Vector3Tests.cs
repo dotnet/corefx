@@ -504,20 +504,20 @@ namespace System.Numerics.Tests
 
             // Case W1: specified value is in the range.
             a = new Vector3(0.5f, 0.3f, 0.33f);
-            expected = min;
+            expected = max;
             actual = Vector3.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector3f.Clamp did not return the expected value.");
 
             // Normal case.
             // Case W2: specified value is bigger than max and min value.
             a = new Vector3(2.0f, 3.0f, 4.0f);
-            expected = min;
+            expected = max;
             actual = Vector3.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector3f.Clamp did not return the expected value.");
 
             // Case W3: specified value is smaller than min and max value.
             a = new Vector3(-2.0f, -3.0f, -4.0f);
-            expected = min;
+            expected = max;
             actual = Vector3.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector3f.Clamp did not return the expected value.");
         }
