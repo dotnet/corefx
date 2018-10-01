@@ -131,6 +131,15 @@
     <PackageReference Include="BenchmarkDotNet">
       <Version>$(BenchmarkDotNetPackageVersion)</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Win32.Primitives">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Primitives">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime">
+      <Version>4.2.1</Version>
+    </PackageReference>
 
     <PackageToInclude Include="xunit.performance.core"/>
     <PackageToInclude Include="xunit.performance.api"/>
@@ -140,6 +149,9 @@
     <PackageToInclude Include="MarkdownLog.NS20"/>
     <PackageToInclude Include="CommandLineParser.NS20" />
     <PackageToInclude Include="BenchmarkDotNet"/>
+    <PackageToInclude Include="Microsoft.Win32.Primitives"/>
+    <PackageToInclude Include="System.Net.Primitives"/>
+    <PackageToInclude Include="System.Runtime"/>
   </ItemGroup>
 
   <ItemGroup>

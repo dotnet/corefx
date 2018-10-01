@@ -4,23 +4,21 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using Microsoft.Xunit.Performance.Api;
+using BenchmarkDotNet.Running;
 
-public class PerfHarness
+public class BenchmarksRunner
 {
     public static int Main(string[] args)
     {
         try
         {
-            using (XunitPerformanceHarness harness = new XunitPerformanceHarness(args))
-            {
-                foreach(var testName in GetTestAssemblies())
-                {
-                    harness.RunBenchmarks(GetTestAssembly(testName));
-                }
-            }
+            BenchmarkSwitcher
+                .FromAssemblies(
+                    GetTestAssemblies().Select(Assembly.Load).ToArray())
+                .Run(args);
 
             return 0;
         }
@@ -34,7 +32,7 @@ public class PerfHarness
 
     private static string GetTestAssembly(string testName)
     {
-        // Assume test assemblies are colocated/restored next to the PerfHarness.
+        // Assume test assemblies are colocated/restored next to the BenchmarksRunner.
         return Path.Combine(
             Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), testName);
     }

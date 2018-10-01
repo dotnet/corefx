@@ -11,7 +11,7 @@
     <NoWarn>0436</NoWarn>
     <IsTestProject>true</IsTestProject>
     <IsPerformanceTestProject>true</IsPerformanceTestProject>
-    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.3-Debug;netstandard1.3-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BenchmarksRunner.cs" />
