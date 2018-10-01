@@ -376,6 +376,9 @@
 
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
     <GenerateLaunchSettings>true</GenerateLaunchSettings>
+
+    <!-- Disable VS Test SDK references if the .NET Native toolchain is used. -->
+    <IncludeVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</IncludeVSTestReferences>
   </PropertyGroup>
 
   <!-- Use Roslyn Compilers to build -->
