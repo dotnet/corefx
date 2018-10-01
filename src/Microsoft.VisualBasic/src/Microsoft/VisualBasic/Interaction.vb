@@ -21,7 +21,13 @@ Namespace Microsoft.VisualBasic
         Public Shared Function MsgBox(ByVal Prompt As Object, Optional ByVal Buttons As MsgBoxStyle = MsgBoxStyle.OkOnly, Optional ByVal Title As Object = Nothing) As MsgBoxResult
             Dim sPrompt As String = Nothing
             Dim sTitle As String
+            'Dim vbhost As CompilerServices.IVbHost
             Dim ParentWindow As Integer = Nothing
+
+            'vbhost = CompilerServices.HostServices.VBHost
+            'If Not vbhost Is Nothing Then
+            '    ParentWindow = vbhost.GetParentWindow()
+            'End If
 
             'Only allow legal button combinations to be set, one choice from each group
             'These bit constants are defined in System.Windows.Forms.MessageBox

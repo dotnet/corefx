@@ -306,9 +306,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue()
-            MsgBox("Please select 'Replace The File' at the next prompt", MsgBoxStyle.OkOnly, NameOf(CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue))
             Using TestBase As New FileIOTests
-                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Replace_the_file")
                 Dim testFileDest As String = TestBase.GetTestFilePath()
 
                 ' Write and copy file
@@ -328,9 +327,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteFalse()
-            MsgBox("Please select 'Skip The File' at the next prompt", MsgBoxStyle.OkOnly, NameOf(CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue))
             Using TestBase As New FileIOTests
-                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Skip_this_file")
                 Dim testFileDest As String = TestBase.GetTestFilePath()
 
                 ' Write and copy file

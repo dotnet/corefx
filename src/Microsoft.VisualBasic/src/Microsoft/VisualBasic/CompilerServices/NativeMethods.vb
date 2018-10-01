@@ -6,7 +6,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
     <ComVisible(False)>
     Partial Friend NotInheritable Class NativeMethods
-        <DllImport("user32.dll", CharSet:=CharSet.Unicode, EntryPoint:="MessageBox")>
+        <DllImport("user32.dll", CharSet:=CharSet.Unicode, EntryPoint:="MessageBox", SetLastError:=False)>
         Friend Shared Function MessageBox(hWnd As Integer, lpText As String, lpCaption As String, uType As UInteger) As Integer
         End Function
 
