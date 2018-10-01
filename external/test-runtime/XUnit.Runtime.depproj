@@ -44,23 +44,6 @@
       <Version>$(XUnitPackageVersion)</Version>
     </PackageReference>
 
-    <!-- Test SDK packages. -->
-    <PackageReference Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.NET.Test.Sdk">
-      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
-    </PackageReference>
-     <PackageReference Condition="'$(TargetsNetFx)' != 'true'" Include="$(TestPlatformHostPackageId)">
-      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
-    </PackageReference>
-    <PackageReference Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.TestPlatform.ObjectModel">
-      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
-    </PackageReference>
-    <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.Extensions.DependencyModel">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsNetFx)' == 'true'" Include="Microsoft.CodeCoverage">
-      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
-    </PackageReference>
-
     <!-- for callstack line numbers -->
     <PackageReference Include="Microsoft.DiaSymReader.Native">
       <Version>1.5.0</Version>
@@ -138,6 +121,31 @@
     <PackageToInclude Include="CommandLineParser.NS20" />
   </ItemGroup>
 
+  <!-- Test SDK packages. -->
+  <ItemGroup Condition="'$(IncludeVSTestReferences)' == 'true'">
+    <PackageReference Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.NET.Test.Sdk">
+      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
+    </PackageReference>
+     <PackageReference Condition="'$(TargetsNetFx)' != 'true'" Include="$(TestPlatformHostPackageId)">
+      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
+    </PackageReference>
+    <PackageReference Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.TestPlatform.ObjectModel">
+      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
+    </PackageReference>
+    <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.Extensions.DependencyModel">
+      <Version>2.0.4</Version>
+    </PackageReference>
+    <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsNetFx)' == 'true'" Include="Microsoft.CodeCoverage">
+      <Version>$(MicrosoftDotNetTestSdkVersion)</Version>
+    </PackageReference>
+
+    <PackageToInclude Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.NET.Test.Sdk" />
+    <PackageToInclude Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.TestPlatform.TestHost" />
+    <PackageToInclude Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.TestPlatform.ObjectModel" />
+    <PackageToInclude Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.Extensions.DependencyModel" />
+    <PackageToInclude Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsNetFx)' == 'true'" Include="Microsoft.CodeCoverage" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- xunit core -->
     <PackageToInclude Include="xunit.abstractions" />
@@ -148,13 +156,6 @@
     <PackageToInclude Include="Microsoft.DotNet.XUnitExtensions" />
     <PackageToInclude Condition="'$(TargetsUap)' != 'true'" Include="$(XUnitRunnerPackageId)" />
     <PackageToInclude Include="$(XUnitTestAdapterPackageId)" />
-    
-    <!-- test sdk -->
-    <PackageToInclude Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.NET.Test.Sdk" />
-    <PackageToInclude Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.TestPlatform.TestHost" />
-    <PackageToInclude Condition="'$(TargetsNetFx)' != 'true'" Include="Microsoft.TestPlatform.ObjectModel" />
-    <PackageToInclude Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.Extensions.DependencyModel" />
-    <PackageToInclude Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsNetFx)' == 'true'" Include="Microsoft.CodeCoverage" />
 
     <PackageToInclude Include="Microsoft.DiaSymReader.Native" />
     <PackageToInclude Include="Newtonsoft.Json" />
