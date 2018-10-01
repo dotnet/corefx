@@ -41,8 +41,9 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a
     stage ('Build Packages') {
         sh "./build-packages.sh -buildArch=arm64 -${params.CGroup}"
     }
-
-    // TODO: Build Tests for arm64 when possible
+    stage ('Build Tests') {
+        sh "./build-tests.sh -buildArch=arm64 -${params.CGroup}"
+    }
 
     // TODO: Add submission for Helix testing once we have queue for arm64 Linux working
 }
