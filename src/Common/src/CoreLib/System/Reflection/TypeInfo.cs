@@ -8,7 +8,7 @@ namespace System.Reflection
 {
     public abstract partial class TypeInfo : Type, IReflectableType
     {
-        protected TypeInfo() { }
+        internal TypeInfo() { }
 
         TypeInfo IReflectableType.GetTypeInfo() => this;
         public virtual Type AsType() => this;
