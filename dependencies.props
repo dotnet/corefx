@@ -49,6 +49,7 @@
     <MicrosoftDotNetTestSdkVersion>15.8.0</MicrosoftDotNetTestSdkVersion>
     <XUnitPackageVersion>2.4.1-pre.build.4059</XUnitPackageVersion>
     <XUnitPerformancePackageVersion>1.0.0-beta-build0020</XUnitPerformancePackageVersion>
+    <BenchmarkDotNetPackageVersion>0.11.1</BenchmarkDotNetPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18456.9</MicrosoftDotNetXUnitExtensionsVersion>
     <UAPToolsPackageVersion>1.0.23</UAPToolsPackageVersion>

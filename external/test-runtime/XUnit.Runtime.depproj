@@ -128,6 +128,9 @@
     <PackageReference Include="CommandLineParser.NS20">
       <Version>2.3.1</Version>
     </PackageReference>
+    <PackageReference Include="BenchmarkDotNet">
+      <Version>$(BenchmarkDotNetPackageVersion)</Version>
+    </PackageReference>
 
     <PackageToInclude Include="xunit.performance.core"/>
     <PackageToInclude Include="xunit.performance.api"/>
@@ -136,6 +139,7 @@
     <PackageToInclude Include="Microsoft.Diagnostics.Tracing.TraceEvent"/>
     <PackageToInclude Include="MarkdownLog.NS20"/>
     <PackageToInclude Include="CommandLineParser.NS20" />
+    <PackageToInclude Include="BenchmarkDotNet"/>
   </ItemGroup>
 
   <ItemGroup>
