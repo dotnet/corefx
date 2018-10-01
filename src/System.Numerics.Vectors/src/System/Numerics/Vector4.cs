@@ -247,10 +247,10 @@ namespace System.Numerics
             x = (min.X > x) ? min.X : x;  // max(x, minx)
             x = (max.X < x) ? max.X : x;  // min(x, maxx)
 
-            float y = value1.X;
+            float y = value1.Y;
             y = (min.Y > y) ? min.Y : y;  // max(y, miny)
             y = (max.Y < y) ? max.Y : y;  // min(y, maxy)
-            
+
             float z = value1.Z;
             z = (min.Z > z) ? min.Z : z;  // max(z, minz)
             z = (max.Z < z) ? max.Z : z;  // min(z, maxz)

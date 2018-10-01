@@ -250,7 +250,7 @@ namespace System.Numerics
             float y = value1.Y;
             y = (min.Y > y) ? min.Y : y;  // max(y, miny)
             y = (max.Y < y) ? max.Y : y;  // min(y, maxy)
-            
+
             return new Vector2(x,y);
         }
 
