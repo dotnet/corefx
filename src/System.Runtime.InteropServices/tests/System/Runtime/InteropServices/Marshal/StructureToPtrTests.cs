@@ -208,8 +208,8 @@ namespace System.Runtime.InteropServices.Tests
             try
             {
                 HasFixedBuffer* bufferStructPtr = (HasFixedBuffer*)parentStructIntPtr.ToPointer();
-                Assert.Equal(original->buffer[0], original->buffer[0]);
-                Assert.Equal(original->buffer[1], original->buffer[1]);
+                Assert.Equal(original->buffer[0], bufferStructPtr->buffer[0]);
+                Assert.Equal(original->buffer[1], bufferStructPtr->buffer[1]);
             }
             finally
             {
