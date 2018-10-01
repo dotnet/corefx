@@ -2,6 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{da95454e-5f0e-4f8a-871a-25d1ab62867a}</ProjectGuid>
     <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <RootNamespace />
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dummy.vb" />

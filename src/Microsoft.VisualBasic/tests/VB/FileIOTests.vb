@@ -3,6 +3,7 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports Microsoft.VisualBasic.FileIO
+Imports Microsoft.VisualBasic.Interaction
 Imports System
 Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
@@ -12,7 +13,7 @@ Imports System.Runtime.InteropServices
 Imports System.Text
 Imports Xunit
 ' Do not Imports System.IO
-Namespace Microsoft.VisualBasic.Tests
+Namespace Microsoft.VisualBasic.Tests.VB
     Public NotInheritable Class FileIOTests
         Inherits IO.FileCleanupTestBase
 
@@ -25,6 +26,10 @@ Namespace Microsoft.VisualBasic.Tests
 
         Public Shared ReadOnly Property ManualTestsEnabled() As Boolean
             Get
+                'While (Not System.Diagnostics.Debugger.IsAttached)
+                '    System.Threading.Thread.Sleep(1000)
+                'End While
+                Return True
                 Return Not String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"))
             End Get
         End Property
@@ -228,28 +233,7 @@ Namespace Microsoft.VisualBasic.Tests
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOptionWindows()
-            'Debugging code
-            While (Not Diagnostics.Debugger.IsAttached)
-                Threading.Thread.Sleep(1000)
-            End While
-
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
-                    CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile{i}")
-                Next
-                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs)
-                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    ' Ensure copy transferred written data
-                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                Next
-            End Using
-
+            'TODO
         End Sub
 
         <Fact>
@@ -321,8 +305,46 @@ Namespace Microsoft.VisualBasic.Tests
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOption()
+        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue()
+            MsgBox("Please select 'Replace The File' at the next prompt", MsgBoxStyle.OkOnly, NameOf(CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue))
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileDest As String = TestBase.GetTestFilePath()
 
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
+
+                ' Ensure copy transferred written data
+                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
+            End Using
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
+        <PlatformSpecific(TestPlatforms.Windows)>
+        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteFalse()
+            MsgBox("Please select 'Skip The File' at the next prompt", MsgBoxStyle.OkOnly, NameOf(CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue))
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileDest As String = TestBase.GetTestFilePath()
+
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
+
+                ' Ensure copy transferred written data
+                Assert.True(FileHasExpectedDate(testFileDest, DestData))
+            End Using
         End Sub
 
         <Fact>
@@ -391,13 +413,13 @@ Namespace Microsoft.VisualBasic.Tests
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteDirectory_Directory_UIOption_RecycleOption()
-
+            ' TODO
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteDirectory_Directory_UIOption_RecycleOption_UICancelOption()
-
+            ' TODO
         End Sub
 
         <Fact>
@@ -414,13 +436,13 @@ Namespace Microsoft.VisualBasic.Tests
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteFile_File_UIOption_RecycleOption()
-
+            ' TODO
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub DeleteFile_File_UIOption_RecycleOption_UICancelOption()
-
+            ' TODO
         End Sub
 
         <Fact>
@@ -650,13 +672,13 @@ Namespace Microsoft.VisualBasic.Tests
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption()
-
+            ' TODO
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
-
+            ' TODO
         End Sub
 
         <Fact>
@@ -799,13 +821,13 @@ Namespace Microsoft.VisualBasic.Tests
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveFile_SourceFileName_DestinationFileName_UIOption()
-
+            ' TODO
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveFile_SourceFileNameDestinationFileName_UIOption_UICancelOption()
-
+            ' TODO
         End Sub
 
         <Fact>

@@ -366,7 +366,6 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' If ShowUI, attempt to call Shell function.
             If showUI <> UIOptionInternal.NoUI AndAlso System.Environment.UserInteractive Then
-                Throw New PlatformNotSupportedException("showUI option not supported")
                 ShellCopyOrMove(operation, FileOrDirectory.File, sourceFileFullPath, destinationFileFullPath, showUI, onUserCancel)
                 Exit Sub
             End If
