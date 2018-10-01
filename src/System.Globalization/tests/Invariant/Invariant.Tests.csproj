@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{9A8926D9-1D4C-4069-8965-A626F6CA8C29}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
-    <AssemblyBeingTestedName Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'netstandard'">System.Private.CoreLib</AssemblyBeingTestedName>
+    <TestRuntime>true</TestRuntime>
     <!-- 
       Overriding the runtime config file to include "System.Globalization.Invariant": true
       which enables the globalization invariant mode.
