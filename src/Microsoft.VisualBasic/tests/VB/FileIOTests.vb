@@ -232,7 +232,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_SkipFilee()
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_SkipFile()
             Using TestBase As New FileIOTests
                 Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
                 Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
@@ -240,16 +240,9 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 For i As Integer = 0 To 5
                     CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"Select_skip_this_file{i}")
                 Next
-                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException)
-                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    ' Ensure copy transferred written data
-                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                Next
-                IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
                 IO.Directory.CreateDirectory(FullPathToTargetDirectory)
                 CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"Select_skip_this_file0")
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException))
+                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException)
                 Assert.Equal(IO.Directory.GetFiles(FullPathToTargetDirectory).Count, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
                 For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
                     If CurrentFile.EndsWith("0") Then
