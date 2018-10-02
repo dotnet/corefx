@@ -711,12 +711,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption_UICancelOptionThrow()
-            ' TODO
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOptionOverwriteFalse()
             Using TestBase As New FileIOTests
                 Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
