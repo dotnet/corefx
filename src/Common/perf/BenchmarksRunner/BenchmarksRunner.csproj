@@ -11,6 +11,7 @@
     <NoWarn>0436</NoWarn>
     <IsTestProject>true</IsTestProject>
     <IsPerformanceTestProject>true</IsPerformanceTestProject>
+    <IsBenchmarkDotNetProject>true</IsBenchmarkDotNetProject>
     <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;</Configurations>
   </PropertyGroup>
   <ItemGroup>
