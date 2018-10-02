@@ -1382,7 +1382,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.1",
       "InboxOn": {
@@ -1682,7 +1683,8 @@
     },
     "System.Drawing.Common": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "InboxOn": {
         "monoandroid10": "Any",
@@ -2209,7 +2211,9 @@
     },
     "System.IO.Pipelines": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.5.1",
+        "4.5.2"
       ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -2622,7 +2626,8 @@
         "4.0.1",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -3005,7 +3010,8 @@
     "System.Net.WebSockets.WebSocketProtocol": {
       "StableVersions": [
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.5.2"
       ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -3616,7 +3622,8 @@
     "System.Runtime.CompilerServices.Unsafe": {
       "StableVersions": [
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.5.2"
       ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -4291,7 +4298,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -4444,7 +4452,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.5.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
