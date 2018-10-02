@@ -61,7 +61,7 @@ namespace System.Net.Http
         {
             // Send connection preface
             _outgoingBuffer.EnsureAvailableSpace(s_http2ConnectionPreface.Length);
-            s_http2ConnectionPreface.AsSpan().CopyTo(_outgoingBuffer.AvailableSpan);
+            s_http2ConnectionPreface.AsBytes().CopyTo(_outgoingBuffer.AvailableSpan);
             _outgoingBuffer.Commit(s_http2ConnectionPreface.Length);
 
             // Send empty settings frame

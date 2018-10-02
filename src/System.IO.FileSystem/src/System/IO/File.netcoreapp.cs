@@ -110,7 +110,7 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
 
             // Utf8String.AsSpan() extension method below handles null inputs correctly.
-            InternalWriteAllBytes(path, contents.AsSpan());
+            InternalWriteAllBytes(path, contents.AsBytes());
         }
     }
 }

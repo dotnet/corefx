@@ -288,7 +288,7 @@ namespace System.Net.Http
             {
                 // TODO: ISSUE 31309: Optimize HPACK static table decoding
 
-                if (name.SequenceEqual(s_statusHeaderName.AsSpan()))
+                if (name.SequenceEqual(s_statusHeaderName.AsBytes()))
                 {
                     if (value.Length != 3)
                         throw new Exception("Invalid status code");
