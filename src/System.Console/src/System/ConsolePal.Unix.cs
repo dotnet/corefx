@@ -609,11 +609,9 @@ namespace System
         private static Encoding GetConsoleEncoding()
         {
             Encoding enc = EncodingHelper.GetEncodingFromCharset();
-            if (enc != null)
-            {
-                enc = enc.RemovePreamble();
-            }
-            return enc ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            return enc != null ?
+                enc.RemovePreamble() :
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         }
 
         public static void SetConsoleInputEncoding(Encoding enc)
