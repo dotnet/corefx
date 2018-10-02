@@ -44,9 +44,9 @@ namespace System.Runtime.InteropServices.Tests
 
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void GetHINSTANCE_NonRuntimeModule_ThrowsArgumentNullException_NetFrameowrk()
+        public void GetHINSTANCE_NonRuntimeModule_ThrowsArgumentNullException_NetFramework()
         {
-            Assert.Equal((IntPtr)(-1), Marshal.GetHINSTANCE(new NonRuntimeModule()));
+            AssertExtensions.Throws<ArgumentNullException>("m", () => Marshal.GetHINSTANCE(new NonRuntimeModule()));
         }
 
         private class NonRuntimeModule : Module
