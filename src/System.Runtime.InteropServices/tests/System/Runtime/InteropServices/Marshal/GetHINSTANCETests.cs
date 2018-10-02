@@ -36,7 +36,15 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetHINSTANCE_NonRuntimeModule_Returns_IntPtrMinusOne()
+        {
+            Assert.Equal((IntPtr)(-1), Marshal.GetHINSTANCE(new NonRuntimeModule()));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void GetHINSTANCE_NonRuntimeModule_ThrowsArgumentNullException_NetFrameowrk()
         {
             Assert.Equal((IntPtr)(-1), Marshal.GetHINSTANCE(new NonRuntimeModule()));
         }
