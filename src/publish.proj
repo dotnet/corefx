@@ -6,12 +6,43 @@
   <Import Project="$(PackagesDir)/$(FeedTasksPackage.ToLower())/$(FeedTasksPackageVersion)/build/$(FeedTasksPackage).targets" />
   <Import Project="$(PackagesDir)/$(PublishSymbolsPackage.ToLower())/$(PublishSymbolsPackageVersion)/build/PublishSymbols.targets" />
 
+  <UsingTask TaskName="UploadToAzure"                    AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <UsingTask TaskName="WriteItemsToJson"                 AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+
   <PropertyGroup>
     <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)\**\*.nupkg</PublishPattern>
+    
+    <!-- Copied in from upload-tests.proj for locating and pushing tests to transfer feed -->
+    <!-- Test builds consist of the tests that are platform specific in one root, plus others in AnyOS. -->
+    <AnyOSPlatformConfig>AnyOS.AnyCPU.$(ConfigurationGroup)</AnyOSPlatformConfig>
+    <AnyOsArchivesRoot>$(TestWorkingDir)$(AnyOSPlatformConfig)/archive/</AnyOsArchivesRoot>
+    <AnyOSTestArchivesRoot>$(AnyOsArchivesRoot)tests/</AnyOSTestArchivesRoot>
+
+    <!-- Additionally, *NIX variations may need to include their own root folders -->
+    <UnixPlatformConfig>Unix.$(Platform).$(ConfigurationGroup)</UnixPlatformConfig>
+    <UnixArchivesRoot>$(TestWorkingDir)$(UnixPlatformConfig)/archive/</UnixArchivesRoot>
+    <UnixTestArchivesRoot>$(UnixArchivesRoot)tests/</UnixTestArchivesRoot>
+
+    <!-- Finally, these archives represent the zips of tests that are OSPlatform specific 
+         This is used by CloudTest.Helix.Targets to generate relative blob paths for archives. -->
+    <ArchivesRoot>$(TestWorkingDir)$(OSPlatformConfig)/archive/</ArchivesRoot>
+    <TestArchivesRoot>$(ArchivesRoot)tests/</TestArchivesRoot>
+
+    <AzureTestsRoot>corefx-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)-tests/</AzureTestsRoot>
   </PropertyGroup>
 
   <ItemGroup>
     <_PackagesToPublish Include="$(PublishPattern)" />
+  </ItemGroup>
+
+  <!-- Collect test archives for pushing to transfer feed -->
+  <ItemGroup>
+    <TestArchive Include="$(TestArchivesRoot)**/*.zip" />
+    <TestArchive Include="$(AnyOSTestArchivesRoot)**/*.zip" />
+    <TestArchive Condition="'$(TargetsUnix)' == 'true'" Include="$(UnixTestArchivesRoot)**/*.zip" />
+    <TestArchive>
+      <RelativeBlobPath>$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
+    </TestArchive>
   </ItemGroup>
 
   <Target Name="CreateContainerName"
@@ -22,9 +53,19 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="UploadTestsToAzure">
+    <UploadToAzure
+      AccountName="$(CloudDropAccountName)"
+      AccountKey="$(CloudDropAccessToken)"
+      ContainerName="$(ContainerName)"
+      Items="@(TestArchive)"
+      Overwrite="true" />
+  </Target>
+
   <Target Name="Build" DependsOnTargets="CreateContainerName">
     <!-- skip uploadToAzure when there are no nupkgs -->
     <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
+    <CallTarget Targets="UploadTestsToAzure" Condition="'@(TestArchive->Count())' != 0" />
   </Target>
 
   <PropertyGroup>
@@ -33,8 +74,12 @@
     <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
     <FinalPublishExperimentalPattern>$(PackageDownloadDirectory)\**\*Experimental*.nupkg</FinalPublishExperimentalPattern>
     <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
+    <FinalTestArchivesPattern>$(PackagesDir)AzureTransfer\**\*.zip</FinalTestArchivesPattern>
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
+    <AzureFeedTestsRoot>tests/</AzureFeedTestsRoot>
+    <TestListFilename>TestList.json</TestListFilename>
+    <TestListPath>$(PackagesDir)AzureTransfer\$(AzureTestsRoot)$(TestListFilename)</TestListPath>
   </PropertyGroup>
 
   <Target Name="GetPackagesToSign">
@@ -67,6 +112,50 @@
                     ManifestBuildId="$(ManifestBuildId)"
                     ManifestBranch="$(ManifestBranch)"
                     ManifestCommit="$(ManifestCommit)" />
+  </Target>
+
+  <Target Name="PublishTestsToAzureBlobFeed" AfterTargets="PublishToAzureBlobFeed">
+    <ItemGroup>
+      <TestsToPush Include="$(FinalTestArchivesPattern)" />
+      <TestsToPush>
+        <RelativeBlobPath>$([System.String]::Copy('$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</RelativeBlobPath> 
+      </TestsToPush>
+    </ItemGroup>
+
+    <Error Condition="'@(ItemsToPush->Count())' == 0" Text="ItemsToPush for tests is empty." />
+
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(TestsToPush)"
+                    PublishFlatContainer="true"/>
+
+    <PropertyGroup>
+      <!-- Regex used by BlobFeedAction to extract same information -->
+      <FeedStorageAccount>$([System.Text.RegularExpressions.Regex]::Match($(ExpectedFeedUrl), `(?'feedurl'https:\/\/(?'accountname'[^\.-]+)(?'domain'[^\/]*)\/((?'token'[a-zA-Z0-9+\/]*?\/\d{4}-\d{2}-\d{2})\/)?(?'containername'[^\/]+)\/(?'relativepath'.*\/)?)index\.json`).Groups["accountname"].value)</FeedStorageAccount>
+      <FeedContainerName>$([System.Text.RegularExpressions.Regex]::Match($(ExpectedFeedUrl), `(?'feedurl'https:\/\/(?'accountname'[^\.-]+)(?'domain'[^\/]*)\/((?'token'[a-zA-Z0-9+\/]*?\/\d{4}-\d{2}-\d{2})\/)?(?'containername'[^\/]+)\/(?'relativepath'.*\/)?)index\.json`).Groups["containername"].value)</FeedContainerName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- Add metadata for tests -->
+      <TestsToPush>
+        <WorkItemId>%(Filename)</WorkItemId>
+        <PayloadUri>$([System.String]::Copy('https://$(FeedStorageAccount).blob.core.windows.net/$(FeedContainerName)/$(AzureFeedTestsRoot)%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</PayloadUri>
+      </TestsToPush>
+    </ItemGroup>
+    
+    <WriteItemsToJson JsonFileName="$(TestListPath)" Items="@(TestsToPush)" ForceJsonArray="true" />
+
+    <ItemGroup>
+      <TestList Include="$(TestListPath)" />
+      <TestList>
+        <RelativeBlobPath>$(AzureFeedTestsRoot)$(AzureTestsRoot)$(OSGroup)-$(ArchGroup)/%(Filename)%(Extension)</RelativeBlobPath>
+      </TestList>
+    </ItemGroup>
+
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(TestList)"
+                    PublishFlatContainer="true"/>
   </Target>
 
   <Target Name="PublishSymbolsToAzureBlobFeed" Condition="'$(PublishSymbols)' == 'true'" >
