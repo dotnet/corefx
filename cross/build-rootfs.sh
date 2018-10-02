@@ -118,6 +118,11 @@ for i in "$@" ; do
                 __LinuxCodeName=zesty
             fi
             ;;
+         bionic)
+            if [ "$__LinuxCodeName" != "jessie" ]; then
+                __LinuxCodeName=bionic
+            fi
+            ;;
         jessie)
             __LinuxCodeName=jessie
             __UbuntuRepo="http://ftp.debian.org/debian/"
