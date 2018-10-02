@@ -8,12 +8,7 @@ using System.Diagnostics;
 namespace Microsoft.Win32
 {
     /// <summary>Registry encapsulation. Contains members representing all top level system keys.</summary>
-#if REGISTRY_ASSEMBLY
-    public
-#else
-    internal
-#endif
-    static class Registry
+    public static class Registry
     {
         /// <summary>Current User Key. This key should be used as the root for all user specific settings.</summary>
         public static readonly RegistryKey CurrentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
@@ -21,7 +16,6 @@ namespace Microsoft.Win32
         /// <summary>Local Machine key. This key should be used as the root for all machine specific settings.</summary>
         public static readonly RegistryKey LocalMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default);
 
-#if REGISTRY_ASSEMBLY
         /// <summary>Classes Root Key. This is the root key of class information.</summary>
         public static readonly RegistryKey ClassesRoot = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Default);
 
@@ -101,6 +95,5 @@ namespace Microsoft.Win32
                 key.SetValue(valueName, value, valueKind);
             }
         }
-#endif
     }
 }

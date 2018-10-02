@@ -102,6 +102,54 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector256<sbyte> AlignRight(Vector256<sbyte> left, Vector256<sbyte> right, byte mask) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// </summary>
+        public static Vector256<byte> AlignRight(Vector256<byte> left, Vector256<byte> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// This intrinsic generates VPALIGNR that operates over bytes rather than elements of the vectors.
+        /// </summary>
+        public static Vector256<short> AlignRight(Vector256<short> left, Vector256<short> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// This intrinsic generates VPALIGNR that operates over bytes rather than elements of the vectors.
+        /// </summary>
+        public static Vector256<ushort> AlignRight(Vector256<ushort> left, Vector256<ushort> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// This intrinsic generates VPALIGNR that operates over bytes rather than elements of the vectors.
+        /// </summary>
+        public static Vector256<int> AlignRight(Vector256<int> left, Vector256<int> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// This intrinsic generates VPALIGNR that operates over bytes rather than elements of the vectors.
+        /// </summary>
+        public static Vector256<uint> AlignRight(Vector256<uint> left, Vector256<uint> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// This intrinsic generates VPALIGNR that operates over bytes rather than elements of the vectors.
+        /// </summary>
+        public static Vector256<long> AlignRight(Vector256<long> left, Vector256<long> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_alignr_epi8 (__m256i a, __m256i b, const int count)
+        ///   VPALIGNR ymm, ymm, ymm/m256, imm8
+        /// This intrinsic generates VPALIGNR that operates over bytes rather than elements of the vectors.
+        /// </summary>
+        public static Vector256<ulong> AlignRight(Vector256<ulong> left, Vector256<ulong> right, byte mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256i _mm256_and_si256 (__m256i a, __m256i b)
         ///   VPAND ymm, ymm, ymm/m256
         /// </summary>
@@ -227,14 +275,53 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
-        ///   PBLENDVB ymm, ymm, ymm/m256, ymm
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
         /// </summary>
         public static Vector256<sbyte> BlendVariable(Vector256<sbyte> left, Vector256<sbyte> right, Vector256<sbyte> mask) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
-        ///   PBLENDVB ymm, ymm, ymm/m256, ymm
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
         /// </summary>
         public static Vector256<byte> BlendVariable(Vector256<byte> left, Vector256<byte> right, Vector256<byte> mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
+        /// This intrinsic generates VPBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector256<short> BlendVariable(Vector256<short> left, Vector256<short> right, Vector256<short> mask) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
+        /// This intrinsic generates VPBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector256<ushort> BlendVariable(Vector256<ushort> left, Vector256<ushort> right, Vector256<ushort> mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
+        /// This intrinsic generates VPBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector256<int> BlendVariable(Vector256<int> left, Vector256<int> right, Vector256<int> mask) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
+        /// This intrinsic generates VPBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector256<uint> BlendVariable(Vector256<uint> left, Vector256<uint> right, Vector256<uint> mask) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
+        /// This intrinsic generates VPBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector256<long> BlendVariable(Vector256<long> left, Vector256<long> right, Vector256<long> mask) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_blendv_epi8 (__m256i a, __m256i b, __m256i mask)
+        ///   VPBLENDVB ymm, ymm, ymm/m256, ymm
+        /// This intrinsic generates VPBLENDVB that needs a BYTE mask-vector, so users should correctly set each mask byte for the selected elements.
+        /// </summary>
+        public static Vector256<ulong> BlendVariable(Vector256<ulong> left, Vector256<ulong> right, Vector256<ulong> mask) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_broadcastb_epi8 (__m128i a)
@@ -251,6 +338,59 @@ namespace System.Runtime.Intrinsics.X86
         ///   VMOVDDUP xmm, xmm
         /// </summary>
         public static Vector128<T> BroadcastScalarToVector128<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastb_epi8 (__m128i a)
+        ///   VPBROADCASTB xmm, m8
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// We provide this additional overload for the lack of pointers to managed.
+        /// </summary>
+        public static unsafe Vector128<byte> BroadcastScalarToVector128(byte* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m128i _mm_broadcastb_epi8 (__m128i a)
+        ///   VPBROADCASTB xmm, m8
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<sbyte> BroadcastScalarToVector128(sbyte* source) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastw_epi16 (__m128i a)
+        ///   VPBROADCASTW xmm, m16
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<short> BroadcastScalarToVector128(short* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m128i _mm_broadcastw_epi16 (__m128i a)
+        ///   VPBROADCASTW xmm, m16
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<ushort> BroadcastScalarToVector128(ushort* source) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastd_epi32 (__m128i a)
+        ///   VPBROADCASTD xmm, m32
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<int> BroadcastScalarToVector128(int* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m128i _mm_broadcastd_epi32 (__m128i a)
+        ///   VPBROADCASTD xmm, m32
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<uint> BroadcastScalarToVector128(uint* source) { throw new PlatformNotSupportedException(); }
+        
+        /// <summary>
+        /// __m128i _mm_broadcastq_epi64 (__m128i a)
+        ///   VPBROADCASTQ xmm, m64
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<long> BroadcastScalarToVector128(long* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m128i _mm_broadcastq_epi64 (__m128i a)
+        ///   VPBROADCASTQ xmm, m64
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector128<ulong> BroadcastScalarToVector128(ulong* source) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m256i _mm256_broadcastb_epi8 (__m128i a)
@@ -271,41 +411,49 @@ namespace System.Runtime.Intrinsics.X86
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m8
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<sbyte> BroadcastVector128ToVector256(sbyte* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m8
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<byte> BroadcastVector128ToVector256(byte* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m16
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<short> BroadcastVector128ToVector256(short* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m16
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<ushort> BroadcastVector128ToVector256(ushort* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m32
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<int> BroadcastVector128ToVector256(int* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m32
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<uint> BroadcastVector128ToVector256(uint* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m64
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<long> BroadcastVector128ToVector256(long* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
         ///   VBROADCASTI128 xmm, m64
+        /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<ulong> BroadcastVector128ToVector256(ulong* address) { throw new PlatformNotSupportedException(); }
 
@@ -1198,10 +1346,21 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector256<short> MultiplyLow(Vector256<short> left, Vector256<short> right) { throw new PlatformNotSupportedException(); }
         /// <summary>
+        /// __m256i _mm256_mullo_epi16 (__m256i a, __m256i b)
+        ///   VPMULLW ymm, ymm, ymm/m256
+        /// </summary>
+        public static Vector256<ushort> MultiplyLow(Vector256<ushort> left, Vector256<ushort> right) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256i _mm256_mullo_epi32 (__m256i a, __m256i b)
         ///   VPMULLD ymm, ymm, ymm/m256
         /// </summary>
         public static Vector256<int> MultiplyLow(Vector256<int> left, Vector256<int> right) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_mullo_epi32 (__m256i a, __m256i b)
+        ///   VPMULLD ymm, ymm, ymm/m256
+        /// </summary>
+        public static Vector256<uint> MultiplyLow(Vector256<uint> left, Vector256<uint> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m256i _mm256_or_si256 (__m256i a, __m256i b)

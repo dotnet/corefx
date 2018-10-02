@@ -32,29 +32,25 @@ namespace System.SpanTests
         public static void IndexOfAnyStrings_Byte(string raw, string search, char expectResult, int expectIndex)
         {
             byte[] buffers = Encoding.UTF8.GetBytes(raw);
-            var span = new ReadOnlySpan<byte>(buffers);
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(buffers);
             char[] searchFor = search.ToCharArray();
             byte[] searchForBytes = Encoding.UTF8.GetBytes(searchFor);
 
-            var index = -1;
+            int index = span.IndexOfAny(new ReadOnlySpan<byte>(searchForBytes));
             if (searchFor.Length == 1)
             {
-                index = span.IndexOf((byte)searchFor[0]);
+                Assert.Equal(index, span.IndexOf((byte)searchFor[0]));
             }
             else if (searchFor.Length == 2)
             {
-                index = span.IndexOfAny((byte)searchFor[0], (byte)searchFor[1]);
+                Assert.Equal(index, span.IndexOfAny((byte)searchFor[0], (byte)searchFor[1]));
             }
             else if (searchFor.Length == 3)
             {
-                index = span.IndexOfAny((byte)searchFor[0], (byte)searchFor[1], (byte)searchFor[2]);
-            }
-            else
-            {
-                index = span.IndexOfAny(new ReadOnlySpan<byte>(searchForBytes));
+                Assert.Equal(index, span.IndexOfAny((byte)searchFor[0], (byte)searchFor[1], (byte)searchFor[2]));
             }
 
-            var found = span[index];
+            byte found = span[index];
             Assert.Equal((byte)expectResult, found);
             Assert.Equal(expectIndex, index);
         }
@@ -131,7 +127,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestNoMatchTwo_Byte()
         {
-            var rnd = new Random(42);
+            Random rnd = new Random(42);
             for (int length = 0; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
@@ -266,7 +262,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestNoMatchThree_Byte()
         {
-            var rnd = new Random(42);
+            Random rnd = new Random(42);
             for (int length = 0; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
@@ -331,7 +327,7 @@ namespace System.SpanTests
         public static void ZeroLengthIndexOfMany_Byte()
         {
             ReadOnlySpan<byte> sp = new ReadOnlySpan<byte>(Array.Empty<byte>());
-            var values = new ReadOnlySpan<byte>(new byte[] { 0, 0, 0, 0 });
+            ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { 0, 0, 0, 0 });
             int idx = sp.IndexOfAny(values);
             Assert.Equal(-1, idx);
 
@@ -348,7 +344,7 @@ namespace System.SpanTests
                 byte[] a = new byte[length];
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
 
-                var values = new ReadOnlySpan<byte>(new byte[] { default, 99, 98, 0 });
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { default, 99, 98, 0 });
 
                 for (int i = 0; i < length; i++)
                 {
@@ -372,21 +368,21 @@ namespace System.SpanTests
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
-                    var values = new ReadOnlySpan<byte>(new byte[] { a[targetIndex], 0, 0, 0 });
+                    ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { a[targetIndex], 0, 0, 0 });
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(targetIndex, idx);
                 }
 
                 for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
                 {
-                    var values = new ReadOnlySpan<byte>(new byte[] { a[targetIndex], a[targetIndex + 1], a[targetIndex + 2], a[targetIndex + 3] });
+                    ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { a[targetIndex], a[targetIndex + 1], a[targetIndex + 2], a[targetIndex + 3] });
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(targetIndex, idx);
                 }
 
                 for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
                 {
-                    var values = new ReadOnlySpan<byte>(new byte[] { 0, 0, 0, a[targetIndex + 3] });
+                    ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { 0, 0, 0, a[targetIndex + 3] });
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(targetIndex + 3, idx);
                 }
@@ -396,7 +392,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchValuesLargerMany_Byte()
         {
-            var rnd = new Random(42);
+            Random rnd = new Random(42);
             for (int length = 2; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
@@ -421,7 +417,7 @@ namespace System.SpanTests
                     targets[i] = (byte)rnd.Next(1, 255);
                 }
 
-                var values = new ReadOnlySpan<byte>(targets);
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(targets);
                 int idx = span.IndexOfAny(values);
                 Assert.Equal(expectedIndex, idx);
             }
@@ -430,7 +426,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestNoMatchMany_Byte()
         {
-            var rnd = new Random(42);
+            Random rnd = new Random(42);
             for (int length = 1; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
@@ -440,7 +436,7 @@ namespace System.SpanTests
                     targets[i] = (byte)rnd.Next(1, 256);
                 }
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
-                var values = new ReadOnlySpan<byte>(targets);
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(targets);
 
                 int idx = span.IndexOfAny(values);
                 Assert.Equal(-1, idx);
@@ -450,7 +446,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestNoMatchValuesLargerMany_Byte()
         {
-            var rnd = new Random(42);
+            Random rnd = new Random(42);
             for (int length = 1; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
@@ -460,7 +456,7 @@ namespace System.SpanTests
                     targets[i] = (byte)rnd.Next(1, 256);
                 }
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
-                var values = new ReadOnlySpan<byte>(targets);
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(targets);
 
                 int idx = span.IndexOfAny(values);
                 Assert.Equal(-1, idx);
@@ -486,7 +482,7 @@ namespace System.SpanTests
                 a[length - 5] = 200;
 
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
-                var values = new ReadOnlySpan<byte>(new byte[] { 200, 200, 200, 200, 200, 200, 200, 200, 200 });
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { 200, 200, 200, 200, 200, 200, 200, 200, 200 });
                 int idx = span.IndexOfAny(values);
                 Assert.Equal(length - 5, idx);
             }
@@ -501,7 +497,7 @@ namespace System.SpanTests
                 a[0] = 99;
                 a[length + 1] = 98;
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a, 1, length - 1);
-                var values = new ReadOnlySpan<byte>(new byte[] { 99, 98, 99, 98, 99, 98 });
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { 99, 98, 99, 98, 99, 98 });
                 int index = span.IndexOfAny(values);
                 Assert.Equal(-1, index);
             }
@@ -512,7 +508,7 @@ namespace System.SpanTests
                 a[0] = 99;
                 a[length + 1] = 99;
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a, 1, length - 1);
-                var values = new ReadOnlySpan<byte>(new byte[] { 99, 99, 99, 99, 99, 99 });
+                ReadOnlySpan<byte> values = new ReadOnlySpan<byte>(new byte[] { 99, 99, 99, 99, 99, 99 });
                 int index = span.IndexOfAny(values);
                 Assert.Equal(-1, index);
             }
