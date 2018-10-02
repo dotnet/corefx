@@ -191,7 +191,7 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        public unsafe void StructureToPtr_StructWithFixedBuffer_In_NonBlittable_Success()
+        public unsafe void StructureToPtr_StructWithBlittableFixedBuffer_In_NonBlittable_Success()
         {
             var str = default(NonBlittableContainingBuffer);
 
@@ -216,6 +216,25 @@ namespace System.Runtime.InteropServices.Tests
                 Marshal.DestroyStructure<NonBlittableContainingBuffer>(parentStructIntPtr);
                 Marshal.FreeHGlobal(parentStructIntPtr);
             }
+        }
+
+        [Fact]
+        public unsafe void StructureToPtr_NonBlittableStruct_WithBlittableFixedBuffer_Success()
+        {
+            NonBlittableWithBlittableBuffer x = new NonBlittableWithBlittableBuffer();
+            x.f[0] = 1;
+            x.f[1] = 2;
+            x.f[2] = 3;
+            x.s = null;
+
+            int size = Marshal.SizeOf(typeof(NonBlittableWithBlittableBuffer));
+            byte* p = stackalloc byte[size];
+            Marshal.StructureToPtr(x, (IntPtr)p, false);
+            NonBlittableWithBlittableBuffer y = Marshal.PtrToStructure<NonBlittableWithBlittableBuffer>((IntPtr)p);
+
+            Assert.Equal(x.f[0], y.f[0]);
+            Assert.Equal(x.f[1], y.f[1]);
+            Assert.Equal(x.f[2], y.f[2]);
         }
 
         public struct StructWithIntField
@@ -261,6 +280,12 @@ namespace System.Runtime.InteropServices.Tests
             public HasFixedBuffer bufferStruct;
             public string str;
             public IntPtr intPtr;
+        }
+
+        unsafe struct NonBlittableWithBlittableBuffer
+        {
+            public fixed int f[100];
+            public string s;
         }
     }
 }
