@@ -8,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Jobs;
 
 public class BenchmarksRunner
 {
@@ -18,7 +20,9 @@ public class BenchmarksRunner
             BenchmarkSwitcher
                 .FromAssemblies(
                     GetTestAssemblies().Select(Assembly.LoadFrom).ToArray())
-                .Run(args);
+                .Run(
+                    args,
+                    DefaultConfig.Instance.With(Job.ShortRun.With(new CoreFxToolchain("netcoreapp"))));
 
             return 0;
         }

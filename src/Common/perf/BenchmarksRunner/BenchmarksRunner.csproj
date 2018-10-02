@@ -16,6 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BenchmarksRunner.cs" />
+    <Compile Include="CoreFxToolchain.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="AssemblyAttributes.cs" />
