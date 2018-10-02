@@ -490,6 +490,41 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [DllImport("libc", SetLastError = true)]
+        private unsafe static extern int setsockopt(int socket, int level, int option_name, void* option_value, uint option_len);
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
+        public unsafe void ReuseAddressUdp()
+        {
+            // Verify that .NET Core Sockets can reuse UDP ports from applications
+            // that use SO_REUSEADDR to allow re-use.
+            int SOL_SOCKET = -1;
+            int SO_REUSEADDR = -1;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                SOL_SOCKET = 1;
+                SO_REUSEADDR = 2;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                SOL_SOCKET = 0xffff;
+                SO_REUSEADDR = 0x0004;
+            }
+            using (Socket s1 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                int value = 1;
+                int rv = setsockopt(s1.Handle.ToInt32(), SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int));
+                Assert.Equal(0, rv);
+                s1.Bind(new IPEndPoint(IPAddress.Any, 0));
+                using (Socket s2 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                {
+                    s2.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    s2.Bind(s1.LocalEndPoint);
+                }
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]  // SetIPProtectionLevel not supported on Unix
