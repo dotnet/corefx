@@ -214,7 +214,7 @@ namespace System.Tests
         public static void Empty_HasLengthZero()
         {
             Assert.Equal(0, Utf8String.Empty.Length);
-            SpanAssert.Equal(ReadOnlySpan<byte>.Empty, Utf8String.Empty.AsSpan());
+            SpanAssert.Equal(ReadOnlySpan<byte>.Empty, Utf8String.Empty.AsBytes());
         }
 
         [Fact]
@@ -287,7 +287,7 @@ namespace System.Tests
             var utf8 = new Utf8String(value);
 
             Assert.Equal(expectedIsNullOrWhiteSpace, Utf8String.IsNullOrWhiteSpace(utf8));
-            Assert.Equal(expectedIsNullOrWhiteSpace, Utf8String.IsEmptyOrWhiteSpace(utf8.AsSpan()));
+            Assert.Equal(expectedIsNullOrWhiteSpace, Utf8String.IsEmptyOrWhiteSpace(utf8.AsBytes()));
         }
 
         [Fact]
@@ -360,7 +360,7 @@ namespace System.Tests
                 if (startIndex + length == s.Length)
                 {
                     Assert.Equal(expected, s.Substring(startIndex));
-                    Assert.Equal(expected, new Utf8String(s.AsSpan(startIndex)));
+                    Assert.Equal(expected, new Utf8String(s.AsBytes(startIndex)));
 
                     if (length == 0)
                     {
@@ -369,7 +369,7 @@ namespace System.Tests
                 }
                 Assert.Equal(expected, s.Substring(startIndex, length));
 
-                Assert.Equal(expected, new Utf8String(s.AsSpan(startIndex, length)));
+                Assert.Equal(expected, new Utf8String(s.AsBytes(startIndex, length)));
 
                 if (length == s.Length)
                 {

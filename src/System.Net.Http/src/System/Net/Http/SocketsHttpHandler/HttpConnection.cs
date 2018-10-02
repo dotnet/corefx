@@ -793,7 +793,7 @@ namespace System.Net.Http
             {
                 byte minorVersion = line[7];
                 if (IsDigit(minorVersion) &&
-                    line.Slice(0, 7).SequenceEqual(s_http1DotBytes.AsSpan()))
+                    line.Slice(0, 7).SequenceEqual(s_http1DotBytes.AsBytes()))
                 {
                     response.SetVersionWithoutValidation(new Version(1, minorVersion - '0'));
                 }
