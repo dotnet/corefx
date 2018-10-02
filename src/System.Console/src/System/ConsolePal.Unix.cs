@@ -58,7 +58,7 @@ namespace System
                         ref s_stdInReader,
                         () => SyncTextReader.GetSynchronizedTextReader(
                             new StdInReader(
-                                encoding: Console.InputEncoding.RemovePreamble(), // This ensures no prefix is written to the stream.
+                                encoding: Console.InputEncoding,
                                 bufferSize: DefaultBufferSize)));
             }
         }
@@ -74,7 +74,7 @@ namespace System
                     StreamReader.Null :
                     new StreamReader(
                         stream: inputStream,
-                        encoding: Console.InputEncoding.RemovePreamble(), // This ensures no prefix is written to the stream.
+                        encoding: Console.InputEncoding,
                         detectEncodingFromByteOrderMarks: false,
                         bufferSize: DefaultConsoleBufferSize,
                         leaveOpen: true)
