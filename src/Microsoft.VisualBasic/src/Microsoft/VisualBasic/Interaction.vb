@@ -2,6 +2,7 @@
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
 
+Imports System.Security
 Imports Microsoft.VisualBasic.CompilerServices
 
 Namespace Microsoft.VisualBasic
@@ -56,11 +57,10 @@ Namespace Microsoft.VisualBasic
             Try
                 If Title Is Nothing Then
                     'If vbhost Is Nothing Then
-                    '    sTitle = GetTitleFromAssembly(System.Reflection.Assembly.GetCallingAssembly())
+                    sTitle = GetTitleFromAssembly(System.Reflection.Assembly.GetCallingAssembly())
                     'Else
                     '    sTitle = vbhost.GetWindowTitle()
                     'End If
-                    sTitle = ""
                 Else
                     sTitle = CStr(Title) 'allows the title to be an expression, e.g. msgbox(prompt, Title:=1+5)
                 End If
@@ -75,6 +75,32 @@ Namespace Microsoft.VisualBasic
             End Try
 
             Return CType(NativeMethods.MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
+        End Function
+
+        Private Shared Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
+
+            Dim Title As String
+
+            'Get the Assembly name of the calling assembly 
+            'Assembly.GetName requires PathDiscovery permission so we try this first
+            'and if it throws we catch the security exception and parse the name
+            'from the full assembly name
+            Try
+                Title = CallingAssembly.GetName().Name
+            Catch ex As SecurityException
+                Dim FullName As String = CallingAssembly.FullName
+                'Find the text up to the first comma. Note, this fails if the assembly has
+                'a comma in its name
+                Dim FirstCommaLocation As Integer = FullName.IndexOf(","c)
+                If FirstCommaLocation >= 0 Then
+                    Title = FullName.Substring(0, FirstCommaLocation)
+                Else
+                    'The name is not in the format we're expecting so return an empty string
+                    Title = ""
+                End If
+            End Try
+
+            Return Title
         End Function
     End Class
 End Namespace

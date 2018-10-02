@@ -664,8 +664,7 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
-            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
-                False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName, False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -677,8 +676,7 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
-            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
-                overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName, overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>

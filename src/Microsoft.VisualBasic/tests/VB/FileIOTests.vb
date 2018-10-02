@@ -29,7 +29,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 'While (Not System.Diagnostics.Debugger.IsAttached)
                 '    System.Threading.Thread.Sleep(1000)
                 'End While
-                Return True
                 Return Not String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"))
             End Get
         End Property
@@ -430,14 +429,34 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub DeleteDirectory_Directory_UIOption_RecycleOption()
-            ' TODO
+        Public Sub DeleteDirectory_Directory_UIOption_Delete()
+            Using TestBase As New FileIOTests
+                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "Select_Yes")
+                FileSystem.CreateDirectory(FullPathToNewDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="Select_Yes", TestFileName:="DoNotCare")
+
+                Assert.True(IO.File.Exists(testFileSource))
+                FileSystem.DeleteDirectory(FullPathToNewDirectory, showUI:=UIOption.AllDialogs, recycle:=RecycleOption.DeletePermanently, onUserCancel:=UICancelOption.ThrowException)
+                Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
+                Assert.False(IO.File.Exists(testFileSource))
+            End Using
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub DeleteDirectory_Directory_UIOption_RecycleOption_UICancelOption()
-            ' TODO
+        Public Sub DeleteDirectory_Directory_UIOption_DoNotDelete()
+            Using TestBase As New FileIOTests
+                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "Select_No")
+                FileSystem.CreateDirectory(FullPathToNewDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="Select_No", TestFileName:="DoNotCare")
+
+                Assert.True(IO.File.Exists(testFileSource))
+                Assert.Throws(Of System.OperationCanceledException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, showUI:=UIOption.AllDialogs, recycle:=RecycleOption.DeletePermanently, onUserCancel:=UICancelOption.ThrowException))
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Assert.True(IO.File.Exists(testFileSource))
+            End Using
         End Sub
 
         <Fact>
