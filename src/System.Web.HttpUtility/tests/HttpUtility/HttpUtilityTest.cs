@@ -753,5 +753,16 @@ namespace System.Web.Tests
         {
             Assert.Equal(encoded, HttpUtility.UrlPathEncode(decoded));
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("name=foo&desc=foo")]
+        [InlineData("type=foo&type=foo")]
+        public void ParseAndToStringRoundtrip(string input)
+        {
+            var values = HttpUtility.ParseQueryString(input);
+            var output = values.ToString();
+            Assert.Equal(input, output);
+        }
     }
 }
