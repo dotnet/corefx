@@ -502,7 +502,7 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
                     memset(&ifmr, 0, sizeof(ifmr));
                     strncpy(ifmr.ifm_name, interfaceName, sizeof(ifmr.ifm_name));
 
-                    if ((ioctl(fd, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0) || ((ifmr.ifm_status & IFM_AVALID) == 0))
+                    if (ioctl(fd, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0)
                     {
                         if (errno == EOPNOTSUPP)
                         {
@@ -514,6 +514,10 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
                         {
                             retStats->Flags |= InterfaceError;
                         }
+                    }
+                    else if ((ifmr.ifm_status & IFM_AVALID) == 0)
+                    {
+                        retStats->Flags |= InterfaceError;
                     }
                     else
                     {
