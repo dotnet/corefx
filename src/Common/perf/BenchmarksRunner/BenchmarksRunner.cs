@@ -17,7 +17,7 @@ public class BenchmarksRunner
         {
             BenchmarkSwitcher
                 .FromAssemblies(
-                    GetTestAssemblies().Select(Assembly.Load).ToArray())
+                    GetTestAssemblies().Select(Assembly.LoadFrom).ToArray())
                 .Run(args);
 
             return 0;
