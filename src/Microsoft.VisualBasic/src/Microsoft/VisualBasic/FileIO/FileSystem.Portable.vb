@@ -837,7 +837,7 @@ Namespace Microsoft.VisualBasic.FileIO
                             ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
                             ByVal SourcePaths() As String, Optional ByVal TargetPath As String = Nothing) As SHFILEOPSTRUCT
             Debug.Assert(System.Enum.IsDefined(GetType(SHFileOperationType), OperationType), "Invalid OperationType!!!")
-            Debug.Assert((Not OperationType = SHFileOperationType.FO_DELETE) AndAlso (TargetPath.Length = 0 OrElse IO.Path.IsPathRooted(TargetPath)), "Invalid TargetPath!!!")
+            Debug.Assert(String.IsNullOrEmpty(TargetPath) OrElse IO.Path.IsPathRooted(TargetPath), "Invalid TargetPath!!!")
             Debug.Assert(SourcePaths IsNot Nothing AndAlso SourcePaths.Length > 0, "Invalid SourcePaths!!!")
 
             Dim OperationInfo As SHFILEOPSTRUCT

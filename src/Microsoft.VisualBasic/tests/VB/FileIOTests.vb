@@ -26,9 +26,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         Public Shared ReadOnly Property ManualTestsEnabled() As Boolean
             Get
-                'While (Not System.Diagnostics.Debugger.IsAttached)
-                '    System.Threading.Thread.Sleep(1000)
-                'End While
+                Return True
                 Return Not String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"))
             End Get
         End Property
@@ -86,14 +84,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Return S.ToString
         End Function
 
-        Private Function FileHasExpectedDate(FileNameWithPath As String, ExpectedData() As Char) As Boolean
-            Using stream As New IO.StreamReader(IO.File.OpenRead(FileNameWithPath))
-                Dim ReadData(ExpectedData.Length - 1) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
-                Return ExpectedData = ReadData
-            End Using
-        End Function
-
         '''**************************************************************************
         ''' RemoveEndingSeparator
         ''' <summary>
@@ -117,6 +107,13 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Return Path.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)
         End Function
 
+        Private Function FileHasExpectedDate(FileNameWithPath As String, ExpectedData() As Char) As Boolean
+            Using stream As New IO.StreamReader(IO.File.OpenRead(FileNameWithPath))
+                Dim ReadData(ExpectedData.Length - 1) As Char
+                stream.Read(ReadData, 0, SourceData.Length)
+                Return ExpectedData = ReadData
+            End Using
+        End Function
         <Fact>
         Public Shared Sub CombinePathTest_BadBaseDirectory_RelativePath()
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
@@ -136,231 +133,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Using TestBase As New FileIOTests
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, ""), TestBase.TestDirectory)
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, "Test"), IO.Path.Combine(TestBase.TestDirectory, "Test"))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
-                Next
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory)
-                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    ' Ensure copy transferred written data
-                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                Next
-                IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                CreateTestFile(TestBase, TestData:=SourceData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile0")
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteFalse()
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
-                Next
-                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False)
-                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    ' Ensure copy transferred written data
-                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                Next
-                IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile0")
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False))
-                Assert.Equal(IO.Directory.GetFiles(FullPathToTargetDirectory).Count, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    If CurrentFile.EndsWith("0") Then
-                        ' Make sure file 0 is unchanged with DestDate
-                        Assert.True(FileHasExpectedDate(CurrentFile, DestData))
-                    Else
-                        ' Ensure file 1 - 5 transferred SourData
-                        Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                    End If
-                Next
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteTrue()
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
-                Next
-                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=True)
-                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    ' Ensure copy transferred written data
-                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                Next
-            End Using
-        End Sub
-
-        <Fact>
-        <PlatformSpecific(TestPlatforms.AnyUnix)>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOptionUnix()
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
-                    CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile{i}")
-                Next
-                Assert.Throws(Of PlatformNotSupportedException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs))
-            End Using
-
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_SkipFile()
-            Using TestBase As New FileIOTests
-                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
-                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
-                For i As Integer = 0 To 5
-                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"Select_skip_this_file{i}")
-                Next
-                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
-                CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"Select_skip_this_file0")
-                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException)
-                Assert.Equal(IO.Directory.GetFiles(FullPathToTargetDirectory).Count, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
-                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
-                    If CurrentFile.EndsWith("0") Then
-                        ' Make sure file 0 is unchanged with DestDate
-                        Assert.True(FileHasExpectedDate(CurrentFile, DestData))
-                    Else
-                        ' Ensure file 1 - 5 transferred SourData
-                        Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
-                    End If
-                Next
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub CopyFile_FileSourceFileName_DestinationFileName()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = TestBase.GetTestFilePath()
-                Dim testFileDest As String = TestBase.GetTestFilePath()
-
-                ' Write and copy file
-                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
-                        sourceStream.Write(SourceData, 0, SourceData.Length)
-                        destStream.Write(DestData, 0, DestData.Length)
-                    End Using
-                End Using
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest))
-
-                ' Ensure copy didn't overwrite existing data
-                Assert.True(FileHasExpectedDate(testFileDest, DestData))
-
-                ' Get a new destination nanme
-                testFileDest = TestBase.GetTestFilePath()
-                FileSystem.CopyFile(testFileSource, testFileDest)
-
-                ' Ensure copy transferred written data
-                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteFalse()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = TestBase.GetTestFilePath()
-                Dim testFileDest As String = TestBase.GetTestFilePath()
-
-                ' Write and copy file
-                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
-                        sourceStream.Write(SourceData, 0, SourceData.Length)
-                        destStream.Write(DestData, 0, DestData.Length)
-                    End Using
-                End Using
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest, overwrite:=False))
-
-                ' Ensure copy didn't overwrite existing data
-                Assert.True(FileHasExpectedDate(testFileDest, DestData))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteTrue()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = TestBase.GetTestFilePath()
-                Dim testFileDest As String = TestBase.GetTestFilePath()
-
-                ' Write and copy file
-                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
-                        sourceStream.Write(SourceData, 0, SourceData.Length)
-                        destStream.Write(DestData, 0, DestData.Length)
-                    End Using
-                End Using
-                FileSystem.CopyFile(testFileSource, testFileDest, overwrite:=True)
-
-                ' Ensure copy transferred written data
-                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
-            End Using
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Replace_the_file")
-                Dim testFileDest As String = TestBase.GetTestFilePath()
-
-                ' Write and copy file
-                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
-                        sourceStream.Write(SourceData, 0, SourceData.Length)
-                        destStream.Write(DestData, 0, DestData.Length)
-                    End Using
-                End Using
-                FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
-
-                ' Ensure copy transferred written data
-                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
-            End Using
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteFalse()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Skip_this_file")
-                Dim testFileDest As String = TestBase.GetTestFilePath()
-
-                ' Write and copy file
-                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
-                        sourceStream.Write(SourceData, 0, SourceData.Length)
-                        destStream.Write(DestData, 0, DestData.Length)
-                    End Using
-                End Using
-                FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
-
-                ' Ensure copy transferred written data
-                Assert.True(FileHasExpectedDate(testFileDest, DestData))
             End Using
         End Sub
 
@@ -400,105 +172,11 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Sub DeleteDirectory_Directory_DeleteAllContents()
-            Using TestBase As New FileIOTests
-                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
-                IO.Directory.CreateDirectory(FullPathToNewDirectory)
-                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="NewDirectory", TestFileName:="TestFile")
-                Assert.True(IO.File.Exists(testFileSource))
-                FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.DeleteAllContents)
-                Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub DeleteDirectory_Directory_ThrowIfDirectoryNonEmpty()
-            Using TestBase As New FileIOTests
-                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
-                FileSystem.CreateDirectory(FullPathToNewDirectory)
-                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="NewDirectory", TestFileName:="TestFile")
-
-                Assert.True(IO.File.Exists(testFileSource))
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.ThrowIfDirectoryNonEmpty))
-                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-                Assert.True(IO.File.Exists(testFileSource))
-            End Using
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub DeleteDirectory_Directory_UIOption_Delete()
-            Using TestBase As New FileIOTests
-                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "Select_Yes")
-                FileSystem.CreateDirectory(FullPathToNewDirectory)
-                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="Select_Yes", TestFileName:="DoNotCare")
-
-                Assert.True(IO.File.Exists(testFileSource))
-                FileSystem.DeleteDirectory(FullPathToNewDirectory, showUI:=UIOption.AllDialogs, recycle:=RecycleOption.DeletePermanently, onUserCancel:=UICancelOption.ThrowException)
-                Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
-                Assert.False(IO.File.Exists(testFileSource))
-            End Using
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub DeleteDirectory_Directory_UIOption_DoNotDelete()
-            Using TestBase As New FileIOTests
-                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "Select_No")
-                FileSystem.CreateDirectory(FullPathToNewDirectory)
-                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="Select_No", TestFileName:="DoNotCare")
-
-                Assert.True(IO.File.Exists(testFileSource))
-                Assert.Throws(Of System.OperationCanceledException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, showUI:=UIOption.AllDialogs, recycle:=RecycleOption.DeletePermanently, onUserCancel:=UICancelOption.ThrowException))
-                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
-                Assert.True(IO.File.Exists(testFileSource))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub DeleteFile_File()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = CreateTestFile(TestBase, SourceData)
-
-                Assert.True(IO.File.Exists(testFileSource))
-                FileSystem.DeleteFile(testFileSource)
-                Assert.False(IO.File.Exists(testFileSource))
-            End Using
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub DeleteFile_File_UIOption_RecycleOption()
-            ' TODO
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub DeleteFile_File_UIOption_RecycleOption_UICancelOption()
-            ' TODO
-        End Sub
-
-        <Fact>
         Public Shared Sub DirectoryExists_directory()
             Using TestBase As New FileIOTests
                 Dim TestDirectory As String = TestBase.TestDirectory()
                 Assert.True(FileSystem.DirectoryExists(TestDirectory))
                 Assert.False(FileSystem.DirectoryExists(IO.Path.Combine(TestDirectory, "NewDirectory")))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Sub FileExists_File()
-            Using TestBase As New FileIOTests
-                Dim testFileSource As String = CreateTestFile(TestBase, SourceData)
-                Assert.True(FileSystem.FileExists(testFileSource))
-                FileSystem.FileExists(testFileSource)
-                IO.File.Delete(testFileSource)
-                Assert.False(FileSystem.FileExists(testFileSource))
             End Using
         End Sub
 
@@ -589,6 +267,354 @@ Namespace Microsoft.VisualBasic.Tests.VB
             ' This test is unneccessory becuase DriveInfo is just Passthrough of IO.GetDrives
         End Sub
 
+        <Fact>
+        Public Shared Sub GetName_Path()
+            Using TestBase As New FileIOTests
+                Assert.Equal(FileSystem.GetName(TestBase.TestDirectory), IO.Path.GetFileName(TestBase.TestDirectory))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetParentPath_Path()
+            Using TestBase As New FileIOTests
+                Dim TestDirectory As String = TestBase.TestDirectory
+                Assert.Equal(FileSystem.GetParentPath(TestDirectory), IO.Path.GetDirectoryName(TestDirectory.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Shared Sub GetTempFileName()
+            Dim TempFile As String = FileSystem.GetTempFileName
+            Assert.True(IO.File.Exists(TempFile))
+            Assert.True((New IO.FileInfo(TempFile)).Length = 0)
+            IO.File.Delete(TempFile)
+        End Sub
+
+        <Fact>
+        Public Shared Sub RenameDirectory_Directory_NewName()
+            Using TestBase As New FileIOTests
+                ''' <exception cref="IO.FileNotFoundException">If directory does not point to an existing directory.</exception>
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Sub() FileSystem.RenameDirectory(IO.Path.Combine(TestBase.TestDirectory, "DoesNotExistDirectory"), "NewDirectory"))
+                Dim OrigDirectoryWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "OriginalDirectory")
+                IO.Directory.CreateDirectory(OrigDirectoryWithPath)
+                ''' <exception cref="System.ArgumentException">If newName is Nothing or Empty String.</exception>
+                Assert.Throws(Of ArgumentNullException)(Sub() FileSystem.RenameDirectory(OrigDirectoryWithPath, ""))
+                Dim DirectoryNameWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "DoesNotExist")
+                ''' <exception cref="System.ArgumentException">If contains path information.</exception>
+                Assert.Throws(Of ArgumentException)(Sub() FileSystem.RenameDirectory(OrigDirectoryWithPath, DirectoryNameWithPath))
+                FileSystem.RenameDirectory(OrigDirectoryWithPath, "NewFDirectory")
+                Dim NewFDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewFDirectory")
+                Assert.True(IO.Directory.Exists(NewFDirectoryPath))
+                Assert.False(IO.Directory.Exists(OrigDirectoryWithPath))
+                ''' <exception cref="IO.IOException">If directory points to a root directory or if there's an existing directory or an existing file with the same name.</exception>
+                IO.Directory.CreateDirectory(OrigDirectoryWithPath)
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameDirectory(NewFDirectoryPath, "OriginalDirectory"))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
+                Next
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory)
+                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
+                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+                    ' Ensure copy transferred written data
+                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                Next
+                IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                CreateTestFile(TestBase, TestData:=SourceData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile0")
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteFalse()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
+                Next
+                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False)
+                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
+                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+                    ' Ensure copy transferred written data
+                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                Next
+                IO.Directory.Delete(FullPathToTargetDirectory, recursive:=True)
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile0")
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=False))
+                Assert.Equal(IO.Directory.GetFiles(FullPathToTargetDirectory).Count, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
+                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+                    If CurrentFile.EndsWith("0") Then
+                        ' Make sure file 0 is unchanged with DestDate
+                        Assert.True(FileHasExpectedDate(CurrentFile, DestData))
+                    Else
+                        ' Ensure file 1 - 5 transferred SourData
+                        Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                    End If
+                Next
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteTrue()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
+                Next
+                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite:=True)
+                Assert.Equal(IO.Directory.GetFiles(FullPathToSourceDirectory).Count, IO.Directory.GetFiles(FullPathToTargetDirectory).Count)
+                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+                    ' Ensure copy transferred written data
+                    Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                Next
+            End Using
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
+        <PlatformSpecific(TestPlatforms.Windows)>
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_SkipFile()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"Select_Skip_this_file{i}")
+                Next
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"Select_Skip_this_file0")
+                FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException)
+                Assert.Equal(IO.Directory.GetFiles(FullPathToTargetDirectory).Count, IO.Directory.GetFiles(FullPathToSourceDirectory).Count)
+                For Each CurrentFile As String In IO.Directory.GetFiles(FullPathToTargetDirectory)
+                    If CurrentFile.EndsWith("0") Then
+                        ' Make sure file 0 is unchanged with DestDate
+                        Assert.True(FileHasExpectedDate(CurrentFile, DestData))
+                    Else
+                        ' Ensure file 1 - 5 transferred SourData
+                        Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                    End If
+                Next
+            End Using
+        End Sub
+
+        <Fact>
+        <PlatformSpecific(TestPlatforms.AnyUnix)>
+        Public Sub CopyDirectory_SourceDirectoryName_DestinationDirectoryName_UIOptionUnix()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"NewFile{i}")
+                    CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:=$"NewFile{i}")
+                Next
+                Assert.Throws(Of PlatformNotSupportedException)(Sub() FileSystem.CopyDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, UIOption.AllDialogs))
+            End Using
+
+        End Sub
+        <Fact>
+        Public Sub CopyFile_FileSourceFileName_DestinationFileName()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileDest As String = TestBase.GetTestFilePath()
+
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest))
+
+                ' Ensure copy didn't overwrite existing data
+                Assert.True(FileHasExpectedDate(testFileDest, DestData))
+
+                ' Get a new destination nanme
+                testFileDest = TestBase.GetTestFilePath()
+                FileSystem.CopyFile(testFileSource, testFileDest)
+
+                ' Ensure copy transferred written data
+                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteFalse()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileDest As String = TestBase.GetTestFilePath()
+
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest, overwrite:=False))
+
+                ' Ensure copy didn't overwrite existing data
+                Assert.True(FileHasExpectedDate(testFileDest, DestData))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub CopyFile_FileSourceFileName_DestinationFileName_OverwriteTrue()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = TestBase.GetTestFilePath()
+                Dim testFileDest As String = TestBase.GetTestFilePath()
+
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                FileSystem.CopyFile(testFileSource, testFileDest, overwrite:=True)
+
+                ' Ensure copy transferred written data
+                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
+            End Using
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
+        <PlatformSpecific(TestPlatforms.Windows)>
+        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteFalse()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Skip_this_file")
+                Dim testFileDest As String = TestBase.GetTestFilePath()
+
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
+
+                ' Ensure copy transferred written data
+                Assert.True(FileHasExpectedDate(testFileDest, DestData))
+            End Using
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
+        <PlatformSpecific(TestPlatforms.Windows)>
+        Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Replace_the_file")
+                Dim testFileDest As String = TestBase.GetTestFilePath()
+
+                ' Write and copy file
+                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
+                    Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
+                        sourceStream.Write(SourceData, 0, SourceData.Length)
+                        destStream.Write(DestData, 0, DestData.Length)
+                    End Using
+                End Using
+                FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
+
+                ' Ensure copy transferred written data
+                Assert.True(FileHasExpectedDate(testFileDest, SourceData))
+            End Using
+        End Sub
+        <Fact>
+        Public Sub DeleteDirectory_Directory_DeleteAllContents()
+            Using TestBase As New FileIOTests
+                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
+                IO.Directory.CreateDirectory(FullPathToNewDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="NewDirectory", TestFileName:="TestFile")
+                Assert.True(IO.File.Exists(testFileSource))
+                FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.DeleteAllContents)
+                Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub DeleteDirectory_Directory_ThrowIfDirectoryNonEmpty()
+            Using TestBase As New FileIOTests
+                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
+                FileSystem.CreateDirectory(FullPathToNewDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="NewDirectory", TestFileName:="TestFile")
+
+                Assert.True(IO.File.Exists(testFileSource))
+                Assert.Throws(Of IO.IOException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, DeleteDirectoryOption.ThrowIfDirectoryNonEmpty))
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Assert.True(IO.File.Exists(testFileSource))
+            End Using
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
+        <PlatformSpecific(TestPlatforms.Windows)>
+        Public Sub DeleteDirectory_Directory_UIOption_Delete()
+            Using TestBase As New FileIOTests
+                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "Select_Yes")
+                FileSystem.CreateDirectory(FullPathToNewDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="Select_Yes", TestFileName:="DoNotCare")
+
+                Assert.True(IO.File.Exists(testFileSource))
+                FileSystem.DeleteDirectory(FullPathToNewDirectory, showUI:=UIOption.AllDialogs, recycle:=RecycleOption.DeletePermanently, onUserCancel:=UICancelOption.ThrowException)
+                Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
+                Assert.False(IO.File.Exists(testFileSource))
+            End Using
+        End Sub
+
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
+        <PlatformSpecific(TestPlatforms.Windows)>
+        Public Sub DeleteDirectory_Directory_UIOption_DoNotDelete()
+            Using TestBase As New FileIOTests
+                Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "Select_No")
+                FileSystem.CreateDirectory(FullPathToNewDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData, PathFromBase:="Select_No", TestFileName:="DoNotCare")
+
+                Assert.True(IO.File.Exists(testFileSource))
+                Assert.Throws(Of System.OperationCanceledException)(Sub() FileSystem.DeleteDirectory(FullPathToNewDirectory, showUI:=UIOption.AllDialogs, recycle:=RecycleOption.DeletePermanently, onUserCancel:=UICancelOption.ThrowException))
+                Assert.True(IO.Directory.Exists(FullPathToNewDirectory))
+                Assert.True(IO.File.Exists(testFileSource))
+            End Using
+        End Sub
+
+        <Fact>
+        Public Sub DeleteFile_File()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData)
+
+                Assert.True(IO.File.Exists(testFileSource))
+                FileSystem.DeleteFile(testFileSource)
+                Assert.False(IO.File.Exists(testFileSource))
+            End Using
+        End Sub
+        <Fact>
+        Public Sub FileExists_File()
+            Using TestBase As New FileIOTests
+                Dim testFileSource As String = CreateTestFile(TestBase, SourceData)
+                Assert.True(FileSystem.FileExists(testFileSource))
+                FileSystem.FileExists(testFileSource)
+                IO.File.Delete(testFileSource)
+                Assert.False(FileSystem.FileExists(testFileSource))
+            End Using
+        End Sub
         <Fact>
         Public Sub GetFileInfo_File()
             Using TestBase As New FileIOTests
@@ -683,41 +709,44 @@ Namespace Microsoft.VisualBasic.Tests.VB
             End Using
         End Sub
 
-        <Fact>
-        Public Shared Sub GetName_Path()
-            Using TestBase As New FileIOTests
-                Assert.Equal(FileSystem.GetName(TestBase.TestDirectory), IO.Path.GetFileName(TestBase.TestDirectory))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Shared Sub GetParentPath_Path()
-            Using TestBase As New FileIOTests
-                Dim TestDirectory As String = TestBase.TestDirectory
-                Assert.Equal(FileSystem.GetParentPath(TestDirectory), IO.Path.GetDirectoryName(TestDirectory.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)))
-            End Using
-        End Sub
-
-        <Fact>
-        Public Shared Sub GetTempFileName()
-            Dim TempFile As String = FileSystem.GetTempFileName
-            Assert.True(IO.File.Exists(TempFile))
-            Assert.True((New IO.FileInfo(TempFile)).Length = 0)
-            IO.File.Delete(TempFile)
-        End Sub
-
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption()
+        Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption_UICancelOptionThrow()
             ' TODO
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOption_UICancelOption()
-            ' TODO
-        End Sub
+        Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOptionOverwriteFalse()
+            Using TestBase As New FileIOTests
+                Dim FullPathToSourceDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "SourceDirectory")
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "TargetDirectory")
+                IO.Directory.CreateDirectory(FullPathToSourceDirectory)
+                For i As Integer = 0 To 5
+                    CreateTestFile(TestBase, SourceData, PathFromBase:="SourceDirectory", TestFileName:=$"Select_Skip_this_file{i}")
+                Next
+                IO.Directory.CreateDirectory(FullPathToTargetDirectory)
+                Dim NewFile0WithPath As String = CreateTestFile(TestBase, DestData, PathFromBase:="TargetDirectory", TestFileName:="Select_Skip_this_file0")
+                FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException)
+                Dim RemainingSourceFilesWithPath As String() = IO.Directory.GetFiles(FullPathToSourceDirectory)
+                ' We couldn't move one file
+                Assert.Equal(1, RemainingSourceFilesWithPath.Count)
+                ' Ensure the file left has correct data
+                Assert.True(FileHasExpectedDate(RemainingSourceFilesWithPath(0), SourceData))
 
+                Dim DestinationFilesWithPath As String() = IO.Directory.GetFiles(FullPathToTargetDirectory)
+                Assert.Equal(6, DestinationFilesWithPath.Count)
+                For Each CurrentFile As String In DestinationFilesWithPath
+                    If CurrentFile.EndsWith("0") Then
+                        ' Make sure file 0 is unchanged with DestDate
+                        Assert.True(FileHasExpectedDate(CurrentFile, DestData))
+                    Else
+                        ' Ensure file 1 - 5 transferred SourData
+                        Assert.True(FileHasExpectedDate(CurrentFile, SourceData))
+                    End If
+                Next
+            End Using
+        End Sub
         <Fact>
         Public Sub MoveDirectory_SourceDirectoryName_DestinationDirectoryName()
             Using TestBase As New FileIOTests
@@ -857,35 +886,20 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub MoveFile_SourceFileName_DestinationFileName_UIOption()
-            ' TODO
-        End Sub
-
-        <ConditionalFact(NameOf(ManualTestsEnabled))>
-        <PlatformSpecific(TestPlatforms.Windows)>
-        Public Sub MoveFile_SourceFileNameDestinationFileName_UIOption_UICancelOption()
-            ' TODO
-        End Sub
-
-        <Fact>
-        Public Shared Sub RenameDirectory_Directory_NewName()
+        Public Sub MoveFile_SourceFileName_DestinationFileName_UIOptionOverWriteFalse()
             Using TestBase As New FileIOTests
-                ''' <exception cref="IO.FileNotFoundException">If directory does not point to an existing directory.</exception>
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Sub() FileSystem.RenameDirectory(IO.Path.Combine(TestBase.TestDirectory, "DoesNotExistDirectory"), "NewDirectory"))
-                Dim OrigDirectoryWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "OriginalDirectory")
-                IO.Directory.CreateDirectory(OrigDirectoryWithPath)
-                ''' <exception cref="System.ArgumentException">If newName is Nothing or Empty String.</exception>
-                Assert.Throws(Of ArgumentNullException)(Sub() FileSystem.RenameDirectory(OrigDirectoryWithPath, ""))
-                Dim DirectoryNameWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "DoesNotExist")
-                ''' <exception cref="System.ArgumentException">If contains path information.</exception>
-                Assert.Throws(Of ArgumentException)(Sub() FileSystem.RenameDirectory(OrigDirectoryWithPath, DirectoryNameWithPath))
-                FileSystem.RenameDirectory(OrigDirectoryWithPath, "NewFDirectory")
-                Dim NewFDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewFDirectory")
-                Assert.True(IO.Directory.Exists(NewFDirectoryPath))
-                Assert.False(IO.Directory.Exists(OrigDirectoryWithPath))
-                ''' <exception cref="IO.IOException">If directory points to a root directory or if there's an existing directory or an existing file with the same name.</exception>
-                IO.Directory.CreateDirectory(OrigDirectoryWithPath)
-                Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameDirectory(NewFDirectoryPath, "OriginalDirectory"))
+                Dim SourceFileNameWithPath As String = CreateTestFile(TestBase, SourceData)
+                Dim DestinationFileNameWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "Select_Skip_this_file")
+                FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
+                Assert.False(IO.File.Exists(SourceFileNameWithPath))
+                Assert.True(IO.File.Exists(DestinationFileNameWithPath))
+                Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, SourceData))
+                SourceFileNameWithPath = DestinationFileNameWithPath
+                DestinationFileNameWithPath = CreateTestFile(TestBase, DestData)
+                FileSystem.MoveFile(SourceFileNameWithPath, DestinationFileNameWithPath, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.ThrowException)
+                ' Make sure we did not override existing file
+                Assert.True(FileHasExpectedDate(DestinationFileNameWithPath, DestData))
+                Assert.True(IO.File.Exists(SourceFileNameWithPath))
             End Using
         End Sub
 
