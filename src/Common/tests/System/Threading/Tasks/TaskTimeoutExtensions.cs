@@ -12,7 +12,7 @@ namespace System.Threading.Tasks
 {
     public static class TaskTimeoutExtensions
     {
-        public static async Task WithCancellation( this Task task, CancellationToken cancellationToken)
+        public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
             using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
