@@ -197,7 +197,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                             If length = 0 Then
                                 length = -1
                             End If
-                            ' BUG? Missing alignment?
                             size = length
                         End If
 

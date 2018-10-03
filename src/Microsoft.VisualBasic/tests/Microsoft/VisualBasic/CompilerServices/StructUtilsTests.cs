@@ -33,7 +33,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             { new Struct_FixedArrayT10x20<int>(), 800 },
             { new Struct_FixedString10(), 10 },
             { new Struct_PrivateInt(), 0 },
-            { new Struct_MultipleWithAlignment(), 22 }, // Bug?
+            { new Struct_MultipleWithAlignment(), 22 },
         };
 
         public struct Struct_Empty { }
