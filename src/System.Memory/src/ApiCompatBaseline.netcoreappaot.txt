@@ -5,6 +5,17 @@ MembersMustExist : Member 'System.MemoryExtensions.AsSpan(System.Utf8String, Sys
 MembersMustExist : Member 'System.MemoryExtensions.AsMemory(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.MemoryExtensions.AsMemory(System.StringSegment, System.Int32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.MemoryExtensions.AsMemory(System.StringSegment, System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
- MembersMustExist : Member 'System.MemoryExtensions.AsSpan(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsSpan(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.MemoryExtensions.AsSpan(System.StringSegment, System.Int32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.MemoryExtensions.AsSpan(System.StringSegment, System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsBytes(System.ReadOnlySpan<System.Text.Utf8Char>)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsBytes(System.Span<System.Text.Utf8Char>)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsBytes(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsBytes(System.Utf8String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsBytes(System.Utf8String, System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsMemory(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsMemory(System.Utf8String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsMemory(System.Utf8String, System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsMemoryBytes(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsMemoryBytes(System.Utf8String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.MemoryExtensions.AsMemoryBytes(System.Utf8String, System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
