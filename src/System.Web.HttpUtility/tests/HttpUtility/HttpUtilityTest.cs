@@ -757,8 +757,10 @@ namespace System.Web.Tests
         [Theory]
         [InlineData("")]
         [InlineData("name=foo&desc=foo")]
-        [InlineData("type=foo&type=foo")]
-        public void ParseAndToStringRoundtrip(string input)
+        [InlineData("type=foo&type=bar")]
+        [InlineData("name=&desc=foo")]
+        [InlineData("name=&name=foo")]
+        public void ParseAndToStringMaintainAllKeyValuePairs(string input)
         {
             var values = HttpUtility.ParseQueryString(input);
             var output = values.ToString();
