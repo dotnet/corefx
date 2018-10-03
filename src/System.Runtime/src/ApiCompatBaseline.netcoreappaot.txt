@@ -16,3 +16,5 @@ TypesMustExist : Type 'System.Text.UnicodeScalar' does not exist in the implemen
 TypesMustExist : Type 'System.Buffers.OperationStatus' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Text.Unicode' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Text.Utf8' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Text.Utf8Char' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Text.Utf8Extensions' does not exist in the implementation but it does exist in the contract.
