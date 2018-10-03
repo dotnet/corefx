@@ -23,6 +23,8 @@ Get the tag name from https://hub.docker.com/r/microsoft/dotnet-buildtools-prere
 - `docker exec -it _id /bin/sh`
 
 ## Notes on commands used in Linux 14.04
+This section describes the process to install unixODBC libraries and SQLite/MSSQL driver for Ubuntu 14.04.
+
 - `sudo su` 
 - `curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -`
 - `curl https://packages.microsoft.com/config/ubuntu/14.04/prod.list > /etc/apt/sources.list.d/mssql-release.list`
@@ -58,7 +60,7 @@ Driver=/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.2.so.0.1
 UsageCount=1
 ```
 
-To use Microsoft driver, here is sample `odbc.ini`
+To use the Microsoft driver, here is sample `odbc.ini`
 ```
 [SQLTest]
 Driver=ODBC Driver 17 for SQL Server
