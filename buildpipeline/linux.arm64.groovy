@@ -37,7 +37,7 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a
         if (params.TestOuter) {
             additionalArgs = '-Outerloop'
         }
-        sh "./build-tests.sh -buildArch=x64 -${params.CGroup} -SkipTests ${additionalArgs} -- /p:ArchiveTests=true /p:EnableDumpling=true"
+        sh "./build-tests.sh -buildArch=arm64 -${params.CGroup} -SkipTests ${additionalArgs} -- /p:ArchiveTests=true /p:EnableDumpling=true"
     }
 
     // TODO: Add submission for Helix testing once we have queue for arm64 Linux working
