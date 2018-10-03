@@ -1211,6 +1211,12 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_AllowAutoRedirectTrue_RetainsOriginalFragmentIfAppropriate(
             string origFragment, string redirFragment, string expectedFragment, bool useRelativeRedirect)
         {
+            if(IsCurlHandler)
+            {
+                // libcurl doesn't append fragment component to CURLINFO_EFFECTIVE_URL after redirect
+                return;
+            }
+
             if (IsWinHttpHandler)
             {
                 // According to https://tools.ietf.org/html/rfc7231#section-7.1.2,
