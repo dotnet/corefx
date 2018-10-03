@@ -27,10 +27,10 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             { new Struct_T<string>(), 4 },
             { new Struct_ArrayT<byte>(elementCount: 10), 4 },
             { new Struct_ArrayT<int>(elementCount: 10), 4 },
-            { new Struct_FixedArrayT10<byte>(), 11 },
-            { new Struct_FixedArrayT10<int>(), 44 },
-            { new Struct_FixedArrayT11To20<byte>(), 252 }, // Bug?
-            { new Struct_FixedArrayT11To20<int>(), 1008 }, // Bug?
+            { new Struct_FixedArrayT10<byte>(), 10 },
+            { new Struct_FixedArrayT10<int>(), 40 },
+            { new Struct_FixedArrayT10x20<byte>(), 200 },
+            { new Struct_FixedArrayT10x20<int>(), 800 },
             { new Struct_FixedString10(), 10 },
             { new Struct_PrivateInt(), 0 },
             { new Struct_MultipleWithAlignment(), 22 }, // Bug?
@@ -39,8 +39,8 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         public struct Struct_Empty { }
         public struct Struct_T<T> { public T x; }
         public struct Struct_ArrayT<T> { public Struct_ArrayT(int elementCount) { x = new T[elementCount]; } public T[] x; }
-        public struct Struct_FixedArrayT10<T> { [VBFixedArray(10)] public T[] x; }
-        public struct Struct_FixedArrayT11To20<T> { [VBFixedArray(11, 20)] public T[] x; }
+        public struct Struct_FixedArrayT10<T> { [VBFixedArray(9)] public T[] x; }
+        public struct Struct_FixedArrayT10x20<T> { [VBFixedArray(9, 19)] public T[] x; }
         public struct Struct_FixedString10 { [VBFixedString(10)] public string x; }
 #pragma warning disable 0169
         public struct Struct_PrivateInt { private int x; }
