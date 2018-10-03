@@ -497,24 +497,28 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
         public unsafe void ReuseAddressUdp()
         {
-            // Verify that .NET Core Sockets can reuse UDP ports from applications
-            // that use SO_REUSEADDR to allow re-use.
+            // Verify that .NET Core Sockets can bind to the UDP address from applications
+            // that allow binding the same address.
             int SOL_SOCKET = -1;
-            int SO_REUSEADDR = -1;
+            int option = -1;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                // Linux: use SO_REUSEADDR to allow binding the same address.
                 SOL_SOCKET = 1;
-                SO_REUSEADDR = 2;
+                const int SO_REUSEADDR = 2;
+                option = SO_REUSEADDR;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                // BSD: use SO_REUSEPORT to allow binding the same address.
                 SOL_SOCKET = 0xffff;
-                SO_REUSEADDR = 0x0004;
+                const int SO_REUSEPORT = 0x200;
+                option = SO_REUSEPORT;
             }
             using (Socket s1 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 int value = 1;
-                int rv = setsockopt(s1.Handle.ToInt32(), SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int));
+                int rv = setsockopt(s1.Handle.ToInt32(), SOL_SOCKET, option, &value, sizeof(int));
                 Assert.Equal(0, rv);
                 s1.Bind(new IPEndPoint(IPAddress.Any, 0));
                 using (Socket s2 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
