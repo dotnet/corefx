@@ -14,11 +14,13 @@
     <Compile Include="ManifestResourceInfoTests.cs" />
     <Compile Include="MemberInfoTests.cs" />
     <Compile Include="MethodInfoTests.cs" />
+    <Compile Include="MockDerivedType.cs" />
     <Compile Include="ModuleTests.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ParameterInfoTests.cs" />
     <Compile Include="PropertyInfoTests.cs" />
     <Compile Include="ReflectionContextTests.cs" />
+    <Compile Include="TypeDerivedTests.cs" />
     <Compile Include="TypeInfoTests.cs" />
     <Compile Include="ExceptionTests.cs" />
   </ItemGroup>
