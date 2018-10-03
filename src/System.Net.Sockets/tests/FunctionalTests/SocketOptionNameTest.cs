@@ -490,9 +490,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [DllImport("libc", SetLastError = true)]
-        private unsafe static extern int setsockopt(int socket, int level, int option_name, void* option_value, uint option_len);
-
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
         public unsafe void ReuseAddressUdp()
