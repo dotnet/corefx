@@ -36,7 +36,7 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a
     stage ('Build Managed') {
         // Cross build builds Linux Managed components using x64 target
         // We do not want x64 packages
-        sh "./build-managed.sh -BuildPackages=false -buildArch=x64 -${params.CGroup}"
+        sh "./build-managed.sh -BuildPackages=false -buildArch=arm64 -${params.CGroup}"
     }
     stage ('Build Packages') {
         sh "./build-packages.sh -buildArch=arm64 -${params.CGroup}"
