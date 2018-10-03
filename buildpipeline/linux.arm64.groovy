@@ -24,25 +24,20 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a
         sh "./build-managed.sh -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true"
     }
     stage ('Sync') {
-        sh "./sync.sh -p -BuildTests=false -- /p:ArchGroup=arm64"
+        sh "./sync.sh -p -- /p:ArchGroup=arm64"
     }
-    // For arm64 cross builds we split the 'Build Product' build.sh command into 3 separate parts
-    stage ('Build Native') {
+    stage ('Build Product') {
         sh """
             export ROOTFS_DIR=/crossrootfs/arm64
-            ./build-native.sh -buildArch=arm64 -${params.CGroup}
+            ./build.sh -buildArch=arm64 -${params.CGroup}
         """
     }
-    stage ('Build Managed') {
-        // Cross build builds Linux Managed components using x64 target
-        // We do not want x64 packages
-        sh "./build-managed.sh -BuildPackages=false -buildArch=arm64 -${params.CGroup}"
-    }
-    stage ('Build Packages') {
-        sh "./build-packages.sh -buildArch=arm64 -${params.CGroup}"
-    }
     stage ('Build Tests') {
-        sh "./build-tests.sh -buildArch=arm64 -${params.CGroup}"
+        def additionalArgs = ''
+        if (params.TestOuter) {
+            additionalArgs = '-Outerloop'
+        }
+        sh "./build-tests.sh -buildArch=x64 -${params.CGroup} -SkipTests ${additionalArgs} -- /p:ArchiveTests=true /p:EnableDumpling=true"
     }
 
     // TODO: Add submission for Helix testing once we have queue for arm64 Linux working
