@@ -304,7 +304,7 @@ namespace Internal.Cryptography.Pal
 
                     int spanLength = (cbData + 1) / 2;
                     Span<char> buffer = spanLength <= 256 ? stackalloc char[spanLength] : new char[spanLength];
-                    fixed (char* ptr = &MemoryMarshal.GetReference(buffer))
+                    fixed (char* ptr = buffer)
                     {
                         if (!Interop.crypt32.CertGetCertificateContextPropertyString(_certContext, CertContextPropId.CERT_FRIENDLY_NAME_PROP_ID, (byte*)ptr, ref cbData))
                             return string.Empty;

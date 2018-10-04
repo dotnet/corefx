@@ -73,7 +73,7 @@ namespace System.Security.Cryptography
 
         internal static unsafe ECParameters FromECPrivateKey(ReadOnlySpan<byte> key, out int bytesRead)
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(key))
+            fixed (byte* ptr = key)
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, key.Length))
                 {

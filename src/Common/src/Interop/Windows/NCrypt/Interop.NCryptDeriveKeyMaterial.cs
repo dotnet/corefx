@@ -124,7 +124,7 @@ internal static partial class Interop
             ReadOnlySpan<NCryptBuffer> parameters,
             SecretAgreementFlags flags)
         {
-            fixed (NCryptBuffer* pParameters = &MemoryMarshal.GetReference(parameters))
+            fixed (NCryptBuffer* pParameters = parameters)
             {
                 NCryptBufferDesc parameterDesc = new NCryptBufferDesc();
                 parameterDesc.ulVersion = 0;

@@ -2011,8 +2011,8 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            fixed (byte* bytePtr = &MemoryMarshal.GetReference(source))
-            fixed (char* charPtr = &MemoryMarshal.GetReference(destination))
+            fixed (byte* bytePtr = source)
+            fixed (char* charPtr = destination)
             {
                 try
                 {
@@ -2062,7 +2062,7 @@ namespace System.Security.Cryptography.Asn1
                 {
                     unsafe
                     {
-                        fixed (byte* bytePtr = &MemoryMarshal.GetReference(contents))
+                        fixed (byte* bytePtr = contents)
                         {
                             try
                             {

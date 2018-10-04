@@ -34,7 +34,7 @@ namespace System.SpanTests
             string testString = "abcdefg";
             ReadOnlySpan<char> readOnlySpan = testString.AsSpan();
 
-            fixed (void* ptr = &MemoryMarshal.GetReference(readOnlySpan))
+            fixed (void* ptr = readOnlySpan)
             {
                 var temp = new Span<char>(ptr, readOnlySpan.Length);
                 Assert.Equal(testString, temp.ToString());

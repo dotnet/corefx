@@ -390,7 +390,7 @@ namespace System.Drawing
                     guids = new Span<Guid>(new Guid[dimensions]);
                 }
 
-                fixed (Guid* g = &MemoryMarshal.GetReference(guids))
+                fixed (Guid* g = guids)
                 {
                     Gdip.CheckStatus(Gdip.GdipImageGetFrameDimensionsList(new HandleRef(image, image.nativeImage), g, dimensions));
                 }

@@ -72,7 +72,7 @@ namespace System.IO.Compression
             if (destination.Length == 0)
                 return 0;
 
-            fixed (byte* bufPtr = &MemoryMarshal.GetReference(destination))
+            fixed (byte* bufPtr = destination)
             {
                 return InflateVerified(bufPtr, destination.Length);
             }

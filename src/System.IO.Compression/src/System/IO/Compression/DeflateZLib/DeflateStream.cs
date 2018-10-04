@@ -534,7 +534,7 @@ namespace System.IO.Compression
             unsafe
             {
                 // Pass new bytes through deflater and write them too:
-                fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
+                fixed (byte* bufferPtr = buffer)
                 {
                     _deflater.SetInput(bufferPtr, buffer.Length);
                     WriteDeflaterOutput();

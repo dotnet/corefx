@@ -2425,7 +2425,7 @@ namespace System
 
             unsafe
             {
-                fixed (byte* bytesPtr = &MemoryMarshal.GetReference(bytes))
+                fixed (byte* bytesPtr = bytes)
                 fixed (char* charsPtr = result)
                 {
                     int charsWritten = ConvertToBase64Array(charsPtr, bytesPtr, 0, bytes.Length, insertLineBreaks);
@@ -2518,8 +2518,8 @@ namespace System
                 return false;
             }
 
-            fixed (char* outChars = &MemoryMarshal.GetReference(chars))
-            fixed (byte* inData = &MemoryMarshal.GetReference(bytes))
+            fixed (char* outChars = chars)
+            fixed (byte* inData = bytes)
             {
                 charsWritten = ConvertToBase64Array(outChars, inData, 0, bytes.Length, insertLineBreaks);
                 return true;

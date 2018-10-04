@@ -17,7 +17,7 @@ namespace System.Net.WebSockets
     {
         internal static unsafe string GetString(this UTF8Encoding encoding, Span<byte> bytes)
         {
-            fixed (byte* b = &MemoryMarshal.GetReference(bytes))
+            fixed (byte* b = bytes)
             {
                 return encoding.GetString(b, bytes.Length);
             }

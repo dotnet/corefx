@@ -102,7 +102,7 @@ internal static partial class Interop
             }
 
             Span<char> buffer = cchCount <= 256 ? stackalloc char[cchCount] : new char[cchCount];
-            fixed (char* ptr = &MemoryMarshal.GetReference(buffer))
+            fixed (char* ptr = buffer)
             {
                 if (CertGetNameString(certContext, certNameType, certNameFlags, strType, ptr, cchCount) == 0)
                 {

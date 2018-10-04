@@ -130,7 +130,7 @@ namespace System.IO.Pipes
             }
 
             // For anonymous pipes, read from the file descriptor.
-            fixed (byte* bufPtr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* bufPtr = buffer)
             {
                 int result = CheckPipeCall(Interop.Sys.Read(_handle, bufPtr, buffer.Length));
                 Debug.Assert(result <= buffer.Length);
@@ -165,7 +165,7 @@ namespace System.IO.Pipes
             }
 
             // For anonymous pipes, write the file descriptor.
-            fixed (byte* bufPtr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* bufPtr = buffer)
             {
                 while (buffer.Length > 0)
                 {

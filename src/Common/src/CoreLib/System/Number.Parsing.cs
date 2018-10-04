@@ -1699,7 +1699,7 @@ namespace System
         private static unsafe void StringToNumber(ReadOnlySpan<char> value, NumberStyles styles, ref NumberBuffer number, NumberFormatInfo info, bool parseDecimal)
         {
             Debug.Assert(info != null);
-            fixed (char* stringPointer = &MemoryMarshal.GetReference(value))
+            fixed (char* stringPointer = value)
             {
                 char* p = stringPointer;
                 if (!ParseNumber(ref p, p + value.Length, styles, ref number, info, parseDecimal)
@@ -1713,7 +1713,7 @@ namespace System
         internal static unsafe bool TryStringToNumber(ReadOnlySpan<char> value, NumberStyles styles, ref NumberBuffer number, NumberFormatInfo info, bool parseDecimal)
         {
             Debug.Assert(info != null);
-            fixed (char* stringPointer = &MemoryMarshal.GetReference(value))
+            fixed (char* stringPointer = value)
             {
                 char* p = stringPointer;
                 if (!ParseNumber(ref p, p + value.Length, styles, ref number, info, parseDecimal)

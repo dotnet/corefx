@@ -37,7 +37,7 @@ internal partial class Interop
             void* eaBuffer = null,
             uint eaLength = 0)
         {
-            fixed (char* c = &MemoryMarshal.GetReference(path))
+            fixed (char* c = path)
             {
                 UNICODE_STRING name = new UNICODE_STRING
                 {

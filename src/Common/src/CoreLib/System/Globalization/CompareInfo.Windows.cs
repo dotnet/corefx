@@ -67,8 +67,8 @@ namespace System.Globalization
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!value.IsEmpty);
 
-            fixed (char* pSource = &MemoryMarshal.GetReference(source))
-            fixed (char* pValue = &MemoryMarshal.GetReference(value))
+            fixed (char* pSource = source)
+            fixed (char* pValue = value)
             {
                 int ret = Interop.Kernel32.FindStringOrdinal(
                             dwFindStringOrdinalFlags,
@@ -143,7 +143,7 @@ namespace System.Globalization
                     stackalloc byte[512] :
                     (borrowedArr = ArrayPool<byte>.Shared.Rent(sortKeyLength));
 
-                fixed (byte* pSortKey = &MemoryMarshal.GetReference(span))
+                fixed (byte* pSortKey = span)
                 {
                     if (Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                       flags,
@@ -191,7 +191,7 @@ namespace System.Globalization
             string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
-            fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
+            fixed (char* pString1 = string1)
             fixed (char* pString2 = &string2.GetRawStringData())
             {
                 Debug.Assert(pString1 != null);
@@ -224,8 +224,8 @@ namespace System.Globalization
             string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
-            fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
-            fixed (char* pString2 = &MemoryMarshal.GetReference(string2))
+            fixed (char* pString1 = string1)
+            fixed (char* pString2 = string2)
             {
                 Debug.Assert(pString1 != null);
                 Debug.Assert(pString2 != null);
@@ -263,8 +263,8 @@ namespace System.Globalization
             string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
-            fixed (char* pSource = &MemoryMarshal.GetReference(lpStringSource))
-            fixed (char* pValue = &MemoryMarshal.GetReference(lpStringValue))
+            fixed (char* pSource = lpStringSource)
+            fixed (char* pValue = lpStringValue)
             {
                 return Interop.Kernel32.FindNLSStringEx(
                                     pLocaleName,

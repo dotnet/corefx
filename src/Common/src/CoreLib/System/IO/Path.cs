@@ -553,7 +553,7 @@ namespace System.IO
             bool hasSeparator = PathInternal.IsDirectorySeparator(first[first.Length - 1])
                 || PathInternal.IsDirectorySeparator(second[0]);
 
-            fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second))
+            fixed (char* f = first, s = second)
             {
 #if MS_IO_REDIST
                 return StringExtensions.Create(
@@ -581,7 +581,7 @@ namespace System.IO
             bool thirdHasSeparator = PathInternal.IsDirectorySeparator(second[second.Length - 1])
                 || PathInternal.IsDirectorySeparator(third[0]);
 
-            fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third))
+            fixed (char* f = first, s = second, t = third)
             {
 #if MS_IO_REDIST
                 return StringExtensions.Create(
@@ -615,7 +615,7 @@ namespace System.IO
             bool fourthHasSeparator = PathInternal.IsDirectorySeparator(third[third.Length - 1])
                 || PathInternal.IsDirectorySeparator(fourth[0]);
 
-            fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third), u = &MemoryMarshal.GetReference(fourth))
+            fixed (char* f = first, s = second, t = third, u = fourth)
             {
 
 #if MS_IO_REDIST

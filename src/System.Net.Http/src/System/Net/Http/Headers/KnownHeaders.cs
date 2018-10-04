@@ -373,7 +373,7 @@ namespace System.Net.Http.Headers
 
         internal unsafe static KnownHeader TryGetKnownHeader(ReadOnlySpan<byte> name)
         {
-            fixed (byte* p = &MemoryMarshal.GetReference(name))
+            fixed (byte* p = name)
             {
                 KnownHeader candidate = GetCandidate(new BytePtrAccessor(p, name.Length));
                 if (candidate != null && ByteArrayHelpers.EqualsOrdinalAsciiIgnoreCase(candidate.Name, name))

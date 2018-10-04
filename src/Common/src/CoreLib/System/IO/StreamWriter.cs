@@ -399,7 +399,7 @@ namespace System.IO
                     throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
                 }
 
-                fixed (char* bufferPtr = &MemoryMarshal.GetReference(buffer))
+                fixed (char* bufferPtr = buffer)
                 fixed (char* dstPtr = &charBuffer[0])
                 {
                     char* srcPtr = bufferPtr;

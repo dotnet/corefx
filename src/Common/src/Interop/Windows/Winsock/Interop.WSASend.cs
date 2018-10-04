@@ -48,7 +48,7 @@ internal static partial class Interop
             IntPtr completionRoutine)
         {
             Debug.Assert(!buffers.IsEmpty);
-            fixed (WSABuffer* buffersPtr = &MemoryMarshal.GetReference(buffers))
+            fixed (WSABuffer* buffersPtr = buffers)
             {
                 return WSASend(socketHandle, buffersPtr, bufferCount, out bytesTransferred, socketFlags, overlapped, completionRoutine);
             }

@@ -1202,7 +1202,7 @@ namespace System.Text
             {
                 unsafe
                 {
-                    fixed (char* valueChars = &MemoryMarshal.GetReference(value))
+                    fixed (char* valueChars = value)
                     {
                         Append(valueChars, value.Length);
                     }
@@ -1444,7 +1444,7 @@ namespace System.Text
             {
                 unsafe
                 {
-                    fixed (char* sourcePtr = &MemoryMarshal.GetReference(value))
+                    fixed (char* sourcePtr = value)
                         Insert(index, sourcePtr, value.Length);
                 }
             }
@@ -2247,7 +2247,7 @@ namespace System.Text
                 }
 
                 fixed (char* sourcePtr = &source[sourceIndex])
-                    fixed (char* destinationPtr = &MemoryMarshal.GetReference(destination))
+                    fixed (char* destinationPtr = destination)
                         string.wstrcpy(destinationPtr + destinationIndex, sourcePtr, count);
             }
         }

@@ -32,8 +32,8 @@ namespace System.Globalization
             Debug.Assert(source.Length != 0);
             Debug.Assert(value.Length != 0);
 
-            fixed (char* pSource = &MemoryMarshal.GetReference(source))
-            fixed (char* pValue = &MemoryMarshal.GetReference(value))
+            fixed (char* pSource = source)
+            fixed (char* pValue = value)
             {
                 return InvariantFindString(pSource, source.Length, pValue, value.Length, ignoreCase, fromBeginning);
             }

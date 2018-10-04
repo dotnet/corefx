@@ -462,7 +462,7 @@ namespace System.IO
             VerifyOSHandlePosition();
 
             int bytesRead;
-            fixed (byte* bufPtr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* bufPtr = buffer)
             {
                 bytesRead = CheckFileCall(Interop.Sys.Read(_fileHandle, bufPtr, buffer.Length));
                 Debug.Assert(bytesRead <= buffer.Length);
@@ -615,7 +615,7 @@ namespace System.IO
         {
             VerifyOSHandlePosition();
 
-            fixed (byte* bufPtr = &MemoryMarshal.GetReference(source))
+            fixed (byte* bufPtr = source)
             {
                 int offset = 0;
                 int count = source.Length;
