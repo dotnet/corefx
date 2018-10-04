@@ -69,8 +69,6 @@ Namespace Microsoft.VisualBasic.FileIO
 
         End Sub
 
-        '''**************************************************************************
-        ''' ShellDelete
         ''' <summary>
         ''' Sets relevant flags on the SHFILEOPSTRUCT and calls into SHFileOperation to delete file / directory.
         ''' </summary>
@@ -96,8 +94,6 @@ Namespace Microsoft.VisualBasic.FileIO
             ShellFileOperation(SHFileOperationType.FO_DELETE, OperationFlags, FullPath, Nothing, OnUserCancel, FileOrDirectory)
         End Sub
 
-        '''**************************************************************************
-        ''' ShellFileOperation
         ''' <summary>
         ''' Calls NativeMethods.SHFileOperation with the given SHFILEOPSTRUCT, notifies the shell of change,
         ''' and throw exceptions if needed.
@@ -107,15 +103,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="FullSource">The full path to the source.</param>
         ''' <param name="FullTarget">The full path to the target. Nothing if this is a Delete operation.</param>
         ''' <param name="OnUserCancel">Value from UICancelOption, specifying to throw or not when user cancels the operation.</param>
-        ''' <remarks>
-        ''' !!!!! SECURITY WARNING !!!!
-        ''' Demand appropriate FileIOPermission on FullSource and FullTarget before calling into this method.
-        ''' </remarks>
         Private Shared Sub ShellFileOperation(ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
             ByVal FullSource As String, ByVal FullTarget As String, ByVal OnUserCancel As UICancelOption, ByVal FileOrDirectory As FileOrDirectory)
-
-            ' Apply HostProtectionAttribute(UI = true) to indicate this function belongs to UI type.
-            ' http://devdiv/SpecTool/Documents/Whidbey/CLR/CurrentSpecs/SQLHost/hPA%20Guidance.doc
 
             Debug.Assert(System.Enum.IsDefined(GetType(SHFileOperationType), OperationType))
             Debug.Assert(OperationType <> SHFileOperationType.FO_RENAME, "Don't call Shell to rename!!!")
@@ -183,9 +172,10 @@ Namespace Microsoft.VisualBasic.FileIO
                     'Case NativeTypes.ERROR_SHARING_VIOLATION
                     'Case NativeTypes.ERROR_FILE_EXISTS
                     Throw New IO.IOException((New Win32Exception(errorCode)).Message,
-                        System.Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
+                        Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
             End Select
         End Sub
+
         Private NotInheritable Class NativeTypes
             ' Error code from public\sdk\inc\winerror.h
             Friend Const ERROR_FILE_NOT_FOUND As Integer = 2
