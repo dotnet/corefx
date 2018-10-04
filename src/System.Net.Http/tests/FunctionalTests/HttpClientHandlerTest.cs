@@ -1201,9 +1201,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't handle fragments according to https://tools.ietf.org/html/rfc7231#section-7.1.2")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Doesn't handle fragments according to https://tools.ietf.org/html/rfc7231#section-7.1.2")]
+        [Theory]
         [InlineData("#origFragment", "", "#origFragment", false)]
         [InlineData("#origFragment", "", "#origFragment", true)]
         [InlineData("", "#redirFragment", "#redirFragment", false)]
