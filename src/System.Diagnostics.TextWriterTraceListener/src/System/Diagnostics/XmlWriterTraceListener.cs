@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Text;
-using System.Threading;
 using System.Xml;
 using System.Xml.XPath;
 
@@ -64,19 +63,18 @@ namespace System.Diagnostics
         public override void Fail(string message, string detailMessage)
         {
             int length = detailMessage != null ? message.Length + 1 + detailMessage.Length : message.Length;
-            TraceEvent(null, SR.TraceAsTraceSource, TraceEventType.Error, 0, string.Create(length, detailMessage,
+            TraceEvent(null, SR.TraceAsTraceSource, TraceEventType.Error, 0, string.Create(length, (message, detailMessage),
             (dst, v) =>
             {
-                ReadOnlySpan<char> prefix = message;
+                ReadOnlySpan<char> prefix = v.message;
                 prefix.CopyTo(dst);
 
-                if (v != null)
+                if (v.detailMessage != null)
                 {
-                    ReadOnlySpan<char> space = " ";
-                    space.CopyTo(dst.Slice(prefix.Length, 1));
+                    dst[prefix.Length] = ' ';
 
-                    ReadOnlySpan<char> detail = v;
-                    detail.CopyTo(dst.Slice(prefix.Length + space.Length, detail.Length));
+                    ReadOnlySpan<char> detail = v.detailMessage;
+                    detail.CopyTo(dst.Slice(prefix.Length + 1, detail.Length));
                 }
             }));
         }
@@ -87,7 +85,7 @@ namespace System.Diagnostics
                 return;
 
             WriteHeader(source, eventType, id, eventCache);
-            WriteEscaped(args != null ? string.Format(CultureInfo.InvariantCulture, format, args) : format);
+            WriteEscaped(args != null && args.Length != 0 ? string.Format(CultureInfo.InvariantCulture, format, args) : format);
             WriteFooter(eventCache);
         }
 

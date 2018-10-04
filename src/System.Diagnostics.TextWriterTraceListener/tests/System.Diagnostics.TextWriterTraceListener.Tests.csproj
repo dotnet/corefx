@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}</ProjectGuid>
-    <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="TestTraceFilter.cs" />
@@ -11,7 +11,7 @@
     <Compile Include="CtorsStreamTests.cs" />
     <Compile Include="DelimiterWriteMethodTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="ConsoleTraceListenerTests.cs" />
     <Compile Include="XmlWriterTraceListenerTests.cs" />
   </ItemGroup>

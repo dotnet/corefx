@@ -2,13 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -48,11 +45,14 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         [Fact]
         public void ConstructorThrows_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new XmlWriterTraceListener((Stream)null));
-            Assert.Throws<ArgumentNullException>(() => new XmlWriterTraceListener((TextWriter)null));
+            AssertExtensions.Throws<ArgumentNullException>("stream", () => new XmlWriterTraceListener((Stream)null));
+            AssertExtensions.Throws<ArgumentNullException>("writer", () => new XmlWriterTraceListener((TextWriter)null));
+            AssertExtensions.Throws<ArgumentNullException>("stream", () => new XmlWriterTraceListener((Stream)null, "trace listener name"));
+            AssertExtensions.Throws<ArgumentNullException>("writer", () => new XmlWriterTraceListener((TextWriter)null, "trace listener name"));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In full framework despite closing it, it still writes the traces, we're fixing that behavior in .NET Core")]
         public void Close_NoWriteSuccess()
         {
             string file = GetTestFilePath();
@@ -66,6 +66,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In full framework despite closing it, it still writes the traces, we're fixing that behavior in .NET Core")]
         public void Close_WriteBeforeAndAfter()
         {
             string file = GetTestFilePath();
@@ -134,10 +135,15 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             Assert.DoesNotContain("<DataItem>here</DataItem>", text);
             Assert.Contains("<DataItem>existent</DataItem><DataItem>.net</DataItem><DataItem>code</DataItem>", text);
 
-            Assert.DoesNotContain("2304", text);
-            Assert.DoesNotContain("this is a transfer", text);
-            Assert.DoesNotContain("Transfer", text);
-            Assert.DoesNotContain(guid.ToString("B"), text);
+            if (!PlatformDetection.IsFullFramework)
+            {
+                // Desktop has a boolean to turn on filtering in TraceTransfer due to a bug.
+                // https://referencesource.microsoft.com/#System/compmod/system/diagnostics/XmlWriterTraceListener.cs,26
+                Assert.DoesNotContain("2304", text);
+                Assert.DoesNotContain("this is a transfer", text);
+                Assert.DoesNotContain("Transfer", text);
+                Assert.DoesNotContain(guid.ToString("B"), text);
+            }
         }
 
         [Theory]
@@ -197,7 +203,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
 
         [Theory]
         [InlineData("This is a format without args", null)]
-        [InlineData("This is my {0} to {1} a trace with {0} {2} format {3}", new object[] { "test", "try", "", 3})]
+        [InlineData("This is my {0} to {1} a trace with {0} {2} format {3}", new object[] { "test", "try", "", 3 })]
         public void TraceEventFormat(string format, object[] args)
         {
             string file = GetTestFilePath();
@@ -230,7 +236,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             XPathNavigator navigator = XDocument.Parse(xml).CreateNavigator();
             yield return new object[] { navigator, TraceEventType.Error };
             yield return new object[] { null, TraceEventType.Critical };
-            
+
         }
 
         [Theory]
@@ -239,7 +245,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         {
             string file = GetTestFilePath();
             var eventCache = new TraceEventCache();
-            
+
             using (var listener = new XmlWriterTraceListener(file))
             {
                 listener.TraceData(eventCache, "Trace", eventType, 100, data);
@@ -272,7 +278,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             string expectedString = $"<TraceData xmlns=\"http://schemas.microsoft.com/2004/06/E2ETraceEvent\"><DataItem>{node.InnerXml}</DataItem></TraceData>";
             Assert.Equal(expectedString, document.GetElementsByTagName("ApplicationData")[0].InnerXml);
         }
-        
+
         [Fact]
         public void TraceData_NullDataParams()
         {

@@ -82,7 +82,7 @@ namespace System.Diagnostics
 
             EventInstance data = CreateEventInstance(severity, id);
 
-            if (args == null)
+            if (args == null || args.Length == 0)
             {
                 EventLog.WriteEvent(data, format);
             }
