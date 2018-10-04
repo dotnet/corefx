@@ -2685,10 +2685,32 @@
         "ubuntu-arm"
       ]
     },
+    "ubuntu.18.10-arm-corert": {
+      "#import": [
+        "ubuntu.18.10-corert",
+        "ubuntu.18.10-arm",
+        "ubuntu.18.10",
+        "ubuntu-arm-corert"
+      ]
+    },
     "ubuntu.18.10-arm64": {
       "#import": [
         "ubuntu.18.10",
         "ubuntu-arm64"
+      ]
+    },
+    "ubuntu.18.10-arm64-corert": {
+      "#import": [
+        "ubuntu.18.10-corert",
+        "ubuntu.18.10-arm64",
+        "ubuntu.18.10",
+        "ubuntu-arm64-corert"
+      ]
+    },
+    "ubuntu.18.10-corert": {
+      "#import": [
+        "ubuntu.18.10",
+        "ubuntu-corert"
       ]
     },
     "ubuntu.18.10-x64": {
@@ -2697,10 +2719,26 @@
         "ubuntu-x64"
       ]
     },
+    "ubuntu.18.10-x64-corert": {
+      "#import": [
+        "ubuntu.18.10-corert",
+        "ubuntu.18.10-x64",
+        "ubuntu.18.10",
+        "ubuntu-x64-corert"
+      ]
+    },
     "ubuntu.18.10-x86": {
       "#import": [
         "ubuntu.18.10",
         "ubuntu-x86"
+      ]
+    },
+    "ubuntu.18.10-x86-corert": {
+      "#import": [
+        "ubuntu.18.10-corert",
+        "ubuntu.18.10-x86",
+        "ubuntu.18.10",
+        "ubuntu-x86-corert"
       ]
     },
     "unix": {
