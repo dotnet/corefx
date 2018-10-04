@@ -111,13 +111,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Debug.Assert(FullSource.Length <> 0 AndAlso IO.Path.IsPathRooted(FullSource), "Invalid FullSource path!!!")
             Debug.Assert(OperationType = SHFileOperationType.FO_DELETE OrElse (FullTarget.Length <> 0 AndAlso IO.Path.IsPathRooted(FullTarget)), "Invalid FullTarget path!!!")
 
-            ' FullSource might end with '\*' (for copying and moving) so normalize the path to the correct format to demand the permission.
-            Dim CheckPermissionPath As String = FullSource
-            If (OperationType = SHFileOperationType.FO_COPY OrElse OperationType = SHFileOperationType.FO_MOVE) _
-                    AndAlso CheckPermissionPath.EndsWith("*", StringComparison.Ordinal) Then
-                CheckPermissionPath = RemoveEndingSeparator(FullSource.TrimEnd("*"c))
-            End If
-
             ' Get the SHFILEOPSTRUCT
             Dim OperationInfo As SHFILEOPSTRUCT = GetShellOperationInfo(OperationType, OperationFlags, FullSource, FullTarget)
 
