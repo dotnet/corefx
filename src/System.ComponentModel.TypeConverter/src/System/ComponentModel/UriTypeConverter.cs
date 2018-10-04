@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 
@@ -78,6 +79,7 @@ namespace System
                 if (destinationType == typeof(InstanceDescriptor))
                 {
                     ConstructorInfo ci = typeof(Uri).GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(string), typeof(UriKind) }, null);
+                    Debug.Assert(ci != null, "Couldn't find constructor");
                     return new InstanceDescriptor(ci, new object[] { uri.OriginalString, uri.IsAbsoluteUri ? UriKind.Absolute : UriKind.Relative });
                 }
 

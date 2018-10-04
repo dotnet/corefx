@@ -139,7 +139,7 @@ namespace System.ComponentModel
             {
                 string enumName = ConvertToInvariantString(context, value);
 
-                if (EnumType.IsDefined(typeof(FlagsAttribute), false) && enumName.IndexOf(',') != -1)
+                if (EnumType.IsDefined(typeof(FlagsAttribute), false) && enumName.Contains(','))
                 {
                     // This is a flags enum, and there is no one flag
                     // that covers the value.  Instead, convert the
