@@ -13,7 +13,7 @@ using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
-    public class SocketOptionNameTest
+    public partial class SocketOptionNameTest
     {
         private static bool SocketsReuseUnicastPortSupport => Capability.SocketsReuseUnicastPortSupport().HasValue;
 
