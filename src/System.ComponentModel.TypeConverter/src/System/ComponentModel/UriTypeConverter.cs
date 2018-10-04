@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
+using System.Reflection;
 
 namespace System
 {
@@ -33,7 +35,7 @@ namespace System
         /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(string) || destinationType == typeof(Uri);
+            return destinationType == typeof(string) || destinationType == typeof(Uri) || destinationType == typeof(InstanceDescriptor);
         }
 
         /// <summary>
@@ -73,6 +75,12 @@ namespace System
 
             if (value is Uri uri)
             {
+                if (destinationType == typeof(InstanceDescriptor))
+                {
+                    ConstructorInfo ci = typeof(Uri).GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(string), typeof(UriKind) }, null);
+                    return new InstanceDescriptor(ci, new object[] { uri.OriginalString, uri.IsAbsoluteUri ? UriKind.Absolute : UriKind.Relative });
+                }
+
                 if (destinationType == typeof(string))
                 {
                     return uri.OriginalString;
@@ -94,6 +102,6 @@ namespace System
                 return Uri.TryCreate(text, UriKind.RelativeOrAbsolute, out Uri uri);
             }
             return value is Uri;
-        }        
+        }
     }
 }
