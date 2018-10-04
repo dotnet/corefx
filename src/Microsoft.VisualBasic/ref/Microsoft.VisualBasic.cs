@@ -5,8 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.VisualBasic
 {
     public enum CallType
@@ -189,7 +187,7 @@ namespace Microsoft.VisualBasic
         }
 
         public const string vbBack = "\b";
-        public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
+        public const Microsoft.VisualBasic.CompareMethod vbBinaryCompare = Microsoft.VisualBasic.CompareMethod.Binary;
         public const string vbCr = "\r";
         public const string vbCrLf = "\r\n";
         public const string vbFormFeed = "\f";
@@ -201,7 +199,7 @@ namespace Microsoft.VisualBasic
         public const string vbNullChar = "\0";
         public const string vbNullString = null;
         public const string vbTab = "\t";
-        public const CompareMethod vbTextCompare = CompareMethod.Text;
+        public const Microsoft.VisualBasic.CompareMethod vbTextCompare = Microsoft.VisualBasic.CompareMethod.Text;
         public const string vbVerticalTab = "\v";
 
         //MsgBoxResult
@@ -438,6 +436,9 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static object ChangeType(object Expression, System.Type TargetType) { throw null; }
         [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackUserDefinedConversion(object Expression, System.Type TargetType) { throw null; }
+        public static string FromCharAndCount(char Value, int Count) { throw null; }
+        public static string FromCharArray(char[] Value) { throw null; }
+        public static string FromCharArraySubset(char[] Value, int StartIndex, int Length) { throw null; }
         public static bool ToBoolean(object Value) { throw null; }
         public static bool ToBoolean(string Value) { throw null; }
         public static byte ToByte(object Value) { throw null; }
@@ -471,12 +472,15 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static string ToString(char Value) { throw null; }
         public static string ToString(System.DateTime Value) { throw null; }
         public static string ToString(decimal Value) { throw null; }
+        public static string ToString(decimal Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         public static string ToString(double Value) { throw null; }
+        public static string ToString(double Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         public static string ToString(short Value) { throw null; }
         public static string ToString(int Value) { throw null; }
         public static string ToString(long Value) { throw null; }
         public static string ToString(object Value) { throw null; }
         public static string ToString(float Value) { throw null; }
+        public static string ToString(float Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static string ToString(uint Value) { throw null; }
         [System.CLSCompliantAttribute(false)]
