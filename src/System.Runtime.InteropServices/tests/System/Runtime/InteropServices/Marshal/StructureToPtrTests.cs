@@ -239,6 +239,24 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Equal(x.f[2], y.f[2]);
         }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public unsafe void StructureToPtr_OpaqueStruct_In_NonBlittableStructure_Success()
+        {
+            NonBlittableWithOpaque x = new NonBlittableWithOpaque();
+            byte* opaqueData = (byte*)&x.opaque;
+            *opaqueData = 1;
+
+            int size = Marshal.SizeOf(typeof(NonBlittableWithOpaque));
+            byte* p = stackalloc byte[size];
+            Marshal.StructureToPtr(x, (IntPtr)p, false);
+            NonBlittableWithOpaque y = Marshal.PtrToStructure<NonBlittableWithOpaque>((IntPtr)p);
+
+            byte* marshaledOpaqueData = (byte*)&y.opaque;
+
+            Assert.Equal(*opaqueData, *marshaledOpaqueData);
+        }
+
         public struct StructWithIntField
         {
             public int value;
@@ -288,6 +306,18 @@ namespace System.Runtime.InteropServices.Tests
         {
             public fixed int f[100];
             public string s;
+        }
+        
+        [StructLayout(LayoutKind.Explicit, Size = 1)]
+        public struct OpaqueStruct
+        {
+
+        }
+
+        public struct NonBlittableWithOpaque
+        {
+            public OpaqueStruct opaque;
+            public string str;
         }
     }
 }
