@@ -74,6 +74,9 @@
     <WithoutCategories>IgnoreForCI</WithoutCategories>
     <EnableDumpling>true</EnableDumpling>
     <CrashDumpFolder Condition="'$(RunningOnUnix)' != 'true'">%TMP%\CoreRunCrashDumps</CrashDumpFolder>
+    <!-- Disable F5 and test explorer support for CI builds. -->
+    <GenerateLaunchSettings>false</GenerateLaunchSettings>
+    <IncludeVSTestReferences>false</IncludeVSTestReferences>
   </PropertyGroup>
 
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
