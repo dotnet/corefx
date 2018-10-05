@@ -141,7 +141,7 @@ namespace System.Net.Http
 
             // Calculate response
             string a1 = credential.UserName + ":" + realm + ":" + credential.Password;
-            if (algorithm.IndexOf("sess", StringComparison.OrdinalIgnoreCase) != -1)
+            if (algorithm.EndsWith("sess", StringComparison.OrdinalIgnoreCase))
             {
                 a1 = ComputeHash(a1, algorithm) + ":" + nonce + ":" + cnonce;
             }
@@ -212,7 +212,7 @@ namespace System.Net.Http
         {
             // Disable MD5 insecure warning.
 #pragma warning disable CA5351
-            using (HashAlgorithm hash = algorithm.Contains(Sha256, StringComparison.OrdinalIgnoreCase) ? SHA256.Create() : (HashAlgorithm)MD5.Create())
+            using (HashAlgorithm hash = algorithm.StartsWith(Sha256, StringComparison.OrdinalIgnoreCase) ? SHA256.Create() : (HashAlgorithm)MD5.Create())
 #pragma warning restore CA5351
             {
                 Span<byte> result = stackalloc byte[hash.HashSize / 8]; // HashSize is in bits
