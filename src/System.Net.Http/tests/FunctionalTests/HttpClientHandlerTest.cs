@@ -725,6 +725,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Needs to be rewritten to use RemoteInvoke")]
         [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_ServerNeedsBasicAuthAndSetDefaultCredentials_StatusCodeUnauthorized()
@@ -1272,6 +1273,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Needs to be rewritten to use RemoteInvoke")]
         [Fact]
         [OuterLoop("Uses external server")]
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
