@@ -438,7 +438,8 @@ namespace System.IO.Ports.Tests
                     5000, "Err_91818aheid BytesToRead");
 
                 // We expect this to fail, because it can't read a surrogate
-                AssertExtensions.Throws<ArgumentException>(null, () => com1.ReadChar());
+                // parameter name can be different on different platforms
+                Assert.Throws<ArgumentException>(() => com1.ReadChar());
 
                 int result = com1.Read(charRcvBuffer, 0, 2);
 

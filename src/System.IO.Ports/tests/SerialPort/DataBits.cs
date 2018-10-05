@@ -270,7 +270,7 @@ namespace System.IO.Ports.Tests
                 int numBytes = 0;
                 byte shiftMask = 0xFF;
 
-                //Create a mask that when logicaly and'd with the transmitted byte will 
+                //Create a mask that when logicaly and'd with the transmitted byte will
                 //will result in the byte recievied due to the leading bits being chopped
                 //off due to DataBits less then 8
                 shiftMask >>= 8 - com1.DataBits;
@@ -303,13 +303,13 @@ namespace System.IO.Ports.Tests
                     sw.Start();
                     while (numBytesToSend > com2.BytesToRead)
                     {
-                        //Wait for all of the bytes to reach the input buffer of com2   
+                        //Wait for all of the bytes to reach the input buffer of com2
                     }
 
                     sw.Stop();
                     actualTime += sw.ElapsedMilliseconds;
                     actualTime += ((bytesToRead * (2.0 + com1.DataBits)) / com1.BaudRate) * 1000;
-                    beginWriteResult.AsyncWaitHandle.WaitOne();
+                    com1.BaseStream.EndWrite(beginWriteResult);
                     sw.Reset();
                 }
 
