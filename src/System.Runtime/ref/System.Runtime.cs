@@ -5896,6 +5896,7 @@ namespace System.Reflection
     public enum MethodImplAttributes
     {
         AggressiveInlining = 256,
+        AggressiveOptimization = 512,
         CodeTypeMask = 3,
         ForwardRef = 16,
         IL = 0,
