@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Diagnostics.TextWriterTraceListenerTests
 {
-    public class ConsoleTraceListenerTests
+    public class ConsoleTraceListenerTests : RemoteExecutorTestBase
     {
         [Fact]
         public static void DefaultCtorPropertiesCheck()
@@ -35,6 +35,62 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
                 Assert.NotNull(listener.Writer);
                 Assert.Equal(Console.Out, listener.Writer);
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteExpectedOutput(bool value)
+        {
+            RemoteInvoke((_value) =>
+            {
+                string message = "Write this message please";
+                bool setErrorStream = bool.Parse(_value);
+                using (var stringWriter = new StringWriter())
+                {
+                    if (setErrorStream)
+                        Console.SetError(stringWriter);
+                    else
+                        Console.SetOut(stringWriter);
+
+                    using (var listener = new ConsoleTraceListener(useErrorStream: setErrorStream))
+                    {
+                        listener.Write(message);
+                        string writerOutput = stringWriter.ToString();
+                        Assert.Equal(message, writerOutput);
+                        Assert.DoesNotContain(Environment.NewLine, writerOutput);
+                    }
+                }
+
+                return SuccessExitCode;
+            }, value.ToString()).Dispose();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteLineExpectedOutput(bool value)
+        {
+            RemoteInvoke((_value) =>
+            {
+                string message = "A new message to the listener";
+                bool setErrorStream = bool.Parse(_value);
+                using (var stringWriter = new StringWriter())
+                {
+                    if (setErrorStream)
+                        Console.SetError(stringWriter);
+                    else
+                        Console.SetOut(stringWriter);
+
+                    using (var listener = new ConsoleTraceListener(useErrorStream: setErrorStream))
+                    {
+                        listener.WriteLine(message);
+                        Assert.Contains(message, stringWriter.ToString() + Environment.NewLine);
+                    }
+                }
+
+                return SuccessExitCode;
+            }, value.ToString()).Dispose();
         }
     }
 }
