@@ -70,6 +70,9 @@ namespace System.IO.Tests
         [Fact]
         public void NonExistentFile()
         {
+            Delete(Path.Combine(Path.GetPathRoot(TestDirectory), Path.GetRandomFileName()));
+            Directory.CreateDirectory(TestDirectory);
+            Delete(Path.Combine(Path.GetPathRoot(TestDirectory), Path.GetRandomFileName()));
             Delete(GetTestFilePath());
         }
 
@@ -103,6 +106,8 @@ namespace System.IO.Tests
         [Fact]
         public void NonExistentPath_Throws_DirectoryNotFoundException()
         {
+            Assert.Throws<DirectoryNotFoundException>(() => Delete(Path.Combine(Path.GetRandomFileName(), "C")));
+            Assert.Throws<DirectoryNotFoundException>(() => Delete(Path.Combine(Path.GetPathRoot(TestDirectory), Path.GetRandomFileName(), "C")));
             Assert.Throws<DirectoryNotFoundException>(() => Delete(Path.Combine(TestDirectory, GetTestFileName(), "C")));
         }
 
