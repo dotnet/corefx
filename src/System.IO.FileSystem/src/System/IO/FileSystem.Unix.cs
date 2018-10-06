@@ -161,7 +161,12 @@ namespace System.IO
                 switch (errorInfo.Error)
                 {
                     case Interop.Error.ENOENT:
-                        // ENOENT means it already doesn't exist; nop
+                        // ENOENT means it already doesn't exist; nop         
+                        var directoryName = Path.GetDirectoryName(fullPath);
+                        if(!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
+                        {
+                            throw new DirectoryNotFoundException(string.IsNullOrEmpty(fullPath) ? SR.IO_PathNotFound_NoPathName : SR.Format(SR.IO_PathNotFound_Path, fullPath));
+                        }                        
                         return;
                     case Interop.Error.EROFS:
                         // EROFS means the file system is read-only
