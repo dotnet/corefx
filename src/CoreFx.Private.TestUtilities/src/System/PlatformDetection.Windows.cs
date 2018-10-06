@@ -190,7 +190,7 @@ namespace System
                 }
                 finally
                 {
-                    CloseHandle(processToken);
+                    Interop.Kernel32.CloseHandle(processToken);
                 }
 
                 return s_isWindowsElevated == 1;
@@ -281,9 +281,6 @@ namespace System
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern int GetCurrentApplicationUserModelId(ref uint applicationUserModelIdLength, byte[] applicationUserModelId);
-            
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool CloseHandle(IntPtr handle);
 
         [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
         private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
