@@ -39,8 +39,33 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a
         }
         sh "./build-tests.sh -buildArch=arm64 -${params.CGroup} -SkipTests ${additionalArgs} -- /p:ArchiveTests=true /p:EnableDumpling=true"
     }
+  stage ('Submit To Helix For Testing') {
+        // Bind the credentials
+        withCredentials([string(credentialsId: 'CloudDropAccessToken', variable: 'CloudDropAccessToken'),
+                         string(credentialsId: 'OutputCloudResultsAccessToken', variable: 'OutputCloudResultsAccessToken')]) {
+            // Ask the CI SDK for a Helix source that makes sense.  This ensures that this pipeline works for both PR and non-PR cases
+            def helixSource = getHelixSource()
+            // Ask the CI SDK for a Build that makes sense.  We currently use the hash for the build
+            def helixBuild = getCommit()
+            // Get the user that should be associated with the submission
+            def helixCreator = getUser()
+            // Target queues
+            def targetHelixQueues = ['Ubuntu.1604.Arm64.Open']
 
-    // TODO: Add submission for Helix testing once we have queue for arm64 Linux working
+            sh "./Tools/msbuild.sh src/upload-tests.proj /p:ArchGroup=x64 /p:ConfigurationGroup=${params.CGroup} /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux /p:HelixJobType=test/functional/cli/ /p:HelixSource=${helixSource} /p:BuildMoniker=${helixBuild} /p:HelixCreator=${helixCreator} /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken=\$CloudDropAccessToken /p:CloudResultsAccessToken=\$OutputCloudResultsAccessToken /p:HelixApiEndpoint=https://helix.dot.net/api/2017-04-14/jobs /p:TargetQueues=${targetHelixQueues.join('+')} /p:HelixLogFolder=${WORKSPACE}/${logFolder}/ /p:HelixCorrelationInfoFileName=SubmittedHelixRuns.txt"
+
+            submittedHelixJson = readJSON file: "${logFolder}/SubmittedHelixRuns.txt"
+        }
+    }
 }
 
-// TODO: Add "Execute tests" stage once we have queue for arm64 Linux working
+stage ('Execute Tests') {
+    def contextBase
+    if (params.TestOuter) {
+        contextBase = "Linux x64 Tests w/outer - ${params.CGroup}"
+    }
+    else {
+        contextBase = "Linux x64 Tests - ${params.CGroup}"
+    }
+    waitForHelixRuns(submittedHelixJson, contextBase)
+}
