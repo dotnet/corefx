@@ -72,7 +72,7 @@ namespace System.IO.Tests
         {
             Delete(Path.Combine(Path.GetPathRoot(TestDirectory), Path.GetRandomFileName()));
             Directory.CreateDirectory(TestDirectory);
-            Delete(Path.Combine(Path.GetPathRoot(TestDirectory), Path.GetRandomFileName()));
+            Delete(Path.Combine(TestDirectory, Path.GetRandomFileName()));
             Delete(GetTestFilePath());
         }
 
