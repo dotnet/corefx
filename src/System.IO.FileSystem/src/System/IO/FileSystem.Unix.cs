@@ -165,7 +165,7 @@ namespace System.IO
                         var directoryName = Path.GetDirectoryName(fullPath);
                         if(!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
                         {
-                            throw new DirectoryNotFoundException(string.IsNullOrEmpty(fullPath) ? SR.IO_PathNotFound_NoPathName : SR.Format(SR.IO_PathNotFound_Path, fullPath));
+                            throw Interop.GetExceptionForIoErrno(errorInfo, fullPath, true);
                         }                        
                         return;
                     case Interop.Error.EROFS:
