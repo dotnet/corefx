@@ -68,13 +68,32 @@ namespace Internal.Cryptography.Pal
 
             public void Remove(ICertificatePal cert)
             {
-                if (_readonly)
-                    throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
-
+                // First check if the certificate is even in the keychain
                 AppleCertificatePal applePal = (AppleCertificatePal)cert;
+                using (SafeCFArrayHandle certs = Interop.AppleCrypto.KeychainEnumerateCerts(_keychainHandle))
+                {
+                    long count = Interop.CoreFoundation.CFArrayGetCount(certs);
 
-                var handle = (SafeKeychainItemHandle)applePal.IdentityHandle ?? applePal.CertificateHandle;
-                Interop.AppleCrypto.X509StoreRemoveCertificate(handle, _keychainHandle);
+                    for (int i = 0; i < count; i++)
+                    {
+                        IntPtr itemHandle = Interop.CoreFoundation.CFArrayGetValueAtIndex(certs, i);
+
+                        SafeSecCertificateHandle certHandle;
+                        SafeSecIdentityHandle identityHandle;
+
+                        if (Interop.AppleCrypto.X509DemuxAndRetainHandle(itemHandle, out certHandle, out identityHandle))
+                        {
+                            if (applePal.IdentityHandle == identityHandle && applePal.CertificateHandle == certHandle)
+                            {
+                                if (_readonly)
+                                    throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
+
+                                var handle = (SafeKeychainItemHandle)applePal.IdentityHandle ?? applePal.CertificateHandle;
+                                Interop.AppleCrypto.X509StoreRemoveCertificate(handle, _keychainHandle);
+                            }
+                        }
+                    }
+                }
             }
 
             public SafeHandle SafeHandle => _keychainHandle;

@@ -283,29 +283,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void RemoveReadOnlyThrowsWhenFound()
+        public static void RemoveReadOnlyNonExistingDoesNotThrow()
         {
-            // This test is unfortunate, in that it will mostly never test.
-            // In order to do so it would have to open the store ReadWrite, put in a known value,
-            // and call Remove on a ReadOnly copy.
-            //
-            // Just calling Remove on the first item found could also work (when the store isn't empty),
-            // but if it fails the cost is too high.
-            //
-            // So what's the purpose of this test, you ask? To record why we're not unit testing it.
-            // And someone could test it manually if they wanted.
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
             {
                 store.Open(OpenFlags.ReadOnly);
-
-                using (var coll = new ImportedCollection(store.Certificates))
-                {
-                    if (coll.Collection.Contains(cert))
-                    {
-                        Assert.ThrowsAny<CryptographicException>(() => store.Remove(cert));
-                    }
-                }
+                store.Remove(cert);
             }
         }
 
