@@ -41,11 +41,10 @@ namespace System.Tests
         [Fact]
         public void TargetFrameworkTest()
         {
-            // On Uap we use the Microsoft.DotNet.XUnitRunnerUap instead of the RemoteExecutorConsoleApp
-            string targetFrameworkName = PlatformDetection.IsUap ? ".NETCore,Version=v5.0" : "DUMMY-TFA";
-            RemoteInvoke((_targetFrameworkName) => {
-                Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
-            }, targetFrameworkName).Dispose();
+            RemoteInvoke(() => {
+                Assert.NotEmpty(AppContext.TargetFrameworkName);
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]

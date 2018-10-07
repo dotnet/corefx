@@ -257,7 +257,6 @@
     <NoStdLib>true</NoStdLib>
     <NoExplicitReferenceToStdLib>true</NoExplicitReferenceToStdLib>
     <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
 
