@@ -46,12 +46,6 @@ namespace Microsoft.VisualBasic
         public void Remove(int Index) { }
         public void Remove(string Key) { }
     }
-    public enum CompareMethod
-    { 
-        Binary = 0,
-        Text = 1,
-    }
-
     public enum MsgBoxResult
     {
         Ok = 1,
@@ -110,6 +104,11 @@ namespace Microsoft.VisualBasic
         public string EventID { get { throw null; } }
         public string InterfaceID { get { throw null; } }
         public bool InterfaceShadows { get { throw null; } set { } }
+    }
+    public enum CompareMethod
+    {
+        Binary = 0,
+        Text = 1,
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Constants
@@ -181,8 +180,8 @@ namespace Microsoft.VisualBasic
     public sealed partial class DateAndTime
     {
         internal DateAndTime() { }
-        public static System.DateTime Now { get; }
-        public static System.DateTime Today { get; }
+        public static System.DateTime Now { get { throw null; } }
+        public static System.DateTime Today { get { throw null; } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
