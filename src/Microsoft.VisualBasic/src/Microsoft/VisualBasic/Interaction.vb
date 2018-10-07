@@ -7,11 +7,9 @@ Imports Microsoft.VisualBasic.CompilerServices
 
 Namespace Microsoft.VisualBasic
 
-    Public NotInheritable Class Interaction
-        Sub New()
-        End Sub
+    Public Module Interaction
 
-        Friend Shared Function IIf(Of T)(ByVal condition As Boolean, ByVal truePart As T, ByVal falsePart As T) As T
+        Friend Function IIf(Of T)(ByVal condition As Boolean, ByVal truePart As T, ByVal falsePart As T) As T
             If condition Then
                 Return truePart
             End If
@@ -19,7 +17,7 @@ Namespace Microsoft.VisualBasic
             Return falsePart
         End Function
 
-        Public Shared Function MsgBox(ByVal Prompt As Object, Optional ByVal Buttons As MsgBoxStyle = MsgBoxStyle.OkOnly, Optional ByVal Title As Object = Nothing) As MsgBoxResult
+        Public Function MsgBox(ByVal Prompt As Object, Optional ByVal Buttons As MsgBoxStyle = MsgBoxStyle.OkOnly, Optional ByVal Title As Object = Nothing) As MsgBoxResult
             Dim sPrompt As String = Nothing
             Dim sTitle As String
             'Dim vbhost As CompilerServices.IVbHost
@@ -77,7 +75,7 @@ Namespace Microsoft.VisualBasic
             Return CType(NativeMethods.MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
         End Function
 
-        Private Shared Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
+        Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
 
             Dim Title As String
 
@@ -102,6 +100,6 @@ Namespace Microsoft.VisualBasic
 
             Return Title
         End Function
-    End Class
+    End Module
 End Namespace
 

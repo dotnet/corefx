@@ -63,7 +63,7 @@ namespace Microsoft.VisualBasic
         No = 7
     }
 
-    [Flags()]
+    [System.Flags()]
     public enum MsgBoxStyle
     {
         //You may BitOr one value from each group
@@ -284,6 +284,12 @@ namespace Microsoft.VisualBasic
         public static void Randomize(double Number) { }
         public static float Rnd() { throw null; }
         public static float Rnd(float Number) { throw null; }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Interaction
+    {
+        internal Interaction() { }
+        public MsgBoxResult MsgBox(object Prompt, MsgBoxStyle Buttons = MsgBoxStyle.OkOnly, object Title = null) { throw null; }
     }
 }
 namespace Microsoft.VisualBasic.ApplicationServices

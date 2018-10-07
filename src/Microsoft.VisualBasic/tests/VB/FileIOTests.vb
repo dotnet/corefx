@@ -3,7 +3,6 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports Microsoft.VisualBasic.FileIO
-Imports Microsoft.VisualBasic.Interaction
 Imports System
 Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
