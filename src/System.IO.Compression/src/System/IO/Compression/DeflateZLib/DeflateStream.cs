@@ -525,6 +525,11 @@ namespace System.IO.Compression
 
         internal void WriteCore(ReadOnlySpan<byte> buffer)
         {
+            if (buffer.IsEmpty)
+            {
+                return;
+            }
+
             EnsureCompressionMode();
             EnsureNotDisposed();
 
