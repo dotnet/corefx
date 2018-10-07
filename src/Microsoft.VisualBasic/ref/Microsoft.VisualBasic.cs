@@ -51,6 +51,54 @@ namespace Microsoft.VisualBasic
         Binary = 0,
         Text = 1,
     }
+
+    public enum MsgBoxResult
+    {
+        Ok = 1,
+        Cancel = 2,
+        Abort = 3,
+        Retry = 4,
+        Ignore = 5,
+        Yes = 6,
+        No = 7
+    }
+
+    [Flags()]
+    public enum MsgBoxStyle
+    {
+        //You may BitOr one value from each group
+        //Button group: Lower 4 bits, &H00F
+        OkOnly = 0x0,
+
+        OkCancel = 0x1,
+        AbortRetryIgnore = 0x2,
+        YesNoCancel = 0x3,
+        YesNo = 0x4,
+        RetryCancel = 0x5,
+
+        //Icon Group: Middle 4 bits &H0F0
+        Critical = 0x10, //Same as Windows.Forms.MessageBox.IconError
+
+        Question = 0x20, //Same As Windows.MessageBox.IconQuestion
+        Exclamation = 0x30, //Same As Windows.MessageBox.IconExclamation
+        Information = 0x40, //Same As Windows.MessageBox.IconInformation
+
+        //Default Group: High 4 bits &HF00
+        DefaultButton1 = 0,
+
+        DefaultButton2 = 0x100,
+        DefaultButton3 = 0x200,
+        //UNSUPPORTED IN VB7
+        //DefaultButton4 = &H300I
+
+        ApplicationModal = 0x0,
+        SystemModal = 0x1000,
+
+        MsgBoxHelp = 0x4000,
+        MsgBoxRight = 0x80000,
+        MsgBoxRtlReading = 0x100000,
+        MsgBoxSetForeground = 0x10000
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     public sealed partial class ComClassAttribute : System.Attribute
     {
@@ -80,7 +128,41 @@ namespace Microsoft.VisualBasic
         public const string vbVerticalTab = "\v";
         public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
         public const CompareMethod vbTextCompare = CompareMethod.Text;
+
+        //MsgBoxResult
+        public const MsgBoxResult vbOK = MsgBoxResult.Ok;
+
+        public const MsgBoxResult vbCancel = MsgBoxResult.Cancel;
+        public const MsgBoxResult vbAbort = MsgBoxResult.Abort;
+        public const MsgBoxResult vbRetry = MsgBoxResult.Retry;
+        public const MsgBoxResult vbIgnore = MsgBoxResult.Ignore;
+        public const MsgBoxResult vbYes = MsgBoxResult.Yes;
+        public const MsgBoxResult vbNo = MsgBoxResult.No;
+
+        //MsgBoxStyle
+        //You may BitOr one value from each group
+        public const MsgBoxStyle vbOKOnly = MsgBoxStyle.OkOnly;
+
+        public const MsgBoxStyle vbOKCancel = MsgBoxStyle.OkCancel;
+        public const MsgBoxStyle vbAbortRetryIgnore = MsgBoxStyle.AbortRetryIgnore;
+        public const MsgBoxStyle vbYesNoCancel = MsgBoxStyle.YesNoCancel;
+        public const MsgBoxStyle vbYesNo = MsgBoxStyle.YesNo;
+        public const MsgBoxStyle vbRetryCancel = MsgBoxStyle.RetryCancel;
+        public const MsgBoxStyle vbCritical = MsgBoxStyle.Critical;
+        public const MsgBoxStyle vbQuestion = MsgBoxStyle.Question;
+        public const MsgBoxStyle vbExclamation = MsgBoxStyle.Exclamation;
+        public const MsgBoxStyle vbInformation = MsgBoxStyle.Information;
+        public const MsgBoxStyle vbDefaultButton1 = MsgBoxStyle.DefaultButton1;
+        public const MsgBoxStyle vbDefaultButton2 = MsgBoxStyle.DefaultButton2;
+        public const MsgBoxStyle vbDefaultButton3 = MsgBoxStyle.DefaultButton3;
+        public const MsgBoxStyle vbApplicationModal = MsgBoxStyle.ApplicationModal;
+        public const MsgBoxStyle vbSystemModal = MsgBoxStyle.SystemModal;
+        public const MsgBoxStyle vbMsgBoxHelp = MsgBoxStyle.MsgBoxHelp;
+        public const MsgBoxStyle vbMsgBoxRight = MsgBoxStyle.MsgBoxRight;
+        public const MsgBoxStyle vbMsgBoxRtlReading = MsgBoxStyle.MsgBoxRtlReading;
+        public const MsgBoxStyle vbMsgBoxSetForeground = MsgBoxStyle.MsgBoxSetForeground;
     }
+
     public sealed partial class ControlChars
     {
         public const char Back = '\b';
@@ -99,8 +181,8 @@ namespace Microsoft.VisualBasic
     public sealed partial class DateAndTime
     {
         internal DateAndTime() { }
-        public static DateTime Now { get; }
-        public static DateTime Today { get; }
+        public static System.DateTime Now { get; }
+        public static System.DateTime Today { get; }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -292,8 +374,8 @@ namespace Microsoft.VisualBasic.CompilerServices
     public sealed partial class BooleanType
     {
         internal BooleanType() { }
-        public static Boolean FromObject(object Value) { throw null; }
-        public static Boolean FromString(string Value) { throw null; }
+        public static System.Boolean FromObject(object Value) { throw null; }
+        public static System.Boolean FromString(string Value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DecimalType
@@ -554,7 +636,7 @@ namespace Microsoft.VisualBasic.FileIO
         public static string Programs { get { throw null; } }
         public static string Temp { get { throw null; } }
     }
-    public partial class TextFieldParser : IDisposable
+    public partial class TextFieldParser : System.IDisposable
     {
         public TextFieldParser(System.IO.Stream stream) { }
         public TextFieldParser(System.IO.Stream stream, System.Text.Encoding defaultEncoding) { }
@@ -589,7 +671,7 @@ namespace Microsoft.VisualBasic.FileIO
         public string ReadToEnd() { throw null; }
         public void SetDelimiters(params string[] delimiters) { }
         public void SetFieldWidths(params int[] fieldWidths) { }
-        void IDisposable.Dispose() { }
+        void IDisposable.Dispose() { throw new NotImplementedException(); }
     }
     public enum UIOption
     {
