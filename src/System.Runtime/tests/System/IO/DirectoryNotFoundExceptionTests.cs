@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using Xunit;
+using ExceptionUtility = System.Tests.ExceptionUtility;
 
 namespace System.IO.Tests
 {

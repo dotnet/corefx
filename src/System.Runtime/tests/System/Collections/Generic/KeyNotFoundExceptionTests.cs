@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 
 using Xunit;
-using ExceptionUtility = System.IO.Tests.ExceptionUtility;
+using ExceptionUtility = System.Tests.ExceptionUtility;
 
 namespace System.Tests
 {

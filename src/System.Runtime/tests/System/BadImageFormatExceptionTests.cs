@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using ExceptionUtility = System.IO.Tests.ExceptionUtility;
+using ExceptionUtility = System.Tests.ExceptionUtility;
 
 namespace System.Tests
 {
@@ -35,7 +35,7 @@ namespace System.Tests
             var innerException = new Exception("Inner exception");
             var exception = new BadImageFormatException(message, innerException);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: COR_E_BADIMAGEFORMAT, innerException: innerException, message: message);
-            Assert.Equal(null, exception.FileName);
+            Assert.Null(exception.FileName);
         }
 
         [Fact]
