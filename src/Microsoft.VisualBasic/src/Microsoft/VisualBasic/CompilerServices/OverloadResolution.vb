@@ -14,6 +14,7 @@ Imports Microsoft.VisualBasic.CompilerServices.Symbols
 Imports Microsoft.VisualBasic.CompilerServices.ConversionResolution
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 Imports Microsoft.VisualBasic.CompilerServices.ReflectionExtensions
+Imports Microsoft.VisualBasic.Interaction
 
 #Const BINDING_LOG = False
 #Const GENERICITY_LOG = False

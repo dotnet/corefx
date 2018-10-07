@@ -12,6 +12,7 @@ Imports System.Reflection
 Imports Microsoft.VisualBasic.CompilerServices.Symbols
 Imports Microsoft.VisualBasic.CompilerServices.OverloadResolution
 Imports Microsoft.VisualBasic.CompilerServices.Utils
+Imports Microsoft.VisualBasic.Interaction
 
 Namespace Microsoft.VisualBasic.CompilerServices
 
