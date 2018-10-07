@@ -161,9 +161,9 @@ namespace System.IO
                 switch (errorInfo.Error)
                 {
                     case Interop.Error.ENOENT:
-                        // ENOENT means it already doesn't exist; nop         
-                        var directoryName = Path.GetDirectoryName(fullPath);
-                        if(!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
+                        // In order to match Windows behavior
+                        string directoryName = Path.GetDirectoryName(fullPath);
+                        if(directoryName.Length > 0 && !Directory.Exists(directoryName))
                         {
                             throw Interop.GetExceptionForIoErrno(errorInfo, fullPath, true);
                         }                        
