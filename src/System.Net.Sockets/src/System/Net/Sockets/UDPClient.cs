@@ -440,6 +440,8 @@ namespace System.Net.Sockets
 
             // IPv6 Changes: we need to create the correct MulticastOption and
             //               must also check for address family compatibility.
+            // Note: we cannot reliably use IPv4 multicast over IPv6 in DualMode
+            // as such we keep the compatibility explicit between IP stack versions
             if (multicastAddr.AddressFamily != _family)
             {
                 throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), nameof(multicastAddr));
