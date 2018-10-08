@@ -119,6 +119,7 @@
     <Compile Include="System\ObjectDisposedExceptionTests.cs" />
     <Compile Include="System\OutOfMemoryExceptionTests.cs" />
     <Compile Include="System\OverflowExceptionTests.cs" />
+    <Compile Include="System\RankExceptionTests.cs" />
     <Compile Include="System\PlatformNotSupportedExceptionTests.cs" />
     <Compile Include="System\PseudoCustomAttributeTests.cs" />
     <Compile Include="System\SByteTests.cs" />

@@ -3,13 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using ExceptionUtility = System.Tests.ExceptionUtility;
+using System.Tests;
 
 namespace System.Tests
 {
     public static class TimeoutExceptionTests
     {
-        private const int COR_E_TIMEOUT = unchecked((int)0x80131516);
+        private const int COR_E_TIMEOUT = unchecked((int)0x80131505);
 
         [Fact]
         public static void Ctor_Empty()
@@ -21,7 +21,7 @@ namespace System.Tests
         [Fact]
         public static void Ctor_String()
         {
-            string message = "overflow";
+            string message = "timeout";
             var exception = new TimeoutException(message);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: COR_E_TIMEOUT, message: message);
         }
@@ -29,7 +29,7 @@ namespace System.Tests
         [Fact]
         public static void Ctor_String_Exception()
         {
-            string message = "overflow";
+            string message = "timeout";
             var innerException = new Exception("Inner exception");
             var exception = new TimeoutException(message, innerException);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: COR_E_TIMEOUT, innerException: innerException, message: message);

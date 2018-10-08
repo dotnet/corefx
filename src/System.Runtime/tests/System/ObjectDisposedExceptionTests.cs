@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using ExceptionUtility = System.Tests.ExceptionUtility;
+using System.Tests;
 
 namespace System.Tests
 {
@@ -18,6 +18,9 @@ namespace System.Tests
             var exception = new ObjectDisposedException(objectName);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: COR_E_OBJECTDISPOSED, validateMessage: false);
             Assert.Contains(objectName, exception.Message);
+
+            var exceptionNullObjectName = new ObjectDisposedException(null);
+            Assert.Equal("", exceptionNullObjectName.ObjectName);
         }
 
         [Fact]
