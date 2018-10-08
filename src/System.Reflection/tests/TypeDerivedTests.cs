@@ -6,18 +6,23 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
+    internal class MockDerivedType : BaseMockType
+    {
+        public override Type UnderlyingSystemType => null;
+        protected override TypeAttributes GetAttributeFlagsImpl() => new TypeAttributes();
+    }
+
     public class TypeDerivedTests
     {
         [Fact]
         public void IsAssignableFrom_NullUnderlyingSystemType()
         {
-            Type compareType = typeof(TypeDerivedTests);
             var testType = new MockDerivedType();
             Assert.Null(testType.UnderlyingSystemType);
+            Assert.True(testType.IsAssignableFrom(testType));
 
-            // Add this test once coreclr has IsAssignableFrom fix
-            // Assert.False(testType.IsAssignableFrom(compareType));
-
+            Type compareType = typeof(int);
+            Assert.False(testType.IsAssignableFrom(compareType));
             Assert.False(compareType.IsAssignableFrom(testType));
         }
     }

@@ -5,6 +5,7 @@
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\tests\System\MockType.cs" Link="Common\System\MockType.cs" />
     <Compile Include="AssemblyNameTests.cs" />
     <Compile Include="AssemblyTests.cs" />
     <Compile Include="ConstructorInfoTests.cs" />
@@ -14,7 +15,6 @@
     <Compile Include="ManifestResourceInfoTests.cs" />
     <Compile Include="MemberInfoTests.cs" />
     <Compile Include="MethodInfoTests.cs" />
-    <Compile Include="MockDerivedType.cs" />
     <Compile Include="ModuleTests.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ParameterInfoTests.cs" />

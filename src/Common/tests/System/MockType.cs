@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-    internal class MockType : Type
+    internal class BaseMockType : Type
     {
         public override Assembly Assembly => throw Unexpected;
         public override string AssemblyQualifiedName => throw Unexpected;
@@ -74,7 +74,6 @@ namespace System
         public override MemberInfo[] GetMember(string name, BindingFlags bindingAttr) => throw Unexpected;
         public override MemberInfo[] GetMember(string name, MemberTypes type, BindingFlags bindingAttr) => throw Unexpected;
         protected override TypeCode GetTypeCodeImpl() => throw Unexpected;
-        public override bool IsAssignableFrom(Type c) => throw Unexpected;
         public override bool IsConstructedGenericType => throw Unexpected;
         protected override bool IsContextfulImpl() => throw Unexpected;
         public override bool IsEnum => throw Unexpected;
@@ -104,5 +103,10 @@ namespace System
         public override RuntimeTypeHandle TypeHandle => throw Unexpected;
 
         protected virtual Exception Unexpected => new Exception("Did not expect to be called.");
+    }
+
+    internal class MockType : BaseMockType
+    {
+        public override bool IsAssignableFrom(Type c) => throw Unexpected;
     }
 }
