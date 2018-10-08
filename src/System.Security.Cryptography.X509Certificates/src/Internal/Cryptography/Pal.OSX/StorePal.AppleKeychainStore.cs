@@ -86,7 +86,9 @@ namespace Internal.Cryptography.Pal
                             if (applePal.IdentityHandle == identityHandle && applePal.CertificateHandle == certHandle)
                             {
                                 if (_readonly)
+                                {
                                     throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
+                                }
 
                                 var handle = (SafeKeychainItemHandle)applePal.IdentityHandle ?? applePal.CertificateHandle;
                                 Interop.AppleCrypto.X509StoreRemoveCertificate(handle, _keychainHandle);
