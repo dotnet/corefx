@@ -706,6 +706,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public async void BeginSend_IPv6Socket_IPv4Address_Multicast_Success()
         {
             // We use IPv6 sockets to both join a group and send a datagram to the group
