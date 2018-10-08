@@ -20,8 +20,8 @@ internal partial class Interop
             const string version = "Microsoft Windows";
             if (RtlGetVersion(ref osvi) == 0)
             {
-                return string.Format("{0} {1}.{2}.{3} {4}",
-                    version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, new string(&(osvi.szCSDVersion[0])));
+                return $"{version} {osvi.dwMajorVersion}.{osvi.dwMinorVersion}.{osvi.dwBuildNumber}" +
+                       $"{(string.IsNullOrWhitespace(osvi.szCSDVersion?[0]) ? string.Empty : new string(&(osvi.szCSDVersion[0])))}";
             }
             else
             {
