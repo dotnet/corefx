@@ -36,6 +36,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
             ' Check Title
             Assert.Equal(MsgBox($"Select OK if Title = 'Microsoft.VisualBasic.Tests'", MsgBoxStyle.OkCancel), MsgBoxResult.Ok)
+            Assert.Equal(MsgBox($"Select OK if Title = 'Hello'", MsgBoxStyle.OkCancel, "Hello"), MsgBoxResult.Ok)
         End Sub
 
         <Fact>
