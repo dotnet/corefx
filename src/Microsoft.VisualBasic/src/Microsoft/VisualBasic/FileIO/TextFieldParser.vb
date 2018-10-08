@@ -29,6 +29,7 @@ Namespace Microsoft.VisualBasic.FileIO
     '''  will build the field and handle escaped quotes
     ''' </summary>
     Friend Class QuoteDelimitedFieldBuilder
+        Private Const DoubleQuoteChar As Char = """"c
 
         ' The length of the closing delimiter if one is found
         Private m_DelimiterLength As Integer
@@ -128,7 +129,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             While m_Index < Length
 
-                If Line(m_Index) = """"c Then
+                If Line(m_Index) = DoubleQuoteChar Then
 
                     ' Are we at the end of the file?
                     If m_Index + 1 = Length Then
@@ -141,8 +142,8 @@ Namespace Microsoft.VisualBasic.FileIO
                         Return
                     End If
                     ' Check to see if this is an escaped quote
-                    If m_Index + 1 < Line.Length And Line(m_Index + 1) = """"c Then
-                        m_Field.Append(""""c)
+                    If m_Index + 1 < Line.Length And Line(m_Index + 1) = DoubleQuoteChar Then
+                        m_Field.Append(DoubleQuoteChar)
                         m_Index += 2
                         Continue While
                     End If
@@ -207,10 +208,10 @@ Namespace Microsoft.VisualBasic.FileIO
         Private ReadOnly m_LeaveOpen As Boolean = False
 
         ' The largest size the buffer can be
-        Private ReadOnly m_MaxBufferSize As Integer = 10000000
+        Private ReadOnly m_MaxBufferSize As Integer = 10_000_000
 
         ' The largest size a line can be.
-        Private ReadOnly m_MaxLineSize As Integer = 10000000
+        Private ReadOnly m_MaxLineSize As Integer = 10_000_000
 
         ' Codes for whitespace as used by String.Trim excluding line end chars as those are handled separately
         Private ReadOnly m_WhitespaceCodes() As Integer = {&H9, &HB, &HC, &H20, &H85, &HA0, &H1680, &H2000, &H2001, &H2002, &H2003, &H2004, &H2005, &H2006, &H2007, &H2008, &H2009, &H200A, &H200B, &H2028, &H2029, &H3000, &HFEFF}
