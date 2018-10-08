@@ -44,6 +44,8 @@
     <Compile Include="SocketAsyncEventArgsTest.cs" />
     <Compile Include="SocketAsyncEventArgsTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
     <Compile Include="SocketOptionNameTest.cs" />
+    <Compile Include="SocketOptionNameTest.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
+    <Compile Include="SocketOptionNameTest.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="MulticastOptionTest.cs" />
     <Compile Include="UdpClientTest.cs" />
     <Compile Include="UnixDomainSocketTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
@@ -106,12 +108,6 @@
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
-    <Compile Include="SocketOptionNameTest.Unix.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <Compile Include="SocketOptionNameTest.Windows.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
