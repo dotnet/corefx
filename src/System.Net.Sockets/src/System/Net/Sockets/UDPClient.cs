@@ -445,7 +445,7 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), nameof(multicastAddr));
             }
 
-            if (_family == AddressFamily.InterNetwork)
+            if (multicastAddr.AddressFamily == AddressFamily.InterNetwork)
             {
                 MulticastOption mcOpt = new MulticastOption(multicastAddr);
 
@@ -567,7 +567,7 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), nameof(multicastAddr));
             }
 
-            if (_family == AddressFamily.InterNetwork)
+            if (multicastAddr.AddressFamily == AddressFamily.InterNetwork)
             {
                 MulticastOption mcOpt = new MulticastOption(multicastAddr);
 

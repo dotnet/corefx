@@ -708,22 +708,25 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public async void BeginSend_IPv6Socket_IPv4Address_Multicast_Success()
         {
+            // We use IPv6 sockets to both join a group and send a datagram to the group
             var port = 2222;
             var ipAddress = IPAddress.Parse("239.0.0.222");
-            var remoteEP = new IPEndPoint(ipAddress, port);
-            var localEP = new IPEndPoint(IPAddress.IPv6Any, port);
+            var listeningEP = new IPEndPoint(IPAddress.IPv6Any, port);
+            var sendingEP = new IPEndPoint(ipAddress, port);
 
-            using (var receiver = new UdpClient(localEP))
+            using (var receiver = new UdpClient(AddressFamily.InterNetworkV6))
             using (var sender = new UdpClient(AddressFamily.InterNetworkV6))
             {
                 receiver.Client.DualMode = true;
                 sender.Client.DualMode = true;
+
                 receiver.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 5000);
-
+                receiver.Client.Bind(listeningEP);
                 receiver.JoinMulticastGroup(ipAddress);
-                await sender.SendAsync(new byte[1], 1, remoteEP);
 
-                UdpReceiveResult result = await receiver.ReceiveAsync();
+                await sender.SendAsync(new byte[1], 1, sendingEP);
+                var result = await receiver.ReceiveAsync();
+
                 Assert.NotNull(result);
                 Assert.NotNull(result.RemoteEndPoint);
                 Assert.NotNull(result.Buffer);
