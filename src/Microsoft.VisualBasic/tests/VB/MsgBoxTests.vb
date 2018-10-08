@@ -1,4 +1,8 @@
-﻿Imports Xunit
+﻿' Licensed to the .NET Foundation under one or more agreements.
+' The .NET Foundation licenses this file to you under the MIT license.
+' See the LICENSE file in the project root for more information.
+
+Imports Xunit
 
 Namespace Microsoft.VisualBasic.Tests.VB
     Public NotInheritable Class MsgBoxTests
@@ -41,7 +45,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         <PlatformSpecific(TestPlatforms.AnyUnix)>
-        Public Sub MsgBoxTestUnix()
+        Public Shared Sub MsgBoxTestUnix()
             Assert.Throws(Of PlatformNotSupportedException)(Sub() MsgBox("Select OK"))
         End Sub
     End Class
