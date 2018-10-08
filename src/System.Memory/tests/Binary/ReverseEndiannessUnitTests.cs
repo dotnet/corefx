@@ -9,7 +9,7 @@ namespace System.Buffers.Binary.Tests
     public class ReverseEndianessUnitTests
     {
         [Fact]
-        public void ReverseEndianness_Byte_DoesNothing()
+        public void ReverseEndianness_ByteAndSByte_DoesNothing()
         {
             byte valueMax = byte.MaxValue;
             byte valueMin = byte.MinValue;
