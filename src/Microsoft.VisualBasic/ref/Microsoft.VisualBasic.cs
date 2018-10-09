@@ -127,39 +127,32 @@ namespace Microsoft.VisualBasic
         public const string vbVerticalTab = "\v";
         public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
         public const CompareMethod vbTextCompare = CompareMethod.Text;
-
-        //MsgBoxResult
-        public const MsgBoxResult vbOK = MsgBoxResult.Ok;
-
-        public const MsgBoxResult vbCancel = MsgBoxResult.Cancel;
         public const MsgBoxResult vbAbort = MsgBoxResult.Abort;
-        public const MsgBoxResult vbRetry = MsgBoxResult.Retry;
+        public const MsgBoxResult vbCancel = MsgBoxResult.Cancel;
         public const MsgBoxResult vbIgnore = MsgBoxResult.Ignore;
-        public const MsgBoxResult vbYes = MsgBoxResult.Yes;
         public const MsgBoxResult vbNo = MsgBoxResult.No;
-
-        //MsgBoxStyle
-        //You may BitOr one value from each group
-        public const MsgBoxStyle vbOKOnly = MsgBoxStyle.OkOnly;
-
-        public const MsgBoxStyle vbOKCancel = MsgBoxStyle.OkCancel;
+        public const MsgBoxResult vbOK = MsgBoxResult.Ok;
+        public const MsgBoxResult vbRetry = MsgBoxResult.Retry;
+        public const MsgBoxResult vbYes = MsgBoxResult.Yes;
         public const MsgBoxStyle vbAbortRetryIgnore = MsgBoxStyle.AbortRetryIgnore;
-        public const MsgBoxStyle vbYesNoCancel = MsgBoxStyle.YesNoCancel;
-        public const MsgBoxStyle vbYesNo = MsgBoxStyle.YesNo;
-        public const MsgBoxStyle vbRetryCancel = MsgBoxStyle.RetryCancel;
+        public const MsgBoxStyle vbApplicationModal = MsgBoxStyle.ApplicationModal;
         public const MsgBoxStyle vbCritical = MsgBoxStyle.Critical;
-        public const MsgBoxStyle vbQuestion = MsgBoxStyle.Question;
-        public const MsgBoxStyle vbExclamation = MsgBoxStyle.Exclamation;
-        public const MsgBoxStyle vbInformation = MsgBoxStyle.Information;
         public const MsgBoxStyle vbDefaultButton1 = MsgBoxStyle.DefaultButton1;
         public const MsgBoxStyle vbDefaultButton2 = MsgBoxStyle.DefaultButton2;
         public const MsgBoxStyle vbDefaultButton3 = MsgBoxStyle.DefaultButton3;
-        public const MsgBoxStyle vbApplicationModal = MsgBoxStyle.ApplicationModal;
-        public const MsgBoxStyle vbSystemModal = MsgBoxStyle.SystemModal;
+        public const MsgBoxStyle vbExclamation = MsgBoxStyle.Exclamation;
+        public const MsgBoxStyle vbInformation = MsgBoxStyle.Information;
         public const MsgBoxStyle vbMsgBoxHelp = MsgBoxStyle.MsgBoxHelp;
-        public const MsgBoxStyle vbMsgBoxRight = MsgBoxStyle.MsgBoxRight;
-        public const MsgBoxStyle vbMsgBoxRtlReading = MsgBoxStyle.MsgBoxRtlReading;
-        public const MsgBoxStyle vbMsgBoxSetForeground = MsgBoxStyle.MsgBoxSetForeground;
+        public const MsgBoxStyle vbMsgBoxRight =(MsgBoxStyle) 0x8_0000;
+        public const MsgBoxStyle vbMsgBoxRtlReading = (MsgBoxStyle) 0x10_0000;
+        public const MsgBoxStyle vbMsgBoxSetForeground = (MsgBoxStyle)0x1_0000;
+        public const MsgBoxStyle vbOKCancel = MsgBoxStyle.OkCancel;
+        public const MsgBoxStyle vbOKOnly = MsgBoxStyle.OkOnly;
+        public const MsgBoxStyle vbQuestion = MsgBoxStyle.Question;
+        public const MsgBoxStyle vbRetryCancel = MsgBoxStyle.RetryCancel;
+        public const MsgBoxStyle vbSystemModal = MsgBoxStyle.SystemModal;
+        public const MsgBoxStyle vbYesNo = MsgBoxStyle.YesNo;
+        public const MsgBoxStyle vbYesNoCancel = MsgBoxStyle.YesNoCancel;
     }
 
     public sealed partial class ControlChars
@@ -553,43 +546,43 @@ namespace Microsoft.VisualBasic.FileIO
         public static string CombinePath(string baseDirectory, string relativePath) { throw null; }
         public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName) { }
         public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, bool overwrite) { }
-        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }        public static void CopyFile(string sourceFileName, string destinationFileName) { }
+        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, UIOption showUI) { }
+        public static void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName, UIOption showUI, UICancelOption onUserCancel) { }        public static void CopyFile(string sourceFileName, string destinationFileName) { }
         public static void CopyFile(string sourceFileName, string destinationFileName, bool overwrite) { }
-        public static void CopyFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        public static void CopyFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void CopyFile(string sourceFileName, string destinationFileName, UIOption showUI) { }
+        public static void CopyFile(string sourceFileName, string destinationFileName, UIOption showUI, UICancelOption onUserCancel) { }
         public static void CreateDirectory(string directory) { }
-        public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.DeleteDirectoryOption onDirectoryNotEmpty) { }
-        public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle) { }
-        public static void DeleteDirectory(string directory, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void DeleteDirectory(string directory, DeleteDirectoryOption onDirectoryNotEmpty) { }
+        public static void DeleteDirectory(string directory, UIOption showUI, RecycleOption recycle) { }
+        public static void DeleteDirectory(string directory, UIOption showUI, RecycleOption recycle, UICancelOption onUserCancel) { }
         public static void DeleteFile(string file) { }
-        public static void DeleteFile(string file, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle) { }
-        public static void DeleteFile(string file, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.RecycleOption recycle, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void DeleteFile(string file, UIOption showUI, RecycleOption recycle) { }
+        public static void DeleteFile(string file, UIOption showUI, RecycleOption recycle, UICancelOption onUserCancel) { }
         public static bool DirectoryExists(string directory) { throw null; }
         public static bool FileExists(string file) { throw null; }
         public static System.Collections.ObjectModel.ReadOnlyCollection<string> FindInFiles(string directory, string containsText, bool ignoreCase, Microsoft.VisualBasic.FileIO.SearchOption searchType) { throw null; }
         public static System.Collections.ObjectModel.ReadOnlyCollection<string> FindInFiles(string directory, string containsText, bool ignoreCase, Microsoft.VisualBasic.FileIO.SearchOption searchType, params string[] fileWildcards) { throw null; }
         public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetDirectories(string directory) { throw null; }
-        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetDirectories(string directory, Microsoft.VisualBasic.FileIO.SearchOption searchType, params string[] wildcards) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetDirectories(string directory, SearchOption searchType, params string[] wildcards) { throw null; }
         public static System.IO.DirectoryInfo GetDirectoryInfo(string directory) { throw null; }
         public static System.IO.DriveInfo GetDriveInfo(string drive) { throw null; }
         public static System.IO.FileInfo GetFileInfo(string file) { throw null; }
         public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetFiles(string directory) { throw null; }
-        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetFiles(string directory, Microsoft.VisualBasic.FileIO.SearchOption searchType, params string[] wildcards) { throw null; }
+        public static System.Collections.ObjectModel.ReadOnlyCollection<string> GetFiles(string directory, SearchOption searchType, params string[] wildcards) { throw null; }
         public static string GetName(string path) { throw null; }
         public static string GetParentPath(string path) { throw null; }
         public static string GetTempFileName() { throw null; }
         public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName) { }
         public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, bool overwrite) { }
-        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
+        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, UIOption showUI) { }
+        public static void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName, UIOption showUI, UICancelOption onUserCancel) { }
         public static void MoveFile(string sourceFileName, string destinationFileName) { }
         public static void MoveFile(string sourceFileName, string destinationFileName, bool overwrite) { }
-        public static void MoveFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI) { }
-        public static void MoveFile(string sourceFileName, string destinationFileName, Microsoft.VisualBasic.FileIO.UIOption showUI, Microsoft.VisualBasic.FileIO.UICancelOption onUserCancel) { }
-        public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file) { throw null; }
-        public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file, params int[] fieldWidths) { throw null; }
-        public static Microsoft.VisualBasic.FileIO.TextFieldParser OpenTextFieldParser(string file, params string[] delimiters) { throw null; }
+        public static void MoveFile(string sourceFileName, string destinationFileName, UIOption showUI) { }
+        public static void MoveFile(string sourceFileName, string destinationFileName, UIOption showUI,UICancelOption onUserCancel) { }
+        public static TextFieldParser OpenTextFieldParser(string file) { throw null; }
+        public static TextFieldParser OpenTextFieldParser(string file, params int[] fieldWidths) { throw null; }
+        public static TextFieldParser OpenTextFieldParser(string file, params string[] delimiters) { throw null; }
         public static System.IO.StreamReader OpenTextFileReader(string file) { throw null; }
         public static System.IO.StreamReader OpenTextFileReader(string file, System.Text.Encoding encoding) { throw null; }
         public static System.IO.StreamWriter OpenTextFileWriter(string file, bool append) { throw null; }
@@ -678,14 +671,14 @@ namespace Microsoft.VisualBasic.FileIO
         public void SetFieldWidths(params int[] fieldWidths) { }
         void IDisposable.Dispose() { throw new NotImplementedException(); }
     }
-    public enum UIOption
-    {
-        OnlyErrorDialogs = 2,
-        AllDialogs = 3
-    }
     public enum UICancelOption
     {
         DoNothing = 2,
         ThrowException = 3
+    }
+    public enum UIOption
+    {
+        OnlyErrorDialogs = 2,
+        AllDialogs = 3
     }
 }
