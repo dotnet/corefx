@@ -22,14 +22,14 @@ namespace System.Net.Sockets
     // to block the user thread in case a graceful close has been
     // requested.  (It's not legal to block any other thread - such closes
     // are always abortive.)
-    internal partial class SafeCloseSocket :
+    internal partial class SafeSocketHandle :
 #if DEBUG
         DebugSafeHandleMinusOneIsInvalid
 #else
         SafeHandleMinusOneIsInvalid
 #endif
     {
-        protected SafeCloseSocket() : base(true) { }
+        protected SafeSocketHandle() : base(true) { }
 
         private InnerSafeCloseSocket _innerSocket;
         private volatile bool _released;
@@ -59,7 +59,7 @@ namespace System.Net.Sockets
             }
             catch (Exception e)
             {
-                Debug.Fail("SafeCloseSocket.AddRef after inner socket disposed." + e);
+                Debug.Fail("SafeSocketHandle.AddRef after inner socket disposed." + e);
             }
         }
 
@@ -76,7 +76,7 @@ namespace System.Net.Sockets
             }
             catch (Exception e)
             {
-                Debug.Fail("SafeCloseSocket.Release after inner socket disposed." + e);
+                Debug.Fail("SafeSocketHandle.Release after inner socket disposed." + e);
             }
         }
 #endif
@@ -90,9 +90,9 @@ namespace System.Net.Sockets
 #endif
         }
 
-        private static SafeCloseSocket CreateSocket(InnerSafeCloseSocket socket)
+        private static SafeSocketHandle CreateSocket(InnerSafeCloseSocket socket)
         {
-            SafeCloseSocket ret = new SafeCloseSocket();
+            SafeSocketHandle ret = new SafeSocketHandle();
             CreateSocket(socket, ret);
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(null, ret);
@@ -100,7 +100,7 @@ namespace System.Net.Sockets
             return ret;
         }
 
-        protected static void CreateSocket(InnerSafeCloseSocket socket, SafeCloseSocket target)
+        protected static void CreateSocket(InnerSafeCloseSocket socket, SafeSocketHandle target)
         {
             if (socket != null && socket.IsInvalid)
             {

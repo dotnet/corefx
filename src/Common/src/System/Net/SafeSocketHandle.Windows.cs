@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace System.Net.Sockets
 {
-    internal partial class SafeCloseSocket :
+    internal partial class SafeSocketHandle :
 #if DEBUG
         DebugSafeHandleMinusOneIsInvalid
 #else
@@ -100,13 +100,13 @@ namespace System.Net.Sockets
             }
         }
 
-        internal static SafeCloseSocket CreateWSASocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
+        internal static SafeSocketHandle CreateWSASocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
             return CreateSocket(InnerSafeCloseSocket.CreateWSASocket(addressFamily, socketType, protocolType));
         }
 
-        internal static SafeCloseSocket Accept(
-            SafeCloseSocket socketHandle,
+        internal static SafeSocketHandle Accept(
+            SafeSocketHandle socketHandle,
             byte[] socketAddress,
             ref int socketAddressSize)
         {
@@ -225,7 +225,7 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            internal static InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressSize)
+            internal static InnerSafeCloseSocket Accept(SafeSocketHandle socketHandle, byte[] socketAddress, ref int socketAddressSize)
             {
                 InnerSafeCloseSocket result = Interop.Winsock.accept(socketHandle.DangerousGetHandle(), socketAddress, ref socketAddressSize);
                 if (result.IsInvalid)

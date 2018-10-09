@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace System.Net.Sockets
 {
-    internal partial class SafeCloseSocket :
+    internal partial class SafeSocketHandle :
 #if DEBUG
         DebugSafeHandleMinusOneIsInvalid
 #else
@@ -41,7 +41,7 @@ namespace System.Net.Sockets
             }
         }
 
-        public void TransferTrackedState(SafeCloseSocket target)
+        public void TransferTrackedState(SafeSocketHandle target)
         {
             target._trackedOptions = _trackedOptions;
             target.LastConnectFailed = LastConnectFailed;
@@ -181,19 +181,19 @@ namespace System.Net.Sockets
             IsDisconnected = true;
         }
 
-        public static unsafe SafeCloseSocket CreateSocket(IntPtr fileDescriptor)
+        public static unsafe SafeSocketHandle CreateSocket(IntPtr fileDescriptor)
         {
             return CreateSocket(InnerSafeCloseSocket.CreateSocket(fileDescriptor));
         }
 
-        public static unsafe SocketError CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType, out SafeCloseSocket socket)
+        public static unsafe SocketError CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType, out SafeSocketHandle socket)
         {
             SocketError errorCode;
             socket = CreateSocket(InnerSafeCloseSocket.CreateSocket(addressFamily, socketType, protocolType, out errorCode));
             return errorCode;
         }
 
-        public static unsafe SocketError Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressSize, out SafeCloseSocket socket)
+        public static unsafe SocketError Accept(SafeSocketHandle socketHandle, byte[] socketAddress, ref int socketAddressSize, out SafeSocketHandle socket)
         {
             SocketError errorCode;
             socket = CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, ref socketAddressSize, out errorCode));
@@ -329,7 +329,7 @@ namespace System.Net.Sockets
                 return res;
             }
 
-            public static unsafe InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressLen, out SocketError errorCode)
+            public static unsafe InnerSafeCloseSocket Accept(SafeSocketHandle socketHandle, byte[] socketAddress, ref int socketAddressLen, out SocketError errorCode)
             {
                 IntPtr acceptedFd;
                 if (!socketHandle.IsNonBlocking)

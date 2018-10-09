@@ -129,11 +129,11 @@
     <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs">
       <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.cs">
-      <Link>Common\System\Net\SafeCloseSocket.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\SafeSocketHandle.cs">
+      <Link>Common\System\Net\SafeSocketHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.Windows.cs">
-      <Link>Common\System\Net\SafeCloseSocket.Windows.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\SafeSocketHandle.Windows.cs">
+      <Link>Common\System\Net\SafeSocketHandle.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\SafeCloseSocketAndEvent.cs">
       <Link>Common\System\Net\SafeCloseSocketAndEvent.cs</Link>
