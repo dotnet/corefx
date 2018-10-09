@@ -127,8 +127,11 @@ namespace System.Diagnostics.Tests
                     listener.TraceEvent(null, source, eventType, id, message);
                     EventLogEntry eventLogEntry = ValidateLastEntryMessage(listener, message, source);
 
-                    Assert.Equal(expectedType, eventLogEntry.EntryType);
-                    Assert.Equal(expectedId, eventLogEntry.InstanceId);
+                    if (eventLogEntry != null)
+                    {
+                        Assert.Equal(expectedType, eventLogEntry.EntryType);
+                        Assert.Equal(expectedId, eventLogEntry.InstanceId);
+                    }
                 }
             }
             finally
@@ -197,27 +200,31 @@ namespace System.Diagnostics.Tests
 
                     if (parameters == null || parameters.Length == 0)
                     {
-                        string[] strings;
+                        string[] messages;
                         if (string.IsNullOrEmpty(format))
-                            strings = Array.Empty<string>();
+                            messages = Array.Empty<string>();
                         else
-                            strings = new string[] { format };
+                            messages = new string[] { format };
 
                         EventLogEntry eventLogEntry = listener.EventLog.Entries.LastOrDefault();
-                        Assert.NotNull(eventLogEntry);
-                        Assert.All(strings, message => eventLogEntry.Message.Contains(message));
+                        if (eventLogEntry != null)
+                        {
+                            Assert.All(messages, message => eventLogEntry.Message.Contains(message));
+                        }
                     }
                     else if (string.IsNullOrEmpty(format))
                     {
-                        string[] strings = new string[parameters.Length];
-                        for (int i = 0; i < strings.Length; i++)
+                        string[] messages = new string[parameters.Length];
+                        for (int i = 0; i < messages.Length; i++)
                         {
-                            strings[i] = parameters[i].ToString();
+                            messages[i] = parameters[i].ToString();
                         }
 
                         EventLogEntry eventLogEntry = listener.EventLog.Entries.LastOrDefault();
-                        Assert.NotNull(eventLogEntry);
-                        Assert.All(strings, message => eventLogEntry.Message.Contains(message));
+                        if (eventLogEntry != null)
+                        {
+                            Assert.All(messages, message => eventLogEntry.Message.Contains(message));
+                        }
                     }
                     else
                     {
@@ -245,12 +252,30 @@ namespace System.Diagnostics.Tests
                 {
                     listener.Filter = new EventTypeFilter(SourceLevels.Critical);
                     listener.TraceData(null, source, TraceEventType.Information, 12, "string shouldn't be present");
-                    listener.TraceData(null, source, TraceEventType.Information, 12, "string shouldn't be present", "neither should this");
-                    listener.TraceEvent(null, source, TraceEventType.Information, 12, "trace an event casually", "one more", null);
-                    listener.TraceEvent(null, source, TraceEventType.Information, 12, "i shouldn't be here");
+                    EventLogEntry eventLogEntry = listener.EventLog.Entries.LastOrDefault();
+                    if (eventLogEntry != null)
+                        Assert.DoesNotContain("string shouldn't be present", eventLogEntry.Message);
 
-                    Assert.Null(listener.EventLog.Entries.LastOrDefault());
-                    Assert.Equal(0, listener.EventLog.Entries.Count);
+                    listener.TraceData(null, source, TraceEventType.Information, 12, "string shouldn't be present", "neither should this");
+                    eventLogEntry = listener.EventLog.Entries.LastOrDefault();
+                    if (eventLogEntry != null)
+                    {
+                        Assert.DoesNotContain("string shouldn't be present", eventLogEntry.Message);
+                        Assert.DoesNotContain("neither should this", eventLogEntry.Message);
+                    }
+
+                    listener.TraceEvent(null, source, TraceEventType.Information, 12, "trace an event casually", "one more", null);
+                    eventLogEntry = listener.EventLog.Entries.LastOrDefault();
+                    if (eventLogEntry != null)
+                    {
+                        Assert.DoesNotContain("trace an event casually", eventLogEntry.Message);
+                        Assert.DoesNotContain("one more", eventLogEntry.Message);
+                    }
+
+                    listener.TraceEvent(null, source, TraceEventType.Information, 12, "i shouldn't be here");
+                    eventLogEntry = listener.EventLog.Entries.LastOrDefault();
+                    if (eventLogEntry != null)
+                        Assert.DoesNotContain("i shouldn't be here", eventLogEntry.Message);
                 }
             }
             finally
@@ -282,10 +307,12 @@ namespace System.Diagnostics.Tests
         private EventLogEntry ValidateLastEntryMessage(EventLogTraceListener listener, string message, string source)
         {
             EventLogEntry eventLogEntry = listener.EventLog.Entries.LastOrDefault();
-            Assert.NotNull(eventLogEntry);
-            Assert.Contains(message, eventLogEntry.Message);
-            Assert.Equal(source, eventLogEntry.Source);
-            Assert.StartsWith(Environment.MachineName.ToLowerInvariant(), eventLogEntry.MachineName.ToLowerInvariant());
+            if (eventLogEntry != null)
+            {
+                Assert.Contains(message, eventLogEntry.Message);
+                Assert.Equal(source, eventLogEntry.Source);
+                Assert.StartsWith(Environment.MachineName.ToLowerInvariant(), eventLogEntry.MachineName.ToLowerInvariant());
+            }
 
             return eventLogEntry;
         }
