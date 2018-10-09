@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    internal class MockDerivedType : MockType
+    internal class TypeWithNullUnderlyingSystemType : MockType
     {
         public override Type UnderlyingSystemType => null;
         protected override TypeAttributes GetAttributeFlagsImpl() => TypeAttributes.Class;
@@ -17,7 +17,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void IsAssignableFrom_NullUnderlyingSystemType()
         {
-            var testType = new MockDerivedType();
+            var testType = new TypeWithNullUnderlyingSystemType();
             Assert.Null(testType.UnderlyingSystemType);
             Assert.True(testType.IsAssignableFrom(testType));
 
