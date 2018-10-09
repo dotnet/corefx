@@ -6,10 +6,10 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    internal class MockDerivedType : BaseMockType
+    internal class MockDerivedType : MockType
     {
         public override Type UnderlyingSystemType => null;
-        protected override TypeAttributes GetAttributeFlagsImpl() => new TypeAttributes();
+        protected override TypeAttributes GetAttributeFlagsImpl() => TypeAttributes.Class;
     }
 
     public class TypeDerivedTests

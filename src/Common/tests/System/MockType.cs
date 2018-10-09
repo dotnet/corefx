@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-    internal class BaseMockType : Type
+    internal class MockType : Type
     {
         public override Assembly Assembly => throw Unexpected;
         public override string AssemblyQualifiedName => throw Unexpected;
@@ -103,10 +103,5 @@ namespace System
         public override RuntimeTypeHandle TypeHandle => throw Unexpected;
 
         protected virtual Exception Unexpected => new Exception("Did not expect to be called.");
-    }
-
-    internal class MockType : BaseMockType
-    {
-        public override bool IsAssignableFrom(Type c) => throw Unexpected;
     }
 }
