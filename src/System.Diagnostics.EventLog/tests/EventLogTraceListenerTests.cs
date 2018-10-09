@@ -178,7 +178,12 @@ namespace System.Diagnostics.Tests
             yield return new object[] { "This is a format with 1 object {0}", new object[] { 123 } };
             yield return new object[] { "This is a weird {0}{1}{2} format that has multiple inputs {3}", new object[] { 0, 1, "two", "." } };
             yield return new object[] { "This is a weird {0}{1}{2} format that but args are null", null };
-            yield return new object[] { "This is a weird {0}{1}{2} format that but args length is 0", new object[] { } };
+            if (!PlatformDetection.IsFullFramework)
+            {
+                // Full framework doesn't check for args.Length == 0 and if format is not null or empty, it calls string.Format
+                yield return new object[] { "This is a weird {0}{1}{2} format that but args length is 0", new object[] { } };
+            }
+
             yield return new object[] { string.Empty, new object[] { } };
             yield return new object[] { null, new object[] { } };
             yield return new object[] { string.Empty, new object[] { 2000, 101, "two", "string is a test." } };
