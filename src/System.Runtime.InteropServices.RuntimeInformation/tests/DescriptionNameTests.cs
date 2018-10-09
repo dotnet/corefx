@@ -17,7 +17,7 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
             // sanity check that the test run or CI job
             // was actually run on the OS that it claims to be on
             string dvs = PlatformDetection.GetDistroVersionString();
-            string osd = RuntimeInformation.OSDescription;
+            string osd = RuntimeInformation.OSDescription.Trim();
             string osv = Environment.OSVersion.ToString();
             string osa = RuntimeInformation.OSArchitecture.ToString();
             string pra = RuntimeInformation.ProcessArchitecture.ToString();
