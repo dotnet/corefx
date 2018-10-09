@@ -4,7 +4,9 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -403,6 +405,41 @@ namespace System.Collections.Tests
             // Remove first item to reduce Count to size and alter the contiguity of the dictionary
             dict.Remove(keyValueSelector(0));
             return dict;
+        }
+
+        [Fact]
+        public void ComparerSerialization()
+        {
+            // Strings switch between randomized and non-randomized comparers, 
+            // however this should never be observable externally.
+            TestComparerSerialization(EqualityComparer<string>.Default);
+            TestComparerSerialization(StringComparer.Ordinal);
+            TestComparerSerialization(StringComparer.OrdinalIgnoreCase);
+            TestComparerSerialization(StringComparer.CurrentCulture);
+            TestComparerSerialization(StringComparer.CurrentCultureIgnoreCase);
+            TestComparerSerialization(StringComparer.InvariantCulture);
+            TestComparerSerialization(StringComparer.InvariantCultureIgnoreCase);
+
+            // Check other types while here, IEquatable valuetype, nullable valuetype, and non IEquatable object
+            TestComparerSerialization(EqualityComparer<int>.Default);
+            TestComparerSerialization(EqualityComparer<int?>.Default);
+            TestComparerSerialization(EqualityComparer<object>.Default);
+        }
+
+        private static void TestComparerSerialization<T>(IEqualityComparer<T> equalityComparer)
+        {
+            var bf = new BinaryFormatter();
+            var s = new MemoryStream();
+
+            var dict = new Dictionary<T, T>(equalityComparer);
+
+            Assert.IsType(equalityComparer.GetType(), dict.Comparer);
+
+            bf.Serialize(s, dict);
+            s.Position = 0;
+            dict = (Dictionary<T, T>)bf.Deserialize(s);
+
+            Assert.IsType(equalityComparer.GetType(), dict.Comparer);
         }
 
         private sealed class DictionarySubclass<TKey, TValue> : Dictionary<TKey, TValue>
