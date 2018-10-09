@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 public partial class TimerFiringTests
@@ -208,5 +210,90 @@ public partial class TimerFiringTests
         Assert.True(allTicksCompleted.WaitOne(MaxPositiveTimeoutInMs));
         Assert.Equal(0, tickCount);
         Assert.Throws<ObjectDisposedException>(() => t.Change(0, 0));
+    }
+
+    [OuterLoop("Takes several seconds")]
+    [Fact]
+    public async Task Timer_ManyDifferentSingleDueTimes_AllFireSuccessfully()
+    {
+        await Task.WhenAll(from p in Enumerable.Range(0, Environment.ProcessorCount)
+                           select Task.Run(async () =>
+                           {
+                               await Task.WhenAll(from i in Enumerable.Range(1, 1_000) select DueTimeAsync(i));
+                               await Task.WhenAll(from i in Enumerable.Range(1, 1_000) select DueTimeAsync(1_001 - i));
+                           }));
+    }
+
+    [OuterLoop("Takes several seconds")]
+    [Fact]
+    public async Task Timer_ManyDifferentPeriodicTimes_AllFireSuccessfully()
+    {
+        await Task.WhenAll(from p in Enumerable.Range(0, Environment.ProcessorCount)
+                           select Task.Run(async () =>
+                           {
+                               await Task.WhenAll(from i in Enumerable.Range(1, 400) select PeriodAsync(period: i, iterations: 3));
+                               await Task.WhenAll(from i in Enumerable.Range(1, 400) select PeriodAsync(period: 401 - i, iterations: 3));
+                           }));
+    }
+
+    [OuterLoop("Takes several seconds")]
+    [Theory] // selection based on 333ms threshold used by implementation
+    [InlineData(new int[] { 15 })]
+    [InlineData(new int[] { 333 })]
+    [InlineData(new int[] { 332, 333, 334 })]
+    [InlineData(new int[] { 200, 300, 400 })]
+    [InlineData(new int[] { 200, 250, 300 })]
+    [InlineData(new int[] { 400, 450, 500 })]
+    [InlineData(new int[] { 1000 })]
+    public async Task Timer_ManyDifferentSerialSingleDueTimes_AllFireWithinAllowedRange(int[] dueTimes)
+    {
+        const int MillisecondsPadding = 50; // for each timer, out of range == Math.Abs(actualTime - dueTime) > MillisecondsPadding
+        const int MaxAllowedOutOfRangePercentage = 10; // max % allowed out of range to pass test
+
+        long totalTimers = 0, outOfRange = 0;
+        await Task.WhenAll(from p in Enumerable.Range(0, Environment.ProcessorCount)
+                           select Task.Run(async () =>
+                           {
+                               await Task.WhenAll(from dueTimeTemplate in dueTimes
+                                                  from dueTime in Enumerable.Repeat(dueTimeTemplate, 10)
+                                                  select Task.Run(async () =>
+                                                  {
+                                                      var sw = new Stopwatch();
+                                                      for (int i = 1; i <= 1_000 / dueTime; i++)
+                                                      {
+                                                          sw.Restart();
+                                                          await DueTimeAsync(dueTime);
+                                                          sw.Stop();
+
+                                                          Interlocked.Increment(ref totalTimers);
+                                                          if (Math.Abs(sw.ElapsedMilliseconds - dueTime) > MillisecondsPadding)
+                                                          {
+                                                              Interlocked.Increment(ref outOfRange);
+                                                          }
+                                                      }
+                                                  }));
+                           }));
+
+        Assert.InRange((double)outOfRange / totalTimers * 100, 0, MaxAllowedOutOfRangePercentage);
+    }
+
+    private static Task DueTimeAsync(int dueTime)
+    {
+        // We could just use Task.Delay, but it only uses Timer as an implementation detail.
+        // Since these are Timer tests, we use an implementation that explicitly uses Timer.
+        var tcs = new TaskCompletionSource<bool>();
+        var t = new Timer(_ => tcs.SetResult(true)); // rely on Timer(TimerCallback) rooting itself
+        t.Change(dueTime, -1);
+        return tcs.Task;
+    }
+
+    private static async Task PeriodAsync(int period, int iterations)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+        using (var t = new Timer(_ => { if (Interlocked.Decrement(ref iterations) == 0) tcs.SetResult(true); })) // rely on Timer(TimerCallback) rooting itself
+        {
+            t.Change(period, period);
+            await tcs.Task.ConfigureAwait(false);
+        }
     }
 }
