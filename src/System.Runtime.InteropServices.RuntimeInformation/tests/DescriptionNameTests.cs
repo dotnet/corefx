@@ -79,8 +79,6 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyWindowsDescriptionDoesNotContainTrailingWhitespace()
         {
-            Assert.NotNull(RuntimeInformation.OSDescription);
-            Assert.Same(RuntimeInformation.OSDescription, RuntimeInformation.OSDescription);
             Assert.False(RuntimeInformation.OSDescription.EndsWith(" "));
         }
 
