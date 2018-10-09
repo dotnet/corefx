@@ -413,8 +413,10 @@ namespace System.Collections.Tests
             // Strings switch between randomized and non-randomized comparers, 
             // however this should never be observable externally.
             TestComparerSerialization(EqualityComparer<string>.Default);
-            TestComparerSerialization(StringComparer.Ordinal);
-            TestComparerSerialization(StringComparer.OrdinalIgnoreCase);
+            // OrdinalCaseSensitiveComparer is internal and (de)serializes as OrdinalComparer
+            TestComparerSerialization(StringComparer.Ordinal, "System.OrdinalComparer");
+            // OrdinalIgnoreCaseComparer is internal and (de)serializes as OrdinalComparer
+            TestComparerSerialization(StringComparer.OrdinalIgnoreCase, "System.OrdinalComparer");
             TestComparerSerialization(StringComparer.CurrentCulture);
             TestComparerSerialization(StringComparer.CurrentCultureIgnoreCase);
             TestComparerSerialization(StringComparer.InvariantCulture);
@@ -426,7 +428,7 @@ namespace System.Collections.Tests
             TestComparerSerialization(EqualityComparer<object>.Default);
         }
 
-        private static void TestComparerSerialization<T>(IEqualityComparer<T> equalityComparer)
+        private static void TestComparerSerialization<T>(IEqualityComparer<T> equalityComparer, string internalTypeName = null)
         {
             var bf = new BinaryFormatter();
             var s = new MemoryStream();
@@ -435,11 +437,21 @@ namespace System.Collections.Tests
 
             Assert.IsType(equalityComparer.GetType(), dict.Comparer);
 
+
             bf.Serialize(s, dict);
             s.Position = 0;
             dict = (Dictionary<T, T>)bf.Deserialize(s);
 
-            Assert.IsType(equalityComparer.GetType(), dict.Comparer);
+            if (internalTypeName == null)
+            {
+                Assert.IsType(equalityComparer.GetType(), dict.Comparer);
+            }
+            else
+            {
+                Assert.Equal(internalTypeName, dict.Comparer.GetType().ToString());
+            }
+
+            Assert.True(equalityComparer.Equals(dict.Comparer));
         }
 
         private sealed class DictionarySubclass<TKey, TValue> : Dictionary<TKey, TValue>
