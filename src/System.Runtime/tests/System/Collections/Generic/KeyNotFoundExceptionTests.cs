@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 
 using Xunit;
-using System.Tests;
 
 namespace System.Tests
 {
