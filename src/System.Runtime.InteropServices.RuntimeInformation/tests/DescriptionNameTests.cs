@@ -17,7 +17,7 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
             // sanity check that the test run or CI job
             // was actually run on the OS that it claims to be on
             string dvs = PlatformDetection.GetDistroVersionString();
-            string osd = RuntimeInformation.OSDescription.Trim();
+            string osd = RuntimeInformation.OSDescription;
             string osv = Environment.OSVersion.ToString();
             string osa = RuntimeInformation.OSArchitecture.ToString();
             string pra = RuntimeInformation.ProcessArchitecture.ToString();
@@ -73,6 +73,15 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         {
             Assert.NotNull(RuntimeInformation.OSDescription);
             Assert.Same(RuntimeInformation.OSDescription, RuntimeInformation.OSDescription);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void VerifyWindowsDescriptionDoesNotContainTrailingWhitespace()
+        {
+            Assert.NotNull(RuntimeInformation.OSDescription);
+            Assert.Same(RuntimeInformation.OSDescription, RuntimeInformation.OSDescription);
+            Assert.False(RuntimeInformation.OSDescription.EndsWith(" "));
         }
 
         [Fact, PlatformSpecific(TestPlatforms.Windows)]  // Checks Windows debug name in RuntimeInformation
