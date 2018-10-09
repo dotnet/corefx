@@ -21,7 +21,7 @@ internal partial class Interop
             if (RtlGetVersion(ref osvi) == 0)
             {
                 return $"{version} {osvi.dwMajorVersion}.{osvi.dwMinorVersion}.{osvi.dwBuildNumber}" +
-                       $"{(string.IsNullOrWhitespace(osvi.szCSDVersion?[0]) ? string.Empty : new string(&(osvi.szCSDVersion[0])))}";
+                       $"{(osvi.szCSDVersion[0] == '\0' ? string.Empty : " " + new string(&(osvi.szCSDVersion[0])))}";
             }
             else
             {
