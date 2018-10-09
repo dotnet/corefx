@@ -19,19 +19,9 @@ internal partial class Interop
             const string version = "Microsoft Windows";
             if (RtlGetVersion(ref osvi) == 0)
             {
-                var stringBuilder = new StringBuilder();
-
-                stringBuilder.Append(version);
-                stringBuilder.Append(" ");
-                stringBuilder.AppendFormat("{0}.{1}.{2}", osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
-
-                if (osvi.szCSDVersion[0] != '\0')
-                {
-                    stringBuilder.Append(" ");
-                    stringBuilder.Append(new string(&(osvi.szCSDVersion[0])));
-                }
-
-                return stringBuilder.ToString();
+                return osvi.szCSDVersion[0] != '\0' ?
+                    string.Format("{0} {1}.{2}.{3} {4}", version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, new string(&(osvi.szCSDVersion[0]))) :
+                    string.Format("{0} {1}.{2}.{3}", version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
             }
             else
             {
