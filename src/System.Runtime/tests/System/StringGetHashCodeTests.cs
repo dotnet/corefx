@@ -35,6 +35,16 @@ namespace System.Tests
             Assert.Equal(SuccessExitCode, exitCode);
         }
 
+        [Theory]
+        [MemberData(nameof(GetHashCodeOrdinalIgnoreCase_TestData))]
+        public void GetHashCode_OrdinalIgnoreCase_ReturnsSameHashCodeAsUpperCaseOrdinal(string input)
+        {
+            // As an implementation detail, the OrdinalIgnoreCase hash code calculation is simply the hash code
+            // of the upper-invariant version of the input string.
+
+            Assert.Equal(input.ToUpperInvariant().GetHashCode(), input.GetHashCode(StringComparison.OrdinalIgnoreCase));
+        }
+
         public static IEnumerable<object[]> GetHashCode_TestData()
         {
             for (int i = 0; i < s_GetHashCodes.Length; i++)
@@ -60,5 +70,25 @@ namespace System.Tests
             () => { return CultureInfo.CurrentCulture.CompareInfo.GetHashCode("abc", CompareOptions.Ordinal); },
             () => { return CultureInfo.CurrentCulture.CompareInfo.GetHashCode("abc", CompareOptions.OrdinalIgnoreCase); }
         };
+
+        public static IEnumerable<object[]> GetHashCodeOrdinalIgnoreCase_TestData()
+        {
+            // 0 through 8 char lowercase & uppercase ASCII strings
+            // tests the various branches within the hash code calculation routines
+
+            for (int i = 0; i <= 8; i++)
+            {
+                yield return new object[] { "abcdefgh".Substring(0, i) };
+                yield return new object[] { "ABCDEFGH".Substring(0, i) };
+            }
+
+            // 0 through 16 char mixed case mostly-ASCII string with a non-ASCII character
+            // tests fallback logic for OrdinalIgnoreCase hash
+
+            for (int i = 0; i <= 16; i++)
+            {
+                yield return new object[] { "AaBbCcDdEeFfGgHh".Insert(i, "\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */) };
+            }
+        }
     }
 }
