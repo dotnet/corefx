@@ -3,8 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -250,7 +253,9 @@ public partial class TimerFiringTests
         const int MillisecondsPadding = 50; // for each timer, out of range == Math.Abs(actualTime - dueTime) > MillisecondsPadding
         const int MaxAllowedOutOfRangePercentage = 10; // max % allowed out of range to pass test
 
-        long totalTimers = 0, outOfRange = 0;
+        var outOfRange = new ConcurrentQueue<KeyValuePair<int, long>>();
+
+        long totalTimers = 0;
         await Task.WhenAll(from p in Enumerable.Range(0, Environment.ProcessorCount)
                            select Task.Run(async () =>
                            {
@@ -268,13 +273,32 @@ public partial class TimerFiringTests
                                                           Interlocked.Increment(ref totalTimers);
                                                           if (Math.Abs(sw.ElapsedMilliseconds - dueTime) > MillisecondsPadding)
                                                           {
-                                                              Interlocked.Increment(ref outOfRange);
+                                                              outOfRange.Enqueue(new KeyValuePair<int, long>(dueTime, sw.ElapsedMilliseconds));
                                                           }
                                                       }
                                                   }));
                            }));
 
-        Assert.InRange((double)outOfRange / totalTimers * 100, 0, MaxAllowedOutOfRangePercentage);
+        double percOutOfRange = (double)outOfRange.Count / totalTimers * 100;
+        if (percOutOfRange > MaxAllowedOutOfRangePercentage)
+        {
+            IOrderedEnumerable<IGrouping<int, KeyValuePair<int, long>>> results =
+                from sample in outOfRange
+                group sample by sample.Key into groupedByDueTime
+                orderby groupedByDueTime.Key
+                select groupedByDueTime;
+
+            var sb = new StringBuilder();
+            sb.AppendFormat("{0}% out of {1} timer firings were off by more than {2}ms",
+                percOutOfRange, totalTimers, MillisecondsPadding);
+            foreach (IGrouping<int, KeyValuePair<int, long>> result in results)
+            {
+                sb.AppendLine();
+                sb.AppendFormat("Expected: {0}, Actuals: {1}", result.Key, string.Join(", ", result.Select(k => k.Value)));
+            }
+
+            Assert.True(false, sb.ToString());
+        }
     }
 
     private static Task DueTimeAsync(int dueTime)
