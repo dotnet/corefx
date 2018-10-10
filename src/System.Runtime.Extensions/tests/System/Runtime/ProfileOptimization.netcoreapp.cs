@@ -13,6 +13,7 @@ namespace System.Runtime.Tests
     public class ProfileOptimizationTest : RemoteExecutorTestBase
     {
         [Fact]
+        [ActiveIssue(31792)]
         public void ProfileOptimization_CheckFileExists()
         {
             string profileFile = GetTestFileName();
