@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class StringGetHashCodeTests : RemoteExecutorTestBase
+    public partial class StringGetHashCodeTests : RemoteExecutorTestBase
     {
         /// <summary>
         /// Ensure that hash codes are randomized by getting the hash in two processes
@@ -33,16 +33,6 @@ namespace System.Tests
                 }
             } while (exitCode != SuccessExitCode && retry < 3);
             Assert.Equal(SuccessExitCode, exitCode);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetHashCodeOrdinalIgnoreCase_TestData))]
-        public void GetHashCode_OrdinalIgnoreCase_ReturnsSameHashCodeAsUpperCaseOrdinal(string input)
-        {
-            // As an implementation detail, the OrdinalIgnoreCase hash code calculation is simply the hash code
-            // of the upper-invariant version of the input string.
-
-            Assert.Equal(input.ToUpperInvariant().GetHashCode(), input.GetHashCode(StringComparison.OrdinalIgnoreCase));
         }
 
         public static IEnumerable<object[]> GetHashCode_TestData()
@@ -70,34 +60,5 @@ namespace System.Tests
             () => { return CultureInfo.CurrentCulture.CompareInfo.GetHashCode("abc", CompareOptions.Ordinal); },
             () => { return CultureInfo.CurrentCulture.CompareInfo.GetHashCode("abc", CompareOptions.OrdinalIgnoreCase); }
         };
-
-        public static IEnumerable<object[]> GetHashCodeOrdinalIgnoreCase_TestData()
-        {
-            // 0 through 8 char lowercase & uppercase ASCII strings
-            // tests the various branches within the hash code calculation routines
-
-            for (int i = 0; i <= 8; i++)
-            {
-                yield return new object[] { "abcdefgh".Substring(0, i) };
-                yield return new object[] { "ABCDEFGH".Substring(0, i) };
-            }
-
-            // 16 char mixed case mostly-ASCII string plus one non-ASCII character inserted at various locations
-            // tests fallback logic for OrdinalIgnoreCase hash
-
-            for (int i = 0; i <= 16; i++)
-            {
-                yield return new object[] { "AaBbCcDdEeFfGgHh".Insert(i, "\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */) };
-                yield return new object[] { "AaBbCcDdEeFfGgHh".Insert(i, "\u044D" /* CYRILLIC SMALL LETTER E */) };
-                yield return new object[] { "AaBbCcDdEeFfGgHh".Insert(i, "\u0131" /* LATIN SMALL LETTER DOTLESS I */) };
-            }
-
-            // Various texts copied from Microsoft's non-U.S. home pages, for further localization tests
-
-            yield return new object[] { "Игры и развлечения без границ в формате 4K." }; // ru-RU
-            yield return new object[] { "Poder portátil." }; // es-ES
-            yield return new object[] { "想像を超えた、パフォーマンスを。" }; // ja-JP
-            yield return new object[] { "Élégant et performant." }; // fr-FR
-        }
     }
 }
