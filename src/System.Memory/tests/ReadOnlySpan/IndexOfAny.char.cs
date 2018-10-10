@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -66,7 +67,7 @@ namespace System.SpanTests
         {
             Random rnd = new Random(42);
 
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
@@ -75,7 +76,7 @@ namespace System.SpanTests
 
                 for (int i = 0; i < length; i++)
                 {
-                    int index = rnd.Next(0, 2) == 0 ? 0 : 1;
+                    int index = rnd.Next(0, targets.Length) == 0 ? 0 : 1;
                     char target0 = targets[index];
                     char target1 = targets[(index + 1) % 2];
                     int idx = span.IndexOfAny(target0, target1);
@@ -87,13 +88,9 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchTwo_Char()
         {
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
-                char[] a = new char[length];
-                for (int i = 0; i < length; i++)
-                {
-                    a[i] = (char)(i + 1);
-                }
+                char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
@@ -126,7 +123,7 @@ namespace System.SpanTests
         public static void TestNoMatchTwo_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 0; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 char target0 = (char)rnd.Next(1, 256);
@@ -141,7 +138,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestMultipleMatchTwo_Char()
         {
-            for (int length = 3; length < byte.MaxValue; length++)
+            for (int length = 3; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 for (int i = 0; i < length; i++)
@@ -163,7 +160,7 @@ namespace System.SpanTests
         [Fact]
         public static void MakeSureNoChecksGoOutOfRangeTwo_Char()
         {
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -173,7 +170,7 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
 
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -197,7 +194,7 @@ namespace System.SpanTests
         {
             Random rnd = new Random(42);
 
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
@@ -206,7 +203,7 @@ namespace System.SpanTests
 
                 for (int i = 0; i < length; i++)
                 {
-                    int index = rnd.Next(0, 3);
+                    int index = rnd.Next(0, targets.Length);
                     char target0 = targets[index];
                     char target1 = targets[(index + 1) % 2];
                     char target2 = targets[(index + 1) % 3];
@@ -219,13 +216,9 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchThree_Char()
         {
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
-                char[] a = new char[length];
-                for (int i = 0; i < length; i++)
-                {
-                    a[i] = (char)(i + 1);
-                }
+                char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
@@ -261,7 +254,7 @@ namespace System.SpanTests
         public static void TestNoMatchThree_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 0; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 char target0 = (char)rnd.Next(1, 256);
@@ -277,7 +270,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestMultipleMatchThree_Char()
         {
-            for (int length = 4; length < byte.MaxValue; length++)
+            for (int length = 4; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 for (int i = 0; i < length; i++)
@@ -300,7 +293,7 @@ namespace System.SpanTests
         [Fact]
         public static void MakeSureNoChecksGoOutOfRangeThree_Char()
         {
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -310,7 +303,7 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
 
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -335,7 +328,7 @@ namespace System.SpanTests
         {
             Random rnd = new Random(42);
 
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
@@ -344,7 +337,7 @@ namespace System.SpanTests
 
                 for (int i = 0; i < length; i++)
                 {
-                    int index = rnd.Next(0, 4);
+                    int index = rnd.Next(0, targets.Length);
                     ReadOnlySpan<char> values = new char[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4] };
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(0, idx);
@@ -355,13 +348,9 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchFour_Char()
         {
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
-                char[] a = new char[length];
-                for (int i = 0; i < length; i++)
-                {
-                    a[i] = (char)(i + 1);
-                }
+                char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
@@ -380,7 +369,7 @@ namespace System.SpanTests
 
                 for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
                 {
-                    ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0, (char)a[targetIndex + 3] };
+                    ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)a[targetIndex + 3] };
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(targetIndex + 3, idx);
                 }
@@ -391,7 +380,7 @@ namespace System.SpanTests
         public static void TestNoMatchFour_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 0; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> values = new char[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
@@ -405,7 +394,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestMultipleMatchFour_Char()
         {
-            for (int length = 5; length < byte.MaxValue; length++)
+            for (int length = 5; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 for (int i = 0; i < length; i++)
@@ -430,7 +419,7 @@ namespace System.SpanTests
         [Fact]
         public static void MakeSureNoChecksGoOutOfRangeFour_Char()
         {
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -441,7 +430,7 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
 
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -467,7 +456,7 @@ namespace System.SpanTests
         {
             Random rnd = new Random(42);
 
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
@@ -476,7 +465,7 @@ namespace System.SpanTests
 
                 for (int i = 0; i < length; i++)
                 {
-                    int index = rnd.Next(0, 5);
+                    int index = rnd.Next(0, targets.Length);
                     ReadOnlySpan<char> values = new char[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4], (char)targets[(index + 1) % 5] };
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(0, idx);
@@ -487,13 +476,9 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchFive_Char()
         {
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
-                char[] a = new char[length];
-                for (int i = 0; i < length; i++)
-                {
-                    a[i] = (char)(i + 1);
-                }
+                char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
@@ -523,7 +508,7 @@ namespace System.SpanTests
         public static void TestNoMatchFive_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 0; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> values = new char[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
@@ -537,7 +522,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestMultipleMatchFive_Char()
         {
-            for (int length = 6; length < byte.MaxValue; length++)
+            for (int length = 6; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 for (int i = 0; i < length; i++)
@@ -563,7 +548,7 @@ namespace System.SpanTests
         [Fact]
         public static void MakeSureNoChecksGoOutOfRangeFive_Char()
         {
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -574,7 +559,7 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
 
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -602,7 +587,7 @@ namespace System.SpanTests
         [Fact]
         public static void DefaultFilledIndexOfMany_Char()
         {
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
@@ -620,13 +605,9 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchMany_Char()
         {
-            for (int length = 0; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
-                char[] a = new char[length];
-                for (int i = 0; i < length; i++)
-                {
-                    a[i] = (char)(i + 1);
-                }
+                char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
                 ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
@@ -656,7 +637,7 @@ namespace System.SpanTests
         public static void TestMatchValuesLargerMany_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 2; length < byte.MaxValue; length++)
+            for (int length = 2; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 int expectedIndex = length / 2;
@@ -690,7 +671,7 @@ namespace System.SpanTests
         public static void TestNoMatchMany_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 char[] targets = new char[length];
@@ -710,7 +691,7 @@ namespace System.SpanTests
         public static void TestNoMatchValuesLargerMany_Char()
         {
             Random rnd = new Random(42);
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 char[] targets = new char[length * 2];
@@ -729,7 +710,7 @@ namespace System.SpanTests
         [Fact]
         public static void TestMultipleMatchMany_Char()
         {
-            for (int length = 5; length < byte.MaxValue; length++)
+            for (int length = 5; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length];
                 for (int i = 0; i < length; i++)
@@ -754,7 +735,7 @@ namespace System.SpanTests
         [Fact]
         public static void MakeSureNoChecksGoOutOfRangeMany_Char()
         {
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
@@ -765,7 +746,7 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
 
-            for (int length = 1; length < byte.MaxValue; length++)
+            for (int length = 1; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = new char[length + 2];
                 a[0] = (char)99;
