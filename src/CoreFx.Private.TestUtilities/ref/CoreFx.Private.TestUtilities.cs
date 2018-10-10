@@ -121,6 +121,8 @@ namespace System
         public static string GetDistroVersionString() { throw null; }
         public static bool TargetsNetFx452OrLower { get { throw null; } }
         public static bool IsDomainJoinedMachine { get { throw null; } }
+        public static bool IsSingleProcessor { get { throw null; } }
+        public static bool IsMultiProcessor { get { throw null; } }
     }
     public static partial class TheoryExtensions
     {

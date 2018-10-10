@@ -12,8 +12,7 @@ namespace System.Runtime.Tests
 {
     public class ProfileOptimizationTest : RemoteExecutorTestBase
     {
-        [Fact]
-        [ActiveIssue(31792)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsMultiProcessor))]
         public void ProfileOptimization_CheckFileExists()
         {
             string profileFile = GetTestFileName();
