@@ -43,9 +43,6 @@ namespace System
 
         public static bool IsDomainJoinedMachine => !Environment.MachineName.Equals(Environment.UserDomainName, StringComparison.OrdinalIgnoreCase);
 
-        public static bool IsSingleProcessor => Environment.ProcessorCount == 1;
-        public static bool IsMultiProcessor => Environment.ProcessorCount > 1;
-
         public static bool IsNotNetNative => !IsNetNative;
 
         // Windows - Schannel supports alpn from win8.1/2012 R2 and higher.

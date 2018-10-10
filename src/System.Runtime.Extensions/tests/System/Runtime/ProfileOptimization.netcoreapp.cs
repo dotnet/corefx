@@ -12,7 +12,8 @@ namespace System.Runtime.Tests
 {
     public class ProfileOptimizationTest : RemoteExecutorTestBase
     {
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsMultiProcessor))]
+        // Active issue https://github.com/dotnet/corefx/issues/31792
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotRedHatFamily6))]
         public void ProfileOptimization_CheckFileExists()
         {
             string profileFile = GetTestFileName();
