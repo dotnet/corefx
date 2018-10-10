@@ -77,6 +77,7 @@
     <ExcludeNotSupportedImport>true</ExcludeNotSupportedImport>
     <ExcludePartialFacadesImport>true</ExcludePartialFacadesImport>
     <ExcludeApiCompatImport>true</ExcludeApiCompatImport>
+    <ExcludeReferenceAssembliesImport>true</ExcludeReferenceAssembliesImport>
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -279,11 +280,6 @@
     <Deterministic>false</Deterministic>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsReferenceAssembly)' == 'true'">
-    <!-- disable warnings about unused fields -->
-    <NoWarn>$(NoWarn);0169;0649</NoWarn>
-  </PropertyGroup>
-
   <!-- Set up some common paths -->
   <PropertyGroup>
     <CommonPath>$(SourceDir)Common\src</CommonPath>
@@ -306,7 +302,6 @@
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
 
-    <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
 
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(RootIntermediateOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>

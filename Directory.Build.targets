@@ -16,6 +16,11 @@
            Text="The tools directory [$(ToolsDir)] does not exist. Please run init-tools.cmd in your repo to ensure the tools are installed before attempting to build an individual project." />
   </Target>
 
+  <!-- Sets output paths and other reference assembly specific properties.
+       We need to import them in the targets file so that it is imported after SDK Common targets,
+       because it overrides TargetDir and TargetPath properties.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)eng/ReferenceAssemblies.props" />
   <Import Project="buildvertical.targets" />
 
   <!-- Corefx-specific binplacing properties -->
