@@ -323,10 +323,275 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ZeroLengthIndexOfFour_Char()
+        {
+            Span<char> sp = new Span<char>(Array.Empty<char>());
+            ReadOnlySpan<char> values = stackalloc[] { (char)0, (char)0, (char)0, (char)0 };
+            int idx = sp.IndexOfAny<char>(values);
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public static void DefaultFilledIndexOfFour_Char()
+        {
+            Random rnd = new Random(42);
+
+            for (int length = 0; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                Span<char> span = new Span<char>(a);
+
+                char[] targets = { default, (char)99, (char)98, (char)97 };
+
+                for (int i = 0; i < length; i++)
+                {
+                    int index = rnd.Next(0, 4);
+                    ReadOnlySpan<char> values = stackalloc[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4] };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(0, idx);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestMatchFour_Char()
+        {
+            for (int length = 0; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+                Span<char> span = new Span<char>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)0, (char)0, (char)0 };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(targetIndex, idx);
+                }
+
+                for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
+                {
+                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)a[targetIndex + 1], (char)a[targetIndex + 2], (char)a[targetIndex + 3] };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(targetIndex, idx);
+                }
+
+                for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
+                {
+                    ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0, (char)a[targetIndex + 3] };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(targetIndex + 3, idx);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestNoMatchFour_Char()
+        {
+            Random rnd = new Random(42);
+            for (int length = 0; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                ReadOnlySpan<char> values = stackalloc[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
+                Span<char> span = new Span<char>(a);
+
+                int idx = span.IndexOfAny(values);
+                Assert.Equal(-1, idx);
+            }
+        }
+
+        [Fact]
+        public static void TestMultipleMatchFour_Char()
+        {
+            for (int length = 5; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    char val = (char)(i + 1);
+                    a[i] = val == (char)200 ? (char)201 : val;
+                }
+
+                a[length - 1] = (char)200;
+                a[length - 2] = (char)200;
+                a[length - 3] = (char)200;
+                a[length - 4] = (char)200;
+                a[length - 5] = (char)200;
+
+                Span<char> span = new Span<char>(a);
+                ReadOnlySpan<char> values = stackalloc[] { (char)200, (char)200, (char)200, (char)200 };
+                int idx = span.IndexOfAny<char>(values);
+                Assert.Equal(length - 5, idx);
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoChecksGoOutOfRangeFour_Char()
+        {
+            for (int length = 1; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length + 2];
+                a[0] = (char)99;
+                a[length + 1] = (char)98;
+                Span<char> span = new Span<char>(a, 1, length - 1);
+                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)98, (char)99, (char)99 };
+                int index = span.IndexOfAny<char>(values);
+                Assert.Equal(-1, index);
+            }
+
+            for (int length = 1; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length + 2];
+                a[0] = (char)99;
+                a[length + 1] = (char)99;
+                Span<char> span = new Span<char>(a, 1, length - 1);
+                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)99, (char)99, (char)99 };
+                int index = span.IndexOfAny<char>(values);
+                Assert.Equal(-1, index);
+            }
+        }
+
+        [Fact]
+        public static void ZeroLengthIndexOfFive_Char()
+        {
+            Span<char> sp = new Span<char>(Array.Empty<char>());
+            ReadOnlySpan<char> values = stackalloc[] { (char)0, (char)0, (char)0, (char)0, (char)0 };
+            int idx = sp.IndexOfAny<char>(values);
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public static void DefaultFilledIndexOfFive_Char()
+        {
+            Random rnd = new Random(42);
+
+            for (int length = 0; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                Span<char> span = new Span<char>(a);
+
+                char[] targets = { default, (char)99, (char)98, (char)97, (char)96 };
+
+                for (int i = 0; i < length; i++)
+                {
+                    int index = rnd.Next(0, 5);
+                    ReadOnlySpan<char> values = stackalloc[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4], (char)targets[(index + 1) % 5] };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(0, idx);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestMatchFive_Char()
+        {
+            for (int length = 0; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+                Span<char> span = new Span<char>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)0, (char)0, (char)0, (char)0 };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(targetIndex, idx);
+                }
+
+                for (int targetIndex = 0; targetIndex < length - 4; targetIndex++)
+                {
+                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)a[targetIndex + 1], (char)a[targetIndex + 2], (char)a[targetIndex + 3], (char)a[targetIndex + 4] };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(targetIndex, idx);
+                }
+
+                for (int targetIndex = 0; targetIndex < length - 4; targetIndex++)
+                {
+                    ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0, (char)a[targetIndex + 4] };
+                    int idx = span.IndexOfAny(values);
+                    Assert.Equal(targetIndex + 4, idx);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestNoMatchFive_Char()
+        {
+            Random rnd = new Random(42);
+            for (int length = 0; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                ReadOnlySpan<char> values = stackalloc[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
+                Span<char> span = new Span<char>(a);
+
+                int idx = span.IndexOfAny(values);
+                Assert.Equal(-1, idx);
+            }
+        }
+
+        [Fact]
+        public static void TestMultipleMatchFive_Char()
+        {
+            for (int length = 6; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    char val = (char)(i + 1);
+                    a[i] = val == (char)200 ? (char)201 : val;
+                }
+
+                a[length - 1] = (char)200;
+                a[length - 2] = (char)200;
+                a[length - 3] = (char)200;
+                a[length - 4] = (char)200;
+                a[length - 5] = (char)200;
+                a[length - 6] = (char)200;
+
+                Span<char> span = new Span<char>(a);
+                ReadOnlySpan<char> values = stackalloc[] { (char)200, (char)200, (char)200, (char)200, (char)200 };
+                int idx = span.IndexOfAny<char>(values);
+                Assert.Equal(length - 6, idx);
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoChecksGoOutOfRangeFive_Char()
+        {
+            for (int length = 1; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length + 2];
+                a[0] = (char)99;
+                a[length + 1] = (char)98;
+                Span<char> span = new Span<char>(a, 1, length - 1);
+                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)98, (char)99, (char)99, (char)99 };
+                int index = span.IndexOfAny<char>(values);
+                Assert.Equal(-1, index);
+            }
+
+            for (int length = 1; length < byte.MaxValue; length++)
+            {
+                char[] a = new char[length + 2];
+                a[0] = (char)99;
+                a[length + 1] = (char)99;
+                Span<char> span = new Span<char>(a, 1, length - 1);
+                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)99, (char)99, (char)99, (char)99 };
+                int index = span.IndexOfAny<char>(values);
+                Assert.Equal(-1, index);
+            }
+        }
+
+        [Fact]
         public static void ZeroLengthIndexOfMany_Char()
         {
             Span<char> sp = new Span<char>(Array.Empty<char>());
-            ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { (char)0, (char)0, (char)0, (char)0 });
+            ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { (char)0, (char)0, (char)0, (char)0, (char)0, (char)0 });
             int idx = sp.IndexOfAny(values);
             Assert.Equal(-1, idx);
 
@@ -343,7 +608,7 @@ namespace System.SpanTests
                 char[] a = new char[length];
                 Span<char> span = new Span<char>(a);
 
-                ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { default, (char)99, (char)98, (char)0 });
+                ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { default, (char)99, (char)98, (char)97, (char)96, (char)0 });
 
                 for (int i = 0; i < length; i++)
                 {
@@ -367,23 +632,23 @@ namespace System.SpanTests
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
-                    ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { a[targetIndex], (char)0, (char)0, (char)0 });
+                    ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { a[targetIndex], (char)0, (char)0, (char)0, (char)0, (char)0 });
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(targetIndex, idx);
                 }
 
-                for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
+                for (int targetIndex = 0; targetIndex < length - 5; targetIndex++)
                 {
-                    ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { a[targetIndex], a[targetIndex + 1], a[targetIndex + 2], a[targetIndex + 3] });
+                    ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { a[targetIndex], a[targetIndex + 1], a[targetIndex + 2], a[targetIndex + 3], a[targetIndex + 4], a[targetIndex + 5] });
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(targetIndex, idx);
                 }
 
-                for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
+                for (int targetIndex = 0; targetIndex < length - 5; targetIndex++)
                 {
-                    ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { (char)0, (char)0, (char)0, a[targetIndex + 3] });
+                    ReadOnlySpan<char> values = new ReadOnlySpan<char>(new char[] { (char)0, (char)0, (char)0, (char)0, (char)0, a[targetIndex + 5] });
                     int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex + 3, idx);
+                    Assert.Equal(targetIndex + 5, idx);
                 }
             }
         }
