@@ -435,8 +435,7 @@ namespace System.Collections.Tests
 
             var dict = new Dictionary<T, T>(equalityComparer);
 
-            Assert.IsType(equalityComparer.GetType(), dict.Comparer);
-
+            Assert.Same(equalityComparer, dict.Comparer);
 
             bf.Serialize(s, dict);
             s.Position = 0;
