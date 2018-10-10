@@ -82,7 +82,7 @@ namespace System.Tests
                 yield return new object[] { "ABCDEFGH".Substring(0, i) };
             }
 
-            // 0 through 16 char mixed case mostly-ASCII string with a non-ASCII character
+            // 16 char mixed case mostly-ASCII string plus one non-ASCII character inserted at various locations
             // tests fallback logic for OrdinalIgnoreCase hash
 
             for (int i = 0; i <= 16; i++)
