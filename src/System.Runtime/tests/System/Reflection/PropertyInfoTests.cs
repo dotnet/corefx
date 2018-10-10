@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public static class PropertyInfoTests
+    public static class RuntimePropertyInfoTests
     {
         [Fact]
         public static void GetRawConstantValueOnProperty()

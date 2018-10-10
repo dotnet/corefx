@@ -110,7 +110,7 @@ namespace System.Reflection.Tests
         [Theory]
         [InlineData(typeof(ModuleTests))]
         [InlineData(typeof(PointerTests))]
-        [InlineData(typeof(EventInfoTests))]
+        [InlineData(typeof(RuntimeEventInfoTests))]
         public void TestGetType(Type type)
         {
             Assert.Equal(type, Module.GetType(type.FullName, true, true));

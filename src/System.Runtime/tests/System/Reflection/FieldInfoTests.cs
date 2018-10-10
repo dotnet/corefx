@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public class FieldInfoTests
+    public class RuntimeFieldInfoTests
     {
         [Theory]
         [InlineData("nonstatic_strField", "nonstatic_strField", true)]
@@ -38,7 +38,7 @@ namespace System.Reflection.Tests
         // Helper method to get field from Type type
         private static FieldInfo GetField(string fieldName)
         {
-            Type t = typeof(FieldInfoTests);
+            Type t = typeof(RuntimeFieldInfoTests);         
             TypeInfo ti = t.GetTypeInfo();
             IEnumerator<FieldInfo> alldefinedFields = ti.DeclaredFields.GetEnumerator();
             FieldInfo fi = null, found = null;

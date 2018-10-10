@@ -9,12 +9,12 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public class RuntimeReflectionExtensionsTests
+    public class RuntimeRuntimeReflectionExtensionsTests
     {
         [Fact]
         public void GetMethodInfo()
         {
-            Assert.Equal(typeof(RuntimeReflectionExtensionsTests).GetMethod("GetMethodInfo"), ((Action)GetMethodInfo).GetMethodInfo());
+            Assert.Equal(typeof(RuntimeRuntimeReflectionExtensionsTests).GetMethod("GetMethodInfo"), ((Action)GetMethodInfo).GetMethodInfo());
         }
 
         [Fact]

@@ -11,12 +11,14 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public static class ParameterInfoTests
+    public static class RuntimeParameterInfoTests
     {
+        static Type testClassType = typeof(RuntimeParameterInfoTests);
+
         [Fact]
         public static void RawDefaultValue()
         {
-            MethodInfo m =  GetMethod(typeof(ParameterInfoTests), "Foo1");
+            MethodInfo m =  GetMethod(testClassType, "Foo1");
             ParameterInfo p = m.GetParameters()[0];
             object raw = p.RawDefaultValue;
             Assert.Equal(typeof(int), raw.GetType());
@@ -26,7 +28,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void RawDefaultValueFromAttribute()
         {
-            MethodInfo m = GetMethod(typeof(ParameterInfoTests), "Foo2");
+            MethodInfo m = GetMethod(testClassType, "Foo2");
             ParameterInfo p = m.GetParameters()[0];
             object cooked = p.DefaultValue;
             object raw = p.RawDefaultValue;
@@ -38,7 +40,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void RawDefaultValue_MetadataTrumpsAttribute()
         {
-            MethodInfo m = GetMethod(typeof(ParameterInfoTests), "Foo3");
+            MethodInfo m = GetMethod(testClassType, "Foo3");
             ParameterInfo p = m.GetParameters()[0];
             object cooked = p.DefaultValue;
             object raw = p.RawDefaultValue;

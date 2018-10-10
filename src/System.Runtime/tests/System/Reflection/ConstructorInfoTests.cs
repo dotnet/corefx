@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public static class ConstructorInfoTests
+    public static class RuntimeConstructorInfoTests
     {
         public static IEnumerable<object[]> Equality_TestData()
         {

@@ -121,7 +121,7 @@ namespace System.Reflection.Tests
         }
     }
 
-    public class TypeInfoTests
+    public class RuntimeTypeInfoTests
     {
         public TypeInfo TestTypeInfo => typeof(TestType).GetTypeInfo();
 
