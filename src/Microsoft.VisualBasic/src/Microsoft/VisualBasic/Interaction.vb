@@ -6,6 +6,9 @@ Namespace Microsoft.VisualBasic
 
     Partial Public Module Interaction
 
+        Sub New()
+        End Sub
+
         Public Enum MsgBoxResult
             Ok = 1
             Cancel = 2
@@ -48,9 +51,6 @@ Namespace Microsoft.VisualBasic
             MsgBoxRtlReading = &H100000I
             MsgBoxSetForeground = &H10000I
         End Enum
-
-        Sub New()
-        End Sub
 
         Friend Function IIf(Of T)(ByVal condition As Boolean, ByVal truePart As T, ByVal falsePart As T) As T
             If condition Then

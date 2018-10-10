@@ -4,6 +4,32 @@ Imports Microsoft.VisualBasic.CompilerServices
 Namespace Microsoft.VisualBasic
 
     Partial Public Module Interaction
+        Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
+
+            Dim Title As String
+
+            'Get the Assembly name of the calling assembly 
+            'Assembly.GetName requires PathDiscovery permission so we try this first
+            'and if it throws we catch the security exception and parse the name
+            'from the full assembly name
+            Try
+                Title = CallingAssembly.GetName().Name
+            Catch ex As SecurityException
+                Dim FullName As String = CallingAssembly.FullName
+                'Find the text up to the first comma. Note, this fails if the assembly has
+                'a comma in its name
+                Dim FirstCommaLocation As Integer = FullName.IndexOf(","c)
+                If FirstCommaLocation >= 0 Then
+                    Title = FullName.Substring(0, FirstCommaLocation)
+                Else
+                    'The name is not in the format we're expecting so return an empty string
+                    Title = ""
+                End If
+            End Try
+
+            Return Title
+        End Function
+
         Public Function MsgBox(ByVal Prompt As Object, Optional ByVal Buttons As MsgBoxStyle = MsgBoxStyle.OkOnly, Optional ByVal Title As Object = Nothing) As MsgBoxResult
             Dim sPrompt As String = Nothing
             Dim sTitle As String
@@ -60,32 +86,6 @@ Namespace Microsoft.VisualBasic
             End Try
 
             Return CType(NativeMethods.MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
-        End Function
-
-        Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
-
-            Dim Title As String
-
-            'Get the Assembly name of the calling assembly 
-            'Assembly.GetName requires PathDiscovery permission so we try this first
-            'and if it throws we catch the security exception and parse the name
-            'from the full assembly name
-            Try
-                Title = CallingAssembly.GetName().Name
-            Catch ex As SecurityException
-                Dim FullName As String = CallingAssembly.FullName
-                'Find the text up to the first comma. Note, this fails if the assembly has
-                'a comma in its name
-                Dim FirstCommaLocation As Integer = FullName.IndexOf(","c)
-                If FirstCommaLocation >= 0 Then
-                    Title = FullName.Substring(0, FirstCommaLocation)
-                Else
-                    'The name is not in the format we're expecting so return an empty string
-                    Title = ""
-                End If
-            End Try
-
-            Return Title
         End Function
     End Module
 End Namespace
