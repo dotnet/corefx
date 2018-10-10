@@ -326,7 +326,7 @@ namespace System.SpanTests
         public static void ZeroLengthIndexOfFour_Char()
         {
             Span<char> sp = new Span<char>(Array.Empty<char>());
-            ReadOnlySpan<char> values = stackalloc[] { (char)0, (char)0, (char)0, (char)0 };
+            ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0 };
             int idx = sp.IndexOfAny<char>(values);
             Assert.Equal(-1, idx);
         }
@@ -346,7 +346,7 @@ namespace System.SpanTests
                 for (int i = 0; i < length; i++)
                 {
                     int index = rnd.Next(0, 4);
-                    ReadOnlySpan<char> values = stackalloc[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4] };
+                    ReadOnlySpan<char> values = new char[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4] };
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(0, idx);
                 }
@@ -395,7 +395,7 @@ namespace System.SpanTests
             for (int length = 0; length < byte.MaxValue; length++)
             {
                 char[] a = new char[length];
-                ReadOnlySpan<char> values = stackalloc[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
+                ReadOnlySpan<char> values = new char[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
                 Span<char> span = new Span<char>(a);
 
                 int idx = span.IndexOfAny(values);
@@ -422,7 +422,7 @@ namespace System.SpanTests
                 a[length - 5] = (char)200;
 
                 Span<char> span = new Span<char>(a);
-                ReadOnlySpan<char> values = stackalloc[] { (char)200, (char)200, (char)200, (char)200 };
+                ReadOnlySpan<char> values = new char[] { (char)200, (char)200, (char)200, (char)200 };
                 int idx = span.IndexOfAny<char>(values);
                 Assert.Equal(length - 5, idx);
             }
@@ -437,7 +437,7 @@ namespace System.SpanTests
                 a[0] = (char)99;
                 a[length + 1] = (char)98;
                 Span<char> span = new Span<char>(a, 1, length - 1);
-                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)98, (char)99, (char)99 };
+                ReadOnlySpan<char> values = new char[] { (char)99, (char)98, (char)99, (char)99 };
                 int index = span.IndexOfAny<char>(values);
                 Assert.Equal(-1, index);
             }
@@ -448,7 +448,7 @@ namespace System.SpanTests
                 a[0] = (char)99;
                 a[length + 1] = (char)99;
                 Span<char> span = new Span<char>(a, 1, length - 1);
-                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)99, (char)99, (char)99 };
+                ReadOnlySpan<char> values = new char[] { (char)99, (char)99, (char)99, (char)99 };
                 int index = span.IndexOfAny<char>(values);
                 Assert.Equal(-1, index);
             }
@@ -458,7 +458,7 @@ namespace System.SpanTests
         public static void ZeroLengthIndexOfFive_Char()
         {
             Span<char> sp = new Span<char>(Array.Empty<char>());
-            ReadOnlySpan<char> values = stackalloc[] { (char)0, (char)0, (char)0, (char)0, (char)0 };
+            ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0, (char)0 };
             int idx = sp.IndexOfAny<char>(values);
             Assert.Equal(-1, idx);
         }
@@ -478,7 +478,7 @@ namespace System.SpanTests
                 for (int i = 0; i < length; i++)
                 {
                     int index = rnd.Next(0, 5);
-                    ReadOnlySpan<char> values = stackalloc[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4], (char)targets[(index + 1) % 5] };
+                    ReadOnlySpan<char> values = new char[] { (char)targets[index], (char)targets[(index + 1) % 2], (char)targets[(index + 1) % 3], (char)targets[(index + 1) % 4], (char)targets[(index + 1) % 5] };
                     int idx = span.IndexOfAny(values);
                     Assert.Equal(0, idx);
                 }
@@ -527,7 +527,7 @@ namespace System.SpanTests
             for (int length = 0; length < byte.MaxValue; length++)
             {
                 char[] a = new char[length];
-                ReadOnlySpan<char> values = stackalloc[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
+                ReadOnlySpan<char> values = new char[] { (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256), (char)rnd.Next(1, 256) };
                 Span<char> span = new Span<char>(a);
 
                 int idx = span.IndexOfAny(values);
@@ -555,7 +555,7 @@ namespace System.SpanTests
                 a[length - 6] = (char)200;
 
                 Span<char> span = new Span<char>(a);
-                ReadOnlySpan<char> values = stackalloc[] { (char)200, (char)200, (char)200, (char)200, (char)200 };
+                ReadOnlySpan<char> values = new char[] { (char)200, (char)200, (char)200, (char)200, (char)200 };
                 int idx = span.IndexOfAny<char>(values);
                 Assert.Equal(length - 6, idx);
             }
@@ -570,7 +570,7 @@ namespace System.SpanTests
                 a[0] = (char)99;
                 a[length + 1] = (char)98;
                 Span<char> span = new Span<char>(a, 1, length - 1);
-                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)98, (char)99, (char)99, (char)99 };
+                ReadOnlySpan<char> values = new char[] { (char)99, (char)98, (char)99, (char)99, (char)99 };
                 int index = span.IndexOfAny<char>(values);
                 Assert.Equal(-1, index);
             }
@@ -581,7 +581,7 @@ namespace System.SpanTests
                 a[0] = (char)99;
                 a[length + 1] = (char)99;
                 Span<char> span = new Span<char>(a, 1, length - 1);
-                ReadOnlySpan<char> values = stackalloc[] { (char)99, (char)99, (char)99, (char)99, (char)99 };
+                ReadOnlySpan<char> values = new char[] { (char)99, (char)99, (char)99, (char)99, (char)99 };
                 int index = span.IndexOfAny<char>(values);
                 Assert.Equal(-1, index);
             }
