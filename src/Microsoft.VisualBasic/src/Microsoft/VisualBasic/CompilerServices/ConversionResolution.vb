@@ -10,7 +10,6 @@ Imports System.Collections.Generic
 Imports Microsoft.VisualBasic.CompilerServices.Symbols
 Imports Microsoft.VisualBasic.CompilerServices.ConversionResolution
 Imports Microsoft.VisualBasic.CompilerServices.ConversionResolution.OperatorCaches
-Imports Microsoft.VisualBasic.Interaction
 
 Namespace Microsoft.VisualBasic.CompilerServices
 

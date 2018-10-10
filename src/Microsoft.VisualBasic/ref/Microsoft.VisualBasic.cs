@@ -46,53 +46,6 @@ namespace Microsoft.VisualBasic
         public void Remove(int Index) { }
         public void Remove(string Key) { }
     }
-    public enum MsgBoxResult
-    {
-        Ok = 1,
-        Cancel = 2,
-        Abort = 3,
-        Retry = 4,
-        Ignore = 5,
-        Yes = 6,
-        No = 7
-    }
-
-    [System.Flags()]
-    public enum MsgBoxStyle
-    {
-        //You may BitOr one value from each group
-        //Button group: Lower 4 bits, &H00F
-        OkOnly = 0x0,
-
-        OkCancel = 0x1,
-        AbortRetryIgnore = 0x2,
-        YesNoCancel = 0x3,
-        YesNo = 0x4,
-        RetryCancel = 0x5,
-
-        //Icon Group: Middle 4 bits &H0F0
-        Critical = 0x10, //Same as Windows.Forms.MessageBox.IconError
-
-        Question = 0x20, //Same As Windows.MessageBox.IconQuestion
-        Exclamation = 0x30, //Same As Windows.MessageBox.IconExclamation
-        Information = 0x40, //Same As Windows.MessageBox.IconInformation
-
-        //Default Group: High 4 bits &HF00
-        DefaultButton1 = 0,
-
-        DefaultButton2 = 0x100,
-        DefaultButton3 = 0x200,
-        //UNSUPPORTED IN VB7
-        //DefaultButton4 = &H300I
-
-        ApplicationModal = 0x0,
-        SystemModal = 0x1000,
-
-        MsgBoxHelp = 0x4000,
-        MsgBoxRight = 0x80000,
-        MsgBoxRtlReading = 0x100000,
-        MsgBoxSetForeground = 0x10000
-    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     public sealed partial class ComClassAttribute : System.Attribute
     {
@@ -127,32 +80,32 @@ namespace Microsoft.VisualBasic
         public const string vbVerticalTab = "\v";
         public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
         public const CompareMethod vbTextCompare = CompareMethod.Text;
-        public const MsgBoxResult vbAbort = MsgBoxResult.Abort;
-        public const MsgBoxResult vbCancel = MsgBoxResult.Cancel;
-        public const MsgBoxResult vbIgnore = MsgBoxResult.Ignore;
-        public const MsgBoxResult vbNo = MsgBoxResult.No;
-        public const MsgBoxResult vbOK = MsgBoxResult.Ok;
-        public const MsgBoxResult vbRetry = MsgBoxResult.Retry;
-        public const MsgBoxResult vbYes = MsgBoxResult.Yes;
-        public const MsgBoxStyle vbAbortRetryIgnore = MsgBoxStyle.AbortRetryIgnore;
-        public const MsgBoxStyle vbApplicationModal = MsgBoxStyle.ApplicationModal;
-        public const MsgBoxStyle vbCritical = MsgBoxStyle.Critical;
-        public const MsgBoxStyle vbDefaultButton1 = MsgBoxStyle.DefaultButton1;
-        public const MsgBoxStyle vbDefaultButton2 = MsgBoxStyle.DefaultButton2;
-        public const MsgBoxStyle vbDefaultButton3 = MsgBoxStyle.DefaultButton3;
-        public const MsgBoxStyle vbExclamation = MsgBoxStyle.Exclamation;
-        public const MsgBoxStyle vbInformation = MsgBoxStyle.Information;
-        public const MsgBoxStyle vbMsgBoxHelp = MsgBoxStyle.MsgBoxHelp;
-        public const MsgBoxStyle vbMsgBoxRight =(MsgBoxStyle) 0x8_0000;
-        public const MsgBoxStyle vbMsgBoxRtlReading = (MsgBoxStyle) 0x10_0000;
-        public const MsgBoxStyle vbMsgBoxSetForeground = (MsgBoxStyle)0x1_0000;
-        public const MsgBoxStyle vbOKCancel = MsgBoxStyle.OkCancel;
-        public const MsgBoxStyle vbOKOnly = MsgBoxStyle.OkOnly;
-        public const MsgBoxStyle vbQuestion = MsgBoxStyle.Question;
-        public const MsgBoxStyle vbRetryCancel = MsgBoxStyle.RetryCancel;
-        public const MsgBoxStyle vbSystemModal = MsgBoxStyle.SystemModal;
-        public const MsgBoxStyle vbYesNo = MsgBoxStyle.YesNo;
-        public const MsgBoxStyle vbYesNoCancel = MsgBoxStyle.YesNoCancel;
+        public const Interaction.MsgBoxResult vbAbort = Interaction.MsgBoxResult.Abort;
+        public const Interaction.MsgBoxResult vbCancel = Interaction.MsgBoxResult.Cancel;
+        public const Interaction.MsgBoxResult vbIgnore = Interaction.MsgBoxResult.Ignore;
+        public const Interaction.MsgBoxResult vbNo = Interaction.MsgBoxResult.No;
+        public const Interaction.MsgBoxResult vbOK = Interaction.MsgBoxResult.Ok;
+        public const Interaction.MsgBoxResult vbRetry = Interaction.MsgBoxResult.Retry;
+        public const Interaction.MsgBoxResult vbYes = Interaction.MsgBoxResult.Yes;
+        public const Interaction.MsgBoxStyle vbAbortRetryIgnore = Interaction.MsgBoxStyle.AbortRetryIgnore;
+        public const Interaction.MsgBoxStyle vbApplicationModal = Interaction.MsgBoxStyle.ApplicationModal;
+        public const Interaction.MsgBoxStyle vbCritical = Interaction.MsgBoxStyle.Critical;
+        public const Interaction.MsgBoxStyle vbDefaultButton1 = Interaction.MsgBoxStyle.DefaultButton1;
+        public const Interaction.MsgBoxStyle vbDefaultButton2 = Interaction.MsgBoxStyle.DefaultButton2;
+        public const Interaction.MsgBoxStyle vbDefaultButton3 = Interaction.MsgBoxStyle.DefaultButton3;
+        public const Interaction.MsgBoxStyle vbExclamation = Interaction.MsgBoxStyle.Exclamation;
+        public const Interaction.MsgBoxStyle vbInformation = Interaction.MsgBoxStyle.Information;
+        public const Interaction.MsgBoxStyle vbMsgBoxHelp = Interaction.MsgBoxStyle.MsgBoxHelp;
+        public const Interaction.MsgBoxStyle vbMsgBoxRight =(Interaction.MsgBoxStyle) 0x8_0000;
+        public const Interaction.MsgBoxStyle vbMsgBoxRtlReading = (Interaction.MsgBoxStyle) 0x10_0000;
+        public const Interaction.MsgBoxStyle vbMsgBoxSetForeground = (Interaction.MsgBoxStyle)0x1_0000;
+        public const Interaction.MsgBoxStyle vbOKCancel = Interaction.MsgBoxStyle.OkCancel;
+        public const Interaction.MsgBoxStyle vbOKOnly = Interaction.MsgBoxStyle.OkOnly;
+        public const Interaction.MsgBoxStyle vbQuestion = Interaction.MsgBoxStyle.Question;
+        public const Interaction.MsgBoxStyle vbRetryCancel = Interaction.MsgBoxStyle.RetryCancel;
+        public const Interaction.MsgBoxStyle vbSystemModal = Interaction.MsgBoxStyle.SystemModal;
+        public const Interaction.MsgBoxStyle vbYesNo = Interaction.MsgBoxStyle.YesNo;
+        public const Interaction.MsgBoxStyle vbYesNoCancel = Interaction.MsgBoxStyle.YesNoCancel;
     }
 
     public sealed partial class ControlChars
@@ -282,6 +235,53 @@ namespace Microsoft.VisualBasic
     {
         internal Interaction() { }
         public MsgBoxResult MsgBox(object Prompt, MsgBoxStyle Buttons=MsgBoxStyle.OkOnly, object Title=null) { throw null; }
+        public enum MsgBoxResult
+        {
+            Ok = 1,
+            Cancel = 2,
+            Abort = 3,
+            Retry = 4,
+            Ignore = 5,
+            Yes = 6,
+            No = 7
+        }
+
+        [System.Flags()]
+        public enum MsgBoxStyle
+        {
+            //You may BitOr one value from each group
+            //Button group: Lower 4 bits, &H00F
+            OkOnly = 0x0,
+
+            OkCancel = 0x1,
+            AbortRetryIgnore = 0x2,
+            YesNoCancel = 0x3,
+            YesNo = 0x4,
+            RetryCancel = 0x5,
+
+            //Icon Group: Middle 4 bits &H0F0
+            Critical = 0x10, //Same as Windows.Forms.MessageBox.IconError
+
+            Question = 0x20, //Same As Windows.MessageBox.IconQuestion
+            Exclamation = 0x30, //Same As Windows.MessageBox.IconExclamation
+            Information = 0x40, //Same As Windows.MessageBox.IconInformation
+
+            //Default Group: High 4 bits &HF00
+            DefaultButton1 = 0,
+
+            DefaultButton2 = 0x100,
+            DefaultButton3 = 0x200,
+            //UNSUPPORTED IN VB7
+            //DefaultButton4 = &H300I
+
+            ApplicationModal = 0x0,
+            SystemModal = 0x1000,
+
+            MsgBoxHelp = 0x4000,
+            MsgBoxRight = 0x80000,
+            MsgBoxRtlReading = 0x100000,
+            MsgBoxSetForeground = 0x10000
+        }
     }
 }
 namespace Microsoft.VisualBasic.ApplicationServices
