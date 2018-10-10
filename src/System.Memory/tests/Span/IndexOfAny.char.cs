@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Xunit;
 
@@ -89,33 +90,37 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchTwo_Char()
         {
-            for (int length = 1; length <= byte.MaxValue + 1; length++)
+            for (int length = Vector<short>.Count; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
-                Span<char> span = new Span<char>(a);
 
-                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                for (int i = 0; i < Vector<short>.Count; i++)
                 {
-                    char target0 = a[targetIndex];
-                    char target1 = (char)0;
-                    int idx = span.IndexOfAny(target0, target1);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    Span<char> span = new Span<char>(a).Slice(i);
 
-                for (int targetIndex = 0; targetIndex < length - 1; targetIndex++)
-                {
-                    char target0 = a[targetIndex];
-                    char target1 = a[targetIndex + 1];
-                    int idx = span.IndexOfAny(target0, target1);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    for (int targetIndex = 0; targetIndex < length - Vector<short>.Count; targetIndex++)
+                    {
+                        char target0 = a[targetIndex + i];
+                        char target1 = (char)0;
+                        int idx = span.IndexOfAny(target0, target1);
+                        Assert.Equal(targetIndex, idx);
+                    }
 
-                for (int targetIndex = 0; targetIndex < length - 1; targetIndex++)
-                {
-                    char target0 = (char)0;
-                    char target1 = a[targetIndex + 1];
-                    int idx = span.IndexOfAny(target0, target1);
-                    Assert.Equal(targetIndex + 1, idx);
+                    for (int targetIndex = 0; targetIndex < length - 1 - Vector<short>.Count; targetIndex++)
+                    {
+                        char target0 = a[targetIndex + i];
+                        char target1 = a[targetIndex + i + 1];
+                        int idx = span.IndexOfAny(target0, target1);
+                        Assert.Equal(targetIndex, idx);
+                    }
+
+                    for (int targetIndex = 0; targetIndex < length - 1 - Vector<short>.Count; targetIndex++)
+                    {
+                        char target0 = (char)0;
+                        char target1 = a[targetIndex + i + 1];
+                        int idx = span.IndexOfAny(target0, target1);
+                        Assert.Equal(targetIndex + 1, idx);
+                    }
                 }
             }
         }
@@ -217,36 +222,39 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchThree_Char()
         {
-            for (int length = 1; length <= byte.MaxValue + 1; length++)
+            for (int length = Vector<short>.Count; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
-                Span<char> span = new Span<char>(a);
-
-                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                for (int i = 0; i < Vector<short>.Count; i++)
                 {
-                    char target0 = a[targetIndex];
-                    char target1 = (char)0;
-                    char target2 = (char)0;
-                    int idx = span.IndexOfAny(target0, target1, target2);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    Span<char> span = new Span<char>(a).Slice(i);
 
-                for (int targetIndex = 0; targetIndex < length - 2; targetIndex++)
-                {
-                    char target0 = a[targetIndex];
-                    char target1 = a[targetIndex + 1];
-                    char target2 = a[targetIndex + 2];
-                    int idx = span.IndexOfAny(target0, target1, target2);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    for (int targetIndex = 0; targetIndex < length - Vector<short>.Count; targetIndex++)
+                    {
+                        char target0 = a[targetIndex + i];
+                        char target1 = (char)0;
+                        char target2 = (char)0;
+                        int idx = span.IndexOfAny(target0, target1, target2);
+                        Assert.Equal(targetIndex, idx);
+                    }
 
-                for (int targetIndex = 0; targetIndex < length - 2; targetIndex++)
-                {
-                    char target0 = (char)0;
-                    char target1 = (char)0;
-                    char target2 = a[targetIndex + 2];
-                    int idx = span.IndexOfAny(target0, target1, target2);
-                    Assert.Equal(targetIndex + 2, idx);
+                    for (int targetIndex = 0; targetIndex < length - 2 - Vector<short>.Count; targetIndex++)
+                    {
+                        char target0 = a[targetIndex + i];
+                        char target1 = a[targetIndex + i + 1];
+                        char target2 = a[targetIndex + i + 2];
+                        int idx = span.IndexOfAny(target0, target1, target2);
+                        Assert.Equal(targetIndex, idx);
+                    }
+
+                    for (int targetIndex = 0; targetIndex < length - 2 - Vector<short>.Count; targetIndex++)
+                    {
+                        char target0 = (char)0;
+                        char target1 = (char)0;
+                        char target2 = a[targetIndex + i + 2];
+                        int idx = span.IndexOfAny(target0, target1, target2);
+                        Assert.Equal(targetIndex + 2, idx);
+                    }
                 }
             }
         }
@@ -349,30 +357,34 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchFour_Char()
         {
-            for (int length = 1; length <= byte.MaxValue + 1; length++)
+            for (int length = Vector<short>.Count; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
-                Span<char> span = new Span<char>(a);
 
-                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                for (int i = 0; i < Vector<short>.Count; i++)
                 {
-                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)0, (char)0, (char)0 };
-                    int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    Span<char> span = new Span<char>(a).Slice(i);
 
-                for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
-                {
-                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)a[targetIndex + 1], (char)a[targetIndex + 2], (char)a[targetIndex + 3] };
-                    int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    for (int targetIndex = 0; targetIndex < length - Vector<short>.Count; targetIndex++)
+                    {
+                        ReadOnlySpan<char> values = new char[] { (char)a[targetIndex + i], (char)0, (char)0, (char)0 };
+                        int idx = span.IndexOfAny(values);
+                        Assert.Equal(targetIndex, idx);
+                    }
 
-                for (int targetIndex = 0; targetIndex < length - 3; targetIndex++)
-                {
-                    ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)a[targetIndex + 3] };
-                    int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex + 3, idx);
+                    for (int targetIndex = 0; targetIndex < length - 3 - Vector<short>.Count; targetIndex++)
+                    {
+                        ReadOnlySpan<char> values = new char[] { (char)a[targetIndex + i], (char)a[targetIndex + i + 1], (char)a[targetIndex + i + 2], (char)a[targetIndex + i + 3] };
+                        int idx = span.IndexOfAny(values);
+                        Assert.Equal(targetIndex, idx);
+                    }
+
+                    for (int targetIndex = 0; targetIndex < length - 3 - Vector<short>.Count; targetIndex++)
+                    {
+                        ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)a[targetIndex + i + 3] };
+                        int idx = span.IndexOfAny(values);
+                        Assert.Equal(targetIndex + 3, idx);
+                    }
                 }
             }
         }
@@ -477,30 +489,33 @@ namespace System.SpanTests
         [Fact]
         public static void TestMatchFive_Char()
         {
-            for (int length = 1; length <= byte.MaxValue + 1; length++)
+            for (int length = Vector<short>.Count; length <= byte.MaxValue + 1; length++)
             {
                 char[] a = Enumerable.Range(0, length).Select(i => (char)(i + 1)).ToArray();
-                Span<char> span = new Span<char>(a);
-
-                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                for (int i = 0; i < Vector<short>.Count; i++)
                 {
-                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)0, (char)0, (char)0, (char)0 };
-                    int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    Span<char> span = new Span<char>(a).Slice(i);
 
-                for (int targetIndex = 0; targetIndex < length - 4; targetIndex++)
-                {
-                    ReadOnlySpan<char> values = new char[] { (char)a[targetIndex], (char)a[targetIndex + 1], (char)a[targetIndex + 2], (char)a[targetIndex + 3], (char)a[targetIndex + 4] };
-                    int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex, idx);
-                }
+                    for (int targetIndex = 0; targetIndex < length - Vector<short>.Count; targetIndex++)
+                    {
+                        ReadOnlySpan<char> values = new char[] { (char)a[targetIndex + i], (char)0, (char)0, (char)0, (char)0 };
+                        int idx = span.IndexOfAny(values);
+                        Assert.Equal(targetIndex, idx);
+                    }
 
-                for (int targetIndex = 0; targetIndex < length - 4; targetIndex++)
-                {
-                    ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0, (char)a[targetIndex + 4] };
-                    int idx = span.IndexOfAny(values);
-                    Assert.Equal(targetIndex + 4, idx);
+                    for (int targetIndex = 0; targetIndex < length - 4 - Vector<short>.Count; targetIndex++)
+                    {
+                        ReadOnlySpan<char> values = new char[] { (char)a[targetIndex + i], (char)a[targetIndex + i + 1], (char)a[targetIndex + i + 2], (char)a[targetIndex + i + 3], (char)a[targetIndex + i + 4] };
+                        int idx = span.IndexOfAny(values);
+                        Assert.Equal(targetIndex, idx);
+                    }
+
+                    for (int targetIndex = 0; targetIndex < length - 4 - Vector<short>.Count; targetIndex++)
+                    {
+                        ReadOnlySpan<char> values = new char[] { (char)0, (char)0, (char)0, (char)0, (char)a[targetIndex + i + 4] };
+                        int idx = span.IndexOfAny(values);
+                        Assert.Equal(targetIndex + 4, idx);
+                    }
                 }
             }
         }
