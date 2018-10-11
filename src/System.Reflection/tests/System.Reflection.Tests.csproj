@@ -5,6 +5,9 @@
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
+      <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
+    </Compile>    
     <Compile Include="AssemblyNameTests.cs" />
     <Compile Include="AssemblyTests.cs" />
     <Compile Include="ConstructorInfoTests.cs" />
