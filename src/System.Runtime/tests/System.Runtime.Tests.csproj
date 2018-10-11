@@ -172,7 +172,6 @@
     <Compile Include="System\Reflection\CustomAttributeDataTests.cs" />
     <Compile Include="System\Reflection\CustomAttributesTestData.cs" />
     <Compile Include="System\Reflection\CustomAttribute_Named_Typed_ArgumentTests.cs" />
-    <Compile Include="System\Reflection\EventInfoTests.cs" />
     <Compile Include="System\Reflection\FieldInfoTests.cs" />
     <Compile Include="System\Reflection\MemberInfoTests.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.cs" />
