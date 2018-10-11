@@ -66,7 +66,6 @@ namespace Microsoft.VisualBasic
     {
         internal Constants() { }
         public const string vbBack = "\b";
-        public const Microsoft.VisualBasic.CompareMethod vbBinaryCompare = Microsoft.VisualBasic.CompareMethod.Binary;
         public const string vbCr = "\r";
         public const string vbCrLf = "\r\n";
         public const string vbFormFeed = "\f";
@@ -76,7 +75,6 @@ namespace Microsoft.VisualBasic
         public const string vbNullChar = "\0";
         public const string vbNullString = null;
         public const string vbTab = "\t";
-        public const Microsoft.VisualBasic.CompareMethod vbTextCompare = Microsoft.VisualBasic.CompareMethod.Text;
         public const string vbVerticalTab = "\v";
         public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
         public const CompareMethod vbTextCompare = CompareMethod.Text;
@@ -707,7 +705,7 @@ namespace Microsoft.VisualBasic.FileIO
         public string ReadToEnd() { throw null; }
         public void SetDelimiters(params string[] delimiters) { }
         public void SetFieldWidths(params int[] fieldWidths) { }
-        void IDisposable.Dispose() { throw new NotImplementedException(); }
+        void System.IDisposable.Dispose() { throw new System.NotImplementedException(); }
     }
     public enum UICancelOption
     {
