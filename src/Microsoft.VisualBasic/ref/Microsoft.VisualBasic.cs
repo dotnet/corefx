@@ -5,8 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.VisualBasic
 {
     public enum CallType
@@ -68,6 +66,7 @@ namespace Microsoft.VisualBasic
     {
         internal Constants() { }
         public const string vbBack = "\b";
+        public const Microsoft.VisualBasic.CompareMethod vbBinaryCompare = Microsoft.VisualBasic.CompareMethod.Binary;
         public const string vbCr = "\r";
         public const string vbCrLf = "\r\n";
         public const string vbFormFeed = "\f";
@@ -77,6 +76,7 @@ namespace Microsoft.VisualBasic
         public const string vbNullChar = "\0";
         public const string vbNullString = null;
         public const string vbTab = "\t";
+        public const Microsoft.VisualBasic.CompareMethod vbTextCompare = Microsoft.VisualBasic.CompareMethod.Text;
         public const string vbVerticalTab = "\v";
         public const CompareMethod vbBinaryCompare = CompareMethod.Binary;
         public const CompareMethod vbTextCompare = CompareMethod.Text;
@@ -135,16 +135,6 @@ namespace Microsoft.VisualBasic
     {
         public HideModuleNameAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
-    public sealed partial class MyGroupCollectionAttribute : System.Attribute
-    {
-        public MyGroupCollectionAttribute(string typeToCollect, string createInstanceMethodName, string disposeInstanceMethodName, string defaultInstanceAlias) { }
-        public string CreateMethod { get { throw null; } }
-        public string DefaultInstanceAlias { get { throw null; } }
-        public string DisposeMethod { get { throw null; } }
-        public string MyGroupName { get { throw null; } }
-    }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Information
     {
@@ -161,8 +151,18 @@ namespace Microsoft.VisualBasic
         public static int RGB(int Red, int Green, int Blue) { throw null; }
         public static string SystemTypeName(string VbName) { throw null; }
         public static int UBound(System.Array Array, int Rank = 1) { throw null; }
-        public static VariantType VarType(object VarName) { throw null; }
+        public static Microsoft.VisualBasic.VariantType VarType(object VarName) { throw null; }
         public static string VbTypeName(string UrtName) { throw null; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+    public sealed partial class MyGroupCollectionAttribute : System.Attribute
+    {
+        public MyGroupCollectionAttribute(string typeToCollect, string createInstanceMethodName, string disposeInstanceMethodName, string defaultInstanceAlias) { }
+        public string CreateMethod { get { throw null; } }
+        public string DefaultInstanceAlias { get { throw null; } }
+        public string DisposeMethod { get { throw null; } }
+        public string MyGroupName { get { throw null; } }
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Strings
@@ -174,8 +174,8 @@ namespace Microsoft.VisualBasic
         public static int AscW(string String) { throw null; }
         public static char Chr(int CharCode) { throw null; }
         public static char ChrW(int CharCode) { throw null; }
-        public static string[] Filter(object[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute] CompareMethod Compare = CompareMethod.Binary) { throw null; }
-        public static string[] Filter(string[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute] CompareMethod Compare = CompareMethod.Binary) { throw null; }
+        public static string[] Filter(object[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = (Microsoft.VisualBasic.CompareMethod)(0)) { throw null; }
+        public static string[] Filter(string[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = (Microsoft.VisualBasic.CompareMethod)(0)) { throw null; }
         public static string Left(string str, int Length) { throw null; }
         public static string LTrim(string str) { throw null; }
         public static string Mid(string str, int Start) { throw null; }
@@ -312,6 +312,11 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         internal Conversions() { }
         public static object ChangeType(object Expression, System.Type TargetType) { throw null; }
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static object FallbackUserDefinedConversion(object Expression, System.Type TargetType) { throw null; }
+        public static string FromCharAndCount(char Value, int Count) { throw null; }
+        public static string FromCharArray(char[] Value) { throw null; }
+        public static string FromCharArraySubset(char[] Value, int StartIndex, int Length) { throw null; }
         public static bool ToBoolean(object Value) { throw null; }
         public static bool ToBoolean(string Value) { throw null; }
         public static byte ToByte(object Value) { throw null; }
@@ -345,12 +350,15 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static string ToString(char Value) { throw null; }
         public static string ToString(System.DateTime Value) { throw null; }
         public static string ToString(decimal Value) { throw null; }
+        public static string ToString(decimal Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         public static string ToString(double Value) { throw null; }
+        public static string ToString(double Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         public static string ToString(short Value) { throw null; }
         public static string ToString(int Value) { throw null; }
         public static string ToString(long Value) { throw null; }
         public static string ToString(object Value) { throw null; }
         public static string ToString(float Value) { throw null; }
+        public static string ToString(float Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static string ToString(uint Value) { throw null; }
         [System.CLSCompliantAttribute(false)]
@@ -412,8 +420,36 @@ namespace Microsoft.VisualBasic.CompilerServices
     public sealed partial class NewLateBinding
     {
         internal NewLateBinding() { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static object FallbackCall(object Instance, string MemberName, object[] Arguments, string[] ArgumentNames, bool IgnoreReturn) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static object FallbackGet(object Instance, string MemberName, object[] Arguments, string[] ArgumentNames) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static void FallbackIndexSet(object Instance, object[] Arguments, string[] ArgumentNames) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static void FallbackIndexSetComplex(object Instance, object[] Arguments, string[] ArgumentNames, bool OptimisticSet, bool RValueBase) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static object FallbackInvokeDefault1(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static object FallbackInvokeDefault2(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static void FallbackSet(object Instance, string MemberName, object[] Arguments) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static void FallbackSetComplex(object Instance, string MemberName, object[] Arguments, bool OptimisticSet, bool RValueBase) { }
         public static object LateCall(object Instance, System.Type Type, string MemberName, object[] Arguments, string[] ArgumentNames, System.Type[] TypeArguments, bool[] CopyBack, bool IgnoreReturn) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public static object LateCallInvokeDefault(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
         public static object LateGet(object Instance, System.Type Type, string MemberName, object[] Arguments, string[] ArgumentNames, System.Type[] TypeArguments, bool[] CopyBack) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public static object LateGetInvokeDefault(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
         public static object LateIndexGet(object Instance, object[] Arguments, string[] ArgumentNames) { throw null; }
         public static void LateIndexSet(object Instance, object[] Arguments, string[] ArgumentNames) { }
         public static void LateIndexSetComplex(object Instance, object[] Arguments, string[] ArgumentNames, bool OptimisticSet, bool RValueBase) { }
@@ -459,6 +495,8 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static bool ConditionalCompareObjectNotEqual(object Left, object Right, bool TextCompare) { throw null; }
         public static object DivideObject(object Left, object Right) { throw null; }
         public static object ExponentObject(object Left, object Right) { throw null; }
+        [System.ObsoleteAttribute("do not use this method", true)]
+        public static object FallbackInvokeUserDefinedOperator(object vbOp, object[] arguments) { throw null; }
         public static object IntDivideObject(object Left, object Right) { throw null; }
         public static object LeftShiftObject(object Operand, object Amount) { throw null; }
         public static object ModObject(object Left, object Right) { throw null; }

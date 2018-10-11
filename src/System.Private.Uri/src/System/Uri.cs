@@ -343,7 +343,7 @@ namespace System
         //
         //  Uri constructor. Assumes that input string is canonically escaped
         //
-        [Obsolete("The constructor has been deprecated. Please use new Uri(string). The dontEscape parameter is deprecated and is always false. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The constructor has been deprecated. Please use new Uri(string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
         public Uri(string uriString, bool dontEscape)
         {
             if (uriString == null)
@@ -358,7 +358,7 @@ namespace System
         //  Uri combinatorial constructor. Do not perform character escaping if
         //  DontEscape is true
         //
-        [Obsolete("The constructor has been deprecated. Please new Uri(Uri, string). The dontEscape parameter is deprecated and is always false. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The constructor has been deprecated. Please new Uri(Uri, string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
         public Uri(Uri baseUri, string relativeUri, bool dontEscape)
         {
             if (baseUri == null)
@@ -3252,6 +3252,15 @@ namespace System
             }
         }
 
+        // Cut trailing spaces
+        private void GetLengthWithoutTrailingSpaces(string str, ref ushort length ,int idx)
+        {
+            // to avoid dereferencing ref length parameter for every update
+            ushort local = length;
+            while (local > idx && UriHelper.IsLWS(str[local - 1])) --local;
+            length = local;
+        }
+
         //
         //This method does:
         //  - Creates m_Info member
@@ -3284,14 +3293,7 @@ namespace System
 
             fixed (char* str = _string)
             {
-                // Cut trailing spaces in m_String
-                if (length > idx && UriHelper.IsLWS(str[length - 1]))
-                {
-                    --length;
-                    while (length != idx && UriHelper.IsLWS(str[--length]))
-                        ;
-                    ++length;
-                }
+                GetLengthWithoutTrailingSpaces(_string, ref length, idx);
 
                 if (IsImplicitFile)
                 {
@@ -3404,6 +3406,11 @@ namespace System
                 }
 
                 length = (ushort)_string.Length;
+                // We need to be sure that there isn't a '?' separated from the path by spaces.
+                if (_string == _originalUnicodeString)
+                {
+                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);
+                }
             }
 
             fixed (char* str = _string)
@@ -3531,6 +3538,11 @@ namespace System
                     }
 
                     length = (ushort)_string.Length;
+                    // We need to be sure that there isn't a '#' separated from the query by spaces.
+                    if (_string == _originalUnicodeString)
+                    {
+                        GetLengthWithoutTrailingSpaces(_string, ref length, idx);
+                    }
                 }
             }
 
@@ -3588,6 +3600,8 @@ namespace System
                     }
 
                     length = (ushort)_string.Length;
+                    // we don't need to check _originalUnicodeString == _string because # is last part
+                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);                    
                 }
             }
 
@@ -4643,10 +4657,19 @@ namespace System
                         res |= Check.DotSlashAttn;
                     }
                 }
-                else if (!needsEscaping && ((c <= '"' && c != '!') || (c >= '[' && c <= '^') || c == '>'
-                    || c == '<' || c == '`'))
+                else if (((c <= '"' && c != '!') || (c >= '[' && c <= '^') || c == '>'
+                        || c == '<' || c == '`'))
                 {
-                    needsEscaping = true;
+                    if (!needsEscaping) needsEscaping = true;
+
+                    // The check above validates only that we have valid IRI characters, which is not enough to
+                    // conclude that we have a valid canonical IRI.
+                    // If we have an IRI with Flags.HasUnicode, we need to set Check.NotIriCanonical so that the 
+                    // path, query, and fragment will be validated.
+                    if ((_flags & Flags.HasUnicode) != 0 && _iriParsing)
+                    {
+                        res |= Check.NotIriCanonical;
+                    }
                 }
                 else if (c == '%')
                 {
@@ -5387,7 +5410,7 @@ namespace System
         // Throws:
         //  ArgumentNullException, InvalidOperationException
         //
-        [Obsolete("The method has been deprecated. Please use MakeRelativeUri(Uri uri). http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. Please use MakeRelativeUri(Uri uri). https://go.microsoft.com/fwlink/?linkid=14202")]
         public string MakeRelative(Uri toUri)
         {
             if (toUri == null)
@@ -5403,7 +5426,7 @@ namespace System
         }
 
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Canonicalize()
         {
             // this method if suppressed by the derived class
@@ -5413,7 +5436,7 @@ namespace System
         }
 
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Parse()
         {
             // this method if suppressed by the derived class
@@ -5423,7 +5446,7 @@ namespace System
         }
 
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Escape()
         {
             // this method if suppressed by the derived class
@@ -5440,7 +5463,7 @@ namespace System
         //  UTF-8 sequences (e.g. %C4%D2 == 'Latin capital Ligature Ij')
         //
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. Please use GetComponents() or static UnescapeDataString() to unescape a Uri component or a string. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. Please use GetComponents() or static UnescapeDataString() to unescape a Uri component or a string. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual string Unescape(string path)
         {
             // This method is dangerous since it gives path unescaping control
@@ -5454,7 +5477,7 @@ namespace System
             return new string(dest, 0, count);
         }
 
-        [Obsolete("The method has been deprecated. Please use GetComponents() or static EscapeUriString() to escape a Uri component or a string. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. Please use GetComponents() or static EscapeUriString() to escape a Uri component or a string. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected static string EscapeString(string str)
         {
             // This method just does not make sense as protected
@@ -5478,7 +5501,7 @@ namespace System
         //  Check for any invalid or problematic character sequences
         //
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void CheckSecurity()
         {
             // This method just does not make sense
@@ -5494,7 +5517,7 @@ namespace System
         //  true if <character> is reserved else false
         //
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual bool IsReservedCharacter(char character)
         {
             // This method just does not make sense as protected virtual
@@ -5522,7 +5545,7 @@ namespace System
         //  true if <character> should be escaped else false
         //
         /// <internalonly/>
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected static bool IsExcludedCharacter(char character)
         {
             // This method just does not make sense as protected
@@ -5565,7 +5588,7 @@ namespace System
         //  true if <character> would be a treated as a bad file system character
         //  else false
         //
-        [Obsolete("The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual bool IsBadFileSystemCharacter(char character)
         {
             // This method just does not make sense as protected virtual

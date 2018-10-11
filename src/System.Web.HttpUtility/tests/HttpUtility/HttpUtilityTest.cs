@@ -753,5 +753,21 @@ namespace System.Web.Tests
         {
             Assert.Equal(encoded, HttpUtility.UrlPathEncode(decoded));
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("name=foo&desc=foo")]
+        [InlineData("type=foo&type=bar")]
+        [InlineData("name=&desc=foo")]
+        [InlineData("name=&name=foo")]
+        [InlineData("foo&bar")]
+        [InlineData("foo&name=bar")]
+        [InlineData("name=bar&foo&foo")]
+        public void ParseAndToStringMaintainAllKeyValuePairs(string input)
+        {
+            var values = HttpUtility.ParseQueryString(input);
+            var output = values.ToString();
+            Assert.Equal(input, output);
+        }
     }
 }
