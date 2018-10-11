@@ -8,8 +8,9 @@ namespace System.Reflection.Tests
 {
     internal class TypeWithNullUnderlyingSystemType : MockType
     {
-        public override Type UnderlyingSystemType => null;
         protected override TypeAttributes GetAttributeFlagsImpl() => TypeAttributes.Class;
+        public override bool IsGenericParameter => false;
+        public override Type UnderlyingSystemType => null;
     }
 
     public class TypeDerivedTests
