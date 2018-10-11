@@ -32,11 +32,6 @@ namespace System.Diagnostics
             GC.SuppressFinalize(this);
         }
 
-        private EventLogEntry(SerializationInfo info, StreamingContext context)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
         /// <summary>
         /// The machine on which this event log resides.
         /// </summary>
@@ -123,7 +118,7 @@ namespace System.Diagnostics
         /// <summary>
         /// The number identifying the message for this source.
         /// </summary>
-        [Obsolete("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public int EventID
         {
             get
