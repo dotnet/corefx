@@ -7,6 +7,7 @@ namespace System.Security.Cryptography
     /// <summary>
     /// Represents a point on an elliptic curve.
     /// </summary>
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public struct ECPoint
     {
         public byte[] X;

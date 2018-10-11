@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static class SocketTaskExtensions
     {
         public static Task<Socket> AcceptAsync(this Socket socket) =>

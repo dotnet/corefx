@@ -4,6 +4,7 @@
 
 namespace System.Runtime.Serialization
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public interface ISerializationSurrogateProvider
     {
         Type GetSurrogateType(Type type);

@@ -1655,6 +1655,7 @@ namespace System.Data.Common
         System.Data.ITableMapping System.Data.ITableMappingCollection.Add(string sourceTableName, string dataSetTableName) { throw null; }
         System.Data.ITableMapping System.Data.ITableMappingCollection.GetByDataSetTable(string dataSetTableName) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public abstract partial class DbColumn
     {
         protected DbColumn() { }
@@ -1992,6 +1993,7 @@ namespace System.Data.Common
         public virtual System.Threading.Tasks.Task<bool> ReadAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         System.Data.IDataReader System.Data.IDataRecord.GetData(int ordinal) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static partial class DbDataReaderExtensions
     {
         public static bool CanGetColumnSchema(this System.Data.Common.DbDataReader reader) { throw null; }
@@ -2248,6 +2250,7 @@ namespace System.Data.Common
         Unknown = 0,
         Unrelated = 2,
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public partial interface IDbColumnSchemaGenerator
     {
         System.Collections.ObjectModel.ReadOnlyCollection<System.Data.Common.DbColumn> GetColumnSchema();

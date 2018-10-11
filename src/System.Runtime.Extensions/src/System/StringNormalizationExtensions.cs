@@ -6,6 +6,7 @@ using System.Text;
 
 namespace System
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static partial class StringNormalizationExtensions
     {
         public static bool IsNormalized(this string strInput)

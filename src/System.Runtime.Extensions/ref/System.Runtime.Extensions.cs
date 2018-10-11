@@ -1000,6 +1000,7 @@ namespace System
     {
         public ContextStaticAttribute() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static class StringNormalizationExtensions
     {
         public static bool IsNormalized(this string value) { throw null; }
@@ -1010,6 +1011,7 @@ namespace System
 }
 namespace System.Globalization
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static partial class GlobalizationExtensions
     {
         public static System.StringComparer GetStringComparer(this System.Globalization.CompareInfo compareInfo, System.Globalization.CompareOptions options) { throw null; }

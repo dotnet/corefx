@@ -6,6 +6,7 @@ using System.Xml.Linq;
 
 namespace System.Xml.XPath
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static class XDocumentExtensions
     {
         private class XDocumentNavigable : IXPathNavigable

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 namespace System.Security
 {
     [CLSCompliantAttribute(false)]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static class SecureStringMarshal
     {
         public static IntPtr SecureStringToCoTaskMemAnsi(SecureString s) => Marshal.SecureStringToCoTaskMemAnsi(s);

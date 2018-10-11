@@ -167,6 +167,7 @@ namespace System.Security.Cryptography
         public override void SetHashAlgorithm(string strName) { }
         public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public partial struct ECCurve
     {
         private object _dummy;
@@ -279,6 +280,7 @@ namespace System.Security.Cryptography
         public bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public abstract bool VerifyHash(byte[] hash, byte[] signature);
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public partial struct ECParameters
     {
         public System.Security.Cryptography.ECCurve Curve;
@@ -286,6 +288,7 @@ namespace System.Security.Cryptography
         public System.Security.Cryptography.ECPoint Q;
         public void Validate() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public partial struct ECPoint
     {
         public byte[] X;
@@ -355,6 +358,7 @@ namespace System.Security.Cryptography
         public override void Initialize() { }
         protected override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class IncrementalHash : System.IDisposable
     {
         internal IncrementalHash() { }

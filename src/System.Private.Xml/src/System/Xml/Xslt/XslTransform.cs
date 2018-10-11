@@ -11,6 +11,7 @@ namespace System.Xml.Xsl
     using System.Xml.Xsl.XsltOld;
     using System.Xml.Xsl.XsltOld.Debugger;
 
+    [System.ObsoleteAttribute("This class has been deprecated. Please use System.Xml.Xsl.XslCompiledTransform instead. https://go.microsoft.com/fwlink/?linkid=14202")]
     public sealed class XslTransform
     {
         private XmlResolver _documentResolver = null;

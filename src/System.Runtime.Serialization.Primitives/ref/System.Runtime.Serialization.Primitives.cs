@@ -79,6 +79,7 @@ namespace System.Runtime.Serialization
         public InvalidDataContractException(string message, System.Exception innerException) { }
         protected InvalidDataContractException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public partial interface ISerializationSurrogateProvider
     {
         object GetDeserializedObject(object obj, System.Type targetType);

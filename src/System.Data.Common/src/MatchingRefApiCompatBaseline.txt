@@ -1,0 +1,2 @@
+CannotChangeAttribute : Attribute 'System.ObsoleteAttribute' on 'System.Data.DataSysDescriptionAttribute' changed from '[ObsoleteAttribute("DataSysDescriptionAttribute has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202", false)]' in the contract to '[ObsoleteAttribute("DataSysDescriptionAttribute has been deprecated.  https://go.microsoft.com/fwlink/?linkid=14202", false)]' in the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.ToolboxItemAttribute' exists on 'System.Data.DataSet' in the contract but not the implementation.

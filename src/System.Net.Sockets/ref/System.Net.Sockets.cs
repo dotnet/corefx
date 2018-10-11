@@ -488,6 +488,7 @@ namespace System.Net.Sockets
     //        public IPAddress Address;
     //        public int Port;
     //    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public struct SocketReceiveFromResult
     {
         public int ReceivedBytes;
@@ -502,6 +503,7 @@ namespace System.Net.Sockets
     //        public int Port;
     //        public int Interface;
     //    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public struct SocketReceiveMessageFromResult
     {
         public int ReceivedBytes;
@@ -515,7 +517,7 @@ namespace System.Net.Sockets
         Receive = 0,
         Send = 1,
     }
-
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static partial class SocketTaskExtensions
     {
         public static System.Threading.Tasks.Task<Socket> AcceptAsync(this System.Net.Sockets.Socket socket) { throw null; }

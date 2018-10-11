@@ -4,6 +4,7 @@
 
 namespace System.Runtime.Serialization
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static class DataContractSerializerExtensions
     {
         public static ISerializationSurrogateProvider GetSerializationSurrogateProvider(this DataContractSerializer serializer)
