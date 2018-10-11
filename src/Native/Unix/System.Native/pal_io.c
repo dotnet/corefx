@@ -49,7 +49,7 @@ extern int     getpeereid(int, uid_t *__restrict__, gid_t *__restrict__);
 extern ssize_t  getline(char **, size_t *, FILE *);
 #endif
 
-#if HAVE_STAT64
+#if HAVE_STAT64 && !defined(__DARWIN_ONLY_64_BIT_INO_T)
 #define stat_ stat64
 #define fstat_ fstat64
 #define lstat_ lstat64
