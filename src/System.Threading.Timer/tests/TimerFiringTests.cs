@@ -239,6 +239,7 @@ public partial class TimerFiringTests
                            }));
     }
 
+    [PlatformSpecific(~TestPlatforms.OSX)] // macOS in CI appears to have a lot more variation
     [OuterLoop("Takes several seconds")]
     [Theory] // selection based on 333ms threshold used by implementation
     [InlineData(new int[] { 15 })]
@@ -250,8 +251,8 @@ public partial class TimerFiringTests
     [InlineData(new int[] { 1000 })]
     public async Task Timer_ManyDifferentSerialSingleDueTimes_AllFireWithinAllowedRange(int[] dueTimes)
     {
-        const int MillisecondsPadding = 50; // for each timer, out of range == Math.Abs(actualTime - dueTime) > MillisecondsPadding
-        const int MaxAllowedOutOfRangePercentage = 10; // max % allowed out of range to pass test
+        const int MillisecondsPadding = 100; // for each timer, out of range == Math.Abs(actualTime - dueTime) > MillisecondsPadding
+        const int MaxAllowedOutOfRangePercentage = 20; // max % allowed out of range to pass test
 
         var outOfRange = new ConcurrentQueue<KeyValuePair<int, long>>();
 
