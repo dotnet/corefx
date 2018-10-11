@@ -1753,6 +1753,7 @@ namespace System.Security
     }
 
     [System.CLSCompliant(false)]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static class SecureStringMarshal {
         public static IntPtr SecureStringToCoTaskMemAnsi(System.Security.SecureString s) { throw null; }
         public static IntPtr SecureStringToCoTaskMemUnicode(System.Security.SecureString s) { throw null; }

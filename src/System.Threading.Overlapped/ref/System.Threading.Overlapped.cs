@@ -18,12 +18,14 @@ namespace System.Threading
         public int OffsetHigh;
         public int OffsetLow;
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class PreAllocatedOverlapped : System.IDisposable
     {
         [System.CLSCompliantAttribute(false)]
         public PreAllocatedOverlapped(System.Threading.IOCompletionCallback callback, object state, object pinData) { }
         public void Dispose() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class ThreadPoolBoundHandle : System.IDisposable
     {
         internal ThreadPoolBoundHandle() { }

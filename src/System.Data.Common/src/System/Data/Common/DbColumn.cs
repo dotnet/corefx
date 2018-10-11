@@ -4,6 +4,7 @@
 
 namespace System.Data.Common
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public abstract class DbColumn
     {
         public bool? AllowDBNull { get; protected set; }

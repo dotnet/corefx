@@ -14,6 +14,7 @@ namespace System.Security.Cryptography
     /// which is either a prime curve or a characteristic-2 curve.
     /// </remarks>
     [DebuggerDisplay("ECCurve: {Oid}")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public partial struct ECCurve
     {
         /// <summary>

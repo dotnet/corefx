@@ -6,6 +6,7 @@
 
 namespace System.Text.RegularExpressions
 {
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public abstract class RegexRunnerFactory
     {
         protected RegexRunnerFactory() { }

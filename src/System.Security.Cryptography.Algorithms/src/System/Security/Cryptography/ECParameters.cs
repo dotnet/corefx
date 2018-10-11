@@ -11,6 +11,7 @@ namespace System.Security.Cryptography
     /// <summary>
     /// Represents the public and private key of the specified elliptic curve.
     /// </summary>
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public struct ECParameters
     {
         /// <summary>

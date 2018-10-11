@@ -6,6 +6,7 @@ using System;
 
 namespace System.Diagnostics
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static partial class StackFrameExtensions
     {
         public static bool HasNativeImage(this StackFrame stackFrame)

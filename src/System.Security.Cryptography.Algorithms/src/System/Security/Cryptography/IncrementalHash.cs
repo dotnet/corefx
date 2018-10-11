@@ -10,6 +10,7 @@ namespace System.Security.Cryptography
     /// <summary>
     /// Provides support for computing a hash or HMAC value incrementally across several segments.
     /// </summary>
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed class IncrementalHash : IDisposable
     {
         private readonly HashAlgorithmName _algorithmName;

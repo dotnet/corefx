@@ -13,7 +13,8 @@ namespace System.Runtime.CompilerServices
     /// Represents a cache of runtime binding rules.
     /// </summary>
     /// <typeparam name="T">The delegate type.</typeparam>
-    [EditorBrowsable(EditorBrowsableState.Never), DebuggerStepThrough]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [DebuggerStepThrough]
     public class RuleCache<T> where T : class
     {
         private T[] _rules = Array.Empty<T>();

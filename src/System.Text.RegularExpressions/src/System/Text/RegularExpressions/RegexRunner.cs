@@ -19,6 +19,7 @@ using System.Globalization;
 
 namespace System.Text.RegularExpressions
 {
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public abstract class RegexRunner
     {
         protected internal int runtextbeg;         // beginning of text to search

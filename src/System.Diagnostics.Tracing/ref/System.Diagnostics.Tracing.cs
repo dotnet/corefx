@@ -54,6 +54,7 @@ namespace System.Diagnostics.Tracing
         public bool DisableEvent(int eventId) { throw null; }
         public bool EnableEvent(int eventId) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public class EventCounter : IDisposable {
         public EventCounter(string name, EventSource eventSource) { }
         public void WriteMetric(float value) { }

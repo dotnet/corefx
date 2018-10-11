@@ -1193,6 +1193,7 @@ namespace System.Runtime.CompilerServices
         public DynamicAttribute(bool[] transformFlags) { }
         public System.Collections.Generic.IList<bool> TransformFlags { get { throw null; } }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public partial class RuleCache<T> where T : class
     {
         internal RuleCache() { }

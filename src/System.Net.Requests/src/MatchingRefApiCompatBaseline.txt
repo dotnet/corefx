@@ -1,3 +1,2 @@
-Compat issues with assembly System.Net.Requests:
 MembersMustExist : Member 'System.Net.HttpWebRequest..ctor()' does not exist in the reference but it does exist in the implementation.
-Total Issues: 1
+CannotChangeAttribute : Attribute 'System.ObsoleteAttribute' on 'System.Net.GlobalProxySelection' changed from '[ObsoleteAttribute("This class has been deprecated. Please use WebRequest.DefaultWebProxy instead to access and set the global default proxy. Use 'null' instead of GetEmptyWebProxy. http://go.microsoft.com/fwlink/?linkid=14202")]' in the contract to '[ObsoleteAttribute("This class has been deprecated. Please use WebRequest.DefaultWebProxy instead to access and set the global default proxy. Use 'null' instead of GetEmptyWebProxy. https://go.microsoft.com/fwlink/?linkid=14202")]' in the implementation.

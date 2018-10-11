@@ -45,6 +45,7 @@ namespace System.Runtime.Serialization
         public override void WriteStartObject(System.Xml.XmlDictionaryWriter writer, object graph) { }
         public override void WriteStartObject(System.Xml.XmlWriter writer, object graph) { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public static partial class DataContractSerializerExtensions
     {
         public static System.Runtime.Serialization.ISerializationSurrogateProvider GetSerializationSurrogateProvider(this DataContractSerializer serializer) { throw null; }

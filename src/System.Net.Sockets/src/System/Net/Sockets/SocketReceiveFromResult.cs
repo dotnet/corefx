@@ -4,6 +4,7 @@
 
 namespace System.Net.Sockets
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public struct SocketReceiveFromResult
     {
         public int ReceivedBytes;

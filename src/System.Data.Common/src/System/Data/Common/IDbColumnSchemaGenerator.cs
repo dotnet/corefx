@@ -4,6 +4,7 @@
 
 namespace System.Data.Common
 {
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public interface IDbColumnSchemaGenerator
     {
         System.Collections.ObjectModel.ReadOnlyCollection<DbColumn> GetColumnSchema();
