@@ -516,7 +516,7 @@ namespace System.Threading.Tasks.Tests
         [InlineData(1)]
         [InlineData(1024)]
         [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 16)]
+        [InlineData(1024 * 1024 * 4)]
         public static void RunSimpleParallelForeachAddTest_Array(int count)
         {
             // Just adds the contents of an auto-generated list inside a foreach loop. Hits the array code-path.
