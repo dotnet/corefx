@@ -374,7 +374,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Clean up following dispose pattern
         ''' </summary>
         Protected Overrides Sub Finalize()
-            ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
+            ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean).
             Dispose(False)
             MyBase.Finalize()
         End Sub

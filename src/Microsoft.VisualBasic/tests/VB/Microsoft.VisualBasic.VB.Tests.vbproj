@@ -7,6 +7,7 @@
     <Compile Include="Dummy.vb" />
     <Compile Include="FileIOTests.vb" />
     <Compile Include="MsgBoxTests.vb" />
+    <Compile Include="TextFieldParserTests.vb" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualBasic.vbproj" />

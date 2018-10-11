@@ -46,6 +46,11 @@ namespace Microsoft.VisualBasic
         public void Remove(int Index) { }
         public void Remove(string Key) { }
     }
+    public enum CompareMethod
+    {
+        Binary = 0,
+        Text = 1,
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited=false, AllowMultiple=false)]
     public sealed partial class ComClassAttribute : System.Attribute
     {
@@ -57,11 +62,6 @@ namespace Microsoft.VisualBasic
         public string EventID { get { throw null; } }
         public string InterfaceID { get { throw null; } }
         public bool InterfaceShadows { get { throw null; } set { } }
-    }
-    public enum CompareMethod
-    {
-        Binary = 0,
-        Text = 1,
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Constants
