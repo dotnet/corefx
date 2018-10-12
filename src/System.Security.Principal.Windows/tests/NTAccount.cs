@@ -10,11 +10,18 @@ namespace System.Security.Principal.Windows.Tests
     public class NTAccountTest
     {
         [Fact(Skip = "This test needs a machine in a domain but off line.")]
-        public void Translate_Fail()
+        public void Translate_Fail_Domain_Offline()
         {
             var nta = new NTAccount("foobar");
             Assert.Throws<Win32Exception>(() => nta.Translate(typeof(SecurityIdentifier)));
             Assert.Throws<Win32Exception>(() => nta.Translate(typeof(SecurityIdentifier)));
+        }
+
+        [Fact]
+        public void Translate_Fail()
+        {
+            var nta = new NTAccount("foobar");
+            Assert.Throws<IdentityNotMappedException>(() => nta.Translate(typeof(SecurityIdentifier)));
         }
     }
 }
