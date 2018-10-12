@@ -8,6 +8,7 @@
     <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
       <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
     </Compile>    
+    <Compile Include="..\..\Common\tests\System\MockType.cs" Link="Common\System\MockType.cs" />
     <Compile Include="AssemblyNameTests.cs" />
     <Compile Include="AssemblyTests.cs" />
     <Compile Include="ConstructorInfoTests.cs" />
@@ -22,6 +23,7 @@
     <Compile Include="ParameterInfoTests.cs" />
     <Compile Include="PropertyInfoTests.cs" />
     <Compile Include="ReflectionContextTests.cs" />
+    <Compile Include="TypeDerivedTests.cs" />
     <Compile Include="TypeInfoTests.cs" />
     <Compile Include="ExceptionTests.cs" />
   </ItemGroup>
