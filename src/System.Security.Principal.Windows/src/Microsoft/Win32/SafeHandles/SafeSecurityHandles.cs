@@ -12,8 +12,6 @@ namespace Microsoft.Win32.SafeHandles
     {
         private SafeLsaMemoryHandle() : base(true) { }
 
-        private static SafeLsaMemoryHandle _invalidHandle = new SafeLsaMemoryHandle(IntPtr.Zero);
-
         // 0 is an Invalid Handle
         internal SafeLsaMemoryHandle(IntPtr handle) : base(true)
         {
@@ -24,7 +22,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             get
             {
-                return _invalidHandle;
+                return new SafeLsaMemoryHandle(IntPtr.Zero);
             }
         }
 
