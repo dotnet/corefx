@@ -19,11 +19,6 @@ The CoreFX repo can be built from a regular, non-admin command prompt. The build
 Developer Workflow
 ------------------
 The dev workflow describes the [development process](https://github.com/dotnet/buildtools/blob/master/Documentation/Dev-workflow.md) to follow. It is divided into specific tasks that are fast, transparent and easy to understand.
-The tasks are represented in scripts (cmd/sh) in the root of the repo:
-* clean - Cleans up the binary output and optionally the working directory (`-all`)
-* sync - Pulls down external dependencies needed to build (i.e. build tools, xunit, coreclr, etc)
-* build - Builds the shipping libraries in corefx.
-* build-tests - Builds and runs the corefx tests.
 
 For more information about the different options that each task has, use the argument `-?` when calling the script.  For example:
 ```
@@ -32,7 +27,7 @@ build -?
 
 ### Build
 The CoreFX build has two logical components, the native build which produces the "shims" (which provide a stable interface between the OS and managed code) and
-the managed build which produces the MSIL code and nuget packages that make up CoreFX.
+the managed build which produces the MSIL code and NuGet packages that make up CoreFX.
 
 Calling the script `build` attempts to build both the native and managed code.
 Only use it when the parameters that you are passing to the script apply for both components. Otherwise, use the scripts `build-native` and `build-managed` respectively.
@@ -44,36 +39,41 @@ The build configurations are generally defaulted based on where you are building
 - `-debug|-release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
 - `-buildArch` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
 
-These options are common for build, build-managed, build-native, and build-tests scripts.
-
 For more details on the build configurations see [project-guidelines](../coding-guidelines/project-guidelines.md#build-pivots).
 
 **Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch.
 
-**Common full clean build and test run**
+The most common workflow for developers is to call `build` from the root once (preceeded by a `clean -all` if you have built previously) and then go and work on the individual library that you are trying to make changes for. On windows folks will usually open up the solution file in the root of that library directory and work in VS.
+
+By default build only builds the product libraries and none of the tests if you want to build and run all the tests you can call `build -test` to build and run only the tests or `build -includetests` to build the project as well as the tests
+
+**Examples**
+- Clean and build the product libraries
 ```
 clean -all
 build
-build-tests
 ```
-
-**Examples**
 
 - Building in debug mode for platform x64
 ```
-build -debug -buildArch=x64
+build -debug /p:ArchGroup=x64
 ```
 
 - Building the src and then building and running the tests
 ```
-build -tests
+build -includetests
 ```
 
 - Building for different target frameworks
 ```
-build -framework=netcoreapp
-build -framework=netfx
-build -framework=uap
+build -framework netcoreapp
+build -framework netfx
+build -framework uap
+```
+
+- Build only managed components and skip the native build
+```
+build /p:BuildNative=false
 ```
 
 ### Build Native
@@ -87,50 +87,33 @@ The native component should be buildable on any system.
 
 - Building in debug mode for platform x64
 ```
-build-native -debug -buildArch=x64
+./src/Native/build-native debug x64
 ```
 
-- The following example shows the argument `--`. Everything that is after it is not going to be processed, and will be passed as-is.
+- The following example shows how you would do an arm cross-compile build.
 ```
-build-native -debug -buildArch=arm -- cross verbose
+./src/Native/build-native debug arm cross verbose
 ```
 
 For more information about extra parameters take a look at the scripts `build-native` under src/Native.
 
-### Build Managed
-Since the managed build uses the .NET Core CLI (which the build will download), managed components can only be built on a subset of distros.
-There are some additional prerequisites from the CLI which need to be installed. Both libicu and libunwind are used by CoreCLR to execute managed code, so they must be installed. Since CoreFX does not actually link against these packages, runtime versions are sufficient. We also require curl to be present, which we use to download the .NET Core CLI.
-
-**Examples**
-
-- Building in debug mode for platform x64
-```
-build-managed -debug -buildArch=x64
-```
-
-- Building in debug mode for platform x64 targeting OS Linux
-```
-build-managed -debug -buildArch=x64 -os=Linux
-```
-
 ### Build And Run Tests
-To build the tests and run them you can call the build-test script. The same parameters you pass to build should also be passed to build-tests script to ensure you are building and running the tests on the same configuration you have build the product on. However to run tests on the same machine you need to ensure the machine supports the configuration you are building.
+To build the tests and run them you can call the build script passing -tests option. The same parameters you pass to build should also be passed to ensure you are building and running the tests on the same configuration you have build the product on. However to run tests on the same machine you need to ensure the machine supports the configuration you are building.
 
 **Examples**
-- The following shows how to build tests but not run them
+- The following shows how to build only the tests but not run them
 ```
-build-tests -skiptests
+build -test -skiptests
 ```
 
 - The following builds and runs all tests for netcoreapp in release configuration.
 ```
-build-tests -release -framework=netcoreapp
+build -test -release -framework=netcoreapp
 ```
 
-- The following example shows the argument `--`. Everything that is after it is not going to be processed and it is going to be passed as it is.
-Use it to pass extra msbuild properties, in this case to ignore tests ignored in CI.
+- The following example shows how to pass extra msbuild properties to ignore tests ignored in CI.
 ```
-build-tests -- /p:WithoutCategories=IgnoreForCI
+build -test /p:WithoutCategories=IgnoreForCI
 ```
 
 ### Building individual libraries
@@ -168,11 +151,11 @@ build System.Collections -framework:netfx -release
 
 ### Building individual projects
 
-You can either ues `dotnet msbuild` or `msbuild`, depending on which is in your path. As `dotnet msbuild` works on all supported environments (i.e. Unix) we will use it throughout this guide.
+You can either use `dotnet msbuild` or `msbuild`, depending on which is in your path. As `dotnet msbuild` works on all supported environments (i.e. Unix) we will use it throughout this guide.
 
 **Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch.
 
-Under the src directory is a set of directories, each of which represents a particular assembly in CoreFX. See Libary Project Guidelines section under [project-guidelines](../coding-guidelines/project-guidelines.md) for more details about the structure.
+Under the src directory is a set of directories, each of which represents a particular assembly in CoreFX. See Library Project Guidelines section under [project-guidelines](../coding-guidelines/project-guidelines.md) for more details about the structure.
 
 For example the src\System.Diagnostics.DiagnosticSource directory holds the source code for the System.Diagnostics.DiagnosticSource.dll assembly.
 
@@ -474,7 +457,7 @@ The CoreFX build and test suite is a work in progress, as are the [building and 
 
 ## Testing with private CoreCLR bits
 
-Generally the CoreFx build system gets the CoreCLR from a nuget package which gets pulled down and correctly copied to the various output directories by building '\external\runtime\runtime.depproj' which gets built as part of `build.cmd/sh`. For folks that want to do builds and test runs in corefx with a local private build of coreclr you can follow these steps:
+Generally the CoreFx build system gets the CoreCLR from a NuGet package which gets pulled down and correctly copied to the various output directories by building '\external\runtime\runtime.depproj' which gets built as part of `build.cmd/sh`. For folks that want to do builds and test runs in corefx with a local private build of coreclr you can follow these steps:
 
 
 1. Build CoreCLR and note your output directory. Ex: `\coreclr\bin\Product\Windows_NT.x64.Release\` Note this will vary based on your OS/Architecture/Flavor and it is generally a good idea to use Release builds for CoreCLR when running CoreFx tests and the OS and Architecture should match what you are building in CoreFx.
@@ -495,8 +478,8 @@ Once you have updated your CoreCLR you can run tests however you usually do (via
 
 If you prefer, you can use a Debug build of System.Private.CoreLib, but if you do you must also use a Debug build of the native portions of the runtime, e.g. coreclr.dll. Tests with a Debug runtime will execute much more slowly than with Release runtime bits.
 
-To collect code coverage that includes types in System.Private.CoreLib.dll, you'll need to follow the above steps, then
+If the test project does not set the property `TestRuntime` to `true` and you want to collect code coverage that includes types in System.Private.CoreLib.dll, you'll need to follow the above steps, then
 
 `dotnet msbuild /t:rebuildandtest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"`
 
-In order to facilitate coverage tools that perform IL rewrite a dedicated shared framework directory is created by default for coverage runs. This shared runtime is copied from the default shared test runtime (the one with version 9.9.9, e.g.: `\corefx\bin\testhost\netcoreapp-Windows_NT-Debug-x64\shared\Microsoft.NETCore.App\9.9.9`). This behavior can be overriden by adding `/p:UseCoverageDedicatedRuntime=false` to the build command used to capture code coverage, which will cause the coverage run to use the same shared runtime as a test run using the native image of System.Private.CoreLib.dll, causing loss of source coverage information for it.
+In order to facilitate coverage tools that perform IL rewrite a dedicated shared framework directory is created by default for coverage runs. This shared runtime is copied from the default shared test runtime (the one with version 9.9.9, e.g.: `\corefx\bin\testhost\netcoreapp-Windows_NT-Debug-x64\shared\Microsoft.NETCore.App\9.9.9`). This behavior can be overridden by adding `/p:UseCoverageDedicatedRuntime=false` to the build command used to capture code coverage, which will cause the coverage run to use the same shared runtime as a test run using the native image of System.Private.CoreLib.dll, causing loss of source coverage information for it.

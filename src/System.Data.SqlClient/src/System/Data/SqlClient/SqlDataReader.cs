@@ -1377,7 +1377,7 @@ namespace System.Data.SqlClient
 
         virtual public XmlReader GetXmlReader(int i)
         {
-            // NOTE: sql_variant can not contain a XML data type: http://msdn.microsoft.com/en-us/library/ms173829.aspx
+            // NOTE: sql_variant can not contain a XML data type: https://docs.microsoft.com/en-us/sql/t-sql/data-types/sql-variant-transact-sql
             // If this ever changes, the following code should be changed to be like GetStream\GetTextReader
             CheckDataIsReady(columnIndex: i);
 
@@ -1782,7 +1782,7 @@ namespace System.Data.SqlClient
                 {
                     // Read data (not exceeding the total amount of data available)
                     int bytesToRead = (int)Math.Min((long)length, _sharedState._columnDataBytesRemaining);
-                    bool result = _stateObj.TryReadByteArray(buffer, index, bytesToRead, out bytesRead);
+                    bool result = _stateObj.TryReadByteArray(buffer.AsSpan(index), bytesToRead, out bytesRead);
                     _columnDataBytesRead += bytesRead;
                     _sharedState._columnDataBytesRemaining -= bytesRead;
                     return result;

@@ -18,6 +18,7 @@
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>9004703a1923e5c5582ceb8d79712df777412446</StandardCurrentRef>
     <BuildToolsCurrentRef>8b89aff77f859bd3a8a93cc106c6f0e5d44356b7</BuildToolsCurrentRef>
+    <CoreFxOptimizationDataCurrentRef>6aee9d4f0b918a9458cdf07d22094d4523204a6c</CoreFxOptimizationDataCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -50,7 +51,6 @@
     <XUnitPackageVersion>2.4.1-pre.build.4059</XUnitPackageVersion>
     <XUnitPerformancePackageVersion>1.0.0-beta-build0020</XUnitPerformancePackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18456.9</MicrosoftDotNetXUnitExtensionsVersion>
     <UAPToolsPackageVersion>1.0.23</UAPToolsPackageVersion>
 
     <!-- Roslyn optimization data package version -->
@@ -59,12 +59,16 @@
     <TestILCArmretPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCArmretPackageVersion>
     <TestILCX86retPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCX86retPackageVersion>
     <OptimizationDataVersion>2.0.0-rc-61101-17</OptimizationDataVersion>
+    <CoreFxOptimizationDataVersion>99.99.99-master-20181008-0042</CoreFxOptimizationDataVersion>
   </PropertyGroup>
 
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>3.0.0-preview1-03227-02</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>3.0.0-preview1-03308-01</FeedTasksPackageVersion>
+
+    <BuildToolsPackage>microsoft.dotnet.buildtools</BuildToolsPackage>
+    <BuildToolsPackageVersion>3.0.0-preview1-03308-01</BuildToolsPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
@@ -72,6 +76,8 @@
     <PublishSymbolsPackage>Microsoft.SymbolUploader.Build.Task</PublishSymbolsPackage>
     <PublishSymbolsPackageVersion>1.0.0-beta-63112-02</PublishSymbolsPackageVersion>
   </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)eng\Versions.props" />
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
   <PropertyGroup>
@@ -117,6 +123,10 @@
     <RemoteDependencyBuildInfo Include="BuildTools">
       <BuildInfoPath>$(BaseDotNetBuildInfo)buildtools/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(BuildToolsCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="CoreFxOptimizationData">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)optimization/$(DependencyBranch)/IBC</BuildInfoPath>
+      <CurrentRef>$(CoreFxOptimizationDataCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
 
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
@@ -189,16 +199,21 @@
       <ElementName>MicrosoftNETCoreAppPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.App</PackageId>
     </XmlUpdateStep>
-    <UpdateStep Include="BuildTools">
-      <UpdaterType>File</UpdaterType>
-      <Path>$(MSBuildThisFileDirectory)BuildToolsVersion.txt</Path>
+    <XmlUpdateStep Include="BuildTools">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>BuildToolsPackageVersion</ElementName>
       <PackageId>Microsoft.DotNet.BuildTools</PackageId>
-    </UpdateStep>
+    </XmlUpdateStep>
      <XmlUpdateStep Include="BuildTools">
        <Path>$(MSBuildThisFileFullPath)</Path>
        <ElementName>FeedTasksPackageVersion</ElementName>
        <PackageId>$(FeedTasksPackage)</PackageId>
      </XmlUpdateStep>
+    <XmlUpdateStep Include="CoreFxOptimizationData">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>CoreFxOptimizationDataVersion</ElementName>
+      <PackageId>optimization.IBC.CoreFx</PackageId>
+    </XmlUpdateStep>
   </ItemGroup>
 
   <PropertyGroup>
@@ -226,10 +241,6 @@
     <XUnitDependency Include="xunit.runner.console"/>
     <StaticDependency Include="@(XUnitDependency)">
       <Version>$(XUnitPackageVersion)</Version>
-    </StaticDependency>
-
-    <StaticDependency Include="Microsoft.DotNet.XUnitExtensions">
-      <Version>$(MicrosoftDotNetXUnitExtensionsVersion)</Version>
     </StaticDependency>
 
     <StaticDependency Include="Microsoft.NET.Test.Sdk">
