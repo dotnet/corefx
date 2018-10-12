@@ -132,13 +132,9 @@ namespace System.Net.NetworkInformation
                 hasDashes = true;
                 buffer = new byte[(address.Length + 1) / 3];
 
-                string[] parts = address.Split('-');
-                for (int i = 0; i < parts.Length; i++)
+                if ((address.Length + 1) % 3 != 0)
                 {
-                    if (parts[i].Length < 2)
-                    {
-                        throw new FormatException(SR.net_bad_mac_address);
-                    }
+                    throw new FormatException(SR.net_bad_mac_address);
                 }
             }
             else
