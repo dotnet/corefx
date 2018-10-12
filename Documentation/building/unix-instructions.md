@@ -123,10 +123,10 @@ https://openssl.org/
   Poured from bottle on 2014-04-07 at 11:26:41
 ```
 
-With the above example, we'd pick the latest version `1.0.1g` and invoke cmake like the following:
+With the above example, we'd pick the latest version `1.0.1g` like the following:
 
 ```
-OPENSSL_ROOT_DIR="/usr/local/Cellar/openssl/1.0.1g cmake
+OPENSSL_ROOT_DIR="/usr/local/Cellar/openssl/1.0.1g"
 ```
 
 ### Known Issues
