@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.Test.Common;
+using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -1019,6 +1020,48 @@ namespace System.Net.Http.Functional.Tests
                 new LoopbackServer.Options { UseSsl = bool.Parse(secureString) });
                 return SuccessExitCode;
             }, secure.ToString()).Dispose();
+        }
+
+        [OuterLoop]
+        [Fact]
+        public void HandlerDroppedWithoutDisposal_NotKeptAlive()
+        {
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            HandlerDroppedWithoutDisposal_NotKeptAliveCore(tcs);
+            for (int i = 0; i < 10; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+            Assert.True(tcs.Task.IsCompleted);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void HandlerDroppedWithoutDisposal_NotKeptAliveCore(TaskCompletionSource<bool> setOnFinalized)
+        {
+            // This relies on knowing that in order for the connection pool to operate, it needs
+            // to maintain a reference to the supplied IWebProxy.  As such, we provide a proxy
+            // that when finalized will set our event, so that we can determine the state associated
+            // with a handler has gone away.
+            IWebProxy p = new PassthroughProxyWithFinalizerCallback(() => setOnFinalized.TrySetResult(true));
+
+            // Make a bunch of requests and drop the associated HttpClient instances after making them, without disposal.
+            Task.WaitAll((from i in Enumerable.Range(0, 10)
+                          select LoopbackServer.CreateClientAndServerAsync(
+                              url => new HttpClient(new SocketsHttpHandler { Proxy = p }).GetStringAsync(url),
+                              server => server.AcceptConnectionSendResponseAndCloseAsync())).ToArray());
+        }
+
+        private sealed class PassthroughProxyWithFinalizerCallback : IWebProxy
+        {
+            private readonly Action _callback;
+
+            public PassthroughProxyWithFinalizerCallback(Action callback) => _callback = callback;
+            ~PassthroughProxyWithFinalizerCallback() => _callback();
+
+            public ICredentials Credentials { get; set; }
+            public Uri GetProxy(Uri destination) => destination;
+            public bool IsBypassed(Uri host) => true;
         }
     }
 
