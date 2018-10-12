@@ -176,7 +176,7 @@ namespace System.Security.Principal
 
             return Result;
         }
-        
+
         internal static IdentityReferenceCollection Translate(IdentityReferenceCollection sourceAccounts, Type targetType, out bool someFailed)
         {
             if (sourceAccounts == null)
@@ -370,7 +370,20 @@ namespace System.Security.Principal
             }
             finally
             {
-                LsaHandle.Dispose();
+                if (!LsaHandle.IsInvalid)
+                {
+                    LsaHandle.Dispose();
+                }
+
+                if (!ReferencedDomainsPtr.IsInvalid)
+                {
+                    ReferencedDomainsPtr.Dispose();
+                }
+
+                if (!SidsPtr.IsInvalid)
+                {
+                    SidsPtr.Dispose();
+                }
             }
         }
         #endregion

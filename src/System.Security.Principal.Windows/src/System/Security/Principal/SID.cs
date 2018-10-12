@@ -1172,7 +1172,20 @@ nameof(binaryForm));
                     }
                 }
 
-                LsaHandle.Dispose();
+                if (!LsaHandle.IsInvalid)
+                {
+                    LsaHandle.Dispose();
+                }
+
+                if (!ReferencedDomainsPtr.IsInvalid)
+                {
+                    ReferencedDomainsPtr.Dispose();
+                }
+
+                if (!NamesPtr.IsInvalid)
+                {
+                    NamesPtr.Dispose();
+                }
             }
         }
 
