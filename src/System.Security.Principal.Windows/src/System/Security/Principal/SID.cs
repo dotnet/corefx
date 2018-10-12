@@ -1173,8 +1173,6 @@ nameof(binaryForm));
                 }
 
                 LsaHandle.Dispose();
-                ReferencedDomainsPtr.Dispose();
-                NamesPtr.Dispose();
             }
         }
 

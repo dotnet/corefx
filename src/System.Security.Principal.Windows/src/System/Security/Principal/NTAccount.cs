@@ -371,8 +371,6 @@ namespace System.Security.Principal
             finally
             {
                 LsaHandle.Dispose();
-                ReferencedDomainsPtr.Dispose();
-                SidsPtr.Dispose();
             }
         }
         #endregion
