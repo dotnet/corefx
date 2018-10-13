@@ -15,6 +15,7 @@ using System.Reflection;
 using System.IO;
 using System.Globalization;
 using System.Security;
+using System.Runtime.CompilerServices;
 
 namespace System.Data.SqlClient
 {
@@ -911,7 +912,7 @@ namespace System.Data.SqlClient
                                             catch (SqlException)
                                             {
                                             }
-                                            runningReconnect = Task.Run(() => ReconnectAsync(timeout));
+                                            runningReconnect = ValidateAndReconnectSetupReconnectContinuation(timeout);
                                             // if current reconnect is not null, somebody already started reconnection task - some kind of race condition
                                             Debug.Assert(_currentReconnectionTask == null, "Duplicate reconnection tasks detected");
                                             _currentReconnectionTask = runningReconnect;
@@ -947,6 +948,13 @@ namespace System.Data.SqlClient
                 }
             }
             return runningReconnect;
+        }
+
+        // This is in its own method to avoid always allocating the lambda in ValidateAndReconnect
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private Task ValidateAndReconnectSetupReconnectContinuation(int timeout)
+        {
+            return Task.Run(() => ReconnectAsync(timeout));
         }
 
         // this is straightforward, but expensive method to do connection resiliency - it take locks and all preparations as for TDS request

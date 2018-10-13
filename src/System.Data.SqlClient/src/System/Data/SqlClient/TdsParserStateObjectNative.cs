@@ -18,6 +18,8 @@ namespace System.Data.SqlClient
         internal SNIPacket _sniAsyncAttnPacket = null;                // Packet to use to send Attn
         private readonly WritePacketCache _writePacketCache = new WritePacketCache(); // Store write packets that are ready to be re-used
 
+        private static readonly object CachedEmptyReadPacketObjectPointer = (object)IntPtr.Zero;
+
         public TdsParserStateObjectNative(TdsParser parser) : base(parser) { }
 
         private GCHandle _gcHandle;                                    // keeps this object alive until we're closed.
@@ -35,7 +37,7 @@ namespace System.Data.SqlClient
 
         internal override object SessionHandle => _sessionHandle;
 
-        protected override object EmptyReadPacket => IntPtr.Zero;
+        protected override object EmptyReadPacket => CachedEmptyReadPacketObjectPointer;
 
         protected override void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async)
         {

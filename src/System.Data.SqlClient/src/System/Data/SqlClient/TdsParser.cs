@@ -9,6 +9,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -2135,7 +2136,7 @@ namespace System.Data.SqlClient
             {
                 // Dev11 #344723: SqlClient stress hang System_Data!Tcp::ReadSync via a call to SqlDataReader::Close
                 // Spin until SendAttention has cleared _attentionSending, this prevents a race condition between receiving the attention ACK and setting _attentionSent
-                SpinWait.SpinUntil(() => !stateObj._attentionSending);
+                TryRunSetupSpinWaitContinuation(stateObj);
 
                 Debug.Assert(stateObj._attentionSent, "Attention ACK has been received without attention sent");
                 if (stateObj._attentionSent)
@@ -2157,6 +2158,13 @@ namespace System.Data.SqlClient
                 ThrowExceptionAndWarning(stateObj);
             }
             return true;
+        }
+
+        // This is in its own method to avoid always allocating the lambda in TryRun
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void TryRunSetupSpinWaitContinuation(TdsParserStateObject stateObj)
+        {
+            SpinWait.SpinUntil(() => !stateObj._attentionSending);
         }
 
         private bool TryProcessEnvChange(int tokenLength, TdsParserStateObject stateObj, out SqlEnvChange[] sqlEnvChange)
