@@ -1420,9 +1420,9 @@ namespace System.Data.SqlClient
         //
         internal void WriteFloat(float v, TdsParserStateObject stateObj)
         {
-            byte[] bytes = BitConverter.GetBytes(v);
-
-            stateObj.WriteByteArray(bytes, bytes.Length, 0);
+            Span<byte> bytes = stackalloc byte[sizeof(float)];
+            BitConverter.TryWriteBytes(bytes, v);
+            stateObj.WriteByteSpan(bytes);
         }
 
         //
@@ -1494,9 +1494,9 @@ namespace System.Data.SqlClient
         //
         internal void WriteDouble(double v, TdsParserStateObject stateObj)
         {
-            byte[] bytes = BitConverter.GetBytes(v);
-
-            stateObj.WriteByteArray(bytes, bytes.Length, 0);
+            Span<byte> bytes = stackalloc byte[sizeof(double)];
+            BitConverter.TryWriteBytes(bytes, v);
+            stateObj.WriteByteSpan(bytes);
         }
 
         internal void PrepareResetConnection(bool preserveTransaction)
