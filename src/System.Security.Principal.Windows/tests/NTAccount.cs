@@ -18,26 +18,27 @@ namespace System.Security.Principal.Windows.Tests
             {
                 nta.Translate(typeof(SecurityIdentifier));
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                // If machine is in a domain but off line throws Win32Exception
-                Assert.True(ex is IdentityNotMappedException || ex is Win32Exception);
-                if (ex is Win32Exception win32Exception)
-                {
-                    // ERROR_TRUSTED_RELATIONSHIP_FAILURE: The trust relationship between this workstation and the primary domain failed.
-                    Assert.Equal(1789, win32Exception.NativeErrorCode);
-                }
+                Asserts(e);
             }
 
             try
             {
                 nta.Translate(typeof(SecurityIdentifier));
             }
-            catch (Exception ex)
+            catch (Exception e)
+            {
+                Asserts(e);
+            }
+
+            return;
+
+            void Asserts(Exception exception)
             {
                 // If machine is in a domain but off line throws Win32Exception
-                Assert.True(ex is IdentityNotMappedException || ex is Win32Exception);
-                if (ex is Win32Exception win32Exception)
+                Assert.True(exception is IdentityNotMappedException || exception is Win32Exception);
+                if (exception is Win32Exception win32Exception)
                 {
                     // ERROR_TRUSTED_RELATIONSHIP_FAILURE: The trust relationship between this workstation and the primary domain failed.
                     Assert.Equal(1789, win32Exception.NativeErrorCode);
