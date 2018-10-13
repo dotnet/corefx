@@ -9,19 +9,40 @@ namespace System.Security.Principal.Windows.Tests
 {
     public class NTAccountTest
     {
-        [Fact(Skip = "This test needs a machine in a domain but off line.")]
-        public void Translate_Fail_Domain_Offline()
-        {
-            var nta = new NTAccount("foobar");
-            Assert.Throws<Win32Exception>(() => nta.Translate(typeof(SecurityIdentifier)));
-            Assert.Throws<Win32Exception>(() => nta.Translate(typeof(SecurityIdentifier)));
-        }
-
         [Fact]
         public void Translate_Fail()
         {
-            var nta = new NTAccount("foobar");
-            Assert.Throws<IdentityNotMappedException>(() => nta.Translate(typeof(SecurityIdentifier)));
+            var nta = new NTAccount(Guid.NewGuid().ToString("N"));
+
+            try
+            {
+                nta.Translate(typeof(SecurityIdentifier));
+            }
+            catch (Exception ex)
+            {
+                // If machine is in a domain but off line throws Win32Exception
+                Assert.True(ex is IdentityNotMappedException || ex is Win32Exception);
+                if (ex is Win32Exception win32Exception)
+                {
+                    // ERROR_TRUSTED_RELATIONSHIP_FAILURE: The trust relationship between this workstation and the primary domain failed.
+                    Assert.Equal(1789, win32Exception.NativeErrorCode);
+                }
+            }
+
+            try
+            {
+                nta.Translate(typeof(SecurityIdentifier));
+            }
+            catch (Exception ex)
+            {
+                // If machine is in a domain but off line throws Win32Exception
+                Assert.True(ex is IdentityNotMappedException || ex is Win32Exception);
+                if (ex is Win32Exception win32Exception)
+                {
+                    // ERROR_TRUSTED_RELATIONSHIP_FAILURE: The trust relationship between this workstation and the primary domain failed.
+                    Assert.Equal(1789, win32Exception.NativeErrorCode);
+                }
+            }
         }
     }
 }
