@@ -34,6 +34,7 @@ namespace System.Security.Principal.Windows.Tests
 
             return;
 
+            // Test assertions
             void Asserts(Exception exception)
             {
                 // If machine is in a domain but off line throws Win32Exception
