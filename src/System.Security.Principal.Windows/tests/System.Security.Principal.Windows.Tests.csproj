@@ -4,10 +4,10 @@
     <Configurations>netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="NTAccount.cs" />
     <Compile Include="WindowsIdentityTests.cs" />
     <Compile Include="WindowsPrincipalTests.cs" />
     <Compile Include="WellKnownSidTypeTests.cs" />
-    <Compile Include="NTAccount.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
