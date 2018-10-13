@@ -34,7 +34,7 @@ namespace System.IO
             // Now the byte[] is pinned for the lifetime of this instance.
             // But I also need to get a pointer to that block of memory...
             int len = array.Length;
-            fixed (byte* ptr = (Span<byte>)array)
+            fixed (byte* ptr = &MemoryMarshal.GetReference((Span<byte>)array))
                 Initialize(ptr, len, len, FileAccess.Read);
         }
 

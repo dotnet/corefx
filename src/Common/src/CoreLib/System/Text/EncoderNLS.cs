@@ -66,7 +66,7 @@ namespace System.Text
 
             // Just call the pointer version
             int result = -1;
-            fixed (char* pChars = (Span<char>)chars)
+            fixed (char* pChars = &MemoryMarshal.GetReference((Span<char>)chars))
             {
                 result = GetByteCount(pChars + index, count, flush);
             }
@@ -112,8 +112,8 @@ namespace System.Text
             int byteCount = bytes.Length - byteIndex;
 
             // Just call pointer version
-            fixed (char* pChars = (Span<char>)chars)
-            fixed (byte* pBytes = (Span<byte>)bytes)
+            fixed (char* pChars = &MemoryMarshal.GetReference((Span<char>)chars))
+            fixed (byte* pBytes = &MemoryMarshal.GetReference((Span<byte>)bytes))
 
                 // Remember that charCount is # to decode, not size of array.
                 return GetBytes(pChars + charIndex, charCount,
@@ -164,9 +164,9 @@ namespace System.Text
                       SR.ArgumentOutOfRange_IndexCountBuffer);
 
             // Just call the pointer version (can't do this for non-msft encoders)
-            fixed (char* pChars = (Span<char>)chars)
+            fixed (char* pChars = &MemoryMarshal.GetReference((Span<char>)chars))
             {
-                fixed (byte* pBytes = (Span<byte>)bytes)
+                fixed (byte* pBytes = &MemoryMarshal.GetReference((Span<byte>)bytes))
                 {
                     Convert(pChars + charIndex, charCount, pBytes + byteIndex, byteCount, flush,
                         out charsUsed, out bytesUsed, out completed);

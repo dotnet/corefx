@@ -102,8 +102,8 @@ namespace System.Globalization
 
             if (ignoreCase)
             {
-                fixed (char* pSource = source)
-                fixed (char* pValue = value)
+                fixed (char* pSource = &MemoryMarshal.GetReference(source))
+                fixed (char* pValue = &MemoryMarshal.GetReference(value))
                 {
                     return Interop.Globalization.IndexOfOrdinalIgnoreCase(pValue, value.Length, pSource, source.Length, findLast: !fromBeginning);
                 }
@@ -214,7 +214,7 @@ namespace System.Globalization
             Debug.Assert(string2 != null);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
-            fixed (char* pString1 = string1)
+            fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
             fixed (char* pString2 = &string2.GetRawStringData())
             {
                 return Interop.Globalization.CompareString(_sortHandle, pString1, string1.Length, pString2, string2.Length, options);
@@ -226,8 +226,8 @@ namespace System.Globalization
             Debug.Assert(!_invariantMode);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
-            fixed (char* pString1 = string1)
-            fixed (char* pString2 = string2)
+            fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
+            fixed (char* pString2 = &MemoryMarshal.GetReference(string2))
             {
                 return Interop.Globalization.CompareString(_sortHandle, pString1, string1.Length, pString2, string2.Length, options);
             }
@@ -299,8 +299,8 @@ namespace System.Globalization
             }
             else
             {
-                fixed (char* pSource = source)
-                fixed (char* pTarget = target)
+                fixed (char* pSource = &MemoryMarshal.GetReference(source))
+                fixed (char* pTarget = &MemoryMarshal.GetReference(target))
                 {
                     if (fromBeginning)
                         return Interop.Globalization.IndexOf(_sortHandle, pTarget, target.Length, pSource, source.Length, options, matchLengthPtr);
@@ -323,8 +323,8 @@ namespace System.Globalization
             Debug.Assert(!target.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
 
-            fixed (char* ap = source)
-            fixed (char* bp = target)
+            fixed (char* ap = &MemoryMarshal.GetReference(source))
+            fixed (char* bp = &MemoryMarshal.GetReference(target))
             {
                 char* a = ap;
                 char* b = bp;
@@ -409,8 +409,8 @@ namespace System.Globalization
             Debug.Assert(!target.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
 
-            fixed (char* ap = source)
-            fixed (char* bp = target)
+            fixed (char* ap = &MemoryMarshal.GetReference(source))
+            fixed (char* bp = &MemoryMarshal.GetReference(target))
             {
                 char* a = ap;
                 char* b = bp;
@@ -558,8 +558,8 @@ namespace System.Globalization
             }
             else
             {
-                fixed (char* pSource = source)
-                fixed (char* pPrefix = prefix)
+                fixed (char* pSource = &MemoryMarshal.GetReference(source))
+                fixed (char* pPrefix = &MemoryMarshal.GetReference(prefix))
                 {
                     return Interop.Globalization.StartsWith(_sortHandle, pPrefix, prefix.Length, pSource, source.Length, options);
                 }
@@ -577,8 +577,8 @@ namespace System.Globalization
 
             int length = prefix.Length;
 
-            fixed (char* ap = source)
-            fixed (char* bp = prefix)
+            fixed (char* ap = &MemoryMarshal.GetReference(source))
+            fixed (char* bp = &MemoryMarshal.GetReference(prefix))
             {
                 char* a = ap;
                 char* b = bp;
@@ -623,8 +623,8 @@ namespace System.Globalization
 
             int length = prefix.Length;
 
-            fixed (char* ap = source)
-            fixed (char* bp = prefix)
+            fixed (char* ap = &MemoryMarshal.GetReference(source))
+            fixed (char* bp = &MemoryMarshal.GetReference(prefix))
             {
                 char* a = ap;
                 char* b = bp;
@@ -691,8 +691,8 @@ namespace System.Globalization
             }
             else
             {
-                fixed (char* pSource = source)
-                fixed (char* pSuffix = suffix)
+                fixed (char* pSource = &MemoryMarshal.GetReference(source))
+                fixed (char* pSuffix = &MemoryMarshal.GetReference(suffix))
                 {
                     return Interop.Globalization.EndsWith(_sortHandle, pSuffix, suffix.Length, pSource, source.Length, options);
                 }
@@ -710,8 +710,8 @@ namespace System.Globalization
 
             int length = suffix.Length;
 
-            fixed (char* ap = source)
-            fixed (char* bp = suffix)
+            fixed (char* ap = &MemoryMarshal.GetReference(source))
+            fixed (char* bp = &MemoryMarshal.GetReference(suffix))
             {
                 char* a = ap + source.Length - 1;
                 char* b = bp + suffix.Length - 1;
@@ -756,8 +756,8 @@ namespace System.Globalization
 
             int length = suffix.Length;
 
-            fixed (char* ap = source)
-            fixed (char* bp = suffix)
+            fixed (char* ap = &MemoryMarshal.GetReference(source))
+            fixed (char* bp = &MemoryMarshal.GetReference(suffix))
             {
                 char* a = ap + source.Length - 1;
                 char* b = bp + suffix.Length - 1;
@@ -875,7 +875,7 @@ namespace System.Globalization
                 stackalloc byte[512] :
                 (borrowedArr = ArrayPool<byte>.Shared.Rent(sortKeyLength));
 
-            fixed (byte* pSortKey = span)
+            fixed (byte* pSortKey = &MemoryMarshal.GetReference(span))
             {
                 if (Interop.Globalization.GetSortKey(_sortHandle, source, source.Length, pSortKey, sortKeyLength, options) != sortKeyLength)
                 {

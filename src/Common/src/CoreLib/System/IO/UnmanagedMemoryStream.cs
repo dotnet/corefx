@@ -418,7 +418,7 @@ namespace System.IO
 
             unsafe
             {
-                fixed (byte* pBuffer = buffer)
+                fixed (byte* pBuffer = &MemoryMarshal.GetReference(buffer))
                 {
                     if (_buffer != null)
                     {
@@ -709,7 +709,7 @@ namespace System.IO
                 }
             }
 
-            fixed (byte* pBuffer = buffer)
+            fixed (byte* pBuffer = &MemoryMarshal.GetReference(buffer))
             {
                 if (_buffer != null)
                 {

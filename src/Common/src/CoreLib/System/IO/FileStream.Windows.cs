@@ -1156,7 +1156,7 @@ namespace System.IO
             int r;
             int numBytesRead = 0;
 
-            fixed (byte* p = bytes)
+            fixed (byte* p = &MemoryMarshal.GetReference(bytes))
             {
                 r = _useAsyncIO ?
                     Interop.Kernel32.ReadFile(handle, p, bytes.Length, IntPtr.Zero, overlapped) :
@@ -1183,7 +1183,7 @@ namespace System.IO
             int numBytesWritten = 0;
             int r;
 
-            fixed (byte* p = buffer)
+            fixed (byte* p = &MemoryMarshal.GetReference(buffer))
             {
                 r = _useAsyncIO ?
                     Interop.Kernel32.WriteFile(handle, p, buffer.Length, IntPtr.Zero, overlapped) :
