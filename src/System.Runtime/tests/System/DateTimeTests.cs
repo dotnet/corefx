@@ -1353,37 +1353,6 @@ namespace System.Tests
             yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ\" \"", CultureInfo.InvariantCulture, DateTimeStyles.AllowTrailingWhite, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
             yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ\"  \"", CultureInfo.InvariantCulture, DateTimeStyles.AllowTrailingWhite, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
 
-
-            yield return new object[] { "9", "\"  \"%d", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
-            yield return new object[] { "15", "\' \'dd", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
-
-            yield return new object[] { "9", "\"  \"%M", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "09", "\" \"MM", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "Sep", "\"  \"MMM", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "September", "\' \'MMMM", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-
-            yield return new object[] { "1", "\' \'%y", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "01", "\"  \"yy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "2001", "\" \"yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2001, 1, 1, 0, 0, 0) };
-
-            yield return new object[] { "3", "\"  \"%H", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "03", "\" \"HH", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, DateTime.Today + TimeSpan.FromHours(3) };
-
-            yield return new object[] { "3A", "\"  \"ht", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "03A", "\" \"hht", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "3P", "\'  \'ht", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, DateTime.Today + TimeSpan.FromHours(12 + 3) };
-            yield return new object[] { "03P", "\" \"hht", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, DateTime.Today + TimeSpan.FromHours(12 + 3) };
-
-            yield return new object[] { "2017-10-11 01:23:45Z", "u", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 10, 11, 1, 23, 45) };
-            yield return new object[] { "9/8/2017 10:11:12 AM", "\'  \'M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
-            yield return new object[] { "9/8/2017 20:11:12 PM", "\" \"M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 20, 11, 12) };
-            yield return new object[] { "1234-05-06T07:00:00.8Z", "\" \"yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(1234, 5, 6, 7, 0, 0, 800) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "\"  \"yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "\' \'yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "\'  \'yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "\" \"yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
-            yield return new object[] { "1234-05-06T07:00:00GMT", "\"  \"yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
-
             yield return new object[] { "9/8/2017 10:11:12 AM                                          ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
             yield return new object[] { "9/8/2017 10:11:12 AM       ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
             yield return new object[] { "9/ 8    /2017    10:11:12 AM       ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
