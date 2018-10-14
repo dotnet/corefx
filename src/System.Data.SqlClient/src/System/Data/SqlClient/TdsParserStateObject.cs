@@ -2417,38 +2417,23 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    uint error;
+                    SniContext = SniContext.Snix_Connect;
+                    uint error = CheckConnection();
 
-                    object readPacket = EmptyReadPacket;
-
-                    try
+                    if ((error != TdsEnums.SNI_SUCCESS) && (error != TdsEnums.SNI_WAIT_TIMEOUT))
                     {
-                        SniContext = SniContext.Snix_Connect;
-
-                        error = CheckConnection();
-
-                        if ((error != TdsEnums.SNI_SUCCESS) && (error != TdsEnums.SNI_WAIT_TIMEOUT))
+                        // Connection is dead
+                        isAlive = false;
+                        if (throwOnException)
                         {
-                            // Connection is dead
-                            isAlive = false;
-                            if (throwOnException)
-                            {
-                                // Get the error from SNI so that we can throw the correct exception
-                                AddError(_parser.ProcessSNIError(this));
-                                ThrowExceptionAndWarning();
-                            }
-                        }
-                        else
-                        {
-                            _lastSuccessfulIOTimer._value = DateTime.UtcNow.Ticks;
+                            // Get the error from SNI so that we can throw the correct exception
+                            AddError(_parser.ProcessSNIError(this));
+                            ThrowExceptionAndWarning();
                         }
                     }
-                    finally
+                    else
                     {
-                        if (!IsPacketEmpty(readPacket))
-                        {
-                            ReleasePacket(readPacket);
-                        }
+                        _lastSuccessfulIOTimer._value = DateTime.UtcNow.Ticks;
                     }
                 }
             }

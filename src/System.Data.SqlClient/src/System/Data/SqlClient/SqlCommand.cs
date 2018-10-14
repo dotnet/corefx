@@ -52,8 +52,9 @@ namespace System.Data.SqlClient
         //
         // _prepareHandle - the handle of a prepared command. Apparently there can be multiple prepared commands at a time - a feature that we do not support yet.
 
+        private static readonly object s_cachedInvalidPrepareHandle = (object)-1;
         private bool _inPrepare = false;
-        private int _prepareHandle = -1;
+        private object _prepareHandle = s_cachedInvalidPrepareHandle; // this is an int which is used in the object typed SqlParameter.Value field, avoid repeated boxing by storing in a box
         private bool _hiddenPrepare = false;
         private int _preparedConnectionCloseCount = -1;
         private int _preparedConnectionReconnectCount = -1;
@@ -292,7 +293,7 @@ namespace System.Data.SqlClient
                         finally
                         {
                             // clean prepare status (even successful Unprepare does not do that)
-                            _prepareHandle = -1;
+                            _prepareHandle = s_cachedInvalidPrepareHandle;
                             _execType = EXECTYPE.UNPREPARED;
                         }
                     }
@@ -672,7 +673,7 @@ namespace System.Data.SqlClient
             if ((_activeConnection.CloseCount != _preparedConnectionCloseCount) || (_activeConnection.ReconnectCount != _preparedConnectionReconnectCount))
             {
                 // reset our handle
-                _prepareHandle = -1;
+                _prepareHandle = s_cachedInvalidPrepareHandle;
             }
 
             _cachedMetaData = null;
@@ -2340,27 +2341,7 @@ namespace System.Data.SqlClient
                         TaskCompletionSource<object> completion = new TaskCompletionSource<object>();
                         _activeConnection.RegisterWaitingForReconnect(completion.Task);
                         _reconnectionCompletionSource = completion;
-                        CancellationTokenSource timeoutCTS = new CancellationTokenSource();
-                        AsyncHelper.SetTimeoutException(completion, timeout, SQL.CR_ReconnectTimeout, timeoutCTS.Token);
-                        AsyncHelper.ContinueTask(reconnectTask, completion,
-                            () =>
-                            {
-                                if (completion.Task.IsCompleted)
-                                {
-                                    return;
-                                }
-                                Interlocked.CompareExchange(ref _reconnectionCompletionSource, null, completion);
-                                timeoutCTS.Cancel();
-                                Task subTask = RunExecuteNonQueryTds(methodName, async, TdsParserStaticMethods.GetRemainingTimeout(timeout, reconnectionStart), asyncWrite);
-                                if (subTask == null)
-                                {
-                                    completion.SetResult(null);
-                                }
-                                else
-                                {
-                                    AsyncHelper.ContinueTask(subTask, completion, () => completion.SetResult(null));
-                                }
-                            }, connectionToAbort: _activeConnection);
+                        RunExecuteNonQueryTdsSetupReconnnectContinuation(methodName, async, timeout, asyncWrite, reconnectTask, reconnectionStart, completion);
                         return completion.Task;
                     }
                     else
@@ -2413,6 +2394,32 @@ namespace System.Data.SqlClient
             return null;
         }
 
+        // This is in its own method to avoid always allocating the lambda in RunExecuteNonQueryTds
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void RunExecuteNonQueryTdsSetupReconnnectContinuation(string methodName, bool async, int timeout, bool asyncWrite, Task reconnectTask, long reconnectionStart, TaskCompletionSource<object> completion)
+        {
+            CancellationTokenSource timeoutCTS = new CancellationTokenSource();
+            AsyncHelper.SetTimeoutException(completion, timeout, SQL.CR_ReconnectTimeout, timeoutCTS.Token);
+            AsyncHelper.ContinueTask(reconnectTask, completion,
+                () =>
+                {
+                    if (completion.Task.IsCompleted)
+                    {
+                        return;
+                    }
+                    Interlocked.CompareExchange(ref _reconnectionCompletionSource, null, completion);
+                    timeoutCTS.Cancel();
+                    Task subTask = RunExecuteNonQueryTds(methodName, async, TdsParserStaticMethods.GetRemainingTimeout(timeout, reconnectionStart), asyncWrite);
+                    if (subTask == null)
+                    {
+                        completion.SetResult(null);
+                    }
+                    else
+                    {
+                        AsyncHelper.ContinueTask(subTask, completion, () => completion.SetResult(null));
+                    }
+                }, connectionToAbort: _activeConnection);
+        }
 
         internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, [CallerMemberName] string method = "")
         {
@@ -2559,7 +2566,7 @@ namespace System.Data.SqlClient
 
                     if (_execType == EXECTYPE.PREPARED)
                     {
-                        Debug.Assert(this.IsPrepared && (_prepareHandle != -1), "invalid attempt to call sp_execute without a handle!");
+                        Debug.Assert(this.IsPrepared && ((int)_prepareHandle != -1), "invalid attempt to call sp_execute without a handle!");
                         rpc = BuildExecute(inSchema);
                     }
                     else if (_execType == EXECTYPE.PREPAREPENDING)
@@ -3406,7 +3413,7 @@ namespace System.Data.SqlClient
 
         private _SqlRPC BuildExecute(bool inSchema)
         {
-            Debug.Assert(_prepareHandle != -1, "Invalid call to sp_execute without a valid handle!");
+            Debug.Assert((int)_prepareHandle != -1, "Invalid call to sp_execute without a valid handle!");
             const int systemParameterCount = 1;
 
             int userParameterCount = CountSendableParameters(_parameters);
@@ -3435,7 +3442,7 @@ namespace System.Data.SqlClient
         private void BuildExecuteSql(CommandBehavior behavior, string commandText, SqlParameterCollection parameters, ref _SqlRPC rpc)
         {
 
-            Debug.Assert(_prepareHandle == -1, "This command has an existing handle, use sp_execute!");
+            Debug.Assert((int)_prepareHandle == -1, "This command has an existing handle, use sp_execute!");
             Debug.Assert(CommandType.Text == this.CommandType, "invalid use of sp_executesql for stored proc invocation!");
             int systemParamCount;
             SqlParameter sqlParam;
@@ -3484,22 +3491,23 @@ namespace System.Data.SqlClient
         {
             StringBuilder paramList = new StringBuilder();
             bool fAddSeperator = false;
+            int count = parameters.Count;
 
-            int count = 0;
-
-
-            count = parameters.Count;
             for (int i = 0; i < count; i++)
             {
                 SqlParameter sqlParam = parameters[i];
                 sqlParam.Validate(i, CommandType.StoredProcedure == CommandType);
                 // skip ReturnValue parameters; we never send them to the server
                 if (!ShouldSendParameter(sqlParam))
+                {
                     continue;
+                }
 
                 // add our separator for the ith parameter
                 if (fAddSeperator)
+                {
                     paramList.Append(',');
+                }
 
                 paramList.Append(sqlParam.ParameterNameFixed);
 
@@ -3620,7 +3628,10 @@ namespace System.Data.SqlClient
 
                 // set the output bit for Output or InputOutput parameters
                 if (sqlParam.Direction != ParameterDirection.Input)
-                    paramList.Append(" " + TdsEnums.PARAM_OUTPUT);
+                {
+                    paramList.Append(" ");
+                    paramList.Append(TdsEnums.PARAM_OUTPUT);
+                }
             }
 
             return paramList.ToString();

@@ -6980,29 +6980,7 @@ namespace System.Data.SqlClient
                     // Need to wait for flush - continuation will unlock the connection                    
                     bool taskReleaseConnectionLock = releaseConnectionLock;
                     releaseConnectionLock = false;
-                    return executeTask.ContinueWith(t =>
-                    {
-                        Debug.Assert(!t.IsCanceled, "Task should not be canceled");
-                        try
-                        {
-                            if (t.IsFaulted)
-                            {
-                                FailureCleanup(stateObj, t.Exception.InnerException);
-                                throw t.Exception.InnerException;
-                            }
-                            else
-                            {
-                                stateObj.SniContext = SniContext.Snix_Read;
-                            }
-                        }
-                        finally
-                        {
-                            if (taskReleaseConnectionLock)
-                            {
-                                _connHandler._parserLock.Release();
-                            }
-                        }
-                    }, TaskScheduler.Default);
+                    return TDSExecuteSqlBatchSetupReleaseContinuation(stateObj, executeTask, taskReleaseConnectionLock);
                 }
 
                 // Finished sync
@@ -7026,6 +7004,35 @@ namespace System.Data.SqlClient
                     _connHandler._parserLock.Release();
                 }
             }
+        }
+
+        // This is in its own method to avoid always allocating the lambda in TDSExecuteSqlBatch
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private Task TDSExecuteSqlBatchSetupReleaseContinuation(TdsParserStateObject stateObj, Task executeTask, bool taskReleaseConnectionLock)
+        {
+            return executeTask.ContinueWith(t =>
+            {
+                Debug.Assert(!t.IsCanceled, "Task should not be canceled");
+                try
+                {
+                    if (t.IsFaulted)
+                    {
+                        FailureCleanup(stateObj, t.Exception.InnerException);
+                        throw t.Exception.InnerException;
+                    }
+                    else
+                    {
+                        stateObj.SniContext = SniContext.Snix_Read;
+                    }
+                }
+                finally
+                {
+                    if (taskReleaseConnectionLock)
+                    {
+                        _connHandler._parserLock.Release();
+                    }
+                }
+            }, TaskScheduler.Default);
         }
 
         internal Task TdsExecuteRPC(_SqlRPC[] rpcArray, int timeout, bool inSchema, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, bool isCommandProc, bool sync = true,
