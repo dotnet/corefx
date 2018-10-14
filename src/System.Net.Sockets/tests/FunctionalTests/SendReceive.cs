@@ -1133,6 +1133,73 @@ namespace System.Net.Sockets.Tests
                 }
             }
         }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(31766, TestPlatforms.OSX)]
+        public async Task Socket_ReceiveFlags_Success()
+        {
+            using (var sender = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            using (var receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                receiver.BindToAnonymousPort(IPAddress.Loopback);
+                receiver.ReceiveTimeout = TestSettings.PassingTestTimeout;
+                sender.Connect(receiver.LocalEndPoint);
+                sender.SendBufferSize = 1500;
+
+                var data = new byte[500];
+                data[0] = data[499] = 1;
+
+                // Send() can send less than asked for but datagram should be atomic and fit to send buffer.
+                Assert.Equal(500, sender.Send(data));
+                data[0] = data[499] = 2;
+                Assert.Equal(500, sender.Send(data));
+
+                var tcs = new TaskCompletionSource<bool>();
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+
+                var receiveBufer = new byte[600];
+                receiveBufer[0] = data[499] = 0;
+
+                args.SetBuffer(receiveBufer);
+                args.Completed += delegate { tcs.SetResult(true); };
+
+                // First peek at the message.
+                args.SocketFlags = SocketFlags.Peek;
+                if (receiver.ReceiveAsync(args))
+                {
+                    await tcs.Task.TimeoutAfter(TestSettings.PassingTestTimeout);
+                }
+                Assert.Equal(SocketFlags.None, args.SocketFlags);
+                Assert.Equal(1, receiveBufer[0]);
+                Assert.Equal(1, receiveBufer[499]);
+                receiveBufer[0] = receiveBufer[499] = 0;
+
+                // Now, we should be able to get same message again.
+                args.SocketFlags = SocketFlags.None;
+                if (receiver.ReceiveAsync(args))
+                {
+                    await tcs.Task.TimeoutAfter(TestSettings.PassingTestTimeout);
+                }
+                Assert.Equal(SocketFlags.None, args.SocketFlags);
+                Assert.Equal(1, receiveBufer[0]);
+                Assert.Equal(1, receiveBufer[499]);
+                receiveBufer[0] = receiveBufer[499] = 0;
+
+                // Set buffer smaller than message.
+                args.SetBuffer(receiveBufer, 0, 100);
+                if (receiver.ReceiveAsync(args))
+                {
+                    await tcs.Task.TimeoutAfter(TestSettings.PassingTestTimeout);
+                }
+                Assert.Equal(SocketFlags.Truncated, args.SocketFlags);
+                Assert.Equal(2, receiveBufer[0]);
+
+                // There should be no more data.
+                Assert.True(receiver.ReceiveAsync(args));
+                await Assert.ThrowsAnyAsync<System.TimeoutException>(async () => await tcs.Task.TimeoutAfter(100));
+            }
+        }
     }
 
     public sealed class SendReceiveUdpClient : MemberDatas
