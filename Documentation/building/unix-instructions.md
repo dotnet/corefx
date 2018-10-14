@@ -129,10 +129,10 @@ https://openssl.org/
   Poured from bottle on 2018-08-31 at 19:37:10
 ```
 
-With the above example, use the latest version path for `1.0.1p`:
+With the above example, use the latest version path for `1.0.2p`:
 
 ```none
-$ export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.1p
+$ export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2p
 ```
 
 ### Known Issues
