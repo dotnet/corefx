@@ -8,7 +8,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
-    <IsTargetingNetCoreApp Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap' OR '$(TargetGroup)'=='uapaot' OR '$(TargetGroup)'=='netcoreappaot'">true</IsTargetingNetCoreApp>
+    <IsTargetingNetCoreApp Condition="'$(TargetsNetCoreApp)'=='true' OR '$(TargetsUap)' == 'true'">true</IsTargetingNetCoreApp>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1'">NETSTANDARD11</DefineConstants>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.1'">netstandard1.1;portable-net45+win8</PackageTargetFramework>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
