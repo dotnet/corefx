@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using DebugProvider = System.Diagnostics.Debug.DebugProvider;
 using System.Threading;
 using System.IO;
 using System.Collections;
@@ -11,6 +12,19 @@ namespace System.Diagnostics
 {
     internal static class TraceInternal
     {
+        private class TraceProvider : DebugProvider
+        {
+            private static readonly Lazy<DebugProvider> lazy = new Lazy<DebugProvider>(() => new TraceProvider());
+            public static DebugProvider s_instance { get { return lazy.Value; } }
+            private TraceProvider() { }
+            public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
+            {
+                base.ShowDialog(stackTrace, message, detailMessage, errorSource);
+            }
+            public override void Write(string message) { TraceInternal.Write(message); }
+        }
+
+        private static readonly DebugProvider s_debugProvider = TraceProvider.s_instance;
         private static volatile string s_appName = null;
         private static volatile TraceListenerCollection s_listeners;
         private static volatile bool s_autoFlush;
@@ -43,6 +57,9 @@ namespace System.Diagnostics
                             defaultListener.IndentLevel = t_indentLevel;
                             defaultListener.IndentSize = s_indentSize;
                             s_listeners.Add(defaultListener);
+                            // This is where we override default DebugProvider because we know
+                            // for sure that we have some Listeners to write to.
+                            Debug.SetProvider(s_debugProvider);
                         }
                     }
                 }
