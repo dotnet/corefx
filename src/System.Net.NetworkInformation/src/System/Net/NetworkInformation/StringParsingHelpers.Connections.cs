@@ -111,7 +111,7 @@ namespace System.Net.NetworkInformation
                 if (ti.State == TcpState.Listen)
                 {
                     endPoints[index] = ti.LocalEndPoint;
-                    index ++;
+                    index++;
                 }
                 else
                 {
@@ -126,7 +126,7 @@ namespace System.Net.NetworkInformation
                 if (ti.State == TcpState.Listen)
                 {
                     endPoints[index] = ti.LocalEndPoint;
-                    index ++;
+                    index++;
                 }
                 else
                 {
