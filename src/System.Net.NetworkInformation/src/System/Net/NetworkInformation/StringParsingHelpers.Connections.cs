@@ -122,7 +122,7 @@ namespace System.Net.NetworkInformation
             // TCP6 Connections
             for (int i = 1; i < v6connections.Length; i++) // Skip first line header.
             {
-                TcpConnectionInformation ti = ParseTcpConnectionInformationFromLine(v4connections[i]);
+                TcpConnectionInformation ti = ParseTcpConnectionInformationFromLine(v6connections[i]);
                 if (ti.State == TcpState.Listen)
                 {
                     endPoints[index] = ti.LocalEndPoint;
