@@ -1150,7 +1150,6 @@ namespace System.Net.Sockets.Tests
                 var data = new byte[500];
                 data[0] = data[499] = 1;
 
-                // Send() can send less than asked for but datagram should be atomic and fit to send buffer.
                 Assert.Equal(500, sender.Send(data));
                 data[0] = data[499] = 2;
                 Assert.Equal(500, sender.Send(data));
@@ -1176,6 +1175,8 @@ namespace System.Net.Sockets.Tests
                 receiveBufer[0] = receiveBufer[499] = 0;
 
                 // Now, we should be able to get same message again.
+                tcs = new TaskCompletionSource<bool>();
+                args.Completed += delegate { tcs.SetResult(true); };
                 args.SocketFlags = SocketFlags.None;
                 if (receiver.ReceiveAsync(args))
                 {
@@ -1187,6 +1188,8 @@ namespace System.Net.Sockets.Tests
                 receiveBufer[0] = receiveBufer[499] = 0;
 
                 // Set buffer smaller than message.
+                tcs = new TaskCompletionSource<bool>();
+                args.Completed += delegate { tcs.SetResult(true); };
                 args.SetBuffer(receiveBufer, 0, 100);
                 if (receiver.ReceiveAsync(args))
                 {
@@ -1196,8 +1199,7 @@ namespace System.Net.Sockets.Tests
                 Assert.Equal(2, receiveBufer[0]);
 
                 // There should be no more data.
-                Assert.True(receiver.ReceiveAsync(args));
-                await Assert.ThrowsAnyAsync<System.TimeoutException>(async () => await tcs.Task.TimeoutAfter(100));
+                Assert.Equal(0, receiver.Available);
             }
         }
     }
