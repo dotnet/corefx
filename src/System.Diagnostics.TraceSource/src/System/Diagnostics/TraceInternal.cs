@@ -14,9 +14,7 @@ namespace System.Diagnostics
     {
         private class TraceProvider : DebugProvider
         {
-            private static readonly Lazy<DebugProvider> lazy = new Lazy<DebugProvider>(() => new TraceProvider());
-            public static DebugProvider s_instance { get { return lazy.Value; } }
-            private TraceProvider() { }
+            public TraceProvider() { }
             public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
             {
                 base.ShowDialog(stackTrace, message, detailMessage, errorSource);
@@ -24,7 +22,7 @@ namespace System.Diagnostics
             public override void Write(string message) { TraceInternal.Write(message); }
         }
 
-        private static readonly DebugProvider s_debugProvider = TraceProvider.s_instance;
+        private static readonly DebugProvider s_provider = new TraceProvider();
         private static volatile string s_appName = null;
         private static volatile TraceListenerCollection s_listeners;
         private static volatile bool s_autoFlush;
@@ -59,7 +57,7 @@ namespace System.Diagnostics
                             s_listeners.Add(defaultListener);
                             // This is where we override default DebugProvider because we know
                             // for sure that we have some Listeners to write to.
-                            Debug.SetProvider(s_debugProvider);
+                            Debug.SetProvider(s_provider);
                         }
                     }
                 }

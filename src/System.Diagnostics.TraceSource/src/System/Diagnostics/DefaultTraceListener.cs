@@ -23,9 +23,7 @@ namespace System.Diagnostics
         private class DefaultTraceDebugProvider : DebugProvider
         {
             private const int InternalWriteSize = 16384;
-            private static readonly Lazy<DebugProvider> lazy = new Lazy<DebugProvider>(() => new DefaultTraceDebugProvider());
-            public static DebugProvider s_instance { get { return lazy.Value; } }
-            private DefaultTraceDebugProvider() { }
+            public DefaultTraceDebugProvider() { }
             public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)  { }
             
             public override void Write(string message)
@@ -48,7 +46,7 @@ namespace System.Diagnostics
             }
         }
 
-        private static readonly DebugProvider s_provider = DefaultTraceDebugProvider.s_instance;
+        private static readonly DebugProvider s_provider = new DefaultTraceDebugProvider();
         private bool _assertUIEnabled; 
         private bool _settingsInitialized;
         private string _logFileName;
@@ -113,7 +111,7 @@ namespace System.Diagnostics
             string stackTrace;
             try
             {
-                stackTrace = new StackTrace(fNeedFileInfo:true);
+                stackTrace = new StackTrace(fNeedFileInfo:true).ToString();
             }
             catch
             {
