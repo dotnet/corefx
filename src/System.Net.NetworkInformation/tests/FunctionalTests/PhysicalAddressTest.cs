@@ -73,7 +73,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Theory]
-        [InlineData("42", new byte[] { 0x42, })]
+        [InlineData("42", new byte[] { 0x42 })]
         [InlineData("69-4F", new byte[] { 0x69, 0x4f })]
         [InlineData("40-DC-27", new byte[] { 0x40, 0xdc, 0x27 })]
         [InlineData("8E-35-99-87", new byte[] { 0x8e, 0x35, 0x99, 0x87 })]
