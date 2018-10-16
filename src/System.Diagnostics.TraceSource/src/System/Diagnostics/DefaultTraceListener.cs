@@ -4,7 +4,6 @@
 
 #define DEBUG
 #define TRACE
-using DebugProvider = System.Diagnostics.Debug.DebugProvider;
 using System;
 using System.IO;
 using System.Text;
