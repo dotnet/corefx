@@ -1,4 +1,6 @@
-﻿Imports System.Runtime.CompilerServices
+﻿Option Strict On
+
+Imports System.Runtime.CompilerServices
 Imports Microsoft.VisualBasic.FileIO
 Imports Xunit
 
@@ -49,7 +51,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
         ''' <param name="TestFileName">Optional Filename, if none a randon one based on TestName will be created</param>
         ''' <returns>Full Path to New File</returns>
-        Private Shared Function CreateTestFile(TestBase As TextFieldParserTests, ByVal TestData() As Char, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+        Private Shared Function CreateTestFile(TestBase As TextFieldParserTests, ByVal TestData As String, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
             Dim TempFileNameWithPath As String
             If TestFileName.Length = 0 Then
                 TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
@@ -106,7 +108,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
                     MyReader.Delimiters = New String() {","}
                     Dim currentRow As String()
                     Assert.False(MyReader.EndOfData)
-                    Dim HeaderSplit() As String = HeaderLine.Split(",")
+                    Dim HeaderSplit() As String = HeaderLine.Split(CType(",", Char()))
                     currentRow = MyReader.ReadFields()
                     For i As Integer = 0 To HeaderSplit.Length - 1
                         Assert.Equal(HeaderSplit(i), currentRow(i))

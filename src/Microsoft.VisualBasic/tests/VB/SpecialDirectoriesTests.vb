@@ -1,4 +1,6 @@
-﻿Imports System.Environment
+﻿Option Strict On
+
+Imports System.Environment
 Imports Microsoft.VisualBasic.FileIO
 Imports Xunit
 Namespace Microsoft.VisualBasic.Tests.VB
@@ -19,7 +21,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).Length = 0 Then
+            If Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
                 Assert.Equal(expected:=Environment.GetFolderPath(SpecialFolder.LocalApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData)
