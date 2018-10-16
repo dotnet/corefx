@@ -111,6 +111,9 @@
     <PackageReference Include="BenchmarkDotNet">
       <Version>$(BenchmarkDotNetPackageVersion)</Version>
     </PackageReference>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows">
+      <Version>$(BenchmarkDotNetPackageVersion)</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Win32.Primitives">
       <Version>4.3.0</Version>
     </PackageReference>
@@ -126,6 +129,7 @@
     <PackageToInclude Include="MarkdownLog.NS20"/>
     <PackageToInclude Include="CommandLineParser.NS20" />
     <PackageToInclude Include="BenchmarkDotNet"/>
+    <PackageToInclude Include="BenchmarkDotNet.Diagnostics.Windows" />
     <PackageToInclude Include="Microsoft.Win32.Primitives"/>
     <PackageToInclude Include="System.Net.Primitives"/>
   </ItemGroup>
