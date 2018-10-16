@@ -1047,4 +1047,10 @@
   <data name="WebNotSupportedOnThisSKU" xml:space="preserve">
     <value>Current target framework does not support web operations.</value>
   </data>
+  <data name="NoUIShellCopyOrMove" xml:space="preserve">
+    <value>UI not available for ShellCopyMove</value>
+  </data>
+  <data name="NoUIShellDelete" xml:space="preserve">
+    <value>UI not available for ShellDelete</value>
+  </data>
 </root>

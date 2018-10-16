@@ -3,10 +3,7 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports Microsoft.VisualBasic.FileIO
-Imports System
-Imports System.Collections.Generic
 Imports System.Collections.ObjectModel
-Imports System.Linq
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports System.Text
@@ -263,7 +260,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub GetDriveInfo_Drive()
-            ' This test is unneccessory becuase DriveInfo is just Passthrough of IO.GetDrives
+            Dim Drives() As IO.DriveInfo = IO.DriveInfo.GetDrives()
+            Assert.Equal(FileSystem.GetDriveInfo(Drives(0).Name), New System.IO.DriveInfo(Drives(0).Name))
         End Sub
 
         <Fact>

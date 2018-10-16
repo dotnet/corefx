@@ -5,7 +5,6 @@ Namespace Microsoft.VisualBasic
 
     Partial Public Module Interaction
         Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
-
             Dim Title As String
 
             'Get the Assembly name of the calling assembly 
@@ -16,8 +15,7 @@ Namespace Microsoft.VisualBasic
                 Title = CallingAssembly.GetName().Name
             Catch ex As SecurityException
                 Dim FullName As String = CallingAssembly.FullName
-                'Find the text up to the first comma. Note, this fails if the assembly has
-                'a comma in its name
+                'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
                 Dim FirstCommaLocation As Integer = FullName.IndexOf(","c)
                 If FirstCommaLocation >= 0 Then
                     Title = FullName.Substring(0, FirstCommaLocation)
@@ -36,18 +34,14 @@ Namespace Microsoft.VisualBasic
             'Dim vbhost As CompilerServices.IVbHost
             Dim ParentWindow As Integer = Nothing
 
-            'vbhost = CompilerServices.HostServices.VBHost
-            'If Not vbhost Is Nothing Then
-            '    ParentWindow = vbhost.GetParentWindow()
-            'End If
-
             'Only allow legal button combinations to be set, one choice from each group
             'These bit constants are defined in System.Windows.Forms.MessageBox
             'Low-order 4 bits (0x000f), legal values: 0, 1, 2, 3, 4, 5
             '     next 4 bits (0x00f0), legal values: 0, &H10, &H20, &H30, &H40
             '     next 4 bits (0x0f00), legal values: 0, &H100, &H200
-            If ((Buttons And &HFI) > MsgBoxStyle.RetryCancel) OrElse ((Buttons And &HF0I) > MsgBoxStyle.Information) _
-                    OrElse ((Buttons And &HF00I) > MsgBoxStyle.DefaultButton3) Then
+            If ((Buttons And &HFI) > MsgBoxStyle.RetryCancel) OrElse
+                ((Buttons And &HF0I) > MsgBoxStyle.Information) OrElse
+                ((Buttons And &HF00I) > MsgBoxStyle.DefaultButton3) Then
                 Buttons = MsgBoxStyle.OkOnly
             End If
 
@@ -67,11 +61,7 @@ Namespace Microsoft.VisualBasic
 
             Try
                 If Title Is Nothing Then
-                    'If vbhost Is Nothing Then
                     sTitle = GetTitleFromAssembly(System.Reflection.Assembly.GetCallingAssembly())
-                    'Else
-                    '    sTitle = vbhost.GetWindowTitle()
-                    'End If
                 Else
                     sTitle = CStr(Title) 'allows the title to be an expression, e.g. msgbox(prompt, Title:=1+5)
                 End If

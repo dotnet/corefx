@@ -12,8 +12,6 @@ Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 Namespace Microsoft.VisualBasic.FileIO
 
-    '''**************************************************************************
-    ''' SpecialDirectories
     ''' <summary>
     ''' This class contains properties that will return the Special Directories
     ''' specific to the current user (My Documents, My Music ...) and those specific
@@ -23,10 +21,6 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Sub New()
         End Sub
 
-        '= PUBLIC =============================================================
-
-        '''**************************************************************************
-        ''' AllUsersApplicationData
         ''' <summary>
         ''' Returns the directory that serves as a common repository for data files
         ''' from your application used by all users.
@@ -44,8 +38,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        '''**************************************************************************
-        ''' CurrentUserApplicationData
         ''' <summary>
         ''' Returns the directory that serves as a common repository for data files
         ''' from your application used only by the current user.
@@ -70,8 +62,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        '''**************************************************************************
-        ''' Desktop
         ''' <summary>
         ''' Return the current user's Desktop directory.
         ''' </summary>
@@ -83,8 +73,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        '''**************************************************************************
-        ''' MyDocuments
         ''' <summary>
         ''' Return the directory that serves as a common repository for user's personal documents.
         ''' </summary>
@@ -97,8 +85,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        '''**************************************************************************
-        ''' MyMusic
         ''' <summary>
         ''' Return the "My Music" directory.
         ''' </summary>
@@ -111,8 +97,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        '''**************************************************************************
-        ''' MyPictures
         ''' <summary>
         ''' Return the "My Pictures" directory.
         ''' </summary>
@@ -124,8 +108,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.MyPictures), SR.IO_SpecialDirectory_MyPictures)
             End Get
         End Property
-        '''**************************************************************************
-        ''' ProgramFiles
+
         ''' <summary>
         ''' Return the program files directory.
         ''' </summary>
@@ -137,8 +120,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        '''**************************************************************************
-        ''' Programs
         ''' <summary>
         ''' Returns the directory used to store program shortcuts from Start Menu for current user.
         ''' </summary>
@@ -149,8 +130,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.Programs), SR.IO_SpecialDirectory_Programs)
             End Get
         End Property
-        '''**************************************************************************
-        ''' Temp
+
         ''' <summary>
         ''' Return the directory that contain temporary files for the current user.
         ''' </summary>
@@ -165,14 +145,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return GetDirectoryPath(IO.Path.GetTempPath(), SR.IO_SpecialDirectory_Temp)
             End Get
         End Property
-        '= FRIEND =============================================================
 
-        '= PROTECTED ==========================================================
-
-        '= PRIVATE ============================================================
-
-        '''**************************************************************************
-        ''' GetDirectoryPath
         ''' <summary>
         ''' Return a normalized from a directory path and throw exception if directory path is "".
         ''' </summary>
