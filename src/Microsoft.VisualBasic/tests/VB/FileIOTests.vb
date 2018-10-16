@@ -1,4 +1,5 @@
-﻿' Licensed to the .NET Foundation under one or more agreements.
+﻿Option Strict on
+' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
 
@@ -262,7 +263,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub GetDriveInfo_Drive()
             Dim Drives() As IO.DriveInfo = IO.DriveInfo.GetDrives()
             Assert.True(Drives.Count > 0)
-            Assert.Equal(FileSystem.GetDriveInfo(Drives(0).Name.Trim), New System.IO.DriveInfo(Drives(0).Name.Trim))
+            Assert.Equal(FileSystem.GetDriveInfo(Drives(0).Name).Name, New System.IO.DriveInfo(Drives(0).Name).Name)
         End Sub
 
         <Fact>
