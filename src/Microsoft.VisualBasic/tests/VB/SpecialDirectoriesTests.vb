@@ -10,17 +10,29 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub AllUsersApplicationDataFolderTest()
-            Assert.True(SpecialDirectories.AllUsersApplicationData.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).TrimEnd(Separators)))
+            If Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.AllUsersApplicationData)
+            Else
+                Assert.True(SpecialDirectories.AllUsersApplicationData.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).TrimEnd(Separators)))
+            End If
         End Sub
 
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
-            Assert.Equal(expected:=Environment.GetFolderPath(SpecialFolder.LocalApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData,)
+            If Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
+            Else
+                Assert.Equal(expected:=Environment.GetFolderPath(SpecialFolder.LocalApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData)
+            End If
         End Sub
 
         <Fact>
         Public Shared Sub DesktopFolderTest()
-            Assert.Equal(Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators), SpecialDirectories.Desktop.TrimEnd(Separators))
+            If Environment.GetFolderPath(Environment.SpecialFolder.Desktop).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
+            Else
+                Assert.Equal(Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators), SpecialDirectories.Desktop.TrimEnd(Separators))
+            End If
         End Sub
 
         <Fact>
@@ -30,22 +42,38 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub MyMusicFolderTest()
-            Assert.Equal(Environment.GetFolderPath(SpecialFolder.MyMusic).TrimEnd(Separators), SpecialDirectories.MyMusic.TrimEnd(Separators))
+            If Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyMusic)
+            Else
+                Assert.Equal(Environment.GetFolderPath(SpecialFolder.MyMusic).TrimEnd(Separators), SpecialDirectories.MyMusic.TrimEnd(Separators))
+            End If
         End Sub
 
         <Fact>
         Public Shared Sub MyPicturesFolderTest()
-            Assert.Equal(Environment.GetFolderPath(SpecialFolder.MyPictures).TrimEnd(Separators), SpecialDirectories.MyPictures.TrimEnd(Separators))
+            If Environment.GetFolderPath(Environment.SpecialFolder.MyPictures).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyPictures)
+            Else
+                Assert.Equal(Environment.GetFolderPath(SpecialFolder.MyPictures).TrimEnd(Separators), SpecialDirectories.MyPictures.TrimEnd(Separators))
+            End If
         End Sub
 
         <Fact>
         Public Shared Sub ProgramFilesFolderTest()
-            Assert.Equal(Environment.GetFolderPath(SpecialFolder.ProgramFiles).TrimEnd(Separators), SpecialDirectories.ProgramFiles.TrimEnd(Separators))
+            If Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.ProgramFiles)
+            Else
+                Assert.Equal(Environment.GetFolderPath(SpecialFolder.ProgramFiles).TrimEnd(Separators), SpecialDirectories.ProgramFiles.TrimEnd(Separators))
+            End If
         End Sub
 
         <Fact>
         Public Shared Sub ProgramsFolderTest()
-            Assert.Equal(Environment.GetFolderPath(SpecialFolder.Programs).TrimEnd(Separators), SpecialDirectories.Programs.TrimEnd(Separators))
+            If Environment.GetFolderPath(Environment.SpecialFolder.Programs).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Programs)
+            Else
+                Assert.Equal(Environment.GetFolderPath(SpecialFolder.Programs).TrimEnd(Separators), SpecialDirectories.Programs.TrimEnd(Separators))
+            End If
         End Sub
 
 

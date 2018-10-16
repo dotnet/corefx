@@ -261,7 +261,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Shared Sub GetDriveInfo_Drive()
             Dim Drives() As IO.DriveInfo = IO.DriveInfo.GetDrives()
-            Assert.Equal(FileSystem.GetDriveInfo(Drives(0).Name), New System.IO.DriveInfo(Drives(0).Name))
+            Assert.True(Drives.Count > 0)
+            Assert.Equal(FileSystem.GetDriveInfo(Drives(0).Name.Trim), New System.IO.DriveInfo(Drives(0).Name.Trim))
         End Sub
 
         <Fact>

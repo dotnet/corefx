@@ -152,6 +152,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
                         Assert.Equal(CurrentRow(1), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0), FixedFieldWidths(1)).Trim)
                         Assert.Equal(CurrentRow(2), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1), FixedFieldWidths(2)).Trim)
                         Assert.Equal(CurrentRow(3), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1) + FixedFieldWidths(2)).Trim)
+                        CurrentRowIndex += 1
                     End While
                 End Using
             End Using
