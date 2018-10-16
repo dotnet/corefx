@@ -177,7 +177,7 @@ namespace System.Net.NetworkInformation
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
-                //we had too many characters after the last dash
+                // we had too many characters after the last dash
                 if (hasDashes && validCount >= 2)
                 {
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
@@ -195,7 +195,7 @@ namespace System.Net.NetworkInformation
                 validCount++;
             }
 
-            //we too few characters after the last dash
+            // we too few characters after the last dash
             if (validCount < 2)
             {
                 throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
