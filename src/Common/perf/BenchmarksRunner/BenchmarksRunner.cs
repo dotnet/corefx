@@ -17,12 +17,12 @@ public class BenchmarksRunner
     {
         try
         {
+            var config = DefaultConfig.Instance
+                .With(Job.Default.With(new CoreFxToolchain("netcoreapp"))); // CoreFxToolchain is responsible for building the benchmarks in CoreFX way
+
             BenchmarkSwitcher
-                .FromAssemblies(
-                    GetTestAssemblies().Select(Assembly.LoadFrom).ToArray())
-                .Run(
-                    args,
-                    DefaultConfig.Instance.With(Job.ShortRun.With(new CoreFxToolchain("netcoreapp"))));
+                .FromAssemblies(GetTestAssemblies().Select(Assembly.LoadFrom).ToArray())
+                .Run(args, config);
 
             return 0;
         }
