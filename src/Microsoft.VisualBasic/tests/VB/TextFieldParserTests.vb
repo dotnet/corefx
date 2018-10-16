@@ -148,10 +148,10 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
                     While Not MyReader.EndOfData
                         CurrentRow = MyReader.ReadFields()
                         Assert.Equal(FixedFieldWidths.Length, CurrentRow.Length)
-                        Assert.Equal(CurrentRow(0), FixedFormatData(CurrentRowIndex).Substring(0, FixedFieldWidths(0)))
-                        Assert.Equal(CurrentRow(1), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0), FixedFieldWidths(1)))
-                        Assert.Equal(CurrentRow(2), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1), FixedFieldWidths(2)))
-                        Assert.Equal(CurrentRow(3), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1) + FixedFieldWidths(2)))
+                        Assert.Equal(CurrentRow(0), FixedFormatData(CurrentRowIndex).Substring(0, FixedFieldWidths(0)).Trim)
+                        Assert.Equal(CurrentRow(1), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0), FixedFieldWidths(1)).Trim)
+                        Assert.Equal(CurrentRow(2), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1), FixedFieldWidths(2)).Trim)
+                        Assert.Equal(CurrentRow(3), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1) + FixedFieldWidths(2)).Trim)
                     End While
                 End Using
             End Using
