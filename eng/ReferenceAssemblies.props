@@ -8,14 +8,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsReferenceAssembly)'=='true'">
-    <OutputPath>$(ReferenceAssemblyOutputPath)$(AssemblyName)/$(AssemblyVersion)/$(TargetOutputRelPath)</OutputPath>
-    <IntermediateOutputPath>$(RootIntermediateOutputPath)ref/$(AssemblyName)/$(AssemblyVersion)/$(TargetOutputRelPath)</IntermediateOutputPath>
-
-    <!-- When using Sdk-style projects, Microsoft.Common.CurrentVersion.targets gets imported before
-         this file, so we are overwriting OutputPath too late and we need to re-default these properties. -->
-    <OutDir>$(OutputPath)</OutDir>
-    <TargetDir>$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
-    <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
+    <OutputPath>$(ReferenceAssemblyOutputPath)$(MSBuildProjectName)/$(TargetOutputRelPath)</OutputPath>
+    <IntermediateOutputPath>$(RootIntermediateOutputPath)ref/$(MSBuildProjectName)/$(TargetOutputRelPath)</IntermediateOutputPath>
 
     <!-- disable warnings about unused fields -->
     <NoWarn>$(NoWarn);0169;0649</NoWarn>
