@@ -103,7 +103,8 @@ namespace System.Net.NetworkInformation.Tests
         [InlineData("AE88.D6EC.A720")]
         public void Parse_Invalid_ThrowsFormatException(string address)
         {
-            Assert.Throws<FormatException>(() => PhysicalAddress.Parse(address));
+            FormatException ex = Assert.Throws<FormatException>(() => PhysicalAddress.Parse(address));
+            Assert.Contains(address, ex.Message);
         }
     }
 }
