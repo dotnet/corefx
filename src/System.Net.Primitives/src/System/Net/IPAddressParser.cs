@@ -62,7 +62,7 @@ namespace System.Net
                 return false;
             }
 
-            fixed (char* formattedPtr = &MemoryMarshal.GetReference(formatted))
+            fixed (char* formattedPtr = formatted)
             {
                 charsWritten = IPv4AddressToStringHelper(address, formattedPtr);
             }
@@ -169,7 +169,7 @@ namespace System.Net
             int end = ipSpan.Length;
             long tmpAddr;
 
-            fixed (char* ipStringPtr = &MemoryMarshal.GetReference(ipSpan))
+            fixed (char* ipStringPtr = ipSpan)
             {
                 tmpAddr = IPv4AddressHelper.ParseNonCanonical(ipStringPtr, 0, ref end, notImplicitFile: true);
             }
@@ -201,7 +201,7 @@ namespace System.Net
             int end = ipSpan.Length;
 
             bool isValid = false;
-            fixed (char* ipStringPtr = &MemoryMarshal.GetReference(ipSpan))
+            fixed (char* ipStringPtr = ipSpan)
             {
                 isValid = IPv6AddressHelper.IsValidStrict(ipStringPtr, 0, ref end);
             }

@@ -38,7 +38,7 @@ namespace Internal.Cryptography.Pal
                         throw ErrorCode.CERT_E_INVALID_NAME.ToCryptographicException();
 
                     Span<char> buffer = cchDecoded <= 256 ? stackalloc char[cchDecoded] : new char[cchDecoded];
-                    fixed (char* ptr = &MemoryMarshal.GetReference(buffer))
+                    fixed (char* ptr = buffer)
                     {
                         if (Interop.crypt32.CertNameToStr(CertEncodingType.All, ref nameBlob, dwStrType, ptr, cchDecoded) == 0)
                             throw ErrorCode.CERT_E_INVALID_NAME.ToCryptographicException();
@@ -90,7 +90,7 @@ namespace Internal.Cryptography.Pal
 
             int spanLength = (cbFormat + 1) / 2;
             Span<char> buffer = spanLength <= 256 ? stackalloc char[spanLength] : new char[spanLength];
-            fixed (char* ptr = &MemoryMarshal.GetReference(buffer))
+            fixed (char* ptr = buffer)
             {
                 if (!Interop.crypt32.CryptFormatObject(
                     CertEncodingType.X509_ASN_ENCODING,

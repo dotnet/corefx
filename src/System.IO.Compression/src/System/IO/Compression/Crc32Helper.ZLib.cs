@@ -21,7 +21,7 @@ namespace System.IO.Compression
 
         public static unsafe uint UpdateCrc32(uint crc32, ReadOnlySpan<byte> buffer)
         {
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* bufferPtr = buffer)
             {
                 return Interop.zlib.crc32(crc32, bufferPtr, buffer.Length);
             }

@@ -72,7 +72,7 @@ internal static partial class Interop
                     }
 
                     byte* dataBytes = CFDataGetBytePtr(cfData);
-                    fixed (byte* destinationPtr = &MemoryMarshal.GetReference(destination))
+                    fixed (byte* destinationPtr = destination)
                     {
                         Buffer.MemoryCopy(dataBytes, destinationPtr, destination.Length, length);
                     }

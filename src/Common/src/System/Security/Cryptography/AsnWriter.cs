@@ -1541,6 +1541,8 @@ namespace System.Security.Cryptography.Asn1
             int size = -1;
 
             // T-REC-X.690-201508 sec 9.2
+            // MemoryMarshal.GetReference is used here to handle empty string case correctly
+            // since Span-based encoding APIs are not available
             if (RuleSet == AsnEncodingRules.CER)
             {
                 // TODO: Split this for netstandard vs netcoreapp for span?.
@@ -1600,7 +1602,7 @@ namespace System.Security.Cryptography.Asn1
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
-                fixed (char* strPtr = &MemoryMarshal.GetReference(str))
+                fixed (char* strPtr = str)
                 {
                     tmp = ArrayPool<byte>.Shared.Rent(size);
 

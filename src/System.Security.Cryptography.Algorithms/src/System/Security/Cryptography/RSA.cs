@@ -480,7 +480,7 @@ namespace System.Security.Cryptography
 
         public override unsafe void ImportSubjectPublicKeyInfo(ReadOnlySpan<byte> source, out int bytesRead)
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+            fixed (byte* ptr = source)
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
@@ -496,7 +496,7 @@ namespace System.Security.Cryptography
 
         public virtual unsafe void ImportRSAPublicKey(ReadOnlySpan<byte> source, out int bytesRead)
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+            fixed (byte* ptr = source)
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
@@ -516,7 +516,7 @@ namespace System.Security.Cryptography
 
         public virtual unsafe void ImportRSAPrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+            fixed (byte* ptr = source)
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
@@ -551,7 +551,7 @@ namespace System.Security.Cryptography
 
         public override unsafe void ImportPkcs8PrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+            fixed (byte* ptr = source)
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {

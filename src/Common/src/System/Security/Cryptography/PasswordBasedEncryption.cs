@@ -187,7 +187,7 @@ namespace System.Security.Cryptography
                         }
                     }
 
-                    fixed (byte* maybeRentedPtr = &MemoryMarshal.GetReference(buf))
+                    fixed (byte* maybeRentedPtr = buf)
                     {
                         if (encoding != null)
                         {
@@ -458,7 +458,7 @@ namespace System.Security.Cryptography
                 }
             }
 
-            fixed (byte* maybeRentedPtr = &MemoryMarshal.GetReference(buf))
+            fixed (byte* maybeRentedPtr = buf)
             {
                 if (encoding != null)
                 {

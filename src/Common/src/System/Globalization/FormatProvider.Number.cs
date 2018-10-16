@@ -565,7 +565,7 @@ namespace System.Globalization
             {
                 Debug.Assert(numfmt != null);
 
-                fixed (char* stringPointer = &MemoryMarshal.GetReference(str))
+                fixed (char* stringPointer = str)
                 {
                     char* p = stringPointer;
                     if (!ParseNumber(ref p, options, ref number, sb, numfmt, parseDecimal)
@@ -1212,7 +1212,7 @@ namespace System.Globalization
                     return 0;
                 }
 
-                fixed (char* pFormat = &MemoryMarshal.GetReference(format))
+                fixed (char* pFormat = format)
                 {
                     int src = 0;
                     for (;;)
@@ -1288,7 +1288,7 @@ namespace System.Globalization
                     scaleAdjust = 0;
                     src = section;
 
-                    fixed (char* pFormat = &MemoryMarshal.GetReference(format))
+                    fixed (char* pFormat = format)
                     {
                         while (src < format.Length && (ch = pFormat[src++]) != 0 && ch != ';')
                         {
@@ -1477,7 +1477,7 @@ namespace System.Globalization
 
                 bool decimalWritten = false;
 
-                fixed (char* pFormat = &MemoryMarshal.GetReference(format))
+                fixed (char* pFormat = format)
                 {
                     char* cur = dig;
 

@@ -190,7 +190,7 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> source,
                 out int bytesRead)
             {
-                fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+                fixed (byte* ptr = source)
                 {
                     using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                     {
@@ -209,7 +209,7 @@ namespace System.Security.Cryptography
 
             public override unsafe void ImportRSAPublicKey(ReadOnlySpan<byte> source, out int bytesRead)
             {
-                fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+                fixed (byte* ptr = source)
                 {
                     using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                     {

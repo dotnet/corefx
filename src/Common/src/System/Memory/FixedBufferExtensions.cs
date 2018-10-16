@@ -13,7 +13,7 @@ namespace System
         /// </summary>
         internal unsafe static string GetStringFromFixedBuffer(this ReadOnlySpan<char> span)
         {
-            fixed (char* c = &MemoryMarshal.GetReference(span))
+            fixed (char* c = span)
             {
                 return new string(c, 0, span.GetFixedBufferStringLength());
             }

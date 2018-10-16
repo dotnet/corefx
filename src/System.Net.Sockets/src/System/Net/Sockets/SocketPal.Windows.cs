@@ -193,7 +193,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError Send(SafeCloseSocket handle, ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out int bytesTransferred)
         {
             int bytesSent;
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* bufferPtr = buffer)
             {
                 bytesSent = Interop.Winsock.send(handle.DangerousGetHandle(), bufferPtr, buffer.Length, socketFlags);
             }
@@ -331,7 +331,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError Receive(SafeCloseSocket handle, Span<byte> buffer, SocketFlags socketFlags, out int bytesTransferred)
         {
             int bytesReceived;
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* bufferPtr = buffer)
             {
                 bytesReceived = Interop.Winsock.recv(handle.DangerousGetHandle(), bufferPtr, buffer.Length, socketFlags);
             }
@@ -787,9 +787,9 @@ namespace System.Net.Sockets
                 // for example, (-2) specified for microseconds, will continue to get the same behavior.
 
                 int socketCount;
-                fixed (IntPtr* readPtr = &MemoryMarshal.GetReference(readfileDescriptorSet))
-                fixed (IntPtr* writePtr = &MemoryMarshal.GetReference(writefileDescriptorSet))
-                fixed (IntPtr* errPtr = &MemoryMarshal.GetReference(errfileDescriptorSet))
+                fixed (IntPtr* readPtr = readfileDescriptorSet)
+                fixed (IntPtr* writePtr = writefileDescriptorSet)
+                fixed (IntPtr* errPtr = errfileDescriptorSet)
                 {
                     if (microseconds != -1)
                     {

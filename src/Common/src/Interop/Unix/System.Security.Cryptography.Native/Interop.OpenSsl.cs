@@ -396,7 +396,7 @@ internal static partial class Interop
                         Span<byte> clientProto = clientList.Slice(1, length);
                         if (clientProto.SequenceEqual(protocolList[i].Protocol.Span))
                         {
-                            fixed (byte* p = &MemoryMarshal.GetReference(clientProto)) outp = p;
+                            fixed (byte* p = clientProto) outp = p;
                             outlen = length;
                             return Ssl.SSL_TLSEXT_ERR_OK;
                         }

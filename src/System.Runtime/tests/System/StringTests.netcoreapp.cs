@@ -707,6 +707,7 @@ namespace System.Tests
             ReadOnlySpan<char> span = s;
             Assert.Equal(s.Length, span.Length);
             fixed (char* stringPtr = s)
+            // removing MemoryMarshal breaks this test
             fixed (char* spanPtr = &MemoryMarshal.GetReference(span))
             {
                 Assert.Equal((IntPtr)stringPtr, (IntPtr)spanPtr);

@@ -294,7 +294,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationReceiveSingleBuffer(SafeCloseSocket handle)
         {
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(_buffer.Span))
+            fixed (byte* bufferPtr = _buffer.Span)
             {
                 NativeOverlapped* overlapped = AllocateNativeOverlapped();
                 try
@@ -366,7 +366,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationReceiveFromSingleBuffer(SafeCloseSocket handle)
         {
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(_buffer.Span))
+            fixed (byte* bufferPtr = _buffer.Span)
             {
                 NativeOverlapped* overlapped = AllocateNativeOverlapped();
                 try
@@ -562,7 +562,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationSendSingleBuffer(SafeCloseSocket handle)
         {
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(_buffer.Span))
+            fixed (byte* bufferPtr = _buffer.Span)
             {
                 NativeOverlapped* overlapped = AllocateNativeOverlapped();
                 try
@@ -736,7 +736,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationSendToSingleBuffer(SafeCloseSocket handle)
         {
-            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(_buffer.Span))
+            fixed (byte* bufferPtr = _buffer.Span)
             {
                 NativeOverlapped* overlapped = AllocateNativeOverlapped();
                 try
