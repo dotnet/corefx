@@ -20,23 +20,14 @@ namespace System.Net.NetworkInformation
             }
 
             TcpConnectionInformation[] connectionInformations = new TcpConnectionInformation[infoCount];
-            int skip = 0;
+            int nextResultIndex = 0;
             for (int i = 0; i < infoCount; i++)
             {
                 Interop.Sys.NativeTcpConnectionInformation nativeInfo = infos[i];
                 TcpState state = nativeInfo.State;
 
-                if (listeners)
+                if (listeners != (state == TcpState.Listen))
                 {
-                    if (state != TcpState.Listen)
-                    {
-                        skip++;
-                        continue;
-                    }
-                }
-                else if (state == TcpState.Listen)
-                {
-                    skip++;
                     continue;
                 }
 
@@ -64,24 +55,24 @@ namespace System.Net.NetworkInformation
                 }
 
                 IPEndPoint remote = new IPEndPoint(remoteIPAddress, (int)nativeInfo.RemoteEndPoint.Port);
-                connectionInformations[i - skip] = new SimpleTcpConnectionInformation(local, remote, state);
+                connectionInformations[nextResultIndex++] = new SimpleTcpConnectionInformation(local, remote, state);
             }
 
-            if (skip != 0)
+            if (nextResultIndex != connectionInformations.Length)
             {
-                Array.Resize(ref connectionInformations, connectionInformations.Length - skip);
+                Array.Resize(ref connectionInformations, nextResultIndex);
             }
 
             return connectionInformations;
         }
         public unsafe override TcpConnectionInformation[] GetActiveTcpConnections()
         {
-            return GetTcpConnections(false);
+            return GetTcpConnections(listeners:false);
         }
 
         public override IPEndPoint[] GetActiveTcpListeners()
         {
-            TcpConnectionInformation[] allConnections = GetTcpConnections(true);
+            TcpConnectionInformation[] allConnections = GetTcpConnections(listeners:true);
             return allConnections.Select(tci => tci.LocalEndPoint).ToArray();
         }
 

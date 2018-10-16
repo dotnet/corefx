@@ -31,23 +31,23 @@ namespace System.Net.NetworkInformation.Tests
         {
             IPGlobalProperties gp = IPGlobalProperties.GetIPGlobalProperties();
 
-            TcpConnectionInformation[] activeConnections = gp.GetActiveTcpConnections();
-            IPEndPoint[] tcpListeners = gp.GetActiveTcpListeners();
-            IPEndPoint[] udpListeners = gp.GetActiveUdpListeners();
+            Assert.NotNull(gp.GetActiveTcpConnections());
+            Assert.NotNull(gp.GetActiveTcpListeners());
+            Assert.NotNull(gp.GetActiveUdpListeners());
 
-            IPGlobalStatistics v4IpStat = gp.GetIPv4GlobalStatistics();
+            Assert.NotNull(gp.GetIPv4GlobalStatistics());
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // OSX does not provide IPv6  stats.
-                IPGlobalStatistics v6IpStat = gp.GetIPv6GlobalStatistics();
+                Assert.NotNull(gp.GetIPv6GlobalStatistics());
             }
 
-            IcmpV4Statistics v4IcmpStat = gp.GetIcmpV4Statistics();
-            IcmpV6Statistics v6IcmpStat = gp.GetIcmpV6Statistics();
-            TcpStatistics v4TcpSTat = gp.GetTcpIPv4Statistics();
-            TcpStatistics v6TcpStat = gp.GetTcpIPv6Statistics();
-            UdpStatistics v4UdpStat = gp.GetUdpIPv4Statistics();
-            UdpStatistics v6UdpStat = gp.GetUdpIPv6Statistics();
+            Assert.NotNull(gp.GetIcmpV4Statistics());
+            Assert.NotNull(gp.GetIcmpV6Statistics());
+            Assert.NotNull(gp.GetTcpIPv4Statistics());
+            Assert.NotNull(gp.GetTcpIPv6Statistics());
+            Assert.NotNull(gp.GetUdpIPv4Statistics());
+            Assert.NotNull(gp.GetUdpIPv6Statistics());
         }
 
         [Theory]
@@ -93,7 +93,7 @@ namespace System.Net.NetworkInformation.Tests
                 foreach (TcpConnectionInformation ti in tcpCconnections)
                 {
                     if (ti.LocalEndPoint.Equals(client.LocalEndPoint) && ti.RemoteEndPoint.Equals(client.RemoteEndPoint) &&
-                         (ti.State == TcpState.Established))
+                       (ti.State == TcpState.Established))
                     {
                         found = true;
                         break;
@@ -105,6 +105,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void IPGlobalProperties_TcpActiveConnections_NotListening()
         {
             TcpConnectionInformation[] tcpCconnections = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections();
