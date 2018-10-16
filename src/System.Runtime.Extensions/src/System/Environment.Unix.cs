@@ -121,6 +121,7 @@ namespace System
             {
                 Debug.Fail($"Unable to get home directory: {exc}");
             }
+
             if (string.IsNullOrEmpty(home))
             {
                 home = Path.GetTempPath();
