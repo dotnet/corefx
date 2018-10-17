@@ -174,7 +174,6 @@ namespace System.Net.NameResolution.PalTests
             var ex = new  SocketException((int)SocketError.HostNotFound);
 
             Assert.Equal(-1, ex.Message.IndexOf("Device"));
-            Assert.NotEqual(-1,  ex.Message.IndexOf("not known"));
         }
     }
 }
