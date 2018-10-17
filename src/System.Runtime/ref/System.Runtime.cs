@@ -2261,6 +2261,12 @@ namespace System
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public System.IO.Stream GetStream() => throw null;
         public static Utf8String Literal(string value) => throw null;
+        public int IndexOf(char value) => throw null;
+        public int IndexOf(char value, int startIndex) => throw null;
+        public int IndexOf(char value, int startIndex, int count) => throw null;
+        public int IndexOf(System.Text.UnicodeScalar value) => throw null;
+        public int IndexOf(System.Text.UnicodeScalar value, int startIndex) => throw null;
+        public int IndexOf(System.Text.UnicodeScalar value, int startIndex, int count) => throw null;
         public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
