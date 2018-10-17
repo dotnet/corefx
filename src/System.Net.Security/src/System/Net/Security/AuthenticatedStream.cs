@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
@@ -71,6 +72,24 @@ namespace System.Net.Security
 #if DEBUG
             }
 #endif
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            if (_leaveStreamOpen)
+            {
+                return new ValueTask(_innerStream.FlushAsync());
+            }
+
+            try
+            {
+                _innerStream.Dispose();
+                return default;
+            }
+            catch (Exception exc)
+            {
+                return new ValueTask(Task.FromException(exc));
+            }
         }
 
         public abstract bool IsAuthenticated { get; }
