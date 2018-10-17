@@ -7,7 +7,6 @@
 
 namespace System.Drawing.Design
 {
-    using System.Runtime.Serialization;
     public partial interface IPropertyValueUIService
     {
         event System.EventHandler PropertyUIValueItemsChanged;
@@ -16,32 +15,16 @@ namespace System.Drawing.Design
         void NotifyPropertyValueUIItemsChanged();
         void RemovePropertyValueUIHandler(System.Drawing.Design.PropertyValueUIHandler newHandler);
     }
-    public partial class PaintValueEventArgs : System.EventArgs
+    public partial interface IToolboxItemProvider
     {
-        public PaintValueEventArgs(System.ComponentModel.ITypeDescriptorContext context, object value, System.Drawing.Graphics graphics, System.Drawing.Rectangle bounds) { }
-        public System.Drawing.Rectangle Bounds { get { throw null; } }
-        public System.ComponentModel.ITypeDescriptorContext Context { get { throw null; } }
-        public System.Drawing.Graphics Graphics { get { throw null; } }
-        public object Value { get { throw null; } }
+        System.Drawing.Design.ToolboxItemCollection Items { get; }
     }
-    public delegate void PropertyValueUIHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor propDesc, System.Collections.ArrayList valueUIItemList);
-    public partial class PropertyValueUIItem
-    {
-        public PropertyValueUIItem(System.Drawing.Image uiItemImage, System.Drawing.Design.PropertyValueUIItemInvokeHandler handler, string tooltip) { }
-        public virtual System.Drawing.Image Image { get { throw null; } }
-        public virtual System.Drawing.Design.PropertyValueUIItemInvokeHandler InvokeHandler { get { throw null; } }
-        public virtual string ToolTip { get { throw null; } }
-        public virtual void Reset() { }
-    }
-    public delegate void PropertyValueUIItemInvokeHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor descriptor, System.Drawing.Design.PropertyValueUIItem invokedItem);
-    [System.Runtime.InteropServices.GuidAttribute("4BACD258-DE64-4048-BC4E-FEDBEF9ACB76")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
     public partial interface IToolboxService
     {
         System.Drawing.Design.CategoryNameCollection CategoryNames { get; }
         string SelectedCategory { get; set; }
-        void AddCreator(System.Drawing.Design.ToolboxItem ToolboxItemCreatorCallback , string format);
-        void AddCreator(System.Drawing.Design.ToolboxItem ToolboxItemCreatorCallback , string format, System.ComponentModel.Design.IDesignerHost host);
+        void AddCreator(System.Drawing.Design.ToolboxItemCreatorCallback creator, string format);
+        void AddCreator(System.Drawing.Design.ToolboxItemCreatorCallback creator, string format, System.ComponentModel.Design.IDesignerHost host);
         void AddLinkedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, System.ComponentModel.Design.IDesignerHost host);
         void AddLinkedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category, System.ComponentModel.Design.IDesignerHost host);
         void AddToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
@@ -68,9 +51,45 @@ namespace System.Drawing.Design
         bool SetCursor();
         void SetSelectedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
     }
+    public partial interface IToolboxUser
+    {
+        bool GetToolSupported(System.Drawing.Design.ToolboxItem tool);
+        void ToolPicked(System.Drawing.Design.ToolboxItem tool);
+    }
+    public partial class PaintValueEventArgs : System.EventArgs
+    {
+        public PaintValueEventArgs(System.ComponentModel.ITypeDescriptorContext context, object value, System.Drawing.Graphics graphics, System.Drawing.Rectangle bounds) { }
+        public System.Drawing.Rectangle Bounds { get { throw null; } }
+        public System.ComponentModel.ITypeDescriptorContext Context { get { throw null; } }
+        public System.Drawing.Graphics Graphics { get { throw null; } }
+        public object Value { get { throw null; } }
+    }
+    public delegate void PropertyValueUIHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor propDesc, System.Collections.ArrayList valueUIItemList);
+    public partial class PropertyValueUIItem
+    {
+        public PropertyValueUIItem(System.Drawing.Image uiItemImage, System.Drawing.Design.PropertyValueUIItemInvokeHandler handler, string tooltip) { }
+        public virtual System.Drawing.Image Image { get { throw null; } }
+        public virtual System.Drawing.Design.PropertyValueUIItemInvokeHandler InvokeHandler { get { throw null; } }
+        public virtual string ToolTip { get { throw null; } }
+        public virtual void Reset() { }
+    }
+    public delegate void PropertyValueUIItemInvokeHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor descriptor, System.Drawing.Design.PropertyValueUIItem invokedItem);
+    public partial class ToolboxComponentsCreatedEventArgs : System.EventArgs
+    {
+        public ToolboxComponentsCreatedEventArgs(System.ComponentModel.IComponent[] components) { }
+        public System.ComponentModel.IComponent[] Components { get { throw null; } }
+    }
+    public delegate void ToolboxComponentsCreatedEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatedEventArgs e);
+    public partial class ToolboxComponentsCreatingEventArgs : System.EventArgs
+    {
+        public ToolboxComponentsCreatingEventArgs(System.ComponentModel.Design.IDesignerHost host) { }
+        public System.ComponentModel.Design.IDesignerHost DesignerHost { get { throw null; } }
+    }
+    public delegate void ToolboxComponentsCreatingEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatingEventArgs e);
     public partial class ToolboxItem : System.Runtime.Serialization.ISerializable
     {
         public ToolboxItem() { }
+        protected ToolboxItem(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public ToolboxItem(System.Type toolType) { }
         public System.Reflection.AssemblyName AssemblyName { get { throw null; } set { } }
         public System.Drawing.Bitmap Bitmap { get { throw null; } set { } }
@@ -110,15 +129,6 @@ namespace System.Drawing.Design
         protected void ValidatePropertyType(string propertyName, object value, System.Type expectedType, bool allowNull) { }
         protected virtual object ValidatePropertyValue(string propertyName, object value) { throw null; }
     }
-    public partial interface IToolboxItemProvider
-    {
-        System.Drawing.Design.ToolboxItemCollection Items { get; }
-    }
-    public partial interface IToolboxUser
-    {
-        bool GetToolSupported(System.Drawing.Design.ToolboxItem tool);
-        void ToolPicked(System.Drawing.Design.ToolboxItem tool);
-    }
     public sealed partial class ToolboxItemCollection : System.Collections.ReadOnlyCollectionBase
     {
         public ToolboxItemCollection(System.Drawing.Design.ToolboxItemCollection value) { }
@@ -128,18 +138,7 @@ namespace System.Drawing.Design
         public void CopyTo(System.Drawing.Design.ToolboxItem[] array, int index) { }
         public int IndexOf(System.Drawing.Design.ToolboxItem value) { throw null; }
     }
-    public partial class ToolboxComponentsCreatedEventArgs : System.EventArgs
-    {
-        public ToolboxComponentsCreatedEventArgs(System.ComponentModel.IComponent[] components) { }
-        public System.ComponentModel.IComponent[] Components { get { throw null; } }
-    }
-    public delegate void ToolboxComponentsCreatedEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatedEventArgs e);
-    public partial class ToolboxComponentsCreatingEventArgs : System.EventArgs
-    {
-        public ToolboxComponentsCreatingEventArgs(System.ComponentModel.Design.IDesignerHost host) { }
-        public System.ComponentModel.Design.IDesignerHost DesignerHost { get { throw null; } }
-    }
-    public delegate void ToolboxComponentsCreatingEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatingEventArgs e);
+    public delegate System.Drawing.Design.ToolboxItem ToolboxItemCreatorCallback(object serializedObject, string format);
     public partial class UITypeEditor
     {
         public UITypeEditor() { }

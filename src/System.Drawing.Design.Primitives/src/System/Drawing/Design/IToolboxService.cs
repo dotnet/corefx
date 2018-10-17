@@ -2,19 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Drawing.Design {
-
-    using System;
-    using System.Collections;
-    using System.ComponentModel.Design;
-    using System.Runtime.InteropServices;
-
+using System.Collections;
+using System.ComponentModel.Design;
+using System.Runtime.InteropServices;
+namespace System.Drawing.Design
+{
     /// <summary>
     /// Provides access to the toolbox in the development environment.
     /// </summary>
     [ComImport(), Guid("4BACD258-DE64-4048-BC4E-FEDBEF9ACB76"), InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IToolboxService {
-
+    public interface IToolboxService
+    {
         /// <summary>
         /// Gets the names of all the tool categories currently on the toolbox.
         /// </summary>

@@ -1,19 +1,19 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
-
 namespace System.Drawing.Design.Primitives.Tests.System.Drawing.Design
 {
     public class ToolboxItemCollectionTests
     {
-
         private ToolboxItemCollection CreateToolboxItemCollection()
         {
-            ToolboxItem[]  tools = { new ToolboxItem(typeof(Bitmap)), new ToolboxItem(typeof(Image)) };
+            ToolboxItem[]  tools = { new ToolboxItem(), new ToolboxItem() };
 
             return new ToolboxItemCollection(tools);
         }
 
-        [Fact]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Contains_StateUnderTest_ExpectedBehavior()
         {
@@ -29,7 +29,6 @@ namespace System.Drawing.Design.Primitives.Tests.System.Drawing.Design
             Assert.True(result);
         }
 
-        [Fact]
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void IndexOf_StateUnderTest_ExpectedBehavior()
         {
