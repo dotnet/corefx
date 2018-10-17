@@ -106,6 +106,7 @@ namespace System.Net.Sockets
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state) { throw null; }
         public void Close(int timeout) { }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         ~NetworkStream() { }
         public override int EndRead(IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(IAsyncResult asyncResult) { }
