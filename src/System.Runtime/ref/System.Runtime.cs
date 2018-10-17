@@ -2258,6 +2258,8 @@ namespace System
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public ref readonly byte GetPinnableReference() => throw null;
         public System.Text.UnicodeScalar GetScalarAt(int index) => throw null;
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public System.IO.Stream GetStream() => throw null;
         public static Utf8String Literal(string value) => throw null;
         public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
