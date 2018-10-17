@@ -58,7 +58,7 @@ namespace System.Net.NetworkInformation.Tests
             {
                 server.Bind(new IPEndPoint(address, 0));
                 server.Listen(1);
-                _log.WriteLine("listening on {0}", server.LocalEndPoint);
+                _log.WriteLine($"listening on {server.LocalEndPoint}");
 
                 IPEndPoint[] tcpListeners = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners();
                 bool found = false;
@@ -84,7 +84,7 @@ namespace System.Net.NetworkInformation.Tests
             {
                 server.Bind(new IPEndPoint(address, 0));
                 server.Listen(1);
-                _log.WriteLine("listening on {0}", server.LocalEndPoint);
+                _log.WriteLine($"listening on {server.LocalEndPoint}");
 
                 await client.ConnectAsync(server.LocalEndPoint);
 
