@@ -7895,33 +7895,6 @@ namespace System.Text.Unicode
         public static System.Buffers.OperationStatus TranscodeUtf8ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int charsWritten) => throw null;
         public static System.Buffers.OperationStatus TranscodeUtf16ToUtf8(ReadOnlySpan<char> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int charsConsumed, out int bytesWritten) => throw null;
     }
-    public enum Utf8Char : byte { }
-    public static partial class Utf8Extensions
-    {
-        public static bool Equals(this ReadOnlySpan<Utf8Char> span, ReadOnlySpan<Utf8Char> other, StringComparison comparisonType) => throw null;
-        public static ScalarCollection GetScalars(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public static bool IsWhiteSpace(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public static int ToLowerInvariant(this ReadOnlySpan<Utf8Char> source, Span<Utf8Char> destination) => throw null;
-        public static int ToUpperInvariant(this ReadOnlySpan<Utf8Char> source, Span<Utf8Char> destination) => throw null;
-        public static Utf8String ToUtf8String(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public static ReadOnlyMemory<Utf8Char> Trim(this ReadOnlyMemory<Utf8Char> memory) => throw null;
-        public static ReadOnlySpan<Utf8Char> Trim(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public static ReadOnlyMemory<Utf8Char> TrimEnd(this ReadOnlyMemory<Utf8Char> memory) => throw null;
-        public static ReadOnlySpan<Utf8Char> TrimEnd(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public static ReadOnlyMemory<Utf8Char> TrimStart(this ReadOnlyMemory<Utf8Char> memory) => throw null;
-        public static ReadOnlySpan<Utf8Char> TrimStart(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public readonly ref struct ScalarCollection
-        {
-            private readonly int _dummy;
-            public Enumerator GetEnumerator() => throw null;
-            public ref struct Enumerator
-            {
-                private readonly int _dummy;
-                public UnicodeScalar Current => throw null;
-                public bool MoveNext() => throw null;
-            }
-        }
-    }
 }
 namespace System.Threading
 {
