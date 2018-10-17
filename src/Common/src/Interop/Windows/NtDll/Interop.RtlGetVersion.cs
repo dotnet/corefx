@@ -5,7 +5,6 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Xunit;
 
 internal partial class Interop
 {
@@ -34,7 +33,8 @@ internal partial class Interop
         internal static string RtlGetVersion()
         {
             var sb = new StringBuilder();
-            sb.Append("Microsoft Windows");
+            const string version = "Microsoft Windows";
+            sb.Append(version);
             Tuple<uint, uint, uint, string> info = RtlGetVersionInternal();
             if (info != null)
             {
