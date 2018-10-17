@@ -3,6 +3,7 @@ Param(
   [string] $ArchGroup,
   [switch] $Release,
   [Alias("framework")][string] $TargetGroup,
+  [Alias("os")][string] $OSGroup,
   [Alias("allconfigurations")][switch] $BuildAllConfigurations,
   [string] $RuntimeOS,
   [switch] $OuterLoop,
@@ -37,7 +38,7 @@ foreach ($argument in $PSBoundParameters.Keys)
 {
   switch($argument)
   {
-    "Debug"      { $arguments += " /p:ConfigurationGroup=Debug -configuruation Debug" }
+    "Debug"      { $arguments += " /p:ConfigurationGroup=Debug -configuration Debug" }
     "Release"    { $arguments += " /p:ConfigurationGroup=Release -configuration Release" }
     "ExtraArgs"  { $arguments += " " + $ExtraArgs }
     "Restore"    { $defaultargs = "-restore" }
