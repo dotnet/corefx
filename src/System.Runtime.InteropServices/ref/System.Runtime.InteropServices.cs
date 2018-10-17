@@ -100,6 +100,7 @@ namespace System.IO
         [System.CLSCompliantAttribute(false)]
         public unsafe byte* PositionPointer {get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         [System.CLSCompliantAttribute(false)]

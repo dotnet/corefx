@@ -1375,6 +1375,10 @@ namespace System
     {
         public HttpStyleUriParser() { }
     }
+    public partial interface IAsyncDisposable
+    {
+        System.Threading.Tasks.ValueTask DisposeAsync();
+    }
     public partial interface IAsyncResult
     {
         object AsyncState { get; }
@@ -3841,6 +3845,15 @@ namespace System.Collections
 }
 namespace System.Collections.Generic
 {
+    public partial interface IAsyncEnumerable<out T>
+    {
+        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator();
+    }
+    public partial interface IAsyncEnumerator<out T> : System.IAsyncDisposable
+    {
+        System.Threading.Tasks.ValueTask<bool> MoveNextAsync();
+        T Current { get; }
+    }
     public partial interface ICollection<T> : System.Collections.Generic.IEnumerable<T>, System.Collections.IEnumerable
     {
         int Count { get; }
@@ -5084,6 +5097,7 @@ namespace System.IO
         public override System.IAsyncResult BeginRead(byte[] array, int offset, int numBytes, System.AsyncCallback callback, object state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] array, int offset, int numBytes, System.AsyncCallback callback, object state) { throw null; }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { }
         ~FileStream() { }
@@ -5131,7 +5145,7 @@ namespace System.IO
         Current = 1,
         End = 2,
     }
-    public abstract partial class Stream : System.MarshalByRefObject, System.IDisposable
+    public abstract partial class Stream : System.MarshalByRefObject, System.IDisposable, System.IAsyncDisposable
     {
         public static readonly System.IO.Stream Null;
         protected Stream() { }
@@ -5156,6 +5170,7 @@ namespace System.IO
         protected virtual System.Threading.WaitHandle CreateWaitHandle() { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public virtual System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public virtual int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public virtual void EndWrite(System.IAsyncResult asyncResult) { }
         public abstract void Flush();
@@ -7683,12 +7698,13 @@ namespace System.Threading
         public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state, bool useSynchronizationContext) { throw null; }
         public void ThrowIfCancellationRequested() { }
     }
-    public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>
+    public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>, System.IAsyncDisposable
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
         public System.Threading.CancellationToken Token { get { throw null; } }
         public void Dispose() { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Threading.CancellationTokenRegistration other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -8126,6 +8142,20 @@ namespace System.Threading.Tasks.Sources
         TResult GetResult(short token);
         System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
         void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
+    }
+    public partial struct ManualResetValueTaskSourceLogic<TResult>
+    {
+        private TResult _result;
+        private object _dummy;
+        private int _dummyPrimitive;
+        public TResult GetResult(short token) { throw null; }
+        public ValueTaskSourceStatus GetStatus(short token) { throw null; }
+        public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) { throw null; }
+        public void Reset() { throw null; }
+        public bool RunContinuationsAsynchronously { get { throw null; } set { throw null; } }
+        public void SetException(System.Exception error) { throw null; }
+        public void SetResult(TResult result) { throw null; }
+        public short Version { get { throw null; } }
     }
     [System.FlagsAttribute]
     public enum ValueTaskSourceOnCompletedFlags
