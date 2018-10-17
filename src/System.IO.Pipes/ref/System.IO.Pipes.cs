@@ -118,6 +118,7 @@ namespace System.IO.Pipes
         protected internal void CheckWriteOperations() { }
         protected bool IsHandleExposed { get { throw null; } }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { throw null; }
         public override void Flush() { }

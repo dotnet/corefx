@@ -398,6 +398,12 @@ namespace System.IO.Pipes
             _state = PipeState.Closed;
         }
 
+        public override ValueTask DisposeAsync()
+        {
+            Dispose(disposing: true);
+            return default;
+        }
+
         // ********************** Public Properties *********************** //
 
         // APIs use coarser definition of connected, but these map to internal 
