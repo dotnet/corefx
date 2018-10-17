@@ -13,5 +13,13 @@ namespace System.Text.RegularExpressions
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, System.Reflection.AssemblyName assemblyname) { }
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, System.Reflection.AssemblyName assemblyname, System.Reflection.Emit.CustomAttributeBuilder[] attributes) { }
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, System.Reflection.AssemblyName assemblyname, System.Reflection.Emit.CustomAttributeBuilder[] attributes, string resourceFile) { }
+
+        /* UTF8 APIs */
+
+        public bool IsMatch(Utf8String input) { throw null; }
+        public bool IsMatch(Utf8String input, int startat) { throw null; }
+        public static bool IsMatch(Utf8String input, string pattern) { throw null; }
+        public static bool IsMatch(Utf8String input, string pattern, System.Text.RegularExpressions.RegexOptions options) { throw null; }
+        public static bool IsMatch(Utf8String input, string pattern, System.Text.RegularExpressions.RegexOptions options, System.TimeSpan matchTimeout) { throw null; }
     }
 }
