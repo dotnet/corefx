@@ -2244,7 +2244,9 @@ namespace System
         public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2, Utf8String str3) => throw null;
         public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
+        public bool EndsWith(char value) => throw null;
         public bool EndsWith(System.Text.UnicodeScalar value) => throw null;
+        public bool EndsWith(Utf8String value) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public static bool Equals(Utf8String a, Utf8String b) => throw null;
@@ -2253,18 +2255,23 @@ namespace System
         public int GetHashCode(StringComparison comparisonType) => throw null;
         public static int GetHashCode(ReadOnlySpan<byte> value) => throw null;
         public static int GetHashCode(ReadOnlySpan<byte> value, StringComparison comparisonType) => throw null;
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public ref readonly byte GetPinnableReference() => throw null;
+        public System.Text.UnicodeScalar GetScalarAt(int index) => throw null;
         public static Utf8String Literal(string value) => throw null;
         public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
+        public bool StartsWith(char value) => throw null;
         public bool StartsWith(System.Text.UnicodeScalar value) => throw null;
+        public bool StartsWith(Utf8String value) => throw null;
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
         public Utf8String Trim() => throw null;
         public Utf8String TrimEnd() => throw null;
         public Utf8String TrimStart() => throw null;
+        public bool TryGetScalarAt(int index, out System.Text.UnicodeScalar scalar) => throw null;
     }
     public readonly partial struct Utf8StringSegment : IEquatable<Utf8StringSegment>
     {
@@ -7853,11 +7860,6 @@ namespace System.Text
         public static UnicodeScalar ToUpper(UnicodeScalar s, System.Globalization.CultureInfo culture) => throw null;
         public static UnicodeScalar ToUpperInvariant(UnicodeScalar s) => throw null;
     }
-    public static partial class Unicode
-    {
-        public static System.Buffers.OperationStatus TranscodeUtf8ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int charsWritten) => throw null;
-        public static System.Buffers.OperationStatus TranscodeUtf16ToUtf8(ReadOnlySpan<char> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int charsConsumed, out int bytesWritten) => throw null;
-    }
     public enum Utf8Char : byte { }
     public static partial class Utf8Extensions
     {
@@ -7884,6 +7886,14 @@ namespace System.Text
                 public bool MoveNext() => throw null;
             }
         }
+    }
+}
+namespace System.Text.Unicode
+{
+    public static partial class Transcoders
+    {
+        public static System.Buffers.OperationStatus TranscodeUtf8ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int charsWritten) => throw null;
+        public static System.Buffers.OperationStatus TranscodeUtf16ToUtf8(ReadOnlySpan<char> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int charsConsumed, out int bytesWritten) => throw null;
     }
 }
 namespace System.Threading
