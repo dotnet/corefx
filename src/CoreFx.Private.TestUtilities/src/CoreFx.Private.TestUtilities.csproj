@@ -36,10 +36,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcess_IntPtr.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentProcess_IntPtr.cs</Link>
     </Compile>
-    <!--Does not work as needs SafeTokenHandle 
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenProcessToken.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.OpenProcessToken.cs</Link>
-	</Compile>-->
     <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
       <Link>Common\System\PasteArguments.Windows.cs</Link>
     </Compile>
