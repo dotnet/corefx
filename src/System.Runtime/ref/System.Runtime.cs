@@ -2270,6 +2270,7 @@ namespace System
         public static bool IsEmptyOrWhiteSpace(ReadOnlySpan<byte> value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
+        public Utf8String Replace(Utf8String oldValue, Utf8String newValue) => throw null;
         public bool StartsWith(char value) => throw null;
         public bool StartsWith(System.Text.UnicodeScalar value) => throw null;
         public bool StartsWith(Utf8String value) => throw null;
