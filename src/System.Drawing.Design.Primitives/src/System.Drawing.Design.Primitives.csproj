@@ -6,7 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyRef.cs" />
-    <Compile Include="SR.cs" />
     <Compile Include="System\Drawing\Design\IPropertyValueUIService.cs" />
     <Compile Include="System\Drawing\Design\IToolboxItemProvider.cs" />
     <Compile Include="System\Drawing\Design\IToolboxService.cs" />
@@ -27,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />

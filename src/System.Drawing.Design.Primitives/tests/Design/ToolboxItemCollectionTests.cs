@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-namespace System.Drawing.Design.Primitives.Tests.System.Drawing.Design
+
+namespace System.Drawing.Design
 {
     public class ToolboxItemCollectionTests
     {

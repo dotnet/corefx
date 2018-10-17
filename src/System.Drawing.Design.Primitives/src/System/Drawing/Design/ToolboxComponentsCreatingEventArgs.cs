@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel.Design;
+
 namespace System.Drawing.Design
 {
     /// <summary>
@@ -11,27 +12,19 @@ namespace System.Drawing.Design
     /// </summary>
     public class ToolboxComponentsCreatingEventArgs : EventArgs
     {
-        private readonly IDesignerHost host;
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Drawing.Design.ToolboxComponentsCreatingEventArgs'/> object.
         /// </summary>
-        /// <param name="host">host</param>
         public ToolboxComponentsCreatingEventArgs(IDesignerHost host)
         {
-            this.host = host;
+            DesignerHost = host;
         }
 
         /// <summary>
         /// An instance of IDesignerHost that has made the creat request.  This can be null if no designer host
         /// was provided to the toolbox item.
         /// </summary>
-        public IDesignerHost DesignerHost
-        {
-            get
-            {
-                return host;
-            }
-        }
+        public IDesignerHost DesignerHost { get; }
     }
 }

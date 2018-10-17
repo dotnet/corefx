@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Globalization;
-using System.Reflection;
 using Xunit;
-namespace System.Drawing.Design.Primitives.Tests.System.Drawing.Design
+
+namespace System.Drawing.Design
 {
     public class ToolboxItemTests
     {
@@ -14,13 +12,26 @@ namespace System.Drawing.Design.Primitives.Tests.System.Drawing.Design
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Ctor_DefaultsAssignedCorrectly()
         {
-            //TODO
+            var type = typeof(Bitmap);
+            var unitUnderTest = new ToolboxItem(type);
+
+            Assert.Equal(type.FullName, unitUnderTest.TypeName);
+            Assert.Equal(type.Name, unitUnderTest.DisplayName);
+            Assert.Equal(type.Assembly.GetName(true).ToString(), unitUnderTest.AssemblyName.ToString());
+            Assert.NotNull(unitUnderTest.DependentAssemblies);
+            Assert.Equal(unitUnderTest.Description, "");
+            Assert.NotEqual(unitUnderTest.Filter.Count, 0);
         }
+
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ToString_StateUnderTest_ExpectedBehavior()
         {
-            //TO DO
+            var type = typeof(Bitmap);
+            var unitUnderTest = new ToolboxItem(type);
+            var result = unitUnderTest.ToString();
+
+            Assert.Equal(type.Name, result);
         }
     }
 }

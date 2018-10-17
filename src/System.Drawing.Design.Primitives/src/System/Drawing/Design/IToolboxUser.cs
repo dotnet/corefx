@@ -5,19 +5,17 @@
 namespace System.Drawing.Design
 {
     /// <summary>
-    ///Provides notifications of toolbox actions to designers which implement this interface.
+    /// Provides notifications of toolbox actions to designers which implement this interface.
     /// </summary>
     public interface IToolboxUser
     {
         /// <summary>
-        ///Gets a value indicating whether the specified tool is supported by the current designer
+        /// Gets a value indicating whether the specified tool is supported by the current designer
         /// </summary>
-        /// <param name="tool"> toolbox item</param>
-        /// <returns>true/false</returns>
         bool GetToolSupported(ToolboxItem tool);
 
         /// <summary>
-        ///Selects the specified tool.
+        /// Selects the specified tool.
         /// </summary>
         /// <param name="tool">toolbox item</param>
         void ToolPicked(ToolboxItem tool);

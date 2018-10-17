@@ -9,7 +9,6 @@ namespace System.Drawing.Design
     /// <summary>
     /// A collection that stores <see cref='System.Drawing.Design.ToolboxItem'/> objects.
     /// </summary>
-    [System.Security.Permissions.PermissionSetAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
     public sealed class ToolboxItemCollection : ReadOnlyCollectionBase
     {
         /// <summary>

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+
 namespace System.Drawing.Design
 {
     /// <summary>
@@ -11,15 +12,14 @@ namespace System.Drawing.Design
     /// </summary>
     public class ToolboxComponentsCreatedEventArgs : EventArgs
     {
-        private readonly IComponent[] _comps;
+        private readonly IComponent[] _components;
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Drawing.Design.ToolboxComponentsCreatedEventArgs'
         /// </summary>
-        /// <param name="components">components</param>
         public ToolboxComponentsCreatedEventArgs(IComponent[] components)
         {
-            _comps = components;
+            _components = components;
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (IComponent[])_comps.Clone();
+                return (IComponent[])_components.Clone();
             }
         }
     }

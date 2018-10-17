@@ -3,23 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.Serialization;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Permissions;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Versioning;
 
 namespace System.Drawing.Design
 {
     /// <summary>
     /// Provides a base implementation of a toolbox item.
     /// </summary>
-    [Serializable]
     public class ToolboxItem : ISerializable
     {
         private static TraceSwitch s_toolboxItemPersist = new TraceSwitch("ToolboxPersisting", "ToolboxItem: write data");
@@ -28,7 +26,7 @@ namespace System.Drawing.Design
         private static object s_eventComponentsCreating = new object();
 
         private bool _locked;
-        private LockableDictionary _properties;
+        private ConcurrentDictionary<object, object> _properties;
         private ToolboxComponentsCreatedEventHandler _componentsCreatedEvent;
         private ToolboxComponentsCreatingEventHandler _componentsCreatingEvent;
 
@@ -40,7 +38,6 @@ namespace System.Drawing.Design
         /// <summary>
         /// Initializes a new instance of the ToolboxItem class using the specified type.
         /// </summary>
-        /// <param name="toolType"></param>
         public ToolboxItem(Type toolType) : this()
         {
             Initialize(toolType);
@@ -48,7 +45,7 @@ namespace System.Drawing.Design
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Drawing.Design.ToolboxItem'/>
-        ///class using the specified serialization information.
+        /// class using the specified serialization information.
         /// </summary>
         protected ToolboxItem(SerializationInfo info, StreamingContext context) : this()
         {
@@ -57,17 +54,17 @@ namespace System.Drawing.Design
 
         /// <summary>
         /// The assembly name for this toolbox item. The assembly name describes the assembly
-        ///information needed to load the toolbox item's type.
+        /// information needed to load the toolbox item's type.
         /// </summary>
         public AssemblyName AssemblyName
         {
             get
             {
-                return (AssemblyName)Properties["AssemblyName"];
+                return (AssemblyName)Properties[nameof(AssemblyName)];
             }
             set
             {
-                Properties["AssemblyName"] = value;
+                Properties[nameof(AssemblyName)] = value;
             }
         }
 
@@ -79,16 +76,12 @@ namespace System.Drawing.Design
         {
             get
             {
-                AssemblyName[] names = (AssemblyName[])Properties["DependentAssemblies"];
-                if (names != null)
-                {
-                    return (AssemblyName[])names.Clone();
-                }
-                return null;
+                AssemblyName[] names = (AssemblyName[])Properties[nameof(DependentAssemblies)];
+                return (AssemblyName[])names?.Clone();
             }
             set
             {
-                Properties["DependentAssemblies"] = value.Clone();
+                Properties[nameof(DependentAssemblies)] = value.Clone();
             }
         }
 
@@ -100,11 +93,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (Bitmap)Properties["Bitmap"];
+                return (Bitmap)Properties[nameof(Bitmap)];
             }
             set
             {
-                Properties["Bitmap"] = value;
+                Properties[nameof(Bitmap)] = value;
             }
         }
 
@@ -116,11 +109,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (Bitmap)Properties["OriginalBitmap"];
+                return (Bitmap)Properties[nameof(OriginalBitmap)];
             }
             set
             {
-                Properties["OriginalBitmap"] = value;
+                Properties[nameof(OriginalBitmap)] = value;
             }
         }
 
@@ -132,11 +125,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (string)Properties["Company"];
+                return (string)Properties[nameof(Company)];
             }
             set
             {
-                Properties["Company"] = value;
+                Properties[nameof(Company)] = value;
             }
         }
 
@@ -147,7 +140,7 @@ namespace System.Drawing.Design
         {
             get
             {
-                return SR.GetString(SR.DotNET_ComponentType);
+                return SR.Format(SR.DotNET_ComponentType);
             }
         }
 
@@ -159,11 +152,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (string)Properties["Description"];
+                return (string)Properties[nameof(Description)];
             }
             set
             {
-                Properties["Description"] = value;
+                Properties[nameof(Description)] = value;
             }
         }
 
@@ -174,11 +167,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (string)Properties["DisplayName"];
+                return (string)Properties[nameof(DisplayName)];
             }
             set
             {
-                Properties["DisplayName"] = value;
+                Properties[nameof(DisplayName)] = value;
             }
         }
 
@@ -190,11 +183,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (ICollection)Properties["Filter"];
+                return (ICollection)Properties[nameof(Filter)];
             }
             set
             {
-                Properties["Filter"] = value;
+                Properties[nameof(Filter)] = value;
             }
         }
 
@@ -205,14 +198,13 @@ namespace System.Drawing.Design
         /// </summary>
         public bool IsTransient
         {
-            [SuppressMessage("Microsoft.Performance", "CA1808:AvoidCallsThatBoxValueTypes")]
             get
             {
-                return (bool)Properties["IsTransient"];
+                return (bool)Properties[nameof(IsTransient)];
             }
             set
             {
-                Properties["IsTransient"] = value;
+                Properties[nameof(IsTransient)] = value;
             }
         }
 
@@ -241,7 +233,7 @@ namespace System.Drawing.Design
             {
                 if (_properties == null)
                 {
-                    _properties = new LockableDictionary(this, 8 /* # of properties we have */);
+                    _properties = new ConcurrentDictionary<object, object>();
                 }
                 return _properties;
             }
@@ -254,11 +246,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                return (string)Properties["TypeName"];
+                return (string)Properties[nameof(TypeName)];
             }
             set
             {
-                Properties["TypeName"] = value;
+                Properties[nameof(TypeName)] = value;
             }
         }
 
@@ -317,7 +309,7 @@ namespace System.Drawing.Design
         protected void CheckUnlocked()
         {
             if (Locked)
-                throw new InvalidOperationException(SR.GetString(SR.ToolboxItemLocked));
+                throw new InvalidOperationException(SR.Format(SR.ToolboxItemLocked));
         }
 
         /// <summary>
@@ -388,7 +380,7 @@ namespace System.Drawing.Design
 
         /// <summary>
         /// Creates objects from the type contained in this toolbox item.  If designerHost is non-null
-        ///     this will also add them to the designer.
+        /// this will also add them to the designer.
         /// </summary>
         protected virtual IComponent[] CreateComponentsCore(IDesignerHost host, IDictionary defaultValues)
         {
@@ -401,22 +393,17 @@ namespace System.Drawing.Design
                     IComponentInitializer init = host.GetDesigner(components[i]) as IComponentInitializer;
                     if (init != null)
                     {
-                        bool removeComponent = true;
-
                         try
                         {
                             init.InitializeNewComponent(defaultValues);
-                            removeComponent = false;
                         }
-                        finally
+                        catch
                         {
-                            if (removeComponent)
+                            for (int index = 0; index < components.Length; index++)
                             {
-                                for (int index = 0; index < components.Length; index++)
-                                {
-                                    host.DestroyComponent(components[index]);
-                                }
+                                host.DestroyComponent(components[index]);
                             }
+                            throw;
                         }
                     }
                 }
@@ -454,12 +441,12 @@ namespace System.Drawing.Design
                 // names we use
                 propertyNames = new string[]
                 {
-                    "AssemblyName",
-                    "Bitmap",
-                    "DisplayName",
-                    "Filter",
-                    "IsTransient",
-                    "TypeName"
+                    nameof(AssemblyName),
+                    nameof(Bitmap),
+                    nameof(DisplayName),
+                    nameof(Filter),
+                    nameof(IsTransient),
+                    nameof(TypeName)
                 };
             }
 
@@ -507,7 +494,7 @@ namespace System.Drawing.Design
                 return false;
             }
 
-            if (!(obj.GetType() == this.GetType()))
+            if (obj.GetType() != this.GetType())
             {
                 return false;
             }
@@ -522,9 +509,7 @@ namespace System.Drawing.Design
 
         public override int GetHashCode()
         {
-            string typeName = TypeName;
-            int hash = (typeName != null) ? typeName.GetHashCode() : 0;
-
+            int hash = TypeName?.GetHashCode() ?? 0;
             return unchecked(hash ^ DisplayName.GetHashCode());
         }
 
@@ -536,23 +521,23 @@ namespace System.Drawing.Design
         {
             switch (propertyName)
             {
-                case "AssemblyName":
+                case nameof(AssemblyName):
                     if (value != null) value = ((AssemblyName)value).Clone();
 
                     break;
 
-                case "DisplayName":
-                case "TypeName":
+                case nameof(DisplayName):
+                case nameof(TypeName):
                     if (value == null) value = string.Empty;
 
                     break;
 
-                case "Filter":
+                case nameof(Filter):
                     if (value == null) value = new ToolboxItemFilterAttribute[0];
 
                     break;
 
-                case "IsTransient":
+                case nameof(IsTransient):
                     if (value == null) value = false;
 
                     break;
@@ -845,33 +830,24 @@ namespace System.Drawing.Design
         /// Raises the OnComponentsCreated event. This
         /// will be called when this <see cref='System.Drawing.Design.ToolboxItem'/> creates a component.
         /// </summary>
-        [SuppressMessage("Microsoft.Security", "CA2109:ReviewVisibleEventHandlers")] //full trust anyway
         protected virtual void OnComponentsCreated(ToolboxComponentsCreatedEventArgs args)
         {
-            if (_componentsCreatedEvent != null)
-            {
-                _componentsCreatedEvent(this, args);
-            }
+            _componentsCreatedEvent?.Invoke(this, args);
         }
 
         /// <summary>
         /// Raises the OnCreateComponentsInvoked event. This
         /// will be called before this <see cref='System.Drawing.Design.ToolboxItem'/> creates a component.
         /// </summary>
-        [SuppressMessage("Microsoft.Security", "CA2109:ReviewVisibleEventHandlers")] //full trust anyway 
         protected virtual void OnComponentsCreating(ToolboxComponentsCreatingEventArgs args)
         {
-            if (_componentsCreatingEvent != null)
-            {
-                _componentsCreatingEvent(this, args);
-            }
+            _componentsCreatingEvent?.Invoke(this, args);
         }
 
         /// <summary>
         /// Saves the state of this <see cref='System.Drawing.Design.ToolboxItem'/> to
         ///    the specified serialization info.
         /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1808:AvoidCallsThatBoxValueTypes")]
         protected virtual void Serialize(SerializationInfo info, StreamingContext context)
         {
             if (s_toolboxItemPersist.TraceVerbose)
@@ -880,7 +856,7 @@ namespace System.Drawing.Design
                 Debug.WriteLine("\tDisplay Name: " + DisplayName);
             }
 
-            info.AddValue("Locked", Locked);
+            info.AddValue(nameof(Locked), Locked);
             ArrayList propertyNames = new ArrayList(Properties.Count);
             foreach (DictionaryEntry de in Properties)
             {
@@ -893,7 +869,7 @@ namespace System.Drawing.Design
 
         public override string ToString()
         {
-            return this.DisplayName;
+            return DisplayName;
         }
 
         /// <summary>
@@ -906,14 +882,14 @@ namespace System.Drawing.Design
             {
                 if (!allowNull)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
             }
             else
             {
                 if (!expectedType.IsInstanceOfType(value))
                 {
-                    throw new ArgumentException(SR.GetString(SR.ToolboxItemInvalidPropertyType, propertyName, expectedType.FullName), "value");
+                    throw new ArgumentException(SR.Format(SR.ToolboxItemInvalidPropertyType, propertyName, expectedType.FullName), nameof(value));
                 }
             }
         }
@@ -927,28 +903,28 @@ namespace System.Drawing.Design
         {
             switch (propertyName)
             {
-                case "AssemblyName":
+                case nameof(AssemblyName):
                     ValidatePropertyType(propertyName, value, typeof(AssemblyName), true);
                     break;
 
-                case "Bitmap":
+                case nameof(Bitmap):
                     ValidatePropertyType(propertyName, value, typeof(Bitmap), true);
                     break;
 
-                case "OriginalBitmap":
+                case nameof(OriginalBitmap):
                     ValidatePropertyType(propertyName, value, typeof(Bitmap), true);
                     break;
 
-                case "Company":
-                case "Description":
-                case "DisplayName":
-                case "TypeName":
+                case nameof(Company):
+                case nameof(Description):
+                case nameof(DisplayName):
+                case nameof(TypeName):
                     ValidatePropertyType(propertyName, value, typeof(string), true);
                     if (value == null) value = string.Empty;
 
                     break;
 
-                case "Filter":
+                case nameof(Filter):
                     ValidatePropertyType(propertyName, value, typeof(ICollection), true);
 
                     int filterCount = 0;
@@ -983,117 +959,18 @@ namespace System.Drawing.Design
                     value = filter;
                     break;
 
-                case "IsTransient":
+                case nameof(IsTransient):
                     ValidatePropertyType(propertyName, value, typeof(bool), false);
                     break;
             }
             return value;
         }
 
-        /// <include file='doc\ToolboxItem.uex' path='docs/doc[@for="ToolboxItem.ISerializable.GetObjectData"]/*' />
-        /// <internalonly/> 
-        // SECREVIEW NOTE: we do not put the linkdemand that should be here, because the one on the type is a superset of this one
-        [SuppressMessage("Microsoft.Usage", "CA2240:ImplementISerializableCorrectly")]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             var UnmanagedCode = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
             UnmanagedCode.Demand();
             Serialize(info, context);
-        }
-
-        /// <summary>
-        /// This is a simple IDictionary that supports locking so
-        /// changing values are not allowed after the toolbox
-        /// item has been locked.
-        /// </summary>
-        private class LockableDictionary : Hashtable
-        {
-            private ToolboxItem _item;
-            internal LockableDictionary(ToolboxItem item, int capacity) : base(capacity)
-            {
-                _item = item;
-            }
-
-            public override bool IsFixedSize
-            {
-                get
-                {
-                    return _item.Locked;
-                }
-            }
-
-            public override bool IsReadOnly
-            {
-                get
-                {
-                    return _item.Locked;
-                }
-            }
-
-            public override object this[object key]
-            {
-                get
-                {
-                    string propertyName = GetPropertyName(key);
-                    object value = base[propertyName];
-
-                    return _item.FilterPropertyValue(propertyName, value);
-                }
-                set
-                {
-                    string propertyName = GetPropertyName(key);
-                    value = _item.ValidatePropertyValue(propertyName, value);
-                    CheckSerializable(value);
-                    _item.CheckUnlocked();
-                    base[propertyName] = value;
-                }
-            }
-
-            public override void Add(object key, object value)
-            {
-                string propertyName = GetPropertyName(key);
-                value = _item.ValidatePropertyValue(propertyName, value);
-                CheckSerializable(value);
-                _item.CheckUnlocked();
-                base.Add(propertyName, value);
-            }
-
-            private void CheckSerializable(object value)
-            {
-                if (value != null && !value.GetType().IsSerializable)
-                {
-                    throw new ArgumentException(SR.GetString(SR.ToolboxItemValueNotSerializable, value.GetType().FullName));
-                }
-            }
-
-            public override void Clear()
-            {
-                _item.CheckUnlocked();
-                base.Clear();
-            }
-
-            private string GetPropertyName(object key)
-            {
-                if (key == null)
-                {
-                    throw new ArgumentNullException("key");
-                }
-
-                string propertyName = key as string;
-
-                if (propertyName == null || propertyName.Length == 0)
-                {
-                    throw new ArgumentException(SR.GetString(SR.ToolboxItemInvalidKey), "key");
-                }
-
-                return propertyName;
-            }
-
-            public override void Remove(object key)
-            {
-                _item.CheckUnlocked();
-                base.Remove(key);
-            }
         }
     }
 }
