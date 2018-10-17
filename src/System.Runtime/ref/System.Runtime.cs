@@ -7797,6 +7797,8 @@ namespace System.Text
         public static bool Contains(ReadOnlySpan<byte> source, UnicodeScalar scalar, StringComparison comparison) => throw null;
         public static int IndexOf(ReadOnlySpan<byte> source, UnicodeScalar scalar) => throw null;
         public static int IndexOf(ReadOnlySpan<byte> source, UnicodeScalar scalar, StringComparison comparison, out int matchLength) => throw null;
+        public static bool IsWellFormedString(ReadOnlySpan<byte> source) => throw null;
+        public static bool IsWellFormedString(Utf8String source) => throw null;
         public static int ToLower(ReadOnlySpan<byte> source, Span<byte> destination, System.Globalization.CultureInfo culture) => throw null;
         public static System.Buffers.OperationStatus ToLower(ReadOnlySpan<byte> source, Span<byte> destination, System.Globalization.CultureInfo culture, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int bytesWritten) => throw null;
         public static int ToLowerInvariant(ReadOnlySpan<byte> source, Span<byte> destination) => throw null;
