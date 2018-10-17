@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -105,6 +106,26 @@ namespace System.IO.Tests
                 tw.Flush();
                 Assert.Equal(testData + tw.NewLine, ctw.Text);
             }
+        }
+
+        [Fact]
+        public void DisposeAsync_InvokesDisposeAsynchronously()
+        {
+            var mres = new ManualResetEventSlim();
+            var tw = new InvokeActionOnDisposeTextWriter() { DisposeAction = () => mres.Set() };
+            for (int i = 0; i < 2; i++)
+            {
+                tw.DisposeAsync();
+                mres.Wait();
+                mres.Reset();
+            }
+        }
+
+        private sealed class InvokeActionOnDisposeTextWriter : TextWriter
+        {
+            public Action DisposeAction;
+            public override Encoding Encoding => Encoding.UTF8;
+            protected override void Dispose(bool disposing) => DisposeAction?.Invoke();
         }
 
         // Generate data for TextWriter.Write* methods that take a stringBuilder.  
