@@ -1,4 +1,8 @@
-﻿Option Strict On
+﻿' Licensed to the .NET Foundation under one or more agreements.
+' The .NET Foundation licenses this file to you under the MIT license.
+' See the LICENSE file in the project root for more information.
+Option Explicit On
+Option Strict On
 
 Imports System.Environment
 Imports Microsoft.VisualBasic.FileIO
@@ -9,7 +13,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.DirectorySeparatorChar,
             IO.Path.AltDirectorySeparatorChar
             }
-
+        ''' <summary>
+        ''' Remove any OS specific invalid characters, then trim whitespace, then remove any leading "." because they hide the directory on Unix and don't
+        ''' need them on other Os's, lastly trim remaining whitespace. Specifically deal with names ". Net Foundation" which become "Net Foundation"
+        ''' </summary>
+        ''' <param name="InputName"></param>
+        ''' <returns>A valid directory name on hosted OS</returns>
         Private Shared Function MakeValidFileName(InputName As String) As String
             Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
             For Each c As Char In InputName
