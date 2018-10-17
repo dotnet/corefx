@@ -11,7 +11,8 @@ string theString = ...;
 ReadOnlySpan<char> theStringSpan = theString.AsSpan();
 
 Utf8String theUtf8String = ...;
-ReadOnlySpan<byte> theUtf8StringSpan = theUtf8String.AsSpan();
+ReadOnlySpan<Utf8Char> theUtf8StringSpan = theUtf8String.AsSpan(); // as a span of Utf8Char
+ReadOnlySpan<byte> theUtf8StringSpan = theUtf8String.AsBytes(); // as a span of byte
 ```
 
 Importantly, `Utf8String` is __not__ intended as an equal to `String`. Our goal is not to bifurcate the framework by introducing two equivalent string types. Rather, `String` will remain the foremost text exchange type in the framework, is intended for general use, and will enjoy the widest possible API support.
@@ -26,10 +27,9 @@ Like `String`, `Utf8String` is:
 
 There are some restrictions on `Utf8String` due to its early preview state.
 
-* `Utf8String` cannot be used across p/invoke boundaries. (Workaround: get its `byte*` and marshal the data manually).
+* `Utf8String` cannot be used across p/invoke boundaries. (Workaround: use `fixed (byte* pBytes = theUtf8String) { /* ... */ }` and marshal the data manually).
 * Debugging tools such as sos do not know how to show these values properly.
-* `Utf8String` instances cannot be wrapped by `Memory<T>` or `ReadOnlyMemory<T>`. (Workaround: use the temporary `Utf8StringSegment` type.)
-* There is no indexer on `Utf8String`. Instead, you can call the `AsSpan()` extension method and use the indexer on the returned `ReadOnlySpan<byte>`.
+* There is no indexer on `Utf8String`. Instead, call the `AsSpan()` or `AsBytes()` extension method and call the indexer on the returned span.
 * Many APIs are missing or incomplete. Additionally, the names and shapes of APIs are fluid. Some APIs have placeholder names so that we can expose the API behavior early to testers and receive feedback quickly without worrying about polishing the prototype.
 
 # Getting started with Utf8String builds
