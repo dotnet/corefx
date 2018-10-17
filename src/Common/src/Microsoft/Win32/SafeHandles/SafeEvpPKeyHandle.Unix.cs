@@ -65,5 +65,9 @@ namespace System.Security.Cryptography
             safeHandle.SetHandle(handle);
             return safeHandle;
         }
+
+#if !INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
+        public static long OpenSslVersion { get; } = Interop.OpenSsl.OpenSslVersionNumber();
+#endif
     }
 }
