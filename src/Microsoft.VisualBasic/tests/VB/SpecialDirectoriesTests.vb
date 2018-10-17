@@ -10,6 +10,14 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
+        Private Shared Function MakeValidFileName(InputName As String) As String
+            Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
+            For Each c As Char In InputName
+                InputName = InputName.Replace(c.ToString(), "")
+            Next c
+            Return InputName.Trim.TrimStart("."c).TrimStart
+        End Function
+
         Private Shared Function GetAssemblyName(FullName As String) As String
             Dim AssemblyName As String
             'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
@@ -33,20 +41,28 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' </summary>
         ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] </returns>
         Private Shared Function GetCompanyProductVersionPath() As String
-            Dim ApplicationDataPath As String = String.Empty
+            Dim DefaultLocation As String = MakeValidFileName(GetAssemblyName(System.Reflection.Assembly.GetExecutingAssembly.FullName))
             Try
                 Dim assm As System.Reflection.Assembly = System.Reflection.Assembly.GetEntryAssembly()
                 If assm Is Nothing Then
-                    assm = System.Reflection.Assembly.GetExecutingAssembly
-                    Return GetAssemblyName(assm.FullName)
+                    Return DefaultLocation
                 End If
-                Dim at As Type = GetType(System.Reflection.AssemblyCompanyAttribute)
-                Dim r() As Object = assm.GetCustomAttributes(at, False)
+                Dim r() As Object = assm.GetCustomAttributes(GetType(System.Reflection.AssemblyCompanyAttribute), False)
                 Dim ct As System.Reflection.AssemblyCompanyAttribute = (DirectCast(r(0), System.Reflection.AssemblyCompanyAttribute))
-                ApplicationDataPath = IO.Path.Combine(ct.Company, GetAssemblyName(assm.FullName), assm.GetName().Version.ToString)
+                Dim CompanyName As String = MakeValidFileName(ct.Company)
+                Dim ProductName As String = MakeValidFileName(GetAssemblyName(assm.FullName))
+                Dim Version As String = MakeValidFileName(assm.GetName().Version.ToString)
+                If CompanyName.Length > 0 Then
+                    If ProductName.Length = 0 Then
+                        Return DefaultLocation
+                    End If
+                    Return IO.Path.Combine(CompanyName, ProductName, Version)
+                Else
+                    Return DefaultLocation
+                End If
             Catch
             End Try
-            Return ApplicationDataPath
+            Return DefaultLocation
         End Function
 
         <Fact>
@@ -60,7 +76,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).Length = 0 Then
+            If Environment.GetFolderPath(SpecialFolder.ApplicationData).Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
                 Assert.True(SpecialDirectories.CurrentUserApplicationData.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).TrimEnd(Separators)))
@@ -78,7 +94,11 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub MyDocumentsFolderTest()
-            Assert.Equal(Environment.GetFolderPath(SpecialFolder.Personal).TrimEnd(Separators), SpecialDirectories.MyDocuments.TrimEnd(Separators))
+            If Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments).Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
+            Else
+                Assert.Equal(Environment.GetFolderPath(SpecialFolder.Personal).TrimEnd(Separators), SpecialDirectories.MyDocuments.TrimEnd(Separators))
+            End If
         End Sub
 
         <Fact>

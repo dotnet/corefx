@@ -180,20 +180,20 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim assm As System.Reflection.Assembly = System.Reflection.Assembly.GetEntryAssembly()
                 If assm Is Nothing Then
                     assm = System.Reflection.Assembly.GetExecutingAssembly
-                    PathList.Add(GetAssemblyName(assm.FullName))
-                    Return PathList
+                    PathList.Add(MakeValidFileName(GetAssemblyName(assm.FullName)))
+                    Return  PathList
                 End If
                 Dim at As Type = GetType(System.Reflection.AssemblyCompanyAttribute)
                 Dim r() As Object = assm.GetCustomAttributes(at, False)
                 Dim ct As System.Reflection.AssemblyCompanyAttribute = (DirectCast(r(0), System.Reflection.AssemblyCompanyAttribute))
                 If Not String.IsNullOrWhiteSpace(ct.Company) Then
-                    PathList.Add(ct.Company)
+                    PathList.Add(MakeValidFileName(ct.Company))
                 End If
                 If Not String.IsNullOrWhiteSpace(assm.FullName) Then
-                    PathList.Add(assm.FullName)
+                    PathList.Add(MakeValidFileName(assm.FullName))
                 End If
                 If Not String.IsNullOrWhiteSpace(assm.GetName().Version.ToString) Then
-                    PathList.Add(assm.GetName().Version.ToString)
+                    PathList.Add(MakeValidFileName(assm.GetName().Version.ToString))
                 End If
             Catch
             End Try
@@ -212,6 +212,14 @@ Namespace Microsoft.VisualBasic.FileIO
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(DirectoryNameResID))
             End If
             Return FileSystem.NormalizePath(Directory)
+        End Function
+
+        Private Shared Function MakeValidFileName(InputName As String) As String
+            Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
+            For Each c As Char In InputName
+                InputName = InputName.Replace(c.ToString(), "")
+            Next c
+            Return InputName.Trim.TrimStart("."c).TrimStart
         End Function
     End Class
 End Namespace
