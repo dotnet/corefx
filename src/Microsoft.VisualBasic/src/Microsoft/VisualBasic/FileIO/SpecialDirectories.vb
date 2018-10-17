@@ -7,6 +7,7 @@ Option Explicit On
 
 Imports System
 Imports System.Environment
+Imports System.Security
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
@@ -34,7 +35,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
-                Return GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
+                Dim CommonApplicationData As String = GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
+                Return CreateValidFullPath(CommonApplicationData)
             End Get
         End Property
 
@@ -44,21 +46,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <value>A String containing the path to the directory your application can use to store data for the current user.</value>
         ''' <remarks>
-        ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
-        '''
-        ''' We choose to use System.Windows.Forms.Application.* instead of System.Environment.GetFolderPath(*)
-        ''' since the second function will only return the C:\Documents and Settings\[UserName]\Application Data.\
-        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
-        ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
-        ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
-        '''
-        ''' Also, we chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
+        ''' We chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
         ''' will work with Roaming User as well.
         ''' </remarks>
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
-                Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.LocalApplicationData), SR.IO_SpecialDirectory_UserAppData)
+                Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData), SR.IO_SpecialDirectory_UserAppData)
+                Return CreateValidFullPath(ApplicationData)
             End Get
         End Property
 
@@ -145,6 +139,66 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return GetDirectoryPath(IO.Path.GetTempPath(), SR.IO_SpecialDirectory_Temp)
             End Get
         End Property
+
+        Private Shared Function CreateValidFullPath(FullPath As String) As String
+            For Each d As String In GetCompanyProductVersionList()
+                FullPath = IO.Path.Combine(FullPath, d)
+                If IO.Directory.Exists(FullPath) Then
+                    Continue For
+                End If
+                IO.Directory.CreateDirectory(FullPath)
+            Next
+
+            Return FullPath
+        End Function
+
+        Private Shared Function GetAssemblyName(FullName As String) As String
+            Dim AssemblyName As String
+            'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
+            Dim FirstCommaLocation As Integer = FullName.IndexOf(","c)
+            If FirstCommaLocation >= 0 Then
+                AssemblyName = FullName.Substring(0, FirstCommaLocation)
+            Else
+                'The name is not in the format we're expecting so return an empty string
+                AssemblyName = ""
+            End If
+
+            Return AssemblyName
+        End Function
+
+        ''' <summary>
+        ''' If a path does not exist, one is created in the following format
+        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
+        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
+        ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
+        ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
+        ''' </summary>
+        ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] </returns>
+        Private Shared Function GetCompanyProductVersionList() As List(Of String)
+            Dim PathList As New List(Of String)
+            Try
+                Dim assm As System.Reflection.Assembly = System.Reflection.Assembly.GetEntryAssembly()
+                If assm Is Nothing Then
+                    assm = System.Reflection.Assembly.GetExecutingAssembly
+                    PathList.Add(GetAssemblyName(assm.FullName))
+                    Return PathList
+                End If
+                Dim at As Type = GetType(System.Reflection.AssemblyCompanyAttribute)
+                Dim r() As Object = assm.GetCustomAttributes(at, False)
+                Dim ct As System.Reflection.AssemblyCompanyAttribute = (DirectCast(r(0), System.Reflection.AssemblyCompanyAttribute))
+                If Not String.IsNullOrWhiteSpace(ct.Company) Then
+                    PathList.Add(ct.Company)
+                End If
+                If Not String.IsNullOrWhiteSpace(assm.FullName) Then
+                    PathList.Add(assm.FullName)
+                End If
+                If Not String.IsNullOrWhiteSpace(assm.GetName().Version.ToString) Then
+                    PathList.Add(assm.GetName().Version.ToString)
+                End If
+            Catch
+            End Try
+            Return PathList
+        End Function
 
         ''' <summary>
         ''' Return a normalized from a directory path and throw exception if directory path is "".
