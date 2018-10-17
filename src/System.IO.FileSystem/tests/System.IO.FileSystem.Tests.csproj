@@ -38,6 +38,7 @@
     <Compile Include="File\ReadWriteAllLinesAsync.cs" />
     <Compile Include="File\ReadWriteAllBytesAsync.cs" />
     <Compile Include="File\ReadWriteAllTextAsync.cs" />
+    <Compile Include="FileStream\DisposeAsync.netcoreapp.cs" />
     <Compile Include="FileStream\ReadWriteSpan.netcoreapp.cs" />
     <Compile Include="Enumeration\ConstructionTests.netcoreapp.cs" />
     <Compile Include="Enumeration\SpecialDirectoryTests.netcoreapp.cs" />
