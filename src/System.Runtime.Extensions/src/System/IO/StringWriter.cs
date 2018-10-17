@@ -60,6 +60,16 @@ namespace System.IO
             base.Dispose(disposing);
         }
 
+        public override ValueTask DisposeAsync()
+        {
+            if (GetType() != typeof(StringWriter))
+            {
+                return base.DisposeAsync();
+            }
+
+            _isOpen = false;
+            return default;
+        }
 
         public override Encoding Encoding
         {
