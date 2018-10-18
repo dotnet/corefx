@@ -1036,8 +1036,8 @@ nameof(binaryForm));
             IntPtr[] SidArrayPtr = new IntPtr[sourceSids.Count];
             GCHandle[] HandleArray = new GCHandle[sourceSids.Count];
             SafeLsaPolicyHandle LsaHandle = SafeLsaPolicyHandle.InvalidHandle;
-            SafeLsaMemoryHandle ReferencedDomainsPtr = SafeLsaMemoryHandle.InvalidHandle;
-            SafeLsaMemoryHandle NamesPtr = SafeLsaMemoryHandle.InvalidHandle;
+            SafeLsaMemoryHandle ReferencedDomainsPtr = null;
+            SafeLsaMemoryHandle NamesPtr = null;
 
             try
             {
@@ -1072,7 +1072,7 @@ nameof(binaryForm));
 
                 someFailed = false;
                 uint ReturnCode;
-                ReturnCode = Interop.Advapi32.LsaLookupSids(LsaHandle, sourceSids.Count, SidArrayPtr, ref ReferencedDomainsPtr, ref NamesPtr);
+                ReturnCode = Interop.Advapi32.LsaLookupSids(LsaHandle, sourceSids.Count, SidArrayPtr, out ReferencedDomainsPtr, out NamesPtr);
 
                 //
                 // Make a decision regarding whether it makes sense to proceed
@@ -1177,15 +1177,8 @@ nameof(binaryForm));
                     LsaHandle.Dispose();
                 }
 
-                if (!ReferencedDomainsPtr.IsInvalid)
-                {
-                    ReferencedDomainsPtr.Dispose();
-                }
-
-                if (!NamesPtr.IsInvalid)
-                {
-                    NamesPtr.Dispose();
-                }
+                ReferencedDomainsPtr?.Dispose();
+                NamesPtr?.Dispose();
             }
         }
 

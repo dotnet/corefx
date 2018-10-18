@@ -12,20 +12,10 @@ namespace Microsoft.Win32.SafeHandles
     {
         private SafeLsaMemoryHandle() : base(true) { }
 
-        private static SafeLsaMemoryHandle _invalidHandle = new SafeLsaMemoryHandle(IntPtr.Zero);
-
         // 0 is an Invalid Handle
         internal SafeLsaMemoryHandle(IntPtr handle) : base(true)
         {
             SetHandle(handle);
-        }
-
-        internal static SafeLsaMemoryHandle InvalidHandle
-        {
-            get
-            {
-                return _invalidHandle;
-            }
         }
 
         override protected bool ReleaseHandle()

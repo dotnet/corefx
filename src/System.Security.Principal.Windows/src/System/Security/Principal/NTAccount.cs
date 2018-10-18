@@ -238,8 +238,8 @@ namespace System.Security.Principal
             }
 
             SafeLsaPolicyHandle LsaHandle = SafeLsaPolicyHandle.InvalidHandle;
-            SafeLsaMemoryHandle ReferencedDomainsPtr = SafeLsaMemoryHandle.InvalidHandle;
-            SafeLsaMemoryHandle SidsPtr = SafeLsaMemoryHandle.InvalidHandle;
+            SafeLsaMemoryHandle ReferencedDomainsPtr = null;
+            SafeLsaMemoryHandle SidsPtr = null;
 
             try
             {
@@ -287,7 +287,7 @@ namespace System.Security.Principal
                 someFailed = false;
                 uint ReturnCode;
 
-                ReturnCode = Interop.Advapi32.LsaLookupNames2(LsaHandle, 0, sourceAccounts.Count, Names, ref ReferencedDomainsPtr, ref SidsPtr);
+                ReturnCode = Interop.Advapi32.LsaLookupNames2(LsaHandle, 0, sourceAccounts.Count, Names, out ReferencedDomainsPtr, out SidsPtr);
 
                 //
                 // Make a decision regarding whether it makes sense to proceed
@@ -375,15 +375,8 @@ namespace System.Security.Principal
                     LsaHandle.Dispose();
                 }
 
-                if (!ReferencedDomainsPtr.IsInvalid)
-                {
-                    ReferencedDomainsPtr.Dispose();
-                }
-
-                if (!SidsPtr.IsInvalid)
-                {
-                    SidsPtr.Dispose();
-                }
+                ReferencedDomainsPtr?.Dispose();
+                SidsPtr?.Dispose();
             }
         }
         #endregion
