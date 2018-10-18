@@ -27,6 +27,7 @@
     <PackageToInclude Include="BenchmarkDotNet"/>
     <PackageToInclude Include="BenchmarkDotNet.Diagnostics.Windows" />
     <PackageToInclude Include="Microsoft.Diagnostics.Tracing.TraceEvent"/>
+    <PackageToInclude Include="Microsoft.DotNet.PlatformAbstractions"/>
   </ItemGroup>
 
   <!-- Ensure that the native components of TraceEvent are restored into the runtime directory so that TraceEvent can pinvoke into them. -->
