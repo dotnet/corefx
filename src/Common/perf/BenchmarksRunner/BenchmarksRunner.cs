@@ -34,13 +34,6 @@ public class BenchmarksRunner
         }
     }
 
-    private static string GetTestAssembly(string testName)
-    {
-        // Assume test assemblies are colocated/restored next to the BenchmarksRunner.
-        return Path.Combine(
-            Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), testName);
-    }
-
     private static IEnumerable<string> GetTestAssemblies()
     {
         return Directory.EnumerateFiles(".", "*.Performance.Tests.dll");
