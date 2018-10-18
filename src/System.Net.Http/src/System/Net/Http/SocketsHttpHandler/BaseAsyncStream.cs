@@ -12,6 +12,12 @@ namespace System.Net.Http
     {
         public sealed override bool CanSeek => false;
 
+        public sealed override ValueTask DisposeAsync()
+        {
+            Dispose(disposing: true);
+            return default;
+        }
+
         public sealed override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, default), callback, state);
 

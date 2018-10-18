@@ -36,6 +36,8 @@ namespace System.IO
                 _position = (int)value;
             }
         }
+
+        public override ValueTask DisposeAsync() => default;
         
         public override long Seek(long offset, SeekOrigin origin)
         {
