@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.Drawing.Design
+namespace System.Drawing.Design.Tests
 {
     public class ToolboxItemCollectionTests
     {
@@ -18,30 +18,24 @@ namespace System.Drawing.Design
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Contains_StateUnderTest_ExpectedBehavior()
         {
-            // Arrange
             var unitUnderTest = CreateToolboxItemCollection();
             ToolboxItem value = unitUnderTest[0];
 
-            // Act
             var result = unitUnderTest.Contains(
                 value);
 
-            // Assert
             Assert.True(result);
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void IndexOf_StateUnderTest_ExpectedBehavior()
         {
-            // Arrange
             var unitUnderTest = CreateToolboxItemCollection();
             ToolboxItem value = unitUnderTest[0];
 
-            // Act
             var result = unitUnderTest.IndexOf(
                 value);
 
-            // Assert
             Assert.Equal(result, 0);
         }
     }

@@ -20,7 +20,7 @@ namespace System.Drawing.Design
     /// </summary>
     public class ToolboxItem : ISerializable
     {
-        private static TraceSwitch s_toolboxItemPersist = new TraceSwitch("ToolboxPersisting", "ToolboxItem: write data");
+        private static TraceSwitch s_toolboxItemPersist = new TraceSwitch(SR.ToolboxPersisting, SR.WriteData);
 
         private static object s_eventComponentsCreated = new object();
         private static object s_eventComponentsCreating = new object();
@@ -49,7 +49,7 @@ namespace System.Drawing.Design
         /// </summary>
         protected ToolboxItem(SerializationInfo info, StreamingContext context) : this()
         {
-            Deserialize(info, context);
+            throw new PlatformNotSupportedException(SR.SerializationOfThisObjectIsNotSupported);
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace System.Drawing.Design
         {
             get
             {
-                return SR.Format(SR.DotNET_ComponentType);
+                return SR.DotNET_ComponentType;
             }
         }
 
@@ -309,7 +309,7 @@ namespace System.Drawing.Design
         protected void CheckUnlocked()
         {
             if (Locked)
-                throw new InvalidOperationException(SR.Format(SR.ToolboxItemLocked));
+                throw new InvalidOperationException(SR.ToolboxItemLocked);
         }
 
         /// <summary>
@@ -412,66 +412,6 @@ namespace System.Drawing.Design
             return components;
         }
 
-
-        /// <summary>
-        /// Loads the state of this <see cref='System.Drawing.Design.ToolboxItem'/>
-        /// from the stream.
-        /// </summary>
-        protected virtual void Deserialize(SerializationInfo info, StreamingContext context)
-        {
-            // Do this in a couple of passes -- first pass, try to pull
-            // out our dictionary of property names.  We need to do this
-            // for backwards compatibilty because if we throw everything
-            // into the property dictionary we'll duplicate stuff people
-            // have serialized by hand.
-
-            string[] propertyNames = null;
-            foreach (SerializationEntry entry in info)
-            {
-                if (entry.Name.Equals("PropertyNames"))
-                {
-                    propertyNames = entry.Value as string[];
-                    break;
-                }
-            }
-
-            if (propertyNames == null)
-            {
-                // For backwards compat, here are the default property
-                // names we use
-                propertyNames = new string[]
-                {
-                    nameof(AssemblyName),
-                    nameof(Bitmap),
-                    nameof(DisplayName),
-                    nameof(Filter),
-                    nameof(IsTransient),
-                    nameof(TypeName)
-                };
-            }
-
-            foreach (SerializationEntry entry in info)
-            {
-                // Check to see if this name is in our
-                // propertyNames array.
-                foreach (string validName in propertyNames)
-                {
-                    if (validName.Equals(entry.Name))
-                    {
-                        Properties[entry.Name] = entry.Value;
-                        break;
-                    }
-                }
-            }
-
-            // Always do "Locked" last (otherwise we can't do the others!)
-            bool isLocked = info.GetBoolean("Locked");
-            if (isLocked)
-            {
-                Lock();
-            }
-        }
-
         /// <summary>
         ///  Check if two AssemblyName instances are equivalent
         /// </summary>
@@ -568,13 +508,10 @@ namespace System.Drawing.Design
 
             if (typeName == null)
             {
-                throw new ArgumentNullException("typeName");
+                throw new ArgumentNullException(nameof(typeName));
             }
 
-            if (host != null)
-            {
-                ts = (ITypeResolutionService)host.GetService(typeof(ITypeResolutionService));
-            }
+            ts = (ITypeResolutionService)host?.GetService(typeof(ITypeResolutionService));
 
             if (ts != null)
             {
@@ -844,29 +781,6 @@ namespace System.Drawing.Design
             _componentsCreatingEvent?.Invoke(this, args);
         }
 
-        /// <summary>
-        /// Saves the state of this <see cref='System.Drawing.Design.ToolboxItem'/> to
-        ///    the specified serialization info.
-        /// </summary>
-        protected virtual void Serialize(SerializationInfo info, StreamingContext context)
-        {
-            if (s_toolboxItemPersist.TraceVerbose)
-            {
-                Debug.WriteLine("Persisting: " + GetType().Name);
-                Debug.WriteLine("\tDisplay Name: " + DisplayName);
-            }
-
-            info.AddValue(nameof(Locked), Locked);
-            ArrayList propertyNames = new ArrayList(Properties.Count);
-            foreach (DictionaryEntry de in Properties)
-            {
-                propertyNames.Add(de.Key);
-                info.AddValue((string)de.Key, de.Value);
-            }
-            info.AddValue("PropertyNames", (string[])propertyNames.ToArray(typeof(string)));
-        }
-
-
         public override string ToString()
         {
             return DisplayName;
@@ -968,9 +882,7 @@ namespace System.Drawing.Design
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            var UnmanagedCode = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-            UnmanagedCode.Demand();
-            Serialize(info, context);
+            throw new PlatformNotSupportedException(SR.SerializationOfThisObjectIsNotSupported);
         }
     }
 }

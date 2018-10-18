@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<root>  
+<root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -61,6 +61,9 @@
   <data name="DotNET_ComponentType" xml:space="preserve">
     <value>.NET Component</value>
   </data>
+  <data name="SerializationOfThisObjectIsNotSupported" xml:space="preserve">
+    <value>Serialization or Deserialization of ToolboxItem object is not supported in core.</value>
+  </data>
   <data name="ToolboxItemInvalidKey" xml:space="preserve">
     <value>Argument should be a non-empty string.</value>
   </data>
@@ -72,5 +75,11 @@
   </data>
   <data name="ToolboxItemValueNotSerializable" xml:space="preserve">
     <value>Data type {0} is not serializable. Items added to a property dictionary must be serializable.</value>
+  </data>
+  <data name="ToolboxPersisting" xml:space="preserve">
+    <value>ToolboxPersisting</value>
+  </data>
+  <data name="WriteData" xml:space="preserve">
+    <value>ToolboxItem: write data</value>
   </data>
 </root>

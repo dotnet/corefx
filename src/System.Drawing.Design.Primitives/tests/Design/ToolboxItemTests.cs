@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.Drawing.Design
+namespace System.Drawing.Design.Tests
 {
     public class ToolboxItemTests
     {
