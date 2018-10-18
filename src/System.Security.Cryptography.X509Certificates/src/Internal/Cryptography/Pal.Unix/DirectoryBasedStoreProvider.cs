@@ -201,7 +201,8 @@ namespace Internal.Cryptography.Pal
 
         public void Remove(ICertificatePal certPal)
         {
-            if (!Directory.Exists(_storePath)) { return; }
+            if (!Directory.Exists(_storePath))
+                return;
 
             OpenSslX509CertificateReader cert = (OpenSslX509CertificateReader)certPal;
 
