@@ -20,9 +20,13 @@
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows">
       <Version>$(BenchmarkDotNetPackageVersion)</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent">
+      <Version>$(TraceEventPackageVersion)</Version>
+    </PackageReference>
 
     <PackageToInclude Include="BenchmarkDotNet"/>
     <PackageToInclude Include="BenchmarkDotNet.Diagnostics.Windows" />
+    <PackageToInclude Include="Microsoft.Diagnostics.Tracing.TraceEvent"/>
   </ItemGroup>
 
   <!-- Ensure that the native components of TraceEvent are restored into the runtime directory so that TraceEvent can pinvoke into them. -->
