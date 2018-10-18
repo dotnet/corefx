@@ -9,10 +9,10 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>a6b09491f116c0edddb8a247b5370b75492ae926</CoreFxCurrentRef>
-    <CoreClrCurrentRef>add1bd8ca4e8b268f6eaf7748037856e99f71741</CoreClrCurrentRef>
-    <ProjectNTfsCurrentRef>a6b09491f116c0edddb8a247b5370b75492ae926</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>a6b09491f116c0edddb8a247b5370b75492ae926</ProjectNTfsTestILCCurrentRef>
+    <CoreFxCurrentRef>0cef8f82c971d8b7151b8aee97c5fb6aa2daca2b</CoreFxCurrentRef>
+    <CoreClrCurrentRef>0cef8f82c971d8b7151b8aee97c5fb6aa2daca2b</CoreClrCurrentRef>
+    <ProjectNTfsCurrentRef>0cef8f82c971d8b7151b8aee97c5fb6aa2daca2b</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>0cef8f82c971d8b7151b8aee97c5fb6aa2daca2b</ProjectNTfsTestILCCurrentRef>
     <StandardCurrentRef>c520a2569b40fc53cf51e4f6970c3e7411adc173</StandardCurrentRef>
     <BuildToolsCurrentRef>a6b09491f116c0edddb8a247b5370b75492ae926</BuildToolsCurrentRef>
   </PropertyGroup>
@@ -29,12 +29,12 @@
   <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
 
-    <CoreFxExpectedPrerelease>servicing-26911-03</CoreFxExpectedPrerelease>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.1-servicing-26902-02</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-uwp62-26810-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <ProjectNTfsExpectedPrerelease>beta-26924-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-26924-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26924-00</ProjectNTfsTestILCPackageVersion>
+    <CoreFxExpectedPrerelease>servicing-27017-02</CoreFxExpectedPrerelease>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.2-servicing-27017-02</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-uwp62-26926-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <ProjectNTfsExpectedPrerelease>rel-27015-02</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>rel-27015-02</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-rel-27015-02</ProjectNTfsTestILCPackageVersion>
     <MicrosoftNETCoreDotNetHostPackageVersion>2.1.1</MicrosoftNETCoreDotNetHostPackageVersion>
     <MicrosoftNETCoreDotNetHostPolicyPackageVersion>2.1.1</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.1</MicrosoftNETCoreAppPackageVersion>
@@ -84,11 +84,11 @@
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="ProjectNTfs">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/master</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="ProjectNTfsTestILC">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/master</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="BuildTools">
