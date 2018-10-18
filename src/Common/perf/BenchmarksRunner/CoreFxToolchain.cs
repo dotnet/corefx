@@ -44,6 +44,9 @@ internal class CoreFxGenerator : CsProjGenerator
         
     protected override void GenerateBuildScript(BuildPartition buildPartition, ArtifactsPaths artifactsPaths)
         => File.WriteAllText(artifactsPaths.BuildScriptFilePath, $"dotnet {CoreFxBuilder.BuildCommand}"); // we create a script which can be used for troubleshooting
+        
+    protected override string[] GetArtifactsToCleanup(ArtifactsPaths artifactsPaths)
+        => new [] { artifactsPaths.BuildArtifactsDirectoryPath, artifactsPaths.BinariesDirectoryPath }; // we want to remove the auto-generated .csproj and .dll files
 
     protected override void GenerateProject(BuildPartition buildPartition, ArtifactsPaths artifactsPaths, ILogger logger)
     {
