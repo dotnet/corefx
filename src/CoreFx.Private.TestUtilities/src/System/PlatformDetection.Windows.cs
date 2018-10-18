@@ -34,7 +34,7 @@ namespace System
         public static bool IsFedora => false;
         public static bool IsWindowsNanoServer => (IsNotWindowsIoTCore && GetInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => GetInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
-        public static int WindowsVersion => (int)Interop.NtDll.GetWindowsVersion();
+        public static int WindowsVersion => (int)GetWindowsVersion();
         public static bool IsMacOsHighSierraOrHigher { get; } = false;
         public static Version ICUVersion => new Version(0, 0, 0, 0);
         public static bool IsRedHatFamily => false;
@@ -44,13 +44,13 @@ namespace System
         public static bool IsNotRedHatFamily6 => true;
 
         public static bool IsWindows10Version1607OrGreater => 
-            Interop.NtDll.GetWindowsVersion() == 10 && Interop.NtDll.GetWindowsMinorVersion() == 0 && Interop.NtDll.GetWindowsBuildNumber() >= 14393;
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => 
-            Interop.NtDll.GetWindowsVersion() == 10 && Interop.NtDll.GetWindowsMinorVersion() == 0 && Interop.NtDll.GetWindowsBuildNumber() >= 15063;
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
         public static bool IsWindows10Version1709OrGreater => 
-            Interop.NtDll.GetWindowsVersion() == 10 && Interop.NtDll.GetWindowsMinorVersion() == 0 && Interop.NtDll.GetWindowsBuildNumber() >= 16299;
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16299;
         public static bool IsWindows10Version1803OrGreater =>
-            Interop.NtDll.GetWindowsVersion() == 10 && Interop.NtDll.GetWindowsMinorVersion() == 0 && Interop.NtDll.GetWindowsBuildNumber() >= 17134;
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 17134;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP =>  
@@ -93,8 +93,8 @@ namespace System
         }
 
         public static bool IsWindows => true;
-        public static bool IsWindows7 => Interop.NtDll.GetWindowsVersion() == 6 && Interop.NtDll.GetWindowsMinorVersion() == 1;
-        public static bool IsWindows8x => Interop.NtDll.GetWindowsVersion() == 6 && (Interop.NtDll.GetWindowsMinorVersion() == 2 || Interop.NtDll.GetWindowsMinorVersion() == 3);
+        public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
+        public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
 
         public static string LibcRelease => "glibc_not_found";
         public static string LibcVersion => "glibc_not_found";
@@ -227,5 +227,21 @@ namespace System
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern int GetCurrentApplicationUserModelId(ref uint applicationUserModelIdLength, byte[] applicationUserModelId);
+
+        internal static uint GetWindowsVersion()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwMajorVersion;
+        }
+        internal static uint GetWindowsMinorVersion()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwMinorVersion;
+        }
+        internal static uint GetWindowsBuildNumber()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwBuildNumber;
+        }
     }
 }
