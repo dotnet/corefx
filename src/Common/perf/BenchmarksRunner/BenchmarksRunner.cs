@@ -7,9 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Horology;
+using BenchmarkDotNet.Running;
 
 public class BenchmarksRunner
 {
@@ -17,12 +19,9 @@ public class BenchmarksRunner
     {
         try
         {
-            var config = DefaultConfig.Instance
-                .With(Job.Default.With(new CoreFxToolchain("netcoreapp"))); // CoreFxToolchain is responsible for building the benchmarks in CoreFX way
-
             BenchmarkSwitcher
                 .FromAssemblies(GetTestAssemblies().Select(Assembly.LoadFrom).ToArray())
-                .Run(args, config);
+                .Run(args, GetConfig());
 
             return 0;
         }
@@ -38,4 +37,15 @@ public class BenchmarksRunner
     {
         return Directory.EnumerateFiles(".", "*.Performance.Tests.dll");
     }
+    
+    private static IConfig GetConfig()
+        => DefaultConfig.Instance
+            .With(Job.Default
+                .WithWarmupCount(1) // 1 warmup is enough for our purpose
+                .WithIterationTime(TimeInterval.FromMilliseconds(250)) // the default is 0.5s per iteration, which is slighlty too much for us
+                .WithMaxIterationCount(15) 
+                .WithMaxIterationCount(20) // we don't want to run more that 20 iterations
+                .With(new CoreFxToolchain("netcoreapp")) // CoreFxToolchain is responsible for building the benchmarks in CoreFX way
+                .AsDefault()) // tell BDN that this are our default settings
+            .With(MemoryDiagnoser.Default); // MemoryDiagnoser is enabled by default
 }
