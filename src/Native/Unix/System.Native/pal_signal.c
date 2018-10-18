@@ -40,28 +40,14 @@ static struct sigaction* OrigActionFor(int sig)
 
 static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
 {
-    if (sig == SIGCONT || sig == SIGCHLD)
+    // Process signals on background thread.
+    // Write the signal code to a pipe that's read by the thread.
+    uint8_t signalCodeByte = (uint8_t)sig;
+    ssize_t writtenBytes;
+    while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR);
+    if (writtenBytes != 1)
     {
-        // SIGCONT will be sent when we're resumed after suspension, at which point
-        // we need to set the terminal back up.  Similarly, SIGCHLD will be sent after
-        // a child process completes, and that child could have left things in a bad state,
-        // so we similarly need to reinitialize.
-        ReinitializeConsole();
-    }
-
-    // Signal handler for signals where we want our background thread to do the real processing.
-    // It simply writes the signal code to a pipe that's read by the thread.
-    if (sig == SIGQUIT || sig == SIGINT || sig == SIGCHLD)
-    {
-        // Write the signal code to the pipe
-        uint8_t signalCodeByte = (uint8_t)sig;
-        ssize_t writtenBytes;
-        while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR);
-
-        if (writtenBytes != 1)
-        {
-            abort(); // fatal error
-        }
+        abort(); // fatal error
     }
 
     // Delegate to any saved handler we may have
@@ -106,6 +92,15 @@ static void* SignalHandlerLoop(void* arg)
             // end of the pipe and exit.
             close(pipeFd);
             return NULL;
+        }
+
+        if (signalCode == SIGCONT || signalCode == SIGCHLD)
+        {
+            // SIGCONT will be sent when we're resumed after suspension, at which point
+            // we need to set the terminal back up.  Similarly, SIGCHLD will be sent after
+            // a child process completes, and that child could have left things in a bad state,
+            // so we similarly need to reinitialize.
+            ReinitializeConsole();
         }
 
         if (signalCode == SIGQUIT || signalCode == SIGINT)

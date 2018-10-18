@@ -306,8 +306,9 @@ int32_t SystemNative_SetSignalForBreak(int32_t signalForBreak)
 void ReinitializeConsole()
 {
     // pal_signal.cpp calls this on SIGCONT/SIGCHLD.
+    // This runs on the SignalHandlerLoop thread because changing the console mode
+    // may be unsafe on the signal handler.
     // This can happen when SystemNative_InitializeConsole was not called.
-    // This gets called on a signal handler, we may only use async-signal-safe functions.
 
     // If the process was suspended while reading, we need to
     // re-initialize the console for the read, as the attributes
