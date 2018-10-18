@@ -87,12 +87,12 @@ namespace System.Drawing.Design
         /// <summary>
         /// Gets all .NET Framework tools on the toolbox fopr specific category.
         /// </summary>
-        ToolboxItemCollection GetToolboxItems(String category);
+        ToolboxItemCollection GetToolboxItems(string category);
 
         /// <summary>
         /// Gets all .NET Framework tools on the toolbox for specific category.
         /// </summary>
-        ToolboxItemCollection GetToolboxItems(String category, IDesignerHost host);
+        ToolboxItemCollection GetToolboxItems(string category, IDesignerHost host);
 
         /// <summary>
         /// Determines if the given designer host contains a designer that supports the serialized

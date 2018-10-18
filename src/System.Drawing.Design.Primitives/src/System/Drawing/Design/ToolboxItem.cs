@@ -263,11 +263,11 @@ namespace System.Drawing.Design
         {
             get
             {
-                if (this.AssemblyName != null)
+                if (AssemblyName != null)
                 {
-                    return this.AssemblyName.Version.ToString();
+                    return AssemblyName.Version.ToString();
                 }
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -556,7 +556,7 @@ namespace System.Drawing.Design
             }
             else
             {
-                if (!String.IsNullOrEmpty(typeName))
+                if (!string.IsNullOrEmpty(typeName))
                 {
                     if (assemblyName != null)
                     {
