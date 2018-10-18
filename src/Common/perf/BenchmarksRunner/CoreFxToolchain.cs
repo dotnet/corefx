@@ -9,9 +9,9 @@ using BenchmarkDotNet.Toolchains.CsProj;
 using BenchmarkDotNet.Toolchains.DotNetCli;
 using BenchmarkDotNet.Toolchains.Results;
 
-public class CoreFxToolchain : Toolchain
+internal class CoreFxToolchain : Toolchain
 {
-    public CoreFxToolchain(string targetFrameworkMoniker)
+    internal CoreFxToolchain(string targetFrameworkMoniker)
         : base(
             "CoreFX",
             new CoreFxGenerator(targetFrameworkMoniker, GetDotNetCliPath()),
@@ -23,9 +23,9 @@ public class CoreFxToolchain : Toolchain
     private static string GetDotNetCliPath() => Path.Combine(Environment.GetEnvironmentVariable("RUNTIME_PATH"), "dotnet");
 }
 
-public class CoreFxGenerator : CsProjGenerator
+internal class CoreFxGenerator : CsProjGenerator
 {
-    public CoreFxGenerator(string targetFrameworkMoniker, string cliPath)
+    internal CoreFxGenerator(string targetFrameworkMoniker, string cliPath)
         : base(targetFrameworkMoniker, cliPath, packagesPath: null, runtimeFrameworkVersion: null)
     {
     }
@@ -41,6 +41,9 @@ public class CoreFxGenerator : CsProjGenerator
         
     protected override string GetBinariesDirectoryPath(string buildArtifactsDirectoryPath, string configuration)
         => Path.Combine(buildArtifactsDirectoryPath, "bin", configuration); // TFM not used
+        
+    protected override void GenerateBuildScript(BuildPartition buildPartition, ArtifactsPaths artifactsPaths)
+        => File.WriteAllText(artifactsPaths.BuildScriptFilePath, $"dotnet {CoreFxBuilder.BuildCommand}"); // we create a script which can be used for troubleshooting
 
     protected override void GenerateProject(BuildPartition buildPartition, ArtifactsPaths artifactsPaths, ILogger logger)
     {
@@ -83,15 +86,15 @@ $@"<Project Sdk=""Microsoft.NET.Sdk"">
     }
 }
 
-public class CoreFxBuilder : IBuilder
+internal class CoreFxBuilder : IBuilder
 {
+    internal const string BuildCommand = "msbuild /p:ConfigurationGroup=Release";
+    
     public BuildResult Build(GenerateResult generateResult, BuildPartition buildPartition, ILogger logger)
     {
-        const string command = "msbuild /p:ConfigurationGroup=Release";
-
         var buildCommand = new DotNetCliCommand(
             cliPath: null,
-            arguments: command,
+            arguments: BuildCommand,
             generateResult: generateResult,
             logger: logger,
             buildPartition: buildPartition,
