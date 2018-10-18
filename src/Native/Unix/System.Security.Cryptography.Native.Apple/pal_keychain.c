@@ -261,13 +261,7 @@ static bool IsCertInKeychain(CFTypeRef needle, SecKeychainRef haystack)
 
     if (status == errSecItemNotFound)
     {
-        CFDictionarySetValue(query, kSecClass, kSecClassIdentity);
-        status = SecItemCopyMatching(query, &result);
-
-        if (status == errSecItemNotFound)
-        {
-            ret = false;
-        }
+        ret = false;
     }
 
     CFRelease(itemMatch);
