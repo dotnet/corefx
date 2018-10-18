@@ -20,16 +20,16 @@ internal partial class Interop
 
         internal static unsafe string RtlGetVersion()
         {            
-            const string version = "Microsoft Windows";
+            const string Version = "Microsoft Windows";
             if (RtlGetVersionEx(out RTL_OSVERSIONINFOEX osvi) == 0)
             {
                 return osvi.szCSDVersion[0] != '\0' ?
-                    string.Format("{0} {1}.{2}.{3} {4}", version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, new string(&(osvi.szCSDVersion[0]))) :
-                    string.Format("{0} {1}.{2}.{3}", version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
+                    string.Format("{0} {1}.{2}.{3} {4}", Version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, new string(&(osvi.szCSDVersion[0]))) :
+                    string.Format("{0} {1}.{2}.{3}", Version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
             }
             else
             {
-                return version;
+                return Version;
             }
         }
     }
