@@ -13,11 +13,6 @@ namespace System.Diagnostics
     {
         private class TraceProvider : DebugProvider
         {
-            public TraceProvider() { }
-            public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
-            {
-                base.ShowDialog(stackTrace, message, detailMessage, errorSource);
-            }
             public override void Write(string message) { TraceInternal.Write(message); }
         }
 

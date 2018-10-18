@@ -119,6 +119,7 @@ namespace System.Diagnostics
             WriteAssert(stackTrace, message, detailMessage);
             if (AssertUiEnabled)
             {
+                // DefaultTraceDebugProvider.ShowDialog can be customized to show a dialog when AssertUiEnabled is true
                 s_provider.ShowDialog(stackTrace, message, detailMessage, "Assertion Failed");
             }
             else if (Debugger.IsAttached)

@@ -166,25 +166,21 @@ namespace System.Diagnostics.Tests
                 return;
             }
 
-            FieldInfo writeCoreHook = typeof(Debug).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
-
-            // First use our test logger to verify the output
-            var originalWriteCoreHook = writeCoreHook.GetValue(null);
-            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
+            Debug.SetProvider(s_writeCustomizer);
 
             try
             {
-                WriteLogger.s_instance.Clear();
+                s_writeCustomizer.Clear();
                 test();
 #if DEBUG
-                Assert.Equal(expectedOutput, WriteLogger.s_instance.LoggedOutput);
+                Assert.Equal(expectedOutput, s_writeCustomizer.LoggedOutput);
 #else
-                Assert.Equal(string.Empty, WriteLogger.s_instance.LoggedOutput);
+                Assert.Equal(string.Empty, s_writeCustomizer.LoggedOutput); 
 #endif
             }
             finally
             {
-                writeCoreHook.SetValue(null, originalWriteCoreHook);
+                Debug.SetProvider(s_defaultProvider);
             }
 
             // Then also use the actual logger for this platform, just to verify
@@ -200,63 +196,102 @@ namespace System.Diagnostics.Tests
                 return;
             }
 
-            FieldInfo writeCoreHook = typeof(Debug).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
-            FieldInfo showDialogHook = typeof(Debug).GetField("s_ShowDialog", BindingFlags.Static | BindingFlags.NonPublic);
-
-            var originalWriteCoreHook = writeCoreHook.GetValue(null);
-            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
-
-            var originalShowDialogHook = showDialogHook.GetValue(null);
-            showDialogHook.SetValue(null, new Action<string, string, string, string>(WriteLogger.s_instance.ShowDialog));
+            Debug.SetProvider(s_assertWriteCustomizer);
 
             try
             {
-                WriteLogger.s_instance.Clear();
+                s_assertWriteCustomizer.Clear();
                 test();
 #if DEBUG
                 for (int i = 0; i < expectedOutputStrings.Length; i++)
                 {
-                    Assert.Contains(expectedOutputStrings[i], WriteLogger.s_instance.LoggedOutput);
-                    Assert.Contains(expectedOutputStrings[i], WriteLogger.s_instance.AssertUIOutput);
+                    Assert.Contains(expectedOutputStrings[i], s_assertWriteCustomizer.LoggedOutput);
+                    Assert.Contains(expectedOutputStrings[i], s_assertWriteCustomizer.AssertUIOutput);
                 }
 #else
-                Assert.Equal(string.Empty, WriteLogger.s_instance.LoggedOutput);
-                Assert.Equal(string.Empty, WriteLogger.s_instance.AssertUIOutput);
+                Assert.Equal(string.Empty, s_assertWriteCustomizer.LoggedOutput);
+                Assert.Equal(string.Empty, s_assertWriteCustomizer.AssertUIOutput);
 #endif
 
             }
             finally
             {
-                writeCoreHook.SetValue(null, originalWriteCoreHook);
-                showDialogHook.SetValue(null, originalShowDialogHook);
+                Debug.SetProvider(s_defaultProvider);
             }
         }
 
-        private class WriteLogger
+        private static readonly DebugProvider s_defaultProvider = new DebugProvider();
+        private static readonly WriteCustomizer s_writeCustomizer = new WriteCustomizer();
+        private static readonly AssertWriteCustomizer s_assertWriteCustomizer = new AssertWriteCustomizer();
+
+        protected class WriteCustomizer : DebugProvider
         {
-            public static readonly WriteLogger s_instance = new WriteLogger();
+            public string LoggedOutput { get; protected set; }
 
-            private WriteLogger() { }
-
-            public string LoggedOutput { get; private set; }
-
-            public string AssertUIOutput { get; private set; }
-
-            public void Clear()
+            public virtual void Clear()
             {
                 LoggedOutput = string.Empty;
-                AssertUIOutput = string.Empty;
             }
 
-            public void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
+            public override void Write(string message)
             {
-                AssertUIOutput += stackTrace + message + detailMessage + errorSource;
+                OldWrite(message);
             }
 
-            public void WriteCore(string message)
+            private void WriteCore(string message)
             {
                 Assert.NotNull(message);
                 LoggedOutput += message;
+            }
+
+            private static bool s_needIndent;
+            private static string s_indentString;
+            private static string GetIndentString()
+            {
+                int indentCount = Debug.IndentSize * Debug.IndentLevel;
+                if (s_indentString?.Length == indentCount)
+                {
+                    return s_indentString;
+                }
+                return s_indentString = new string(' ', indentCount);
+            }
+            private static readonly object s_lock = new object();
+            private void OldWrite(string message)
+            {
+                lock (s_lock)
+                {
+                    if (message == null)
+                    {
+                        WriteCore(string.Empty);
+                        return;
+                    }
+                    if (s_needIndent)
+                    {
+                        message = GetIndentString() + message;
+                        s_needIndent = false;
+                    }
+                    WriteCore(message);
+                    if (message.EndsWith(Environment.NewLine))
+                    {
+                        s_needIndent = true;
+                    }
+                }
+            }
+        }
+
+        protected class AssertWriteCustomizer : WriteCustomizer
+        {
+            public string AssertUIOutput { get; protected set; }
+
+            public override void Clear()
+            {
+                base.Clear();
+                AssertUIOutput = string.Empty;
+            }
+
+            public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
+            {
+                AssertUIOutput += stackTrace + message + detailMessage + errorSource;
             }
         }
     }
