@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
@@ -64,20 +63,6 @@ namespace System.Text.RegularExpressions.Tests
             RegexCompilationInfo regexCompilationInfo = Instance;
             AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => 
                 regexCompilationInfo.MatchTimeout = matchTimeout);            
-        }
-
-        [Fact]
-        public void Compile_To_Assembly()
-        {
-            var rex = new Regex(".*(/Common.Controls.Wpf;component/Themes/)[^/]*.xaml", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            const string noMatch = "This is a long string which contains no matches at all. Sorry for that";
-            var sw = Stopwatch.StartNew();
-            for(int i=0;i<100*1000;i++)
-            {
-                Assert.False(rex.IsMatch(noMatch));
-            }
-            sw.Stop();
-            Console.WriteLine($"Did take: {sw.Elapsed.TotalSeconds}s");
         }
 
         [Theory]
