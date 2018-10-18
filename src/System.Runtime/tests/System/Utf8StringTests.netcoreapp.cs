@@ -348,6 +348,40 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData("", "1", "2", "")]
+        [InlineData("Hello", "ll", "!!!!", "He!!!!o")]
+        [InlineData("Hello", "l", "", "Heo")]
+        [InlineData("Hello", "l", null, "Heo")]
+        [InlineData("11111", "1", "23", "2323232323")]
+        [InlineData("111111", "111", "23", "2323")]
+        [InlineData("1111111", "111", "23", "23231")]
+        [InlineData("11111111", "111", "23", "232311")]
+        [InlineData("111111111", "111", "23", "232323")]
+        [InlineData("A1B1C1D1E1F", "1", "23", "A23B23C23D23E23F")]
+        [InlineData("abcdefghijkl", "cdef", "12345", "ab12345ghijkl")]
+        [InlineData("Aa1Bbb1Cccc1Ddddd1Eeeeee1Fffffff", "1", "23", "Aa23Bbb23Cccc23Ddddd23Eeeeee23Fffffff")]
+        [InlineData("11111111111111111111111", "1", "11", "1111111111111111111111111111111111111111111111")]
+        [InlineData("11111111111111111111111", "1", "", "")]
+        public static void Replace(string targetAsUtf16, string oldValueAsUtf16, string newValueAsUtf16, string expectedAsUtf16)
+        {
+            Utf8String target = U(targetAsUtf16);
+            Utf8String oldValue = U(oldValueAsUtf16);
+            Utf8String newValue = U(newValueAsUtf16);
+            Utf8String expected = U(expectedAsUtf16);
+
+            Assert.Equal(expected, target.Replace(oldValue, newValue));
+        }
+
+        [Fact]
+        public static void Replace_SearchStringNotFound_ReturnsOriginalStringInstance()
+        {
+            var target = Utf8String.Literal("This is a string.");
+            var searchString = Utf8String.Literal("XYZ");
+
+            Assert.Same(target, target.Replace(searchString, null));
+        }
+
+        [Theory]
         [InlineData("Hello", 0, 5, "Hello")]
         [InlineData("Hello", 0, 3, "Hel")]
         [InlineData("Hello", 2, 3, "llo")]
