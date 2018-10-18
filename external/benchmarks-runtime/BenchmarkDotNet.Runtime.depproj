@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <PropertyGroup>
+    <NugetRuntimeIdentifier>win10-$(ArchGroup)</NugetRuntimeIdentifier>
+    <!-- Use xunit for arm packages because of not providing armel package in win10 -->
+    <NugetRuntimeIdentifier Condition="'$(ArchGroup)' == 'armel'">win10-arm</NugetRuntimeIdentifier>
+    <RidSpecificAssets>true</RidSpecificAssets>
+    <OutputPath>$(RuntimePath)</OutputPath>
+    <Language Condition="'$(Language)' == ''">unknown</Language>
+    <!-- Don't warn if some dependencies were rolled forward -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
+  </PropertyGroup>
+  
+    <!-- Perf testing -->
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'uapaot'">
+    <PackageReference Include="BenchmarkDotNet">
+      <Version>$(BenchmarkDotNetPackageVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows">
+      <Version>$(BenchmarkDotNetPackageVersion)</Version>
+    </PackageReference>
+
+    <PackageToInclude Include="BenchmarkDotNet"/>
+    <PackageToInclude Include="BenchmarkDotNet.Diagnostics.Windows" />
+  </ItemGroup>
+
+  <!-- Ensure that the native components of TraceEvent are restored into the runtime directory so that TraceEvent can pinvoke into them. -->
+  <Target Name="CopyTraceEventNativeFiles" AfterTargets="RestorePackages">
+    <ItemGroup>
+      <TraceEventNativeFiles
+        Include="$(PackagesDir)\Microsoft.Diagnostics.Tracing.TraceEvent\$(TraceEventPackageVersion)\lib\native\**\*.*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(TraceEventNativeFiles)"
+      DestinationFiles="@(TraceEventNativeFiles->'$(TargetDir)%(RecursiveDir)%(FileName)%(Extension)')"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(TraceEventNativeFiles)"
+      DestinationFiles="@(TraceEventNativeFiles->'$(NETCoreAppTestSharedFrameworkPath)%(RecursiveDir)%(FileName)%(Extension)')"
+      UseHardlinksIfPossible="true"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
+
+</Project>
