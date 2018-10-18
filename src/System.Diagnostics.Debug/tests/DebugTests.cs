@@ -166,21 +166,25 @@ namespace System.Diagnostics.Tests
                 return;
             }
 
-            Debug.SetProvider(s_writeCustomizer);
+            FieldInfo writeCoreHook = typeof(DebugProvider).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
+
+            // First use our test logger to verify the output
+            var originalWriteCoreHook = writeCoreHook.GetValue(null);
+            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
 
             try
             {
-                s_writeCustomizer.Clear();
+                WriteLogger.s_instance.Clear();
                 test();
 #if DEBUG
-                Assert.Equal(expectedOutput, s_writeCustomizer.LoggedOutput);
+                Assert.Equal(expectedOutput, WriteLogger.s_instance.LoggedOutput);
 #else
-                Assert.Equal(string.Empty, s_writeCustomizer.LoggedOutput); 
+                Assert.Equal(string.Empty, WriteLogger.s_instance.LoggedOutput);
 #endif
             }
             finally
             {
-                Debug.SetProvider(s_defaultProvider);
+                writeCoreHook.SetValue(null, originalWriteCoreHook);
             }
 
             // Then also use the actual logger for this platform, just to verify
@@ -196,102 +200,61 @@ namespace System.Diagnostics.Tests
                 return;
             }
 
-            Debug.SetProvider(s_assertWriteCustomizer);
+            FieldInfo writeCoreHook = typeof(DebugProvider).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
+            Debug.SetProvider(WriteLogger.s_instance);
+
+            var originalWriteCoreHook = writeCoreHook.GetValue(null);
+            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
 
             try
             {
-                s_assertWriteCustomizer.Clear();
+                WriteLogger.s_instance.Clear();
                 test();
 #if DEBUG
                 for (int i = 0; i < expectedOutputStrings.Length; i++)
                 {
-                    Assert.Contains(expectedOutputStrings[i], s_assertWriteCustomizer.LoggedOutput);
-                    Assert.Contains(expectedOutputStrings[i], s_assertWriteCustomizer.AssertUIOutput);
+                    Assert.Contains(expectedOutputStrings[i], WriteLogger.s_instance.LoggedOutput);
+                    Assert.Contains(expectedOutputStrings[i], WriteLogger.s_instance.AssertUIOutput);
                 }
 #else
-                Assert.Equal(string.Empty, s_assertWriteCustomizer.LoggedOutput);
-                Assert.Equal(string.Empty, s_assertWriteCustomizer.AssertUIOutput);
+                Assert.Equal(string.Empty, WriteLogger.s_instance.LoggedOutput);
+                Assert.Equal(string.Empty, WriteLogger.s_instance.AssertUIOutput);
 #endif
 
             }
             finally
             {
+                writeCoreHook.SetValue(null, originalWriteCoreHook);
                 Debug.SetProvider(s_defaultProvider);
             }
         }
 
         private static readonly DebugProvider s_defaultProvider = new DebugProvider();
-        private static readonly WriteCustomizer s_writeCustomizer = new WriteCustomizer();
-        private static readonly AssertWriteCustomizer s_assertWriteCustomizer = new AssertWriteCustomizer();
-
-        protected class WriteCustomizer : DebugProvider
+        private class WriteLogger : DebugProvider
         {
-            public string LoggedOutput { get; protected set; }
+            public static readonly WriteLogger s_instance = new WriteLogger();
 
-            public virtual void Clear()
+            private WriteLogger() { }
+
+            public string LoggedOutput { get; private set; }
+
+            public string AssertUIOutput { get; private set; }
+
+            public void Clear()
             {
                 LoggedOutput = string.Empty;
-            }
-
-            public override void Write(string message)
-            {
-                OldWrite(message);
-            }
-
-            private void WriteCore(string message)
-            {
-                Assert.NotNull(message);
-                LoggedOutput += message;
-            }
-
-            private static bool s_needIndent;
-            private static string s_indentString;
-            private static string GetIndentString()
-            {
-                int indentCount = Debug.IndentSize * Debug.IndentLevel;
-                if (s_indentString?.Length == indentCount)
-                {
-                    return s_indentString;
-                }
-                return s_indentString = new string(' ', indentCount);
-            }
-            private static readonly object s_lock = new object();
-            private void OldWrite(string message)
-            {
-                lock (s_lock)
-                {
-                    if (message == null)
-                    {
-                        WriteCore(string.Empty);
-                        return;
-                    }
-                    if (s_needIndent)
-                    {
-                        message = GetIndentString() + message;
-                        s_needIndent = false;
-                    }
-                    WriteCore(message);
-                    if (message.EndsWith(Environment.NewLine))
-                    {
-                        s_needIndent = true;
-                    }
-                }
-            }
-        }
-
-        protected class AssertWriteCustomizer : WriteCustomizer
-        {
-            public string AssertUIOutput { get; protected set; }
-
-            public override void Clear()
-            {
-                base.Clear();
                 AssertUIOutput = string.Empty;
             }
 
             public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
             {
                 AssertUIOutput += stackTrace + message + detailMessage + errorSource;
+            }
+
+            public void WriteCore(string message)
+            {
+                Assert.NotNull(message);
+                LoggedOutput += message;
             }
         }
     }
