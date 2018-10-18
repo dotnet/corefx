@@ -34,14 +34,6 @@ namespace Microsoft.Win32.SafeHandles
             SetHandle(handle);
         }
 
-        internal static SafeLsaPolicyHandle InvalidHandle
-        {
-            get
-            {
-                return new SafeLsaPolicyHandle(IntPtr.Zero);
-            }
-        }
-
         override protected bool ReleaseHandle()
         {
             return Interop.Advapi32.LsaClose(handle) == 0;
@@ -56,14 +48,6 @@ namespace Microsoft.Win32.SafeHandles
         internal SafeLsaReturnBufferHandle(IntPtr handle) : base(true)
         {
             SetHandle(handle);
-        }
-
-        internal static SafeLsaReturnBufferHandle InvalidHandle
-        {
-            get
-            {
-                return new SafeLsaReturnBufferHandle(IntPtr.Zero);
-            }
         }
 
         override protected bool ReleaseHandle()

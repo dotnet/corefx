@@ -237,7 +237,7 @@ namespace System.Security.Principal
                 throw new ArgumentException(SR.Arg_EmptyCollection, nameof(sourceAccounts));
             }
 
-            SafeLsaPolicyHandle LsaHandle = SafeLsaPolicyHandle.InvalidHandle;
+            SafeLsaPolicyHandle LsaHandle = null;
             SafeLsaMemoryHandle ReferencedDomainsPtr = null;
             SafeLsaMemoryHandle SidsPtr = null;
 
@@ -370,11 +370,7 @@ namespace System.Security.Principal
             }
             finally
             {
-                if (!LsaHandle.IsInvalid)
-                {
-                    LsaHandle.Dispose();
-                }
-
+                LsaHandle?.Dispose();
                 ReferencedDomainsPtr?.Dispose();
                 SidsPtr?.Dispose();
             }

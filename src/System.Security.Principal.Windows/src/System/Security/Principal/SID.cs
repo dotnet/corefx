@@ -1035,7 +1035,7 @@ nameof(binaryForm));
 
             IntPtr[] SidArrayPtr = new IntPtr[sourceSids.Count];
             GCHandle[] HandleArray = new GCHandle[sourceSids.Count];
-            SafeLsaPolicyHandle LsaHandle = SafeLsaPolicyHandle.InvalidHandle;
+            SafeLsaPolicyHandle LsaHandle = null;
             SafeLsaMemoryHandle ReferencedDomainsPtr = null;
             SafeLsaMemoryHandle NamesPtr = null;
 
@@ -1172,11 +1172,7 @@ nameof(binaryForm));
                     }
                 }
 
-                if (!LsaHandle.IsInvalid)
-                {
-                    LsaHandle.Dispose();
-                }
-
+                LsaHandle?.Dispose();
                 ReferencedDomainsPtr?.Dispose();
                 NamesPtr?.Dispose();
             }
