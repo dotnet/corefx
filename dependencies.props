@@ -13,11 +13,11 @@
     <CoreClrCurrentRef>1f0b9ddcfa577a02574a2eeac3e9ecd2c210a567</CoreClrCurrentRef>
     <CoreSetupCurrentRef>1f0b9ddcfa577a02574a2eeac3e9ecd2c210a567</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>6ad5a5320d83cbb3571ed507e236e5112d87d544</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>6ad5a5320d83cbb3571ed507e236e5112d87d544</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>6ede7dd5103464f0e7062f20428afd0eaaaabf24</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>6ede7dd5103464f0e7062f20428afd0eaaaabf24</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>9004703a1923e5c5582ceb8d79712df777412446</StandardCurrentRef>
-    <BuildToolsCurrentRef>8b89aff77f859bd3a8a93cc106c6f0e5d44356b7</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>40b05a06fd39b8b39bb24c58957e58f0aacefb25</BuildToolsCurrentRef>
     <CoreFxOptimizationDataCurrentRef>6aee9d4f0b918a9458cdf07d22094d4523204a6c</CoreFxOptimizationDataCurrentRef>
   </PropertyGroup>
 
@@ -36,9 +36,9 @@
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-alphautf8string-27003-07</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-alphautf8string-27017-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNetCoreIlasmPackageVersion>3.0.0-alphautf8string-27017-02</MicrosoftNetCoreIlasmPackageVersion>
-    <ProjectNTfsExpectedPrerelease>beta-27011-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-27011-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27011-00</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-27018-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-27018-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27018-00</ProjectNTfsTestILCPackageVersion>
     <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-alphautf8string-27003-05</MicrosoftNETCoreDotNetHostPackageVersion>
     <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-alphautf8string-27003-05</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>3.0.0-alphautf8string-27003-05</MicrosoftNETCoreAppPackageVersion>
