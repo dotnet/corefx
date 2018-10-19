@@ -12,6 +12,9 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub Dummy()
+            'While (Not System.Diagnostics.Debugger.IsAttached)
+            '    System.Threading.Thread.Sleep(1000)
+            'End While
 
             Dim dateTimeNowBefore As Date = Date.Now()
             Dim now As Date = DateAndTime.Now()

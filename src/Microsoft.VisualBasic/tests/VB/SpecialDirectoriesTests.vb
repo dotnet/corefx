@@ -76,19 +76,26 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub AllUsersApplicationDataFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).Length = 0 Then
+            Dim AllUsersApplicationDataRoot As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
+
+            If AllUsersApplicationDataRoot.Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.AllUsersApplicationData)
             Else
-                Assert.Equal(IO.Path.Combine(Environment.GetFolderPath(SpecialFolder.CommonApplicationData).TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                Assert.Equal(IO.Path.Combine(AllUsersApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
             End If
         End Sub
 
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
-            If Environment.GetFolderPath(SpecialFolder.ApplicationData).Length = 0 Then
+            Dim ApplicationDataRoot As String = Environment.GetFolderPath(SpecialFolder.ApplicationData)
+            If ApplicationDataRoot.Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
-                Assert.True(SpecialDirectories.CurrentUserApplicationData.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).TrimEnd(Separators)))
+                If ApplicationDataRoot = "C:\User" Then
+                    Assert.Throws(Of UnauthorizedAccessException)(Function() SpecialDirectories.CurrentUserApplicationData)
+                Else
+                    Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
+                End If
             End If
         End Sub
 

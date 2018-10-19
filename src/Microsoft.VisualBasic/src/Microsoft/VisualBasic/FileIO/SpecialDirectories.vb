@@ -51,7 +51,11 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
                 Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData), SR.IO_SpecialDirectory_UserAppData)
-                Return CreateValidFullPath(ApplicationData)
+                Try
+                    Return CreateValidFullPath(ApplicationData)
+                Catch ex As UnauthorizedAccessException
+                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData))
+                End Try
             End Get
         End Property
 
