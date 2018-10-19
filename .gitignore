@@ -281,3 +281,4 @@ config.ps1
 
 # VS debug support files
 launchSettings.json
+/src/Microsoft.VisualBasic/tests/VB/FileCleanupTestBase.vb

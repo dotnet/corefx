@@ -101,7 +101,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             End If
         End Sub
 
-        <Fact>
+        <PlatformSpecific(TestPlatforms.Windows), ConditionalFact(GetType(PlatformDetection), NameOf(PlatformDetection.IsNotWindowsNanoServer))>
         Public Shared Sub MyDocumentsFolderTest()
             If Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments).Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
@@ -109,6 +109,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.Equal(Environment.GetFolderPath(SpecialFolder.Personal).TrimEnd(Separators), SpecialDirectories.MyDocuments.TrimEnd(Separators))
             End If
         End Sub
+
+        <PlatformSpecific(TestPlatforms.Windows), ConditionalFact(GetType(PlatformDetection), NameOf(PlatformDetection.IsWindowsNanoServer))>
+        Public Shared Sub MyDocumentsFolderTestForNano()
+            Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
+        End Sub
+
 
         <Fact>
         Public Shared Sub MyMusicFolderTest()
