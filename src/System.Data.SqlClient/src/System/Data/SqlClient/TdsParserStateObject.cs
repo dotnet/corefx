@@ -3056,7 +3056,7 @@ namespace System.Data.SqlClient
                             {
                                 byte[] tempArray = new byte[len];
                                 Span<byte> copyTempTo = tempArray.AsSpan();
-                                ReadOnlySpan<byte> copyTempFrom = b.Slice(remainder);
+                                ReadOnlySpan<byte> copyTempFrom = b.Slice(remainder,len);
                                 copyTempFrom.CopyTo(copyTempTo);
                                 array = tempArray;
                                 offset = 0;
