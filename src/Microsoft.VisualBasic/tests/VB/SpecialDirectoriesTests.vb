@@ -92,7 +92,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
                 If ApplicationDataRoot = "C:\User" Then
-                    Assert.Throws(Of UnauthorizedAccessException)(Function() SpecialDirectories.CurrentUserApplicationData)
+                    Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
                 Else
                     Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
                 End If

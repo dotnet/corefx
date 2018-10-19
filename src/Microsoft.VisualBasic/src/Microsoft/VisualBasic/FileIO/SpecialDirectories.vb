@@ -53,7 +53,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData), SR.IO_SpecialDirectory_UserAppData)
                 Try
                     Return CreateValidFullPath(ApplicationData)
-                Catch ex As UnauthorizedAccessException
+                Catch
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData))
                 End Try
             End Get
