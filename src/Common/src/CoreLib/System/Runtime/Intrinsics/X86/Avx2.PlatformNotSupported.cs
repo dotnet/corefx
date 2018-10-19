@@ -326,18 +326,62 @@ namespace System.Runtime.Intrinsics.X86
         /// <summary>
         /// __m128i _mm_broadcastb_epi8 (__m128i a)
         ///   VPBROADCASTB xmm, xmm
+        /// </summary>
+        public static Vector128<byte> BroadcastScalarToVector128(Vector128<byte> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastb_epi8 (__m128i a)
+        ///   VPBROADCASTB xmm, xmm
+        /// </summary>
+        public static Vector128<sbyte> BroadcastScalarToVector128(Vector128<sbyte> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m128i _mm_broadcastw_epi16 (__m128i a)
         ///   VPBROADCASTW xmm, xmm
+        /// </summary>
+        public static Vector128<short> BroadcastScalarToVector128(Vector128<short> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastw_epi16 (__m128i a)
+        ///   VPBROADCASTW xmm, xmm
+        /// </summary>
+        public static Vector128<ushort> BroadcastScalarToVector128(Vector128<ushort> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m128i _mm_broadcastd_epi32 (__m128i a)
         ///   VPBROADCASTD xmm, xmm
+        /// </summary>
+        public static Vector128<int> BroadcastScalarToVector128(Vector128<int> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastd_epi32 (__m128i a)
+        ///   VPBROADCASTD xmm, xmm
+        /// </summary>
+        public static Vector128<uint> BroadcastScalarToVector128(Vector128<uint> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m128i _mm_broadcastq_epi64 (__m128i a)
         ///   VPBROADCASTQ xmm, xmm
+        /// </summary>
+        public static Vector128<long> BroadcastScalarToVector128(Vector128<long> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m128i _mm_broadcastq_epi64 (__m128i a)
+        ///   VPBROADCASTQ xmm, xmm
+        /// </summary>
+        public static Vector128<ulong> BroadcastScalarToVector128(Vector128<ulong> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m128 _mm_broadcastss_ps (__m128 a)
         ///   VBROADCASTSS xmm, xmm
+        /// </summary>
+        public static Vector128<float> BroadcastScalarToVector128(Vector128<float> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m128d _mm_broadcastsd_pd (__m128d a)
         ///   VMOVDDUP xmm, xmm
         /// </summary>
-        public static Vector128<T> BroadcastScalarToVector128<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> BroadcastScalarToVector128(Vector128<double> value) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_broadcastb_epi8 (__m128i a)
@@ -395,64 +439,160 @@ namespace System.Runtime.Intrinsics.X86
         /// <summary>
         /// __m256i _mm256_broadcastb_epi8 (__m128i a)
         ///   VPBROADCASTB ymm, xmm
+        /// </summary>
+        public static Vector256<byte> BroadcastScalarToVector256(Vector128<byte> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastb_epi8 (__m128i a)
+        ///   VPBROADCASTB ymm, xmm
+        /// </summary>
+        public static Vector256<sbyte> BroadcastScalarToVector256(Vector128<sbyte> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256i _mm256_broadcastw_epi16 (__m128i a)
         ///   VPBROADCASTW ymm, xmm
+        /// </summary>
+        public static Vector256<short> BroadcastScalarToVector256(Vector128<short> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastw_epi16 (__m128i a)
+        ///   VPBROADCASTW ymm, xmm
+        /// </summary>
+        public static Vector256<ushort> BroadcastScalarToVector256(Vector128<ushort> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256i _mm256_broadcastd_epi32 (__m128i a)
         ///   VPBROADCASTD ymm, xmm
+        /// </summary>
+        public static Vector256<int> BroadcastScalarToVector256(Vector128<int> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastd_epi32 (__m128i a)
+        ///   VPBROADCASTD ymm, xmm
+        /// </summary>
+        public static Vector256<uint> BroadcastScalarToVector256(Vector128<uint> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256i _mm256_broadcastq_epi64 (__m128i a)
         ///   VPBROADCASTQ ymm, xmm
+        /// </summary>
+        public static Vector256<long> BroadcastScalarToVector256(Vector128<long> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastq_epi64 (__m128i a)
+        ///   VPBROADCASTQ ymm, xmm
+        /// </summary>
+        public static Vector256<ulong> BroadcastScalarToVector256(Vector128<ulong> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256 _mm256_broadcastss_ps (__m128 a)
         ///   VBROADCASTSS ymm, xmm
+        /// </summary>
+        public static Vector256<float> BroadcastScalarToVector256(Vector128<float> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
         /// __m256d _mm256_broadcastsd_pd (__m128d a)
         ///   VBROADCASTSD ymm, xmm
         /// </summary>
-        public static Vector256<T> BroadcastScalarToVector256<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
+        public static Vector256<double> BroadcastScalarToVector256(Vector128<double> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastb_epi8 (__m128i a)
+        ///   VPBROADCASTB ymm, m8
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<byte> BroadcastScalarToVector256(byte* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_broadcastb_epi8 (__m128i a)
+        ///   VPBROADCASTB ymm, m8
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<sbyte> BroadcastScalarToVector256(sbyte* source) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastw_epi16 (__m128i a)
+        ///   VPBROADCASTW ymm, m16
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<short> BroadcastScalarToVector256(short* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_broadcastw_epi16 (__m128i a)
+        ///   VPBROADCASTW ymm, m16
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<ushort> BroadcastScalarToVector256(ushort* source) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastd_epi32 (__m128i a)
+        ///   VPBROADCASTD ymm, m32
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<int> BroadcastScalarToVector256(int* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_broadcastd_epi32 (__m128i a)
+        ///   VPBROADCASTD ymm, m32
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<uint> BroadcastScalarToVector256(uint* source) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        /// __m256i _mm256_broadcastq_epi64 (__m128i a)
+        ///   VPBROADCASTQ ymm, m64
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<long> BroadcastScalarToVector256(long* source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// __m256i _mm256_broadcastq_epi64 (__m128i a)
+        ///   VPBROADCASTQ ymm, m64
+        /// The above native signature does not directly correspond to the managed signature. 
+        /// </summary>
+        public static unsafe Vector256<ulong> BroadcastScalarToVector256(ulong* source) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m8
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<sbyte> BroadcastVector128ToVector256(sbyte* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m8
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<byte> BroadcastVector128ToVector256(byte* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m16
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<short> BroadcastVector128ToVector256(short* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m16
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<ushort> BroadcastVector128ToVector256(ushort* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m32
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<int> BroadcastVector128ToVector256(int* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m32
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<uint> BroadcastVector128ToVector256(uint* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m64
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<long> BroadcastVector128ToVector256(long* address) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_broadcastsi128_si256 (__m128i a)
-        ///   VBROADCASTI128 xmm, m64
+        ///   VBROADCASTI128 ymm, m128
         /// The above native signature does not directly correspond to the managed signature. 
         /// </summary>
         public static unsafe Vector256<ulong> BroadcastVector128ToVector256(ulong* address) { throw new PlatformNotSupportedException(); }
@@ -600,7 +740,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<sbyte> ExtractVector128(Vector256<sbyte> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<sbyte> ExtractVector128(Vector256<sbyte> value, byte index) { throw new PlatformNotSupportedException(); }
         // <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -611,7 +751,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<byte> ExtractVector128(Vector256<byte> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<byte> ExtractVector128(Vector256<byte> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -622,7 +762,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<short> ExtractVector128(Vector256<short> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<short> ExtractVector128(Vector256<short> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -633,7 +773,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<ushort> ExtractVector128(Vector256<ushort> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<ushort> ExtractVector128(Vector256<ushort> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -644,7 +784,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<int> ExtractVector128(Vector256<int> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<int> ExtractVector128(Vector256<int> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -655,7 +795,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<uint> ExtractVector128(Vector256<uint> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<uint> ExtractVector128(Vector256<uint> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -666,7 +806,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<long> ExtractVector128(Vector256<long> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<long> ExtractVector128(Vector256<long> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -677,7 +817,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
-        public static Vector128<ulong> ExtractVector128(Vector256<ulong> value, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector128<ulong> ExtractVector128(Vector256<ulong> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
@@ -1012,7 +1152,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<sbyte> InsertVector128(Vector256<sbyte> value, Vector128<sbyte> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<sbyte> InsertVector128(Vector256<sbyte> value, Vector128<sbyte> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xm128, imm8
@@ -1023,7 +1163,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<byte> InsertVector128(Vector256<byte> value, Vector128<byte> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<byte> InsertVector128(Vector256<byte> value, Vector128<byte> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1034,7 +1174,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<short> InsertVector128(Vector256<short> value, Vector128<short> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<short> InsertVector128(Vector256<short> value, Vector128<short> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1045,7 +1185,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<ushort> InsertVector128(Vector256<ushort> value, Vector128<ushort> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<ushort> InsertVector128(Vector256<ushort> value, Vector128<ushort> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1056,7 +1196,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<int> InsertVector128(Vector256<int> value, Vector128<int> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<int> InsertVector128(Vector256<int> value, Vector128<int> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1067,7 +1207,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<uint> InsertVector128(Vector256<uint> value, Vector128<uint> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<uint> InsertVector128(Vector256<uint> value, Vector128<uint> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1078,7 +1218,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<long> InsertVector128(Vector256<long> value, Vector128<long> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<long> InsertVector128(Vector256<long> value, Vector128<long> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1089,7 +1229,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
-        public static Vector256<ulong> InsertVector128(Vector256<ulong> value, Vector128<ulong> data, byte index) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<ulong> InsertVector128(Vector256<ulong> value, Vector128<ulong> data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, m128, imm8
@@ -1428,42 +1568,42 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<sbyte> Permute2x128(Vector256<sbyte> left, Vector256<sbyte> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<sbyte> Permute2x128(Vector256<sbyte> left, Vector256<sbyte> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<byte> Permute2x128(Vector256<byte> left, Vector256<byte> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<byte> Permute2x128(Vector256<byte> left, Vector256<byte> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<short> Permute2x128(Vector256<short> left, Vector256<short> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<short> Permute2x128(Vector256<short> left, Vector256<short> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<ushort> Permute2x128(Vector256<ushort> left, Vector256<ushort> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<ushort> Permute2x128(Vector256<ushort> left, Vector256<ushort> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<int> Permute2x128(Vector256<int> left, Vector256<int> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<int> Permute2x128(Vector256<int> left, Vector256<int> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<uint> Permute2x128(Vector256<uint> left, Vector256<uint> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<uint> Permute2x128(Vector256<uint> left, Vector256<uint> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<long> Permute2x128(Vector256<long> left, Vector256<long> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<long> Permute2x128(Vector256<long> left, Vector256<long> right, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permute2x128_si256 (__m256i a, __m256i b, const int imm8)
         ///   VPERM2I128 ymm, ymm, ymm/m256, imm8
         /// </summary>
-        public static Vector256<ulong> Permute2x128(Vector256<ulong> left, Vector256<ulong> right, byte control) { throw new PlatformNotSupportedException(); }
+        public new static Vector256<ulong> Permute2x128(Vector256<ulong> left, Vector256<ulong> right, byte control) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m256i _mm256_permute4x64_epi64 (__m256i a, const int imm8)
@@ -1483,17 +1623,17 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// __m256i _mm256_permutevar8x32_epi32 (__m256i a, __m256i idx)
-        ///   VPERMD ymm, ymm/m256, imm8
+        ///   VPERMD ymm, ymm/m256, ymm
         /// </summary>
         public static Vector256<int> PermuteVar8x32(Vector256<int> left, Vector256<int> control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_permutevar8x32_epi32 (__m256i a, __m256i idx)
-        ///   VPERMD ymm, ymm/m256, imm8
+        ///   VPERMD ymm, ymm/m256, ymm
         /// </summary>
         public static Vector256<uint> PermuteVar8x32(Vector256<uint> left, Vector256<uint> control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256 _mm256_permutevar8x32_ps (__m256 a, __m256i idx)
-        ///   VPERMPS ymm, ymm/m256, imm8
+        ///   VPERMPS ymm, ymm/m256, ymm
         /// </summary>
         public static Vector256<float> PermuteVar8x32(Vector256<float> left, Vector256<int> control) { throw new PlatformNotSupportedException(); }
 
@@ -1833,12 +1973,12 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector256<byte> Shuffle(Vector256<byte> value, Vector256<byte> mask) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_shuffle_epi32 (__m256i a, const int imm8)
-        ///   VPSHUFD ymm, ymm, ymm/m256
+        ///   VPSHUFD ymm, ymm/m256, imm8
         /// </summary>
         public static Vector256<int> Shuffle(Vector256<int> value, byte control) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m256i _mm256_shuffle_epi32 (__m256i a, const int imm8)
-        ///   VPSHUFD ymm, ymm, ymm/m256
+        ///   VPSHUFD ymm, ymm/m256, imm8
         /// </summary>
         public static Vector256<uint> Shuffle(Vector256<uint> value, byte control) { throw new PlatformNotSupportedException(); }
 

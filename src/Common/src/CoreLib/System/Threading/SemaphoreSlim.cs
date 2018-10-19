@@ -75,19 +75,16 @@ namespace System.Threading
         private const int NO_MAXIMUM = int.MaxValue;
 
         // Task in a linked list of asynchronous waiters
-        private sealed class TaskNode : Task<bool>, IThreadPoolWorkItem
+        private sealed class TaskNode : Task<bool>
         {
             internal TaskNode Prev, Next;
             internal TaskNode() : base() { }
 
-            void IThreadPoolWorkItem.ExecuteWorkItem()
+            internal override void ExecuteFromThreadPool()
             {
                 bool setSuccessfully = TrySetResult(true);
                 Debug.Assert(setSuccessfully, "Should have been able to complete task");
             }
-#if CORECLR
-            void IThreadPoolWorkItem.MarkAborted(ThreadAbortException tae) { /* nop */ } 
-#endif
         }
         #endregion
 
@@ -333,7 +330,7 @@ namespace System.Threading
             //Register for cancellation outside of the main lock.
             //NOTE: Register/unregister inside the lock can deadlock as different lock acquisition orders could
             //      occur for (1)this.m_lockObj and (2)cts.internalLock
-            CancellationTokenRegistration cancellationTokenRegistration = cancellationToken.InternalRegisterWithoutEC(s_cancellationTokenCanceledEventHandler, this);
+            CancellationTokenRegistration cancellationTokenRegistration = cancellationToken.UnsafeRegister(s_cancellationTokenCanceledEventHandler, this);
             try
             {
                 // Perf: first spin wait for the count to be positive.
@@ -851,7 +848,7 @@ namespace System.Threading
                         // Get the next async waiter to release and queue it to be completed
                         var waiterTask = m_asyncHead;
                         RemoveAsyncWaiter(waiterTask); // ensures waiterTask.Next/Prev are null
-                        QueueWaiterTask(waiterTask);
+                        ThreadPool.UnsafeQueueUserWorkItemInternal(waiterTask, preferLocal: true);
                     }
                 }
                 m_currentCount = currentCount;
@@ -865,15 +862,6 @@ namespace System.Threading
 
             // And return the count
             return returnCount;
-        }
-
-        /// <summary>
-        /// Queues a waiter task to the ThreadPool. We use this small helper method so that
-        /// the larger Release(count) method does not need to be SecuritySafeCritical.
-        /// </summary>
-        private static void QueueWaiterTask(TaskNode waiterTask)
-        {
-            ThreadPool.UnsafeQueueCustomWorkItem(waiterTask, forceGlobal: false);
         }
 
         /// <summary>
