@@ -404,6 +404,9 @@
   <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
   <Import Project="$(MSBuildThisFileDirectory)eng/ReferenceAssemblies.props" />
 
+  <!-- Set the documentation output file globally. -->
+  <DocumentationFile Condition="'$(IsTestProject)' != 'true' AND '$(IsReferenceAssembly)' !='true'">$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
+
   <!-- Use Roslyn Compilers to build -->
   <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false' and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />
   <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'=='true' and Exists('$(RoslynPropsFile)') and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />
