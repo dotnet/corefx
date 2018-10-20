@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
@@ -406,6 +406,10 @@
 
   <!-- Set the documentation output file globally. -->
   <DocumentationFile Condition="'$(IsTestProject)' != 'true' AND '$(IsReferenceAssembly)' !='true'">$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
+  <!--
+    We ignore all documentation related warnings.
+  -->
+  <NoWarn Condition="'$(DocumentationFile)' != ''">1591</NoWarn>
 
   <!-- Use Roslyn Compilers to build -->
   <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false' and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />
