@@ -289,7 +289,7 @@ namespace System.Net.Sockets
             }
         }
 
-        internal SafeSocketHandle SafeHandle
+        public SafeSocketHandle SafeHandle
         {
             get
             {
