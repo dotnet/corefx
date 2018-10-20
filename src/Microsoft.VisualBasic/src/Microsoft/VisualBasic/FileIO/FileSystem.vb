@@ -1658,6 +1658,20 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         ''' <summary>
+        ''' Convert UIOption to UIOptionInternal to use internally.
+        ''' </summary>
+        Private Shared Function ToUIOptionInternal(ByVal showUI As UIOption) As UIOptionInternal
+            Select Case showUI
+                Case UIOption.AllDialogs
+                    Return UIOptionInternal.AllDialogs
+                Case UIOption.OnlyErrorDialogs
+                    Return UIOptionInternal.OnlyErrorDialogs
+                Case Else
+                    Throw New InvalidEnumArgumentException("showUI", showUI, GetType(UIOption))
+            End Select
+        End Function
+
+        ''' <summary>
         ''' Verify that the given argument value is a valid DeleteDirectoryOption. If not, throw InvalidEnumArgumentException.
         ''' </summary>
         ''' <param name="argName">The argument name.</param>

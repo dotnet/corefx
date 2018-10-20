@@ -294,20 +294,6 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         ''' <summary>
-        ''' Convert UIOption to UIOptionInternal to use internally.
-        ''' </summary>
-        Private Shared Function ToUIOptionInternal(ByVal showUI As UIOption) As UIOptionInternal
-            Select Case showUI
-                Case FileIO.UIOption.AllDialogs
-                    Return UIOptionInternal.AllDialogs
-                Case FileIO.UIOption.OnlyErrorDialogs
-                    Return UIOptionInternal.OnlyErrorDialogs
-                Case Else
-                    Throw New System.ComponentModel.InvalidEnumArgumentException("showUI", showUI, GetType(UIOption))
-            End Select
-        End Function
-
-        ''' <summary>
         ''' Contains information that the SHFileOperation function uses to perform file operations on 32-bit platforms.
         ''' </summary>
         ''' <remarks>
