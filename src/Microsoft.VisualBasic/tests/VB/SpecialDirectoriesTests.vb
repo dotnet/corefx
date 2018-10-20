@@ -42,13 +42,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Function
 
         ''' <summary>
-        ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
-        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
+        ''' This function separates applications by CompanyName, ProductName, ProductVersion.
         ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
         ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
+        ''' This function must be kept in sync with the one in coreFx\src\Microsoft.VisualBasic\src\Microsoft\VisualBasic\FileIO\SpecialDirectories.vb
         ''' </summary>
-        ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] </returns>
+        ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] or name of the assembly</returns>
         Private Shared Function GetCompanyProductVersionPath() As String
             Dim DefaultLocation As String = MakeValidFileName(GetAssemblyName(System.Reflection.Assembly.GetExecutingAssembly.FullName))
             Try

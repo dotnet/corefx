@@ -22,55 +22,6 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         ''' <summary>
-        ''' Returns the directory that serves as a common repository for data files
-        ''' from your application used by all users.
-        ''' </summary>
-        ''' <value>A String containing the path to the directory your application can use to store data for all users.</value>
-        ''' <remarks>
-        ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
-        '''
-        ''' See above for reason why we don't use System.Environment.GetFolderPath(*).
-        ''' </remarks>
-        Public Shared ReadOnly Property AllUsersApplicationData() As String
-            Get
-                Dim CommonApplicationData As String = GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
-                Return CreateValidFullPath(CommonApplicationData)
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' Returns the directory that serves as a common repository for data files
-        ''' from your application used only by the current user.
-        ''' </summary>
-        ''' <value>A String containing the path to the directory your application can use to store data for the current user.</value>
-        ''' <remarks>
-        ''' We chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
-        ''' will work with Roaming User as well.
-        ''' </remarks>
-        Public Shared ReadOnly Property CurrentUserApplicationData() As String
-            Get
-                Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData), SR.IO_SpecialDirectory_UserAppData)
-                Try
-                    Return CreateValidFullPath(ApplicationData)
-                Catch
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData))
-                End Try
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' Return the current user's Desktop directory.
-        ''' </summary>
-        ''' <value>A String containing the path to the current user's Desktop directory.</value>
-        ''' <remarks>This directory is C:\Document and Settings\[UserName]\Desktop.</remarks>
-        Public Shared ReadOnly Property Desktop() As String
-            Get
-                Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.Desktop), SR.IO_SpecialDirectory_Desktop)
-            End Get
-        End Property
-
-        ''' <summary>
         ''' Return the directory that serves as a common repository for user's personal documents.
         ''' </summary>
         ''' <value>A String containing the path to the user's personal documents.</value>
@@ -81,6 +32,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.Personal), SR.IO_SpecialDirectory_MyDocuments)
             End Get
         End Property
+
 
         ''' <summary>
         ''' Return the "My Music" directory.
@@ -107,13 +59,13 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         ''' <summary>
-        ''' Return the program files directory.
+        ''' Return the current user's Desktop directory.
         ''' </summary>
-        ''' <value>A String containing the path to the default program directories.</value>
-        ''' <remarks>This directory is C:\Program Files.</remarks>
-        Public Shared ReadOnly Property ProgramFiles() As String
+        ''' <value>A String containing the path to the current user's Desktop directory.</value>
+        ''' <remarks>This directory is C:\Document and Settings\[UserName]\Desktop.</remarks>
+        Public Shared ReadOnly Property Desktop() As String
             Get
-                Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ProgramFiles), SR.IO_SpecialDirectory_ProgramFiles)
+                Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.Desktop), SR.IO_SpecialDirectory_Desktop)
             End Get
         End Property
 
@@ -125,6 +77,17 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Shared ReadOnly Property Programs() As String
             Get
                 Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.Programs), SR.IO_SpecialDirectory_Programs)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Return the program files directory.
+        ''' </summary>
+        ''' <value>A String containing the path to the default program directories.</value>
+        ''' <remarks>This directory is C:\Program Files.</remarks>
+        Public Shared ReadOnly Property ProgramFiles() As String
+            Get
+                Return GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ProgramFiles), SR.IO_SpecialDirectory_ProgramFiles)
             End Get
         End Property
 
@@ -143,65 +106,42 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-        Private Shared Function CreateValidFullPath(FullPath As String) As String
-            For Each d As String In GetCompanyProductVersionList()
-                FullPath = IO.Path.Combine(FullPath, d)
-                If IO.Directory.Exists(FullPath) Then
-                    Continue For
-                End If
-                IO.Directory.CreateDirectory(FullPath)
-            Next
-
-            Return FullPath
-        End Function
-
-        Private Shared Function GetAssemblyName(FullName As String) As String
-            Dim AssemblyName As String
-            'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
-            Dim FirstCommaLocation As Integer = FullName.IndexOf(","c)
-            If FirstCommaLocation >= 0 Then
-                AssemblyName = FullName.Substring(0, FirstCommaLocation)
-            Else
-                'The name is not in the format we're expecting so return an empty string
-                AssemblyName = ""
-            End If
-
-            Return AssemblyName
-        End Function
+        ''' <summary>
+        ''' Returns the directory that serves as a common repository for data files
+        ''' from your application used only by the current user.
+        ''' </summary>
+        ''' <value>A String containing the path to the directory your application can use to store data for the current user.</value>
+        ''' <remarks>
+        ''' We chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
+        ''' will work with Roaming User as well.
+        ''' </remarks>
+        Public Shared ReadOnly Property CurrentUserApplicationData() As String
+            Get
+                Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData), SR.IO_SpecialDirectory_UserAppData)
+                Try
+                    Return CreateValidFullPath(ApplicationData)
+                Catch
+                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData))
+                End Try
+            End Get
+        End Property
 
         ''' <summary>
-        ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
-        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
-        ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
-        ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
+        ''' Returns the directory that serves as a common repository for data files
+        ''' from your application used by all users.
         ''' </summary>
-        ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] </returns>
-        Private Shared Function GetCompanyProductVersionList() As List(Of String)
-            Dim PathList As New List(Of String)
-            Try
-                Dim assm As System.Reflection.Assembly = System.Reflection.Assembly.GetEntryAssembly()
-                If assm Is Nothing Then
-                    assm = System.Reflection.Assembly.GetExecutingAssembly
-                    PathList.Add(MakeValidFileName(GetAssemblyName(assm.FullName)))
-                    Return  PathList
-                End If
-                Dim at As Type = GetType(System.Reflection.AssemblyCompanyAttribute)
-                Dim r() As Object = assm.GetCustomAttributes(at, False)
-                Dim ct As System.Reflection.AssemblyCompanyAttribute = (DirectCast(r(0), System.Reflection.AssemblyCompanyAttribute))
-                If Not String.IsNullOrWhiteSpace(ct.Company) Then
-                    PathList.Add(MakeValidFileName(ct.Company))
-                End If
-                If Not String.IsNullOrWhiteSpace(assm.FullName) Then
-                    PathList.Add(MakeValidFileName(assm.FullName))
-                End If
-                If Not String.IsNullOrWhiteSpace(assm.GetName().Version.ToString) Then
-                    PathList.Add(MakeValidFileName(assm.GetName().Version.ToString))
-                End If
-            Catch
-            End Try
-            Return PathList
-        End Function
+        ''' <value>A String containing the path to the directory your application can use to store data for all users.</value>
+        ''' <remarks>
+        ''' If a path does not exist, one is created in the following format
+        ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
+        '''
+        ''' See above for reason why we don't use System.Environment.GetFolderPath(*).
+        ''' </remarks>
+        Public Shared ReadOnly Property AllUsersApplicationData() As String
+            Get
+                Return CreateValidFullPath(GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData))
+            End Get
+        End Property
 
         ''' <summary>
         ''' Return a normalized from a directory path and throw exception if directory path is "".
@@ -217,6 +157,72 @@ Namespace Microsoft.VisualBasic.FileIO
             Return FileSystem.NormalizePath(Directory)
         End Function
 
+        Private Shared Function CreateValidFullPath(FullPath As String) As String
+            For Each d As String In GetCompanyProductVersionList()
+                FullPath = IO.Path.Combine(FullPath, d)
+                If IO.Directory.Exists(FullPath) Then
+                    Continue For
+                End If
+                IO.Directory.CreateDirectory(FullPath)
+            Next
+
+            Return FullPath
+        End Function
+
+        ''' <summary>
+        ''' This takes a full assembly name which includes version and other information and extracts just the name upto the comma
+        ''' </summary>
+        ''' <param name="AssemblyFullName"></param>
+        ''' <returns></returns>
+        Private Shared Function GetTitleFromAssemblyFullName(AssemblyFullName As String) As String
+            'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
+            Dim FirstCommaLocation As Integer = AssemblyFullName.IndexOf(","c)
+            If FirstCommaLocation >= 0 Then
+                Return AssemblyFullName.Substring(0, FirstCommaLocation)
+            End If
+            'The name is not in the format we're expecting so return an empty string
+            Return ""
+        End Function
+
+        ''' <summary>
+        ''' If a path does not exist, one is created in the following format
+        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
+        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
+        ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
+        ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
+        ''' </summary>
+        ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] </returns>
+        Private Shared Function GetCompanyProductVersionList() As List(Of String)
+            Dim PathList As New List(Of String)
+            Try
+                Dim assm As Reflection.Assembly = Reflection.Assembly.GetEntryAssembly()
+                If assm Is Nothing Then
+                    assm = Reflection.Assembly.GetExecutingAssembly
+                    PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(assm.FullName)))
+                    Return PathList
+                End If
+                Dim at As Type = GetType(Reflection.AssemblyCompanyAttribute)
+                Dim r() As Object = assm.GetCustomAttributes(at, False)
+                Dim ct As Reflection.AssemblyCompanyAttribute = (DirectCast(r(0), Reflection.AssemblyCompanyAttribute))
+                If Not String.IsNullOrWhiteSpace(ct.Company) Then
+                    PathList.Add(MakeValidFileName(ct.Company))
+                End If
+                If Not String.IsNullOrWhiteSpace(assm.FullName) Then
+                    PathList.Add(MakeValidFileName(assm.FullName))
+                End If
+                If Not String.IsNullOrWhiteSpace(assm.GetName().Version.ToString) Then
+                    PathList.Add(MakeValidFileName(assm.GetName().Version.ToString))
+                End If
+            Catch
+            End Try
+            Return PathList
+        End Function
+
+        ''' <summary>
+        ''' Remove invalid characters, leading "." and leading and training spaces.
+        ''' </summary>
+        ''' <param name="InputName"></param>
+        ''' <returns></returns>
         Private Shared Function MakeValidFileName(InputName As String) As String
             Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
             For Each c As Char In InputName

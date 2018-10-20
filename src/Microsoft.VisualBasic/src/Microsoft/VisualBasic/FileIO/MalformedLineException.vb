@@ -18,26 +18,6 @@ Namespace Microsoft.VisualBasic.FileIO
     Public Class MalformedLineException
         Inherits Exception
 
-        ' Name of property used for serialization
-        Private Const LINE_NUMBER_PROPERTY As String = "LineNumber"
-
-        ''' <summary>
-        '''  Constructor used for serialization
-        ''' </summary>
-        ''' <param name="info"></param>
-        ''' <param name="context"></param>
-        ''' <remarks></remarks>
-        <EditorBrowsable(EditorBrowsableState.Advanced)>
-        Protected Sub New(ByVal info As System.Runtime.Serialization.SerializationInfo, ByVal context As System.Runtime.Serialization.StreamingContext)
-            MyBase.New(info, context)
-
-            If info IsNot Nothing Then ' Fix FxCop violation ValidateArgumentsOfPublicMethods.
-                LineNumber = info.GetInt32(LINE_NUMBER_PROPERTY)
-            Else
-                LineNumber = -1
-            End If
-        End Sub
-
         ''' <summary>
         '''  Creates a new exception with no properties set
         ''' </summary>
@@ -84,6 +64,23 @@ Namespace Microsoft.VisualBasic.FileIO
         End Sub
 
         ''' <summary>
+        '''  Constructor used for serialization
+        ''' </summary>
+        ''' <param name="info"></param>
+        ''' <param name="context"></param>
+        ''' <remarks></remarks>
+        <EditorBrowsable(EditorBrowsableState.Advanced)>
+        Protected Sub New(ByVal info As System.Runtime.Serialization.SerializationInfo, ByVal context As System.Runtime.Serialization.StreamingContext)
+            MyBase.New(info, context)
+
+            If info IsNot Nothing Then ' Fix FxCop violation ValidateArgumentsOfPublicMethods.
+                LineNumber = info.GetInt32(LINE_NUMBER_PROPERTY)
+            Else
+                LineNumber = -1
+            End If
+        End Sub
+
+        ''' <summary>
         '''  The number of the offending line
         ''' </summary>
         ''' <value>The line number</value>
@@ -111,5 +108,9 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Overrides Function ToString() As String
             Return MyBase.ToString() & " " & GetResourceString(SR.TextFieldParser_MalformedExtraData, LineNumber.ToString(CultureInfo.InvariantCulture))
         End Function
+
+        ' Name of property used for serialization
+        Private Const LINE_NUMBER_PROPERTY As String = "LineNumber"
+
     End Class
 End Namespace
