@@ -86,11 +86,11 @@ this, there are two options you can take.
 This is the default case for applications - running against an installed .NET Core
 runtime.
 
-0. You still need to install the prerequisite .NET Core SDK from above.
-1. Also, install the specific .NET Core runtime you require:
+1. You still need to install the prerequisite .NET Core SDK from above.
+2. Also, install the specific .NET Core runtime you require:
     - https://github.com/dotnet/core-setup#daily-builds
     - Remember the version number you picked, you'll need it below
-2. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App
+3. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App
 
 ```XML
   <PropertyGroup>
@@ -109,8 +109,8 @@ $ dotnet run
 
 In this case, the .NET Core runtime will be published along with your application.
 
-0. You still need to install the prerequisite .NET Core SDK from above.
-1. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App *and*
+1. You still need to install the prerequisite .NET Core SDK from above.
+2. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App *and*
 make it self-contained
 
 ```XML
