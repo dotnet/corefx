@@ -121,7 +121,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Try
                     Return CreateValidFullPath(ApplicationData)
                 Catch
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData))
+                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $"ApplicationData = '{ApplicationData}'")
                 End Try
             End Get
         End Property
