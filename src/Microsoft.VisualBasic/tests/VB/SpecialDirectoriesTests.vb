@@ -87,14 +87,15 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
             Dim ApplicationDataRoot As String = Environment.GetFolderPath(SpecialFolder.ApplicationData)
-            If ApplicationDataRoot.Length = 0 Then
+            If ApplicationDataRoot.Length = 0 OrElse PlatformDetection.IsWindowsNanoServer Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
-                ' Windows.10.Amd64.ClientRS4.Open-x64-Debug throws exeption and for now we are ignoring since I don't know how to detect just this one configuration
-                Try
+                ' Windows.10.Amd64.ClientRS4.Open-x64-Debug throws exeption and for now we are ignoring
+                If PlatformDetection.IsWindowsNanoServer Then
+                    Assert.Throws(Of IO.DirectoryNotFoundException)(Sub() Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData))
+                Else
                     Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
-                Catch ex As IO.DirectoryNotFoundException
-                End Try
+                End If
             End If
         End Sub
 
