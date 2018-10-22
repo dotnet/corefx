@@ -158,7 +158,6 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="DirectoryNameResID">The resource ID of the special directory's localized name.</param>
         ''' <returns>A String containing the path to the special directory if success.</returns>
         Private Shared Function GetDirectoryPath(ByVal Directory As String, ByVal DirectoryNameResID As String) As String
-            ' Only need to worry about Directory being "" since it comes from Framework.
             If Directory.Trim.TrimEnd(Separators).TrimEnd.Length = 0 Then
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(DirectoryNameResID))
             End If
