@@ -88,10 +88,15 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub CurrentUserApplicationDataFolderTest()
             Dim Env_ApplicationData As String = Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.Create).Trim.TrimEnd(Separators).Trim
 
-            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData.Length = 0 Then
+            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData.Length = 0 OrElse Not IO.Directory.Exists(Env_ApplicationData) Then
                 Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
-                Assert.Equal(expected:=IO.Path.Combine(Env_ApplicationData, GetCompanyProductVersionPath).TrimEnd(Separators), actual:=SpecialDirectories.CurrentUserApplicationData)
+                If GetCompanyProductVersionPath.Length = 0 Then
+                    Dim CurrentUserApplicationData As String = SpecialDirectories.CurrentUserApplicationData
+                    Assert.Equal(expected:=Env_ApplicationData, actual:=CurrentUserApplicationData)
+                Else
+                    Assert.Equal(expected:=IO.Path.Combine(Env_ApplicationData, GetCompanyProductVersionPath), actual:=SpecialDirectories.CurrentUserApplicationData)
+                End If
             End If
         End Sub
 
