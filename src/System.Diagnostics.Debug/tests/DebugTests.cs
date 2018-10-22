@@ -342,7 +342,7 @@ namespace System.Diagnostics.Tests
             }
 
             FieldInfo writeCoreHook = typeof(DebugProvider).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
-            Debug.SetProvider(WriteLogger.s_instance);
+            s_defaultProvider = Debug.SetProvider(WriteLogger.s_instance);
 
             var originalWriteCoreHook = writeCoreHook.GetValue(null);
             writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
@@ -370,7 +370,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        private static readonly DebugProvider s_defaultProvider = new DebugProvider();
+        private static DebugProvider s_defaultProvider;
         private class WriteLogger : DebugProvider
         {
             public static readonly WriteLogger s_instance = new WriteLogger();
