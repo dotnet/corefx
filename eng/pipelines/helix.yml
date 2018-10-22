@@ -1,0 +1,33 @@
+parameters:
+  targetOS: ''
+  archGroup: ''
+  configuration: ''
+  helixQueues: ''
+  helixToken: $(BotAccount-dotnet-github-anon-kaonashi-bot-helix-token)
+  waitForCompletion: true
+  msbuildScript: ''
+  framework: ''
+
+steps:
+  # TODO: delete calling this target and hook it up to vertical once: https://github.com/dotnet/corefx/pull/33423 is merged
+  - script: ${{ parameters.msbuildScript }}
+            src/upload-tests.proj
+            /t:CompressRuntimeDir
+            /p:TargetGroup=${{ parameters.framework }}
+            /p:ArchGroup=${{ parameters.archGroup }}
+            /p:ConfigurationGroup=${{ parameters.configuration }}
+            /p:TargetOS=${{ parameters.targetOS }}
+    displayName: Compress Runtime Directory
+  - script: ${{ parameters.msbuildScript }}
+            eng/sendtohelix.proj
+            /t:test
+            /p:ArchGroup=${{ parameters.archGroup }}
+            /p:ConfigurationGroup=${{ parameters.configuration }}
+            /p:OSGroup=${{ parameters.targetOS }}
+            /p:TargetGroup=${{ parameters.framework }}
+            /p:HelixTargetQueues=${{ parameters.helixQueues }}
+            /p:HelixBuild=$(Build.BuildNumber)
+            /p:HelixAccessToken=${{ parameters.helixToken }}
+    displayName: Send to Helix
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken) # We need to set this env var to publish helix results to Azure Dev Ops

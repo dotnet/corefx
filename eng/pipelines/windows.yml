@@ -1,0 +1,94 @@
+# Windows legs
+jobs:
+
+# Legs with Helix testing
+- template: corefx-base.yml
+  parameters:
+    name: WinWithHelix
+    displayName: Windows
+    strategy:
+      matrix:
+        # netcoreapp windows x64 debug
+        x64_Debug:
+          _configuration: Debug
+          _architecture: x64
+          framework: netcoreapp
+          helixQueues: $(netcoreappWindowsQueues) #TODO: enable nano queue once issues are fixed +$(nanoQueues)
+
+        # netcoreapp windows x86 release
+        x86_Release:
+          _configuration: Release
+          _architecture: x86
+          framework: netcoreapp
+          helixQueues: $(netcoreappWindowsQueues)
+
+        NETFX_x86_Release:
+          _configuration: Release
+          _architecture: x86
+          framework: netfx
+          helixQueues: $(uapNetfxQueues)
+
+        UWP_CoreCLR_x64_Debug:
+          _configuration: Debug
+          _architecture: x64
+          framework: uap
+          helixQueues: $(uapNetfxQueues)
+
+    pool:
+      name: Hosted VS2017
+    targetOS: Windows_NT
+
+# # Legs without Helix testing
+- template: /eng/pipelines/corefx-base.yml
+  parameters:
+    name: WinNoHelix
+    displayName: Windows
+    strategy:
+      matrix:
+        UWP_NETNative_x86_Release:
+          _configuration: Release
+          _architecture: x86
+          framework: uapaot
+
+    submitToHelix: false
+    pool:
+      name: Hosted VS2017
+    targetOS: Windows_NT
+
+- template: /eng/pipelines/corefx-base.yml
+  parameters:
+    name: WinAllConfigurations
+    displayName: Packaging All Configurations
+    strategy:
+      matrix:
+        x64_Debug:
+          _configuration: Debug
+          _architecture: x64
+          framework: allConfigurations
+    pool:
+      name: Hosted VS2017
+    submitToHelix: false
+
+    customBuildSteps:
+      - script: build.cmd
+                -ci
+                -$(framework)
+                /p:ArchGroup=$(_architecture)
+                /p:ConfigurationGroup=$(_configuration)
+                /p:RuntimeOS=win10
+        displayName: Build Packages
+      - script: build.cmd
+                -ci
+                -test
+                /p:TargetGroup=netstandard
+                /p:ArchGroup=$(_architecture)
+                /p:ConfigurationGroup=$(_configuration)
+                /p:SkipTests=true
+        displayName: Build Netstandard Test Suite
+      - script: build.cmd
+                -ci
+                -test
+                -$(framework)
+                /p:ArchGroup=$(_architecture)
+                /p:ConfigurationGroup=$(_configuration)
+        displayName: Run Package Tests

@@ -1,0 +1,51 @@
+# Disable triggers for now. TODO: add right merge triggers.
+trigger: none
+
+# TODO: add paths to exclude CI when modifying docs or stuff not affecting the build
+pr:
+- master
+
+resources:
+  containers:
+  - container: rhel7_container
+    image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
+
+  - container: alpine_36_container
+    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-dc92048-20181204212646
+
+  - container: ubuntu_1604_arm64_cross_container
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
+
+  - container: ubuntu_1604_arm_cross_container
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-ef0ac75-20175511035548
+
+variables:
+# Helix target queues need to be separated by +
+
+# Windows queues
+- name: netcoreappWindowsQueues
+  value: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
+- name: nanoQueues
+  value: Windows.10.Nano.Amd64.Open
+- name: uapNetfxQueues
+  value: Windows.10.Amd64.ClientRS4.Open
+
+# Linux queues
+- name: linuxDefaultQueues
+  value: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open+Fedora.27.Amd64.Open
+- name: linuxArm64Queues
+  value: Ubuntu.1604.Arm64.Open
+
+# MacOS queues:
+- name: macOSQueues
+  value: OSX.1012.Amd64.Open+OSX.1013.Amd64.Open
+
+jobs:
+  # Include Windows legs
+  - template: /eng/pipelines/windows.yml
+  
+  # Linux legs
+  - template: /eng/pipelines/linux.yml
+
+  # MacOS legs
+  - template: /eng/pipelines/macos.yml
