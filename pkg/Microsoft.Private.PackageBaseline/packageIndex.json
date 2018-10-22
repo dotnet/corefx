@@ -2552,8 +2552,7 @@
         "xamarinwatchos10": "Any"
       },
       "AssemblyVersionInPackageVersion": {
-        "4.0.1.0": "4.5.0",
-        "4.1.0.0": "4.6.0"
+        "4.0.1.0": "4.5.0"
       }
     },
     "System.Messaging": {
