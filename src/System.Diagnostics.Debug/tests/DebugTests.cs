@@ -11,6 +11,148 @@ namespace System.Diagnostics.Tests
     [Collection("System.Diagnostics.Debug")]
     public class DebugTests
     {
+        // [Fact] // uncomment when running this xunit method alone
+        public void Bug_SkipsIndentationOnFirstWrite()
+        {
+            // This test shows an existing indentation bug in Debug class
+                // First Debug.Write call won't respect the indentation. Desktop does not have this bug.
+
+            Debug.Indent();
+            int expectedIndentation = Debug.IndentLevel * Debug.IndentSize;
+            int wrongIndentation = 0; // should match with expectedIndentation
+            
+            VerifyLogged(() => Debug.Write("pizza"),        new string(' ', wrongIndentation) +     "pizza"); // Inconsistent with Desktop
+            
+            // After first WriteLine invocation we get proper indentation
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine);
+
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            VerifyLogged(() => Debug.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            Debug.Unindent();
+        }
+
+        // [Fact] // uncomment when running this xunit method alone
+        public void Bug_SkipsIndentationOnFirstWriteLine()
+        {
+            // This test shows an existing indentation bug in Debug class
+                // First Debug.WriteLine call won't respect the indentation. Desktop does not have this bug.
+
+            Debug.Indent();
+            int expectedIndentation = Debug.IndentLevel * Debug.IndentSize;
+            int wrongIndentation = 0; // should match with expectedIndentation
+
+            // After first WriteLine invocation we get proper indentation
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', wrongIndentation) +     "pizza" + Environment.NewLine); // Inconsistent with Desktop
+
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            VerifyLogged(() => Debug.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            Debug.Unindent();
+        }
+
+        // [Fact] // uncomment when running this xunit method alone
+        public void Bug_DebugSumsUpTraceAndDebugIndentation()
+        {
+            // In Core:
+               // - The existing indentation amount for Trace is currently: `Debug.IndentLevel * Debug.IndentSize + Trace.IndentLevel * Trace.IndentSize`. 
+               // The Trace indentation amount is just `Trace.IndentLevel * Trace.IndentSize`
+
+            // Set same values of IndentSize and IndentLevel for both Trace and Debug, to ignore bug in: DesktopDiscrepancy_DebugIndentationNotInSyncWithTrace
+            Debug.IndentSize = 4;
+            Trace.IndentSize = 4;
+            Debug.Indent();
+            Trace.Indent();
+
+            int expected = Debug.IndentSize * Debug.IndentLevel;
+            int actual = expected + Trace.IndentLevel * Trace.IndentSize; // should match with expected
+
+            Debug.WriteLine("pizza"); // Skip first call, to ignore bug in: Bug_SkipsIndentationOnFirstWriteLine
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expected) +  "pizza" + Environment.NewLine);
+            Trace.WriteLine("pizza"); // Wires up Debug with TraceListeners
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', actual) +  "pizza" + Environment.NewLine);
+
+            // reset
+            Debug.Unindent();
+            Trace.Unindent();
+            Trace.Refresh();
+        }
+
+        // [Fact] // uncomment when running this xunit method alone
+        public void WriteNull()
+        {
+            // reset
+            Debug.IndentSize = 4;
+            Trace.IndentSize = 4;
+            Debug.Indent();
+            Trace.Indent();
+
+            int expected = Debug.IndentSize * Debug.IndentLevel;
+            int actual = expected + Trace.IndentLevel * Trace.IndentSize; // should match with expected
+
+            Debug.WriteLine(null); // Skip first call, to ignore bug in: Bug_SkipsIndentationOnFirstWriteLine
+            VerifyLogged(() => Debug.WriteLine(null), new string(' ', expected) + Environment.NewLine);
+            Trace.WriteLine(null); // Wires up Debug with TraceListeners
+            VerifyLogged(() => Trace.WriteLine(null), new string(' ', actual) + Environment.NewLine);
+
+            // reset
+            Debug.Unindent();
+            Trace.Unindent();
+            Trace.Refresh();
+        }
+        
+        [Fact]
+        public void DesktopDiscrepancy_DebugIndentationNotInSyncWithTrace()
+        {
+            // This test shows an existing indentation bug in Debug class:
+                // In Desktop, Debug and Trace have the same values for IndentLevel and IndentSize.
+                // In Core, Updating Trace IndentLevel or IndentSize won't update that for Debug and vice versa.
+
+            // reset
+            int originalDebugIndentSize = Debug.IndentSize;
+            int originalTraceIndentSize = Trace.IndentSize;
+            Debug.IndentLevel = 0;
+            Trace.IndentLevel = 0;
+
+            // test if Debug gets changed when Trace changes
+            Trace.IndentSize = 7;
+            Assert.Equal(7, Trace.IndentSize);
+            Assert.NotEqual(7, Debug.IndentSize); // Inconsistent with Desktop, should be 7
+            Trace.Indent();
+            Assert.Equal(1, Trace.IndentLevel);
+            Assert.NotEqual(1, Debug.IndentLevel); // Inconsistent with Desktop, should be 1
+
+            // reset
+            Trace.Unindent();
+            Trace.IndentSize = originalTraceIndentSize;
+
+            // test if Trace gets changed when Debug changes
+            Debug.IndentSize = 7;
+            Assert.Equal(7, Debug.IndentSize);
+            Assert.NotEqual(7, Trace.IndentSize); // Inconsistent with Desktop, should be 7
+            Debug.Indent();
+            Assert.Equal(1, Debug.IndentLevel);
+            Assert.NotEqual(1, Trace.IndentLevel); // Inconsistent with Desktop, should be 1
+            
+            // reset
+            Debug.Unindent();
+            Debug.IndentSize = originalDebugIndentSize;
+            Trace.Refresh();
+        }
+
+        [Fact]
+        public void ClearTraceListeners_StopsWritingToDebugger()
+        {
+            VerifyLogged(() => Debug.Write("pizza"), "pizza");
+            VerifyLogged(() => Trace.Write("pizza"), "pizza"); // Wires up Debug with TraceListeners
+            Trace.Listeners.Clear();
+            VerifyLogged(() => Debug.Write("pizza"), string.Empty); // new behavior, corrects behavior discrepancy with Desktop
+            VerifyLogged(() => Trace.Write("pizza"), string.Empty);
+            Trace.Refresh();
+        }
+
         [Fact]
         public void Asserts()
         {
