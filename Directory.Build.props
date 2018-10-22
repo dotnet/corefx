@@ -74,9 +74,6 @@
     <DotNetRoot Condition="!HasTrailingSlash('$(DotNetRoot)')">$(DotNetRoot)\</DotNetRoot>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(DotNetRoot)</DotnetCliPath>
     <ToolHostCmd Condition="'$(ToolHostCmd)'==''">"$(DotNetRoot)dotnet"</ToolHostCmd>
-
-    <!-- Need to keep in sync with Tools.props file. -->
-    <AnalyzerPropsFile>$(ToolSetCommonDirectory)Tools.Analyzers.props</AnalyzerPropsFile>
   </PropertyGroup>
 
   <!-- Choose .targets files that come from Arcade rather than from buildtools -->

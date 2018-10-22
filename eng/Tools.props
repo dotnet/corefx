@@ -7,6 +7,9 @@
     </RestoreSources>
     <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
     <Language>C#</Language>
+
+    <!-- Need to keep in sync with CodeAnalysis.targets file. -->
+    <AnalyzerPropsFile>$(ArtifactsToolsetDir)Common\Tools.Analyzers.props</AnalyzerPropsFile>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\dependencies.props" />
   <ItemGroup>
@@ -58,7 +61,7 @@
     <SaveItems Condition="'@(Analyzer)' != ''"
                ItemName="ResolvedAnalyzer"
                Items="@(Analyzer)"
-               File="$(ArtifactsToolsetDir)Common\Tools.Analyzers.props" />
+               File="$(AnalyzerPropsFile)" />
   </Target>
   
 </Project>
