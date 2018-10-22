@@ -90,12 +90,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             If ApplicationDataRoot.Length = 0 OrElse PlatformDetection.IsWindowsNanoServer Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
-                ' Windows.10.Amd64.ClientRS4.Open-x64-Debug throws exeption and for now we are ignoring
-                If PlatformDetection.IsWindowsNanoServer Then
-                    Assert.Throws(Of IO.DirectoryNotFoundException)(Sub() Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData))
-                Else
-                    Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
-                End If
+                Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
             End If
         End Sub
 
@@ -108,8 +103,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
             End If
         End Sub
 
-        <PlatformSpecific(TestPlatforms.Windows), ConditionalFact(GetType(PlatformDetection), NameOf(PlatformDetection.IsNotWindowsNanoServer))>
+        <Fact>
         Public Shared Sub MyDocumentsFolderTest()
+            If PlatformDetection.IsWindowsNanoServer Then
+                Exit Sub
+            End If
+
             If Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments).Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
             Else
