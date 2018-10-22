@@ -20,14 +20,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(!(bool)value);
+                    data[index] = (bool)obj ? Utils.BoxedFalse : Utils.BoxedTrue;
                 }
                 return 1;
             }
@@ -37,14 +35,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(~(long)value);
+                    data[index] = ~(long)obj;
                 }
                 return 1;
             }
@@ -54,14 +50,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(~(int)value);
+                    data[index] = ScriptingRuntimeHelpers.Int32ToObject(~(int)obj);
                 }
                 return 1;
             }
@@ -71,14 +65,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push((short)(~(short)value));
+                    data[index] = (short)(~(short)obj);
                 }
                 return 1;
             }
@@ -88,14 +80,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(~(ulong)value);
+                    data[index] = ~(ulong)obj;
                 }
                 return 1;
             }
@@ -105,14 +95,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(~(uint)value);
+                    data[index] = ~(uint)obj;
                 }
                 return 1;
             }
@@ -122,14 +110,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked((ushort)(~(ushort)value)));
+                    data[index] = unchecked((ushort)(~(ushort)obj));
                 }
                 return 1;
             }
@@ -139,14 +125,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked((byte)(~(byte)value)));
+                    data[index] = unchecked((byte)(~(byte)obj));
                 }
                 return 1;
             }
@@ -156,14 +140,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                if (value == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push((sbyte)(~(sbyte)value));
+                    data[index] = (sbyte)(~(sbyte)obj);
                 }
                 return 1;
             }

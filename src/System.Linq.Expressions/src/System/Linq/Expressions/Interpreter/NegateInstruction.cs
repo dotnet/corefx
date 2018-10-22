@@ -21,14 +21,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked((short)(-(short)obj)));
+                    data[index] = unchecked((short)(-(short)obj));
                 }
                 return 1;
             }
@@ -38,14 +36,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked(-(int)obj));
+                    data[index] = ScriptingRuntimeHelpers.Int32ToObject(unchecked(-(int)obj));
                 }
                 return 1;
             }
@@ -55,14 +51,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked(-(long)obj));
+                    data[index] = unchecked(-(long)obj);
                 }
                 return 1;
             }
@@ -72,14 +66,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(-(float)obj);
+                    data[index] = -(float)obj;
                 }
                 return 1;
             }
@@ -89,14 +81,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(-(double)obj);
+                    data[index] = -(double)obj;
                 }
                 return 1;
             }
@@ -132,14 +122,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(checked(-(int)obj));
+                    data[index] = ScriptingRuntimeHelpers.Int32ToObject(checked(-(int)obj));
                 }
                 return 1;
             }
@@ -149,14 +137,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(checked((short)(-(short)obj)));
+                    data[index] = checked((short)(-(short)obj));
                 }
                 return 1;
             }
@@ -166,14 +152,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object[] data = frame.Data;
+                int index = frame.StackIndex - 1;
+                object obj = data[index];
+                if (obj != null)
                 {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(checked(-(long)obj));
+                    data[index] = checked(-(long)obj);
                 }
                 return 1;
             }
