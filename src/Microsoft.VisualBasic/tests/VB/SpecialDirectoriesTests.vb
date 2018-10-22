@@ -95,15 +95,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub DesktopFolderTest()
-            If PlatformDetection.IsUbuntu1710OrHigher Then
-                Assert.Equal(SpecialDirectories.Desktop, "")
+            Dim Env_Desktop As String = Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators)
+            If Env_Desktop.Length = 0 Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
             Else
-                If Environment.GetFolderPath(Environment.SpecialFolder.Desktop).Length = 0 Then
-                    Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
-                Else
-                    Assert.Equal(Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators), SpecialDirectories.Desktop.TrimEnd(Separators))
-                End If
-
+                Dim FileIO_Desktop As String = SpecialDirectories.Desktop.TrimEnd(Separators)
+                Assert.True(Env_Desktop = FileIO_Desktop, $"{Env_Desktop} <> {FileIO_Desktop}")
             End If
         End Sub
 
