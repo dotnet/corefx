@@ -122,8 +122,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
-                Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), SR.IO_SpecialDirectory_UserAppData)
-                If Not IO.Directory.Exists(ApplicationData) Then
+                Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), SR.IO_SpecialDirectory_UserAppData).Trim.TrimEnd(Separators).Trim
+                If ApplicationData.Length = 0 OrElse Not IO.Directory.Exists(ApplicationData) Then
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" {ApplicationData}")
                 End If
                 Try
