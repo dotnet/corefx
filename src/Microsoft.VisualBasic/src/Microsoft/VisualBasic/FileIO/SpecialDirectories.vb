@@ -21,6 +21,11 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Sub New()
         End Sub
 
+        Private Shared ReadOnly Separators() As Char = {
+            IO.Path.DirectorySeparatorChar,
+            IO.Path.AltDirectorySeparatorChar
+            }
+
         ''' <summary>
         ''' Return the directory that serves as a common repository for user's personal documents.
         ''' </summary>
@@ -154,7 +159,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>A String containing the path to the special directory if success.</returns>
         Private Shared Function GetDirectoryPath(ByVal Directory As String, ByVal DirectoryNameResID As String) As String
             ' Only need to worry about Directory being "" since it comes from Framework.
-            If Directory.Length = 0 Then
+            If Directory.Trim.TrimEnd(Separators).TrimEnd.Length = 0 Then
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(DirectoryNameResID))
             End If
             Return FileSystem.NormalizePath(Directory)

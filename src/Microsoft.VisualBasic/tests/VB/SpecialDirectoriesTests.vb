@@ -95,7 +95,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub DesktopFolderTest()
-            Dim Env_Desktop As String = Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators)
+            Dim Env_Desktop As String = Environment.GetFolderPath(SpecialFolder.Desktop).Trim.TrimEnd(Separators).TrimEnd
             If Env_Desktop.Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
             Else
