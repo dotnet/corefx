@@ -16,7 +16,13 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("", "")]
         public static void Escape(string str, string expected)
         {
+            // Use Escape(string)
             Assert.Equal(expected, Regex.Escape(str));
+
+            // Use Escape(ReadOnlySpan, Span)
+            Span<char> output = stackalloc char[255];
+            bool success = Regex.TryEscape(str.AsSpan(), output, out int charsWritten);
+            SpanTestHelper.VerifySpan(expected, output, charsWritten, success);
         }
 
         [Fact]
@@ -35,6 +41,11 @@ namespace System.Text.RegularExpressions.Tests
         public void Unescape(string str, string expected)
         {
             Assert.Equal(expected, Regex.Unescape(str));
+
+            // Use Escape(ReadOnlySpan, Span)
+            Span<char> output = stackalloc char[255];
+            bool success = Regex.TryUnescape(str.AsSpan(), output, out int charsWritten);
+            SpanTestHelper.VerifySpan(expected, output, charsWritten, success);
         }
 
         [Fact]

@@ -157,6 +157,7 @@ namespace System.Text.RegularExpressions
         public System.Text.RegularExpressions.RegexOptions Options { get { throw null; } }
         public bool RightToLeft { get { throw null; } }
         public static string Escape(string str) { throw null; }
+        public static bool TryEscape(ReadOnlySpan<char> str, Span<char> destination, out int charsWritten) { throw null; }
         public string[] GetGroupNames() { throw null; }
         public int[] GetGroupNumbers() { throw null; }
         public string GroupNameFromNumber(int i) { throw null; }
@@ -199,6 +200,7 @@ namespace System.Text.RegularExpressions
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
         public static string Unescape(string str) { throw null; }
+        public static bool TryUnescape(ReadOnlySpan<char> str, Span<char> destination, out int charsWritten) { throw null; }
         protected bool UseOptionC() { throw null; }
         protected bool UseOptionR() { throw null; }
         protected internal static void ValidateMatchTimeout(System.TimeSpan matchTimeout) { }

@@ -9,6 +9,7 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreappaot-Debug;netcoreappaot-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Buffers\SpanHelper.cs" />
     <Compile Include="System\Collections\Generic\ValueListBuilder.Pop.cs" />
     <Compile Include="System\Collections\HashtableExtensions.cs" />
     <Compile Include="System\Text\RegularExpressions\Capture.cs" />
@@ -16,22 +17,26 @@
     <Compile Include="System\Text\RegularExpressions\CollectionDebuggerProxy.cs" />
     <Compile Include="System\Text\RegularExpressions\Group.cs" />
     <Compile Include="System\Text\RegularExpressions\GroupCollection.cs" />
+    <Compile Include="System\Text\RegularExpressions\InputWalker.cs" />
     <Compile Include="System\Text\RegularExpressions\Match.cs" />
     <Compile Include="System\Text\RegularExpressions\MatchCollection.cs" />
     <Compile Include="System\Text\RegularExpressions\Reference.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.Cache.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.cs" />
+    <Compile Include="System\Text\RegularExpressions\Regex.Escape.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.Match.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.Replace.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.Split.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.Timeout.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexBoyerMoore.cs" />
+    <Compile Include="System\Text\RegularExpressions\RegexCharCategory.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCharClass.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCode.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCompilationInfo.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexFCD.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexInterpreter.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexMatchTimeoutException.cs" />
+    <Compile Include="System\Text\RegularExpressions\ParserMin.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexNode.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexOptions.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexParseError.cs" />

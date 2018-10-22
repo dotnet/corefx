@@ -232,34 +232,6 @@ namespace System.Text.RegularExpressions
 #endif // FEATURE_COMPILEAPIS
 
         /// <summary>
-        /// Escapes a minimal set of metacharacters (\, *, +, ?, |, {, [, (, ), ^, $, ., #, and
-        /// whitespace) by replacing them with their \ codes. This converts a string so that
-        /// it can be used as a constant within a regular expression safely. (Note that the
-        /// reason # and whitespace must be escaped is so the string can be used safely
-        /// within an expression parsed with x mode. If future Regex features add
-        /// additional metacharacters, developers should depend on Escape to escape those
-        /// characters as well.)
-        /// </summary>
-        public static string Escape(string str)
-        {
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            return RegexParser.Escape(str);
-        }
-
-        /// <summary>
-        /// Unescapes any escaped characters in the input string.
-        /// </summary>
-        public static string Unescape(string str)
-        {
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            return RegexParser.Unescape(str);
-        }
-
-        /// <summary>
         /// Returns the options passed into the constructor
         /// </summary>
         public RegexOptions Options => roptions;
@@ -457,7 +429,7 @@ namespace System.Text.RegularExpressions
                 if (factory != null)
                     runner = factory.CreateInstance();
                 else
-                    runner = new RegexInterpreter(_code, UseOptionInvariant() ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
+                    runner = new RegexInterpreter(_code, roptions.UseOptionInvariant() ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
             }
 
             Match match;
@@ -473,26 +445,21 @@ namespace System.Text.RegularExpressions
             }
 
 #if DEBUG
-            if (Debug && match != null)
+            if (roptions.IsDebug() && match != null)
                 match.Dump();
 #endif
             return match;
         }
 
-        protected bool UseOptionC() => (roptions & RegexOptions.Compiled) != 0;
+        protected bool UseOptionC() => roptions.UseOptionC();
 
-        /*
-         * True if the L option was set
-         */
-        protected internal bool UseOptionR() => (roptions & RegexOptions.RightToLeft) != 0;
-
-        internal bool UseOptionInvariant() => (roptions & RegexOptions.CultureInvariant) != 0;
+        protected internal bool UseOptionR() => roptions.UseOptionR();
 
 #if DEBUG
         /// <summary>
         /// True if the regex has debugging enabled
         /// </summary>
-        internal bool Debug => (roptions & RegexOptions.Debug) != 0;
+        internal bool Debug => roptions.IsDebug();
 #endif
     }
 }
