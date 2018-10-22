@@ -36,7 +36,6 @@
     <Compile Include="ListChangedEventArgsTests.cs" />
     <Compile Include="LicenseProviderAttributeTests.cs" />
     <Compile Include="LicenseExceptionTests.cs" />
-    <Compile Include="InvalidAsynchronousStateExceptionTests.cs" />
     <Compile Include="ExtenderProvidedPropertyAttributeTests.cs" />
     <Compile Include="InstanceCreationEditorTests.cs" />
     <Compile Include="InstallerTypeAttributeTests.cs" />
