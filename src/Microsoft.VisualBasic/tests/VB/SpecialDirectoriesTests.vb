@@ -86,20 +86,24 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
-            Dim ApplicationDataRoot As String = Environment.GetFolderPath(SpecialFolder.ApplicationData)
-            If ApplicationDataRoot.Length = 0 OrElse PlatformDetection.IsWindowsNanoServer Then
+            If PlatformDetection.IsWindowsNanoServer OrElse Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.DoNotVerify).Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
-                Assert.Equal(IO.Path.Combine(ApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
+                Assert.Equal(IO.Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData).TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
             End If
         End Sub
 
         <Fact>
         Public Shared Sub DesktopFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.Desktop).Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
+            If PlatformDetection.IsUbuntu1710OrHigher Then
+                Assert.Equal(SpecialDirectories.Desktop, "")
             Else
-                Assert.Equal(Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators), SpecialDirectories.Desktop.TrimEnd(Separators))
+                If Environment.GetFolderPath(Environment.SpecialFolder.Desktop).Length = 0 Then
+                    Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
+                Else
+                    Assert.Equal(Environment.GetFolderPath(SpecialFolder.Desktop).TrimEnd(Separators), SpecialDirectories.Desktop.TrimEnd(Separators))
+                End If
+
             End If
         End Sub
 
