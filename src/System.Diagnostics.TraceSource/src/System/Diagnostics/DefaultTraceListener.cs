@@ -22,8 +22,6 @@ namespace System.Diagnostics
         private class DefaultTraceDebugProvider : DebugProvider
         {
             private const int InternalWriteSize = 16384;
-            public DefaultTraceDebugProvider() { }
-            public override void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)  { }
             
             public override void Write(string message)
             {
@@ -116,13 +114,14 @@ namespace System.Diagnostics
             {
                 stackTrace = "";
             }
-            WriteAssert(stackTrace, message, detailMessage);
+            // Tracked by #32955: WriteAssert should write "stackTrace" rather than string.Empty. 
+            WriteAssert(string.Empty, message, detailMessage);
             if (AssertUiEnabled)
             {
-                // DefaultTraceDebugProvider.ShowDialog can be customized to show a dialog when AssertUiEnabled is true
-                s_provider.ShowDialog(stackTrace, message, detailMessage, "Assertion Failed");
+                // Tracked by #32955: Currently AssertUiEnabled is true by default but we are not calling Enviroment.FailFast as Debug.Fail does 
+                // s_provider.ShowDialog(stackTrace, message, detailMessage, "Assertion Failed");
             }
-            else if (Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
                 Debugger.Break();
             }
@@ -138,6 +137,7 @@ namespace System.Diagnostics
 
         private void WriteAssert(string stackTrace, string message, string detailMessage)
         {
+            // Tracked by #32955: WriteAssert should indent "assertMessage" same way Debug.Fail does.
             string assertMessage = SR.DebugAssertBanner + Environment.NewLine
                                             + SR.DebugAssertShortMessage + Environment.NewLine
                                             + message + Environment.NewLine

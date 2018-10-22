@@ -11,7 +11,8 @@ namespace System.Diagnostics.Tests
     [Collection("System.Diagnostics.Debug")]
     public class DebugTests
     {
-        // [Fact] // uncomment when running this xunit method alone
+        [Fact] // for netcoreapp only uncomment when running this xunit method alone
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
         public void Bug_SkipsIndentationOnFirstWrite()
         {
             // This test shows an existing indentation bug in Debug class
@@ -19,9 +20,8 @@ namespace System.Diagnostics.Tests
 
             Debug.Indent();
             int expectedIndentation = Debug.IndentLevel * Debug.IndentSize;
-            int wrongIndentation = 0; // should match with expectedIndentation
             
-            VerifyLogged(() => Debug.Write("pizza"),        new string(' ', wrongIndentation) +     "pizza"); // Inconsistent with Desktop
+            VerifyLogged(() => Debug.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza"); // bug: netcoreapp does not indent
             
             // After first WriteLine invocation we get proper indentation
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine);
@@ -33,7 +33,8 @@ namespace System.Diagnostics.Tests
             Debug.Unindent();
         }
 
-        // [Fact] // uncomment when running this xunit method alone
+        [Fact] // for netcoreapp only uncomment when running this xunit method alone
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
         public void Bug_SkipsIndentationOnFirstWriteLine()
         {
             // This test shows an existing indentation bug in Debug class
@@ -41,10 +42,9 @@ namespace System.Diagnostics.Tests
 
             Debug.Indent();
             int expectedIndentation = Debug.IndentLevel * Debug.IndentSize;
-            int wrongIndentation = 0; // should match with expectedIndentation
 
             // After first WriteLine invocation we get proper indentation
-            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', wrongIndentation) +     "pizza" + Environment.NewLine); // Inconsistent with Desktop
+            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine); // bug: netcoreapp does not indent
 
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
             VerifyLogged(() => Debug.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
@@ -53,7 +53,8 @@ namespace System.Diagnostics.Tests
             Debug.Unindent();
         }
 
-        // [Fact] // uncomment when running this xunit method alone
+        [Fact] // for netcoreapp only uncomment when running this xunit method alone
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
         public void Bug_DebugSumsUpTraceAndDebugIndentation()
         {
             // In Core:
@@ -67,12 +68,11 @@ namespace System.Diagnostics.Tests
             Trace.Indent();
 
             int expected = Debug.IndentSize * Debug.IndentLevel;
-            int actual = expected + Trace.IndentLevel * Trace.IndentSize; // should match with expected
 
             Debug.WriteLine("pizza"); // Skip first call, to ignore bug in: Bug_SkipsIndentationOnFirstWriteLine
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expected) +  "pizza" + Environment.NewLine);
             Trace.WriteLine("pizza"); // Wires up Debug with TraceListeners
-            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', actual) +  "pizza" + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expected) +  "pizza" + Environment.NewLine); // bug: actual netcoreapp indent size is (expected + Trace.IndentLevel * Trace.IndentSize)
 
             // reset
             Debug.Unindent();
@@ -80,22 +80,21 @@ namespace System.Diagnostics.Tests
             Trace.Refresh();
         }
 
-        // [Fact] // uncomment when running this xunit method alone
+        [Fact] // for netcoreapp only uncomment when running this xunit method alone
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
         public void WriteNull()
         {
-            // reset
             Debug.IndentSize = 4;
             Trace.IndentSize = 4;
             Debug.Indent();
             Trace.Indent();
 
             int expected = Debug.IndentSize * Debug.IndentLevel;
-            int actual = expected + Trace.IndentLevel * Trace.IndentSize; // should match with expected
 
             Debug.WriteLine(null); // Skip first call, to ignore bug in: Bug_SkipsIndentationOnFirstWriteLine
             VerifyLogged(() => Debug.WriteLine(null), new string(' ', expected) + Environment.NewLine);
             Trace.WriteLine(null); // Wires up Debug with TraceListeners
-            VerifyLogged(() => Trace.WriteLine(null), new string(' ', actual) + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLine(null), new string(' ', expected) + Environment.NewLine); // bug: actual netcoreapp indent size is (expected + Trace.IndentLevel * Trace.IndentSize)
 
             // reset
             Debug.Unindent();
@@ -104,13 +103,13 @@ namespace System.Diagnostics.Tests
         }
         
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
         public void DesktopDiscrepancy_DebugIndentationNotInSyncWithTrace()
         {
             // This test shows an existing indentation bug in Debug class:
                 // In Desktop, Debug and Trace have the same values for IndentLevel and IndentSize.
                 // In Core, Updating Trace IndentLevel or IndentSize won't update that for Debug and vice versa.
 
-            // reset
             int originalDebugIndentSize = Debug.IndentSize;
             int originalTraceIndentSize = Trace.IndentSize;
             Debug.IndentLevel = 0;
@@ -119,10 +118,10 @@ namespace System.Diagnostics.Tests
             // test if Debug gets changed when Trace changes
             Trace.IndentSize = 7;
             Assert.Equal(7, Trace.IndentSize);
-            Assert.NotEqual(7, Debug.IndentSize); // Inconsistent with Desktop, should be 7
+            Assert.Equal(7, Debug.IndentSize); // bug: in netcoreapp is not equal to 7
             Trace.Indent();
             Assert.Equal(1, Trace.IndentLevel);
-            Assert.NotEqual(1, Debug.IndentLevel); // Inconsistent with Desktop, should be 1
+            Assert.Equal(1, Debug.IndentLevel); // bug: in netcoreapp is not equal to 1
 
             // reset
             Trace.Unindent();
@@ -131,10 +130,10 @@ namespace System.Diagnostics.Tests
             // test if Trace gets changed when Debug changes
             Debug.IndentSize = 7;
             Assert.Equal(7, Debug.IndentSize);
-            Assert.NotEqual(7, Trace.IndentSize); // Inconsistent with Desktop, should be 7
+            Assert.Equal(7, Trace.IndentSize); // bug: in netcoreapp is not equal to 7
             Debug.Indent();
             Assert.Equal(1, Debug.IndentLevel);
-            Assert.NotEqual(1, Trace.IndentLevel); // Inconsistent with Desktop, should be 1
+            Assert.Equal(1, Trace.IndentLevel); // bug: in netcoreapp is not equal to 1
             
             // reset
             Debug.Unindent();
@@ -148,7 +147,7 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Debug.Write("pizza"), "pizza");
             VerifyLogged(() => Trace.Write("pizza"), "pizza"); // Wires up Debug with TraceListeners
             Trace.Listeners.Clear();
-            VerifyLogged(() => Debug.Write("pizza"), string.Empty); // new behavior, corrects behavior discrepancy with Desktop
+            VerifyLogged(() => Debug.Write("pizza"), string.Empty); 
             VerifyLogged(() => Trace.Write("pizza"), string.Empty);
             Trace.Refresh();
         }
