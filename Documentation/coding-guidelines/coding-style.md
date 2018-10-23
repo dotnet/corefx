@@ -15,7 +15,7 @@ The general rule we follow is "use Visual Studio defaults".
    `private string _foo` not `string _foo`). Visibility should be the first modifier (e.g. 
    `public abstract` not `abstract public`).
 6. Namespace imports should be specified at the top of the file, *outside* of
-   `namespace` declarations, and should be sorted alphabetically, with the exception of `system.*` namespaces, which are to be placed on top of all others.
+   `namespace` declarations, and should be sorted alphabetically, with the exception of `System.*` namespaces, which are to be placed on top of all others.
 7. Avoid more than one empty line at any time. For example, do not have two
    blank lines between members of a type.
 8. Avoid spurious free spaces.
