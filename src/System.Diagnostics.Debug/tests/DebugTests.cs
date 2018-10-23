@@ -12,7 +12,7 @@ namespace System.Diagnostics.Tests
     public class DebugTests
     {
         [Fact] // for netcoreapp only uncomment when running this xunit method alone
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,  "dotnet/corefx#32955")]
         public void Bug_SkipsIndentationOnFirstWrite()
         {
             // This test shows an existing indentation bug in Debug class
@@ -34,7 +34,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact] // for netcoreapp only uncomment when running this xunit method alone
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,  "dotnet/corefx#32955")]
         public void Bug_SkipsIndentationOnFirstWriteLine()
         {
             // This test shows an existing indentation bug in Debug class
@@ -54,7 +54,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact] // for netcoreapp only uncomment when running this xunit method alone
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,  "dotnet/corefx#32955")]
         public void Bug_DebugSumsUpTraceAndDebugIndentation()
         {
             // In Core:
@@ -81,7 +81,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact] // for netcoreapp only uncomment when running this xunit method alone
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,  "dotnet/corefx#32955")]
         public void WriteNull()
         {
             Debug.IndentSize = 4;
@@ -103,7 +103,7 @@ namespace System.Diagnostics.Tests
         }
         
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,  "dotnet/corefx#32955")]
         public void DesktopDiscrepancy_DebugIndentationNotInSyncWithTrace()
         {
             // This test shows an existing indentation bug in Debug class:
@@ -142,7 +142,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap,  "dotnet/corefx#32955")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,  "dotnet/corefx#32955")]
         public void ClearTraceListeners_StopsWritingToDebugger()
         {
             VerifyLogged(() => Debug.Write("pizza"), "pizza");
@@ -302,12 +302,6 @@ namespace System.Diagnostics.Tests
 
         static void VerifyLogged(Action test, string expectedOutput)
         {
-            // .NET Core has an internal extensibility point for unit tests.
-            if (PlatformDetection.IsFullFramework || PlatformDetection.IsUap)
-            {
-                return;
-            }
-
             FieldInfo writeCoreHook = typeof(DebugProvider).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
 
             // First use our test logger to verify the output
@@ -336,12 +330,6 @@ namespace System.Diagnostics.Tests
 
         static void VerifyAssert(Action test, params string[] expectedOutputStrings)
         {
-            // .NET Core has an internal extensibility point for unit tests.
-            if (PlatformDetection.IsFullFramework || PlatformDetection.IsUap)
-            {
-                return;
-            }
-
             FieldInfo writeCoreHook = typeof(DebugProvider).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
             s_defaultProvider = Debug.SetProvider(WriteLogger.s_instance);
 
