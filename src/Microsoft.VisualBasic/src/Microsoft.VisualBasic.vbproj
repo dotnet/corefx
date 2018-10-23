@@ -17,10 +17,12 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.vb" />
-    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
+    <Compile Include="Microsoft\VisualBasic\Helpers\NativeTypes.vb" />
+      <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
+      <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\Interaction.Windows.vb" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'false'">
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
     <Compile Include="Microsoft\VisualBasic\Interaction.Unix.vb" />
   </ItemGroup>
@@ -52,7 +54,6 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.LateBinder.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Versioned.vb" />
-    <Compile Include="Microsoft\VisualBasic\Helpers\NativeTypes.vb" />
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.vb" />
     <Compile Include="Microsoft\VisualBasic\FileIO\MalformedLineException.vb" />
     <Compile Include="Microsoft\VisualBasic\FileIO\SpecialDirectories.vb" />
@@ -62,7 +63,6 @@
     <Compile Include="Microsoft\VisualBasic\ComClassAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\Constants.vb" />
     <Compile Include="Microsoft\VisualBasic\ControlChars.vb" />
-    <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\ForEachEnum.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\DoubleType.vb" />
     <Compile Include="Microsoft\VisualBasic\DateAndTime.vb" />
