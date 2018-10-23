@@ -12,6 +12,7 @@ internal partial class Interop
     {
         const uint MOVEFILE_REPLACE_EXISTING = 0x01;
         const uint MOVEFILE_COPY_ALLOWED = 0x02;
+        const uint MOVEFILE_WRITE_THROUGH = 0x08;
 
         /// <summary>
         /// WARNING: This method does not implicitly handle long paths. Use MoveFile.
@@ -24,14 +25,14 @@ internal partial class Interop
         /// </summary>
         /// <param name="src">Source file or directory</param>
         /// <param name="dst">Destination file or directory</param>
-        /// <param name="overwrite">True to overwrite existing destination file. NOTE: must pass false for directories as overwrite of directories is not supported.</param>
+        /// <param name="overwrite">True to overwrite existing destination file. False to fail if destination file already exists. NOTE: must pass false for directories as overwrite of directories is not supported.</param>
         /// <returns></returns>
         internal static bool MoveFile(string src, string dst, bool overwrite)
         {
             src = PathInternal.EnsureExtendedPrefixIfNeeded(src);
             dst = PathInternal.EnsureExtendedPrefixIfNeeded(dst);
 
-            uint flags = MOVEFILE_COPY_ALLOWED;
+            uint flags = MOVEFILE_WRITE_THROUGH | MOVEFILE_COPY_ALLOWED;
             if (overwrite)
             {
                 flags |= MOVEFILE_REPLACE_EXISTING;
