@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,7 +78,23 @@ namespace System.Net.Http
 
                         string challengeData = challenge.ChallengeData;
 
-                        string spn = "HTTP/" + authUri.IdnHost;
+                        // Need to use FQDN normalized host so that CNAME's are traversed.
+                        string spn;
+                        if (authUri.HostNameType == UriHostNameType.IPv6 || authUri.HostNameType == UriHostNameType.IPv4)
+                        {
+                            spn = "HTTP/" + authUri.IdnHost;
+                        }
+                        else
+                        {
+                            IPHostEntry result = await Dns.GetHostEntryAsync(authUri.IdnHost);
+                            spn = "HTTP/" + result.HostName;
+                        }
+
+                        if (NetEventSource.IsEnabled)
+                        {
+                            NetEventSource.Info(connection, $"Authentication: {challenge.AuthenticationType}, Host: {authUri.IdnHost}, SPN: {spn}");
+                        }
+
                         ChannelBinding channelBinding = connection.TransportContext?.GetChannelBinding(ChannelBindingKind.Endpoint);
                         NTAuthentication authContext = new NTAuthentication(isServer:false, challenge.SchemeName, challenge.Credential, spn, ContextFlagsPal.Connection, channelBinding);
                         try
