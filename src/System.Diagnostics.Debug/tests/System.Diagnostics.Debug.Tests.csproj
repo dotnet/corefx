@@ -21,6 +21,7 @@
     <Compile Include="DebuggerTests.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="DebuggerVisualizerAttributeTests.cs" />
     <Compile Include="DebugTests.cs"  Condition="'$(TargetGroup)' == 'netcoreapp'"/>
+    <Compile Include="TraceDebugTests.cs"  Condition="'$(TargetGroup)' == 'netcoreapp'"/>
     <Compile Include="EmptyAttributeTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>

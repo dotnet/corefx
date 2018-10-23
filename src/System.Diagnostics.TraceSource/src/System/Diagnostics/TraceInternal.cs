@@ -11,9 +11,21 @@ namespace System.Diagnostics
 {
     internal static class TraceInternal
     {
+        static TraceInternal()
+        {
+            // This is where we override default DebugProvider because we know
+            // for sure that we have some Listeners to write to.
+            t_indentLevel = Debug.IndentLevel;
+            s_indentSize = Debug.IndentSize;
+            Debug.SetProvider(s_provider);
+        }
+
         private class TraceProvider : DebugProvider
         {
+            public override int IndentLevel { get { return TraceInternal.IndentLevel; } set { TraceInternal.IndentLevel = value; } }
+            public override int IndentSize { get { return TraceInternal.IndentSize; } set { TraceInternal.IndentSize = value; } }
             public override void Write(string message) { TraceInternal.Write(message); }
+            public override void WriteLine(string message) { TraceInternal.WriteLine(message); }
         }
 
         private static readonly DebugProvider s_provider = new TraceProvider();
@@ -49,9 +61,6 @@ namespace System.Diagnostics
                             defaultListener.IndentLevel = t_indentLevel;
                             defaultListener.IndentSize = s_indentSize;
                             s_listeners.Add(defaultListener);
-                            // This is where we override default DebugProvider because we know
-                            // for sure that we have some Listeners to write to.
-                            Debug.SetProvider(s_provider);
                         }
                     }
                 }

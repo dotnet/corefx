@@ -7,9 +7,9 @@ using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    // These tests test the static Debug class. They cannot be run in parallel
+    // These tests test the static Debug class after it has wired up with Trace Listeners. They cannot be run in parallel
     [Collection("System.Diagnostics.Debug")]
-    public class DebugTests
+    public class TraceDebugTests
     {
         [Fact]
         public void Write_Indents()
@@ -43,6 +43,167 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
             Debug.Unindent();
+        }
+
+        [Fact]
+        public void TraceWrite_Indents()
+        {
+            // This test when run alone verifies Debug.Write indentation, even on first call, is correct.
+            Trace.Indent();
+            int expectedIndentation = Trace.IndentLevel * Trace.IndentSize;
+            
+            VerifyLogged(() => Trace.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
+            
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine);
+
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            VerifyLogged(() => Trace.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            Trace.Unindent();
+        }
+
+        [Fact]
+        public void TraceWriteLine_Indents()
+        {
+            // This test when run alone verifies Debug.WriteLine indentation, even on first call, is correct.
+            Trace.Indent();
+            int expectedIndentation = Debug.IndentLevel * Debug.IndentSize;
+
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            VerifyLogged(() => Trace.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
+            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
+            Trace.Unindent();
+        }
+
+        [Fact] // for netcoreapp only uncomment when running this xunit method alone
+        public void Bug_DebugSumsUpTraceAndDebugIndentation()
+        {
+            int before = Debug.IndentSize * Debug.IndentLevel;
+            // In Core:
+               // - The existing indentation amount for Trace is currently: `Debug.IndentLevel * Debug.IndentSize + Trace.IndentLevel * Trace.IndentSize`. 
+               // The Trace indentation amount is just `Trace.IndentLevel * Trace.IndentSize`
+
+            // Set same values of IndentSize and IndentLevel for both Trace and Debug, to ignore bug in: DesktopDiscrepancy_DebugIndentationNotInSyncWithTrace
+            Trace.Refresh();
+            Trace.Indent();
+
+            int expected = Debug.IndentSize * Debug.IndentLevel;
+
+            Debug.WriteLine("pizza"); // Skip first call, to ignore bug in: Bug_SkipsIndentationOnFirstWriteLine
+            VerifyLogged(() => Debug.WriteLine("pizza"), new string(' ', expected) +  "pizza" + Environment.NewLine);
+            Trace.WriteLine("pizza"); // Wires up Debug with TraceListeners
+            VerifyLogged(() => Trace.WriteLine("pizza"), new string(' ', expected) +  "pizza" + Environment.NewLine); // bug: actual netcoreapp indent size is (expected + Trace.IndentLevel * Trace.IndentSize)
+
+            // reset
+            Trace.Unindent();
+            Trace.Refresh();
+            Assert.Equal(before, Debug.IndentSize * Debug.IndentLevel);
+        }
+
+        [Fact] // for netcoreapp only uncomment when running this xunit method alone
+        public void WriteNull()
+        {
+            int before = Debug.IndentSize * Debug.IndentLevel;
+            Trace.Refresh();
+            Trace.Indent();
+
+            int expected = Debug.IndentSize * Debug.IndentLevel;
+
+            Debug.WriteLine(null); // Skip first call, to ignore bug in: Bug_SkipsIndentationOnFirstWriteLine
+            VerifyLogged(() => Debug.WriteLine(null), new string(' ', expected) + Environment.NewLine);
+            Trace.WriteLine(null); // Wires up Debug with TraceListeners
+            VerifyLogged(() => Trace.WriteLine(null), new string(' ', expected) + Environment.NewLine); // bug: actual netcoreapp indent size is (expected + Trace.IndentLevel * Trace.IndentSize)
+
+            // reset
+            Trace.Unindent();
+            Trace.Refresh();
+            Assert.Equal(before, Debug.IndentSize * Debug.IndentLevel);
+        }
+        
+        [Fact]
+        public void UpdatingDebugIndentation_UpdatesTraceIndentation_AndViceVersa()
+        {
+            int before = Debug.IndentSize * Debug.IndentLevel;
+            Assert.Equal(Debug.IndentSize, Trace.IndentSize);
+            Assert.Equal(Debug.IndentSize, Trace.Listeners[0].IndentSize);
+            Assert.Equal(Debug.IndentLevel, Trace.IndentLevel);
+            Assert.Equal(Debug.IndentLevel, Trace.Listeners[0].IndentLevel);
+
+            Debug.IndentLevel = 3;
+            Assert.Equal(3, Trace.IndentLevel);
+            Assert.Equal(3, Debug.IndentLevel);
+            Assert.Equal(3, Trace.Listeners[0].IndentLevel);
+
+            Debug.IndentLevel = 0;
+            Assert.Equal(0, Trace.IndentLevel);
+            Assert.Equal(0, Debug.IndentLevel);
+            Assert.Equal(0, Trace.Listeners[0].IndentLevel);
+
+            Debug.Indent();
+            Assert.Equal(1, Trace.IndentLevel);
+            Assert.Equal(1, Debug.IndentLevel);
+            Assert.Equal(1, Trace.Listeners[0].IndentLevel);
+
+            Trace.Indent();
+            Assert.Equal(2, Trace.IndentLevel);
+            Assert.Equal(2, Debug.IndentLevel);
+            Assert.Equal(2, Trace.Listeners[0].IndentLevel);
+
+            Debug.Unindent();
+            Trace.Unindent();
+            Assert.Equal(0, Trace.IndentLevel);
+            Assert.Equal(0, Debug.IndentLevel);
+            Assert.Equal(0, Trace.Listeners[0].IndentLevel);
+
+            Debug.Unindent();
+            Assert.Equal(0, Trace.IndentLevel);
+            Assert.Equal(0, Debug.IndentLevel);
+            Assert.Equal(0, Trace.Listeners[0].IndentLevel);
+
+            Trace.IndentSize = 7;
+            Assert.Equal(7, Debug.IndentSize);
+            Assert.Equal(7, Trace.Listeners[0].IndentSize);
+
+            Debug.IndentSize = 4;
+            Assert.Equal(4, Trace.IndentSize);
+            Assert.Equal(4, Trace.Listeners[0].IndentSize);
+
+            Debug.IndentLevel = 0; // reset
+            Assert.Equal(before, Debug.IndentSize * Debug.IndentLevel);
+        }
+
+        [Fact]
+        public void TraceRefresh_ResetsIndentSize()
+        {
+            int before = Debug.IndentSize * Debug.IndentLevel;
+            Debug.IndentSize = 5;
+            Debug.IndentLevel = 3;
+            Trace.Refresh();
+
+            Assert.Equal(4, Debug.IndentSize);
+            Assert.Equal(3, Debug.IndentLevel);
+                
+            Debug.IndentLevel = 0; // reset
+            Assert.Equal(before, Debug.IndentSize * Debug.IndentLevel);
+        }
+
+        [Fact]
+        public void ClearTraceListeners_StopsWritingToDebugger()
+        {
+            VerifyLogged(() => Debug.Write("pizza"), "pizza");
+            VerifyLogged(() => Trace.Write("pizza"), "pizza");
+            Trace.Listeners.Clear();
+            VerifyLogged(() => Debug.Write("pizza"), string.Empty); 
+            VerifyLogged(() => Trace.Write("pizza"), string.Empty);
+            Trace.Refresh();
+            VerifyLogged(() => Debug.Write("pizza"), "pizza"); 
+            VerifyLogged(() => Trace.Write("pizza"), "pizza");
+
+            Debug.WriteLine(""); // neutralize next indentation HACK
         }
 
         [Fact]
@@ -139,6 +300,40 @@ namespace System.Diagnostics.Tests
 
             VerifyLogged(() => Debug.WriteLineIf(true, "logged", "category"), "category: logged" + Environment.NewLine);
             VerifyLogged(() => Debug.WriteLineIf(false, "logged", "category"), "");     
+        }
+
+        [Fact]
+        public void TraceWriteIf()
+        {
+            VerifyLogged(() => Trace.WriteIf(true, 5), "5");
+            VerifyLogged(() => Trace.WriteIf(false, 5), "");
+
+            VerifyLogged(() => Trace.WriteIf(true, 5, "category"), "category: 5");
+            VerifyLogged(() => Trace.WriteIf(false, 5, "category"), "");
+
+            VerifyLogged(() => Trace.WriteIf(true, "logged"), "logged");
+            VerifyLogged(() => Trace.WriteIf(false, "logged"), "");
+
+            VerifyLogged(() => Trace.WriteIf(true, "logged", "category"), "category: logged");
+            VerifyLogged(() => Trace.WriteIf(false, "logged", "category"), "");
+
+            Trace.WriteLine(""); // neutralize next indentation HACK
+        }
+
+        [Fact]
+        public void TraceWriteLineIf()
+        {
+            VerifyLogged(() => Trace.WriteLineIf(true, 5), "5" + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLineIf(false, 5), "");
+
+            VerifyLogged(() => Trace.WriteLineIf(true, 5, "category"), "category: 5" + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLineIf(false, 5, "category"), "");
+
+            VerifyLogged(() => Trace.WriteLineIf(true, "logged"), "logged" + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLineIf(false, "logged"), "");
+
+            VerifyLogged(() => Trace.WriteLineIf(true, "logged", "category"), "category: logged" + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLineIf(false, "logged", "category"), "");     
         }
 
         [Theory]
@@ -262,7 +457,7 @@ namespace System.Diagnostics.Tests
         {
             public static readonly WriteLogger s_instance = new WriteLogger();
 
-            private WriteLogger() { }
+            private WriteLogger() { Assert.Equal(1, Trace.Listeners.Count); } // Activates Wiring of TraceListeners to Debug
 
             public string LoggedOutput { get; private set; }
 

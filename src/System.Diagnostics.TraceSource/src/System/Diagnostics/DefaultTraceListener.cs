@@ -41,6 +41,7 @@ namespace System.Diagnostics
                     base.Write(message.Substring(offset));
                 }
             }
+            public override int IndentLevel { get { return 0; } set { } } // ignores indentation inside base.Write call
         }
 
         private static readonly DebugProvider s_provider = new DefaultTraceDebugProvider();
