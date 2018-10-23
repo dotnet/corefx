@@ -34,7 +34,7 @@ namespace System.SpanTests
             Memory<string> pinnedMemory = MemoryMarshal.CreateFromPinnedArray(a, 4, 3);
             pinnedMemory.Validate("94", "95", "96");
         }
-        
+
         [Fact]
         public static void CreateFromPinnedArrayIntSliceRemainsPinned()
         {
@@ -46,25 +46,23 @@ namespace System.SpanTests
 
             Memory<int> slice = pinnedMemory.Slice(0);
             TestMemory<int> testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index, testSlice._index);
-            Assert.Equal(testPinnedMemory._length, testSlice._length);
+            Assert.Equal(3 | (1 << 31), testSlice._index);
+            Assert.Equal(5, testSlice._length);
 
             slice = pinnedMemory.Slice(0, pinnedMemory.Length);
             testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index, testSlice._index);
-            Assert.Equal(testPinnedMemory._length, testSlice._length);
+            Assert.Equal(3 | (1 << 31), testSlice._index);
+            Assert.Equal(5, testSlice._length);
 
-            int expectedLength = testPinnedMemory._length - 1;
             slice = pinnedMemory.Slice(1);
             testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
-            Assert.Equal(expectedLength, testSlice._length);
+            Assert.Equal(4 | (1 << 31), testSlice._index);
+            Assert.Equal(4, testSlice._length);
 
-            expectedLength = 2 | (1 << 31);
             slice = pinnedMemory.Slice(1, 2);
             testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
-            Assert.Equal(expectedLength, testSlice._length);
+            Assert.Equal(4 | (1 << 31), testSlice._index);
+            Assert.Equal(2, testSlice._length);
         }
         
         [Fact]
@@ -78,25 +76,23 @@ namespace System.SpanTests
 
             ReadOnlyMemory<int> slice = pinnedMemory.Slice(0);
             TestMemory<int> testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index, testSlice._index);
-            Assert.Equal(testPinnedMemory._length, testSlice._length);
+            Assert.Equal(3 | (1 << 31), testSlice._index);
+            Assert.Equal(5, testSlice._length);
 
             slice = pinnedMemory.Slice(0, pinnedMemory.Length);
             testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index, testSlice._index);
-            Assert.Equal(testPinnedMemory._length, testSlice._length);
+            Assert.Equal(3 | (1 << 31), testSlice._index);
+            Assert.Equal(5, testSlice._length);
 
-            int expectedLength = testPinnedMemory._length - 1;
             slice = pinnedMemory.Slice(1);
             testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
-            Assert.Equal(expectedLength, testSlice._length);
+            Assert.Equal(4 | (1 << 31), testSlice._index);
+            Assert.Equal(4, testSlice._length);
 
-            expectedLength = 2 | (1 << 31);
             slice = pinnedMemory.Slice(1, 2);
             testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
-            Assert.Equal(testPinnedMemory._index + 1, testSlice._index);
-            Assert.Equal(expectedLength, testSlice._length);
+            Assert.Equal(4 | (1 << 31), testSlice._index);
+            Assert.Equal(2, testSlice._length);
         }
 
         [Fact]
