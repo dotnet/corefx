@@ -7,6 +7,9 @@
     tell Microsoft.Common.props not to import Directory.Build.props again
     -->
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+
+    <ToolSetCommonDirectory>$(MSBuildThisFileDirectory)artifacts\toolset\Common\</ToolSetCommonDirectory>
+    <IsSourceProject Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectDirectory), 'src%24'))">true</IsSourceProject>
   </PropertyGroup>
 
   <!-- We shipped assembly file version 4.6.x up until the end of rc3.  Version assembly as
@@ -39,7 +42,7 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
-  <Import Project="$(ProjectDir)artifacts\toolset\Common\Tools.proj.nuget.g.props" Condition="Exists('$(ProjectDir)artifacts\toolset\Common\Tools.proj.nuget.g.props')" />
+  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.props" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.props')" />
 
   <!-- Common repo directories -->
   <PropertyGroup>
@@ -72,11 +75,17 @@
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(DotNetRoot)</DotnetCliPath>
     <ToolHostCmd Condition="'$(ToolHostCmd)'==''">"$(DotNetRoot)dotnet"</ToolHostCmd>
   </PropertyGroup>
+
   <!-- Choose .targets files that come from Arcade rather than from buildtools -->
+  <!-- TODO: Remove when buildtools dependency removed. -->
   <PropertyGroup>
     <ExcludeNotSupportedImport>true</ExcludeNotSupportedImport>
     <ExcludePartialFacadesImport>true</ExcludePartialFacadesImport>
     <ExcludeApiCompatImport>true</ExcludeApiCompatImport>
+    <ExcludeReferenceAssembliesImport>true</ExcludeReferenceAssembliesImport>
+    <ExcludePackagingImport>true</ExcludePackagingImport>
+    <ExcludePackageLibsImport>true</ExcludePackageLibsImport>
+    <ExcludeCodeAnalysisImport>true</ExcludeCodeAnalysisImport>
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -84,7 +93,7 @@
 
   <!-- Enable the analyzers for this repo -->
   <PropertyGroup>
-    <EnableDotnetAnalyzers Condition="'$(EnableDotnetAnalyzers)'==''">true</EnableDotnetAnalyzers>
+    <EnableAnalyzers Condition="'$(EnableAnalyzers)'=='' AND '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
   </PropertyGroup>
 
   <!-- Default properties for CI builds -->
@@ -279,11 +288,6 @@
     <Deterministic>false</Deterministic>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsReferenceAssembly)' == 'true'">
-    <!-- disable warnings about unused fields -->
-    <NoWarn>$(NoWarn);0169;0649</NoWarn>
-  </PropertyGroup>
-
   <!-- Set up some common paths -->
   <PropertyGroup>
     <CommonPath>$(SourceDir)Common\src</CommonPath>
@@ -306,7 +310,6 @@
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
 
-    <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
 
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(RootIntermediateOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
@@ -403,6 +406,9 @@
     <!-- Disable VS Test SDK references if the .NET Native toolchain is used. -->
     <IncludeVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</IncludeVSTestReferences>
   </PropertyGroup>
+
+  <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
+  <Import Project="$(MSBuildThisFileDirectory)eng\ReferenceAssemblies.props" />
 
   <!-- Use Roslyn Compilers to build -->
   <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false' and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />
