@@ -13,7 +13,7 @@ Namespace Microsoft.VisualBasic
         Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
             Dim Title As String
 
-            'Get the Assembly name of the calling assembly 
+            'Get the Assembly name of the calling assembly
             'Assembly.GetName requires PathDiscovery permission so we try this first
             'and if it throws we catch the security exception and parse the name
             'from the full assembly name
@@ -38,7 +38,14 @@ Namespace Microsoft.VisualBasic
             Dim sPrompt As String = Nothing
             Dim sTitle As String
             'Dim vbhost As CompilerServices.IVbHost
+            'Dim ParentWindow As System.Windows.Forms.IWin32Window = Nothing
+            ' A read Parent window is need to make this monction modal
             Dim ParentWindow As Integer = Nothing
+
+            'vbhost = CompilerServices.HostServices.VBHost
+            'If Not vbhost Is Nothing Then
+            '    ParentWindow = vbhost.GetParentWindow()
+            'End If
 
             'Only allow legal button combinations to be set, one choice from each group
             'These bit constants are defined in System.Windows.Forms.MessageBox

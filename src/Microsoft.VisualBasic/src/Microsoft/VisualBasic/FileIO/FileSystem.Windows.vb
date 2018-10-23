@@ -3,14 +3,14 @@
 ' See the LICENSE file in the project root for more information.
 Option Explicit On
 Option Strict On
-
-Imports System
 Imports System.ComponentModel
-Imports System.Diagnostics
 Imports System.Runtime.InteropServices
 Imports System.Security
 Imports System.Text
 Imports Microsoft.VisualBasic.CompilerServices
+Imports Microsoft.VisualBasic.CompilerServices.NativeMethods
+Imports Microsoft.VisualBasic.CompilerServices.NativeTypes
+
 Namespace Microsoft.VisualBasic.FileIO
     Partial Public Class FileSystem
         ''' <summary>
@@ -293,44 +293,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Select
         End Sub
 
-        ''' <summary>
-        ''' Contains information that the SHFileOperation function uses to perform file operations on 32-bit platforms.
-        ''' </summary>
-        ''' <remarks>
-        ''' * For detail documentation: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/reference/structures/shfileopstruct.asp.
-        ''' Members:
-        '''   hwnd: Window handle to the dialog box to display information about the status of the operation.
-        '''   wFunc: Value indicates which operation (copy, move, rename, delete) to perform.
-        '''   pFrom: Buffer for 1 or more source file names. Each name ends with a NULL separator + additional NULL at the end.
-        '''   pTo: Buffer for destination name(s). Same rule as pFrom.
-        '''   fFlags: Flags that control details of the operation.
-        '''   fAnyOperationsAborted: Out param. TRUE if user aborted any file operations. Otherwise, FALSE.
-        '''   hNameMappings: Handle to name mapping object containing old and new names of renamed files (not used).
-        '''   lpszProgressTitle: Address of a string to use as title of progress dialog box. (not used).
-        ''' typedef struct _SHFILEOPSTRUCT {
-        '''    HWND hwnd;
-        '''    UINT wFunc;
-        '''    LPCTSTR pFrom;
-        '''    LPCTSTR pTo;
-        '''    FILEOP_FLAGS fFlags; (WORD)
-        '''    BOOL fAnyOperationsAborted;
-        '''    LPVOID hNameMappings;
-        '''    LPCTSTR lpszProgressTitle;
-        ''' } SHFILEOPSTRUCT, *LPSHFILEOPSTRUCT;
-        '''   If no steps are taken, the last 3 variables will not be passed correctly. Hence the Pack:=1.
-        ''' </remarks>
-        <StructLayout(LayoutKind.Sequential, Pack:=1, CharSet:=CharSet.Auto)>
-        Friend Structure SHFILEOPSTRUCT
-            Friend hwnd As IntPtr
-            Friend wFunc As UInteger
-            <MarshalAs(UnmanagedType.LPTStr)> Friend pFrom As String
-            <MarshalAs(UnmanagedType.LPTStr)> Friend pTo As String
-            Friend fFlags As UShort
-            Friend fAnyOperationsAborted As Boolean
-            Friend hNameMappings As IntPtr
-            <MarshalAs(UnmanagedType.LPTStr)> Friend lpszProgressTitle As String
-        End Structure
-
         ' Base operation flags used in shell IO operation.
         ' - DON'T move connected files as a group.
         ' - DON'T confirm directory creation - our silent copy / move do not.
@@ -353,20 +315,5 @@ Namespace Microsoft.VisualBasic.FileIO
             MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
             MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
             MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
-
-        Private NotInheritable Class NativeTypes
-            ' Error code from public\sdk\inc\winerror.h
-            Friend Const ERROR_FILE_NOT_FOUND As Integer = 2
-            Friend Const ERROR_PATH_NOT_FOUND As Integer = 3
-            Friend Const ERROR_ACCESS_DENIED As Integer = 5
-            Friend Const ERROR_ALREADY_EXISTS As Integer = 183
-            Friend Const ERROR_FILENAME_EXCED_RANGE As Integer = 206
-            Friend Const ERROR_INVALID_DRIVE As Integer = 15
-            Friend Const ERROR_INVALID_PARAMETER As Integer = 87
-            Friend Const ERROR_SHARING_VIOLATION As Integer = 32
-            Friend Const ERROR_FILE_EXISTS As Integer = 80
-            Friend Const ERROR_OPERATION_ABORTED As Integer = 995
-            Friend Const ERROR_CANCELLED As Integer = 1223
-        End Class
     End Class
 End Namespace

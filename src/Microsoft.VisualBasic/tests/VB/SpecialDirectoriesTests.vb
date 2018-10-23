@@ -88,9 +88,13 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub CurrentUserApplicationDataFolderTest()
             Dim Env_ApplicationData As String = Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.Create).Trim.TrimEnd(Separators).Trim
 
-            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData.Length = 0 OrElse Not IO.Directory.Exists(Env_ApplicationData) Then
+            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData.Length = 0 Then
+                Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
+            ElseIf Not IO.Directory.Exists(Env_ApplicationData) Then
+                ' I don't know why you would ever get here but you do on one test platform. Need help isolating issue.
                 Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
+
                 If GetCompanyProductVersionPath.Length = 0 Then
                     Dim CurrentUserApplicationData As String = SpecialDirectories.CurrentUserApplicationData
                     Assert.Equal(expected:=Env_ApplicationData, actual:=CurrentUserApplicationData)

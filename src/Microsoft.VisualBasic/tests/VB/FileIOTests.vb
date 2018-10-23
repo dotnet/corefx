@@ -133,6 +133,10 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, "Test"), IO.Path.Combine(TestBase.TestDirectory, "Test"))
             End Using
         End Sub
+        <Fact>
+        Public Shared Sub IOPathCombineTest()
+            Assert.Throws(Of System.ArgumentNullException)(Function() FileSystem.CombinePath(Nothing, "User"))
+        End Sub
 
         <Fact>
         Public Shared Sub CreateDirectory_Directory()
