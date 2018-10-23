@@ -123,7 +123,7 @@ Namespace Microsoft.VisualBasic.FileIO
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
                 Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), SR.IO_SpecialDirectory_UserAppData).Trim.TrimEnd(Separators).Trim
-                If ApplicationData.Length = 0 Then
+                If String.IsNullOrEmpty(ApplicationData) Then
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.ApplicationData returned String.Empty.")
                 End If
                 If Not IO.Directory.Exists(ApplicationData) Then
@@ -161,7 +161,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="DirectoryNameResID">The resource ID of the special directory's localized name.</param>
         ''' <returns>A String containing the path to the special directory if success.</returns>
         Private Shared Function GetDirectoryPath(ByVal Directory As String, ByVal DirectoryNameResID As String) As String
-            If Directory.Trim.TrimEnd(Separators).TrimEnd.Length = 0 Then
+            If Directory Is Nothing OrElse Directory.Trim.TrimEnd(Separators).TrimEnd.Length = 0 Then
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(DirectoryNameResID))
             End If
             Return FileSystem.NormalizePath(Directory)

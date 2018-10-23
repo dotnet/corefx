@@ -487,7 +487,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="detectEncoding">Indicates whether or not to detect encoding from the BOM</param>
         ''' <remarks>We validate the arguments here for the three Public constructors that take a Path</remarks>
         Private Sub InitializeFromPath(ByVal path As String, ByVal defaultEncoding As System.Text.Encoding, ByVal detectEncoding As Boolean)
-            If path.Length = 0 Then
+            If path = "" Then
                 Throw GetArgumentNullException("path")
             End If
 
@@ -558,14 +558,14 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' Ignore empty or whitespace lines
             Dim TrimmedLine As String = line.Trim()
-            If TrimmedLine.Length = 0 Then
+            If TrimmedLine = "" Then
                 Return True
             End If
 
             ' Ignore comments
             If m_CommentTokens IsNot Nothing Then
                 For Each Token As String In m_CommentTokens
-                    If Token.Length = 0 Then
+                    If Token = "" Then
                         Continue For
                     End If
 
@@ -1133,7 +1133,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 ' Check Comment Tokens
                 If m_CommentTokens IsNot Nothing Then
                     For Each Token As String In m_CommentTokens
-                        If Token.Length = 0 Then
+                        If Token = "" Then
                             If HasFieldsEnclosedInQuotes And m_TextFieldType = FieldType.Delimited Then
 
                                 If String.Compare(Token.Trim(), """", StringComparison.Ordinal) = 0 Then
@@ -1156,7 +1156,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return
             End If
             For Each delimiter As String In delimiterArray
-                If delimiter.Length = 0 Then
+                If delimiter = "" Then
                     Throw GetArgumentExceptionWithArgName("Delimiters", SR.TextFieldParser_DelimiterNothing, "Delimiters")
                 End If
                 If delimiter.IndexOfAny(New Char() {Chr(13), Chr(10)}) > -1 Then

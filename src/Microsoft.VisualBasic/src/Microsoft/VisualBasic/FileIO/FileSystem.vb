@@ -59,7 +59,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="relativePath">The second part of the path, must be a relative path.</param>
         ''' <returns>A String contains the combined path.</returns>
         Public Shared Function CombinePath(ByVal baseDirectory As String, ByVal relativePath As String) As String
-            If baseDirectory.Length = 0 Then
+            If IsEmptyNullOrWhitespace(baseDirectory) Then
                 Throw ExUtils.GetArgumentNullException("baseDirectory", SR.General_ArgumentEmptyOrNothing_Name, "baseDirectory")
             End If
             If relativePath.Length = 0 Then
@@ -86,7 +86,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to verify.</param>
         ''' <returns>True if FilePath refers to an existing file on disk. Otherwise, False.</returns>
         Public Shared Function FileExists(ByVal file As String) As Boolean
-            If Not String.IsNullOrEmpty(file) AndAlso
+            If Not IsEmptyNullOrWhitespace( file) AndAlso
                 (file.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) Or
                 file.EndsWith(IO.Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) Then
                 Return False
@@ -123,7 +123,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 FileOrDirectory.File, directory, searchType, fileWildcards)
 
             ' Find the files containing the given text.
-            If containsText.Length <> 0 Then
+            If Not String.IsNullOrEmpty(containsText) Then
                 Dim ContainTextFiles As New ObjectModel.Collection(Of String)
                 For Each FilePath As String In NameMatchFiles
                     If (FileContainsText(FilePath, containsText, ignoreCase)) Then
@@ -667,7 +667,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             ' Verify newName is not null.
-            If newName.Length = 0 Then
+            If String.IsNullOrEmpty(newName) Then
                 Throw ExUtils.GetArgumentNullException(
                     "newName", SR.General_ArgumentEmptyOrNothing_Name, "newName")
             End If
@@ -703,7 +703,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             ' Verify newName is not null.
-            If newName.Length = 0 Then
+            If String.IsNullOrEmpty(newName) Then
                 Throw ExUtils.GetArgumentNullException(
                     "newName", SR.General_ArgumentEmptyOrNothing_Name, "newName")
             End If
@@ -835,7 +835,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="path">The file path.</param>
         ''' <param name="paramName">The parameter name to include in ArgumentException.</param>
         Friend Shared Sub CheckFilePathTrailingSeparator(ByVal path As String, ByVal paramName As String)
-            If path.Length = 0 Then ' Check for argument null
+            If path = "" Then ' Check for argument null
                 Throw ExUtils.GetArgumentNullException(paramName)
             End If
             If path.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.Ordinal) Or
@@ -1341,7 +1341,7 @@ Namespace Microsoft.VisualBasic.FileIO
             If wildcards IsNot Nothing Then
                 For Each wildcard As String In wildcards
                     ' Throw if empty string or Nothing.
-                    If wildcard.TrimEnd().Length = 0 Then
+                    If wildcard.TrimEnd() = "" Then
                         Throw ExUtils.GetArgumentNullException("wildcards", SR.IO_GetFiles_NullPattern)
                     End If
                 Next
