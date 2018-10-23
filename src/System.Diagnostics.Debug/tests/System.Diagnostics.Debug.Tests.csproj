@@ -9,6 +9,12 @@
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Diagnostics.Debug" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ReferenceFromRuntime Include="System.Runtime" />
+    <ReferenceFromRuntime Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="DebuggerTypeProxyAttributeTests.cs" />
     <Compile Include="DebuggerDisplayAttributeTests.cs" />
     <Compile Include="DebuggerBrowsableAttributeTests.cs" />
