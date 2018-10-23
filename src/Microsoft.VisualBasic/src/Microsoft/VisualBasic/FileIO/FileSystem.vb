@@ -8,7 +8,6 @@ Imports System.ComponentModel
 Imports System.Globalization
 Imports System.Runtime.Versioning
 Imports System.Security
-Imports System.Security.Permissions
 Imports System.Text
 Imports Microsoft.VisualBasic.CompilerServices
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
@@ -18,7 +17,7 @@ Namespace Microsoft.VisualBasic.FileIO
     '''  This class represents the file system on a computer. It allows browsing the existing drives, special directories;
     '''  and also contains some commonly use methods for IO tasks.
     ''' </summary>
-    <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
+    '<HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
     Partial Public Class FileSystem
         Sub New()
         End Sub
