@@ -30,9 +30,5 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>dd701110d79bb60c84a141ab9017320ed2df0b41</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.CodeAnalysis" Version="1.0.0-beta.18519.7">
-      <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>850bc9fe3cf335eb54c1fe57ed20b54d2ba46d09</Sha>
-    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
