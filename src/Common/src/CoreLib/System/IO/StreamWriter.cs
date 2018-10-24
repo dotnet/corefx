@@ -81,8 +81,18 @@ namespace System.IO
         {
         }
 
+        public StreamWriter(Stream stream, IFormatProvider formatProvider)
+            : this(stream, UTF8NoBOM, DefaultBufferSize, false, formatProvider)
+        {
+        }
+
         public StreamWriter(Stream stream, Encoding encoding)
             : this(stream, encoding, DefaultBufferSize, false)
+        {
+        }
+
+        public StreamWriter(Stream stream, Encoding encoding, IFormatProvider formatProvider)
+           : this(stream, encoding, DefaultBufferSize, false, formatProvider)
         {
         }
 
@@ -95,8 +105,18 @@ namespace System.IO
         {
         }
 
+        public StreamWriter(Stream stream, Encoding encoding, int bufferSize, IFormatProvider formatProvider)
+           : this(stream, encoding, bufferSize, false, formatProvider)
+        {
+        }
+
         public StreamWriter(Stream stream, Encoding encoding, int bufferSize, bool leaveOpen)
-            : base(null) // Ask for CurrentCulture all the time
+            : this(stream, encoding, bufferSize, leaveOpen, null) // Ask for CurrentCulture all the time
+        {
+        }
+
+        public StreamWriter(Stream stream, Encoding encoding, int bufferSize, bool leaveOpen, IFormatProvider formatProvider)
+           : base(formatProvider)
         {
             if (stream == null || encoding == null)
             {
@@ -119,8 +139,18 @@ namespace System.IO
         {
         }
 
+        public StreamWriter(string path, IFormatProvider formatProvider)
+            : this(path, false, UTF8NoBOM, DefaultBufferSize, formatProvider)
+        {
+        }
+
         public StreamWriter(string path, bool append)
             : this(path, append, UTF8NoBOM, DefaultBufferSize)
+        {
+        }
+
+        public StreamWriter(string path, bool append, IFormatProvider formatProvider)
+            : this(path, append, UTF8NoBOM, DefaultBufferSize, formatProvider)
         {
         }
 
@@ -129,8 +159,19 @@ namespace System.IO
         {
         }
 
+        public StreamWriter(string path, bool append, Encoding encoding, IFormatProvider formatProvider)
+            : this(path, append, encoding, DefaultBufferSize, formatProvider)
+        {
+        }
+
         public StreamWriter(string path, bool append, Encoding encoding, int bufferSize)
-        { 
+            : this(path, append, encoding, bufferSize, null)
+        {
+        }
+
+        public StreamWriter(string path, bool append, Encoding encoding, int bufferSize, IFormatProvider formatProvider)
+            : base(formatProvider)
+        {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
             if (encoding == null)
