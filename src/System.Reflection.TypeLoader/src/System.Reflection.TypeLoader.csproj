@@ -40,7 +40,6 @@
     <Compile Include="FromCoreRt\System\Reflection\Runtime\TypeInfos\RuntimeTypeInfo.TypeComponentsCache.cs" />
     <Compile Include="FromCoreRt\System\Reflection\SignatureTypeExtensions.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="SR2.cs" />
     <Compile Include="System\Reflection\TypeLoader.Apis.cs" />
@@ -150,54 +149,17 @@
     <Compile Include="System\Reflection\TypeLoading\Types\RoType.TypeClassification.cs" />
     <Compile Include="System\Reflection\TypeLoading\Types\RoWrappedType.cs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <!-- Compile Include="..\..\Common\src\CoreLib\Internal\Runtime\CompilerServices\Unsafe.cs" / -->
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Reference Include="System.Collections.Concurrent" />
-    <Reference Include="System.Collections.Immutable" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Reflection" />
-    <Reference Include="System.Reflection.Metadata" />
-    <Reference Include="System.Memory" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
-
-    <Reference Include="System.IO" />
-    <Reference Include="System.IO.FileSystem" />
-    
-    <Reference Include="System.Reflection.Extensions" />
-    <Reference Include="System.Reflection.Primitives" />
-    <Reference Include="System.Resources.ResourceManager" />
-    < Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading" />
-
-    <Reference Include="System.Collections">
-    <Reference Include="System.Diagnostics.Contracts" />
-    <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Globalization" />
-    <Reference Include="System.Linq" / -->
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.Immutable" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Reflection.Metadata" />
-    <!-- Reference Include="System.Runtime.CompilerServices.Unsafe" / -->
-
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
-
-  <!-->ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3' or '$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'" -->
-  <!-->Reference Include="System.Runtime.InteropServices" / -->
-  <!-- /ItemGroup -->
 </Project>

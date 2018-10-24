@@ -2,12 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
-    <ProjectReference Include="..\ref\System.Reflection.TypeLoader.csproj">
-      <SupportedFramework>net461;netcoreapp3.0</SupportedFramework>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Reflection.TypeLoader.csproj" />
-    <HarvestIncludePaths Include="ref/netstandard1.3;runtimes/win/lib/netstandard1.3;lib/netstandard1.3" />
-    <HarvestIncludePaths Include="ref/netcoreapp2.1;lib/netcoreapp2.1;runtimes/win/lib/netcoreapp2.1" />
     <!-- this package is part of the implementation closure of NETStandard.Library
          therefore it cannot reference NETStandard.Library -->
     <SuppressMetaPackage Include="NETStandard.Library" />
