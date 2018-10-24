@@ -97,12 +97,13 @@ namespace System.Buffers
 
                 if (typeof(T) == typeof(char) && startObject.GetType() == typeof(string))
                 {
-                    return (ReadOnlyMemory<T>)(object)Unsafe.As<string>(startObject).AsMemory(startIndex, endIndex - startIndex);
+                    // No need to remove the FlagBitMask since (endIndex - startIndex) == (endIndex & ReadOnlySequence.IndexBitMask) - (startIndex & ReadOnlySequence.IndexBitMask)
+                    return (ReadOnlyMemory<T>)(object)Unsafe.As<string>(startObject).AsMemory(startIndex & ReadOnlySequence.IndexBitMask, endIndex - startIndex);
                 }
                 else
                 {
                     Debug.Assert(startObject is T[]);
-                    return new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, endIndex - startIndex);
+                    return new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, (endIndex & ReadOnlySequence.IndexBitMask) - startIndex);
                 }
             }
             else
@@ -124,7 +125,6 @@ namespace System.Buffers
             return MemoryFromMemoryManager(startObject, isMultiSegment);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private ReadOnlyMemory<T> MemoryFromMemoryManager(object startObject, bool isMultiSegment)
         {
             Debug.Assert(startObject != null);
@@ -133,7 +133,7 @@ namespace System.Buffers
             if (isMultiSegment)
                 ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
-            int startIndex = _sequenceStart.GetInteger();
+            int startIndex = _sequenceStart.GetInteger() & ReadOnlySequence.IndexBitMask;
             int endIndex = _sequenceEnd.GetInteger();
 
             return Unsafe.As<MemoryManagerHolder<T>>(startObject).MemoryManager.Memory.Slice(startIndex, endIndex - startIndex);
@@ -316,7 +316,7 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetIndex(in SequencePosition position) => position.GetInteger();
+        private static int GetIndex(in SequencePosition position) => position.GetInteger() & ReadOnlySequence.IndexBitMask;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
@@ -327,9 +327,9 @@ namespace System.Buffers
 
             return new ReadOnlySequence<T>(
                 start.GetObject(),
-                start.GetInteger(),
+                GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
                 end.GetObject(),
-                end.GetInteger()
+                GetIndex(end) | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
             );
         }
 

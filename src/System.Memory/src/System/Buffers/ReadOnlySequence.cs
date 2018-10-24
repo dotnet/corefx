@@ -85,8 +85,8 @@ namespace System.Buffers
                 (startSegment == endSegment && endIndex < startIndex))
                 ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
 
-            _sequenceStart = new SequencePosition(startSegment, startIndex);
-            _sequenceEnd = new SequencePosition(endSegment, endIndex);
+            _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
+            _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(endIndex));
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace System.Buffers
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
 
-            _sequenceStart = new SequencePosition(array, 0);
-            _sequenceEnd = new SequencePosition(array, array.Length);
+            _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(0));
+            _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(array.Length));
         }
 
         /// <summary>
@@ -111,8 +111,8 @@ namespace System.Buffers
                 (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentValidationException(array, start);
 
-            _sequenceStart = new SequencePosition(array, start);
-            _sequenceEnd = new SequencePosition(array, start + length);
+            _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
+            _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + length));
         }
 
         /// <summary>
@@ -124,23 +124,23 @@ namespace System.Buffers
             if (MemoryMarshal.TryGetMemoryManager(memory, out MemoryManager<T> manager, out int index, out int length))
             {
                 var holder = new MemoryManagerHolder<T>(manager);
-                _sequenceStart = new SequencePosition(holder, index);
-                _sequenceEnd = new SequencePosition(holder, length);
+                _sequenceStart = new SequencePosition(holder, ReadOnlySequence.MemoryManagerToSequenceStart(index));
+                _sequenceEnd = new SequencePosition(holder, ReadOnlySequence.MemoryManagerToSequenceEnd(length));
             }
             else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
                 T[] array = segment.Array;
                 int start = segment.Offset;
-                _sequenceStart = new SequencePosition(array, start);
-                _sequenceEnd = new SequencePosition(array, start + segment.Count);
+                _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
+                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + segment.Count));
             }
             else if (typeof(T) == typeof(char))
             {
                 if (!MemoryMarshal.TryGetString((ReadOnlyMemory<char>)(object)memory, out string text, out int start, out length))
                     ThrowHelper.ThrowInvalidOperationException();
 
-                _sequenceStart = new SequencePosition(text, start);
-                _sequenceEnd = new SequencePosition(text, start + length);
+                _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
+                _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + length));
             }
             else
             {
@@ -543,6 +543,40 @@ namespace System.Buffers
 
     internal static class ReadOnlySequence
     {
+        public const int FlagBitMask = 1 << 31;
+        public const int IndexBitMask = ~FlagBitMask;
+
+        public const int SegmentStartMask = 0;
+        public const int SegmentEndMask = 0;
+
+        public const int ArrayStartMask = 0;
+        public const int ArrayEndMask = FlagBitMask;
+
+        public const int MemoryManagerStartMask = FlagBitMask;
+        public const int MemoryManagerEndMask = 0;
+
+        public const int StringStartMask = FlagBitMask;
+        public const int StringEndMask = FlagBitMask;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SegmentToSequenceStart(int startIndex) => startIndex | SegmentStartMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SegmentToSequenceEnd(int endIndex) => endIndex | SegmentEndMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ArrayToSequenceStart(int startIndex) => startIndex | ArrayStartMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ArrayToSequenceEnd(int endIndex) => endIndex | ArrayEndMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MemoryManagerToSequenceStart(int startIndex) => startIndex | MemoryManagerStartMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MemoryManagerToSequenceEnd(int endIndex) => endIndex | MemoryManagerEndMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int StringToSequenceStart(int startIndex) => startIndex | StringStartMask;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int StringToSequenceEnd(int endIndex) => endIndex | StringEndMask;
+
+        // Borrowed from https://github.com/dotnet/coreclr/pull/20386
+
         // Returns true iff the object has a component size;
         // i.e., is variable length like string, array, Utf8String.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -596,6 +630,7 @@ namespace System.Buffers
         public MemoryManager<T> MemoryManager { get; }
     }
 
+    // Borrowed from https://github.com/dotnet/coreclr/blob/master/src/System.Private.CoreLib/src/System/Runtime/CompilerServices/jithelpers.cs
     // Helper class to assist with unsafe pinning of arbitrary objects. The typical usage pattern is:
     // fixed (byte * pData = &JitHelpers.GetPinningHelper(value).m_data)
     // {
