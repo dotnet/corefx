@@ -123,7 +123,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Private Shared Function SHFileOperation64(ByRef lpFileOp As SHFILEOPSTRUCT64) As Int32
         End Function
 
-
         ''' <summary>
         ''' Contains information that the SHFileOperation function uses to perform file operations
         ''' on 64-bit platforms, where the structure is unpacked. VSWhidbey 421265,

@@ -196,33 +196,36 @@ Namespace Microsoft.VisualBasic.FileIO
 
         ''' <summary>
         ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
+        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\ProductVersion
         ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
-        ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
+        ''' The only catch is that CompanyName and/or ProductName has to be specified in the AssemblyInfo.vb file,
         ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
         ''' </summary>
-        ''' <returns>[CompanyName]\[ProductName]\[ProductVersion] </returns>
+        ''' <returns>[CompanyName]\[ProductName]\ProductVersion or Assembly.Name </returns>
         Private Shared Function GetCompanyProductVersionList() As List(Of String)
+            Dim assm As Reflection.Assembly = Reflection.Assembly.GetExecutingAssembly()
             Dim PathList As New List(Of String)
             Try
-                Dim assm As Reflection.Assembly = Reflection.Assembly.GetEntryAssembly()
-                If assm Is Nothing Then
-                    assm = Reflection.Assembly.GetExecutingAssembly
-                    PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(assm.FullName)))
+                Dim CurrentProcess As Process = Process.GetCurrentProcess
+                Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.CompanyName)
+                If CompanyName <> "" Then
+                    PathList.Add(CompanyName)
+                End If
+                Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.ProductName)
+                If ProductName <> "" Then
+                    PathList.Add(ProductName)
+                End If
+                If PathList.Count = 0 Then
+                    Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
+                    Try
+                        PathList.Add(MakeValidFileName(CallingAssembly.GetName().Name))
+                    Catch ex As SecurityException
+                        Dim FullName As String = CallingAssembly.FullName
+                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(FullName)))
+                    End Try
                     Return PathList
                 End If
-                Dim at As Type = GetType(Reflection.AssemblyCompanyAttribute)
-                Dim r() As Object = assm.GetCustomAttributes(at, False)
-                Dim ct As Reflection.AssemblyCompanyAttribute = (DirectCast(r(0), Reflection.AssemblyCompanyAttribute))
-                If Not String.IsNullOrWhiteSpace(ct.Company) Then
-                    PathList.Add(MakeValidFileName(ct.Company))
-                End If
-                If Not String.IsNullOrWhiteSpace(assm.FullName) Then
-                    PathList.Add(MakeValidFileName(assm.FullName))
-                End If
-                If Not String.IsNullOrWhiteSpace(assm.GetName().Version.ToString) Then
-                    PathList.Add(MakeValidFileName(assm.GetName().Version.ToString))
-                End If
+                PathList.Add(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
             Catch
             End Try
             Return PathList
@@ -235,7 +238,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns></returns>
         Private Shared Function MakeValidFileName(InputName As String) As String
             Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
-            For Each c As Char In InputName
+            For Each c As Char In invalidFileChars
                 InputName = InputName.Replace(c.ToString(), "")
             Next c
             Return InputName.Trim.TrimStart("."c).TrimStart
