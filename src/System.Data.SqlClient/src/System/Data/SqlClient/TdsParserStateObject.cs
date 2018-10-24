@@ -3033,6 +3033,9 @@ namespace System.Data.SqlClient
                         //Buffer.BlockCopy(b, offset, _outBuff, _outBytesUsed, remainder);
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, remainder);
                         ReadOnlySpan<byte> copyFrom = b.Slice(0, remainder);
+
+                        Debug.Assert(copyTo.Length == copyFrom.Length, $"copyTo.Length:{copyTo.Length} and copyFrom.Length{copyFrom.Length:D} should be the same");
+
                         copyFrom.CopyTo(copyTo);
 
                         // handle counters
@@ -3057,6 +3060,9 @@ namespace System.Data.SqlClient
                                 byte[] tempArray = new byte[len];
                                 Span<byte> copyTempTo = tempArray.AsSpan();
                                 ReadOnlySpan<byte> copyTempFrom = b.Slice(remainder,len);
+
+                                Debug.Assert(copyTempTo.Length == copyTempFrom.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length{copyTempFrom.Length:D} should be the same");
+
                                 copyTempFrom.CopyTo(copyTempTo);
                                 array = tempArray;
                                 offset = 0;
@@ -3073,7 +3079,11 @@ namespace System.Data.SqlClient
 
                         //Buffer.BlockCopy(b, offset, _outBuff, _outBytesUsed, len);
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, len);
-                        b.CopyTo(copyTo);
+                        ReadOnlySpan<byte> copyFrom = b.Slice(0,len);
+
+                        Debug.Assert(copyTo.Length == copyFrom.Length, $"copyTo.Length:{copyTo.Length} and copyFrom.Length{copyFrom.Length:D} should be the same");
+
+                        copyFrom.CopyTo(copyTo);
 
                         // handle out buffer bytes used counter
                         _outBytesUsed += len;
