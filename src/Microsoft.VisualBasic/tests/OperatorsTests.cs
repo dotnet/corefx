@@ -836,7 +836,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(AndObject_TestData))]
         public void AndObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.AndObject(left, right));
+            Assert.Equal(expected, Operators.AndObject(left, right));
         }
 
         public static IEnumerable<object[]> AndObject_InvalidObjects_TestData()
@@ -1179,7 +1179,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(ConcatenateObject_TestData))]
         public void ConcatenateObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.ConcatenateObject(left, right));
+            Assert.Equal(expected, Operators.ConcatenateObject(left, right));
         }
 
         public static IEnumerable<object[]> ConcatenateObject_InvalidObjects_TestData()
@@ -1374,7 +1374,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (float)52, true, (float)(-52) };
             yield return new object[] { (float)56, null, double.PositiveInfinity };
             yield return new object[] { (float)58, float.PositiveInfinity, (float)0 };
-            yield return new object[] { (float)58, float.NegativeInfinity, (float)0 };
+            yield return new object[] { (float)58, float.NegativeInfinity, (float)(-0.0f) };
             yield return new object[] { (float)58, float.NaN, float.NaN };
             yield return new object[] { float.PositiveInfinity, (float)2, float.PositiveInfinity };
             yield return new object[] { float.NegativeInfinity, (float)2, float.NegativeInfinity };
@@ -1396,7 +1396,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (double)52, true, (double)(-52) };
             yield return new object[] { (double)56, null, double.PositiveInfinity };
             yield return new object[] { (double)58, double.PositiveInfinity, (double)0 };
-            yield return new object[] { (double)58, double.NegativeInfinity, (double)0 };
+            yield return new object[] { (double)58, double.NegativeInfinity, (double)(-0.0) };
             yield return new object[] { (double)58, double.NaN, double.NaN };
             yield return new object[] { double.PositiveInfinity, (double)2, double.PositiveInfinity };
             yield return new object[] { double.NegativeInfinity, (double)2, double.NegativeInfinity };
@@ -1416,7 +1416,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)44, (decimal)2, (decimal)22 };
             yield return new object[] { (decimal)48, "2", (double)24 };
             yield return new object[] { (decimal)52, true, (decimal)(-52) };
-            yield return new object[] { decimal.MaxValue, (decimal)0.5, float.Parse("1.584563E+29", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { decimal.MaxValue, (decimal)0.5, float.Parse("1.58456325028529E+29", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // string + primitives
             yield return new object[] { "4", (byte)2, (double)2 };
@@ -1477,7 +1477,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(DivideObject_TestData))]
         public void DivideObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.DivideObject(left, right));
+            Assert.Equal(expected, Operators.DivideObject(left, right));
         }
 
         [Fact]
@@ -1730,7 +1730,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(ExponentObject_TestData))]
         public void ExponentObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.ExponentObject(left, right));
+            Assert.Equal(expected, Operators.ExponentObject(left, right));
         }
 
         public static IEnumerable<object[]> ExponentObject_InvalidObjects_TestData()
@@ -2003,7 +2003,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(IntDivideObject_TestData))]
         public void IntDivideObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.IntDivideObject(left, right));
+            Assert.Equal(expected, Operators.IntDivideObject(left, right));
         }
 
         public static IEnumerable<object[]> IntDivideObject_DivideByZero_TestData()
@@ -2341,7 +2341,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(LeftShiftObject_TestData))]
         public void LeftShiftObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.LeftShiftObject(left, right));
+            Assert.Equal(expected, Operators.LeftShiftObject(left, right));
         }
 
         public static IEnumerable<object[]> LeftShiftObject_InvalidObjects_TestData()
@@ -2515,7 +2515,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ulong)13, true, (decimal)(-13) };
             yield return new object[] { (ulong)14, null, (ulong)0 };
             yield return new object[] { (ulong)15, ulong.MaxValue, decimal.Parse("276701161105643274225", CultureInfo.InvariantCulture) };
-            yield return new object[] { ulong.MaxValue, ulong.MaxValue, double.Parse("3.40282366920938E+38", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { ulong.MaxValue, ulong.MaxValue, double.Parse("3.4028236692093846E+38", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // long + primitives.
             yield return new object[] { (long)1, (byte)2, (long)2 };
@@ -2533,7 +2533,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (long)13, true, (long)(-13) };
             yield return new object[] { (long)14, null, (long)0 };
             yield return new object[] { (long)15, long.MaxValue, decimal.Parse("138350580552821637105", CultureInfo.InvariantCulture) };
-            yield return new object[] { long.MaxValue, long.MaxValue, double.Parse("8.50705917302346E+37", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { long.MaxValue, long.MaxValue, double.Parse("8.5070591730234616E+37", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // float + primitives
             yield return new object[] { (float)1, (byte)2, (float)2 };
@@ -2550,8 +2550,8 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (float)12, "2", (double)24 };
             yield return new object[] { (float)13, true, (float)(-13) };
             yield return new object[] { (float)14, null, (float)0 };
-            yield return new object[] { (float)15, float.MaxValue, double.Parse("5.10423519957793E+39", NumberStyles.Any, CultureInfo.InvariantCulture) };
-            yield return new object[] { float.MaxValue, float.MaxValue, double.Parse("1.15792075433824E+77", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { (float)15, float.MaxValue, double.Parse("5.1042351995779329E+39", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { float.MaxValue, float.MaxValue, double.Parse("1.1579207543382391E+77", NumberStyles.Any, CultureInfo.InvariantCulture) };
             yield return new object[] { (float)15, float.PositiveInfinity, float.PositiveInfinity };
             yield return new object[] { (float)15, float.NegativeInfinity, float.NegativeInfinity };
             yield return new object[] { (float)15, float.NaN, double.NaN };
@@ -2598,7 +2598,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)12, "2", (double)24 };
             yield return new object[] { (decimal)13, true, (decimal)(-13) };
             yield return new object[] { (decimal)14, null, (decimal)0 };
-            yield return new object[] { (decimal)15, decimal.MaxValue, double.Parse("1.18842243771397E+30", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { (decimal)15, decimal.MaxValue, double.Parse("1.1884224377139651E+30", NumberStyles.Any, CultureInfo.InvariantCulture) };
 
             // string + primitives
             yield return new object[] { "1", (byte)2, (double)2 };
@@ -2659,7 +2659,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(MultiplyObject_Idempotent_TestData))]
         public void MultiplyObject_Convertible_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.MultiplyObject(left, right));
+            Assert.Equal(expected, Operators.MultiplyObject(left, right));
 
             if (expected is string expectedString)
             {
@@ -2668,7 +2668,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             }
             else
             {
-                AssertEqual(expected, Operators.MultiplyObject(right, left));
+                Assert.Equal(expected, Operators.MultiplyObject(right, left));
             }
         }
 
@@ -2970,15 +2970,15 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (float)0, (float)1, (float)0 };
             yield return new object[] { (float)0, (float)0, float.NaN };
             yield return new object[] { (float)0, (float)(-1), (float)0 };
-            yield return new object[] { (float)(-20), (float)1, (float)0 };
+            yield return new object[] { (float)(-20), (float)1, (float)(-0.0f) };
             yield return new object[] { (float)(-20), (float)0, float.NaN };
-            yield return new object[] { (float)(-20), (float)(-1), (float)0 };
-            yield return new object[] { float.MaxValue, float.MinValue, (float)0 };
+            yield return new object[] { (float)(-20), (float)(-1), (float)(-0.0f) };
+            yield return new object[] { float.MaxValue, float.MaxValue, (float)0 };
             yield return new object[] { float.MaxValue, float.MinValue, (float)0 };
             yield return new object[] { float.MaxValue, (float)0, float.NaN };
             yield return new object[] { float.MaxValue, (float)(-1), (float)0 };
-            yield return new object[] { float.MinValue, float.MinValue, (float)0 };
-            yield return new object[] { float.MinValue, float.MinValue, (float)0 };
+            yield return new object[] { float.MinValue, float.MaxValue, (float)(-0.0f) };
+            yield return new object[] { float.MinValue, float.MinValue, (float)(-0.0f) };
             yield return new object[] { float.MinValue, (float)0, float.NaN };
             yield return new object[] { float.MinValue, (float)(-1), (float)0 };
 
@@ -3011,17 +3011,17 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (double)0, (double)1, (double)0 };
             yield return new object[] { (double)0, (double)0, double.NaN };
             yield return new object[] { (double)0, (double)(-1), (double)0 };
-            yield return new object[] { (double)(-20), (double)1, (double)0 };
+            yield return new object[] { (double)(-20), (double)1, (double)(-0.0) };
             yield return new object[] { (double)(-20), (double)0, double.NaN };
-            yield return new object[] { (double)(-20), (double)(-1), (double)0 };
-            yield return new object[] { double.MaxValue, double.MinValue, (double)0 };
+            yield return new object[] { (double)(-20), (double)(-1), (double)(-0.0) };
+            yield return new object[] { double.MaxValue, double.MaxValue, (double)0 };
             yield return new object[] { double.MaxValue, double.MinValue, (double)0 };
             yield return new object[] { double.MaxValue, (double)0, double.NaN };
             yield return new object[] { double.MaxValue, (double)(-1), (double)0 };
-            yield return new object[] { double.MinValue, double.MinValue, (double)0 };
-            yield return new object[] { double.MinValue, double.MinValue, (double)0 };
+            yield return new object[] { double.MinValue, double.MaxValue, (double)(-0.0) };
+            yield return new object[] { double.MinValue, double.MinValue, (double)(-0.0) };
             yield return new object[] { double.MinValue, (double)0, double.NaN };
-            yield return new object[] { double.MinValue, (double)(-1), (double)0 };
+            yield return new object[] { double.MinValue, (double)(-1), (double)(-0.0) };
 
             // decimal.
             yield return new object[] { (decimal)20, (byte)3, (decimal)2 };
@@ -3139,7 +3139,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(ModObject_TestData))]
         public void ModObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-             AssertEqual(expected, Operators.ModObject(left, right));
+             Assert.Equal(expected, Operators.ModObject(left, right));
         }
 
         public static IEnumerable<object[]> ModObject_InvalidObject_TestData()
@@ -3473,7 +3473,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(NegateObject_TestData))]
         public void NegateObject_Invoke_ReturnsExpected(object value, object expected)
         {
-             AssertEqual(expected, Operators.NegateObject(value));
+             Assert.Equal(expected, Operators.NegateObject(value));
         }
 
         public static IEnumerable<object[]> NegateObject_InvalidObject_TestData()
@@ -3574,7 +3574,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(NotObject_TestData))]
         public void NotObject_Invoke_ReturnsExpected(object value, object expected)
         {
-             AssertEqual(expected, Operators.NotObject(value));
+             Assert.Equal(expected, Operators.NotObject(value));
         }
 
         public static IEnumerable<object[]> NotObject_InvalidObject_TestData()
@@ -4156,7 +4156,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(OrObject_TestData))]
         public void OrObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.OrObject(left, right));
+            Assert.Equal(expected, Operators.OrObject(left, right));
         }
 
         public static IEnumerable<object[]> OrObject_InvalidObjects_TestData()
@@ -4521,7 +4521,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(RightShiftObject_TestData))]
         public void RightShiftObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.RightShiftObject(left, right));
+            Assert.Equal(expected, Operators.RightShiftObject(left, right));
         }
 
         public static IEnumerable<object[]> RightShiftObject_InvalidObjects_TestData()
@@ -4768,7 +4768,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (decimal)13, "2", (double)11 };
             yield return new object[] { (decimal)14, true, (decimal)15 };
             yield return new object[] { (decimal)15, null, (decimal)15 };
-            yield return new object[] { decimal.MinValue, decimal.MaxValue, double.Parse("-1.58456325028529E+29", NumberStyles.Any, CultureInfo.InvariantCulture) };
+            yield return new object[] { decimal.MinValue, decimal.MaxValue, double.Parse("-1.5845632502852868E+29", NumberStyles.Any, CultureInfo.InvariantCulture) };
         
             // string.
             yield return new object[] { "2", (byte)2, (double)0 };
@@ -4835,7 +4835,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(SubtractObject_TestData))]
         public void SubtractObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.SubtractObject(left, right));
+            Assert.Equal(expected, Operators.SubtractObject(left, right));
         }
 
         public static IEnumerable<object[]> SubtractObject_InvalidObjects_TestData()
@@ -5410,7 +5410,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(XorObject_TestData))]
         public void XorObject_Invoke_ReturnsExpected(object left, object right, object expected)
         {
-            AssertEqual(expected, Operators.XorObject(left, right));
+            Assert.Equal(expected, Operators.XorObject(left, right));
         }
 
         public static IEnumerable<object[]> XorObject_InvalidObjects_TestData()
@@ -5450,22 +5450,6 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
             public static string operator ^(XorObject left, OperatorsTests right) => "customobject";
             public static string operator ^(OperatorsTests left, XorObject right) => "tcejbomotsuc";
-        }
-
-        private static void AssertEqual(object expected, object actual)
-        {
-            if (expected is double expectedDouble && actual is double actualDouble)
-            {
-                Assert.Equal(expected.ToString(), actual.ToString());
-            }
-            else  if (expected is float expectedFloat && actual is float actualFloat)
-            {
-                Assert.Equal(expected.ToString(), actual.ToString());
-            }
-            else
-            {
-                Assert.Equal(expected, actual);
-            }
         }
     
         public enum ByteEnum : byte { Value = 1 }
