@@ -196,6 +196,20 @@ namespace System.Data.Tests.Common
             da.ReturnProviderSpecificTypes = true;
             Assert.True(da.ReturnProviderSpecificTypes);
         }
+
+        [Fact]
+        public void ResetFillLoadOption_OverwriteChanges()
+        {
+            DataAdapter da = new MyAdapter
+            {
+                FillLoadOption = LoadOption.PreserveChanges
+            };
+            da.ResetFillLoadOption();
+            Assert.Equal(LoadOption.OverwriteChanges, da.FillLoadOption);
+            da.FillLoadOption = LoadOption.Upsert;
+            da.ResetFillLoadOption();
+            Assert.Equal(LoadOption.OverwriteChanges, da.FillLoadOption);
+        }
     }
 
     internal class MyAdapter : DataAdapter
