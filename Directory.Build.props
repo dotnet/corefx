@@ -7,6 +7,9 @@
     tell Microsoft.Common.props not to import Directory.Build.props again
     -->
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+
+    <ToolSetCommonDirectory>$(MSBuildThisFileDirectory)artifacts\toolset\Common\</ToolSetCommonDirectory>
+    <IsSourceProject Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectDirectory), 'src%24'))">true</IsSourceProject>
   </PropertyGroup>
 
   <!-- We shipped assembly file version 4.6.x up until the end of rc3.  Version assembly as
@@ -36,6 +39,11 @@
     <IsPrerelease>true</IsPrerelease>
   </PropertyGroup>
 
+  <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
+  <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
+
+  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.props" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.props')" />
+
   <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
@@ -46,29 +54,38 @@
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
-    
+    <RootIntermediateOutputPath>$(MSBuildThisFileDirectory)bin/obj/</RootIntermediateOutputPath>
+
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'=='' and '$(NonShippingPackage)' == 'true'">$(BinDir)packages_noship/</PackageOutputRoot>
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'==''">$(BinDir)packages/</PackageOutputRoot>
 
     <!-- Input Directories -->
     <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
+    <PackagesDir Condition="'$(PackagesDir)'==''">$(NuGetPackageRoot)/</PackagesDir>
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
     <RestorePackagesPath Condition="'$(RestorePackagesPath)'==''">$(PackagesDir)</RestorePackagesPath>
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)'==''">$(PackagesDir)</NuGetPackageRoot>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
     <IlasmToolPath>$(ToolsDir)ilasm/ilasm</IlasmToolPath>
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
-
-    <!-- Set up ToolHostCmd for Arcade targets -->
-    <ToolHostCmd Condition="'$(ToolHostCmd)'==''">"$(ToolsDir)dotnetcli/dotnet"</ToolHostCmd>
+    <!-- Respect environment variable for the .NET install directory if set; otherwise, use the current default location -->
+    <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(DOTNET_INSTALL_DIR)</DotNetRoot>
+    <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(ProjectDir).dotnet\</DotNetRoot>
+    <DotNetRoot Condition="!HasTrailingSlash('$(DotNetRoot)')">$(DotNetRoot)\</DotNetRoot>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(DotNetRoot)</DotnetCliPath>
+    <ToolHostCmd Condition="'$(ToolHostCmd)'==''">"$(DotNetRoot)dotnet"</ToolHostCmd>
   </PropertyGroup>
 
   <!-- Choose .targets files that come from Arcade rather than from buildtools -->
+  <!-- TODO: Remove when buildtools dependency removed. -->
   <PropertyGroup>
     <ExcludeNotSupportedImport>true</ExcludeNotSupportedImport>
     <ExcludePartialFacadesImport>true</ExcludePartialFacadesImport>
     <ExcludeApiCompatImport>true</ExcludeApiCompatImport>
+    <ExcludeReferenceAssembliesImport>true</ExcludeReferenceAssembliesImport>
+    <ExcludePackagingImport>true</ExcludePackagingImport>
+    <ExcludePackageLibsImport>true</ExcludePackageLibsImport>
+    <ExcludeCodeAnalysisImport>true</ExcludeCodeAnalysisImport>
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -76,18 +93,20 @@
 
   <!-- Enable the analyzers for this repo -->
   <PropertyGroup>
-    <EnableDotnetAnalyzers Condition="'$(EnableDotnetAnalyzers)'==''">true</EnableDotnetAnalyzers>
+    <EnableAnalyzers Condition="'$(EnableAnalyzers)'=='' AND '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
   </PropertyGroup>
 
   <!-- Default properties for CI builds -->
-  <PropertyGroup Condition="'$(IsCIBuild)' == 'true'">
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
     <WithoutCategories>IgnoreForCI</WithoutCategories>
     <EnableDumpling>true</EnableDumpling>
     <CrashDumpFolder Condition="'$(RunningOnUnix)' != 'true'">%TMP%\CoreRunCrashDumps</CrashDumpFolder>
   </PropertyGroup>
-
-  <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
-  <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
+    <!-- Disable F5 and test explorer support for CI builds. -->
+    <GenerateLaunchSettings>false</GenerateLaunchSettings>
+    <IncludeVSTestReferences>false</IncludeVSTestReferences>
+  </PropertyGroup>
 
   <!-- list of nuget package sources passed to nuget restore -->
   <!-- Example to consume local CoreCLR package:
@@ -111,8 +130,10 @@
     <!-- Default any assembly not specifying a key to use the Open Key -->
     <AssemblyKey>Open</AssemblyKey>
     <RunApiCompat Condition="'$(TargetGroup)' != 'netcoreappaot'">true</RunApiCompat>
+    <ApiCompatExcludeAttributeList>$(MSBuildThisFileDirectory)tools-local/DefaultGenApiDocIds.txt</ApiCompatExcludeAttributeList>
     <!-- Build as portable by default -->
     <PortableBuild Condition="'$(PortableBuild)' == ''">true</PortableBuild>
+    <Performance Condition="'$(Performance)' == ''">false</Performance>
     <!-- Used for launchSettings.json and runtime config files. -->
     <AppDesignerFolder>Properties</AppDesignerFolder>
   </PropertyGroup>
@@ -164,7 +185,7 @@
     <_runtimeOS Condition="'$(_runtimeOS)' == 'tizen.5.0.0'">linux</_runtimeOS>
     <_runtimeOS Condition="'$(PortableBuild)' == 'true'">$(_portableOS)</_runtimeOS>
     <ToolRuntimeRID>$(_runtimeOS)-x64</ToolRuntimeRID>
-    
+
     <!-- There are no WebAssembly tools, so treat them as Windows -->
     <ToolRuntimeRID Condition="'$(RuntimeOS)' == 'WebAssembly'">win-x64</ToolRuntimeRID>
     <MicrosoftNetCoreIlasmPackageRuntimeId Condition="'$(MicrosoftNetCoreIlasmPackageRuntimeId)' == ''">$(ToolRuntimeRID)</MicrosoftNetCoreIlasmPackageRuntimeId>
@@ -264,11 +285,7 @@
     <Features>strict</Features>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(IsReferenceAssembly)' == 'true'">
-    <!-- disable warnings about unused fields -->
-    <NoWarn>$(NoWarn);0169;0649</NoWarn>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
 
   <!-- Set up some common paths -->
@@ -279,9 +296,9 @@
 
   <!-- Set up the default output and intermediate paths -->
   <PropertyGroup>
-    <!-- 
-      Microsoft.NET.TargetFrameworkInference.targets appends the TargetFramework. 
-      We do this manually and use the TargetGroup instead. 
+    <!--
+      Microsoft.NET.TargetFrameworkInference.targets appends the TargetFramework.
+      We do this manually and use the TargetGroup instead.
     -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 
@@ -293,11 +310,10 @@
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
 
-    <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
 
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(RootIntermediateOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(BaseIntermediateOutputPath)$(TargetOutputRelPath)</IntermediateOutputPath>    
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(BaseIntermediateOutputPath)$(TargetOutputRelPath)</IntermediateOutputPath>
 
     <RuntimePath Condition="'$(RuntimePath)' == ''">$(BinDir)runtime/$(BuildConfiguration)/</RuntimePath>
     <ShimsTargetRuntimeRoot>$(BinDir)shimsTargetRuntime/</ShimsTargetRuntimeRoot>
@@ -377,7 +393,7 @@
     <!-- Don't run tests if we're building another platform's binaries on Windows -->
     <SkipTests Condition="'$(SkipTests)'=='' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
 
-    <!-- 
+    <!--
       Set these properties early as they are consumed by some test projects.
       TODO: Remove when https://github.com/dotnet/corefx/issues/32421 is fixed.
     -->
@@ -385,8 +401,14 @@
     <UseCoverageDedicatedRuntime Condition="'$(UseCoverageDedicatedRuntime)' == '' AND '$(CodeCoverageEnabled)' == 'true'">true</UseCoverageDedicatedRuntime>
 
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
-    <GenerateLaunchSettings>true</GenerateLaunchSettings>
+    <GenerateLaunchSettings Condition="'$(GenerateLaunchSettings)' == ''">true</GenerateLaunchSettings>
+
+    <!-- Disable VS Test SDK references if the .NET Native toolchain is used. -->
+    <IncludeVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</IncludeVSTestReferences>
   </PropertyGroup>
+
+  <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
+  <Import Project="$(MSBuildThisFileDirectory)eng\ReferenceAssemblies.props" />
 
   <!-- Use Roslyn Compilers to build -->
   <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false' and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />

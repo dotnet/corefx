@@ -350,7 +350,7 @@ check_function_exists(
 
 check_symbol_exists(
     kqueue
-    "sys/event.h"
+    "sys/types.h;sys/event.h"
     HAVE_KQUEUE)
 
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wsign-conversion")
@@ -611,6 +611,10 @@ set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 check_include_files(
     "sys/types.h;sys/sysctl.h"
     HAVE_SYS_SYSCTL_H)
+
+check_include_files(
+    "net/if_media.h"
+    HAVE_NET_IFMEDIA_H)
 
 check_include_files(
     linux/rtnetlink.h

@@ -42,6 +42,7 @@
   >
     <PropertyGroup>
       <ApiCompatArgs>$(ApiCompatArgs) -implDirs:"$(ApiCompatImplementationDirs)"</ApiCompatArgs>
+      <ApiCompatArgs Condition="'$(ApiCompatExcludeAttributeList)' != ''">$(ApiCompatArgs) -excludeAttributes:"$(ApiCompatExcludeAttributeList)"</ApiCompatArgs>
       <BaselineApiCompatArgs Condition="Exists($(ApiCompatBaselineIgnoreFile))">-baseline:"$(ApiCompatBaselineIgnoreFile)"</BaselineApiCompatArgs>
       <ApiCompatExitCode>0</ApiCompatExitCode>
 

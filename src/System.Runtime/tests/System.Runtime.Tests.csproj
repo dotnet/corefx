@@ -4,6 +4,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release;uapaot-Debug;uapaot-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\EnumTypes.cs">
@@ -33,9 +34,6 @@
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
-      <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
       <Link>System\StringTests.cs</Link>
     </Compile>
@@ -58,11 +56,17 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\ActivatorTests.cs" />
+    <Compile Include="System\ArgumentExceptionTests.cs" />
+    <Compile Include="System\ArgumentNullExceptionTests.cs" />
+    <Compile Include="System\ArgumentOutOfRangeExceptionTests.cs" />
+    <Compile Include="System\ArithmeticExceptionTests.cs" />
     <Compile Include="System\ArrayTests.cs" />
     <Compile Include="System\ArraySegmentTests.cs" />
+    <Compile Include="System\ArrayTypeMismatchExceptionTests.cs" />
     <Compile Include="System\ApplicationExceptionTests.cs" />
     <Compile Include="System\AttributeTests.cs" />
     <Compile Include="System\Attributes.cs" />
+    <Compile Include="System\AttributeUsageAttributeTests.cs" />
     <Compile Include="System\BadImageFormatExceptionTests.cs" />
     <Compile Include="System\BooleanTests.cs" />
     <Compile Include="System\BufferTests.cs" />
@@ -73,35 +77,53 @@
     <Compile Include="System\DBNullTests.cs" />
     <Compile Include="System\DecimalTests.cs" />
     <Compile Include="System\DelegateTests.cs" />
+    <Compile Include="System\DivideByZeroExceptionTests.cs" />
     <Compile Include="System\DoubleTests.cs" />
     <Compile Include="System\DuplicateWaitObjectExceptionTests.cs" />
     <Compile Include="System\EntryPointNotFoundExceptionTests.cs" />
     <Compile Include="System\EnumTests.cs" />
     <Compile Include="System\ExceptionTests.cs" />
+    <Compile Include="System\Exceptions.Utility.cs" />
     <Compile Include="System\ExecutionEngineExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
+    <Compile Include="System\EventArgsTests.cs" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
     <Compile Include="System\FormattableStringTests.cs" />
+    <Compile Include="System\FormatExceptionTests.cs" />
     <Compile Include="System\GCTests.cs" />
     <Compile Include="System\GuidTests.cs" />
     <Compile Include="System\HandleTests.cs" />
+    <Compile Include="System\IndexOutOfRangeExceptionTests.cs" />
     <Compile Include="System\Int16Tests.cs" />
     <Compile Include="System\Int32Tests.cs" />
     <Compile Include="System\Int64Tests.cs" />
     <Compile Include="System\IntPtrTests.cs" />
+    <Compile Include="System\InvalidCastExceptionTests.cs" />
+    <Compile Include="System\InvalidOperationExceptionTests.cs" />
+    <Compile Include="System\InvalidProgramExceptionTests.cs" />
     <Compile Include="System\LazyTests.cs" />
     <Compile Include="System\LazyOfTMetadataTests.cs" />
     <Compile Include="System\MarshalByRefObjectTests.cs" />
+    <Compile Include="System\MemberAccessExceptionTests.cs" />
     <Compile Include="System\MethodAccessExceptionTests.cs" />
     <Compile Include="System\MissingFieldExceptionTests.cs" />
     <Compile Include="System\MissingMemberExceptionTests.cs" />
     <Compile Include="System\MissingMethodExceptionTests.cs" />
     <Compile Include="System\MulticastDelegateTests.cs" />
     <Compile Include="System\NotFiniteNumberExceptionTests.cs" />
+    <Compile Include="System\NotImplementedExceptionTests.cs" />
+    <Compile Include="System\NotSupportedExceptionTests.cs" />
     <Compile Include="System\NullableTests.cs" />
     <Compile Include="System\NullReferenceExceptionTests.cs" />
     <Compile Include="System\ObjectTests.cs" />
+    <Compile Include="System\ObjectDisposedExceptionTests.cs" />
+    <Compile Include="System\ObsoleteAttributeTests.cs" />
+    <Compile Include="System\OutOfMemoryExceptionTests.cs" />
+    <Compile Include="System\OverflowExceptionTests.cs" />
+    <Compile Include="System\ParamArrayAttributeTests.cs" />
+    <Compile Include="System\PlatformNotSupportedExceptionTests.cs" />
     <Compile Include="System\PseudoCustomAttributeTests.cs" />
+    <Compile Include="System\RankExceptionTests.cs" />
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StackOverflowExceptionTests.cs" />
@@ -109,10 +131,12 @@
     <Compile Include="System\StringGetHashCodeTests.cs" />
     <Compile Include="System\String.SplitTests.cs" />
     <Compile Include="System\SystemExceptionTests.cs" />
+    <Compile Include="System\TimeoutExceptionTests.cs" />
     <Compile Include="System\TimeSpanTests.cs" />
     <Compile Include="System\TimeZoneInfoTests.cs" />
     <Compile Include="System\TimeZoneTests.cs" />
     <Compile Include="System\TimeZoneNotFoundExceptionTests.cs" />
+    <Compile Include="System\TypeLoadExceptionTests.cs" />
     <Compile Include="System\TypeUnloadedExceptionTests.cs" />
     <Compile Include="System\TupleTests.cs" />
     <Compile Include="System\UInt16Tests.cs" />
@@ -139,34 +163,26 @@
     <Compile Include="System\IO\DirectoryNotFoundException.InteropTests.cs" />
     <Compile Include="System\IO\EndOfStreamExceptionTests.cs" />
     <Compile Include="System\IO\Exceptions.HResults.cs" />
-    <Compile Include="System\IO\Exceptions.Utility.cs" />
     <Compile Include="System\IO\FileLoadExceptionTests.cs" />
     <Compile Include="System\IO\FileLoadException.InteropTests.cs" />
     <Compile Include="System\IO\FileNotFoundExceptionTests.cs" />
     <Compile Include="System\IO\FileNotFoundException.InteropTests.cs" />
+    <Compile Include="System\IO\IOExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
     <Compile Include="System\Reflection\AssemblyTests.cs" />
     <Compile Include="System\Reflection\AssemblyNameTests.cs" />
-    <Compile Include="System\Reflection\ConstructorInfoTests.cs" />
     <Compile Include="System\Reflection\CustomAttributeDataTests.cs" />
     <Compile Include="System\Reflection\CustomAttributesTestData.cs" />
     <Compile Include="System\Reflection\CustomAttribute_Named_Typed_ArgumentTests.cs" />
-    <Compile Include="System\Reflection\EventInfoTests.cs" />
-    <Compile Include="System\Reflection\FieldInfoTests.cs" />
-    <Compile Include="System\Reflection\MemberInfoTests.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.cs" />
     <Compile Include="System\Reflection\MethodBodyTests.cs" />
     <Compile Include="System\Reflection\MethodInfoTests.cs" />
     <Compile Include="System\Reflection\ModuleTests.cs" />
-    <Compile Include="System\Reflection\ParameterInfoTests.cs" />
     <Compile Include="System\Reflection\PointerTests.cs" />
-    <Compile Include="System\Reflection\PropertyInfoTests.cs" />
     <Compile Include="System\Reflection\ReflectionTypeLoadExceptionTests.cs" />
-    <Compile Include="System\Reflection\RuntimeReflectionExtensionsTests.cs" />
     <Compile Include="System\Reflection\StrongNameKeyPairTests.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.cs" />
-    <Compile Include="System\Reflection\TypeInfoTests.cs" />
     <Compile Include="System\Reflection\TypeTests.Get.CornerCases.cs" />
     <Compile Include="System\Reflection\TypeTests.GetInterface.cs" />
     <Compile Include="System\Reflection\TypeTests.GetMember.cs" />
@@ -183,6 +199,7 @@
     <Compile Include="System\Runtime\Serialization\SerializationExceptionTests.cs" />
     <Compile Include="System\Runtime\Serialization\StreamingContextTests.cs" />
     <Compile Include="System\Security\SecurityAttributeTests.cs" />
+    <Compile Include="System\Security\SecurityExceptionTests.cs" />
     <Compile Include="System\Text\StringBuilderTests.cs" />
     <Compile Include="System\Threading\WaitHandleTests.cs" />
     <Compile Include="System\Type\TypePropertyTests.cs" />
@@ -214,6 +231,7 @@
     <Compile Include="System\LazyTests.netcoreapp.cs" />
     <Compile Include="System\SByteTests.netcoreapp.cs" />
     <Compile Include="System\StringComparerTests.netcoreapp.cs" />
+    <Compile Include="System\StringGetHashCodeTests.netcoreapp.cs" />
     <Compile Include="System\StringTests.netcoreapp.cs" />
     <Compile Include="System\TimeSpanTests.netcoreapp.cs" />
     <Compile Include="System\TypedReferenceTests.cs" />
@@ -227,10 +245,8 @@
     <Compile Include="System\Reflection\BindingFlagsDoNotWrap.netcoreapp.cs" />
     <Compile Include="System\Reflection\InvokeRefReturn.netcoreapp.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\MemberInfoTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\SignatureTypes.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\TypeInfoTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttributeTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp.cs" />
