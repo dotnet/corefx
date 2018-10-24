@@ -361,7 +361,8 @@ namespace System.ComponentModel
         /// <summary>
         /// Retrieves the typehandle of the interop helper
         /// </summary>
-        private static IntPtr GetLicenseInteropHelperType() {
+        private static IntPtr GetLicenseInteropHelperType()
+        {
             return typeof(LicenseInteropHelper).TypeHandle.Value;
         }
     }

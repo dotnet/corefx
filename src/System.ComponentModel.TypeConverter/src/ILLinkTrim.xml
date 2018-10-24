@@ -8,5 +8,6 @@
       <!-- supports the CLR's IClassFactory2 marshaling -->
       <method name="GetLicenseInteropHelperType" />
     </type>
+    <type fullname="System.ComponentModel.LicenseManager/LicenseInteropHelper" />
   </assembly>
 </linker>

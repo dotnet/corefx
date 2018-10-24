@@ -36,7 +36,7 @@ namespace System.ComponentModel
             private Type _savedType;
             // The CLR invokes this whenever a COM client invokes
             // IClassFactory::CreateInstance() or IClassFactory2::CreateInstanceLic()
-            // on a managed managed that has a LicenseProvider custom attribute.
+            // on a managed that has a LicenseProvider custom attribute.
             //
             // If we are being entered because of a call to ICF::CreateInstance(),
             // fDesignTime will be "true".
