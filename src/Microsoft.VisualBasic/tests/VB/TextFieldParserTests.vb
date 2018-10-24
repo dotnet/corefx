@@ -33,6 +33,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
 
         Private Shared ErrorFormat As Integer() = {5, 5, -1}
         Private Shared StdFormat As Integer() = {5, 10, 11, -1}
+
         Enum FormatType
             ErrorFormat = 0
             StdFormat = 1

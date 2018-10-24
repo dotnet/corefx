@@ -128,7 +128,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Try
                 Result = NativeMethods.SHFileOperation(OperationInfo)
                 ' Notify the shell in case some changes happened.
-                'NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS, SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
+                NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS, SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
             Catch
                 Throw
             Finally
@@ -240,13 +240,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="FullPaths">A string array containing the paths for the operation.</param>
         ''' <returns>A string in the required format.</returns>
         Private Shared Function GetShellPath(ByVal FullPaths() As String) As String
-            ' #If Debug Then
+#If DEBUG Then
             Debug.Assert(FullPaths IsNot Nothing, "FullPaths is NULL!!!")
             Debug.Assert(FullPaths.Length > 0, "FullPaths() is empty array!!!")
             For Each FullPath As String In FullPaths
                 Debug.Assert(FullPath.Length <> 0 AndAlso IO.Path.IsPathRooted(FullPath), FullPath)
             Next
-            ' #End If
+#End If
             ' Each path will end with a Null character.
             Dim MultiString As New StringBuilder()
             For Each FullPath As String In FullPaths
@@ -306,14 +306,5 @@ Namespace Microsoft.VisualBasic.FileIO
         Private Const m_SHELL_OPERATION_FLAGS_HIDE_UI As ShFileOperationFlags =
             ShFileOperationFlags.FOF_SILENT Or
             ShFileOperationFlags.FOF_NOCONFIRMATION
-
-        ' When calling MoveFileEx, set the following flags:
-        ' - Simulate CopyFile and DeleteFile if copied to a different volume.
-        ' - Replace contents of existing target with the contents of source file.
-        ' - Do not return until the file has actually been moved on the disk.
-        Private Const m_MOVEFILEEX_FLAGS As Integer = CInt(
-            MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
-            MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
-            MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
     End Class
 End Namespace

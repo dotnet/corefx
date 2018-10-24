@@ -1048,9 +1048,9 @@
     <value>Current target framework does not support web operations.</value>
   </data>
   <data name="NoShellCopyOrMove" xml:space="preserve">
-    <value>UI not available for ShellCopyMove</value>
+    <value>UI not available for copy or move</value>
   </data>
   <data name="NoShellDelete" xml:space="preserve">
-    <value>UI not available for ShellDelete</value>
+    <value>UI not available for delete</value>
   </data>
 </root>

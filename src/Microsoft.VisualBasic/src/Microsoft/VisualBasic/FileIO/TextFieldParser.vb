@@ -182,7 +182,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         '''  Returns the line number of last malformed line if there is one.
         ''' </summary>
-        ''' <value>The last malformed line, line number</value>
+        ''' <value>Line number</value>
         Public ReadOnly Property ErrorLineNumber() As Long
             Get
                 Return m_ErrorLineNumber
@@ -280,7 +280,14 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Indicates whether or not leading and trailing white space should be removed when returning a field
         ''' </summary>
         ''' <value>True if white space should be removed, otherwise False</value>
-        Public Property TrimWhiteSpace() As Boolean = True
+        Public Property TrimWhiteSpace() As Boolean
+            Get
+                Return m_TrimWhiteSpace
+            End Get
+            Set(ByVal value As Boolean)
+                m_TrimWhiteSpace = value
+            End Set
+        End Property
 
         ''' <summary>
         '''  Reads and returns the next line from the file
@@ -403,7 +410,14 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <value>True if we escape quotes otherwise false</value>
         <EditorBrowsable(EditorBrowsableState.Advanced)>
-        Public Property HasFieldsEnclosedInQuotes() As Boolean = True
+        Public Property HasFieldsEnclosedInQuotes() As Boolean
+            Get
+                Return m_HasFieldsEnclosedInQuotes
+            End Get
+            Set(ByVal value As Boolean)
+                m_HasFieldsEnclosedInQuotes = value
+            End Set
+        End Property
 
         ''' <summary>
         '''  Closes the StreamReader
@@ -1170,38 +1184,51 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <remarks>If the array has changed, we need to re initialize before reading.</remarks>
         Private Function ArrayHasChanged() As Boolean
+
             Dim lowerBound As Integer = 0
             Dim upperBound As Integer = 0
+
             Select Case m_TextFieldType
                 Case FieldType.Delimited
+
                     Debug.Assert((m_DelimitersCopy Is Nothing And m_Delimiters Is Nothing) Or (m_DelimitersCopy IsNot Nothing And m_Delimiters IsNot Nothing), "Delimiters and copy are not both Nothing or both not Nothing")
+
                     ' Check null cases
                     If m_Delimiters Is Nothing Then
                         Return False
                     End If
+
                     lowerBound = m_DelimitersCopy.GetLowerBound(0)
                     upperBound = m_DelimitersCopy.GetUpperBound(0)
+
                     For i As Integer = lowerBound To upperBound
                         If m_Delimiters(i) <> m_DelimitersCopy(i) Then
                             Return True
                         End If
                     Next i
+
                 Case FieldType.FixedWidth
+
                     Debug.Assert((m_FieldWidthsCopy Is Nothing And m_FieldWidths Is Nothing) Or (m_FieldWidthsCopy IsNot Nothing And m_FieldWidths IsNot Nothing), "FieldWidths and copy are not both Nothing or both not Nothing")
+
                     ' Check null cases
                     If m_FieldWidths Is Nothing Then
                         Return False
                     End If
+
                     lowerBound = m_FieldWidthsCopy.GetLowerBound(0)
                     upperBound = m_FieldWidthsCopy.GetUpperBound(0)
+
                     For i As Integer = lowerBound To upperBound
                         If m_FieldWidths(i) <> m_FieldWidthsCopy(i) Then
                             Return True
                         End If
                     Next i
+
                 Case Else
                     Debug.Fail("Unknown TextFieldType")
             End Select
+
             Return False
         End Function
 
@@ -1490,6 +1517,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="Line">The line containing the data</param>
         ''' <param name="StartAt">The index at which we start building the field</param>
         Public Sub BuildField(ByVal Line As String, ByVal StartAt As Integer)
+            ' For readability
+            Const DoubleQuoteChar As Char = """"c
             m_Index = StartAt
             Dim Length As Integer = Line.Length
 
@@ -1546,9 +1575,6 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
             End While
         End Sub
-
-        ' For readibility
-        Private Const DoubleQuoteChar As Char = """"c
 
         ' String builder holding the field
         Private m_Field As New StringBuilder

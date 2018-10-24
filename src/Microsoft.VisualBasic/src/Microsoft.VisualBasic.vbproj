@@ -18,8 +18,8 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeTypes.vb" />
-      <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
-      <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
+    <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\Interaction.Windows.vb" />
   </ItemGroup>
     <ItemGroup Condition="'$(TargetsUnix)' == 'true'">

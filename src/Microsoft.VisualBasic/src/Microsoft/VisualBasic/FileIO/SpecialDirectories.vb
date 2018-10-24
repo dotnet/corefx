@@ -17,7 +17,7 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' specific to the current user (My Documents, My Music ...) and those specific
     ''' to the current Application that a developer expects to be able to find quickly.
     ''' </summary>
-    Partial Public NotInheritable Class SpecialDirectories
+    Public Class SpecialDirectories
         Public Sub New()
         End Sub
 

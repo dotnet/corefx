@@ -19,9 +19,6 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' </summary>
     '<HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
     Partial Public Class FileSystem
-        Sub New()
-        End Sub
-
         ''' <summary>
         ''' Return the names of all available drives on the computer.
         ''' </summary>
@@ -59,10 +56,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="relativePath">The second part of the path, must be a relative path.</param>
         ''' <returns>A String contains the combined path.</returns>
         Public Shared Function CombinePath(ByVal baseDirectory As String, ByVal relativePath As String) As String
-            If IsEmptyNullOrWhitespace(baseDirectory) Then
+            If baseDirectory = "" Then
                 Throw ExUtils.GetArgumentNullException("baseDirectory", SR.General_ArgumentEmptyOrNothing_Name, "baseDirectory")
             End If
-            If relativePath.Length = 0 Then
+            If relativePath = "" Then
                 Return baseDirectory
             End If
 
@@ -86,7 +83,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to verify.</param>
         ''' <returns>True if FilePath refers to an existing file on disk. Otherwise, False.</returns>
         Public Shared Function FileExists(ByVal file As String) As Boolean
-            If Not IsEmptyNullOrWhitespace( file) AndAlso
+            If file <> "" AndAlso
                 (file.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) Or
                 file.EndsWith(IO.Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) Then
                 Return False
@@ -667,7 +664,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             ' Verify newName is not null.
-            If String.IsNullOrEmpty(newName) Then
+            If newName = "" Then
                 Throw ExUtils.GetArgumentNullException(
                     "newName", SR.General_ArgumentEmptyOrNothing_Name, "newName")
             End If
@@ -730,7 +727,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' Cannot call through IO.File.WriteAllBytes (since they don't support append)
             ' so only check for trailing separator
-            CheckFilePathTrailingSeparator(file, NameOf(file))
+            CheckFilePathTrailingSeparator(file, "file")
 
             Dim FileStream As IO.FileStream = Nothing
             Try
@@ -776,7 +773,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             'Cannot call through IO.File.WriteAllText (since they don't support: append, prefer current encoding than specified one)
             ' so only check for trailing separator.
-            CheckFilePathTrailingSeparator(file, NameOf(file))
+            CheckFilePathTrailingSeparator(file, "file")
 
             Dim StreamWriter As IO.StreamWriter = Nothing
             Try
@@ -953,7 +950,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' Special case for moving: If target directory does not exist, AND both directories are on same drive,
             '   use IO.Directory.Move for performance gain (not copying).
-            If operation = CopyOrMove.Move AndAlso Not IO.Directory.Exists(targetDirectoryPath) And
+            If operation = CopyOrMove.Move And Not IO.Directory.Exists(targetDirectoryPath) And
                 IsOnSameDrive(sourceDirectoryPath, targetDirectoryPath) Then
 
                 ' Create the target's parent. IO.Directory.CreateDirectory won't throw if it exists.
@@ -1115,7 +1112,6 @@ Namespace Microsoft.VisualBasic.FileIO
                 If overwrite Then ' User wants to overwrite destination.
                     IO.File.Delete(destinationFileFullPath)
                     IO.File.Move(sourceFileFullPath, destinationFileFullPath)
-                    'End If
                 Else ' Overwrite = False, call Framework.
                     IO.File.Move(sourceFileFullPath, destinationFileFullPath)
                 End If ' Overwrite
@@ -1137,9 +1133,6 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' Get the full path. This will handle invalid paths exceptions.
             Dim directoryFullPath As String = IO.Path.GetFullPath(directory)
-
-            ' Demand Write permission for security reason (see CopyOrMoveFile / CopyOrMoveDirectory).
-            'DemandDirectoryPermission(directoryFullPath, FileIOPermissionAccess.Write)
 
             ' Throw if device path.
             ThrowIfDevicePath(directoryFullPath)
@@ -1176,9 +1169,6 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Get the full path. This will handle invalid path exceptions.
             Dim fileFullPath As String = NormalizeFilePath(file, "file")
 
-            ' Demand Write permission for security reason (see CopyOrMoveFile / CopyOrMoveDirectory).
-            'Call (New FileIOPermission(FileIOPermissionAccess.Write, fileFullPath)).Demand()
-
             ' Throw if device path.
             ThrowIfDevicePath(fileFullPath)
 
@@ -1187,8 +1177,8 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             ' If user want shell features (Progress, Recycle Bin), call shell operation.
+            ' We don't need to consider onDirectoryNotEmpty here.
             If (showUI <> UIOptionInternal.NoUI) AndAlso Environment.UserInteractive Then
-                Throw New PlatformNotSupportedException("showUI option not supported")
                 ShellDelete(fileFullPath, showUI, recycle, onUserCancel, FileOrDirectory.File)
                 Exit Sub
             End If
@@ -1373,13 +1363,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>An array of String containing the paths found.</returns>
         Private Shared Function FindPaths(ByVal FileOrDirectory As FileOrDirectory, ByVal directory As String, ByVal wildCard As String) As String()
             If FileOrDirectory = FileSystem.FileOrDirectory.Directory Then
-                If IsEmptyNullOrWhitespace(wildCard) Then
+                If wildCard = "" Then
                     Return IO.Directory.GetDirectories(directory)
                 Else
                     Return IO.Directory.GetDirectories(directory, wildCard)
                 End If
             Else
-                If IsEmptyNullOrWhitespace(wildCard) Then
+                If wildCard = "" Then
                     Return IO.Directory.GetFiles(directory)
                 Else
                     Return IO.Directory.GetFiles(directory, wildCard)
@@ -1432,6 +1422,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Use DirectoryInfo.GetFiles and GetDirectories (which call FindFirstFile) so that we always have permission.
         '''</remarks>
         Private Shared Function GetLongPath(ByVal FullPath As String) As String
+            Debug.Assert(Not FullPath = "" AndAlso IO.Path.IsPathRooted(FullPath), "Must be full path!!!")
             Try
                 ' If root path, return itself. UNC path do not recognize 8.3 format in root path, so this is fine.
                 If IsRoot(FullPath) Then
@@ -1532,28 +1523,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Return Path.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)
         End Function
 
-        Private Shared Function IsEmptyNullOrWhitespace(ByVal StringToCheck As String) As Boolean
-            If StringToCheck Is Nothing Then
-                Return True
-            End If
-            Return StringToCheck.Trim.Length = 0
-        End Function
-
-
-        ''' <summary>
-        ''' Verify that a path does not refer to an existing directory or file.
-        ''' </summary>
-        ''' <param name="Path">The path to verify.</param>
-        Private Shared Function PathDoesNotExist(ByVal Path As String) As Boolean
-            If IO.File.Exists(Path) Then
-                Return False
-            End If
-
-            If IO.Directory.Exists(Path) Then
-                Return False
-            End If
-            Return True
-        End Function
         ''' <summary>
         ''' Throw an argument exception if the given path starts with "\\.\" (device path).
         ''' </summary>
@@ -1720,28 +1689,6 @@ Namespace Microsoft.VisualBasic.FileIO
         '''      the next IsTextFound() call.
         ''' </remarks>
         Private Class TextSearchHelper
-
-            Private ReadOnly m_IgnoreCase As Boolean
-
-            Private m_CheckPreamble As Boolean = True
-
-            ' Should we ignore case?
-            Private m_Decoder As Text.Decoder
-
-            ' True to check for preamble. False otherwise.
-            Private m_Preamble() As Byte
-
-            ' The Decoder to use.
-            Private m_PreviousCharBuffer() As Char = Array.Empty(Of Char)()
-
-            Private m_SearchText As String
-
-            ''' <summary>
-            ''' No default constructor.
-            ''' </summary>
-            Private Sub New()
-            End Sub
-
             ''' <summary>
             ''' Constructs a new helper with a given encoding and a text to search for.
             ''' </summary>
@@ -1762,25 +1709,6 @@ Namespace Microsoft.VisualBasic.FileIO
                     m_SearchText = Text
                 End If
             End Sub
-
-            ''' <summary>
-            ''' Returns whether the big buffer starts with the small buffer.
-            ''' </summary>
-            ''' <param name="BigBuffer"></param>
-            ''' <param name="SmallBuffer"></param>
-            ''' <returns>True if BigBuffer starts with SmallBuffer.Otherwise, False.</returns>
-            Private Shared Function BytesMatch(ByVal BigBuffer() As Byte, ByVal SmallBuffer() As Byte) As Boolean
-                Debug.Assert(BigBuffer.Length > SmallBuffer.Length, "BigBuffer should be longer!!!")
-                If BigBuffer.Length < SmallBuffer.Length OrElse SmallBuffer.Length = 0 Then
-                    Return False
-                End If
-                For i As Integer = 0 To SmallBuffer.Length - 1
-                    If BigBuffer(i) <> SmallBuffer(i) Then
-                        Return False
-                    End If
-                Next
-                Return True
-            End Function
 
             ''' <summary>
             ''' Determines whether the text is found in the given byte array.
@@ -1841,8 +1769,41 @@ Namespace Microsoft.VisualBasic.FileIO
                     Return New String(CharBuffer).Contains(m_SearchText)
                 End If
             End Function
+
+            ''' <summary>
+            ''' No default constructor.
+            ''' </summary>
+            Private Sub New()
+            End Sub
+
+            ''' <summary>
+            ''' Returns whether the big buffer starts with the small buffer.
+            ''' </summary>
+            ''' <param name="BigBuffer"></param>
+            ''' <param name="SmallBuffer"></param>
+            ''' <returns>True if BigBuffer starts with SmallBuffer.Otherwise, False.</returns>
+            Private Shared Function BytesMatch(ByVal BigBuffer() As Byte, ByVal SmallBuffer() As Byte) As Boolean
+                Debug.Assert(BigBuffer.Length > SmallBuffer.Length, "BigBuffer should be longer!!!")
+                If BigBuffer.Length < SmallBuffer.Length OrElse SmallBuffer.Length = 0 Then
+                    Return False
+                End If
+                For i As Integer = 0 To SmallBuffer.Length - 1
+                    If BigBuffer(i) <> SmallBuffer(i) Then
+                        Return False
+                    End If
+                Next
+                Return True
+            End Function
+
+            Private m_SearchText As String ' The text to search.
+            Private m_IgnoreCase As Boolean ' Should we ignore case?
+            Private m_Decoder As Text.Decoder ' The Decoder to use.
+            Private m_PreviousCharBuffer() As Char = {} ' The cached character array from previous call to IsTextExist.
+            Private m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
+            Private m_Preamble() As Byte ' The byte order mark we need to consider.
         End Class 'Private Class TextSearchHelper
     End Class 'Public Class FileSystem
+
     ''' <summary>
     ''' Specify the action to do when deleting a directory and it is not empty.
     ''' </summary>

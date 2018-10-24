@@ -38,15 +38,15 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Else ' 64-bit plaforms
                 ' Create a new SHFILEOPSTRUCT64. The only difference is the packing, so copy all fields.
                 Dim lpFileOp64 As New SHFILEOPSTRUCT64 With {
-                    .hwnd = lpFileOp.hwnd,
-                    .wFunc = lpFileOp.wFunc,
-                    .pFrom = lpFileOp.pFrom,
-                    .pTo = lpFileOp.pTo,
-                    .fFlags = lpFileOp.fFlags,
-                    .fAnyOperationsAborted = lpFileOp.fAnyOperationsAborted,
-                    .hNameMappings = lpFileOp.hNameMappings,
-                    .lpszProgressTitle = lpFileOp.lpszProgressTitle
-                }
+            .hwnd = lpFileOp.hwnd,
+            .wFunc = lpFileOp.wFunc,
+            .pFrom = lpFileOp.pFrom,
+            .pTo = lpFileOp.pTo,
+            .fFlags = lpFileOp.fFlags,
+            .fAnyOperationsAborted = lpFileOp.fAnyOperationsAborted,
+            .hNameMappings = lpFileOp.hNameMappings,
+            .lpszProgressTitle = lpFileOp.lpszProgressTitle
+        }
 
                 ' P/Invoke SHFileOperation with the 64 bit structure.
                 Dim result As Int32 = SHFileOperation64(lpFileOp64)
@@ -120,7 +120,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         <SecurityCritical()>
         <ResourceExposure(ResourceScope.Machine)>
         <DllImport("shell32.dll", CharSet:=CharSet.Auto, EntryPoint:="SHFileOperation", SetLastError:=True, ThrowOnUnmappableChar:=True)>
-        Private Shared Function SHFileOperation64(ByRef lpFileOp As SHFILEOPSTRUCT64) As Integer
+        Private Shared Function SHFileOperation64(ByRef lpFileOp As SHFILEOPSTRUCT64) As Int32
         End Function
 
 
@@ -154,7 +154,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         ''' Flags that control the file operation. Used in SHFILEOPSTRUCT.
         ''' </summary>
         <Flags>
-        Friend Enum ShFileOperationFlags As UShort
+        Friend Enum ShFileOperationFlags As UInt16
             ' The pTo member specifies multiple destination files (one for each source file)
             ' rather than one directory where all source files are to be deposited.
             FOF_MULTIDESTFILES = &H1
@@ -194,5 +194,49 @@ Namespace Microsoft.VisualBasic.CompilerServices
             ' Treat reparse points as objects, not containers.
             FOF_NORECURSEREPARSE = &H8000
         End Enum
+
+        ''' <summary>
+        ''' Notifies the system of an event that an application has performed.
+        ''' An appliation should use this function if it performs an action that may affect the shell.
+        ''' </summary>
+        ''' <param name="wEventId">Describes the event that has occured. Typically, only one event is specified at at a time.
+        '''       If more than one event is specified, the values contained in dwItem1 and dwItem2 must be the same,
+        '''       respectively, for all specified events. See ShellChangeNotificationEvents.</param>
+        ''' <param name="uFlags">Flags that indicate the meaning of the dwItem1 and dwItem2 parameter. See ShellChangeNotificationFlags.</param>
+        ''' <param name="dwItem1">First event-dependent value.</param>
+        ''' <param name="dwItem2">Second event-dependent value.</param>
+        ''' <remarks>
+        ''' Win 95/98/Me: SHChangeNotify is supported by Microsoft Layer for Unicode.
+        ''' To use this http://msdn.microsoft.com/library/default.asp?url=/library/en-us/mslu/winprog/microsoft_layer_for_unicode_on_windows_95_98_me_systems.asp
+        ''' </remarks>
+        <SecurityCritical()>
+        <ResourceExposure(ResourceScope.None)>
+        <DllImport("shell32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+        Friend Shared Sub SHChangeNotify(ByVal wEventId As UInt32, ByVal uFlags As UInt32,
+                ByVal dwItem1 As IntPtr, ByVal dwItem2 As IntPtr)
+        End Sub
+
+        ''' <summary>
+        ''' Describes the event that has occured. Used in SHChangeNotify.
+        ''' There are more values in shellapi.h. Only include the relevant ones.
+        ''' </summary>
+        Friend Enum SHChangeEventTypes As UInt32
+            ' Specifies a combination of all of the disk event identifiers.
+            SHCNE_DISKEVENTS = &H2381F
+            ' All events have occurred.
+            SHCNE_ALLEVENTS = &H7FFFFFFF
+        End Enum
+
+        ''' <summary>
+        ''' Indicates the meaning of dwItem1 and dwItem2 parameters in SHChangeNotify method.
+        ''' There are more values in shellapi.h. Only include the relevant one.
+        ''' </summary>
+        Friend Enum SHChangeEventParameterFlags As UInt32
+            ' The dwItem1 and dwItem2 parameters are DWORD values.
+            SHCNF_DWORD = &H3
+        End Enum
+
     End Class
+
+
 End Namespace

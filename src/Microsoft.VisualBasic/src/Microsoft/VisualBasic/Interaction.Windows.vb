@@ -69,7 +69,7 @@ Namespace Microsoft.VisualBasic
             Catch ex As System.Threading.ThreadAbortException
                 Throw ex
             Catch
-                Throw New ArgumentException(SR.GetResourceString(SR.Argument_InvalidValueType2, "Prompt"), "String")
+                Throw New ArgumentException(SR.GetResourceString(SR.Argument_InvalidValueType2, "Prompt"))
             End Try
 
             Try
@@ -85,7 +85,7 @@ Namespace Microsoft.VisualBasic
             Catch ex As Threading.ThreadAbortException
                 Throw ex
             Catch
-                Throw New ArgumentException(SR.GetResourceString(SR.Argument_InvalidValueType2, "Title"), "String")
+                Throw New ArgumentException(SR.GetResourceString(SR.Argument_InvalidValueType2, "Title"))
             End Try
 
             Return CType(NativeMethods.MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)

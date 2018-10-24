@@ -13,6 +13,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.DirectorySeparatorChar,
             IO.Path.AltDirectorySeparatorChar
             }
+
         ''' <summary>
         ''' Remove any OS specific invalid characters, then trim whitespace, then remove any leading "." because they hide the directory on Unix and don't
         ''' need them on other Os's, lastly trim remaining whitespace. Specifically deal with names ". Net Foundation" which become "Net Foundation"
@@ -169,7 +170,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.Equal(Environment.GetFolderPath(SpecialFolder.Programs).TrimEnd(Separators), SpecialDirectories.Programs.TrimEnd(Separators))
             End If
         End Sub
-
 
         <Fact>
         Public Shared Sub TempFolderTest()

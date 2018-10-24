@@ -81,7 +81,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Return S.ToString
         End Function
 
-
         '''**************************************************************************
         ''' RemoveEndingSeparator
         ''' <summary>
@@ -112,8 +111,10 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Return ExpectedData = ReadData
             End Using
         End Function
+
         <Fact>
         Public Shared Sub CombinePathTest_BadBaseDirectory_RelativePath()
+            Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath(Nothing, "Test2"))
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
         End Sub
 
@@ -129,10 +130,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Shared Sub CombinePathTest_RootDirectory_RelativePath()
             Using TestBase As New FileIOTests
+                Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, Nothing), TestBase.TestDirectory)
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, ""), TestBase.TestDirectory)
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, "Test"), IO.Path.Combine(TestBase.TestDirectory, "Test"))
             End Using
         End Sub
+
         <Fact>
         Public Shared Sub IOPathCombineTest()
             Assert.Throws(Of System.ArgumentNullException)(Function() FileSystem.CombinePath(Nothing, "User"))
@@ -541,6 +544,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.True(FileHasExpectedDate(testFileDest, SourceData))
             End Using
         End Sub
+
         <Fact>
         Public Sub DeleteDirectory_Directory_DeleteAllContents()
             Using TestBase As New FileIOTests
@@ -611,6 +615,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.False(IO.File.Exists(testFileSource))
             End Using
         End Sub
+
         <Fact>
         Public Sub FileExists_File()
             Using TestBase As New FileIOTests
@@ -621,6 +626,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.False(FileSystem.FileExists(testFileSource))
             End Using
         End Sub
+
         <Fact>
         Public Sub GetFileInfo_File()
             Using TestBase As New FileIOTests
