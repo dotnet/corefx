@@ -85,8 +85,8 @@ namespace System.Buffers
                 (startSegment == endSegment && endIndex < startIndex))
                 ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
 
-            _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
-            _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(endIndex));
+            _sequenceStart = new SequencePosition(startSegment, startIndex);
+            _sequenceEnd = new SequencePosition(endSegment, endIndex);
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace System.Buffers
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
 
-            _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(0));
-            _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(array.Length));
+            _sequenceStart = new SequencePosition(array, 0);
+            _sequenceEnd = new SequencePosition(array, array.Length);
         }
 
         /// <summary>
@@ -111,8 +111,8 @@ namespace System.Buffers
                 (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentValidationException(array, start);
 
-            _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
-            _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + length));
+            _sequenceStart = new SequencePosition(array, start);
+            _sequenceEnd = new SequencePosition(array, start + length);
         }
 
         /// <summary>
@@ -123,23 +123,24 @@ namespace System.Buffers
         {
             if (MemoryMarshal.TryGetMemoryManager(memory, out MemoryManager<T> manager, out int index, out int length))
             {
-                _sequenceStart = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceStart(index));
-                _sequenceEnd = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceEnd(length));
+                var holder = new MemoryManagerHolder<T>(manager);
+                _sequenceStart = new SequencePosition(holder, index);
+                _sequenceEnd = new SequencePosition(holder, length);
             }
             else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
                 T[] array = segment.Array;
                 int start = segment.Offset;
-                _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
-                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + segment.Count));
+                _sequenceStart = new SequencePosition(array, start);
+                _sequenceEnd = new SequencePosition(array, start + segment.Count);
             }
             else if (typeof(T) == typeof(char))
             {
-                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)memory), out string text, out int start, out length))
+                if (!MemoryMarshal.TryGetString((ReadOnlyMemory<char>)(object)memory, out string text, out int start, out length))
                     ThrowHelper.ThrowInvalidOperationException();
 
-                _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
-                _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + length));
+                _sequenceStart = new SequencePosition(text, start);
+                _sequenceEnd = new SequencePosition(text, start + length);
             }
             else
             {
@@ -542,36 +543,66 @@ namespace System.Buffers
 
     internal static class ReadOnlySequence
     {
-        public const int FlagBitMask = 1 << 31;
-        public const int IndexBitMask = ~FlagBitMask;
+        // Returns true iff the object has a component size;
+        // i.e., is variable length like string, array, Utf8String.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool ObjectHasComponentSize(object obj)
+        {
+            // CLR objects are laid out in memory as follows.
+            // [ pMethodTable || .. object data .. ]
+            //   ^-- the object reference points here
+            //
+            // The first DWORD of the method table class will have its high bit set if the
+            // method table has component size info stored somewhere. See member
+            // MethodTable:IsStringOrArray in src\vm\methodtable.h for full details.
+            //
+            // So in effect this method is the equivalent of
+            // return ((MethodTable*)(*obj))->IsStringOrArray();
+            Debug.Assert(obj != null);
+            return *(int*)GetObjectMethodTablePointer(obj) < 0;
+        }
 
-        public const int SegmentStartMask = 0;
-        public const int SegmentEndMask = 0;
+        // Given an object reference, returns its MethodTable* as an IntPtr.
+        //[Intrinsic]
+        //[NonVersionable]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static IntPtr GetObjectMethodTablePointer(object obj)
+        {
+            Debug.Assert(obj != null);
+            // We know that the first data field in any managed object is immediately after the
+            // method table pointer, so just back up one pointer and immediately deref.
+            // This is not ideal in terms of minimizing instruction count but is the best we can do at the moment.
+            return Unsafe.Add(ref Unsafe.As<byte, IntPtr>(ref GetPinningHelper(obj).m_data), -1);
+            // Ideally this method would be replaced by the VM with:
+            // ldarg.0
+            // ldind.i
+            // ret
+        }
 
-        public const int ArrayStartMask = 0;
-        public const int ArrayEndMask = FlagBitMask;
+        // Used for unsafe pinning of arbitrary objects.
+        internal static PinningHelper GetPinningHelper(object o)
+        {
+            return Unsafe.As<PinningHelper>(o);
+        }
+    }
 
-        public const int MemoryManagerStartMask = FlagBitMask;
-        public const int MemoryManagerEndMask = 0;
+    internal sealed class MemoryManagerHolder<T>
+    {
+        public MemoryManagerHolder(MemoryManager<T> memoryManager)
+        {
+            MemoryManager = memoryManager;
+        }
 
-        public const int StringStartMask = FlagBitMask;
-        public const int StringEndMask = FlagBitMask;
+        public MemoryManager<T> MemoryManager { get; }
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int SegmentToSequenceStart(int startIndex) => startIndex | SegmentStartMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int SegmentToSequenceEnd(int endIndex) => endIndex | SegmentEndMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ArrayToSequenceStart(int startIndex) => startIndex | ArrayStartMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ArrayToSequenceEnd(int endIndex) => endIndex | ArrayEndMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int MemoryManagerToSequenceStart(int startIndex) => startIndex | MemoryManagerStartMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int MemoryManagerToSequenceEnd(int endIndex) => endIndex | MemoryManagerEndMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int StringToSequenceStart(int startIndex) => startIndex | StringStartMask;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int StringToSequenceEnd(int endIndex) => endIndex | StringEndMask;
+    // Helper class to assist with unsafe pinning of arbitrary objects. The typical usage pattern is:
+    // fixed (byte * pData = &JitHelpers.GetPinningHelper(value).m_data)
+    // {
+    //    ... pData is what Object::GetData() returns in VM ...
+    // }
+    internal class PinningHelper
+    {
+        public byte m_data;
     }
 }

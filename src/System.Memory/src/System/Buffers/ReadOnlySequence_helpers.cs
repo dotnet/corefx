@@ -68,9 +68,9 @@ namespace System.Buffers
                 else // type == SequenceType.MemoryManager
                 {
                     Debug.Assert(type == SequenceType.MemoryManager);
-                    Debug.Assert(positionObject is MemoryManager<T>);
+                    Debug.Assert(positionObject is MemoryManagerHolder<T>);
 
-                    memory = ((MemoryManager<T>)positionObject).Memory.Slice(startIndex, endIndex - startIndex);
+                    memory = ((MemoryManagerHolder<T>)positionObject).MemoryManager.Memory.Slice(startIndex, endIndex - startIndex);
                 }
             }
 
@@ -90,60 +90,53 @@ namespace System.Buffers
 
             bool isMultiSegment = startObject != _sequenceEnd.GetObject();
 
-            // The highest bit of startIndex and endIndex are used to infer the sequence type
-            // The code below is structured this way for performance reasons and is equivalent to the following:
-            // SequenceType type = GetSequenceType();
-            // if (type == SequenceType.MultiSegment) { ... }
-            // else if (type == SequenceType.Array) { ... }
-            // else if (type == SequenceType.String){ ... }
-            // else if (type == SequenceType.MemoryManager) { ... }
-
-            // Highest bit of startIndex: A = startIndex >> 31
-            // Highest bit of endIndex: B = endIndex >> 31
-
-            if (startIndex >= 0)
-            {
-                // A == 0 && B == 0 means SequenceType.MultiSegment
-                // A == 0 && B == 1 means SequenceType.Array
-
-                if (endIndex >= 0)  // SequenceType.MultiSegment
-                {
-                    ReadOnlyMemory<T> memory = ((ReadOnlySequenceSegment<T>)startObject).Memory;
-                    if (isMultiSegment)
-                    {
-                        return memory.Slice(startIndex);
-                    }
-                    return memory.Slice(startIndex, endIndex - startIndex);
-                }
-                else // endIndex < 0, SequenceType.Array
-                {
-                    if (isMultiSegment)
-                        ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-
-                    return new ReadOnlyMemory<T>((T[])startObject, startIndex, (endIndex & ReadOnlySequence.IndexBitMask) - startIndex);
-                }
-            }
-            else // startIndex < 0
+            if (ReadOnlySequence.ObjectHasComponentSize(startObject))
             {
                 if (isMultiSegment)
                     ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
-                // A == 1 && B == 1 means SequenceType.String
-                // A == 1 && B == 0 means SequenceType.MemoryManager
-
-                // The type == char check here is redundant. However, we still have it to allow
-                // the JIT to see when that the code is unreachable and eliminate it.
-                if (typeof(T) == typeof(char) && endIndex < 0)  // SequenceType.String
+                if (typeof(T) == typeof(char) && startObject.GetType() == typeof(string))
                 {
-                    // No need to remove the FlagBitMask since (endIndex - startIndex) == (endIndex & ReadOnlySequence.IndexBitMask) - (startIndex & ReadOnlySequence.IndexBitMask)
-                    return (ReadOnlyMemory<T>)(object)((string)startObject).AsMemory((startIndex & ReadOnlySequence.IndexBitMask), endIndex - startIndex);
+                    return (ReadOnlyMemory<T>)(object)Unsafe.As<string>(startObject).AsMemory(startIndex, endIndex - startIndex);
                 }
-                else // endIndex >= 0, SequenceType.MemoryManager
+                else
                 {
-                    startIndex &= ReadOnlySequence.IndexBitMask;
-                    return ((MemoryManager<T>)startObject).Memory.Slice(startIndex, endIndex - startIndex);
+                    Debug.Assert(startObject is T[]);
+                    return new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, endIndex - startIndex);
                 }
             }
+            else
+            {
+                if (startObject.GetType() != typeof(MemoryManagerHolder<T>))
+                {
+                    Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
+                    ReadOnlyMemory<T> memory = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject).Memory;
+                    if (isMultiSegment)
+                    {
+                        return memory.Slice(startIndex);
+                    }
+                    else
+                    {
+                        return memory.Slice(startIndex, endIndex - startIndex);
+                    }
+                }
+            }
+            return MemoryFromMemoryManager(startObject, isMultiSegment);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private ReadOnlyMemory<T> MemoryFromMemoryManager(object startObject, bool isMultiSegment)
+        {
+            Debug.Assert(startObject != null);
+            Debug.Assert(startObject is MemoryManagerHolder<T>);
+
+            if (isMultiSegment)
+                ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+
+            int startIndex = _sequenceStart.GetInteger();
+            int endIndex = _sequenceEnd.GetInteger();
+
+            return Unsafe.As<MemoryManagerHolder<T>>(startObject).MemoryManager.Memory.Slice(startIndex, endIndex - startIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -323,7 +316,7 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetIndex(in SequencePosition position) => position.GetInteger() & ReadOnlySequence.IndexBitMask;
+        private static int GetIndex(in SequencePosition position) => position.GetInteger();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
@@ -334,9 +327,9 @@ namespace System.Buffers
 
             return new ReadOnlySequence<T>(
                 start.GetObject(),
-                GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
+                start.GetInteger(),
                 end.GetObject(),
-                GetIndex(end) | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
+                end.GetInteger()
             );
         }
 
