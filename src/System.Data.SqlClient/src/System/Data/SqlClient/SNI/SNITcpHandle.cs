@@ -223,6 +223,14 @@ namespace System.Data.SqlClient.SNI
                     if (ipAddresses[i] != null)
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+                        // enable keep-alive on socket
+                        const int time = 30;
+                        const int interval = 1000;
+                        sockets[i].SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, interval);
+                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, time);
+
                         sockets[i].Connect(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
