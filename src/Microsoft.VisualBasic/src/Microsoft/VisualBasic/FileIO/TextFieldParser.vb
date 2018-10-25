@@ -890,7 +890,7 @@ Namespace Microsoft.VisualBasic.FileIO
                         Index = EndHelper.Index + EndHelper.DelimiterLength
                     End If
 
-                    If TrimWhiteSpace Then
+                    If m_TrimWhiteSpace Then
                         Field = Field.Trim()
                     End If
 

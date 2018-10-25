@@ -83,7 +83,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to verify.</param>
         ''' <returns>True if FilePath refers to an existing file on disk. Otherwise, False.</returns>
         Public Shared Function FileExists(ByVal file As String) As Boolean
-            If file <> "" AndAlso
+            If Not String.IsNullOrEmpty(file) AndAlso
                 (file.EndsWith(IO.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) Or
                 file.EndsWith(IO.Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) Then
                 Return False
@@ -870,7 +870,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''     Or if NewName contains path information.</exception>
         ''' <exception cref="System.ArgumentException">If Source or Target is device path (\\.\).</exception>
         ''' <exception cref="IO.DirectoryNotFoundException">Source directory does not exist as a directory.</exception>
-        ''' <exception cref="System.ArgumentNullException">If NewName.Length = 0.</exception>
+        ''' <exception cref="System.ArgumentNullException">If NewName = "".</exception>
         ''' <exception cref="IO.IOException">SourceDirectoryPath and TargetDirectoryPath are the same.
         '''     IOException: Target directory is under source directory - cyclic operation.
         '''     IOException: TargetDirectoryPath points to an existing file.
@@ -1208,8 +1208,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="Text">The text to search for.</param>
         ''' <returns>True if the file contains the text. Otherwise False.</returns>
         Private Shared Function FileContainsText(ByVal FilePath As String, ByVal Text As String, ByVal IgnoreCase As Boolean) As Boolean
-            Debug.Assert(FilePath.Length <> 0 AndAlso IO.Path.IsPathRooted(FilePath), FilePath)
-            Debug.Assert(Text.Length <> 0, "Empty text!!!")
+            Debug.Assert(FilePath <> "" AndAlso IO.Path.IsPathRooted(FilePath), FilePath)
+            Debug.Assert(Text <> "", "Empty text!!!")
 
             ' To support different encoding (UTF-8, ASCII).
             ' Read the file in byte, then use Decoder classes to get a string from those bytes and compare.
@@ -1243,7 +1243,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim BufferSize As Integer = Math.Max(MaxByteDetectedEncoding, DEFAULT_BUFFER_SIZE)
 
                 ' Dim up the byte buffer and the search helpers (See TextSearchHelper).
-                Dim SearchHelper As TextSearchHelper = New TextSearchHelper(DetectedEncoding, Text, IgnoreCase)
+                Dim SearchHelper As New TextSearchHelper(DetectedEncoding, Text, IgnoreCase)
 
                 ' If the buffer size is larger than DEFAULT_BUFFER_SIZE, read more from the file stream
                 ' to fill up the byte buffer.
@@ -1386,7 +1386,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>A String contains the full path.</returns>
         ''' <remarks>This function is used for CopyFile, RenameFile and RenameDirectory.</remarks>
         Private Shared Function GetFullPathFromNewName(ByVal Path As String, ByVal NewName As String, ByVal ArgumentName As String) As String
-            Debug.Assert(Path.Length <> 0 AndAlso IO.Path.IsPathRooted(Path), Path)
+            Debug.Assert(Path <> "" AndAlso IO.Path.IsPathRooted(Path), Path)
             Debug.Assert(Path.Equals(IO.Path.GetFullPath(Path)), Path)
             Debug.Assert(NewName.Length <> 0, "Null NewName!!!")
             Debug.Assert(ArgumentName.Length <> 0, "Null argument name!!!")
@@ -1649,7 +1649,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ''' <param name="TargetDirectoryPath">Path to the target directory of the move / copy. NOTE: must be a full path.</param>
             Friend Sub New(ByVal DirectoryPath As String, ByVal TargetDirectoryPath As String)
                 Debug.Assert(IO.Directory.Exists(DirectoryPath), "Directory does not exist!!!")
-                Debug.Assert(TargetDirectoryPath.Length <> 0 AndAlso IO.Path.IsPathRooted(TargetDirectoryPath), "Invalid TargetPath!!!")
+                Debug.Assert(TargetDirectoryPath <> "" And IO.Path.IsPathRooted(TargetDirectoryPath), "Invalid TargetPath!!!")
 
                 Path = DirectoryPath
                 TargetPath = TargetDirectoryPath
@@ -1667,16 +1667,16 @@ Namespace Microsoft.VisualBasic.FileIO
             Friend ReadOnly Property Path() As String
 
             ''' <summary>
-            ''' Return the sub directories of the current node.
-            ''' </summary>
-            ''' <value>A Collection(Of DirectoryNode) containing the sub-directory nodes.</value>
-            Friend ReadOnly Property SubDirs() As ObjectModel.Collection(Of DirectoryNode)
-
-            ''' <summary>
             ''' Return the TargetPath for copy / move.
             ''' </summary>
             ''' <value>A String containing the copy / move target path of the current node.</value>
             Friend ReadOnly Property TargetPath() As String
+
+            ''' <summary>
+            ''' Return the sub directories of the current node.
+            ''' </summary>
+            ''' <value>A Collection(Of DirectoryNode) containing the sub-directory nodes.</value>
+            Friend ReadOnly Property SubDirs() As ObjectModel.Collection(Of DirectoryNode)
         End Class 'Private Class DirectoryNode
 
         ''' <summary>
@@ -1696,7 +1696,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ''' <param name="Text">The text to search for in subsequent byte array.</param>
             Friend Sub New(ByVal Encoding As Text.Encoding, ByVal Text As String, ByVal IgnoreCase As Boolean)
                 Debug.Assert(Encoding IsNot Nothing, "Null Decoder!!!")
-                Debug.Assert(Text.Length <> 0, "Empty Text!!!")
+                Debug.Assert(Text <> "", "Empty Text!!!")
 
                 m_Decoder = Encoding.GetDecoder
                 m_Preamble = Encoding.GetPreamble
