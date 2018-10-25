@@ -666,7 +666,7 @@ namespace System.IO.Ports
             {
                 if (r.IsCompleted)
                 {
-                    Debug.Assert(q.TryDequeue(out _));
+                    q.TryDequeue(out _);
                     // take another item since we haven't processed anything
                     continue;
                 }
@@ -676,7 +676,7 @@ namespace System.IO.Ports
 
                 if (r.IsCompleted)
                 {
-                    Debug.Assert(q.TryDequeue(out _));
+                    q.TryDequeue(out _);
                 }
 
                 return ret;
