@@ -204,9 +204,11 @@ namespace System.Data.Tests.Common
             {
                 FillLoadOption = LoadOption.PreserveChanges
             };
+            Assert.Equal(LoadOption.PreserveChanges, da.FillLoadOption);
             da.ResetFillLoadOption();
             Assert.Equal(LoadOption.OverwriteChanges, da.FillLoadOption);
             da.FillLoadOption = LoadOption.Upsert;
+            Assert.Equal(LoadOption.Upsert, da.FillLoadOption);
             da.ResetFillLoadOption();
             Assert.Equal(LoadOption.OverwriteChanges, da.FillLoadOption);
         }
