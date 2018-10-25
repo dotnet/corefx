@@ -579,19 +579,6 @@ namespace System.Data.SqlClient
         internal int warningsIndexEnd;
         internal SqlErrorCollection warnings;
 
-        //internal string GetCommandTextOrRpcName()
-        //{
-        //    if (TdsEnums.RPC_PROCID_EXECUTESQL == ProcID)
-        //    {
-        //        // Param 0 is the actual sql executing
-        //        return (string)parameters[0].Value;
-        //    }
-        //    else
-        //    {
-        //        return rpcName;
-        //    }
-        //}
-
         public SqlParameter GetParameterByIndex(int index, out byte options)
         {
             options = 0;
