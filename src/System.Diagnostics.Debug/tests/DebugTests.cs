@@ -7,12 +7,34 @@ using Xunit;
 
 namespace System.Diagnostics.Tests
 {
+
     // These tests test the static Debug class. They cannot be run in parallel
     [Collection("System.Diagnostics.Debug")]
-    public class DebugTests
+    public class DebugTestsWithListeners : DebugTests
+    {
+        protected override bool TestDebugWithTraceListeners { get { return true; } }
+    }
+
+    // These tests test the static Debug class. They cannot be run in parallel
+    [Collection("System.Diagnostics.Debug")]
+    public class DebugTestsNoListeners : DebugTests
+    {
+        protected override bool TestDebugWithTraceListeners { get { return false; } }
+    }
+
+    public abstract class DebugTests
     {
         // When true, tests Debug after it has wired up with Trace Listeners
-        private static readonly bool _testDebugWithTraceListeners = true;
+        protected abstract bool TestDebugWithTraceListeners { get; }
+
+        public DebugTests()
+        {
+            if (TestDebugWithTraceListeners)
+            {
+                // Wires up TraceListeners to Debug
+                Assert.Equal(1, Trace.Listeners.Count);
+            }
+        }
 
         [Fact]
         public void Debug_Write_Indents()
@@ -37,7 +59,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_Write_Indents()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             // This test when run alone verifies Trace.Write indentation, even on first call, is correct.
@@ -51,7 +73,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_WriteLine_Indents()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             // This test when run alone verifies Debug.WriteLine indentation, even on first call, is correct.
@@ -83,7 +105,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_WriteLine_WontIndentAfterWrite()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             Trace.Indent();
@@ -106,7 +128,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Debug_WriteLine_SameIndentationForBothTraceAndDebug()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             Trace.Indent();
@@ -122,7 +144,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_WriteNull_IndentsEmptyStringProperly()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             Trace.Indent();
@@ -138,7 +160,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_UpdatingDebugIndentation_UpdatesTraceIndentation_AndViceVersa()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             int before = Debug.IndentSize * Debug.IndentLevel;
@@ -193,7 +215,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_Refresh_ResetsIndentSize()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             int before = Debug.IndentSize * Debug.IndentLevel;
@@ -211,7 +233,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void Trace_ClearTraceListeners_StopsWritingToDebugger()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             VerifyLogged(() => Debug.Write("pizza"), "pizza");
@@ -325,7 +347,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TraceWriteIf()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             VerifyLogged(() => Trace.WriteIf(true, 5), "5");
@@ -346,7 +368,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TraceWriteLineIf()
         {
-            if (!_testDebugWithTraceListeners) 
+            if (!TestDebugWithTraceListeners) 
                 return;
 
             VerifyLogged(() => Trace.WriteLineIf(true, 5), "5" + Environment.NewLine);
@@ -483,14 +505,7 @@ namespace System.Diagnostics.Tests
         {
             public static readonly WriteLogger s_instance = new WriteLogger();
 
-            private WriteLogger()
-            {
-                if (DebugTests._testDebugWithTraceListeners)
-                {
-                    // Wires up TraceListeners to Debug
-                    Assert.Equal(1, Trace.Listeners.Count);
-                }
-            }
+            private WriteLogger() { }
 
             public string LoggedOutput { get; private set; }
 
