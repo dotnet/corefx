@@ -3030,7 +3030,6 @@ namespace System.Data.SqlClient
                         int remainder = _outBuff.Length - _outBytesUsed;
 
                         // write the remainder
-                        //Buffer.BlockCopy(b, offset, _outBuff, _outBytesUsed, remainder);
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, remainder);
                         ReadOnlySpan<byte> copyFrom = b.Slice(0, remainder);
 
@@ -3038,10 +3037,10 @@ namespace System.Data.SqlClient
 
                         copyFrom.CopyTo(copyTo);
 
-                        // handle counters
                         offset += remainder;
                         _outBytesUsed += remainder;
                         len -= remainder;
+                        b = b.Slice(remainder);
 
                         Task packetTask = WritePacket(TdsEnums.SOFTFLUSH, canAccumulate);
 
@@ -3073,7 +3072,8 @@ namespace System.Data.SqlClient
                         }
                     }
                     else
-                    { //((stateObj._outBytesUsed + len) <= stateObj._outBuff.Length )
+                    { 
+                        //((stateObj._outBytesUsed + len) <= stateObj._outBuff.Length )
                         // Else the remainder of the string will fit into the buffer, so copy it into the
                         // buffer and then break out of the loop.
 

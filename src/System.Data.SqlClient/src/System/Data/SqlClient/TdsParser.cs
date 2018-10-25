@@ -2171,7 +2171,6 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in TryRun
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void TryRunSetupSpinWaitContinuation(TdsParserStateObject stateObj)
         {
             SpinWait.SpinUntil(() => !stateObj._attentionSending);
@@ -7017,7 +7016,6 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in TDSExecuteSqlBatch
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private Task TDSExecuteSqlBatchSetupReleaseContinuation(TdsParserStateObject stateObj, Task executeTask, bool taskReleaseConnectionLock)
         {
             return executeTask.ContinueWith(t =>

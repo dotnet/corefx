@@ -954,7 +954,6 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in BeginExecuteNonQuery
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void BeginExecuteNonQuerySetupCompletionContinuation(TaskCompletionSource<object> completion, Task execNQ)
         {
             AsyncHelper.ContinueTask(execNQ, completion, () => BeginExecuteNonQueryInternalReadStage(completion));
@@ -2395,7 +2394,6 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in RunExecuteNonQueryTds
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void RunExecuteNonQueryTdsSetupReconnnectContinuation(string methodName, bool async, int timeout, bool asyncWrite, Task reconnectTask, long reconnectionStart, TaskCompletionSource<object> completion)
         {
             CancellationTokenSource timeoutCTS = new CancellationTokenSource();
@@ -2665,7 +2663,6 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private Task RunExecuteReaderTdsSetupContinuation(RunBehavior runBehavior, SqlDataReader ds, string optionSettings, Task writeTask)
         {
             Task task;
@@ -2682,7 +2679,6 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void RunExecuteReaderTdsSetupReconnectContinuation(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, bool async, int timeout, bool asyncWrite, SqlDataReader ds, Task reconnectTask, long reconnectionStart, TaskCompletionSource<object> completion)
         {
             CancellationTokenSource timeoutCTS = new CancellationTokenSource();
