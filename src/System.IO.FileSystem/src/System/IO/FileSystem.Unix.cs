@@ -108,7 +108,7 @@ namespace System.IO
             // If overwrite is allowed then just call rename
             if (overwrite)
             {
-                if (Interop.libc.rename(sourceFullPath, destFullPath) < 0)
+                if (Interop.Sys.Rename(sourceFullPath, destFullPath) < 0)
                 {
                     Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
                     if (errorInfo.Error == Interop.Error.EXDEV) // rename fails across devices / mount points
