@@ -13,6 +13,11 @@ namespace System.IO.Tests
             new FileInfo(sourceFile).MoveTo(destFile);
         }
 
+        public override void Move(string sourceFile, string destFile, bool overwrite)
+        {
+            new FileInfo(sourceFile).MoveTo(destFile, overwrite);
+        }
+
         [Fact]
         public override void NonExistentPath()
         {

@@ -25,7 +25,7 @@ internal partial class Interop
         /// </summary>
         /// <param name="src">Source file or directory</param>
         /// <param name="dst">Destination file or directory</param>
-        /// <param name="overwrite">True to overwrite existing destination file. False to fail if destination file already exists. NOTE: must pass false for directories as overwrite of directories is not supported.</param>
+        /// <param name="overwrite">True to overwrite existing destination file. NOTE: must pass false for directories as overwrite of directories is not supported.</param>
         /// <returns></returns>
         internal static bool MoveFile(string src, string dst, bool overwrite)
         {
