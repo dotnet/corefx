@@ -68,7 +68,21 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void Trace_WriteNull_IndentsEmptyStringProperly()
+        public void Trace_WriteNull_SkipsIndentation()
+        {
+            Trace.Indent();
+
+            VerifyLogged(() => Debug.Write(null), new string(' ', 0));
+            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+            VerifyLogged(() => Trace.Write(null), new string(' ', 0));
+            Trace.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+
+            // reset
+            Trace.Unindent();
+        }
+
+        [Fact]
+        public void Trace_WriteLineNull_IndentsEmptyStringProperly()
         {
             Trace.Indent();
             int expected = Debug.IndentSize * Debug.IndentLevel;

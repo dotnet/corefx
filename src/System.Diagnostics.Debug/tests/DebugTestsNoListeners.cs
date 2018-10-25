@@ -55,6 +55,30 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void Debug_WriteNull_SkipsIndentation()
+        {
+            Debug.Indent();
+
+            VerifyLogged(() => Debug.Write(null), new string(' ', 0));
+            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+
+            // reset
+            Debug.Unindent();
+        }
+
+        [Fact]
+        public void Debug_WriteLineNull_IndentsEmptyStringProperly()
+        {
+            Debug.Indent();
+            int expected = Debug.IndentSize * Debug.IndentLevel;
+
+            VerifyLogged(() => Debug.WriteLine(null), new string(' ', expected) + Environment.NewLine);
+
+            // reset
+            Debug.Unindent();
+        }
+
+        [Fact]
         public void Asserts()
         {
             VerifyLogged(() => Debug.Assert(true), "");

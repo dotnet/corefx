@@ -180,7 +180,7 @@ namespace System.Diagnostics
 
         private void Write(string message, bool useLogFile)
         {
-            if (NeedIndent) 
+            if (NeedIndent && !string.IsNullOrEmpty(message)) 
                 WriteIndent();
 
             s_provider.Write(message);
