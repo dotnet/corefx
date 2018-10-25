@@ -94,5 +94,27 @@ namespace System.IO.Ports
         {
             Dispose(false);
         }
+
+        private void CheckReadWriteArguments(byte[] array, int offset, int count)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
+            if (array.Length - offset < count)
+                throw new ArgumentException(SR.Argument_InvalidOffLen);
+            if (_handle == null)
+                InternalResources.FileNotOpen();
+        }
+
+        private void CheckWriteArguments(byte[] array, int offset, int count)
+        {
+            if (_inBreak)
+                throw new InvalidOperationException(SR.In_Break_State);
+
+            CheckReadWriteArguments(array, offset, count);
+        }
     }
 }

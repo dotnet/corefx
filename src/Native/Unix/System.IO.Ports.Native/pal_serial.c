@@ -23,10 +23,10 @@ intptr_t SystemIoPortsNative_SerialPortOpen(const char * name)
 
     if (ioctl(fd, TIOCEXCL) != 0)
     {
-        intptr_t result;
-        while ((result = close(fd)) < 0 && errno == EINTR);
+        // We couldn't get exclusive access to the device file
+        close(fd);
         return -1;
     }
-    
+
     return fd;
 }

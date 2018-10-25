@@ -11,6 +11,7 @@
   <!-- Default configurations to help VS understand the options -->
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true' AND ('$(TargetsWindows)' == 'true' OR '$(TargetsLinux)' == 'true')">
     <Compile Include="System\IO\Ports\Handshake.cs" />
+    <Compile Include="System\IO\Ports\InternalResources.cs" />
     <Compile Include="System\IO\Ports\NativeMethods.cs" />
     <Compile Include="System\IO\Ports\Parity.cs" />
     <Compile Include="System\IO\Ports\SerialData.cs" />
@@ -27,8 +28,8 @@
     <Compile Include="System\IO\Ports\StopBits.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'">
-    <Compile Include="System\IO\Ports\InternalResources.cs" />
     <Compile Include="System\IO\Ports\SerialStream.Windows.cs" />
+    <Compile Include="System\IO\Ports\InternalResources.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DCB.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.DCB.cs</Link>
     </Compile>
@@ -155,6 +156,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
       <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.IOErrors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Read.cs">
       <Link>Interop\Unix\System.Native\Interop.Read.cs</Link>

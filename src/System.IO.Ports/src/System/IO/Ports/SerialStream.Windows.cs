@@ -763,7 +763,6 @@ namespace System.IO.Ports
                     }
                     base.Dispose(disposing);
                 }
-
             }
         }
 
@@ -772,15 +771,7 @@ namespace System.IO.Ports
         // User-accessible async read method.  Returns SerialStreamAsyncResult : IAsyncResult
         public override IAsyncResult BeginRead(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
         {
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-            if (numBytes < 0)
-                throw new ArgumentOutOfRangeException(nameof(numBytes), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-            if (array.Length - offset < numBytes)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            if (_handle == null) InternalResources.FileNotOpen();
+            CheckReadWriteArguments(array, offset, numBytes);
 
             int oldtimeout = ReadTimeout;
             ReadTimeout = SerialPort.InfiniteTimeout;
@@ -796,6 +787,7 @@ namespace System.IO.Ports
             {
                 ReadTimeout = oldtimeout;
             }
+
             return result;
         }
 
@@ -804,17 +796,7 @@ namespace System.IO.Ports
         public override IAsyncResult BeginWrite(byte[] array, int offset, int numBytes,
             AsyncCallback userCallback, object stateObject)
         {
-            if (_inBreak)
-                throw new InvalidOperationException(SR.In_Break_State);
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-            if (numBytes < 0)
-                throw new ArgumentOutOfRangeException(nameof(numBytes), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-            if (array.Length - offset < numBytes)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            if (_handle == null) InternalResources.FileNotOpen();
+            CheckWriteArguments(array, offset, numBytes);
 
             int oldtimeout = WriteTimeout;
             WriteTimeout = SerialPort.InfiniteTimeout;
@@ -830,6 +812,7 @@ namespace System.IO.Ports
             {
                 WriteTimeout = oldtimeout;
             }
+
             return result;
         }
 
@@ -1002,20 +985,11 @@ namespace System.IO.Ports
 
         internal unsafe int Read(byte[] array, int offset, int count, int timeout)
         {
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-            if (array.Length - offset < count)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
+            CheckReadWriteArguments(array, offset, count);
+
             if (count == 0) return 0; // return immediately if no bytes requested; no need for overhead.
 
             Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, "Serial Stream Read - called with timeout " + timeout);
-
-            // Check to see we have no handle-related error, since the port's always supposed to be open.
-            if (_handle == null) InternalResources.FileNotOpen();
 
             int numBytes = 0;
             if (_isAsync)
@@ -1075,22 +1049,11 @@ namespace System.IO.Ports
 
         internal unsafe void Write(byte[] array, int offset, int count, int timeout)
         {
+            CheckWriteArguments(array, offset, count);
 
-            if (_inBreak)
-                throw new InvalidOperationException(SR.In_Break_State);
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedPosNum);
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedPosNum);
             if (count == 0) return; // no need to expend overhead in creating asyncResult, etc.
-            if (array.Length - offset < count)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, "Serial Stream Write - write timeout is " + timeout);
 
-            // check for open handle, though the port is always supposed to be open
-            if (_handle == null) InternalResources.FileNotOpen();
+            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, "Serial Stream Write - write timeout is " + timeout);
 
             int numBytes;
             if (_isAsync)
@@ -1108,7 +1071,6 @@ namespace System.IO.Ports
                 numBytes = WriteFileNative(array, offset, count, null, out hr);
                 if (numBytes == -1)
                 {
-
                     // This is how writes timeout on Win9x.
                     if (hr == Interop.Errors.ERROR_COUNTER_TIMEOUT)
                         throw new TimeoutException(SR.Write_timed_out);

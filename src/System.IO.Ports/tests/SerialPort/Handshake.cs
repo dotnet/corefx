@@ -495,7 +495,7 @@ namespace System.IO.Ports.Tests
                     xmitXOffBytes[i] = rndByte;
                 }
 
-                Assert.True(xmitXOnBytes.Length > 0);
+                Assert.InRange(xmitXOnBytes.Length, 1, int.MaxValue);
 
                 int XOnIndex = rndGen.Next(0, xmitXOnBytes.Length);
                 int XOffIndex = rndGen.Next(0, xmitXOffBytes.Length);
