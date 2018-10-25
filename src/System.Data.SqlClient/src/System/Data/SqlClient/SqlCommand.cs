@@ -84,7 +84,7 @@ namespace System.Data.SqlClient
         }
 
         // Cached info for async executions
-        private class CachedAsyncState
+        private sealed class CachedAsyncState
         {
             private int _cachedAsyncCloseCount = -1;    // value of the connection's CloseCount property when the asyncResult was set; tracks when connections are closed after an async operation
             private TaskCompletionSource<object> _cachedAsyncResult = null;
@@ -262,7 +262,7 @@ namespace System.Data.SqlClient
                 // Don't allow the connection to be changed while in an async operation.
                 if (_activeConnection != value && _activeConnection != null)
                 { // If new value...
-                    if (cachedAsyncState.PendingAsyncOperation)
+                    if (_cachedAsyncState!=null && _cachedAsyncState.PendingAsyncOperation)
                     { // If in pending async state, throw.
                         throw SQL.CannotModifyPropertyAsyncOperationInProgress();
                     }
@@ -2897,16 +2897,16 @@ namespace System.Data.SqlClient
 
         private void ValidateAsyncCommand()
         {
-            if (cachedAsyncState.PendingAsyncOperation)
+            if (_cachedAsyncState!=null && _cachedAsyncState.PendingAsyncOperation)
             { // Enforce only one pending async execute at a time.
-                if (cachedAsyncState.IsActiveConnectionValid(_activeConnection))
+                if (_cachedAsyncState.IsActiveConnectionValid(_activeConnection))
                 {
                     throw SQL.PendingBeginXXXExists();
                 }
                 else
                 {
                     _stateObj = null; // Session was re-claimed by session pool upon connection close.
-                    cachedAsyncState.ResetAsyncState();
+                    _cachedAsyncState.ResetAsyncState();
                 }
             }
         }
