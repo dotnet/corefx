@@ -17,8 +17,8 @@ namespace System.Text.RegularExpressions.Tests
             var turkish = new CultureInfo("tr-TR");
             string input = "Iıİi";
 
-            var cultInvariantRegex = Create(input, CultureInfo.InvariantCulture, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-            var turkishRegex =       Create(input, turkish,                      RegexOptions.IgnoreCase);
+            Regex[] cultInvariantRegex = Create(input, CultureInfo.InvariantCulture, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            Regex[] turkishRegex =       Create(input, turkish,                      RegexOptions.IgnoreCase);
 
             // same input and regex does match so far so good
             Assert.All(cultInvariantRegex, rex => Assert.Equal(true, rex.IsMatch(input)) );
