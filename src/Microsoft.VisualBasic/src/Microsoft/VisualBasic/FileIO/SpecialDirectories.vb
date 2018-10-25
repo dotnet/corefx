@@ -150,6 +150,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
+                While (Not System.Diagnostics.Debugger.IsAttached)
+                    System.Threading.Thread.Sleep(1000)
+                End While     'End While
+
                 Return CreateValidFullPath(GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData))
             End Get
         End Property
@@ -225,10 +229,26 @@ Namespace Microsoft.VisualBasic.FileIO
                     End Try
                     Return PathList
                 End If
-                PathList.Add(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
+                Dim Version As String = ExtractBuildNumber(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
+                If Version = "" Then
+                    Version = "0.0.0.0"
+                End If
+                PathList.Add(Version)
             Catch
             End Try
             Return PathList
+        End Function
+
+        Private Shared Function ExtractBuildNumber(productVersion As String) As String
+            Dim Version As String = ""
+            For Each c As Char In productVersion
+                If IsNumeric(c) OrElse c = "." Then
+                    Version &= c
+                Else
+                    Exit For
+                End If
+            Next
+            Return Version
         End Function
 
         ''' <summary>

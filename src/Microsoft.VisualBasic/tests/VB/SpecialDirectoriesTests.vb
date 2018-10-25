@@ -15,37 +15,70 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
+        Private Shared Function CreateValidFullPath(FullPath As String) As String
+            For Each d As String In GetCompanyProductVersionList()
+                FullPath = IO.Path.Combine(FullPath, d)
+            Next
+            Return FullPath
+        End Function
+
         ''' <summary>
-        ''' This function separates applications by CompanyName, ProductName, ProductVersion.
+        ''' If a path does not exist, one is created in the following format
+        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\ProductVersion
+        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
         ''' The only catch is that CompanyName and/or ProductName has to be specified in the AssemblyInfo.vb file,
         ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
         ''' This function must be kept in sync with the one in coreFx\src\Microsoft.VisualBasic\src\Microsoft\VisualBasic\FileIO\SpecialDirectories.vb
         ''' </summary>
-        ''' <returns>[CompanyName]\[ProductName]\ProductVersion or name of the assembly</returns>
-        Private Shared Function GetCompanyProductVersionPath() As String
+        ''' <returns>[CompanyName]\[ProductName]\ProductVersion or Assembly.Name </returns>
+        Private Shared Function GetCompanyProductVersionList() As List(Of String)
             Dim assm As Reflection.Assembly = Reflection.Assembly.GetExecutingAssembly()
-            Dim SeparationpPath As String = ""
-            Dim CurrentProcess As Process = Process.GetCurrentProcess
-            Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.CompanyName)
-            If CompanyName <> "" Then
-                SeparationpPath = CompanyName
-            End If
-            Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.ProductName)
-            If ProductName <> "" Then
-                SeparationpPath = ProductName
-            Else
-                SeparationpPath = IO.Path.Combine(CompanyName, ProductName)
-            End If
-            If SeparationpPath = "" Then
-                Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
-                Try
-                    Return MakeValidFileName(CallingAssembly.GetName().Name)
-                Catch ex As SecurityException
-                    Dim FullName As String = CallingAssembly.FullName
-                    Return MakeValidFileName(GetTitleFromAssemblyFullName(FullName))
-                End Try
-            End If
-            Return IO.Path.Combine(SeparationpPath, CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
+            Dim PathList As New List(Of String)
+            Try
+                Dim CurrentProcess As Process = Process.GetCurrentProcess
+                Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.CompanyName)
+                If CompanyName <> "" Then
+                    PathList.Add(CompanyName)
+                End If
+                Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.ProductName)
+                If ProductName <> "" Then
+                    PathList.Add(ProductName)
+                End If
+                If PathList.Count = 0 Then
+                    Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
+                    Try
+                        PathList.Add(MakeValidFileName(CallingAssembly.GetName().Name))
+                    Catch ex As SecurityException
+                        Dim FullName As String = CallingAssembly.FullName
+                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(FullName)))
+                    End Try
+                    Return PathList
+                End If
+                Dim Version As String = ExtractBuildNumber(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
+                If Version = "" Then
+                    Version = "0.0.0.0"
+                End If
+                PathList.Add(Version)
+            Catch
+            End Try
+            Return PathList
+        End Function
+
+        ''' <summary>
+        ''' We just want numbers and "."
+        ''' </summary>
+        ''' <param name="productVersion"></param>
+        ''' <returns></returns>
+        Private Shared Function ExtractBuildNumber(productVersion As String) As String
+            Dim Version As String = ""
+            For Each c As Char In productVersion
+                If IsNumeric(c) OrElse c = "." Then
+                    Version &= c
+                Else
+                    Exit For
+                End If
+            Next
+            Return Version
         End Function
 
         ''' <summary>
@@ -70,6 +103,9 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' <param name="InputName"></param>
         ''' <returns>A valid directory name on hosted OS</returns>
         Private Shared Function MakeValidFileName(InputName As String) As String
+            If InputName = "" Then
+                Return ""
+            End If
             Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
             For Each c As Char In invalidFileChars
                 InputName = InputName.Replace(c.ToString(), "")
@@ -84,7 +120,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             If AllUsersApplicationDataRoot.Length = 0 Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.AllUsersApplicationData)
             Else
-                Assert.Equal(IO.Path.Combine(AllUsersApplicationDataRoot.TrimEnd(Separators), GetCompanyProductVersionPath).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                Assert.Equal(CreateValidFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
             End If
         End Sub
 
@@ -98,13 +134,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 ' I don't know why you would ever get here but you do on one test platform. Need help isolating issue.
                 Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
             Else
-
-                If GetCompanyProductVersionPath.Length = 0 Then
-                    Dim CurrentUserApplicationData As String = SpecialDirectories.CurrentUserApplicationData
-                    Assert.Equal(expected:=Env_ApplicationData, actual:=CurrentUserApplicationData)
-                Else
-                    Assert.Equal(expected:=IO.Path.Combine(Env_ApplicationData, GetCompanyProductVersionPath), actual:=SpecialDirectories.CurrentUserApplicationData)
-                End If
+                Assert.Equal(expected:=CreateValidFullPath(Env_ApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData)
             End If
         End Sub
 

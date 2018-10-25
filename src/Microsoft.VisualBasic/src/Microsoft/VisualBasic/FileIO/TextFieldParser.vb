@@ -198,7 +198,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Return m_TextFieldType
             End Get
             Set(ByVal value As FieldType)
-                ValidateFieldTypeEnumValue(value, NameOf(value))
+                ValidateFieldTypeEnumValue(value, "value")
                 m_TextFieldType = value
                 m_NeedPropertyCheck = True
             End Set
@@ -572,7 +572,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' Ignore empty or whitespace lines
             Dim TrimmedLine As String = line.Trim()
-            If TrimmedLine = "" Then
+            If TrimmedLine.Length = 0 Then
                 Return True
             End If
 
@@ -831,7 +831,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim MatchResult As Match = Nothing
                 Dim QuoteDelimited As Boolean = False
 
-                If HasFieldsEnclosedInQuotes Then
+                If m_HasFieldsEnclosedInQuotes Then
                     MatchResult = BeginQuotesRegex.Match(Line, Index)
                     QuoteDelimited = MatchResult.Success
                 End If
@@ -901,7 +901,7 @@ Namespace Microsoft.VisualBasic.FileIO
                     If DelimiterMatch.Success Then
                         Field = Line.Substring(Index, DelimiterMatch.Index - Index)
 
-                        If TrimWhiteSpace Then
+                        If m_TrimWhiteSpace Then
                             Field = Field.Trim()
                         End If
 
@@ -976,7 +976,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
             End If
 
-            If TrimWhiteSpace Then
+            If m_TrimWhiteSpace Then
                 Return Field.Trim()
             Else
                 Return Field
@@ -1099,7 +1099,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 If m_Delimiters(i) IsNot Nothing Then
 
                     ' Make sure delimiter is legal
-                    If HasFieldsEnclosedInQuotes Then
+                    If m_HasFieldsEnclosedInQuotes Then
                         If m_Delimiters(i).IndexOf(""""c) > -1 Then
                             Throw GetInvalidOperationException(SR.TextFieldParser_IllegalDelimiter)
                         End If
@@ -1147,8 +1147,8 @@ Namespace Microsoft.VisualBasic.FileIO
                 ' Check Comment Tokens
                 If m_CommentTokens IsNot Nothing Then
                     For Each Token As String In m_CommentTokens
-                        If Token = "" Then
-                            If HasFieldsEnclosedInQuotes And m_TextFieldType = FieldType.Delimited Then
+                        If Token <> "" Then
+                            If m_HasFieldsEnclosedInQuotes And m_TextFieldType = FieldType.Delimited Then
 
                                 If String.Compare(Token.Trim(), """", StringComparison.Ordinal) = 0 Then
                                     Throw GetInvalidOperationException(SR.TextFieldParser_InvalidComment)
