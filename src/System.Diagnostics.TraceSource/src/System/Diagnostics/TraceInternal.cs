@@ -15,9 +15,7 @@ namespace System.Diagnostics
         {
             // This is where we override default DebugProvider because we know
             // for sure that we have some Listeners to write to.
-            t_indentLevel = Debug.IndentLevel;
-            s_indentSize = Debug.IndentSize;
-            Debug.SetProvider(s_provider);
+            s_originalProvider = Debug.SetProvider(s_provider);
         }
 
         private class TraceProvider : DebugProvider
@@ -29,13 +27,11 @@ namespace System.Diagnostics
         }
 
         private static readonly DebugProvider s_provider = new TraceProvider();
+        private static readonly DebugProvider s_originalProvider;
         private static volatile string s_appName = null;
         private static volatile TraceListenerCollection s_listeners;
         private static volatile bool s_autoFlush;
         private static volatile bool s_useGlobalLock;
-        [ThreadStatic]
-        private static int t_indentLevel;
-        private static volatile int s_indentSize;
         private static volatile bool s_settingsInitialized;
 
 
@@ -58,8 +54,8 @@ namespace System.Diagnostics
                             // DefaultTraceListener to the listener collection.
                             s_listeners = new TraceListenerCollection();
                             TraceListener defaultListener = new DefaultTraceListener();
-                            defaultListener.IndentLevel = t_indentLevel;
-                            defaultListener.IndentSize = s_indentSize;
+                            defaultListener.IndentLevel = s_originalProvider.IndentLevel;
+                            defaultListener.IndentSize = s_originalProvider.IndentSize;
                             s_listeners.Add(defaultListener);
                         }
                     }
@@ -112,7 +108,7 @@ namespace System.Diagnostics
 
         public static int IndentLevel
         {
-            get { return t_indentLevel; }
+            get { return s_originalProvider.IndentLevel; }
 
             set
             {
@@ -125,13 +121,13 @@ namespace System.Diagnostics
                     {
                         value = 0;
                     }
-                    t_indentLevel = value;
+                    s_originalProvider.IndentLevel = value;
 
                     if (s_listeners != null)
                     {
                         foreach (TraceListener listener in Listeners)
                         {
-                            listener.IndentLevel = t_indentLevel;
+                            listener.IndentLevel = s_originalProvider.IndentLevel;
                         }
                     }
                 }
@@ -143,7 +139,7 @@ namespace System.Diagnostics
             get
             {
                 InitializeSettings();
-                return s_indentSize;
+                return s_originalProvider.IndentSize;
             }
 
             set
@@ -165,13 +161,13 @@ namespace System.Diagnostics
                     value = 0;
                 }
 
-                s_indentSize = value;
+                s_originalProvider.IndentSize = value;
 
                 if (s_listeners != null)
                 {
                     foreach (TraceListener listener in Listeners)
                     {
-                        listener.IndentSize = s_indentSize;
+                        listener.IndentSize = s_originalProvider.IndentSize;
                     }
                 }
             }
@@ -183,13 +179,13 @@ namespace System.Diagnostics
             lock (critSec)
             {
                 InitializeSettings();
-                if (t_indentLevel < int.MaxValue)
+                if (s_originalProvider.IndentLevel < int.MaxValue)
                 {
-                    t_indentLevel++;
+                    s_originalProvider.IndentLevel++;
                 }
                 foreach (TraceListener listener in Listeners)
                 {
-                    listener.IndentLevel = t_indentLevel;
+                    listener.IndentLevel = s_originalProvider.IndentLevel;
                 }
             }
         }
@@ -200,13 +196,13 @@ namespace System.Diagnostics
             lock (critSec)
             {
                 InitializeSettings();
-                if (t_indentLevel > 0)
+                if (s_originalProvider.IndentLevel > 0)
                 {
-                    t_indentLevel--;
+                    s_originalProvider.IndentLevel--;
                 }
                 foreach (TraceListener listener in Listeners)
                 {
-                    listener.IndentLevel = t_indentLevel;
+                    listener.IndentLevel = s_originalProvider.IndentLevel;
                 }
             }
         }
