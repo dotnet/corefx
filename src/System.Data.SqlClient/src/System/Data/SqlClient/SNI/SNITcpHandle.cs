@@ -224,13 +224,15 @@ namespace System.Data.SqlClient.SNI
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 #if netcoreapp
+#if uapassembly
                         // enable keep-alive on socket
-                        const int time = 30;
-                        const int interval = 1000;
+                        const int Time = 30;
+                        const int Interval = 1000;
                         sockets[i].SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, interval);
-                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, time);
+                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, Interval);
+                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, Time);
 #endif
+#endif                        
                         sockets[i].Connect(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
