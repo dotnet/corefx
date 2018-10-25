@@ -150,10 +150,6 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
-                While (Not System.Diagnostics.Debugger.IsAttached)
-                    System.Threading.Thread.Sleep(1000)
-                End While     'End While
-
                 Return CreateValidFullPath(GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData))
             End Get
         End Property
