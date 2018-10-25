@@ -122,7 +122,7 @@ namespace System
                 Debug.Fail($"Unable to get home directory: {exc}");
             }
 
-            // Like mono, fall back to '/' when we can't determine the home directory.
+            // Fall back to '/' when we can't determine the home directory.
             // This location isn't writable by non-root users which provides some
             // safeguard that the application doesn't write data which is meant to be private.
             if (string.IsNullOrEmpty(home))
