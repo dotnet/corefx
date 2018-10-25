@@ -21,26 +21,6 @@ namespace System.Diagnostics
     {
         private class DefaultTraceDebugProvider : DebugProvider
         {
-            private const int InternalWriteSize = 16384;
-            
-            public override void Write(string message)
-            {
-                // really huge messages mess up both VS and dbmon, so we chop it up into 
-                // reasonable chunks if it's too big
-                if (message == null || message.Length <= InternalWriteSize)
-                {
-                    base.Write(message);
-                }
-                else
-                {
-                    int offset;
-                    for (offset = 0; offset < message.Length - InternalWriteSize; offset += InternalWriteSize)
-                    {
-                        base.Write(message.Substring(offset, InternalWriteSize));
-                    }
-                    base.Write(message.Substring(offset));
-                }
-            }
             public override int IndentLevel { get { return 0; } set { } } // ignores indentation inside base.Write call
         }
 
