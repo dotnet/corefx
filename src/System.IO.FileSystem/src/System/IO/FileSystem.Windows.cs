@@ -328,7 +328,7 @@ namespace System.IO
 
         public static void MoveDirectory(string sourceFullPath, string destFullPath)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, false))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite: false))
             {
                 int errorCode = Marshal.GetLastWin32Error();
 
