@@ -802,7 +802,7 @@ namespace System.IO.Pipelines
             }
             else
             {
-                result = new ReadResult(ReadOnlySequence<byte>.Empty, isCanceled, isCompleted);
+                result = new ReadResult(new ReadOnlySequence<byte>(), isCanceled, isCompleted);
             }
 
             if (isCanceled)
