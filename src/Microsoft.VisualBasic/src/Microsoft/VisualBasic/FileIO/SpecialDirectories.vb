@@ -196,6 +196,9 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         Private Shared Function CreateValidFullPath(FullPath As String) As String
+            If FullPath = "" Then
+                Return ""
+            End If
             For Each d As String In GetCompanyProductVersionList()
                 FullPath = IO.Path.Combine(FullPath, d)
                 If IO.Directory.Exists(FullPath) Then
@@ -287,6 +290,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="InputName"></param>
         ''' <returns></returns>
         Private Shared Function MakeValidFileName(InputName As String) As String
+            If InputName = "" Then
+                Return ""
+            End If
             Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
             For Each c As Char In invalidFileChars
                 InputName = InputName.Replace(c.ToString(), "")
