@@ -219,10 +219,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <returns>[CompanyName]\[ProductName]\ProductVersion or Assembly.Name </returns>
         Private Shared Function GetCompanyProductVersionList() As List(Of String)
-            Dim assm As Reflection.Assembly = Reflection.Assembly.GetExecutingAssembly()
+            Dim CurrentProcess As Process = Process.GetCurrentProcess
             Dim PathList As New List(Of String)
             Try
-                Dim CurrentProcess As Process = Process.GetCurrentProcess
                 Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.CompanyName)
                 If CompanyName <> "" Then
                     PathList.Add(CompanyName)

@@ -32,10 +32,9 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' </summary>
         ''' <returns>[CompanyName]\[ProductName]\ProductVersion or Assembly.Name </returns>
         Private Shared Function GetCompanyProductVersionList() As List(Of String)
-            Dim assm As Reflection.Assembly = Reflection.Assembly.GetExecutingAssembly()
+            Dim CurrentProcess As Process = Process.GetCurrentProcess
             Dim PathList As New List(Of String)
             Try
-                Dim CurrentProcess As Process = Process.GetCurrentProcess
                 Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.CompanyName)
                 If CompanyName <> "" Then
                     PathList.Add(CompanyName)
@@ -46,11 +45,19 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 End If
                 If PathList.Count = 0 Then
                     Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
+                    Dim CallingAssemblyName As String = ""
                     Try
-                        PathList.Add(MakeValidFileName(CallingAssembly.GetName().Name))
+                        CallingAssemblyName = CallingAssembly.GetName().Name
+                        If CallingAssemblyName = "" Then
+                            Return PathList
+                        End If
+                        PathList.Add(MakeValidFileName(CallingAssemblyName))
                     Catch ex As SecurityException
-                        Dim FullName As String = CallingAssembly.FullName
-                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(FullName)))
+                        Dim CallingAssemblyFullName As String = CallingAssembly.FullName
+                        If CallingAssemblyFullName = "" Then
+                            Return PathList
+                        End If
+                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(CallingAssemblyFullName)))
                     End Try
                     Return PathList
                 End If
@@ -117,10 +124,14 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub AllUsersApplicationDataFolderTest()
             Dim AllUsersApplicationDataRoot As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
 
-            If AllUsersApplicationDataRoot.Length = 0 Then
+            If AllUsersApplicationDataRoot = "" Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.AllUsersApplicationData)
             Else
-                Assert.Equal(CreateValidFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                If GetCompanyProductVersionList.Any Then
+                    Assert.Equal(CreateValidFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                Else
+                    Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
+                End If
             End If
         End Sub
 
@@ -128,13 +139,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub CurrentUserApplicationDataFolderTest()
             Dim Env_ApplicationData As String = Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.Create).Trim.TrimEnd(Separators).Trim
 
-            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData.Length = 0 Then
+            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData = "" Then
                 Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
-            ElseIf Not IO.Directory.Exists(Env_ApplicationData) Then
-                ' I don't know why you would ever get here but you do on one test platform. Need help isolating issue.
-                Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
-            Else
+            ElseIf GetCompanyProductVersionList.Any Then
                 Assert.Equal(expected:=CreateValidFullPath(Env_ApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData)
+            Else
+                Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
             End If
         End Sub
 
