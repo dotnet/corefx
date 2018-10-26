@@ -4,12 +4,10 @@
     <VersionPrefix>1.0.0</VersionPrefix>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
   </PropertyGroup>
-  
   <!-- Package names if they are used in more then one location in the repo -->
   <PropertyGroup>
     <MicrosoftDotNetXUnitExtensionsPackage>Microsoft.DotNet.XUnitExtensions</MicrosoftDotNetXUnitExtensionsPackage>
   </PropertyGroup>
-
   <!--
     DARC doesn't currently update properties that end in PackageVersion yet but that is the convention
     we want to use for our properties so for now we will define both and set the PackageVersion properties
@@ -18,14 +16,13 @@
     see issue https://github.com/dotnet/arcade/issues/1114
   -->
   <PropertyGroup>
-    <MicrosoftDotNetApiCompatVersion>1.0.0-beta.18522.6</MicrosoftDotNetApiCompatVersion>
-    <MicrosoftDotNetCodeAnalysisVersion>1.0.0-beta.18522.6</MicrosoftDotNetCodeAnalysisVersion>
+    <MicrosoftDotNetApiCompatVersion>1.0.0-beta.18525.8</MicrosoftDotNetApiCompatVersion>
+    <MicrosoftDotNetCodeAnalysisVersion>1.0.0-beta.18525.8</MicrosoftDotNetCodeAnalysisVersion>
     <MicrosoftDotNetGenApiVersion>1.0.0-beta.18522.6</MicrosoftDotNetGenApiVersion>
-    <MicrosoftDotNetGenFacadesVersion>1.0.0-beta.18522.6</MicrosoftDotNetGenFacadesVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18522.6</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>1.0.0-beta.18522.6</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetGenFacadesVersion>1.0.0-beta.18525.8</MicrosoftDotNetGenFacadesVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18525.8</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>1.0.0-beta.18525.8</MicrosoftDotNetBuildTasksPackagingVersion>
   </PropertyGroup>
-
   <PropertyGroup>
     <MicrosoftDotNetApiCompatPackageVersion>$(MicrosoftDotNetApiCompatVersion)</MicrosoftDotNetApiCompatPackageVersion>
     <MicrosoftDotNetCodeAnalysisPackageVersion>$(MicrosoftDotNetCodeAnalysisVersion)</MicrosoftDotNetCodeAnalysisPackageVersion>
