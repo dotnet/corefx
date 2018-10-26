@@ -32,7 +32,7 @@ internal partial class Interop
             src = PathInternal.EnsureExtendedPrefixIfNeeded(src);
             dst = PathInternal.EnsureExtendedPrefixIfNeeded(dst);
 
-            uint flags = MOVEFILE_WRITE_THROUGH | MOVEFILE_COPY_ALLOWED;
+            uint flags = MOVEFILE_COPY_ALLOWED;
             if (overwrite)
             {
                 flags |= MOVEFILE_REPLACE_EXISTING;
