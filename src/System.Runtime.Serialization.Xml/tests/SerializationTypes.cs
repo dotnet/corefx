@@ -1243,3 +1243,12 @@ public class TypeWithMismatchBetweenAttributeAndPropertyType
         }
     }
 }
+
+[DataContract(IsReference = true)]
+public class TypeWithLinkedProperty
+{
+    [DataMember]
+    public TypeWithLinkedProperty Child { get; set; }
+    [DataMember]
+    public List<TypeWithLinkedProperty> Children { get; set; }
+}

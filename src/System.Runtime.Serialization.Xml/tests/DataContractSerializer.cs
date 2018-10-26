@@ -4054,6 +4054,21 @@ public static partial class DataContractSerializerTests
         Assert.NotNull(actual);
     }
 
+    [Fact]
+    public static void DCS_DeeplyLinkedData()
+    {
+        TypeWithLinkedProperty head = new TypeWithLinkedProperty();
+        TypeWithLinkedProperty cur = head;
+        for (int i = 0; i < 513; i++)
+        {
+            cur.Child = new TypeWithLinkedProperty();
+            cur = cur.Child;
+        }
+        cur.Children = new List<TypeWithLinkedProperty> { new TypeWithLinkedProperty() };
+        TypeWithLinkedProperty actual = DataContractSerializerHelper.SerializeAndDeserialize(head, baseline: null, skipStringCompare: true);
+        Assert.NotNull(actual);
+    }
+
     private static T DeserializeString<T>(string stringToDeserialize, bool shouldReportDeserializationExceptions = true, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null)
     {
         DataContractSerializer dcs;
