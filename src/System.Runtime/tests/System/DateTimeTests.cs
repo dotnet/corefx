@@ -1230,8 +1230,12 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void EnsureTryParseNotThrowing()
+        public static void TestTryParseAtBoundaries()
         {
+            Assert.True(DateTime.TryParse("9999-12-31T23:59:59.9999999", out var maxDateTime),
+                        "DateTime parsing expected to succeed at the boundary DateTime.MaxValue");
+            Assert.Equal(DateTime.MaxValue, maxDateTime);
+
             if (PlatformDetection.IsFullFramework)
             {
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime)); // exceeded DateTime.MaxValue
