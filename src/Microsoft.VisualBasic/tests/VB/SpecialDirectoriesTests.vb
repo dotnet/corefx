@@ -15,7 +15,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
-        Private Shared Function CreateValidFullPath(FullPath As String) As String
+        Private Shared Function GetExpectedFullPath(FullPath As String) As String
             For Each d As String In GetCompanyProductVersionList()
                 FullPath = IO.Path.Combine(FullPath, d)
             Next
@@ -128,7 +128,11 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
             Else
                 If GetCompanyProductVersionList.Any Then
-                    Assert.Equal(CreateValidFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                    If IO.Directory.Exists(GetExpectedFullPath(AllUsersApplicationDataRoot)) Then
+                        Assert.Equal(GetExpectedFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                    Else
+                        Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
+                    End If
                 Else
                     Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
                 End If
@@ -141,10 +145,16 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
             If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData = "" Then
                 Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
-            ElseIf GetCompanyProductVersionList.Any Then
-                Assert.Equal(expected:=CreateValidFullPath(Env_ApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData)
             Else
-                Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
+                If GetCompanyProductVersionList.Any Then
+                    If IO.Directory.Exists(GetExpectedFullPath(Env_ApplicationData)) Then
+                        Assert.Equal(GetExpectedFullPath(Env_ApplicationData.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                    Else
+                        Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
+                    End If
+                Else
+                    Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
+                End If
             End If
         End Sub
 

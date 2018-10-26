@@ -177,7 +177,7 @@ Namespace Microsoft.VisualBasic.FileIO
                     Debug.Assert(FullPath <> "", "CreateValidFullPath is Empty")
                     Return FullPath
                 Catch ex As Exception
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" '{CommonApplicationData}' with real exception {ex.Message}")
+                    Throw New PlatformNotSupportedException(ex.Message)
                 End Try
             End Get
         End Property
