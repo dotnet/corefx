@@ -3077,7 +3077,6 @@ namespace System.Data.SqlClient
                         // Else the remainder of the string will fit into the buffer, so copy it into the
                         // buffer and then break out of the loop.
 
-                        //Buffer.BlockCopy(b, offset, _outBuff, _outBytesUsed, len);
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, len);
                         ReadOnlySpan<byte> copyFrom = b.Slice(0,len);
 

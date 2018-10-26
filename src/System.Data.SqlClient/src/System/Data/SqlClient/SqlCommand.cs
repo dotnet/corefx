@@ -3218,8 +3218,6 @@ namespace System.Data.SqlClient
                 rpc = _rpcArrayOf1[0];
             }
 
-            //rpc.ProcID = 0;
-            //rpc.rpcName = null;
             rpc.options = 0;
             rpc.systemParamCount = systemParamCount;
 
@@ -3247,7 +3245,6 @@ namespace System.Data.SqlClient
         private void SetUpRPCParameters(_SqlRPC rpc, int startCount, bool inSchema, SqlParameterCollection parameters)
         {
             int paramCount = GetParameterCount(parameters);
-            //int j = startCount;
             int userParamCount = 0;
 
             for (int index = 0; index < paramCount; index++)
@@ -3514,7 +3511,7 @@ namespace System.Data.SqlClient
 
                 // paragraph above doesn't seem to be correct. Server won't find the type
                 // if we don't provide a fully qualified name
-                paramList.Append(" ");
+                paramList.Append(' ');
                 if (mt.SqlDbType == SqlDbType.Udt)
                 {
                     string fullTypeName = sqlParam.UdtTypeName;
@@ -3625,7 +3622,7 @@ namespace System.Data.SqlClient
                 // set the output bit for Output or InputOutput parameters
                 if (sqlParam.Direction != ParameterDirection.Input)
                 {
-                    paramList.Append(" ");
+                    paramList.Append(' ');
                     paramList.Append(TdsEnums.PARAM_OUTPUT);
                 }
             }
