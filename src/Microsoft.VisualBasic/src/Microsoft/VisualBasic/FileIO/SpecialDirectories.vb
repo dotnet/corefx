@@ -122,10 +122,15 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
-                Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), SR.IO_SpecialDirectory_UserAppData).Trim.TrimEnd(Separators).Trim
+                Dim ApplicationData As String = ""
+                Try
+                    ApplicationData = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), SR.IO_SpecialDirectory_UserAppData).Trim.TrimEnd(Separators).Trim
+                Catch ex As Exception
+                End Try
                 If String.IsNullOrEmpty(ApplicationData) Then
                     Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectory_UserAppData))
                 End If
+
                 If Not IO.Directory.Exists(ApplicationData) Then
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.ApplicationData could not create '{ApplicationData}'")
                 End If
@@ -154,10 +159,16 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
-                Dim CommonApplicationData As String = GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
-                If String.IsNullOrEmpty(CommonApplicationData) Then
+                Dim CommonApplicationData As String = ""
+                Try
+                    CommonApplicationData = GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
+                Catch ex As Exception
+                End Try
+
+                If String.IsNullOrWhiteSpace(CommonApplicationData) Then
                     Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectory_UserAppData))
                 End If
+
                 If Not IO.Directory.Exists(CommonApplicationData) Then
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.AllUsersApplicationData could Not create '{CommonApplicationData}'")
                 End If
@@ -252,7 +263,8 @@ Namespace Microsoft.VisualBasic.FileIO
                     Version = "0.0.0.0"
                 End If
                 PathList.Add(Version)
-            Catch
+            Catch ex As Exception
+                Throw New PlatformNotSupportedException("For debug only, can't get CallingAssembly.GetName().Name", ex)
             End Try
             Return PathList
         End Function
