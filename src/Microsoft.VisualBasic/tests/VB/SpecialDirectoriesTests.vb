@@ -125,7 +125,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Dim AllUsersApplicationDataRoot As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
 
             If AllUsersApplicationDataRoot = "" Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.AllUsersApplicationData)
+                Assert.Throws(Of IO.PathTooLongException)(Function() SpecialDirectories.AllUsersApplicationData)
             Else
                 If GetCompanyProductVersionList.Any Then
                     Assert.Equal(CreateValidFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
