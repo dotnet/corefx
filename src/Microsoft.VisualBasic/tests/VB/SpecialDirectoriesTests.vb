@@ -125,7 +125,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Dim AllUsersApplicationDataRoot As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
 
             If AllUsersApplicationDataRoot = "" Then
-                Assert.Throws(Of IO.PathTooLongException)(Function() SpecialDirectories.AllUsersApplicationData)
+                Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
             Else
                 If GetCompanyProductVersionList.Any Then
                     Assert.Equal(CreateValidFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
@@ -140,7 +140,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Dim Env_ApplicationData As String = Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.Create).Trim.TrimEnd(Separators).Trim
 
             If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData = "" Then
-                Assert.Throws(Of System.IO.DirectoryNotFoundException)(Function() SpecialDirectories.CurrentUserApplicationData)
+                Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
             ElseIf GetCompanyProductVersionList.Any Then
                 Assert.Equal(expected:=CreateValidFullPath(Env_ApplicationData), actual:=SpecialDirectories.CurrentUserApplicationData)
             Else

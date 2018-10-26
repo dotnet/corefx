@@ -204,7 +204,11 @@ Namespace Microsoft.VisualBasic.FileIO
                 If IO.Directory.Exists(FullPath) Then
                     Continue For
                 End If
-                IO.Directory.CreateDirectory(FullPath)
+                Try
+                    IO.Directory.CreateDirectory(FullPath)
+                Catch ex As Exception
+                    Throw New PlatformNotSupportedException($"Can't Create {FullPath}", ex)
+                End Try
             Next
             Return FullPath
         End Function
