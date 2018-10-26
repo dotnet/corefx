@@ -148,7 +148,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Else
                 If GetCompanyProductVersionList.Any Then
                     If IO.Directory.Exists(GetExpectedFullPath(Env_ApplicationData)) Then
-                        Assert.Equal(GetExpectedFullPath(Env_ApplicationData.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
+                        Assert.Equal(GetExpectedFullPath(Env_ApplicationData.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
                     Else
                         Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
                     End If

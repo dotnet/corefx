@@ -132,14 +132,14 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
 
                 If Not IO.Directory.Exists(ApplicationData) Then
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.ApplicationData could not create '{ApplicationData}'")
+                    Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectoryNotExist, $"{ApplicationData}"))
                 End If
                 Try
                     Dim FullPath As String = CreateValidFullPath(ApplicationData)
                     Debug.Assert(FullPath <> "", "CreateValidFullPath is Empty")
                     Return FullPath
                 Catch ex As Exception
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" '{ApplicationData}' with real exception {ex.Message}")
+                    Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectoryNotExist, $"{GetExpectedFullPath(ApplicationData)}"))
                 End Try
             End Get
         End Property
@@ -170,14 +170,14 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
 
                 If Not IO.Directory.Exists(CommonApplicationData) Then
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.AllUsersApplicationData could Not create '{CommonApplicationData}'")
+                    Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectoryNotExist, $"{CommonApplicationData}"))
                 End If
                 Try
                     Dim FullPath As String = CreateValidFullPath(CommonApplicationData)
                     Debug.Assert(FullPath <> "", "CreateValidFullPath is Empty")
                     Return FullPath
                 Catch ex As Exception
-                    Throw New PlatformNotSupportedException(ex.Message)
+                    Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectoryNotExist, $"{GetExpectedFullPath(CommonApplicationData)}"))
                 End Try
             End Get
         End Property
@@ -226,6 +226,13 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
             'The name is not in the format we're expecting so return an empty string
             Return ""
+        End Function
+
+        Private Shared Function GetExpectedFullPath(FullPath As String) As String
+            For Each d As String In GetCompanyProductVersionList()
+                FullPath = IO.Path.Combine(FullPath, d)
+            Next
+            Return FullPath
         End Function
 
         ''' <summary>
