@@ -124,13 +124,15 @@ Namespace Microsoft.VisualBasic.FileIO
             Get
                 Dim ApplicationData As String = GetDirectoryPath(Environment.GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), SR.IO_SpecialDirectory_UserAppData).Trim.TrimEnd(Separators).Trim
                 If String.IsNullOrEmpty(ApplicationData) Then
-                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.ApplicationData returned String.Empty.")
+                    Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectory_UserAppData))
                 End If
                 If Not IO.Directory.Exists(ApplicationData) Then
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.ApplicationData could not create '{ApplicationData}'")
                 End If
                 Try
-                    Return CreateValidFullPath(ApplicationData)
+                    Dim FullPath As String = CreateValidFullPath(ApplicationData)
+                    Debug.Assert(FullPath <> "", "CreateValidFullPath is Empty")
+                    Return FullPath
                 Catch ex As Exception
                     Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" '{ApplicationData}' with real exception {ex.Message}")
                 End Try
@@ -144,13 +146,28 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <value>A String containing the path to the directory your application can use to store data for all users.</value>
         ''' <remarks>
         ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
+        ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\ProductVersion
+        ''' Either CompanyName or ProductName may be left out but not both
+        ''' Product version is required but will default to "0.0.0.0"
         '''
         ''' See above for reason why we don't use System.Environment.GetFolderPath(*).
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
-                Return CreateValidFullPath(GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData))
+                Dim CommonApplicationData As String = GetDirectoryPath(GetFolderPath(SpecialFolder.CommonApplicationData), SR.IO_SpecialDirectory_AllUserAppData)
+                If String.IsNullOrEmpty(CommonApplicationData) Then
+                    Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectory_UserAppData))
+                End If
+                If Not IO.Directory.Exists(CommonApplicationData) Then
+                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" SpecialFolder.AllUsersApplicationData could Not create '{CommonApplicationData}'")
+                End If
+                Try
+                    Dim FullPath As String = CreateValidFullPath(CommonApplicationData)
+                    Debug.Assert(FullPath <> "", "CreateValidFullPath is Empty")
+                    Return FullPath
+                Catch ex As Exception
+                    Throw ExUtils.GetDirectoryNotFoundException(SR.IO_SpecialDirectoryNotExist, GetResourceString(SR.IO_SpecialDirectory_UserAppData) & $" '{CommonApplicationData}' with real exception {ex.Message}")
+                End Try
             End Get
         End Property
 
@@ -175,7 +192,6 @@ Namespace Microsoft.VisualBasic.FileIO
                 End If
                 IO.Directory.CreateDirectory(FullPath)
             Next
-
             Return FullPath
         End Function
 
@@ -218,10 +234,17 @@ Namespace Microsoft.VisualBasic.FileIO
                 If PathList.Count = 0 Then
                     Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
                     Try
-                        PathList.Add(MakeValidFileName(CallingAssembly.GetName().Name))
+                        Dim CallingAssemblyName As String = CallingAssembly.GetName().Name
+                        If CallingAssemblyName = "" Then
+                            Throw New PlatformNotSupportedException("For debug only, can't get CallingAssembly.GetName().Name")
+                        End If
+                        PathList.Add(MakeValidFileName(CallingAssemblyName))
                     Catch ex As SecurityException
-                        Dim FullName As String = CallingAssembly.FullName
-                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(FullName)))
+                        Dim CallingAssemblyFullName As String = CallingAssembly.FullName
+                        If CallingAssemblyFullName = "" Then
+                            Throw New PlatformNotSupportedException("For debug only, can't get CallingAssembly.FullName")
+                        End If
+                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(CallingAssemblyFullName)))
                     End Try
                     Return PathList
                 End If
