@@ -251,15 +251,8 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers1()
         {
-            using (TypeLoader tl = new TypeLoader("mscorlib"))
+            using (TypeLoader tl = new TypeLoader(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        if (name.Name == "mscorlib")
-                            return tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                        return null;
-                    };
 
                 Assembly a = tl.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);
@@ -286,21 +279,10 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestMethodBody1()
         {
-            using (TypeLoader tl = new TypeLoader("mscorlib"))
+            using (TypeLoader tl = new TypeLoader(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
                 Assembly coreAssembly = tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        if (name.Name == "mscorlib")
-                            return coreAssembly;
-                        return null;
-                    };
-
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithMethodBodyImage);
-
-                //a = Assembly.Load(TestData.s_AssemblyWithMethodBodyImage);
-                //coreAssembly = typeof(object).Assembly;
 
                 Type nonsense = a.GetType("Nonsense`1", throwOnError: true);
                 Type theT = nonsense.GetTypeInfo().GenericTypeParameters[0];
@@ -379,17 +361,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestEHClauses()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
                 Assembly coreAssembly = tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        if (name.Name == "mscorlib")
-                            return coreAssembly;
-                        return null;
-                    };
-
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithEhClausesImage);
 
                 Type gt = a.GetType("G`1", throwOnError: true);

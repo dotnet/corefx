@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CannotDoWithReflectionOnlyAssemblies()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 // Storing as ICustomAttributeProvider so we don't accidentally pick up the CustomAttributeExtensions extension methods.
                 ICustomAttributeProvider icp = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);

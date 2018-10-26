@@ -16,16 +16,17 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadExternalAssembly1()
         {
-            using (TypeLoader tl = new TypeLoader())
-            {
-                Assembly runtimeAssembly = typeof(object).Assembly;  // Intentionally not projected.
-                string location = runtimeAssembly.Location;
+            Assembly runtimeAssembly = typeof(object).Assembly;  // Intentionally not projected.
 
-                tl.Resolving +=
+            using (TypeLoader tl = new TypeLoader(
+                new FuncMetadataAssemblyResolver(
                     delegate (TypeLoader sender, AssemblyName an)
                     {
                         return runtimeAssembly;
-                    };
+                    }
+                    )))
+            {
+                string location = runtimeAssembly.Location;
 
                 Assert.Throws<FileLoadException>(() => tl.LoadFromAssemblyName("DontCare"));
             }

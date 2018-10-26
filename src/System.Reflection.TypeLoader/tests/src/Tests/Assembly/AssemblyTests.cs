@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetName()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 AssemblyName name = a.GetName(copiedName: false);
@@ -28,7 +28,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetCopiedName()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 AssemblyName name = a.GetName(copiedName: true);   // Shadow-copying is irrevant for TypeLoader-loaded assemblies so this parameter is ignored.
@@ -41,7 +41,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetNameAlwaysReturnsNewInstance()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 AssemblyName name1 = a.GetName();
@@ -53,7 +53,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyFullName()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 string fullName = a.FullName;
@@ -64,7 +64,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGlobalAssemblyCache()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.False(a.GlobalAssemblyCache);  // This property is meaningless for TypeLoaders and always returns false.
@@ -74,7 +74,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyHostContext()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.Equal(0L, a.HostContext);  // This property is meaningless for TypeLoaders and always returns 0.
@@ -84,7 +84,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyIsDynamic()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.False(a.IsDynamic);
@@ -94,7 +94,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyReflectionOnly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.True(a.ReflectionOnly);
@@ -104,7 +104,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyMetadataVersion4_0()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 string metadataVersion = a.ImageRuntimeVersion;
@@ -115,7 +115,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyMetadataVersion2_0()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_NetFx20AssemblyImage);
                 string metadataVersion = a.ImageRuntimeVersion;
@@ -126,7 +126,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyLocationMemory()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 string location = a.Location;
@@ -138,7 +138,7 @@ namespace System.Reflection.Tests
         public static void AssemblyLocationFile()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromAssemblyPath(tf.Path);
                 string location = a.Location;
@@ -149,7 +149,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetTypesReturnsDifferentObjectsEachTime()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                 TestUtils.AssertNewObjectReturnedEachTime<Type>(() => a.GetTypes());
@@ -159,7 +159,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyDefinedTypeInfosReturnsDifferentObjectsEachTime()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                 TestUtils.AssertNewObjectReturnedEachTime<TypeInfo>(() => a.DefinedTypes);
@@ -169,7 +169,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetReferencedAssemblies()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyReferencesTestImage);
                 AssemblyName[] ans = a.GetReferencedAssemblies();
@@ -224,7 +224,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetReferencedAssembliesFullPublicKeyReference()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 // Ecma-335 allows an assembly reference to specify a full public key rather than the token.
 
@@ -244,7 +244,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetReferencedAssembliesPartialVersions()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PartialVersionsImage);
                 AssemblyName[] ans = a.GetReferencedAssemblies();
@@ -292,7 +292,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetReferencedAssembliesReturnsDifferentObjectsEachTime()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyReferencesTestImage);
                 AssemblyName[] ans1 = a.GetReferencedAssemblies();
@@ -345,7 +345,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetTypes1()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly upper = tl.LoadFromByteArray(TestData.s_UpperImage);
                 Type[] types = upper.GetTypes().OrderBy(t => t.FullName).ToArray();
@@ -364,7 +364,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetExportedTypes1()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly upper = tl.LoadFromByteArray(TestData.s_UpperImage);
                 Type[] types = upper.GetExportedTypes().OrderBy(t => t.FullName).ToArray();
@@ -378,7 +378,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetForwardedTypes1()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly upper = tl.LoadFromByteArray(TestData.s_UpperImage);
                 Assembly middle = tl.LoadFromByteArray(TestData.s_MiddleImage);
@@ -395,7 +395,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetForwardedTypes2()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly upper = tl.LoadFromByteArray(TestData.s_UpperImage);
                 Assembly middle = tl.LoadFromByteArray(TestData.s_MiddleImage);
@@ -415,7 +415,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyGetForwardedTypes3()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly upper = tl.LoadFromByteArray(TestData.s_UpperImage);
                 Assembly lower = tl.LoadFromByteArray(TestData.s_LowerImage);
@@ -436,7 +436,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyWithEmbeddedResources()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithEmbeddedResourcesImage);
 
@@ -486,7 +486,7 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(myRes2Path, TestData.s_MyRes2);
                 File.WriteAllBytes(myRes3Path, TestData.s_MyRes3);
 
-                using (TypeLoader tl = new TypeLoader())
+                using (TypeLoader tl = new TypeLoader(null))
                 {
                     Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
 
@@ -531,7 +531,7 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_AssemblyWithResourcesInModuleImage);
                 File.WriteAllBytes(modulePath, TestData.s_ModuleForAssemblyWithResourcesInModuleImage);
 
-                using (TypeLoader tl = new TypeLoader())
+                using (TypeLoader tl = new TypeLoader(null))
                 {
                     Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
 
@@ -569,7 +569,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyEntryPoint1()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithEntryPointImage);
                 MethodInfo m = a.EntryPoint;
@@ -581,7 +581,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyEntryPoint2()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 MethodInfo m = a.EntryPoint;
@@ -592,7 +592,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CrossAssemblyTypeRefToNestedType()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithNestedTypeImage);
                 Assembly n = tl.LoadFromByteArray(TestData.s_AssemblyWithTypeRefToNestedTypeImage);

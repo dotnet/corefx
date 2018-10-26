@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromByteArraySimpleAssembly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.NotNull(a);
@@ -35,7 +35,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
             {
-                using (TypeLoader tl = new TypeLoader())
+                using (TypeLoader tl = new TypeLoader(null))
                 {
                     Assembly a = tl.LoadFromAssemblyPath(tf.Path);
                     Assert.NotNull(a);
@@ -54,7 +54,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromStreamMemorySimpleAssembly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Stream peStream = new MemoryStream(TestData.s_SimpleAssemblyImage);
                 Assembly a = tl.LoadFromStream(peStream);
@@ -75,7 +75,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
             {
-                using (TypeLoader tl = new TypeLoader())
+                using (TypeLoader tl = new TypeLoader(null))
                 {
                     Stream fs = File.OpenRead(tf.Path);
                     Assembly a = tl.LoadFromStream(fs);
@@ -95,7 +95,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromNonZeroPositionedStreamMemorySimpleAssembly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Stream peStream = new MemoryStream(TestData.s_SimpleAssemblyImage);
                 peStream.Position = 1; 
@@ -117,7 +117,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyName()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Stream peStream = new MemoryStream(TestData.s_SimpleAssemblyImage);
                 Assembly a = tl.LoadFromStream(peStream);
@@ -136,7 +136,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf1 = TempFile.Create(TestData.s_SimpleAssemblyImage))
             using (TempFile tf2 = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 // As long as the MVID matches, you can load the same assembly from multiple locations.
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
@@ -159,7 +159,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromDifferentLocationsMvidMismatch()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.Equal(TestData.s_SimpleAssemblyName, a.GetName().FullName);
@@ -167,7 +167,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(TestData.s_SimpleAssemblyMvid, mvid);
             }
 
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyRecompiledImage);
                 Assert.Equal(TestData.s_SimpleAssemblyName, a.GetName().FullName);
@@ -175,7 +175,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(TestData.s_SimpleAssemblyRecompiledMvid, mvid);
             }
 
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.Throws<FileLoadException>(() => tl.LoadFromByteArray(TestData.s_SimpleAssemblyRecompiledImage));
@@ -185,7 +185,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyNameNullString()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assert.Throws<ArgumentNullException>(() => tl.LoadFromAssemblyName((string)null));
             }
@@ -194,7 +194,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyNameNullAssemblyName()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assert.Throws<ArgumentNullException>(() => tl.LoadFromAssemblyName((AssemblyName)null));
             }
@@ -203,7 +203,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyPathNull()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assert.Throws<ArgumentNullException>(() => tl.LoadFromAssemblyPath(null));
             }
@@ -212,7 +212,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromByteArrayNull()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assert.Throws<ArgumentNullException>(() => tl.LoadFromByteArray(null));
             }
@@ -221,7 +221,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromStreamNull()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assert.Throws<ArgumentNullException>(() => tl.LoadFromStream(null));
             }
@@ -230,7 +230,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void BadImageFormat()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 for (int i = 0; i < 100; i++)
                 {
@@ -243,7 +243,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyNameNeverLoadedAssembly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assert.Throws<FileNotFoundException>(() => tl.LoadFromAssemblyName("NeverSawThis"));
             }

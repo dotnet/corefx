@@ -15,10 +15,10 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreAssemblyCanBeAFacade()
         {
-            using (TypeLoader tl = new TypeLoader(coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
-            {
-                Assembly actualCoreAssembly = null;
-                tl.Resolving +=
+            Assembly actualCoreAssembly = null;
+
+            using (TypeLoader tl = new TypeLoader(
+                new FuncMetadataAssemblyResolver(
                     delegate (TypeLoader sender, AssemblyName refName)
                     {
                         if (refName.Name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase))
@@ -26,8 +26,9 @@ namespace System.Reflection.Tests
                             return actualCoreAssembly = sender.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                         }
                         return null;
-                    };
-
+                    }),
+                coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
+            {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
 
                 // This is a sanity check to ensure that "TestData.s_PhonyCoreAssemblyName" is actually the def-name of this
@@ -54,7 +55,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreAssemblyDelayedWrite()
         {
-            using (TypeLoader tl = new TypeLoader(coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
+            using (TypeLoader tl = new TypeLoader(null, coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
                 Type derived = a.GetType("Derived", throwOnError: true, ignoreCase: false);

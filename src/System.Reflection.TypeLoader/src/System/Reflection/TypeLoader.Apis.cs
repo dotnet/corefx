@@ -108,22 +108,14 @@ namespace System.Reflection
     public sealed partial class TypeLoader : IDisposable
     {
         /// <summary>
-        /// Creates a new TypeLoader object without setting a core assembly name. The core assembly name should be set by setting the
-        /// CoreAssemblyName property.
-        /// </summary>
-        public TypeLoader() 
-            : this(null)
-        {
-        }
-
-        /// <summary>
         /// Create a new TypeLoader object.
         /// </summary>
         /// <param name="coreAssemblyName">
         /// The name of the assembly that contains the core types such as System.Object. Typically, this would be "mscorlib".
         /// </param>
-        public TypeLoader(string coreAssemblyName)
+        public TypeLoader(MetadataAssemblyResolver resolver, string coreAssemblyName = null)
         {
+            this.resolver = resolver;
             CoreAssemblyName = coreAssemblyName;
         }
 
@@ -219,27 +211,6 @@ namespace System.Reflection
         }
 
         /// <summary>
-        /// Subscribe to this event to define the binding algorithm. The event should use TypeLoader.LoadFromStream(), LoadFromAssemblyPath()
-        /// or LoadFromByteArray() to load the requested assembly and return it. 
-        /// 
-        /// To indicate the failure to find an assembly, the handler should return null rather than throwing an exception. Returning null commits 
-        /// the failure so that future attempts to load that name will fail without re-invoking the handler.
-        /// 
-        /// If the handler throws an exception, the exception will be passed through to the application that invoked the operation that triggered
-        /// the binding. The TypeLoader will not catch it and no binding will occur.
-        /// 
-        /// The handler will generally not be called more than once for the same name, unless two threads race to load the same assembly.
-        /// Even in that case, one result will win and be atomically bound to the name.
-        /// 
-        /// The TypeLoader intentionally performs no ref-def matching on the returned assembly as what constitutes a ref-def match is a policy. 
-        /// It is also the kind of arbitrary restriction that TypeLoader strives to avoid.
-        /// 
-        /// TypeLoaders cannot consume assemblies from other TypeLoaders or other type providers (such as the underlying runtime's own Reflection system.)
-        /// If a handler returns such an assembly, the TypeLoader throws a FileLoadException.
-        /// </summary>
-        public event Func<TypeLoader, AssemblyName, Assembly> Resolving;
-
-        /// <summary>
         /// Returns the assembly name that denotes the "system assembly" that houses the well-known types such as System.Int32.
         /// Typically, this assembly is named "mscorlib", or "netstandard". If the system assembly cannot
         /// be found, many methods, including those that parse method signatures, will throw.
@@ -306,8 +277,6 @@ namespace System.Reflection
             }
         }
 
-        private volatile string _userSuppliedCoreAssemblyName;
-
         /// <summary>
         /// Return an atomic snapshot of the assemblies that have been loaded into the TypeLoader.
         /// </summary>
@@ -331,5 +300,8 @@ namespace System.Reflection
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        private MetadataAssemblyResolver resolver;
+        private volatile string _userSuppliedCoreAssemblyName;
     }
 }

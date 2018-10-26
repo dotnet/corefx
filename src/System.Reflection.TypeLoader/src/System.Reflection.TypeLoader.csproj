@@ -12,7 +12,7 @@
     <AssemblyName>System.Reflection.TypeLoader</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>.NET Core Type Loader</Description>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FromCoreRt\CoreRtBridge.cs" />
@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SR2.cs" />
+    <Compile Include="System\Reflection\MetadataAssemblyResolver.cs" />
+    <Compile Include="System\Reflection\PathAssemblyResolver.cs" />
     <Compile Include="System\Reflection\TypeLoader.Apis.cs" />
     <Compile Include="System\Reflection\TypeLoader.CoreAssembly.cs" />
     <Compile Include="System\Reflection\TypeLoader.Disposing.cs" />

@@ -24,7 +24,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_SimpleNameOnly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                 AssemblyName an = a.GetName(copiedName: false);
@@ -57,7 +57,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_Version1_2_65534_4()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_Version1_2_65534_4Image);
                 AssemblyName an = a.GetName(copiedName: false);
@@ -78,7 +78,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_Version1_2_65535_65535()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_Version1_2_65535_65535Image);
                 AssemblyName an = a.GetName(copiedName: false);
@@ -99,7 +99,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_CultureFrCh()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_CultureFrChImage);
                 AssemblyName an = a.GetName(copiedName: false);
@@ -116,7 +116,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_PublicKeyToken1ee753223f71263d()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PublicKeyToken1ee753223f71263dImage);
                 AssemblyName an = a.GetName(copiedName: false);
@@ -135,7 +135,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_HashWithSha256()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_HashWithSha256Image);
                 AssemblyName an = a.GetName(copiedName: false);

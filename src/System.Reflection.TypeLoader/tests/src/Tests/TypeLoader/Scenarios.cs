@@ -21,7 +21,7 @@ namespace System.Reflection.Tests
         public static void Scenario_GetAssemblyName()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 AssemblyName assemblyName = a.GetName();
@@ -33,7 +33,7 @@ namespace System.Reflection.Tests
         public static void Scenario_EnumerateDependencies()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 foreach (AssemblyName name in a.GetReferencedAssemblies())
@@ -47,7 +47,7 @@ namespace System.Reflection.Tests
         public static void Scenario_FindACoreAssembly()
         {
             // Ensure you can do all this without setting a core assembly.
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly[] candidates =
                 {
@@ -74,7 +74,7 @@ namespace System.Reflection.Tests
         public static void Scenario_EnumerateTypesAndMembers()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 foreach (TypeInfo t in a.DefinedTypes)

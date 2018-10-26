@@ -16,7 +16,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies_EmptyTypeLoader()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly[] loadedAssemblies = tl.GetAssemblies().ToArray();
                 Assert.Equal(0, loadedAssemblies.Length);
@@ -26,7 +26,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly[] loadedAssemblies = tl.GetAssemblies().ToArray();
                 Assert.Equal(0, loadedAssemblies.Length);
@@ -43,7 +43,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies_SnapshotIsAtomic()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a1 = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 IEnumerable<Assembly> loadedAssembliesSnapshot = tl.GetAssemblies();

@@ -44,7 +44,7 @@
     <Compile Include="src\Tests\TypeLoader\ExternalAssemblies.cs" />
     <Compile Include="src\Tests\TypeLoader\GetAssemblies.cs" />
     <Compile Include="src\Tests\TypeLoader\LoadApi.cs" />
-    <Compile Include="src\Tests\TypeLoader\ResolveEvent.cs" />
+    <Compile Include="src\Tests\TypeLoader\ResolveMethod.cs" />
     <Compile Include="src\Tests\TypeLoader\Scenarios.cs" />
     <Compile Include="src\Tests\Type\TypeInvariants.cs" />
     <Compile Include="src\Tests\Type\TypeTests.BaseType.cs" />
@@ -57,7 +57,9 @@
     <Compile Include="src\Tests\Type\TypeTests.Interfaces.cs" />
     <Compile Include="src\Tests\Type\TypeTests.StructLayoutAttribute.cs" />
     <Compile Include="src\Tests\Type\TypeTests.TypeFactories.cs" />
+    <Compile Include="src\TestUtils\CoreAssemblyMetadataAssemblyResolver.cs" />
     <Compile Include="src\TestUtils\CustomAttributeInstantiator.cs" />
+    <Compile Include="src\TestUtils\FuncMetadataAssemblyResolver.cs" />
     <Compile Include="src\TestUtils\NetStandardBridge.cs" />
     <Compile Include="src\TestUtils\TestData.cs" />
     <Compile Include="src\TestUtils\TestUtils.cs" />

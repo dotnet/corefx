@@ -17,7 +17,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
             {
-                using (TypeLoader tl = new TypeLoader())
+                using (TypeLoader tl = new TypeLoader(null))
                 {
                     tl.LoadFromAssemblyPath(tf.Path);
                 }
@@ -36,7 +36,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ExtraDisposesIgnored()
         {
-            TypeLoader tl = new TypeLoader();
+            TypeLoader tl = new TypeLoader(null);
             tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
             tl.Dispose();
             tl.Dispose();
@@ -46,7 +46,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TypeLoaderApisAfterDispose()
         {
-            TypeLoader tl = new TypeLoader();
+            TypeLoader tl = new TypeLoader(null);
             tl.Dispose();
 
             Assert.Throws<ObjectDisposedException>(() => tl.LoadFromAssemblyName(new AssemblyName("Foo")));
@@ -63,7 +63,7 @@ namespace System.Reflection.Tests
         public static void TypeLoaderDispensedObjectsAfterDispose()
         {
             Assembly a;
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
             }

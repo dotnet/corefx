@@ -60,7 +60,8 @@ namespace System.Reflection
         {
             Debug.Assert(refName != null);
 
-            Assembly assembly = Resolving?.Invoke(this, refName.ToAssemblyName());
+            Assembly assembly = resolver?.Resolve(this, refName.ToAssemblyName());
+
             if (assembly == null)
                 return new RoExceptionAssembly(new FileNotFoundException(SR.Format(SR.FileNotFoundAssembly, refName.FullName)));
 

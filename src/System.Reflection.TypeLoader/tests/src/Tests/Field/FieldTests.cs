@@ -391,16 +391,16 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers1()
         {
-            using (TypeLoader tl = new TypeLoader("mscorlib"))
-            {
-                tl.Resolving +=
+            using (TypeLoader tl = new TypeLoader(
+                new FuncMetadataAssemblyResolver(
                     delegate (TypeLoader sender, AssemblyName name)
                     {
                         if (name.Name == "mscorlib")
-                            return tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
+                            return sender.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                         return null;
-                    };
-
+                    }),
+                    "mscorlib"))
+            {
                 Assembly a = tl.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);
                 Type reqA = a.GetType("ReqA", throwOnError: true);
@@ -425,16 +425,8 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers2()
         {
-            using (TypeLoader tl = new TypeLoader("mscorlib"))
+            using (TypeLoader tl = new TypeLoader(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        if (name.Name == "mscorlib")
-                            return tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                        return null;
-                    };
-
                 Assembly a = tl.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);
                 Type reqA = a.GetType("ReqA", throwOnError: true);

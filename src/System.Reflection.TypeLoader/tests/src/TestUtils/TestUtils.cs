@@ -250,22 +250,24 @@ namespace System.Reflection.Tests
         private static TypeLoader TestTypeLoader => s_lazyTestTypeLoader.Value;
         private static readonly Lazy<TypeLoader> s_lazyTestTypeLoader = new Lazy<TypeLoader>(() =>
         {
-            TypeLoader tl = new TypeLoader("mscorlib");
-            tl.Resolving +=
-                delegate (TypeLoader sender, AssemblyName assemblyName)
-                {
-                    string name = assemblyName.Name;
-                    if (name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("System.Private.CoreLib", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("System.Runtime", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("System.Runtime.InteropServices", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("netstandard", StringComparison.OrdinalIgnoreCase))
+            TypeLoader tl = new TypeLoader(
+                new FuncMetadataAssemblyResolver(
+                    delegate (TypeLoader sender, AssemblyName assemblyName)
                     {
-                        return tl.LoadFromStream(CreateStreamForCoreAssembly());
-                    }
+                        string name = assemblyName.Name;
+                        if (name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase) ||
+                            name.Equals("System.Private.CoreLib", StringComparison.OrdinalIgnoreCase) ||
+                            name.Equals("System.Runtime", StringComparison.OrdinalIgnoreCase) ||
+                            name.Equals("System.Runtime.InteropServices", StringComparison.OrdinalIgnoreCase) ||
+                            name.Equals("netstandard", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return sender.LoadFromStream(CreateStreamForCoreAssembly());
+                        }
 
-                    return null;
-                };
+                        return null;
+                    }),
+                    "mscorlib");
+
             return tl;
         });
 

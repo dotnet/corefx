@@ -18,7 +18,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestRestrictions()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromAssemblyPath(typeof(TopLevelType).Assembly.Location);
 

@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleAssembly()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -26,7 +26,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleMvid()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -38,7 +38,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleMetadataToken()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -49,7 +49,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleIsResource()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -61,7 +61,7 @@ namespace System.Reflection.Tests
         public static void ModuleFullyQualifiedNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 string path = tf.Path;
                 Assembly a = tl.LoadFromAssemblyPath(path);
@@ -73,7 +73,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleFullyQualifiedNameFromByteArray()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -85,7 +85,7 @@ namespace System.Reflection.Tests
         public static void ModuleGetNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 string path = tf.Path;
                 Assembly a = tl.LoadFromAssemblyPath(path);
@@ -98,7 +98,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleGetNameFromByteArray()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -110,7 +110,7 @@ namespace System.Reflection.Tests
         public static void ModuleScopeNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 string path = tf.Path;
                 Assembly a = tl.LoadFromAssemblyPath(path);
@@ -122,7 +122,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleScopeNameFromByteArray()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -133,7 +133,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindAnyCpu()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PlatformAnyCpu);
                 Module m = a.ManifestModule;
@@ -151,7 +151,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindAnyCpu32BitPreferred()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PlatformAnyCpu32BitPreferred);
                 Module m = a.ManifestModule;
@@ -169,7 +169,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindX86()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PlatformX86);
                 Module m = a.ManifestModule;
@@ -187,7 +187,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindX64()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PlatformX64);
                 Module m = a.ManifestModule;
@@ -205,7 +205,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindItanium()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PlatformItanium);
                 Module m = a.ManifestModule;
@@ -223,7 +223,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindArm()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_PlatformArm);
                 Module m = a.ManifestModule;

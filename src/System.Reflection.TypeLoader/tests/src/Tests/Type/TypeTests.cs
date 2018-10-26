@@ -16,6 +16,22 @@ namespace System.Reflection.Tests
 {
     public static partial class TypeTests
     {
+        //public static int Main(string[] args)
+        //{
+        //    while (!Diagnostics.Debugger.IsAttached)
+        //    {
+        //        Console.WriteLine("Waiting for debugger to attach");
+        //        Threading.Thread.Sleep(2000);
+        //    }
+        //    Console.WriteLine("Debugger attached");
+        //    //System.Diagnostics.Debugger.Launch();
+        //    //System.Console.ReadLine();
+        //    TestGuid();
+
+        //    return 0;
+        //}
+
+
         [Theory]
         [MemberData(nameof(InvariantTheoryData))]
         public static void TestInvariants(TypeWrapper tw)
@@ -506,7 +522,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage1()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 // Create big hash collisions in GetTypeCoreCache.
@@ -524,7 +540,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage2()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromAssemblyPath(typeof(SampleMetadata.NS0.SameNamedType).Assembly.Location);
                 // Create big hash collisions in GetTypeCoreCache.
@@ -542,7 +558,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage3()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 // Make sure the tricky corner case of a null/empty namespace is covered.
                 Assembly a = tl.LoadFromAssemblyPath(typeof(TopLevelType).Assembly.Location);
@@ -576,7 +592,7 @@ namespace System.Reflection.Tests
         public static void TypesWithStrangeCharacters()
         {
             // Make sure types with strange characters are escaped.
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly a = tl.LoadFromByteArray(TestData.s_TypeWithStrangeCharacters);
                 Type[] types = a.GetTypes();

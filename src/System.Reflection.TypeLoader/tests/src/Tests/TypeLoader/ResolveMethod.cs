@@ -14,9 +14,9 @@ namespace System.Reflection.Tests
     public static partial class TypeLoaderTests
     {
         [Fact]
-        public static void EmptyResolveEvent()
+        public static void NoResolver()
         {
-            using (TypeLoader tl = new TypeLoader())
+            using (TypeLoader tl = new TypeLoader(null))
             {
                 Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
@@ -26,88 +26,77 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        public static void ResolveEventReturnsNull()
+        public static void ResolverReturnsNull()
         {
-            using (TypeLoader tl = new TypeLoader())
+            var resolver = new ResolverReturnsNull();
+            using (TypeLoader tl = new TypeLoader(resolver))
             {
-                bool resolveHandlerCalled = false;
-
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        Assert.Same(tl, sender);
-                        Assert.Equal(name.Name, "Foo");
-                        resolveHandlerCalled = true;
-                        return null;
-                    };
+                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.AssemblyName);
+                Assert.False(resolver.Called);
 
                 Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
-
                 Assert.Throws<FileNotFoundException>(() => t.BaseType);
-                Assert.True(resolveHandlerCalled);
+
+                Assert.Same(tl, resolver.Sender);
+                Assert.Equal(resolver.AssemblyName.Name, "Foo");
+                Assert.True(resolver.Called);
             }
         }
 
         [Fact]
-        public static void ResolveEventReturnsSomething()
+        public static void ResolverReturnsSomething()
         {
-            using (TypeLoader tl = new TypeLoader())
+            var resolver = new ResolverReturnsSomething();
+            using (TypeLoader tl = new TypeLoader(resolver))
             {
-                bool resolveHandlerCalled = false;
-                Assembly resolveEventHandlerResult = null;
-
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        Assert.Same(tl, sender);
-                        Assert.Equal(name.Name, "Foo");
-                        resolveHandlerCalled = true;
-                        resolveEventHandlerResult = sender.LoadFromByteArray(TestData.s_BaseClassesImage);
-                        return resolveEventHandlerResult;
-                    };
+                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.AssemblyName);
+                Assert.False(resolver.Called);
 
                 Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 Type bt = t.BaseType;
+
+                Assert.Same(tl, resolver.Sender);
+                Assert.Equal(resolver.AssemblyName.Name, "Foo");
+                Assert.True(resolver.Called);
+
                 Assembly a = bt.Assembly;
-                Assert.True(resolveHandlerCalled);
-                Assert.Equal(a, resolveEventHandlerResult);
+                Assert.Equal(a, resolver.Assembly);
             }
         }
 
         [Fact]
-        public static void ResolveEventThrows()
+        public static void ResolverThrows()
         {
-            using (TypeLoader tl = new TypeLoader())
+            var resolver = new ResolverThrows();
+            using (TypeLoader tl = new TypeLoader(resolver))
             {
-                bool resolveHandlerCalled = false;
-
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        resolveHandlerCalled = true;
-                        throw new TargetParameterCountException("Hi!");
-                    };
+                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.AssemblyName);
+                Assert.False(resolver.Called);
 
                 Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 TargetParameterCountException e = Assert.Throws<TargetParameterCountException>(() => t.BaseType);
-                Assert.True(resolveHandlerCalled);
+
+                Assert.Same(tl, resolver.Sender);
+                Assert.True(resolver.Called);
                 Assert.Equal("Hi!", e.Message);
             }
         }
 
         [Fact]
-        public static void ResolveEventNoUnnecessaryCalls()
+        public static void ResolverNoUnnecessaryCalls()
         {
-            // In a single-threaded scenario at least, TypeLoaders shouldn't ask the event to bind the same name twice.
-            using (TypeLoader tl = new TypeLoader())
-            {
-                int resolveHandlerCallCount = 0;
-                Assembly resolveEventHandlerResult = null;
+            int resolveHandlerCallCount = 0;
+            Assembly resolveEventHandlerResult = null;
 
-                tl.Resolving +=
+            // In a single-threaded scenario at least, TypeLoaders shouldn't ask the resolver to bind the same name twice.
+            using (TypeLoader tl = new TypeLoader(
+                new FuncMetadataAssemblyResolver(
                     delegate (TypeLoader sender, AssemblyName name)
                     {
                         if (name.Name == "Foo")
@@ -117,8 +106,8 @@ namespace System.Reflection.Tests
                             return resolveEventHandlerResult;
                         }
                         return null;
-                    };
-
+                    })))
+                {
                 Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t1 = derived.GetType("Derived1", throwOnError: true);
                 Type bt1 = t1.BaseType;
@@ -131,21 +120,11 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        public static void ResolveEventMultipleCalls()
+        public static void ResolverMultipleCalls()
         {
-            using (TypeLoader tl = new TypeLoader())
+            var resolver = new ResolverReturnsSomething();
+            using (TypeLoader tl = new TypeLoader(resolver))
             {
-                int resolveHandlerCallCount = 0;
-
-                Assembly basesAssembly = tl.LoadFromByteArray(TestData.s_BaseClassesImage);
-
-                tl.Resolving +=
-                    delegate (TypeLoader sender, AssemblyName name)
-                    {
-                        resolveHandlerCallCount++;
-                        return basesAssembly;
-                    };
-
                 Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
 
                 int expectedCount = 1;
@@ -153,28 +132,28 @@ namespace System.Reflection.Tests
                 {
                     Type t = derived.GetType(typeName, throwOnError: true);
                     Type bt = t.BaseType;
-                    Assert.Equal(basesAssembly, bt.Assembly);
-                    Assert.Equal(expectedCount++, resolveHandlerCallCount);
+                    Assert.Equal(bt.Assembly, resolver.Assembly);
+                    Assert.Equal(expectedCount++, resolver.CallCount);
                 }
             }
         }
 
         [Fact]
-        public static void ResolveEventFromReferencedAssembliesUsingFullPublicKeyReference()
+        public static void ResolverFromReferencedAssembliesUsingFullPublicKeyReference()
         {
             // Ecma-335 allows an assembly reference to specify a full public key rather than the token. Ensure that those references
             // still hand out usable AssemblyNames to resolve handlers.
-            using (TypeLoader tl = new TypeLoader())
-            {
-                AssemblyName assemblyNameReceivedByHandler = null;
-                tl.Resolving +=
+
+            AssemblyName assemblyNameReceivedByHandler = null;
+
+            using (TypeLoader tl = new TypeLoader(
+                new FuncMetadataAssemblyResolver(
                     delegate (TypeLoader sender, AssemblyName name)
                     {
                         assemblyNameReceivedByHandler = name;
                         return null;
-                    };
-
-
+                    })))
+            {
                 Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyRefUsingFullPublicKeyImage);
                 Type t = a.GetType("C", throwOnError: true);
 
@@ -191,5 +170,57 @@ namespace System.Reflection.Tests
                 Assert.Equal<byte>(expectedPkt, actualPkt);
             }
         }
+    }
+
+    public class ResolverReturnsNull : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(System.Reflection.TypeLoader context, AssemblyName assemblyName)
+        {
+            Sender = context;
+            AssemblyName = assemblyName;
+            Called = true;
+
+            return null;
+        }
+
+        public AssemblyName AssemblyName { get; private set; }
+        public TypeLoader Sender { get; private set; }
+        public bool Called { get; private set; }
+    }
+
+    public class ResolverReturnsSomething : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(System.Reflection.TypeLoader context, AssemblyName assemblyName)
+        {
+            Sender = context;
+            AssemblyName = assemblyName;
+            Called = true;
+            CallCount++;
+
+            Assembly = context.LoadFromByteArray(TestData.s_BaseClassesImage);
+            return Assembly;
+        }
+
+        public Assembly Assembly { get; private set; }
+        public AssemblyName AssemblyName { get; private set; }
+        public TypeLoader Sender { get; private set; }
+        public bool Called { get; private set; }
+        public int CallCount { get; private set; }
+    }
+
+    public class ResolverThrows : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(System.Reflection.TypeLoader context, AssemblyName assemblyName)
+        {
+            Sender = context;
+            AssemblyName = assemblyName;
+            Called = true;
+
+            throw new TargetParameterCountException("Hi!");
+        }
+
+        public AssemblyName AssemblyName { get; private set; }
+        public TypeLoader Sender { get; private set; }
+        public bool Called { get; private set; }
     }
 }

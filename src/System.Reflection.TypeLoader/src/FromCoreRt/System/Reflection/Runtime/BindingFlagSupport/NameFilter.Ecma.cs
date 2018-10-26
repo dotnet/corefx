@@ -15,7 +15,7 @@ namespace System.Reflection
 
     internal sealed partial class NameFilterCaseSensitive : NameFilter
     {
-        public sealed override bool Matches(StringHandle stringHandle, MetadataReader reader) => stringHandle.Equals(_expectedNameUtf8, reader); 
+        public sealed override bool Matches(StringHandle stringHandle, MetadataReader reader) => stringHandle.Equals(_expectedNameUtf8, reader);
     }
 
     internal sealed partial class NameFilterCaseInsensitive : NameFilter
