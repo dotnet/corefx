@@ -128,6 +128,9 @@
     <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
       <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap' and '$(TargetsWindows)' == 'true'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
@@ -184,13 +187,13 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Reference Include="Microsoft.Win32.Registry" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
@@ -208,7 +211,6 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.IO.FileSystem" />
-    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

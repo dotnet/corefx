@@ -1381,7 +1381,7 @@ namespace System.IO.Ports
                     if (hr == Interop.Errors.ERROR_HANDLE_EOF)
                         InternalResources.EndOfFile();
                     else
-                        throw Win32Marshal.GetExceptionForLastWin32Error(hr, string.Empty);
+                        throw Win32Marshal.GetExceptionForWin32Error(hr, string.Empty);
                 }
             }
             return asyncResult;
