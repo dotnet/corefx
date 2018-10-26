@@ -6,12 +6,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class UdtBulkCopyTest
     {
+        private const string UdtTestDbName = "UdtTestDb";
         private string _connStr;
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void RunCopyTest()
         {
-            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = "UdtTestDb" }).ConnectionString;
+            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = UdtTestDbName }).ConnectionString;
             SqlConnection conn = new SqlConnection(_connStr);
 
             string cities = DataTestUtility.GetUniqueNameForSqlServer("UdtBulkCopy_cities");
