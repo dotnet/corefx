@@ -87,7 +87,7 @@ namespace System.IO.Ports
                     if (Interop.Kernel32.SetCommState(_handle, ref _dcb) == false)
                     {
                         _dcb.BaudRate = (uint)baudRateOld;
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
                 }
             }
@@ -101,13 +101,13 @@ namespace System.IO.Ports
                 if (value)
                 {
                     if (Interop.Kernel32.SetCommBreak(_handle) == false)
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     _inBreak = true;
                 }
                 else
                 {
                     if (Interop.Kernel32.ClearCommBreak(_handle) == false)
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     _inBreak = false;
                 }
             }
@@ -126,7 +126,7 @@ namespace System.IO.Ports
                     if (Interop.Kernel32.SetCommState(_handle, ref _dcb) == false)
                     {
                         _dcb.ByteSize = byteSizeOld;
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
                 }
             }
@@ -145,7 +145,7 @@ namespace System.IO.Ports
                     if (Interop.Kernel32.SetCommState(_handle, ref _dcb) == false)
                     {
                         SetDcbFlag(NativeMethods.FNULL, fNullOld);
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
                 }
             }
@@ -168,12 +168,12 @@ namespace System.IO.Ports
                 if (Interop.Kernel32.SetCommState(_handle, ref _dcb) == false)
                 {
                     SetDcbFlag(NativeMethods.FDTRCONTROL, fDtrControlOld);
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
 
                 // then set the actual pin
                 if (!Interop.Kernel32.EscapeCommFunction(_handle, value ? NativeMethods.SETDTR : NativeMethods.CLRDTR))
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
             }
         }
 
@@ -222,7 +222,7 @@ namespace System.IO.Ports
                         SetDcbFlag(NativeMethods.FOUTX, fInOutXOld);
                         SetDcbFlag(NativeMethods.FOUTXCTSFLOW, fOutxCtsFlowOld);
                         SetDcbFlag(NativeMethods.FRTSCONTROL, fRtsControlOld);
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
 
                 }
@@ -269,7 +269,7 @@ namespace System.IO.Ports
                         _dcb.ErrorChar = ErrorCharOld;
                         SetDcbFlag(NativeMethods.FERRORCHAR, fErrorCharOld);
 
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
                 }
             }
@@ -305,7 +305,7 @@ namespace System.IO.Ports
                         _parityReplace = parityReplaceOld;
                         SetDcbFlag(NativeMethods.FERRORCHAR, fErrorCharOld);
                         _dcb.ErrorChar = errorCharOld;
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
                 }
             }
@@ -371,7 +371,7 @@ namespace System.IO.Ports
                     _commTimeouts.ReadTotalTimeoutConstant = oldReadConstant;
                     _commTimeouts.ReadTotalTimeoutMultiplier = oldReadMultipler;
                     _commTimeouts.ReadIntervalTimeout = oldReadInterval;
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
         }
@@ -406,11 +406,11 @@ namespace System.IO.Ports
                         SetDcbFlag(NativeMethods.FRTSCONTROL, fRtsControlOld);
                         // set it back to the old value on a failure
                         _rtsEnable = !_rtsEnable;
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
 
                     if (!Interop.Kernel32.EscapeCommFunction(_handle, value ? NativeMethods.SETRTS : NativeMethods.CLRRTS))
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
         }
@@ -435,7 +435,7 @@ namespace System.IO.Ports
                     if (Interop.Kernel32.SetCommState(_handle, ref _dcb) == false)
                     {
                         _dcb.StopBits = stopBitsOld;
-                        InternalResources.WinIOError();
+                        throw Win32Marshal.GetExceptionForLastWin32Error();
                     }
                 }
             }
@@ -462,7 +462,7 @@ namespace System.IO.Ports
                 if (Interop.Kernel32.SetCommTimeouts(_handle, ref _commTimeouts) == false)
                 {
                     _commTimeouts.WriteTotalTimeoutConstant = oldWriteConstant;
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
         }
@@ -476,7 +476,7 @@ namespace System.IO.Ports
             {
                 int pinStatus = 0;
                 if (Interop.Kernel32.GetCommModemStatus(_handle, ref pinStatus) == false)
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
 
                 return (NativeMethods.MS_RLSD_ON & pinStatus) != 0;
             }
@@ -488,7 +488,7 @@ namespace System.IO.Ports
             {
                 int pinStatus = 0;
                 if (Interop.Kernel32.GetCommModemStatus(_handle, ref pinStatus) == false)
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 return (NativeMethods.MS_CTS_ON & pinStatus) != 0;
             }
 
@@ -500,7 +500,7 @@ namespace System.IO.Ports
             {
                 int pinStatus = 0;
                 if (Interop.Kernel32.GetCommModemStatus(_handle, ref pinStatus) == false)
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
 
                 return (NativeMethods.MS_DSR_ON & pinStatus) != 0;
             }
@@ -516,7 +516,7 @@ namespace System.IO.Ports
                 int errorCode = 0; // "ref" arguments need to have values, as opposed to "out" arguments
                 if (Interop.Kernel32.ClearCommError(_handle, ref errorCode, ref _comStat) == false)
                 {
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
                 return (int)_comStat.cbInQue;
             }
@@ -530,7 +530,7 @@ namespace System.IO.Ports
             {
                 int errorCode = 0; // "ref" arguments need to be set before method invocation, as opposed to "out" arguments
                 if (Interop.Kernel32.ClearCommError(_handle, ref errorCode, ref _comStat) == false)
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 return (int)_comStat.cbOutQue;
 
             }
@@ -559,7 +559,7 @@ namespace System.IO.Ports
 
             if (tempHandle.IsInvalid)
             {
-                InternalResources.WinIOError(portName);
+                throw Win32Marshal.GetExceptionForLastWin32Error(portName);
             }
 
             try
@@ -599,7 +599,7 @@ namespace System.IO.Ports
                     if ((errorCode == Interop.Errors.ERROR_INVALID_PARAMETER) || (errorCode == Interop.Errors.ERROR_INVALID_HANDLE))
                         throw new ArgumentException(SR.Arg_InvalidSerialPortExtended, nameof(portName));
                     else
-                        InternalResources.WinIOError(errorCode, string.Empty);
+                        throw Win32Marshal.GetExceptionForWin32Error(errorCode, string.Empty);
                 }
 
                 if (_commProp.dwMaxBaud != 0 && baudRate > _commProp.dwMaxBaud)
@@ -653,7 +653,7 @@ namespace System.IO.Ports
                 // set unmanaged timeout structure
                 if (Interop.Kernel32.SetCommTimeouts(_handle, ref _commTimeouts) == false)
                 {
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
 
                 if (_isAsync)
@@ -718,7 +718,7 @@ namespace System.IO.Ports
 
                             // Do not throw an exception from the finalizer here.
                             if (disposing)
-                                InternalResources.WinIOError();
+                                throw Win32Marshal.GetExceptionForLastWin32Error();
                         }
                     }
 
@@ -821,14 +821,14 @@ namespace System.IO.Ports
         {
 
             if (Interop.Kernel32.PurgeComm(_handle, NativeMethods.PURGE_RXCLEAR | NativeMethods.PURGE_RXABORT) == false)
-                InternalResources.WinIOError();
+                throw Win32Marshal.GetExceptionForLastWin32Error();
         }
 
         // Uses Win32 method to dump out the xmit buffer; analagous to MSComm's "OutBufferCount = 0"
         internal void DiscardOutBuffer()
         {
             if (Interop.Kernel32.PurgeComm(_handle, NativeMethods.PURGE_TXCLEAR | NativeMethods.PURGE_TXABORT) == false)
-                InternalResources.WinIOError();
+                throw Win32Marshal.GetExceptionForLastWin32Error();
         }
 
         // Async companion to BeginRead.
@@ -897,7 +897,7 @@ namespace System.IO.Ports
 
             // Check for non-timeout errors during the read.
             if (afsar._errorCode != 0)
-                InternalResources.WinIOError(afsar._errorCode, _portName);
+                throw Win32Marshal.GetExceptionForWin32Error(afsar._errorCode, _portName);
 
             if (failed)
                 throw new IOException(SR.IO_OperationAborted);
@@ -961,7 +961,7 @@ namespace System.IO.Ports
 
             // Now check for any error during the write.
             if (afsar._errorCode != 0)
-                InternalResources.WinIOError(afsar._errorCode, _portName);
+                throw Win32Marshal.GetExceptionForWin32Error(afsar._errorCode, _portName);
 
             // Number of bytes written is afsar._numBytes.
         }
@@ -1003,7 +1003,7 @@ namespace System.IO.Ports
                 numBytes = ReadFileNative(array, offset, count, null, out hr);
                 if (numBytes == -1)
                 {
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
 
@@ -1029,7 +1029,7 @@ namespace System.IO.Ports
                 numBytes = ReadFileNative(_tempBuf, 0, 1, null, out hr);
                 if (numBytes == -1)
                 {
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
 
@@ -1044,7 +1044,7 @@ namespace System.IO.Ports
             if (_handle == null) InternalResources.FileNotOpen();
 
             if (!Interop.Kernel32.SetupComm(_handle, readBufferSize, writeBufferSize))
-                InternalResources.WinIOError();
+                throw Win32Marshal.GetExceptionForLastWin32Error();
         }
 
         internal unsafe void Write(byte[] array, int offset, int count, int timeout)
@@ -1075,7 +1075,7 @@ namespace System.IO.Ports
                     if (hr == Interop.Errors.ERROR_COUNTER_TIMEOUT)
                         throw new TimeoutException(SR.Write_timed_out);
 
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
 
@@ -1118,7 +1118,7 @@ namespace System.IO.Ports
                     if (Marshal.GetLastWin32Error() == Interop.Errors.ERROR_COUNTER_TIMEOUT)
                         throw new TimeoutException(SR.Write_timed_out);
 
-                    InternalResources.WinIOError();
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
                 }
             }
 
@@ -1139,7 +1139,7 @@ namespace System.IO.Ports
             // first get the current dcb structure setup
             if (Interop.Kernel32.GetCommState(_handle, ref _dcb) == false)
             {
-                InternalResources.WinIOError();
+                throw Win32Marshal.GetExceptionForLastWin32Error();
             }
             _dcb.DCBlength = (uint)sizeof(Interop.Kernel32.DCB);
 
@@ -1232,7 +1232,7 @@ namespace System.IO.Ports
             // set DCB structure
             if (Interop.Kernel32.SetCommState(_handle, ref _dcb) == false)
             {
-                InternalResources.WinIOError();
+                throw Win32Marshal.GetExceptionForLastWin32Error();
             }
         }
 
@@ -1334,7 +1334,7 @@ namespace System.IO.Ports
                     if (hr == Interop.Errors.ERROR_HANDLE_EOF)
                         InternalResources.EndOfFile();
                     else
-                        InternalResources.WinIOError(hr, string.Empty);
+                        throw Win32Marshal.GetExceptionForWin32Error(hr, string.Empty);
                 }
             }
 
@@ -1381,7 +1381,7 @@ namespace System.IO.Ports
                     if (hr == Interop.Errors.ERROR_HANDLE_EOF)
                         InternalResources.EndOfFile();
                     else
-                        InternalResources.WinIOError(hr, string.Empty);
+                        throw Win32Marshal.GetExceptionForLastWin32Error(hr, string.Empty);
                 }
             }
             return asyncResult;
@@ -1513,7 +1513,7 @@ namespace System.IO.Ports
             if (wh != null)
             {
                 bool r = wh.Set();
-                if (!r) InternalResources.WinIOError();
+                if (!r) throw Win32Marshal.GetExceptionForLastWin32Error();
             }
 
             asyncResult._userCallback?.Invoke(asyncResult);
@@ -1682,7 +1682,7 @@ namespace System.IO.Ports
                     if (Interop.Kernel32.ClearCommError(handle, ref errors, IntPtr.Zero) == false)
                     {
 
-                        //InternalResources.WinIOError();
+                        //throw Win32Marshal.GetExceptionForLastWin32Error();
 
                         // We don't want to throw an exception from the background thread which is un-catchable and hence tear down the process.
                         // At present we don't have a first class event that we can raise for this class of fatal errors. One possibility is

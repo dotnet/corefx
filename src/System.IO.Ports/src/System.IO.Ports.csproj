@@ -29,7 +29,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="System\IO\Ports\SerialStream.Windows.cs" />
-    <Compile Include="System\IO\Ports\InternalResources.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DCB.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.DCB.cs</Link>
     </Compile>
@@ -125,6 +124,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap' and '$(TargetsWindows)' == 'true'">
