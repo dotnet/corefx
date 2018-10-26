@@ -232,16 +232,16 @@ Namespace Microsoft.VisualBasic.FileIO
         Private Shared Function GetCompanyProductVersionList() As List(Of String)
             Dim CurrentProcess As Process = Process.GetCurrentProcess
             Dim PathList As New List(Of String)
-            Try
-                Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.CompanyName)
-                If CompanyName <> "" Then
-                    PathList.Add(CompanyName)
-                End If
-                Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule.FileVersionInfo.ProductName)
-                If ProductName <> "" Then
-                    PathList.Add(ProductName)
-                End If
-                If PathList.Count = 0 Then
+            Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule?.FileVersionInfo?.CompanyName)
+            If CompanyName <> "" Then
+                PathList.Add(CompanyName)
+            End If
+            Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule?.FileVersionInfo?.ProductName)
+            If ProductName <> "" Then
+                PathList.Add(ProductName)
+            End If
+            If PathList.Count = 0 Then
+                Try
                     Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
                     Try
                         Dim CallingAssemblyName As String = CallingAssembly.GetName().Name
@@ -257,15 +257,15 @@ Namespace Microsoft.VisualBasic.FileIO
                         PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(CallingAssemblyFullName)))
                     End Try
                     Return PathList
-                End If
-                Dim Version As String = ExtractBuildNumber(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
-                If Version = "" Then
-                    Version = "0.0.0.0"
-                End If
-                PathList.Add(Version)
-            Catch ex As Exception
-                Throw New PlatformNotSupportedException("For debug only, can't get CallingAssembly.GetName().Name", ex)
-            End Try
+                Catch ex As Exception
+                    Throw New PlatformNotSupportedException($"For debug only, inner exception {ex.Message}")
+                End Try
+            End If
+            Dim Version As String = ExtractBuildNumber(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
+            If Version = "" Then
+                Version = "0.0.0.0"
+            End If
+            PathList.Add(Version)
             Return PathList
         End Function
 
