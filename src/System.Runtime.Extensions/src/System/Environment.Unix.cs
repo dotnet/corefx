@@ -17,7 +17,6 @@ namespace System
     public static partial class Environment
     {
         internal static readonly bool IsMac = Interop.Sys.GetUnixName() == "OSX";
-        private static Func<string, IEnumerable<string>> s_fileReadLines;
         private static Func<string, object> s_directoryCreateDirectory;
 
         private static string CurrentDirectoryCore
@@ -113,7 +112,7 @@ namespace System
 
             // All other paths are based on the XDG Base Directory Specification:
             // https://specifications.freedesktop.org/basedir-spec/latest/
-            string home;
+            string home = null;
             try
             {
                 home = PersistedFiles.GetHomeDirectory();
@@ -121,9 +120,15 @@ namespace System
             catch (Exception exc)
             {
                 Debug.Fail($"Unable to get home directory: {exc}");
-                home = Path.GetTempPath();
             }
-            Debug.Assert(!string.IsNullOrEmpty(home), "Expected non-null or empty HOME");
+
+            // Fall back to '/' when we can't determine the home directory.
+            // This location isn't writable by non-root users which provides some safeguard
+            // that the application doesn't write data which is meant to be private.
+            if (string.IsNullOrEmpty(home))
+            {
+                home = "/";
+            }
 
             // TODO: Consider caching (or precomputing and caching) all subsequent results.
             // This would significantly improve performance for repeated access, at the expense
@@ -210,27 +215,10 @@ namespace System
             {
                 try
                 {
-                    // TODO #11151: Replace with direct usage of File.ReadLines or equivalent once we have access to System.IO.FileSystem here.
-                    Func<string, IEnumerable<string>> readLines = LazyInitializer.EnsureInitialized(ref s_fileReadLines, () =>
+                    using (var reader = new StreamReader(userDirsPath))
                     {
-                        Type fileType = Type.GetType("System.IO.File, System.IO.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
-                        if (fileType != null)
-                        {
-                            foreach (MethodInfo mi in fileType.GetTypeInfo().GetDeclaredMethods("ReadLines"))
-                            {
-                                if (mi.GetParameters().Length == 1)
-                                {
-                                    return (Func<string, IEnumerable<string>>)mi.CreateDelegate(typeof(Func<string, IEnumerable<string>>));
-                                }
-                            }
-                        }
-                        return null;
-                    });
-
-                    IEnumerable<string> lines = readLines?.Invoke(userDirsPath);
-                    if (lines != null)
-                    {
-                        foreach (string line in lines)
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
                         {
                             // Example lines:
                             // XDG_DESKTOP_DIR="$HOME/Desktop"
@@ -311,7 +299,7 @@ namespace System
 
         public static string NewLine => "\n";
 
-        private static Lazy<OperatingSystem> s_osVersion = new Lazy<OperatingSystem>(() => GetOperatingSystem(Interop.Sys.GetUnixRelease()));
+        private static readonly Lazy<OperatingSystem> s_osVersion = new Lazy<OperatingSystem>(() => GetOperatingSystem(Interop.Sys.GetUnixRelease()));
 
         private static OperatingSystem GetOperatingSystem(string release)
         {

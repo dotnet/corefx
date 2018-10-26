@@ -9,16 +9,12 @@ set __rootDir=%~dp0..\..
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
-set __TargetGroup=netcoreapp
 set __appContainer=""
 set __VCBuildArch=x86_amd64
 set __BuildOS=Windows_NT
 set CMAKE_BUILD_TYPE=Debug
 set "__LinkArgs= "
 set "__LinkLibraries= "
-
-call %__rootDir%/run.cmd build-managed -GenerateVersion -project=%__rootDir%/build.proj 
-msbuild "%__rootDir%/build.proj" /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /v:minimal
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
@@ -36,7 +32,6 @@ if /i [%1] == [wasm]        ( set __BuildArch=wasm&&set __VCBuildArch=x86_amd64&
 
 
 if /i [%1] == [WebAssembly] ( set __BuildOS=WebAssembly&&shift&goto Arg_Loop)
-if /i [%1] == [--TargetGroup]  ( set "__TargetGroup=%2"&&shift&&shift&goto Arg_Loop)
 
 shift
 goto :Arg_Loop
@@ -118,7 +113,7 @@ set "__IntermediatesDir=%__IntermediatesDir:\=/%"
 if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"
 if not exist "%__IntermediatesDir%" md "%__IntermediatesDir%"
 
-:: Write an empty Directory.Build.props/targets to ensure that msbuild doesn't pick up 
+:: Write an empty Directory.Build.props/targets to ensure that msbuild doesn't pick up
 :: the repo's root Directory.Build.props/targets.
 set MSBUILD_EMPTY_PROJECT_CONTENT= ^
  ^^^<Project xmlns=^"http://schemas.microsoft.com/developer/msbuild/2003^"^^^> ^
@@ -186,8 +181,15 @@ exit /B 0
 pushd "%__IntermediatesDir%"
 nmake install
 popd
-IF NOT ERRORLEVEL 1 exit /B 0
-exit /B 1
+IF ERRORLEVEL 1 (
+    goto :Failure
+)
+
+:: Copy results to native_aot since packaging expects a copy there too
+mkdir %__binDir%\%__BuildOS%.%__BuildArch%.%CMAKE_BUILD_TYPE%\native_aot
+copy %__binDir%\%__BuildOS%.%__BuildArch%.%CMAKE_BUILD_TYPE%\native\* %__binDir%\%__BuildOS%.%__BuildArch%.%CMAKE_BUILD_TYPE%\native_aot\
+
+exit /B 0
 
 :Failure
 :: Build failed

@@ -4,11 +4,12 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Security;
 using System.Security.AccessControl;
-using System.Buffers;
 
 /*
   Note on transaction support:
@@ -56,12 +57,7 @@ using System.Buffers;
 
 namespace Microsoft.Win32
 {
-#if REGISTRY_ASSEMBLY
-    public
-#else
-    internal
-#endif
-    sealed partial class RegistryKey : MarshalByRefObject, IDisposable
+    public sealed partial class RegistryKey : MarshalByRefObject, IDisposable
     {
         private void ClosePerfDataKey()
         {
@@ -87,7 +83,7 @@ namespace Microsoft.Win32
             }
         }
 
-        private unsafe RegistryKey CreateSubKeyInternalCore(string subkey, RegistryKeyPermissionCheck permissionCheck, object registrySecurityObj, RegistryOptions registryOptions)
+        private unsafe RegistryKey CreateSubKeyInternalCore(string subkey, RegistryKeyPermissionCheck permissionCheck, RegistryOptions registryOptions)
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
             int disposition = 0;
@@ -138,7 +134,7 @@ namespace Microsoft.Win32
                 {
                     if (throwOnMissingSubKey)
                     {
-                        ThrowHelper.ThrowArgumentException(SR.Arg_RegSubKeyAbsent);
+                        throw new ArgumentException(SR.Arg_RegSubKeyAbsent);
                     }
                 }
                 else
@@ -170,7 +166,7 @@ namespace Microsoft.Win32
             {
                 if (throwOnMissingValue)
                 {
-                    ThrowHelper.ThrowArgumentException(SR.Arg_RegSubKeyValueAbsent);
+                    throw new ArgumentException(SR.Arg_RegSubKeyValueAbsent);
                 }
                 else
                 {
@@ -250,7 +246,7 @@ namespace Microsoft.Win32
             return key;
         }
 
-        private RegistryKey InternalOpenSubKeyCore(string name, RegistryKeyPermissionCheck permissionCheck, int rights, bool throwOnPermissionFailure)
+        private RegistryKey InternalOpenSubKeyCore(string name, RegistryKeyPermissionCheck permissionCheck, int rights)
         {
             SafeRegistryHandle result = null;
             int ret = Interop.Advapi32.RegOpenKeyEx(_hkey, name, 0, (rights | (int)_regView), out result);
@@ -262,21 +258,18 @@ namespace Microsoft.Win32
                 return key;
             }
 
-            if (throwOnPermissionFailure)
+            if (ret == Interop.Errors.ERROR_ACCESS_DENIED || ret == Interop.Errors.ERROR_BAD_IMPERSONATION_LEVEL)
             {
-                if (ret == Interop.Errors.ERROR_ACCESS_DENIED || ret == Interop.Errors.ERROR_BAD_IMPERSONATION_LEVEL)
-                {
-                    // We need to throw SecurityException here for compatibility reason,
-                    // although UnauthorizedAccessException will make more sense.
-                    ThrowHelper.ThrowSecurityException(SR.Security_RegistryPermission);
-                }
+                // We need to throw SecurityException here for compatibility reason,
+                // although UnauthorizedAccessException will make more sense.
+                throw new SecurityException(SR.Security_RegistryPermission);
             }
 
             // Return null if we didn't find the key.
             return null;
         }
 
-        private RegistryKey InternalOpenSubKeyCore(string name, bool writable, bool throwOnPermissionFailure)
+        private RegistryKey InternalOpenSubKeyCore(string name, bool writable)
         {
             SafeRegistryHandle result = null;
             int ret = Interop.Advapi32.RegOpenKeyEx(_hkey, name, 0, (GetRegistryKeyAccess(writable) | (int)_regView), out result);
@@ -288,17 +281,14 @@ namespace Microsoft.Win32
                 return key;
             }
 
-            if (throwOnPermissionFailure)
+            if (ret == Interop.Errors.ERROR_ACCESS_DENIED || ret == Interop.Errors.ERROR_BAD_IMPERSONATION_LEVEL)
             {
-                // Return null if we didn't find the key.
-                if (ret == Interop.Errors.ERROR_ACCESS_DENIED || ret == Interop.Errors.ERROR_BAD_IMPERSONATION_LEVEL)
-                {
-                    // We need to throw SecurityException here for compatibility reasons,
-                    // although UnauthorizedAccessException will make more sense.
-                    ThrowHelper.ThrowSecurityException(SR.Security_RegistryPermission);
-                }
+                // We need to throw SecurityException here for compatibility reasons,
+                // although UnauthorizedAccessException will make more sense.
+                throw new SecurityException(SR.Security_RegistryPermission);
             }
 
+            // Return null if we didn't find the key.
             return null;
         }
 
@@ -820,7 +810,7 @@ namespace Microsoft.Win32
                             ret = Interop.Advapi32.RegSetValueEx(_hkey,
                                 name,
                                 0,
-                                valueKind,
+                                (int)valueKind,
                                 data,
                                 checked(data.Length * 2 + 2));
                             break;
@@ -842,7 +832,7 @@ namespace Microsoft.Win32
                             {
                                 if (dataStrings[i] == null)
                                 {
-                                    ThrowHelper.ThrowArgumentException(SR.Arg_RegSetStrArrNull);
+                                    throw new ArgumentException(SR.Arg_RegSetStrArrNull);
                                 }
                                 sizeInChars = checked(sizeInChars + (dataStrings[i].Length + 1));
                             }
@@ -862,7 +852,7 @@ namespace Microsoft.Win32
                             ret = Interop.Advapi32.RegSetValueEx(_hkey,
                                 name,
                                 0,
-                                RegistryValueKind.MultiString,
+                                Interop.Advapi32.RegistryValues.REG_MULTI_SZ,
                                 dataChars,
                                 sizeInBytes);
 
@@ -875,7 +865,7 @@ namespace Microsoft.Win32
                         ret = Interop.Advapi32.RegSetValueEx(_hkey,
                             name,
                             0,
-                            (valueKind == RegistryValueKind.None ? Interop.Advapi32.RegistryValues.REG_NONE : RegistryValueKind.Binary),
+                            (valueKind == RegistryValueKind.None ? Interop.Advapi32.RegistryValues.REG_NONE : Interop.Advapi32.RegistryValues.REG_BINARY),
                             dataBytes,
                             dataBytes.Length);
                         break;
@@ -889,7 +879,7 @@ namespace Microsoft.Win32
                             ret = Interop.Advapi32.RegSetValueEx(_hkey,
                                 name,
                                 0,
-                                RegistryValueKind.DWord,
+                                Interop.Advapi32.RegistryValues.REG_DWORD,
                                 ref data,
                                 4);
                             break;
@@ -902,7 +892,7 @@ namespace Microsoft.Win32
                             ret = Interop.Advapi32.RegSetValueEx(_hkey,
                                 name,
                                 0,
-                                RegistryValueKind.QWord,
+                                Interop.Advapi32.RegistryValues.REG_QWORD,
                                 ref data,
                                 8);
                             break;
@@ -911,7 +901,7 @@ namespace Microsoft.Win32
             }
             catch (Exception exc) when (exc is OverflowException || exc is InvalidOperationException || exc is FormatException || exc is InvalidCastException)
             {
-                ThrowHelper.ThrowArgumentException(SR.Arg_RegSetMismatchedKind);
+                throw new ArgumentException(SR.Arg_RegSetMismatchedKind);
             }
 
             if (ret == 0)

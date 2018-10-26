@@ -42,6 +42,7 @@
   >
     <PropertyGroup>
       <ApiCompatArgs>$(ApiCompatArgs) -implDirs:"$(ApiCompatImplementationDirs)"</ApiCompatArgs>
+      <ApiCompatArgs Condition="'$(ApiCompatExcludeAttributeList)' != ''">$(ApiCompatArgs) -excludeAttributes:"$(ApiCompatExcludeAttributeList)"</ApiCompatArgs>
       <BaselineApiCompatArgs Condition="Exists($(ApiCompatBaselineIgnoreFile))">-baseline:"$(ApiCompatBaselineIgnoreFile)"</BaselineApiCompatArgs>
       <ApiCompatExitCode>0</ApiCompatExitCode>
 
@@ -92,7 +93,7 @@
 
   <Target Name="Build" DependsOnTargets="RunApiCompat" />
   <Target Name="Clean">
-    <RemoveDir Directories="$(IntermediateOutputPath);$(GenFacadesOutputPath)" />
+    <RemoveDir Directories="$(BaseIntermediateOutputPath);$(GenFacadesOutputPath)" />
   </Target>
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 

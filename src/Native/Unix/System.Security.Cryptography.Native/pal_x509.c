@@ -101,6 +101,11 @@ X509* CryptoNative_X509Duplicate(X509* x509)
 
 X509* CryptoNative_PemReadX509FromBio(BIO* bio)
 {
+    return PEM_read_bio_X509(bio, NULL, NULL, NULL);
+}
+
+X509* CryptoNative_PemReadX509FromBioAux(BIO* bio)
+{
     return PEM_read_bio_X509_AUX(bio, NULL, NULL, NULL);
 }
 
@@ -231,12 +236,22 @@ X509Stack* CryptoNative_X509StoreCtxGetChain(X509_STORE_CTX* ctx)
 
 X509Stack* CryptoNative_X509StoreCtxGetSharedUntrusted(X509_STORE_CTX* ctx)
 {
-    return ctx ? ctx->untrusted : NULL;
+    if (ctx)
+    {
+        return X509_STORE_CTX_get0_untrusted(ctx);
+    }
+
+    return NULL;
 }
 
 X509* CryptoNative_X509StoreCtxGetTargetCert(X509_STORE_CTX* ctx)
 {
-    return ctx ? ctx->cert : NULL;
+    if (ctx)
+    {
+        return X509_STORE_CTX_get0_cert(ctx);
+    }
+
+    return NULL;
 }
 
 X509VerifyStatusCode CryptoNative_X509StoreCtxGetError(X509_STORE_CTX* ctx)
@@ -303,7 +318,7 @@ X509* CryptoNative_X509UpRef(X509* x509)
 {
     if (x509 != NULL)
     {
-        CRYPTO_add(&x509->references, 1, CRYPTO_LOCK_X509);
+        X509_up_ref(x509);
     }
 
     return x509;

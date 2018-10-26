@@ -311,7 +311,7 @@ namespace System.Net.Http.HPack
                     default:
                         // Can't happen
                         Debug.Fail("HPACK decoder reach an invalid state");
-                        throw new InternalException();
+                        throw new InternalException(_state);
                 }
             }
         }
@@ -359,7 +359,7 @@ namespace System.Net.Http.HPack
             {
                 if (_huffman)
                 {
-                    return Huffman.Decode(_stringOctets, 0, _stringLength, dst);
+                    return Huffman.Decode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), dst);
                 }
                 else
                 {

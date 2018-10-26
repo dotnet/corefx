@@ -72,7 +72,7 @@ namespace System.Diagnostics
     }
     public partial class InstanceDataCollection : System.Collections.DictionaryBase
     {
-        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use System.Diagnostics.InstanceDataCollectionCollection.get_Item to get an instance of this collection instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use System.Diagnostics.InstanceDataCollectionCollection.get_Item to get an instance of this collection instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public InstanceDataCollection(string counterName) { }
         public string CounterName { get { throw null; } }
         public System.Diagnostics.InstanceData this[string instanceName] { get { throw null; } }
@@ -83,7 +83,7 @@ namespace System.Diagnostics
     }
     public partial class InstanceDataCollectionCollection : System.Collections.DictionaryBase
     {
-        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.ReadCategory() to get an instance of this collection instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.ReadCategory() to get an instance of this collection instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public InstanceDataCollectionCollection() { }
         public System.Diagnostics.InstanceDataCollection this[string counterName] { get { throw null; } }
         public System.Collections.ICollection Keys { get { throw null; } }
@@ -134,11 +134,11 @@ namespace System.Diagnostics
         public bool CounterExists(string counterName) { throw null; }
         public static bool CounterExists(string counterName, string categoryName) { throw null; }
         public static bool CounterExists(string counterName, string categoryName, string machineName) { throw null; }
-        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, CounterCreationDataCollection counterData) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, CounterCreationDataCollection counterData) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static System.Diagnostics.PerformanceCounterCategory Create(string categoryName, string categoryHelp, System.Diagnostics.CounterCreationDataCollection counterData) { throw null; }
         public static System.Diagnostics.PerformanceCounterCategory Create(string categoryName, string categoryHelp, System.Diagnostics.PerformanceCounterCategoryType categoryType, System.Diagnostics.CounterCreationDataCollection counterData) { throw null; }
         public static System.Diagnostics.PerformanceCounterCategory Create(string categoryName, string categoryHelp, System.Diagnostics.PerformanceCounterCategoryType categoryType, string counterName, string counterHelp) { throw null; }
-        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, string counterName, string counterHelp) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, string counterName, string counterHelp) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static System.Diagnostics.PerformanceCounterCategory Create(string categoryName, string categoryHelp, string counterName, string counterHelp) { throw null; }
         public static void Delete(string categoryName) { }
         public static bool Exists(string categoryName) { throw null; }
@@ -166,11 +166,11 @@ namespace System.Diagnostics
     }
     public sealed partial class PerformanceCounterManager : System.Diagnostics.ICollectData
     {
-        [System.ObsoleteAttribute("This class has been deprecated.  Use the PerformanceCounters through the System.Diagnostics.PerformanceCounter class instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This class has been deprecated.  Use the PerformanceCounters through the System.Diagnostics.PerformanceCounter class instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public PerformanceCounterManager() { }
-        [System.ObsoleteAttribute("This class has been deprecated.  Use the PerformanceCounters through the System.Diagnostics.PerformanceCounter class instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This class has been deprecated.  Use the PerformanceCounters through the System.Diagnostics.PerformanceCounter class instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         void System.Diagnostics.ICollectData.CloseData() { }
-        [System.ObsoleteAttribute("This class has been deprecated.  Use the PerformanceCounters through the System.Diagnostics.PerformanceCounter class instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This class has been deprecated.  Use the PerformanceCounters through the System.Diagnostics.PerformanceCounter class instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         void System.Diagnostics.ICollectData.CollectData(int callIdx, System.IntPtr valueNamePtr, System.IntPtr dataPtr, int totalBytes, out System.IntPtr res) { throw null; }
     }
     public enum PerformanceCounterType
@@ -203,5 +203,90 @@ namespace System.Diagnostics
         SampleFraction = 549585920,
         Timer100Ns = 542180608,
         Timer100NsInverse = 558957824,
+    }
+}
+namespace System.Diagnostics.PerformanceData
+{
+    public sealed class CounterData
+    {
+        unsafe internal CounterData(long* pCounterData) { }
+        public void Decrement() { throw null; }
+        public void Increment() { throw null; }
+        public void IncrementBy(long value) { throw null; }
+        public long RawValue { get { throw null; } set { } }
+        public long Value { get { throw null; } set { } }
+    }
+    public class CounterSet : IDisposable
+    {
+        ~CounterSet() { throw null; }
+        public void AddCounter(int counterId, CounterType counterType) { throw null; }
+        public void AddCounter(int counterId, CounterType counterType, string counterName) { throw null; }
+        public CounterSet(Guid providerGuid, Guid counterSetGuid, CounterSetInstanceType instanceType) { }
+        public CounterSetInstance CreateCounterSetInstance(string instanceName) { throw null; }
+        public void Dispose() { throw null; }
+        protected virtual void Dispose(bool disposing) { throw null; }
+    }
+    public sealed class CounterSetInstance : IDisposable
+    {
+        ~CounterSetInstance() { throw null; }
+        internal CounterSetInstance(CounterSet counterSetDefined, string instanceName) { }
+        public void Dispose() { throw null; }
+        public CounterSetInstanceCounterDataSet Counters { get { throw null; } }
+    }
+    public sealed class CounterSetInstanceCounterDataSet : IDisposable
+    {
+        ~CounterSetInstanceCounterDataSet() { throw null; }
+        internal CounterSetInstanceCounterDataSet(CounterSetInstance thisInst) { }
+        public void Dispose() { throw null; }
+        public CounterData this[int counterId] { get { throw null; } }
+        public CounterData this[string counterName] { get { throw null; } }
+    }
+    public enum CounterType
+    {
+        RawDataHex32 = 0,
+        RawDataHex64 = 256,
+        RawData32 = 65536,
+        RawData64 = 65792,
+        Delta32 = 4195328,
+        Delta64 = 4195584,
+        SampleCounter = 4260864,
+        QueueLength = 4523008,
+        LargeQueueLength = 4523264,
+        QueueLength100Ns = 5571840,
+        QueueLengthObjectTime = 6620416,
+        RateOfCountPerSecond32 = 272696320,
+        RateOfCountPerSecond64 = 272696576,
+        RawFraction32 = 537003008,
+        RawFraction64 = 537003264,
+        PercentageActive = 541132032,
+        PrecisionSystemTimer = 541525248,
+        PercentageActive100Ns = 542180608,
+        PrecisionTimer100Ns = 542573824,
+        ObjectSpecificTimer = 543229184,
+        PrecisionObjectSpecificTimer = 543622400,
+        SampleFraction = 549585920,
+        PercentageNotActive = 557909248,
+        PercentageNotActive100Ns = 558957824,
+        MultiTimerPercentageActive = 574686464,
+        MultiTimerPercentageActive100Ns = 575735040,
+        MultiTimerPercentageNotActive = 591463680,
+        MultiTimerPercentageNotActive100Ns = 592512256,
+        AverageTimer32 = 805438464,
+        ElapsedTime = 807666944,
+        AverageCount64 = 1073874176,
+        SampleBase = 1073939457,
+        AverageBase = 1073939458,
+        RawBase32 = 1073939459,
+        RawBase64 = 1073939712,
+        MultiTimerBase = 1107494144
+    }
+    public enum CounterSetInstanceType
+    {
+        Single = 0,
+        Multiple = 2,
+        GlobalAggregate = 4,
+        MultipleAggregate = 6,
+        GlobalAggregateWithHistory = 11,
+        InstanceAggregate = 22
     }
 }

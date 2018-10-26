@@ -398,6 +398,35 @@ namespace System.Numerics.Tests
         }
 
         [Theory]
+        [MemberData(nameof(Add_TestData))]
+        [MemberData(nameof(Random_4_TestData))]
+        [MemberData(nameof(Invalid_4_TestData))]
+        public static void AddDouble(double realLeft, double imaginaryLeft, double realRight, double imaginaryRight)
+        {
+            var left = new Complex(realLeft, imaginaryLeft);
+            var right = realRight;
+
+            // Calculate the expected results
+            Complex expected = left + new Complex(right, 0.0);
+            double expectedReal = expected.Real;
+            double expectedImaginary = expected.Imaginary;
+
+            // Operator
+            Complex result = left + right;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+            
+            result = right + left;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            // Static method
+            result = Complex.Add(left, right);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            result = Complex.Add(right, left);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+        }
+
+        [Theory]
         [MemberData(nameof(Primitives_2_TestData))]
         [MemberData(nameof(SmallRandom_2_TestData))]
         public static void ASin_Basic(double real, double imaginary)
@@ -735,6 +764,50 @@ namespace System.Numerics.Tests
             {
                 expectedImaginary = expectedImaginary / (divisor.Magnitude * divisor.Magnitude);
             }
+
+            // Operator
+            Complex result = dividend / divisor;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            // Static method
+            result = Complex.Divide(dividend, divisor);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+        }
+
+        [Theory]
+        [MemberData(nameof(Divide_TestData))]
+        [MemberData(nameof(SmallRandom_4_TestData))]
+        [MemberData(nameof(Invalid_4_TestData))]
+        public static void DivideByDouble(double realLeft, double imaginaryLeft, double realRight, double imaginaryRight)
+        {
+            var dividend = new Complex(realLeft, imaginaryLeft);
+            var divisor = realRight;
+
+            Complex expected = dividend / new Complex(realRight, 0.0);
+            double expectedReal = expected.Real;
+            double expectedImaginary = expected.Imaginary;
+
+            // Operator
+            Complex result = dividend / divisor;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            // Static method
+            result = Complex.Divide(dividend, divisor);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+        }
+
+        [Theory]
+        [MemberData(nameof(Divide_TestData))]
+        [MemberData(nameof(SmallRandom_4_TestData))]
+        [MemberData(nameof(Invalid_4_TestData))]
+        public static void DivideByComplex(double realLeft, double imaginaryLeft, double realRight, double imaginaryRight)
+        {
+            var dividend = realLeft;
+            var divisor = new Complex(realRight, imaginaryRight);
+
+            Complex expected = new Complex(realLeft, 0.0) / divisor;
+            double expectedReal = expected.Real;
+            double expectedImaginary = expected.Imaginary;
 
             // Operator
             Complex result = dividend / divisor;
@@ -1219,6 +1292,34 @@ namespace System.Numerics.Tests
         }
 
         [Theory]
+        [MemberData(nameof(Multiply_TestData))]
+        [MemberData(nameof(SmallRandom_4_TestData))]
+        [MemberData(nameof(Invalid_4_TestData))]
+        public static void MultiplyDouble(double realLeft, double imaginaryLeft, double realRight, double imaginaryRight)
+        {
+            var left = new Complex(realLeft, imaginaryLeft);
+            var right = realRight;
+
+            Complex expected = left * new Complex(right, 0.0);
+            double expectedReal = expected.Real;
+            double expectedImaginary = expected.Imaginary;
+
+            // Operator
+            Complex result = left * right;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            result = right * left;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            // Static method
+            result = Complex.Multiply(left, right);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            result = Complex.Multiply(right, left);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+        }
+
+        [Theory]
         [MemberData(nameof(Valid_2_TestData))]
         [MemberData(nameof(Random_2_TestData))]
         [MemberData(nameof(Invalid_2_TestData))]
@@ -1530,6 +1631,35 @@ namespace System.Numerics.Tests
             // Static method
             result = Complex.Subtract(left, right);
             VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+        }
+
+        [Theory]
+        [MemberData(nameof(Subtract_TestData))]
+        [MemberData(nameof(Random_4_TestData))]
+        [MemberData(nameof(Invalid_4_TestData))]
+        public static void SubtractDouble(double realLeft, double imaginaryLeft, double realRight, double imaginaryRight)
+        {
+            var left = new Complex(realLeft, imaginaryLeft);
+            var right = realRight;
+
+            // calculate the expected results
+            Complex expected = left - new Complex(right, 0.0);
+            double expectedReal = expected.Real;
+            double expectedImaginary = expected.Imaginary;
+
+            // Operator
+            Complex result = left - right;
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+            
+            result = right - left;
+            VerifyRealImaginaryProperties(result, -expectedReal, -expectedImaginary);
+
+            // Static method
+            result = Complex.Subtract(left, right);
+            VerifyRealImaginaryProperties(result, expectedReal, expectedImaginary);
+
+            result = Complex.Subtract(right, left);
+            VerifyRealImaginaryProperties(result, -expectedReal, -expectedImaginary);
         }
 
         public static IEnumerable<object[]> Sqrt_TestData()

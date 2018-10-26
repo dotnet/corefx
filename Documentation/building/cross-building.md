@@ -49,11 +49,11 @@ Once the rootfs has been generated, it will be possible to cross compile CoreFX.
 
 So, without `ROOTFS_DIR`:
 
-    lgs@ubuntu ~/git/corefx/ $ ./build-native.sh -debug -buildArch=arm -- verbose cross
+    lgs@ubuntu ~/git/corefx/ $ ./src/Native/build-native.sh debug arm verbose cross
 
 And with:
 
-    lgs@ubuntu ~/git/corefx/ $ ROOTFS_DIR=/home/lgs/corefx-cross/arm ./build-native.sh -debug -buildArch=arm -- verbose cross
+    lgs@ubuntu ~/git/corefx/ $ ROOTFS_DIR=/home/lgs/corefx-cross/arm ./src/Native/build-native.sh debug arm verbose cross
 
 As usual the generated binaries will be found in `bin/BuildOS.BuildArch.BuildType/native` as following:
 
@@ -78,7 +78,7 @@ The managed components of CoreFX are architecture-independent and thus do not re
 
 Many of the managed binaries are also OS-independent, e.g. System.Linq.dll, while some are OS-specific, e.g. System.IO.FileSystem.dll, with different builds for Windows and Linux.
 
-    lgs@ubuntu ~/git/corefx/ $ ./build-managed.sh -debug -verbose
+    lgs@ubuntu ~/git/corefx/ $ ./build.sh -debug /p:BuildNative=false
 
 The output is at `bin/[BuildConfiguration]` where `BuildConfiguration` looks something like `netcoreapp-<OSGroup>-Debug-<Architecture>`. Ex: `bin/netcoreapp-Linux-Debug-x64`. For more details on the build configurations see [project-guidelines](../coding-guidelines/project-guidelines.md)
 
@@ -112,10 +112,10 @@ When building for a new architecture you will need to build the native pieces se
 
 Example building for armel
 ```
-build-native.sh -buildArch=armel
+src/Native/build-native.sh armel
 --> Output goes to bin/runtime/netcoreapp-Linux-Debug-armel
 
-build-managed.sh -buildArch=x64
+build /p:ArchGroup=x64 /p:BuildNative=false
 --> Output goes to bin/runtime/netcoreapp-Linux-Debug-x64
 ```
 
@@ -123,4 +123,4 @@ The reason you need to build the managed portion for x64 is because it depends o
 
 Similar if you want to try and run tests you will have to copy the managed assemblies from the proxy directory (i.e. `netcoreapp-Linux-Debug-x64`) to the new architecture directory (i.e `netcoreapp-Linux-Debug-armel`) and run code via another host such as corerun because dotnet is at a higher level and most likely doesn't exist for the new architecture yet.
 
-Once all the necessary builds are setup and packages are published the spliting of the build and manual creation of the runtime should no longer be necessary.
+Once all the necessary builds are setup and packages are published the splitting of the build and manual creation of the runtime should no longer be necessary.

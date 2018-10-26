@@ -4,7 +4,9 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -16,9 +18,9 @@ namespace System.Collections.Tests
             return new Dictionary<string, string>();
         }
 
-        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert | ModifyOperation.Clear;
+        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert;
 
-        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove;
+        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove | ModifyOperation.Clear;
 
         /// <summary>
         /// Creates an object that is dependent on the seed given. The object may be either
@@ -123,6 +125,20 @@ namespace System.Collections.Tests
             {
                 IDictionary dictionary = new Dictionary<string, int>();
                 Assert.False(dictionary.Contains(1));
+            }
+        }
+
+        [Fact]
+        public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
+        {
+            if (ModifyEnumeratorAllowed.HasFlag(ModifyOperation.Clear))
+            {
+                IDictionary dictionary = new Dictionary<string, string>();
+                IEnumerator valuesEnum = dictionary.GetEnumerator();
+
+                dictionary.Clear();
+                Assert.Empty(dictionary);
+                Assert.False(valuesEnum.MoveNext());
             }
         }
 
@@ -248,6 +264,18 @@ namespace System.Collections.Tests
                 if (dictionary.Remove(key + SubKey))
                     break;
             }
+        }
+
+        [Fact]
+        public void TryAdd_ItemAlreadyExists_DoesNotInvalidateEnumerator()
+        {
+            var dictionary = new Dictionary<string, string>();
+            dictionary.Add("a", "b");
+
+            IEnumerator valuesEnum = dictionary.GetEnumerator();
+            Assert.False(dictionary.TryAdd("a", "c"));
+
+            Assert.True(valuesEnum.MoveNext());
         }
 
         [Theory]
@@ -377,6 +405,52 @@ namespace System.Collections.Tests
             // Remove first item to reduce Count to size and alter the contiguity of the dictionary
             dict.Remove(keyValueSelector(0));
             return dict;
+        }
+
+        [Fact]
+        public void ComparerSerialization()
+        {
+            // Strings switch between randomized and non-randomized comparers, 
+            // however this should never be observable externally.
+            TestComparerSerialization(EqualityComparer<string>.Default);
+            // OrdinalCaseSensitiveComparer is internal and (de)serializes as OrdinalComparer
+            TestComparerSerialization(StringComparer.Ordinal, "System.OrdinalComparer");
+            // OrdinalIgnoreCaseComparer is internal and (de)serializes as OrdinalComparer
+            TestComparerSerialization(StringComparer.OrdinalIgnoreCase, "System.OrdinalComparer");
+            TestComparerSerialization(StringComparer.CurrentCulture);
+            TestComparerSerialization(StringComparer.CurrentCultureIgnoreCase);
+            TestComparerSerialization(StringComparer.InvariantCulture);
+            TestComparerSerialization(StringComparer.InvariantCultureIgnoreCase);
+
+            // Check other types while here, IEquatable valuetype, nullable valuetype, and non IEquatable object
+            TestComparerSerialization(EqualityComparer<int>.Default);
+            TestComparerSerialization(EqualityComparer<int?>.Default);
+            TestComparerSerialization(EqualityComparer<object>.Default);
+        }
+
+        private static void TestComparerSerialization<T>(IEqualityComparer<T> equalityComparer, string internalTypeName = null)
+        {
+            var bf = new BinaryFormatter();
+            var s = new MemoryStream();
+
+            var dict = new Dictionary<T, T>(equalityComparer);
+
+            Assert.Same(equalityComparer, dict.Comparer);
+
+            bf.Serialize(s, dict);
+            s.Position = 0;
+            dict = (Dictionary<T, T>)bf.Deserialize(s);
+
+            if (internalTypeName == null)
+            {
+                Assert.IsType(equalityComparer.GetType(), dict.Comparer);
+            }
+            else
+            {
+                Assert.Equal(internalTypeName, dict.Comparer.GetType().ToString());
+            }
+
+            Assert.True(equalityComparer.Equals(dict.Comparer));
         }
 
         private sealed class DictionarySubclass<TKey, TValue> : Dictionary<TKey, TValue>

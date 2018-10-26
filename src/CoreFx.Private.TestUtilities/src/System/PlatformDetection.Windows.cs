@@ -34,7 +34,7 @@ namespace System
         public static bool IsFedora => false;
         public static bool IsWindowsNanoServer => (IsNotWindowsIoTCore && GetInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => GetInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
-        public static int WindowsVersion => GetWindowsVersion();
+        public static int WindowsVersion => (int)GetWindowsVersion();
         public static bool IsMacOsHighSierraOrHigher { get; } = false;
         public static Version ICUVersion => new Version(0, 0, 0, 0);
         public static bool IsRedHatFamily => false;
@@ -70,9 +70,34 @@ namespace System
             }
         }
 
+        public static bool IsWindowsHomeEdition
+        {
+            get
+            {
+                int productType = GetWindowsProductType();
+                switch (productType)
+                {
+                    case PRODUCT_CORE:
+                    case PRODUCT_CORE_COUNTRYSPECIFIC:
+                    case PRODUCT_CORE_N:
+                    case PRODUCT_CORE_SINGLELANGUAGE:
+                    case PRODUCT_HOME_BASIC:
+                    case PRODUCT_HOME_BASIC_N:
+                    case PRODUCT_HOME_PREMIUM:
+                    case PRODUCT_HOME_PREMIUM_N:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
         public static bool IsWindows => true;
         public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
+
+        public static string LibcRelease => "glibc_not_found";
+        public static string LibcVersion => "glibc_not_found";
 
         public static string GetDistroVersionString() { return "WindowsProductType=" + GetWindowsProductType() + " WindowsInstallationType=" + GetInstallationType(); }
 
@@ -151,22 +176,7 @@ namespace System
                     return false;
                 }
 
-                IntPtr processToken;
-                Assert.True(OpenProcessToken(GetCurrentProcess(), TOKEN_READ, out processToken));
-
-                try
-                {
-                    uint tokenInfo;
-                    uint returnLength;
-                    Assert.True(GetTokenInformation(
-                        processToken, TokenElevation, out tokenInfo, sizeof(uint), out returnLength));
-
-                    s_isWindowsElevated = tokenInfo == 0 ? 0 : 1;
-                }
-                finally
-                {
-                    CloseHandle(processToken);
-                }
+                s_isWindowsElevated = AdminHelpers.IsProcessElevated() ? 1 : 0;
 
                 return s_isWindowsElevated == 1;
             }
@@ -194,37 +204,16 @@ namespace System
             return productType;
         }
 
-        private static int GetWindowsMinorVersion()
-        {
-            RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
-            Assert.Equal(0, RtlGetVersion(out osvi));
-            return (int)osvi.dwMinorVersion;
-        }
-
-        private static int GetWindowsBuildNumber()
-        {
-            RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
-            Assert.Equal(0, RtlGetVersion(out osvi));
-            return (int)osvi.dwBuildNumber;
-        }
-
-        private const uint TokenElevation = 20;
-        private const uint STANDARD_RIGHTS_READ = 0x00020000;
-        private const uint TOKEN_QUERY = 0x0008;
-        private const uint TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY;
-
-        [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool GetTokenInformation(
-            IntPtr TokenHandle,
-            uint TokenInformationClass,
-            out uint TokenInformation,
-            uint TokenInformationLength,
-            out uint ReturnLength);
-
         private const int PRODUCT_IOTUAP = 0x0000007B;
         private const int PRODUCT_IOTUAPCOMMERCIAL = 0x00000083;
+        private const int PRODUCT_CORE = 0x00000065;
+        private const int PRODUCT_CORE_COUNTRYSPECIFIC = 0x00000063;
+        private const int PRODUCT_CORE_N = 0x00000062;
+        private const int PRODUCT_CORE_SINGLELANGUAGE = 0x00000064;
+        private const int PRODUCT_HOME_BASIC = 0x00000002;
+        private const int PRODUCT_HOME_BASIC_N = 0x00000005;
+        private const int PRODUCT_HOME_PREMIUM = 0x00000003;
+        private const int PRODUCT_HOME_PREMIUM_N = 0x0000001A;
 
         [DllImport("kernel32.dll", SetLastError = false)]
         private static extern bool GetProductInfo(
@@ -235,40 +224,24 @@ namespace System
             out int pdwReturnedProductType
         );
 
-        [DllImport("ntdll.dll", ExactSpelling=true)]
-        private static extern int RtlGetVersion(out RTL_OSVERSIONINFOEX lpVersionInformation);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RTL_OSVERSIONINFOEX
-        {
-            internal uint dwOSVersionInfoSize;
-            internal uint dwMajorVersion;
-            internal uint dwMinorVersion;
-            internal uint dwBuildNumber;
-            internal uint dwPlatformId;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-            internal string szCSDVersion;
-        }
-
-        private static int GetWindowsVersion()
-        {
-            RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
-            Assert.Equal(0, RtlGetVersion(out osvi));
-            return (int)osvi.dwMajorVersion;
-        }
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern int GetCurrentApplicationUserModelId(ref uint applicationUserModelIdLength, byte[] applicationUserModelId);
-            
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool CloseHandle(IntPtr handle);
 
-        [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
-
-        // The process handle does NOT need closing
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        private static extern IntPtr GetCurrentProcess();
- }
+        internal static uint GetWindowsVersion()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwMajorVersion;
+        }
+        internal static uint GetWindowsMinorVersion()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwMinorVersion;
+        }
+        internal static uint GetWindowsBuildNumber()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwBuildNumber;
+        }
+    }
 }

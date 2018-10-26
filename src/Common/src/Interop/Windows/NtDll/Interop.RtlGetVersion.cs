@@ -2,30 +2,34 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.InteropServices;
-using System.Security;
 
 internal partial class Interop
 {
     internal partial class NtDll
     {
         [DllImport(Libraries.NtDll, ExactSpelling=true)]
-        private static extern int RtlGetVersion(out RTL_OSVERSIONINFOEX lpVersionInformation);
+        private static extern int RtlGetVersion(ref RTL_OSVERSIONINFOEX lpVersionInformation);
 
-        internal static string RtlGetVersion()
+        internal static unsafe int RtlGetVersionEx(out RTL_OSVERSIONINFOEX osvi)
         {
-            RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
-            const string version = "Microsoft Windows";
-            if (RtlGetVersion(out osvi) == 0)
+            osvi = new RTL_OSVERSIONINFOEX();
+            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
+            return RtlGetVersion(ref osvi);
+        }
+
+        internal static unsafe string RtlGetVersion()
+        {            
+            const string Version = "Microsoft Windows";
+            if (RtlGetVersionEx(out RTL_OSVERSIONINFOEX osvi) == 0)
             {
-                return string.Format("{0} {1}.{2}.{3} {4}",
-                    version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, osvi.szCSDVersion);
+                return osvi.szCSDVersion[0] != '\0' ?
+                    string.Format("{0} {1}.{2}.{3} {4}", Version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, new string(&(osvi.szCSDVersion[0]))) :
+                    string.Format("{0} {1}.{2}.{3}", Version, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
             }
             else
             {
-                return version;
+                return Version;
             }
         }
     }

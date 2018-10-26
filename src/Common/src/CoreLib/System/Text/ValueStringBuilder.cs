@@ -50,9 +50,20 @@ namespace System.Text
 
         /// <summary>
         /// Get a pinnable reference to the builder.
+        /// Does not ensure there is a null char after <see cref="Length"/>
+        /// This overload is pattern matched in the C# 7.3+ compiler so you can omit
+        /// the explicit method call, and write eg "fixed (char* c = builder)"
+        /// </summary>
+        public ref char GetPinnableReference()
+        {
+            return ref MemoryMarshal.GetReference(_chars);
+        }
+
+        /// <summary>
+        /// Get a pinnable reference to the builder.
         /// </summary>
         /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
-        public ref char GetPinnableReference(bool terminate = false)
+        public ref char GetPinnableReference(bool terminate)
         {
             if (terminate)
             {
@@ -125,6 +136,21 @@ namespace System.Text
             int remaining = _pos - index;
             _chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
             _chars.Slice(index, count).Fill(value);
+            _pos += count;
+        }
+
+        public void Insert(int index, string s)
+        {
+            int count = s.Length;
+
+            if (_pos > (_chars.Length - count))
+            {
+                Grow(count);
+            }
+
+            int remaining = _pos - index;
+            _chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
+            s.AsSpan().CopyTo(_chars.Slice(index));
             _pos += count;
         }
 

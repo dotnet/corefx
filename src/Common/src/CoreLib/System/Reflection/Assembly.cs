@@ -69,6 +69,7 @@ namespace System.Reflection
         public virtual bool IsDynamic => false;
         public virtual string Location { get { throw NotImplemented.ByDesign; } }
         public virtual bool ReflectionOnly { get { throw NotImplemented.ByDesign; } }
+        public virtual bool IsCollectible => true;
 
         public virtual ManifestResourceInfo GetManifestResourceInfo(string resourceName) { throw NotImplemented.ByDesign; }
         public virtual string[] GetManifestResourceNames() { throw NotImplemented.ByDesign; }
@@ -178,7 +179,7 @@ namespace System.Reflection
 
         public static Assembly Load(byte[] rawAssembly) => Load(rawAssembly, rawSymbolStore: null);
 
-        [Obsolete("This method has been deprecated. Please use Assembly.Load() instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Please use Assembly.Load() instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static Assembly LoadWithPartialName(string partialName)
         {
             if (partialName == null)

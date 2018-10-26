@@ -80,7 +80,7 @@ namespace System.Data.Common
                     }
 
                     // Mutate name if it contains space(s)
-                    if (columnName.IndexOf(' ') >= 0)
+                    if (columnName.Contains(' '))
                     {
                         columnName = columnName.Replace(' ', '_');
                         isMutatedName = true;
@@ -215,7 +215,7 @@ namespace System.Data.Common
                 //    generate name based on current index
                 //    increment index
                 //    search name in base names
-                //   loop while name occures in base names
+                //   loop while name occurs in base names
                 //  end for
                 // end foreach
                 string name;

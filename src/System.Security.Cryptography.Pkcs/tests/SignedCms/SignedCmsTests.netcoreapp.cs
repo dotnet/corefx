@@ -91,6 +91,16 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        public static void SignCmsUsingExplicitECDsaP521Key()
+        {
+            using (X509Certificate2 cert = Certificates.ECDsaP521Win.TryGetCertificateWithPrivateKey())
+            using (ECDsa key = cert.GetECDsaPrivateKey())
+            {
+                VerifyWithExplicitPrivateKey(cert, key);
+            }
+        }
+
+        [Fact]
         public static void CounterSignCmsUsingExplicitRSAKeyForFirstSignerAndDSAForCounterSignature()
         {
             using (X509Certificate2 cert = Certificates.RSA2048SignatureOnly.TryGetCertificateWithPrivateKey())
@@ -348,6 +358,20 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 cms.AddCertificate(newCert);
                 Assert.Throws<CryptographicException>(() => cms.AddCertificate(newCert));
             }
+        }
+
+        [Fact]
+        public static void AddAttributeToIndefiniteLengthContent()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.IndefiniteLengthContentDocument);
+            cms.SignerInfos[0].AddUnsignedAttribute(new Pkcs9DocumentDescription("Indefinite length test"));
+            byte[] encoded = cms.Encode();
+
+            cms = new SignedCms();
+            cms.Decode(encoded);
+            // It should sort first, because it's smaller.
+            Assert.Equal(Oids.DocumentDescription, cms.SignerInfos[0].UnsignedAttributes[0].Oid.Value);
         }
 
         private static void VerifyWithExplicitPrivateKey(X509Certificate2 cert, AsymmetricAlgorithm key)

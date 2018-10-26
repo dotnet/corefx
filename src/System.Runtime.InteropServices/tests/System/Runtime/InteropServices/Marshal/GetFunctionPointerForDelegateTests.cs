@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Runtime.InteropServices.Tests
 {
-    public partial class GetFunctionPointerForDelegateTests
+    public class GetFunctionPointerForDelegateTests
     {
         [Fact]
         public void GetFunctionPointerForDelegate_NormalDelegateNonGeneric_ReturnsExpected()

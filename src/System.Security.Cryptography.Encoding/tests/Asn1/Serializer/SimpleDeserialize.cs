@@ -37,7 +37,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal("1.2.840.10045.2.1", algorithmIdentifier.Algorithm.Value);
             
             var reader = new AsnReader(algorithmIdentifier.Parameters.Value, (AsnEncodingRules)ruleSet);
-            Oid curveId = reader.ReadObjectIdentifier(skipFriendlyName: true);
+            Oid curveId = reader.ReadObjectIdentifier();
             Assert.Equal(curveOid, curveId.Value);
         }
 
@@ -59,7 +59,6 @@ namespace System.Security.Cryptography.Tests.Asn1
                   "0303000102" +
                   "0404FF0055AA" +
                   "0500" +
-                  "06082A8648CE3D030107" +
                   "06072A8648CE3D0201" +
                   "06092A864886F70D010101" +
                   "0A011E" +
@@ -119,10 +118,8 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal("0102", atst.BitStringBytes.ByteArrayToHex());
             Assert.Equal("FF0055AA", atst.OctetStringBytes.ByteArrayToHex());
             Assert.Equal("0500", atst.Null.ByteArrayToHex());
-            Assert.Equal("1.2.840.10045.3.1.7", atst.UnattrOid.Value);
-            Assert.Equal("1.2.840.10045.3.1.7", atst.UnattrOid.FriendlyName);
-            Assert.Equal("1.2.840.10045.2.1", atst.WithName.Value);
-            Assert.Equal("ECC", atst.WithName.FriendlyName);
+            Assert.Equal("1.2.840.10045.2.1", atst.Oid.Value);
+            Assert.Equal("ECC", atst.Oid.FriendlyName);
             Assert.Equal("1.2.840.113549.1.1.1", atst.OidString);
             Assert.Equal(UniversalTagNumber.BMPString, atst.LinearEnum);
             Assert.Equal(UnicodeVerifier, atst.Utf8Encoded);
@@ -176,11 +173,11 @@ namespace System.Security.Cryptography.Tests.Asn1
             const string BmpInputHex = "1E0400480069";
             const string Utf8InputHex = "0C024869";
 
-            var ds1 = AsnSerializer.Deserialize<DirectoryStringAsn>(
+            var ds1 = AsnSerializer.Deserialize<DirectoryString>(
                 BmpInputHex.HexToByteArray(),
                 AsnEncodingRules.DER);
 
-            var ds2 = AsnSerializer.Deserialize<DirectoryStringAsn>(
+            var ds2 = AsnSerializer.Deserialize<DirectoryString>(
                 Utf8InputHex.HexToByteArray(),
                 AsnEncodingRules.DER);
 
@@ -539,8 +536,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         private ReadOnlyMemory<byte> _octetString;
         [AnyValue]
         private ReadOnlyMemory<byte> _null;
-        private Oid _oidNoName;
-        [ObjectIdentifier(PopulateFriendlyName = true)]
         private Oid _oid;
         [ObjectIdentifier]
         private string _oidString;
@@ -644,13 +639,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             set => _null = value.ToArray();
         }
 
-        public Oid UnattrOid
-        {
-            get => _oidNoName;
-            set => _oidNoName = value;
-        }
-
-        public Oid WithName
+        public Oid Oid
         {
             get => _oid;
             set => _oid = value;
@@ -705,11 +694,40 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
     }
 
+    // https://tools.ietf.org/html/rfc5280#section-4.1.2.4
+    //
+    // DirectoryString ::= CHOICE {
+    //     teletexString           TeletexString (SIZE (1..MAX)),
+    //     printableString         PrintableString (SIZE (1..MAX)),
+    //     universalString         UniversalString (SIZE (1..MAX)),
+    //     utf8String              UTF8String (SIZE (1..MAX)),
+    //     bmpString               BMPString (SIZE (1..MAX))
+    // }
+    [Choice]
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DirectoryString
+    {
+        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.TeletexString)]
+        internal ReadOnlyMemory<byte>? TeletexString;
+
+        [PrintableString]
+        internal string PrintableString;
+
+        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.UniversalString)]
+        internal ReadOnlyMemory<byte>? UniversalString;
+
+        [UTF8String]
+        internal string Utf8String;
+
+        [BMPString]
+        internal string BmpString;
+    }
+
     [Choice]
     [StructLayout(LayoutKind.Sequential)]
     internal struct FlexibleString
     {
-        public DirectoryStringAsn? DirectoryString;
+        public DirectoryString? DirectoryString;
 
         [IA5String]
         public string Ascii;
@@ -741,7 +759,7 @@ namespace System.Security.Cryptography.Tests.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal sealed class FlexibleStringClassHybrid
     {
-        public DirectoryStringAsn? DirectoryString;
+        public DirectoryString? DirectoryString;
 
         [IA5String]
         public string Ascii;
@@ -881,5 +899,36 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         [Integer]
         public ReadOnlyMemory<byte> Second;
+    }
+
+    // https://tools.ietf.org/html/rfc3280#section-4.1.1.2
+    //
+    // AlgorithmIdentifier  ::=  SEQUENCE  {
+    //   algorithm OBJECT IDENTIFIER,
+    //   parameters ANY DEFINED BY algorithm OPTIONAL  }
+    [StructLayout(LayoutKind.Sequential)]
+    internal partial struct AlgorithmIdentifierAsn
+    {
+        internal static readonly ReadOnlyMemory<byte> ExplicitDerNull = new byte[] { 0x05, 0x00 };
+
+        [ObjectIdentifier]
+        public Oid Algorithm;
+
+        [AnyValue, OptionalValue]
+        public ReadOnlyMemory<byte>? Parameters;
+    }
+
+    // https://tools.ietf.org/html/rfc3280#section-4.1
+    //
+    // SubjectPublicKeyInfo  ::=  SEQUENCE  {
+    //   algorithm            AlgorithmIdentifier,
+    //   subjectPublicKey     BIT STRING  }
+    [StructLayout(LayoutKind.Sequential)]
+    internal partial struct SubjectPublicKeyInfoAsn
+    {
+        internal AlgorithmIdentifierAsn Algorithm;
+
+        [BitString]
+        internal ReadOnlyMemory<byte> SubjectPublicKey;
     }
 }

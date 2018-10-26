@@ -3,29 +3,41 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using Internal.Runtime.CompilerServices;
 
 namespace System
 {
     internal static partial class Number
     {
-        private const int NumberMaxDigits = 50; // needs to == NUMBER_MAXDIGITS in coreclr's src/classlibnative/bcltype/number.h.
+        private const int NumberMaxDigits = 50;
+
+        private const double Log10V2 = 0.30102999566398119521373889472449;
+
+        // DriftFactor = 1 - Log10V2 - epsilon (a small number account for drift of floating point multiplication)
+        private const double DriftFactor = 0.69;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        internal unsafe ref struct NumberBuffer // needs to match layout of NUMBER in coreclr's src/classlibnative/bcltype/number.h
+        internal unsafe ref struct NumberBuffer
         {
             public int precision;
             public int scale;
-            private int _sign;
-            private DigitsAndNullTerminator _digits;
-            private char* _allDigits;
+            public bool sign;
+            public NumberBufferKind kind;
+            public fixed char digits[NumberMaxDigits + 1];
 
-            public bool sign { get => _sign != 0; set => _sign = value ? 1 : 0; }
-            public char* digits => (char*)Unsafe.AsPointer(ref _digits);
+            public char* GetDigitsPointer()
+            {
+                // This is safe to do since we are a ref struct
+                return (char*)(Unsafe.AsPointer(ref digits[0]));
+            }
+        }
 
-            [StructLayout(LayoutKind.Sequential, Size = (NumberMaxDigits + 1) * sizeof(char))]
-            private struct DigitsAndNullTerminator { }
+        internal enum NumberBufferKind : byte
+        {
+            Unknown = 0,
+            Integer = 1,
+            Decimal = 2,
+            Double = 3
         }
     }
 }

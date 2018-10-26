@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -301,7 +301,7 @@ namespace System
 
             if (fmt != 0)
             {
-                NumberToString(ref sb, ref number, fmt, digits, info, isDecimal:true);
+                NumberToString(ref sb, ref number, fmt, digits, info);
             }
             else
             {
@@ -327,7 +327,7 @@ namespace System
 
             if (fmt != 0)
             {
-                NumberToString(ref sb, ref number, fmt, digits, info, isDecimal: true);
+                NumberToString(ref sb, ref number, fmt, digits, info);
             }
             else
             {
@@ -339,9 +339,10 @@ namespace System
 
         private static unsafe void DecimalToNumber(ref decimal d, ref NumberBuffer number)
         {
-            char* buffer = number.digits;
+            char* buffer = number.GetDigitsPointer();
             number.precision = DecimalPrecision;
             number.sign = d.IsNegative;
+            number.kind = NumberBufferKind.Decimal;
 
             char* p = buffer + DecimalPrecision;
             while ((d.Mid | d.High) != 0)
@@ -353,7 +354,7 @@ namespace System
             int i = (int)((byte*)(buffer + DecimalPrecision) - (byte*)p) >> 1;
             number.scale = i - d.Scale;
 
-            char* dst = number.digits;
+            char* dst = number.GetDigitsPointer();
             while (--i >= 0)
             {
                 *dst++ = *p++;
@@ -388,6 +389,7 @@ namespace System
             char fmt = ParseFormatSpecifier(format, out int digits);
             int precision = DoublePrecision;
             NumberBuffer number = default;
+            number.kind = NumberBufferKind.Double;
 
             switch (fmt)
             {
@@ -409,12 +411,12 @@ namespace System
 
                         if (NumberToDouble(ref number) == value)
                         {
-                            NumberToString(ref sb, ref number, 'G', DoublePrecision, info, isDecimal: false);
+                            NumberToString(ref sb, ref number, 'G', DoublePrecision, info);
                         }
                         else
                         {
                             DoubleToNumber(value, 17, ref number);
-                            NumberToString(ref sb, ref number, 'G', 17, info, isDecimal: false);
+                            NumberToString(ref sb, ref number, 'G', 17, info);
                         }
 
                         return null;
@@ -451,7 +453,7 @@ namespace System
 
             if (fmt != 0)
             {
-                NumberToString(ref sb, ref number, fmt, digits, info, isDecimal: false);
+                NumberToString(ref sb, ref number, fmt, digits, info);
             }
             else
             {
@@ -488,6 +490,7 @@ namespace System
             char fmt = ParseFormatSpecifier(format, out int digits);
             int precision = FloatPrecision;
             NumberBuffer number = default;
+            number.kind = NumberBufferKind.Double;
 
             switch (fmt)
             {
@@ -509,12 +512,12 @@ namespace System
 
                         if ((float)NumberToDouble(ref number) == value)
                         {
-                            NumberToString(ref sb, ref number, 'G', FloatPrecision, info, isDecimal: false);
+                            NumberToString(ref sb, ref number, 'G', FloatPrecision, info);
                         }
                         else
                         {
                             DoubleToNumber(value, 9, ref number);
-                            NumberToString(ref sb, ref number, 'G', 9, info, isDecimal: false);
+                            NumberToString(ref sb, ref number, 'G', 9, info);
                         }
                         return null;
                     }
@@ -550,7 +553,7 @@ namespace System
 
             if (fmt != 0)
             {
-                NumberToString(ref sb, ref number, fmt, digits, info, false);
+                NumberToString(ref sb, ref number, fmt, digits, info);
             }
             else
             {
@@ -608,7 +611,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -653,7 +656,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -696,7 +699,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -739,7 +742,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -785,7 +788,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -831,7 +834,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -875,7 +878,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -919,7 +922,7 @@ namespace System
                 }
                 if (fmt != 0)
                 {
-                    NumberToString(ref sb, ref number, fmt, digits, info, false);
+                    NumberToString(ref sb, ref number, fmt, digits, info);
                 }
                 else
                 {
@@ -944,13 +947,14 @@ namespace System
                 value = -value;
             }
 
-            char* buffer = number.digits;
+            char* buffer = number.GetDigitsPointer();
             char* p = UInt32ToDecChars(buffer + Int32Precision, (uint)value, 0);
             int i = (int)(buffer + Int32Precision - p);
 
             number.scale = i;
+            number.kind = NumberBufferKind.Integer;
 
-            char* dst = number.digits;
+            char* dst = number.GetDigitsPointer();
             while (--i >= 0)
                 *dst++ = *p++;
             *dst = '\0';
@@ -1061,12 +1065,13 @@ namespace System
             number.precision = UInt32Precision;
             number.sign = false;
 
-            char* buffer = number.digits;
+            char* buffer = number.GetDigitsPointer();
             char* p = UInt32ToDecChars(buffer + UInt32Precision, value, 0);
             int i = (int)(buffer + UInt32Precision - p);
             number.scale = i;
+            number.kind = NumberBufferKind.Integer;
 
-            char* dst = number.digits;
+            char* dst = number.GetDigitsPointer();
             while (--i >= 0)
                 *dst++ = *p++;
             *dst = '\0';
@@ -1176,7 +1181,7 @@ namespace System
                 value = (ulong)(-input);
             }
 
-            char* buffer = number.digits;
+            char* buffer = number.GetDigitsPointer();
             char* p = buffer + Int64Precision;
             while (High32(value) != 0)
                 p = UInt32ToDecChars(p, Int64DivMod1E9(ref value), 9);
@@ -1184,8 +1189,9 @@ namespace System
             int i = (int)(buffer + Int64Precision - p);
 
             number.scale = i;
+            number.kind = NumberBufferKind.Integer;
 
-            char* dst = number.digits;
+            char* dst = number.GetDigitsPointer();
             while (--i >= 0)
                 *dst++ = *p++;
             *dst = '\0';
@@ -1316,7 +1322,7 @@ namespace System
             number.precision = UInt64Precision;
             number.sign = false;
 
-            char* buffer = number.digits;
+            char* buffer = number.GetDigitsPointer();
             char* p = buffer + UInt64Precision;
 
             while (High32(value) != 0)
@@ -1325,8 +1331,9 @@ namespace System
             int i = (int)(buffer + UInt64Precision - p);
 
             number.scale = i;
+            number.kind = NumberBufferKind.Integer;
 
-            char* dst = number.digits;
+            char* dst = number.GetDigitsPointer();
             while (--i >= 0)
                 *dst++ = *p++;
             *dst = '\0';
@@ -1453,8 +1460,10 @@ namespace System
                 '\0';
         }
 
-        internal static unsafe void NumberToString(ref ValueStringBuilder sb, ref NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info, bool isDecimal)
+        internal static unsafe void NumberToString(ref ValueStringBuilder sb, ref NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info)
         {
+            Debug.Assert(number.kind != NumberBufferKind.Unknown);
+
             switch (format)
             {
                 case 'C':
@@ -1522,14 +1531,9 @@ namespace System
                         bool noRounding = false;
                         if (nMaxDigits < 1)
                         {
-                            if (isDecimal && (nMaxDigits == -1))
+                            if ((number.kind == NumberBufferKind.Decimal) && (nMaxDigits == -1))
                             {
                                 noRounding = true;  // Turn off rounding for ECMA compliance to output trailing 0's after decimal as significant
-                                if (number.digits[0] == 0)
-                                {
-                                    // Minus zero should be formatted as 0
-                                    goto SkipSign;
-                                }
                                 goto SkipRounding;
                             }
                             else
@@ -1539,13 +1543,12 @@ namespace System
                             }
                         }
 
-                        RoundNumber(ref number, nMaxDigits); // This also fixes up the minus zero case
+                        RoundNumber(ref number, nMaxDigits);
 
 SkipRounding:
                         if (number.sign)
                             sb.Append(info.NegativeSign);
 
-SkipSign:
                         FormatGeneral(ref sb, ref number, nMaxDigits, info, (char)(format - ('G' - 'E')), noRounding);
 
                         break;
@@ -1572,6 +1575,8 @@ SkipSign:
 
         internal static unsafe void NumberToStringFormat(ref ValueStringBuilder sb, ref NumberBuffer number, ReadOnlySpan<char> format, NumberFormatInfo info)
         {
+            Debug.Assert(number.kind != NumberBufferKind.Unknown);
+
             int digitCount;
             int decimalPos;
             int firstDigit;
@@ -1586,7 +1591,7 @@ SkipSign:
 
             int section;
             int src;
-            char* dig = number.digits;
+            char* dig = number.GetDigitsPointer();
             char ch;
 
             section = FindSection(format, dig[0] == 0 ? 2 : number.sign ? 1 : 0);
@@ -1694,7 +1699,6 @@ SkipSign:
                 }
                 else
                 {
-                    number.sign = false;   // We need to format -0 without the sign set.
                     number.scale = 0;      // Decimals with scale ('0.00') should be rounded.
                 }
 
@@ -1766,8 +1770,8 @@ SkipSign:
                     }
                 }
             }
-            
-            if (number.sign && section == 0)
+
+            if (number.sign && (section == 0) && (number.scale != 0))
                 sb.Append(info.NegativeSign);
 
             bool decimalWritten = false;
@@ -1925,6 +1929,9 @@ SkipSign:
                     }
                 }
             }
+
+            if (number.sign && (section == 0) && (number.scale == 0) && (sb.Length > 0))
+                sb.Insert(0, info.NegativeSign);
         }
 
         private static void FormatCurrency(ref ValueStringBuilder sb, ref NumberBuffer number, int nMaxDigits, NumberFormatInfo info)
@@ -1956,7 +1963,7 @@ SkipSign:
         private static unsafe void FormatFixed(ref ValueStringBuilder sb, ref NumberBuffer number, int nMaxDigits, NumberFormatInfo info, int[] groupDigits, string sDecimal, string sGroup)
         {
             int digPos = number.scale;
-            char* dig = number.digits;
+            char* dig = number.GetDigitsPointer();
 
             if (digPos > 0)
             {
@@ -2080,7 +2087,7 @@ SkipSign:
 
         private static unsafe void FormatScientific(ref ValueStringBuilder sb, ref NumberBuffer number, int nMaxDigits, NumberFormatInfo info, char expChar)
         {
-            char* dig = number.digits;
+            char* dig = number.GetDigitsPointer();
 
             sb.Append((*dig != 0) ? *dig++ : '0');
 
@@ -2130,7 +2137,7 @@ SkipSign:
                 }
             }
 
-            char* dig = number.digits;
+            char* dig = number.GetDigitsPointer();
 
             if (digPos > 0)
             {
@@ -2190,7 +2197,7 @@ SkipSign:
 
         private static unsafe void RoundNumber(ref NumberBuffer number, int pos)
         {
-            char* dig = number.digits;
+            char* dig = number.GetDigitsPointer();
 
             int i = 0;
             while (i < pos && dig[i] != 0)
@@ -2220,7 +2227,11 @@ SkipSign:
             if (i == 0)
             {
                 number.scale = 0;
-                number.sign = false;
+
+                if (number.kind == NumberBufferKind.Integer)
+                {
+                    number.sign = false;
+                }
             }
             dig[i] = '\0';
         }
@@ -2276,6 +2287,60 @@ SkipSign:
             uint rem = (uint)(value % 1000000000);
             value /= 1000000000;
             return rem;
+        }
+
+        private static unsafe void DoubleToNumber(double value, int precision, ref NumberBuffer number)
+        {
+            number.precision = precision;
+
+            if (!double.IsFinite(value))
+            {
+                number.scale = double.IsNaN(value) ? ScaleNAN : ScaleINF;
+                number.sign = double.IsNegative(value);
+                number.digits[0] = '\0';
+            }
+            else if (value == 0.0)
+            {
+                number.scale = 0;
+                number.sign = double.IsNegative(value);
+                number.digits[0] = '\0';
+            }
+            else if (!Grisu3.Run(value, precision, ref number))
+            {
+                Dragon4(value, precision, ref number);
+            }
+        }
+
+        private static long ExtractFractionAndBiasedExponent(double value, out int exponent)
+        {
+            var bits = BitConverter.DoubleToInt64Bits(value);
+            long fraction = (bits & 0xFFFFFFFFFFFFF);
+            exponent = (int)((bits >> 52) & 0x7FF);
+
+            if (exponent != 0)
+            {
+                // For normalized value, according to https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+                // value = 1.fraction * 2^(exp - 1023)
+                //       = (1 + mantissa / 2^52) * 2^(exp - 1023)
+                //       = (2^52 + mantissa) * 2^(exp - 1023 - 52)
+                //
+                // So f = (2^52 + mantissa), e = exp - 1075;
+
+                fraction |= ((long)(1) << 52);
+                exponent -= 1075;
+            }
+            else
+            {
+                // For denormalized value, according to https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+                // value = 0.fraction * 2^(1 - 1023)
+                //       = (mantissa / 2^52) * 2^(-1022)
+                //       = mantissa * 2^(-1022 - 52)
+                //       = mantissa * 2^(-1074)
+                // So f = mantissa, e = -1074
+                exponent = -1074;
+            }
+
+            return fraction;
         }
     }
 }

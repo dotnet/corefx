@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,10 +20,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
 {
     public partial class BinaryFormatterTests : RemoteExecutorTestBase
     {
-        private static unsafe bool Is64Bit => sizeof(void*) == 8;
-
         // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
-        [ConditionalTheory(nameof(Is64Bit))]
+        [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [InlineData(2 * 6_584_983 - 2)] // previous limit
         [InlineData(2 * 7_199_369 - 2)] // last pre-computed prime number
         public void SerializeHugeObjectGraphs(int limit)
@@ -562,7 +562,16 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             // These types are unstable during serialization and produce different blobs.
             if (obj is WeakReference<Point> ||
-                obj is Collections.Specialized.HybridDictionary)
+                obj is Collections.Specialized.HybridDictionary ||
+                obj is Color)
+            {
+                return;
+            }
+
+            // The blobs aren't identical because of different implementations on Unix vs. Windows.
+            if (obj is Bitmap ||
+                obj is Icon ||
+                obj is Metafile)
             {
                 return;
             }

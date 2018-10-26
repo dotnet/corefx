@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
-    <ReferencePath Include="$(_RuntimePath)System.*.dll;$(_RuntimePath)Microsoft.*.dll" Exclude="$(_RuntimePath)Microsoft.Diagnostics.Tracing.TraceEvent.dll;$(_RuntimePath)Microsoft.DiaSymReader.Native.*.dll" />
   </ItemGroup>
   <ItemGroup>
     <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilder" Assembly="System.Reflection.Emit" />
@@ -26,5 +25,14 @@
     <SeedTypePreference Include="System.Reflection.Emit.PropertyBuilder" Assembly="System.Reflection.Emit" />
     <SeedTypePreference Include="System.Reflection.Emit.SignatureHelper" Assembly="System.Reflection.Emit.ILGeneration" />
     <SeedTypePreference Include="System.Reflection.Emit.TypeBuilder" Assembly="System.Reflection.Emit" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.DefaultInterfaceAttribute" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable`1" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.IActivationFactory" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.InterfaceImplementedInVersionAttribute" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeMarshal" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute" Assembly="System.Runtime.InteropServices.WindowsRuntime" />
   </ItemGroup>
 </Project>

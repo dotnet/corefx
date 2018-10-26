@@ -6,12 +6,7 @@ using System;
 
 namespace Microsoft.Win32
 {
-#if REGISTRY_ASSEMBLY
-    public
-#else
-    internal
-#endif
-    enum RegistryView
+    public enum RegistryView
     {
         Default = 0, // 0x0000 operate on the default registry view
         Registry64 = Interop.Advapi32.RegistryView.KEY_WOW64_64KEY, // 0x0100 operate on the 64-bit registry view

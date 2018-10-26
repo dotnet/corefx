@@ -127,16 +127,21 @@ namespace System.Net.NetworkInformation
             }
 
             // Has dashes?
-            if (address.IndexOf('-') >= 0)
+            if (address.Contains('-'))
             {
                 hasDashes = true;
                 buffer = new byte[(address.Length + 1) / 3];
+
+                if ((address.Length + 1) % 3 != 0)
+                {
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                }
             }
             else
             {
                 if (address.Length % 2 > 0)
                 {
-                    throw new FormatException(SR.net_bad_mac_address);
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
                 buffer = new byte[address.Length / 2];
@@ -164,18 +169,18 @@ namespace System.Net.NetworkInformation
                     }
                     else
                     {
-                        throw new FormatException(SR.net_bad_mac_address);
+                        throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                     }
                 }
                 else
                 {
-                    throw new FormatException(SR.net_bad_mac_address);
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
-                //we had too many characters after the last dash
+                // we had too many characters after the last dash
                 if (hasDashes && validCount >= 2)
                 {
-                    throw new FormatException(SR.net_bad_mac_address);
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
                 if (validCount % 2 == 0)
@@ -190,10 +195,10 @@ namespace System.Net.NetworkInformation
                 validCount++;
             }
 
-            //we too few characters after the last dash
+            // we too few characters after the last dash
             if (validCount < 2)
             {
-                throw new FormatException(SR.net_bad_mac_address);
+                throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
             }
 
             return new PhysicalAddress(buffer);

@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace Internal.Cryptography.Pal
 {
@@ -244,7 +245,7 @@ namespace Internal.Cryptography.Pal
 
             if (rootStoreFile != null && rootStoreFile.Exists)
             {
-                trustedCertFiles = Append(trustedCertFiles, rootStoreFile);
+                trustedCertFiles = trustedCertFiles.Prepend(rootStoreFile);
             }
 
             HashSet<X509Certificate2> uniqueRootCerts = new HashSet<X509Certificate2>();
@@ -263,7 +264,13 @@ namespace Internal.Cryptography.Pal
 
                     ICertificatePal pal;
 
-                    while (OpenSslX509CertificateReader.TryReadX509Pem(fileBio, out pal) ||
+                    // Some distros ship with two variants of the same certificate.
+                    // One is the regular format ('BEGIN CERTIFICATE') and the other
+                    // contains additional AUX-data ('BEGIN TRUSTED CERTIFICATE').
+                    // The additional data contains the appropriate usage (e.g. emailProtection, serverAuth, ...).
+                    // Because corefx doesn't validate for a specific usage, derived certificates are rejected.
+                    // For now, we skip the certificates with AUX data and use the regular certificates.
+                    while (OpenSslX509CertificateReader.TryReadX509PemNoAux(fileBio, out pal) ||
                         OpenSslX509CertificateReader.TryReadX509Der(fileBio, out pal))
                     {
                         X509Certificate2 cert = new X509Certificate2(pal);
@@ -299,14 +306,6 @@ namespace Internal.Cryptography.Pal
             // s_machineRootStore's nullarity is the loaded-state sentinel, so write it with Volatile.
             Debug.Assert(Monitor.IsEntered(s_machineLoadLock), "LoadMachineStores assumes a lock(s_machineLoadLock)");
             Volatile.Write(ref s_machineRootStore, rootStorePal);
-        }
-
-        private static IEnumerable<T> Append<T>(IEnumerable<T> current, T addition)
-        {
-            foreach (T element in current)
-                yield return element;
-
-            yield return addition;
         }
     }
 }

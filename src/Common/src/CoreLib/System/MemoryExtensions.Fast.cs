@@ -83,20 +83,6 @@ namespace System
             return CompareInfo.EqualsOrdinalIgnoreCase(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), span.Length);
         }
 
-        // TODO https://github.com/dotnet/corefx/issues/27526
-        internal static bool Contains(this ReadOnlySpan<char> source, char value)
-        {
-            for (int i = 0; i < source.Length; i++)
-            {
-                if (source[i] == value)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         /// <summary>
         /// Compares the specified <paramref name="span"/> and <paramref name="other"/> using the specified <paramref name="comparisonType"/>,
         /// and returns an integer that indicates their relative position in the sort order.
@@ -242,7 +228,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToLowerAsciiInvariant(source, destination);
             else
-                culture.TextInfo.ChangeCase(source, destination, toUpper: false);
+                culture.TextInfo.ChangeCaseToLower(source, destination);
             return source.Length;
         }
 
@@ -264,7 +250,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToLowerAsciiInvariant(source, destination);
             else
-                CultureInfo.InvariantCulture.TextInfo.ChangeCase(source, destination, toUpper: false);
+                CultureInfo.InvariantCulture.TextInfo.ChangeCaseToLower(source, destination);
             return source.Length;
         }
 
@@ -293,7 +279,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToUpperAsciiInvariant(source, destination);
             else
-                culture.TextInfo.ChangeCase(source, destination, toUpper: true);
+                culture.TextInfo.ChangeCaseToUpper(source, destination);
             return source.Length;
         }
 
@@ -315,7 +301,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToUpperAsciiInvariant(source, destination);
             else
-                CultureInfo.InvariantCulture.TextInfo.ChangeCase(source, destination, toUpper: true);
+                CultureInfo.InvariantCulture.TextInfo.ChangeCaseToUpper(source, destination);
             return source.Length;
         }
 

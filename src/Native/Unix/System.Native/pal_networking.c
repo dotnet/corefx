@@ -775,6 +775,7 @@ static void ConvertMessageHeaderToMsghdr(struct msghdr* header, const MessageHea
     header->msg_iovlen = (__typeof__(header->msg_iovlen))iovlen;
     header->msg_control = messageHeader->ControlBuffer;
     header->msg_controllen = (uint32_t)messageHeader->ControlBufferLen;
+    header->msg_flags = 0;
 }
 
 int32_t SystemNative_GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6)
@@ -1230,7 +1231,7 @@ int32_t SystemNative_ReceiveMessage(intptr_t socket, MessageHeader* messageHeade
 
     assert((int32_t)header.msg_namelen <= messageHeader->SocketAddressLen);
     messageHeader->SocketAddressLen = Min((int32_t)header.msg_namelen, messageHeader->SocketAddressLen);
-    
+
     assert(header.msg_controllen <= (size_t)messageHeader->ControlBufferLen);
     messageHeader->ControlBufferLen = Min((int32_t)header.msg_controllen, messageHeader->ControlBufferLen);
 
@@ -1266,7 +1267,7 @@ int32_t SystemNative_SendMessage(intptr_t socket, MessageHeader* messageHeader, 
     ConvertMessageHeaderToMsghdr(&header, messageHeader, fd);
 
     ssize_t res;
-    while ((res = sendmsg(fd, &header, flags)) < 0 && errno == EINTR);
+    while ((res = sendmsg(fd, &header, socketFlags)) < 0 && errno == EINTR);
     if (res != -1)
     {
         *sent = res;
@@ -1743,6 +1744,7 @@ int32_t SystemNative_GetSockOpt(
                 return Error_EINVAL;
             }
 
+#ifdef SO_REUSEPORT
             socklen_t optLen = (socklen_t)*optionLen;
             // On Unix, SO_REUSEPORT controls the ability to bind multiple sockets to the same address.
             int err = getsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, &optLen);
@@ -1763,7 +1765,9 @@ int32_t SystemNative_GetSockOpt(
                 value = value == 0 ? 1 : 0;
             }
             *(int32_t*)optionValue = value;
-
+#else // !SO_REUSEPORT
+            *optionValue = 0;
+#endif
             return Error_SUCCESS;
         }
     }
@@ -1812,16 +1816,15 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
     //
     if (socketOptionLevel == SocketOptionLevel_SOL_SOCKET)
     {
-        // Windows supports 3 address sharing modes:
-        // - not sharing      (SO_EXCLUSIVEADDRUSE=1, SO_REUSEADDR=0)
-        // - explicit sharing (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=1)
-        // - implicit sharing (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=0)
-        // On Unix we have two address sharing modes:
-        // - not sharing      (SO_REUSEPORT=0)
-        // - explicit sharing (SO_REUSEPORT=1)
-        // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT.
+        // Windows supports 3 address reuse modes:
+        // - reuse not allowed        (SO_EXCLUSIVEADDRUSE=1, SO_REUSEADDR=0)
+        // - reuse explicily allowed  (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=1)
+        // - reuse implicitly allowed (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=0)
+        // On Unix we can reuse or not, there is no implicit reuse.
+        // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT/SO_REUSEADDR.
         if (socketOptionName == SocketOptionName_SO_EXCLUSIVEADDRUSE || socketOptionName == SocketOptionName_SO_REUSEADDR)
         {
+#ifdef SO_REUSEPORT
             if (optionLen != sizeof(int32_t))
             {
                 return Error_EINVAL;
@@ -1842,8 +1845,19 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
                 }
             }
 
+            // An application that sets SO_REUSEPORT/SO_REUSEADDR can reuse the endpoint with another
+            // application that sets the same option. If one application sets SO_REUSEPORT and another
+            // sets SO_REUSEADDR the second application will fail to bind. We set both options, this
+            // enables reuse with applications that set one or both options.
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &value, (socklen_t)optionLen);
+            if (err == 0)
+            {
+                err = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &value, (socklen_t)optionLen);
+            }
             return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+#else // !SO_REUSEPORT
+            return Error_SUCCESS;
+#endif
         }
     }
 #ifdef IP_MTU_DISCOVER
@@ -1964,7 +1978,15 @@ int32_t SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t p
     platformSocketType |= SOCK_CLOEXEC;
 #endif
     *createdSocket = socket(platformAddressFamily, platformSocketType, platformProtocolType);
-    return *createdSocket != -1 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+    if (*createdSocket == -1)
+    {
+        return SystemNative_ConvertErrorPlatformToPal(errno);
+    }
+
+#ifndef SOCK_CLOEXEC
+    fcntl(ToFileDescriptor(*createdSocket), F_SETFD, FD_CLOEXEC); // ignore any failures; this is best effort
+#endif
+    return Error_SUCCESS;
 }
 
 int32_t SystemNative_GetAtOutOfBandMark(intptr_t socket, int32_t* atMark)

@@ -24,6 +24,7 @@ namespace System.Security.Cryptography.Asn1
         private ReadOnlyMemory<byte> _data;
         private readonly AsnEncodingRules _ruleSet;
 
+        public AsnEncodingRules RuleSet => _ruleSet;
         public bool HasData => !_data.IsEmpty;
 
         public AsnReader(ReadOnlyMemory<byte> data, AsnEncodingRules ruleSet)
@@ -1089,6 +1090,45 @@ namespace System.Security.Cryptography.Asn1
             return read;
         }
 
+        public byte[] ReadBitString(out int unusedBitCount)
+        {
+            return ReadBitString(Asn1Tag.PrimitiveBitString, out unusedBitCount);
+        }
+
+        public byte[] ReadBitString(Asn1Tag expectedTag, out int unusedBitCount)
+        {
+            ReadOnlyMemory<byte> memory;
+
+            if (TryGetPrimitiveBitStringValue(expectedTag, out unusedBitCount, out memory))
+            {
+                return memory.ToArray();
+            }
+
+            memory = PeekEncodedValue();
+
+            // Guaranteed long enough
+            byte[] rented = ArrayPool<byte>.Shared.Rent(memory.Length);
+            int dataLength = 0;
+
+            try
+            {
+                if (!TryCopyBitStringBytes(expectedTag, rented, out unusedBitCount, out dataLength))
+                {
+                    Debug.Fail("TryCopyBitStringBytes failed with a pre-allocated buffer");
+                    throw new CryptographicException();
+                }
+
+                byte[] alloc = new byte[dataLength];
+                rented.AsSpan(0, dataLength).CopyTo(alloc);
+                return alloc;
+            }
+            finally
+            {
+                rented.AsSpan(0, dataLength).Clear();
+                ArrayPool<byte>.Shared.Return(rented);
+            }
+        }
+
         public TFlagsEnum GetNamedBitListValue<TFlagsEnum>() where TFlagsEnum : struct =>
             GetNamedBitListValue<TFlagsEnum>(Asn1Tag.PrimitiveBitString);
 
@@ -1602,6 +1642,45 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
+        public byte[] ReadOctetString()
+        {
+            return ReadOctetString(Asn1Tag.PrimitiveOctetString);
+        }
+
+        public byte[] ReadOctetString(Asn1Tag expectedTag)
+        {
+            ReadOnlyMemory<byte> memory;
+
+            if (TryGetPrimitiveOctetStringBytes(expectedTag, out memory))
+            {
+                return memory.ToArray();
+            }
+
+            memory = PeekEncodedValue();
+
+            // Guaranteed long enough
+            byte[] rented = ArrayPool<byte>.Shared.Rent(memory.Length);
+            int dataLength = 0;
+
+            try
+            {
+                if (!TryCopyOctetStringBytes(expectedTag, rented, out dataLength))
+                {
+                    Debug.Fail("TryCopyOctetStringBytes failed with a pre-allocated buffer");
+                    throw new CryptographicException();
+                }
+
+                byte[] alloc = new byte[dataLength];
+                rented.AsSpan(0, dataLength).CopyTo(alloc);
+                return alloc;
+            }
+            finally
+            {
+                rented.AsSpan(0, dataLength).Clear();
+                ArrayPool<byte>.Shared.Return(rented);
+            }
+        }
+
         public void ReadNull() => ReadNull(Asn1Tag.Null);
 
         public void ReadNull(Asn1Tag expectedTag)
@@ -1852,13 +1931,15 @@ namespace System.Security.Cryptography.Asn1
             return oidValue;
         }
 
-        public Oid ReadObjectIdentifier(bool skipFriendlyName = false) =>
-            ReadObjectIdentifier(Asn1Tag.ObjectIdentifier, skipFriendlyName);
+        public Oid ReadObjectIdentifier() =>
+            ReadObjectIdentifier(Asn1Tag.ObjectIdentifier);
 
-        public Oid ReadObjectIdentifier(Asn1Tag expectedTag, bool skipFriendlyName=false)
+        public Oid ReadObjectIdentifier(Asn1Tag expectedTag)
         {
             string oidValue = ReadObjectIdentifierAsString(expectedTag, out int bytesRead);
-            Oid oid = skipFriendlyName ? new Oid(oidValue, oidValue) : new Oid(oidValue);
+            // Specifying null for friendly name makes the lookup deferred until first read
+            // of the Oid.FriendlyName property.
+            Oid oid = new Oid(oidValue, null);
 
             // Don't slice until the return object has been created.
             _data = _data.Slice(bytesRead);
