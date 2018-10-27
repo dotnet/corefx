@@ -45,7 +45,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Assert.Equal(MsgBox($"Select OK if Title = 'Hello'", MsgBoxStyle.OkCancel, "Hello"), MsgBoxResult.Ok)
         End Sub
 
-        <Fact>
+        <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.AnyUnix)>
         Public Shared Sub MsgBoxTestUnix()
             Assert.Throws(Of PlatformNotSupportedException)(Sub() MsgBox("Select OK"))
