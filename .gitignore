@@ -21,7 +21,7 @@ artifacts/
 [Rr]elease/
 [Rr]eleases/
 x64/
-x86/
+x86/ !eng/common/cross/x86/
 build/
 bld/
 [Bb]in/
