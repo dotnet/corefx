@@ -16,15 +16,13 @@
     <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeTypes.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
-    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
-    <Compile Include="Microsoft\VisualBasic\Interaction.Windows.vb" />
   </ItemGroup>
     <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
-    <Compile Include="Microsoft\VisualBasic\Interaction.Unix.vb" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />

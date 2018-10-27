@@ -8,7 +8,6 @@
     <Compile Include="SpecialDirectoriesTests.vb" />
     <Compile Include="Dummy.vb" />
     <Compile Include="FileIOTests.vb" />
-    <Compile Include="MsgBoxTests.vb" />
     <Compile Include="TextFieldParserTests.vb" />
   </ItemGroup>
   <ItemGroup>

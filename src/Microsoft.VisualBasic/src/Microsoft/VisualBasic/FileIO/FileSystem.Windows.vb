@@ -121,7 +121,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="FullSource">The full path to the source.</param>
         ''' <param name="FullTarget">The full path to the target. Nothing if this is a Delete operation.</param>
         ''' <param name="OnUserCancel">Value from UICancelOption, specifying to throw or not when user cancels the operation.</param>
-        ''' </remarks>
+        '''<remarks></remarks>
         <SecurityCritical()>
         <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt, UI:=True)>
         <ResourceExposure(ResourceScope.Machine)>
