@@ -20,6 +20,41 @@ namespace System.Data.SqlClient
         internal long _value;
     }
 
+    internal readonly ref struct PacketHandle
+    {
+        public const int NativePointerType = 1;
+        public const int NativePacketType = 2;
+        public const int ManagedPacketType = 3;
+
+        public readonly IntPtr NativePointer;
+        public readonly SNIPacketHandle NativePacket;
+        public readonly SNI.SNIPacket ManagedPacket;
+        public readonly int Type;
+
+        private PacketHandle(IntPtr nativePointer, SNIPacketHandle nativePacket, SNI.SNIPacket managedPacket,int type)
+        {
+            Type = type;
+            NativePointer = nativePointer;
+            NativePacket = nativePacket;
+            ManagedPacket = managedPacket;
+        }
+
+        public static PacketHandle FromNativePointer(IntPtr nativePointer)
+        {
+            return new PacketHandle(nativePointer,default,default, NativePointerType);
+        }
+
+        public static PacketHandle FromNativePacket(SNIPacketHandle nativePacket)
+        {
+            return new PacketHandle(default, nativePacket, default, NativePacketType);
+        }
+
+        public static PacketHandle FromManagedPacket(SNI.SNIPacket managedPacket)
+        {
+            return new PacketHandle(default, default, managedPacket, ManagedPacketType);
+        }
+    }
+
     internal abstract class TdsParserStateObject
     {
         private const int AttentionTimeoutSeconds = 5;
@@ -4044,51 +4079,5 @@ namespace System.Data.SqlClient
         */
     }
 
-    internal readonly ref struct PacketHandle
-    {
-        public readonly IntPtr NativePointer;
-        public readonly SNIPacket NativePacket;
-        public readonly SNI.SNIPacket ManagedPacket;
 
-        //public PacketHandle(IntPtr pointer)
-        //{
-        //    NativePacket = default;
-        //    NativePointer = pointer;
-        //    ManagedPacket = default;
-        //}
-        //public PacketHandle(SNI.SNIPacket managedPacket)
-        //{
-        //    NativePacket = default;
-        //    NativePointer = default;
-        //    ManagedPacket = managedPacket;
-        //}
-        //public PacketHandle(SNIPacket nativePacket)
-        //{
-        //    NativePacket = nativePacket;
-        //    NativePointer = default;
-        //    ManagedPacket = default;
-        //}
-
-        private PacketHandle(IntPtr nativePointer, SNIPacket nativePacket, SNI.SNIPacket managedPacket)
-        {
-            NativePacket = nativePacket;
-            NativePointer = nativePointer;
-            ManagedPacket = managedPacket;
-        }
-
-        public static PacketHandle FromNativePointer(IntPtr nativePointer)
-        {
-            return new PacketHandle(nativePointer,default,default);
-        }
-
-        public static PacketHandle FromNativePacket(SNIPacket nativePacket)
-        {
-            return new PacketHandle(default, nativePacket, default);
-        }
-
-        public static PacketHandle FromManagedPacket(SNI.SNIPacket managedPacket)
-        {
-            return new PacketHandle(default, default, managedPacket);
-        }
-    }
 }

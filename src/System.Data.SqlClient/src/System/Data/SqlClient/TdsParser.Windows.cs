@@ -27,6 +27,8 @@ namespace System.Data.SqlClient
             object handle = _pMarsPhysicalConObj.SessionHandle;
             temp = _pMarsPhysicalConObj.ReadAsync(out error, ref handle);
 
+            Debug.Assert(temp.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
+
             if (temp.NativePointer != IntPtr.Zero)
             {
                 // Be sure to release packet, otherwise it will be leaked by native.

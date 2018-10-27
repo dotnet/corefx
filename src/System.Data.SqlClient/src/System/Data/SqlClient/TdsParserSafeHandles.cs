@@ -131,13 +131,13 @@ namespace System.Data.SqlClient
         }
     }
 
-    internal sealed class SNIHandle : SafeHandle
+    internal sealed class SNISessionHandle : SafeHandle
     {
         private readonly uint _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly bool _fSync = false;
 
         // creates a physical connection
-        internal SNIHandle(
+        internal SNISessionHandle(
             SNINativeMethodWrapper.ConsumerInfo myInfo,
             string serverName,
             byte[] spnBuffer,
@@ -165,7 +165,7 @@ namespace System.Data.SqlClient
         }
 
         // constructs SNI Handle for MARS session
-        internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent) : base(IntPtr.Zero, true)
+        internal SNISessionHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNISessionHandle parent) : base(IntPtr.Zero, true)
         {
             try { }
             finally
@@ -206,9 +206,9 @@ namespace System.Data.SqlClient
         }
     }
 
-    internal sealed class SNIPacket : SafeHandle
+    internal sealed class SNIPacketHandle : SafeHandle
     {
-        internal SNIPacket(SafeHandle sniHandle) : base(IntPtr.Zero, true)
+        internal SNIPacketHandle(SafeHandle sniHandle) : base(IntPtr.Zero, true)
         {
             SNINativeMethodWrapper.SNIPacketAllocate(sniHandle, SNINativeMethodWrapper.IOType.WRITE, ref base.handle);
             if (IntPtr.Zero == base.handle)
@@ -241,17 +241,17 @@ namespace System.Data.SqlClient
     internal sealed class WritePacketCache : IDisposable
     {
         private bool _disposed;
-        private Stack<SNIPacket> _packets;
+        private Stack<SNIPacketHandle> _packets;
 
         public WritePacketCache()
         {
             _disposed = false;
-            _packets = new Stack<SNIPacket>();
+            _packets = new Stack<SNIPacketHandle>();
         }
 
-        public SNIPacket Take(SNIHandle sniHandle)
+        public SNIPacketHandle Take(SNISessionHandle sniHandle)
         {
-            SNIPacket packet;
+            SNIPacketHandle packet;
             if (_packets.Count > 0)
             {
                 // Success - reset the packet
@@ -261,12 +261,12 @@ namespace System.Data.SqlClient
             else
             {
                 // Failed to take a packet - create a new one
-                packet = new SNIPacket(sniHandle);
+                packet = new SNIPacketHandle(sniHandle);
             }
             return packet;
         }
 
-        public void Add(SNIPacket packet)
+        public void Add(SNIPacketHandle packet)
         {
             if (!_disposed)
             {
