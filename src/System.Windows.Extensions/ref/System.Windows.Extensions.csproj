@@ -4,7 +4,6 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="System.ComponentModel.TypeConverter.cs" />
     <Compile Include="System.Windows.Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
