@@ -5,7 +5,6 @@ Option Strict On
 Option Explicit On
 
 Imports System.ComponentModel
-Imports System.Security.Permissions
 Imports System.Security
 Imports System.Runtime.Versioning
 Imports System.Text
@@ -122,8 +121,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="FullTarget">The full path to the target. Nothing if this is a Delete operation.</param>
         ''' <param name="OnUserCancel">Value from UICancelOption, specifying to throw or not when user cancels the operation.</param>
         '''<remarks></remarks>
+        '<HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt, UI:=True)>
         <SecurityCritical()>
-        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt, UI:=True)>
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Private Shared Sub ShellFileOperation(ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
