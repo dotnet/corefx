@@ -36,13 +36,9 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Certificate2UI.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\SafeX509Handles.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Utils.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="System\Drawing\FontConverter.cs" />
     <Compile Include="System\Drawing\IconConverter.cs" />
     <Compile Include="System\Drawing\ImageConverter.cs" />
