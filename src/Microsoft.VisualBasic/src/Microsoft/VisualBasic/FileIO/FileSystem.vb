@@ -1,13 +1,13 @@
 ﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
-Option Explicit On
 Option Strict On
+Option Explicit On
 Imports System.Collections.Specialized
 Imports System.ComponentModel
 Imports System.Globalization
-Imports System.Runtime.Versioning
 Imports System.Security
+Imports System.Runtime.Versioning
 Imports System.Text
 Imports Microsoft.VisualBasic.CompilerServices
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
@@ -100,7 +100,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="ignoreCase">True to ignore case. Otherwise, False.</param>
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <returns>A string array containing the files that match the search condition.</returns>
-        Public Shared Function FindInFiles(ByVal directory As String, ByVal containsText As String, ByVal ignoreCase As Boolean, ByVal searchType As SearchOption) As ObjectModel.ReadOnlyCollection(Of String)
+        Public Shared Function FindInFiles(ByVal directory As String,
+                                           ByVal containsText As String, ByVal ignoreCase As Boolean, ByVal searchType As SearchOption) As ObjectModel.ReadOnlyCollection(Of String)
             Return FindInFiles(directory, containsText, ignoreCase, searchType, Nothing)
         End Function
 
@@ -114,13 +115,14 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="fileWildcards">The search patterns to use for the file name ("*.*")</param>
         ''' <returns>A string array containing the files that match the search condition.</returns>
         ''' <exception cref="System.ArgumentNullException">If one of the pattern is Null, Empty or all-spaces string.</exception>
-        Public Shared Function FindInFiles(ByVal directory As String, ByVal containsText As String, ByVal ignoreCase As Boolean, ByVal searchType As SearchOption, ByVal ParamArray fileWildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
+        Public Shared Function FindInFiles(ByVal directory As String, ByVal containsText As String, ByVal ignoreCase As Boolean,
+                                           ByVal searchType As SearchOption, ByVal ParamArray fileWildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
             ' Find the files with matching name.
             Dim NameMatchFiles As ObjectModel.ReadOnlyCollection(Of String) = FindFilesOrDirectories(
                 FileOrDirectory.File, directory, searchType, fileWildcards)
 
             ' Find the files containing the given text.
-            If Not String.IsNullOrEmpty(containsText) Then
+            If containsText <> "" Then
                 Dim ContainTextFiles As New ObjectModel.Collection(Of String)
                 For Each FilePath As String In NameMatchFiles
                     If (FileContainsText(FilePath, containsText, ignoreCase)) Then
@@ -139,6 +141,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="directory">The directory to find the sub directories inside.</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched directories' paths.</returns>
         Public Shared Function GetDirectories(ByVal directory As String) As ObjectModel.ReadOnlyCollection(Of String)
+
             Return FindFilesOrDirectories(FileOrDirectory.Directory, directory, SearchOption.SearchTopLevelOnly, Nothing)
         End Function
 
@@ -149,7 +152,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <param name="wildcards">The wildcards for the file name, for example "*.bmp", "*.txt"</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched directories' paths.</returns>
-        Public Shared Function GetDirectories(ByVal directory As String, ByVal searchType As SearchOption, ByVal ParamArray wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
+        Public Shared Function GetDirectories(ByVal directory As String, ByVal searchType As SearchOption,
+                                              ByVal ParamArray wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
+
             Return FindFilesOrDirectories(FileOrDirectory.Directory, directory, searchType, wildcards)
         End Function
 
@@ -159,7 +164,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="directory">The path to the directory.</param>
         ''' <returns>A DirectoryInfo object containing the information about the specified directory.</returns>
         Public Shared Function GetDirectoryInfo(ByVal directory As String) As System.IO.DirectoryInfo
-            Return New IO.DirectoryInfo(directory)
+            Return New System.IO.DirectoryInfo(directory)
         End Function
 
         ''' <summary>
@@ -197,7 +202,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <param name="wildcards">The wildcards for the file name, for example "*.bmp", "*.txt"</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the matched files' paths.</returns>
-        Public Shared Function GetFiles(ByVal directory As String, ByVal searchType As SearchOption, ByVal ParamArray wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
+        Public Shared Function GetFiles(ByVal directory As String, ByVal searchType As SearchOption,
+                                        ByVal ParamArray wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
+
             Return FindFilesOrDirectories(FileOrDirectory.File, directory, searchType, wildcards)
         End Function
 
@@ -278,6 +285,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Result.TextFieldType = FieldType.FixedWidth
             Return Result
         End Function
+
         ''' <summary>
         ''' Return a StreamReader for reading the given file using UTF-8 as preferred encoding.
         ''' </summary>
@@ -364,7 +372,8 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
-            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName, False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
+                                overwrite:=False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -377,7 +386,8 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal overwrite As Boolean)
-            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName, overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
+                                overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -388,8 +398,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="sourceDirectoryName">The path to the source directory, can be relative or absolute.</param>
         ''' <param name="destinationDirectoryName">The path to the target directory, can be relative or absolute. Parent directory will always be created.</param>
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal showUI As UIOption)
-            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName, False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
+            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
+                                overwrite:=False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -402,7 +415,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="onUserCancel">ThrowException to throw exception if user cancels the operation. Otherwise DoNothing.</param>
         Public Shared Sub CopyDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal showUI As UIOption, ByVal onUserCancel As UICancelOption)
-            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName, overwrite:=False, showUI:=ToUIOptionInternal(showUI), onUserCancel:=onUserCancel)
+            CopyOrMoveDirectory(CopyOrMove.Copy, sourceDirectoryName, destinationDirectoryName,
+                                overwrite:=False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
 
         ''' <summary>
@@ -413,7 +427,8 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
-            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName, False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
+                           overwrite:=False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -425,7 +440,8 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
-            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName, overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
+                           overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -436,8 +452,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="sourceFileName">The path to the source file, can be relative or absolute.</param>
         ''' <param name="destinationFileName">The path to the destination file, can be relative or absolute. Parent directory will always be created.</param>
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal showUI As UIOption)
-            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName, False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
+                           overwrite:=False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -450,8 +469,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="onUserCancel">ThrowException to throw exception if user cancels the operation. Otherwise DoNothing.</param>
         ''' <remarks>onUserCancel will be ignored if showUI = HideDialogs.</remarks>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub CopyFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal showUI As UIOption, ByVal onUserCancel As UICancelOption)
-            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName, False, ToUIOptionInternal(showUI), onUserCancel)
+            CopyOrMoveFile(CopyOrMove.Copy, sourceFileName, destinationFileName,
+                           overwrite:=False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
 
         ''' <summary>
@@ -488,8 +510,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="directory">The path to the directory.</param>
         ''' <param name="showUI">True to shows progress window. Otherwise, False.</param>
         ''' <param name="recycle">SendToRecycleBin to delete to Recycle Bin. Otherwise DeletePermanently.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub DeleteDirectory(ByVal directory As String, ByVal showUI As UIOption, ByVal recycle As RecycleOption)
-            DeleteDirectoryInternal(directory, DeleteDirectoryOption.DeleteAllContents, ToUIOptionInternal(showUI), recycle, UICancelOption.ThrowException)
+            DeleteDirectoryInternal(directory, DeleteDirectoryOption.DeleteAllContents,
+                                    ToUIOptionInternal(showUI), recycle, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -499,9 +524,12 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="recycle">SendToRecycleBin to delete to Recycle Bin. Otherwise DeletePermanently.</param>
         ''' <param name="onUserCancel">Throw exception when user cancel the UI operation or not.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub DeleteDirectory(ByVal directory As String,
             ByVal showUI As UIOption, ByVal recycle As RecycleOption, ByVal onUserCancel As UICancelOption)
-            DeleteDirectoryInternal(directory, DeleteDirectoryOption.DeleteAllContents, ToUIOptionInternal(showUI), recycle, onUserCancel)
+            DeleteDirectoryInternal(directory, DeleteDirectoryOption.DeleteAllContents,
+                                    ToUIOptionInternal(showUI), recycle, onUserCancel)
         End Sub
 
         ''' <summary>
@@ -520,6 +548,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="file">The path to the file.</param>
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="recycle">SendToRecycleBin to delete to Recycle Bin. Otherwise DeletePermanently.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub DeleteFile(ByVal file As String, ByVal showUI As UIOption, ByVal recycle As RecycleOption)
             DeleteFileInternal(file, ToUIOptionInternal(showUI), recycle, UICancelOption.ThrowException)
         End Sub
@@ -533,7 +563,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="onUserCancel">Throw exception when user cancel the UI operation or not.</param>
         ''' <exception cref="IO.Path.GetFullPath">IO.Path.GetFullPath() exceptions: if FilePath is invalid.</exception>
         ''' <exception cref="IO.FileNotFoundException">if a file does not exist at FilePath</exception>
-        Public Shared Sub DeleteFile(ByVal file As String, ByVal showUI As UIOption, ByVal recycle As RecycleOption, ByVal onUserCancel As UICancelOption)
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Public Shared Sub DeleteFile(ByVal file As String, ByVal showUI As UIOption, ByVal recycle As RecycleOption,
+                                     ByVal onUserCancel As UICancelOption)
+
             DeleteFileInternal(file, ToUIOptionInternal(showUI), recycle, onUserCancel)
         End Sub
 
@@ -547,7 +581,7 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
             CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
-                False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+                overwrite:=False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -571,8 +605,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="sourceDirectoryName">The path to the source directory, can be relative or absolute.</param>
         ''' <param name="destinationDirectoryName">The path to the target directory, can be relative or absolute. Parent directory will always be created.</param>
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal showUI As UIOption)
-            CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName, False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
+            CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
+                                overwrite:=False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -584,8 +621,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="destinationDirectoryName">The path to the target directory, can be relative or absolute. Parent directory will always be created.</param>
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="onUserCancel">ThrowException to throw exception if user cancels the operation. Otherwise DoNothing.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal showUI As UIOption, ByVal onUserCancel As UICancelOption)
-            CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName, False, ToUIOptionInternal(showUI), onUserCancel)
+            CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
+                                overwrite:=False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
 
         ''' <summary>
@@ -596,7 +636,8 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String)
-            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName, False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
+                           overwrite:=False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -608,7 +649,8 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean)
-            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName, overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
+                           overwrite, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -619,8 +661,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="sourceFileName">The path to the source file, can be relative or absolute.</param>
         ''' <param name="destinationFileName">The path to the destination file, can be relative or absolute. Parent directory will always be created.</param>
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal showUI As UIOption)
-            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName, False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
+            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
+                           overwrite:=False, ToUIOptionInternal(showUI), UICancelOption.ThrowException)
         End Sub
 
         ''' <summary>
@@ -633,8 +678,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="onUserCancel">ThrowException to throw exception if user cancels the operation. Otherwise DoNothing.</param>
         ''' <remarks>onUserCancel will be ignored if showUI = HideDialogs.</remarks>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveFile(ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal showUI As UIOption, ByVal onUserCancel As UICancelOption)
-            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName, False, ToUIOptionInternal(showUI), onUserCancel)
+            CopyOrMoveFile(CopyOrMove.Move, sourceFileName, destinationFileName,
+                           overwrite:=False, ToUIOptionInternal(showUI), onUserCancel)
         End Sub
 
         ''' <summary>
@@ -671,7 +719,8 @@ Namespace Microsoft.VisualBasic.FileIO
 
             ' Calculate new path. GetFullPathFromNewName will verify newName is only a name.
             Dim FullNewPath As String = GetFullPathFromNewName(GetParentPath(directory), newName, "newName")
-            Debug.Assert(GetParentPath(FullNewPath).Equals(GetParentPath(directory), StringComparison.OrdinalIgnoreCase), "Invalid FullNewPath!!!")
+            Debug.Assert(GetParentPath(FullNewPath).Equals(GetParentPath(directory),
+                                                           StringComparison.OrdinalIgnoreCase), "Invalid FullNewPath!!!")
 
             ' Verify that the new path does not conflict.
             EnsurePathNotExist(FullNewPath)
@@ -700,14 +749,15 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             ' Verify newName is not null.
-            If String.IsNullOrEmpty(newName) Then
+            If newName = "" Then
                 Throw ExUtils.GetArgumentNullException(
                     "newName", SR.General_ArgumentEmptyOrNothing_Name, "newName")
             End If
 
             ' Calculate new path. GetFullPathFromNewName will verify that newName is only a name.
             Dim FullNewPath As String = GetFullPathFromNewName(GetParentPath(file), newName, "newName")
-            Debug.Assert(GetParentPath(FullNewPath).Equals(GetParentPath(file), StringComparison.OrdinalIgnoreCase), "Invalid FullNewPath!!!")
+            Debug.Assert(GetParentPath(FullNewPath).Equals(GetParentPath(file),
+                                                           StringComparison.OrdinalIgnoreCase), "Invalid FullNewPath!!!")
 
             ' Verify that the new path does not conflict.
             EnsurePathNotExist(FullNewPath)
@@ -769,7 +819,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="append">True to append the text to the existing content. False to overwrite the existing content.</param>
         ''' <param name="encoding">The encoding to use.</param>
         ''' <exception cref="IO.StreamWriter">See StreamWriter constructor and Write: For other exceptions.</exception>
-        Public Shared Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean, ByVal encoding As Encoding)
+        Public Shared Sub WriteAllText(ByVal file As String, ByVal text As String, ByVal append As Boolean,
+                                       ByVal encoding As Encoding)
 
             'Cannot call through IO.File.WriteAllText (since they don't support: append, prefer current encoding than specified one)
             ' so only check for trailing separator.
@@ -827,7 +878,7 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         ''' <summary>
-        ''' Throw ArgumentException if the file path ends with a separator..
+        ''' Throw ArgumentException if the file path ends with a separator.
         ''' </summary>
         ''' <param name="path">The file path.</param>
         ''' <param name="paramName">The parameter name to include in ArgumentException.</param>
@@ -875,7 +926,12 @@ Namespace Microsoft.VisualBasic.FileIO
         '''     IOException: Target directory is under source directory - cyclic operation.
         '''     IOException: TargetDirectoryPath points to an existing file.
         '''     IOException: Some files and directories can not be copied.</exception>
-        Private Shared Sub CopyOrMoveDirectory(ByVal operation As CopyOrMove, ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String, ByVal overwrite As Boolean, ByVal showUI As UIOptionInternal, ByVal onUserCancel As UICancelOption)
+        <SecuritySafeCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Private Shared Sub CopyOrMoveDirectory(ByVal operation As CopyOrMove,
+                                               ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String,
+                                               ByVal overwrite As Boolean, ByVal showUI As UIOptionInternal, ByVal onUserCancel As UICancelOption)
             Debug.Assert(System.Enum.IsDefined(GetType(CopyOrMove), operation), "Invalid Operation!!!")
 
             ' Verify enums.
@@ -942,11 +998,14 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="targetDirectoryPath">Target path - must be full path.</param>
         ''' <param name="Overwrite">True to overwrite the files. Otherwise, False.</param>
         ''' <exception cref="IO.IOException">Some files or directories cannot be copied or moved.</exception>
-        Private Shared Sub FxCopyOrMoveDirectory(ByVal operation As CopyOrMove, ByVal sourceDirectoryPath As String, ByVal targetDirectoryPath As String, ByVal overwrite As Boolean)
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Private Shared Sub FxCopyOrMoveDirectory(ByVal operation As CopyOrMove,
+                                                 ByVal sourceDirectoryPath As String, ByVal targetDirectoryPath As String, ByVal overwrite As Boolean)
 
             Debug.Assert(System.Enum.IsDefined(GetType(CopyOrMove), operation), "Invalid Operation!!!")
-            Debug.Assert(sourceDirectoryPath.Length <> 0 AndAlso IO.Path.IsPathRooted(sourceDirectoryPath), "Invalid Source!!!")
-            Debug.Assert(targetDirectoryPath.Length <> 0 AndAlso IO.Path.IsPathRooted(targetDirectoryPath), "Invalid Target!!!")
+            Debug.Assert(sourceDirectoryPath <> "" And IO.Path.IsPathRooted(sourceDirectoryPath), "Invalid Source!!!")
+            Debug.Assert(targetDirectoryPath <> "" And IO.Path.IsPathRooted(targetDirectoryPath), "Invalid Target!!!")
 
             ' Special case for moving: If target directory does not exist, AND both directories are on same drive,
             '   use IO.Directory.Move for performance gain (not copying).
@@ -961,6 +1020,7 @@ Namespace Microsoft.VisualBasic.FileIO
                     Exit Sub
                 Catch ex As IO.IOException
                 Catch ex As UnauthorizedAccessException
+                    ' Ignore IO.Directory.Move specific exceptions here. Try to do as much as possible later.
                 End Try
             End If
 
@@ -989,7 +1049,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="SourceDirectoryNode">The source node. Only copy / move directories contained in the source node.</param>
         ''' <param name="Overwrite">True to overwrite sub-files. Otherwise False.</param>
         ''' <param name="Exceptions">The list of accumulated exceptions while doing the copy / move</param>
-        Private Shared Sub CopyOrMoveDirectoryNode(ByVal Operation As CopyOrMove, ByVal SourceDirectoryNode As DirectoryNode, ByVal Overwrite As Boolean, ByVal Exceptions As ListDictionary)
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Private Shared Sub CopyOrMoveDirectoryNode(ByVal Operation As CopyOrMove,
+                                                   ByVal SourceDirectoryNode As DirectoryNode, ByVal Overwrite As Boolean, ByVal Exceptions As ListDictionary)
+
             Debug.Assert(System.Enum.IsDefined(GetType(CopyOrMove), Operation), "Invalid Operation!!!")
             Debug.Assert(Exceptions IsNot Nothing, "Null exception list!!!")
             Debug.Assert(SourceDirectoryNode IsNot Nothing, "Null source node!!!")
@@ -1000,10 +1064,8 @@ Namespace Microsoft.VisualBasic.FileIO
                     IO.Directory.CreateDirectory(SourceDirectoryNode.TargetPath)
                 End If
             Catch ex As Exception
-                If (TypeOf ex Is IO.IOException OrElse
-                    TypeOf ex Is UnauthorizedAccessException OrElse
-                    TypeOf ex Is IO.DirectoryNotFoundException OrElse
-                    TypeOf ex Is NotSupportedException OrElse
+                If (TypeOf ex Is IO.IOException OrElse TypeOf ex Is UnauthorizedAccessException OrElse
+                    TypeOf ex Is IO.DirectoryNotFoundException OrElse TypeOf ex Is NotSupportedException OrElse
                     TypeOf ex Is SecurityException) Then
                     Exceptions.Add(SourceDirectoryNode.Path, ex.Message)
                     Exit Sub
@@ -1067,10 +1129,16 @@ Namespace Microsoft.VisualBasic.FileIO
         '''   ArgumentException: If Source or Target is device path (\\.\).
         '''   FileNotFoundException: If SourceFilePath does not exist (including pointing to an existing directory).
         '''   IOException: If TargetFilePath points to an existing directory.
-        '''   ArgumenNullException: If NewName.
+        '''   ArgumenNullException: If NewName = "".
         '''   ArgumentException: If NewName contains path information.
         ''' </exception>
-        Private Shared Sub CopyOrMoveFile(ByVal operation As CopyOrMove, ByVal sourceFileName As String, ByVal destinationFileName As String, ByVal overwrite As Boolean, ByVal showUI As UIOptionInternal, ByVal onUserCancel As UICancelOption)
+        <SecuritySafeCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Private Shared Sub CopyOrMoveFile(ByVal operation As CopyOrMove,
+                                          ByVal sourceFileName As String, ByVal destinationFileName As String,
+                                          ByVal overwrite As Boolean, ByVal showUI As UIOptionInternal, ByVal onUserCancel As UICancelOption
+                                          )
             Debug.Assert(System.Enum.IsDefined(GetType(CopyOrMove), operation), "Invalid Operation!!!")
 
             ' Verify enums.
@@ -1107,10 +1175,16 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Use Framework.
             If operation = CopyOrMove.Copy OrElse
                 sourceFileFullPath.Equals(destinationFileFullPath, StringComparison.OrdinalIgnoreCase) Then
+                ' Call IO.File.Copy if this is a copy operation.
+                ' In addition, if sourceFileFullPath is the same as destinationFileFullPath,
+                '   IO.File.Copy will throw, IO.File.Move will not.
+                '   Whatever overwrite flag is passed in, IO.File.Move should throw exception,
+                '   so call IO.File.Copy to get the exception as well.
                 IO.File.Copy(sourceFileFullPath, destinationFileFullPath, overwrite)
             Else ' MoveFile with support for overwrite flag.
                 If overwrite Then ' User wants to overwrite destination.
                     IO.File.Delete(destinationFileFullPath)
+
                     IO.File.Move(sourceFileFullPath, destinationFileFullPath)
                 Else ' Overwrite = False, call Framework.
                     IO.File.Move(sourceFileFullPath, destinationFileFullPath)
@@ -1126,7 +1200,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">ShowDialogs to display progress and confirmation dialogs. Otherwise HideDialogs.</param>
         ''' <param name="recycle">SendToRecycleBin to delete to Recycle Bin. Otherwise DeletePermanently.</param>
         ''' <param name="onUserCancel">Throw exception when user cancel the UI operation or not.</param>
-        Private Shared Sub DeleteDirectoryInternal(ByVal directory As String, ByVal onDirectoryNotEmpty As DeleteDirectoryOption, ByVal showUI As UIOptionInternal, ByVal recycle As RecycleOption, ByVal onUserCancel As UICancelOption)
+        ''' <remarks>If user wants shell features, onDirectoryNotEmpty is ignored.</remarks>
+        <SecuritySafeCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Private Shared Sub DeleteDirectoryInternal(ByVal directory As String, ByVal onDirectoryNotEmpty As DeleteDirectoryOption,
+                                                   ByVal showUI As UIOptionInternal, ByVal recycle As RecycleOption, ByVal onUserCancel As UICancelOption)
+
             VerifyDeleteDirectoryOption("onDirectoryNotEmpty", onDirectoryNotEmpty)
             VerifyRecycleOption("recycle", recycle)
             VerifyUICancelOption("onUserCancel", onUserCancel)
@@ -1137,6 +1217,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Throw if device path.
             ThrowIfDevicePath(directoryFullPath)
 
+
             If Not IO.Directory.Exists(directoryFullPath) Then
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_DirectoryNotFound_Path, directory)
             End If
@@ -1145,6 +1226,8 @@ Namespace Microsoft.VisualBasic.FileIO
                 Throw ExUtils.GetIOException(SR.IO_DirectoryIsRoot_Path, directory)
             End If
 
+            ' If user want shell features (Progress, Recycle Bin), call shell operation.
+            ' We don't need to consider onDirectoryNotEmpty here.
             If (showUI <> UIOptionInternal.NoUI) AndAlso Environment.UserInteractive Then
                 ShellDelete(directoryFullPath, showUI, recycle, onUserCancel, FileOrDirectory.Directory)
                 Exit Sub
@@ -1161,7 +1244,12 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="showUI">AllDialogs, OnlyErrorDialogs, or NoUI</param>
         ''' <param name="recycle">DeletePermanently or SendToRecycleBin</param>
         ''' <param name="onUserCancel">DoNothing or ThrowException</param>
-        Private Shared Sub DeleteFileInternal(ByVal file As String, ByVal showUI As UIOptionInternal, ByVal recycle As RecycleOption, ByVal onUserCancel As UICancelOption)
+        ''' <remarks></remarks>
+        <SecuritySafeCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
+        Private Shared Sub DeleteFileInternal(ByVal file As String, ByVal showUI As UIOptionInternal, ByVal recycle As RecycleOption,
+                                              ByVal onUserCancel As UICancelOption)
             ' Verify enums
             VerifyRecycleOption("recycle", recycle)
             VerifyUICancelOption("onUserCancel", onUserCancel)
@@ -1177,7 +1265,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             ' If user want shell features (Progress, Recycle Bin), call shell operation.
-            ' We don't need to consider onDirectoryNotEmpty here.
             If (showUI <> UIOptionInternal.NoUI) AndAlso Environment.UserInteractive Then
                 ShellDelete(fileFullPath, showUI, recycle, onUserCancel, FileOrDirectory.File)
                 Exit Sub
@@ -1207,7 +1294,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="FilePath">The file to check for.</param>
         ''' <param name="Text">The text to search for.</param>
         ''' <returns>True if the file contains the text. Otherwise False.</returns>
-        Private Shared Function FileContainsText(ByVal FilePath As String, ByVal Text As String, ByVal IgnoreCase As Boolean) As Boolean
+        Private Shared Function FileContainsText(ByVal FilePath As String, ByVal Text As String, ByVal IgnoreCase As Boolean) _
+            As Boolean
+
             Debug.Assert(FilePath <> "" AndAlso IO.Path.IsPathRooted(FilePath), FilePath)
             Debug.Assert(Text <> "", "Empty text!!!")
 
@@ -1229,6 +1318,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim ByteCount As Integer = 0
                 ByteCount = FileStream.Read(ByteBuffer, 0, ByteBuffer.Length)
                 If ByteCount > 0 Then
+                    ' Only take the number of bytes returned to avoid false detection.
                     Dim MemoryStream As New IO.MemoryStream(ByteBuffer, 0, ByteCount)
                     Dim StreamReader As New IO.StreamReader(MemoryStream, DetectedEncoding, detectEncodingFromByteOrderMarks:=True)
                     StreamReader.ReadLine()
@@ -1270,16 +1360,16 @@ Namespace Microsoft.VisualBasic.FileIO
             Catch ex As Exception
 
                 ' We don't expect the following types of exceptions, so we'll re-throw it together with Yukon's exceptions.
-                Debug.Assert(Not (TypeOf ex Is ArgumentException OrElse TypeOf ex Is ArgumentOutOfRangeException OrElse
-                    TypeOf ex Is ArgumentNullException OrElse TypeOf ex Is IO.DirectoryNotFoundException OrElse
-                    TypeOf ex Is IO.FileNotFoundException OrElse TypeOf ex Is ObjectDisposedException OrElse
-                    TypeOf ex Is RankException OrElse TypeOf ex Is ArrayTypeMismatchException OrElse
+                Debug.Assert(Not (TypeOf ex Is ArgumentException Or TypeOf ex Is ArgumentOutOfRangeException Or
+                    TypeOf ex Is ArgumentNullException Or TypeOf ex Is IO.DirectoryNotFoundException Or
+                    TypeOf ex Is IO.FileNotFoundException Or TypeOf ex Is ObjectDisposedException Or
+                    TypeOf ex Is RankException Or TypeOf ex Is ArrayTypeMismatchException Or
                     TypeOf ex Is InvalidCastException), "Unexpected exception: " & ex.ToString())
 
                 ' These exceptions may happen and we'll return False here.
-                If TypeOf ex Is IO.IOException OrElse
-                    TypeOf ex Is NotSupportedException OrElse
-                    TypeOf ex Is SecurityException OrElse
+                If TypeOf ex Is IO.IOException Or
+                    TypeOf ex Is NotSupportedException Or
+                    TypeOf ex Is SecurityException Or
                     TypeOf ex Is UnauthorizedAccessException Then
 
                     Return False
@@ -1303,7 +1393,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="wildcards">The search patterns to use for the file name ("*.*")</param>
         ''' <returns>A ReadOnlyCollection(Of String) containing the files that match the search condition.</returns>
         ''' <exception cref="System.ArgumentException">ArgumentNullException: If one of the pattern is Null, Empty or all-spaces string.</exception>
-        Private Shared Function FindFilesOrDirectories(ByVal FileOrDirectory As FileOrDirectory, ByVal directory As String, ByVal searchType As SearchOption, ByVal wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
+        Private Shared Function FindFilesOrDirectories(ByVal FileOrDirectory As FileOrDirectory, ByVal directory As String,
+                                                       ByVal searchType As SearchOption, ByVal wildcards() As String) As ObjectModel.ReadOnlyCollection(Of String)
 
             Dim Results As New ObjectModel.Collection(Of String)
             FindFilesOrDirectories(FileOrDirectory, directory, searchType, wildcards, Results)
@@ -1319,7 +1410,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="searchType">SearchAllSubDirectories to find recursively. Otherwise, SearchTopLevelOnly.</param>
         ''' <param name="wildcards">The search patterns to use for the file name ("*.*")</param>
         ''' <param name="Results">A ReadOnlyCollection(Of String) containing the files that match the search condition.</param>
-        Private Shared Sub FindFilesOrDirectories(ByVal FileOrDirectory As FileOrDirectory, ByVal directory As String, ByVal searchType As SearchOption, ByVal wildcards() As String, ByVal Results As ObjectModel.Collection(Of String))
+        Private Shared Sub FindFilesOrDirectories(ByVal FileOrDirectory As FileOrDirectory, ByVal directory As String,
+                                                  ByVal searchType As SearchOption, ByVal wildcards() As String, ByVal Results As ObjectModel.Collection(Of String))
             Debug.Assert(Results IsNot Nothing, "Results is NULL!!!")
 
             ' Verify enums.
@@ -1385,11 +1477,12 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="ArgumentName">The argument name to throw in the exception.</param>
         ''' <returns>A String contains the full path.</returns>
         ''' <remarks>This function is used for CopyFile, RenameFile and RenameDirectory.</remarks>
-        Private Shared Function GetFullPathFromNewName(ByVal Path As String, ByVal NewName As String, ByVal ArgumentName As String) As String
+        Private Shared Function GetFullPathFromNewName(ByVal Path As String,
+                                                       ByVal NewName As String, ByVal ArgumentName As String) As String
             Debug.Assert(Path <> "" AndAlso IO.Path.IsPathRooted(Path), Path)
             Debug.Assert(Path.Equals(IO.Path.GetFullPath(Path)), Path)
-            Debug.Assert(NewName.Length <> 0, "Null NewName!!!")
-            Debug.Assert(ArgumentName.Length <> 0, "Null argument name!!!")
+            Debug.Assert(NewName <> "", "Null NewName!!!")
+            Debug.Assert(ArgumentName <> "", "Null argument name!!!")
 
             ' In copy file, rename file and rename directory, the new name must be a name only.
             ' Enforce that by combine the path, normalize it, then compare the new parent directory with the old parent directory.
@@ -1437,7 +1530,8 @@ Namespace Microsoft.VisualBasic.FileIO
                     Debug.Assert(DInfo.GetFiles(IO.Path.GetFileName(FullPath)).Length = 1, "Must found exactly 1!!!")
                     Return DInfo.GetFiles(IO.Path.GetFileName(FullPath))(0).FullName
                 ElseIf IO.Directory.Exists(FullPath) Then
-                    Debug.Assert(DInfo.GetDirectories(IO.Path.GetFileName(FullPath)).Length = 1, "Must found exactly 1!!!")
+                    Debug.Assert(DInfo.GetDirectories(IO.Path.GetFileName(FullPath)).Length = 1,
+                                 "Must found exactly 1!!!")
                     Return DInfo.GetDirectories(IO.Path.GetFileName(FullPath))(0).FullName
                 Else
                     Return FullPath ' Path does not exist, cannot resolve.
@@ -1539,14 +1633,17 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         ''' Convert UIOption to UIOptionInternal to use internally.
         ''' </summary>
+        ''' <remarks>
+        ''' Only accept valid UIOption values.
+        ''' </remarks>
         Private Shared Function ToUIOptionInternal(ByVal showUI As UIOption) As UIOptionInternal
             Select Case showUI
-                Case UIOption.AllDialogs
+                Case FileIO.UIOption.AllDialogs
                     Return UIOptionInternal.AllDialogs
-                Case UIOption.OnlyErrorDialogs
+                Case FileIO.UIOption.OnlyErrorDialogs
                     Return UIOptionInternal.OnlyErrorDialogs
                 Case Else
-                    Throw New InvalidEnumArgumentException("showUI", showUI, GetType(UIOption))
+                    Throw New System.ComponentModel.InvalidEnumArgumentException("showUI", showUI, GetType(UIOption))
             End Select
         End Function
 
@@ -1555,6 +1652,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="argName">The argument name.</param>
         ''' <param name="argValue">The argument value.</param>
+        ''' <remarks></remarks>
         Private Shared Sub VerifyDeleteDirectoryOption(ByVal argName As String, ByVal argValue As DeleteDirectoryOption)
             If argValue = FileIO.DeleteDirectoryOption.DeleteAllContents OrElse
                 argValue = FileIO.DeleteDirectoryOption.ThrowIfDirectoryNonEmpty Then
@@ -1608,9 +1706,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
         ' Array containing all the path separator chars. Used to verify that input is a name, not a path.
         Private Shared ReadOnly m_SeparatorChars() As Char = {
-            IO.Path.DirectorySeparatorChar,
-            IO.Path.AltDirectorySeparatorChar,
-            IO.Path.VolumeSeparatorChar}
+            IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar, IO.Path.VolumeSeparatorChar}
 
         ''' <summary>
         ''' Private enumeration: The operation is a Copy or Move.
@@ -1623,6 +1719,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         ''' Private enumeration: Target of the operation is a File or Directory.
         ''' </summary>
+        ''' <remarks></remarks>
         Private Enum FileOrDirectory
             File
             Directory
@@ -1632,6 +1729,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Private enumeration: Indicate the options of ShowUI to use internally.
         ''' This includes NoUI so that we can base the decision on 1 variable.
         ''' </summary>
+        ''' <remarks></remarks>
         Private Enum UIOptionInternal
             OnlyErrorDialogs = UIOption.OnlyErrorDialogs
             AllDialogs = UIOption.AllDialogs
@@ -1651,32 +1749,46 @@ Namespace Microsoft.VisualBasic.FileIO
                 Debug.Assert(IO.Directory.Exists(DirectoryPath), "Directory does not exist!!!")
                 Debug.Assert(TargetDirectoryPath <> "" And IO.Path.IsPathRooted(TargetDirectoryPath), "Invalid TargetPath!!!")
 
-                Path = DirectoryPath
-                TargetPath = TargetDirectoryPath
-                SubDirs = New ObjectModel.Collection(Of DirectoryNode)
-                For Each SubDirPath As String In IO.Directory.GetDirectories(Path)
-                    Dim SubTargetDirPath As String = IO.Path.Combine(TargetPath, IO.Path.GetFileName(SubDirPath))
-                    SubDirs.Add(New DirectoryNode(SubDirPath, SubTargetDirPath))
+                m_Path = DirectoryPath
+                m_TargetPath = TargetDirectoryPath
+                m_SubDirs = New ObjectModel.Collection(Of DirectoryNode)
+                For Each SubDirPath As String In IO.Directory.GetDirectories(m_Path)
+                    Dim SubTargetDirPath As String = IO.Path.Combine(m_TargetPath, IO.Path.GetFileName(SubDirPath))
+                    m_SubDirs.Add(New DirectoryNode(SubDirPath, SubTargetDirPath))
                 Next
             End Sub
-
             ''' <summary>
             ''' Return the Path of the current node.
             ''' </summary>
             ''' <value>A String containing the Path of the current node.</value>
             Friend ReadOnly Property Path() As String
+                Get
+                    Return m_Path
+                End Get
+            End Property
 
             ''' <summary>
             ''' Return the TargetPath for copy / move.
             ''' </summary>
             ''' <value>A String containing the copy / move target path of the current node.</value>
             Friend ReadOnly Property TargetPath() As String
+                Get
+                    Return m_TargetPath
+                End Get
+            End Property
 
             ''' <summary>
             ''' Return the sub directories of the current node.
             ''' </summary>
             ''' <value>A Collection(Of DirectoryNode) containing the sub-directory nodes.</value>
             Friend ReadOnly Property SubDirs() As ObjectModel.Collection(Of DirectoryNode)
+                Get
+                    Return m_SubDirs
+                End Get
+            End Property
+            Private m_Path As String
+            Private m_TargetPath As String
+            Private m_SubDirs As ObjectModel.Collection(Of DirectoryNode)
         End Class 'Private Class DirectoryNode
 
         ''' <summary>
@@ -1784,7 +1896,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ''' <returns>True if BigBuffer starts with SmallBuffer.Otherwise, False.</returns>
             Private Shared Function BytesMatch(ByVal BigBuffer() As Byte, ByVal SmallBuffer() As Byte) As Boolean
                 Debug.Assert(BigBuffer.Length > SmallBuffer.Length, "BigBuffer should be longer!!!")
-                If BigBuffer.Length < SmallBuffer.Length OrElse SmallBuffer.Length = 0 Then
+                If BigBuffer.Length < SmallBuffer.Length Or SmallBuffer.Length = 0 Then
                     Return False
                 End If
                 For i As Integer = 0 To SmallBuffer.Length - 1
@@ -1802,6 +1914,8 @@ Namespace Microsoft.VisualBasic.FileIO
             Private m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
             Private m_Preamble() As Byte ' The byte order mark we need to consider.
         End Class 'Private Class TextSearchHelper
+
+
     End Class 'Public Class FileSystem
 
     ''' <summary>
@@ -1845,7 +1959,8 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' Specify which UI dialogs to show.
     ''' </summary>
     ''' <remarks>
-    ''' Integer values that VB Compiler will convert Boolean to (0 and -1).
+    ''' To fix common issues; avoid Integer values that VB Compiler
+    ''' will convert Boolean to (0 and -1).
     ''' </remarks>
     Public Enum UIOption As Integer
         OnlyErrorDialogs = 2

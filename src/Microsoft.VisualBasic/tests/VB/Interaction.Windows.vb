@@ -1,17 +1,20 @@
 ﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
-#If 0 Then
-
 Option Explicit On
 Option Strict On
 
+Imports System.Runtime.InteropServices
 Imports System.Security
 Imports Microsoft.VisualBasic.CompilerServices
 
 Namespace Microsoft.VisualBasic
 
     Partial Public Module Interaction
+        <DllImport("user32.dll", CharSet:=CharSet.Unicode, EntryPoint:="MessageBox", SetLastError:=False)>
+        Friend Function MessageBox(hWnd As Integer, lpText As String, lpCaption As String, uType As UInteger) As Integer
+        End Function
+
         Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
             Dim Title As String
 
@@ -62,7 +65,7 @@ Namespace Microsoft.VisualBasic
 
             Try
                 If Not Prompt Is Nothing Then
-                    sPrompt = DirectCast(Conversions.ChangeType(Prompt, GetType(String)), String)
+                    sPrompt = CType(Prompt, String)
                 End If
             Catch ex As StackOverflowException
                 Throw ex
@@ -70,8 +73,8 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             Catch ex As System.Threading.ThreadAbortException
                 Throw ex
-            Catch
-                Throw New ArgumentException(SR.GetResourceString(SR.Argument_InvalidValueType2, "Prompt"))
+            Catch ex As Exception
+                Throw New ArgumentException("Invalid Prompt", ex)
             End Try
 
             Try
@@ -86,12 +89,11 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             Catch ex As Threading.ThreadAbortException
                 Throw ex
-            Catch
-                Throw New ArgumentException(SR.GetResourceString(SR.Argument_InvalidValueType2, "Title"))
+            Catch ex As Exception
+                Throw New ArgumentException("Invalid Title", ex)
             End Try
 
-            Return CType(NativeMethods.MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
+            Return CType(MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
         End Function
     End Module
 End Namespace
-#End If

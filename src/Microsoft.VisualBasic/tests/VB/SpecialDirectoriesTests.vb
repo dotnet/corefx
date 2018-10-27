@@ -15,147 +15,150 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
-        Private Shared Function GetExpectedFullPath(FullPath As String) As String
-            For Each d As String In GetCompanyProductVersionList()
-                FullPath = IO.Path.Combine(FullPath, d)
-            Next
-            Return FullPath
-        End Function
+        'Private Shared Function GetExpectedFullPath(FullPath As String) As String
+        '    Dim PathComponentList As List(Of String) = GetCompanyProductVersionList()
 
-        ''' <summary>
-        ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\ProductVersion
-        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
-        ''' The only catch is that CompanyName and/or ProductName has to be specified in the AssemblyInfo.vb file,
-        ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
-        ''' This function must be kept in sync with the one in coreFx\src\Microsoft.VisualBasic\src\Microsoft\VisualBasic\FileIO\SpecialDirectories.vb
-        ''' </summary>
-        ''' <returns>[CompanyName]\[ProductName]\ProductVersion or Assembly.Name </returns>
-        Private Shared Function GetCompanyProductVersionList() As List(Of String)
-            Dim CurrentProcess As Process = Process.GetCurrentProcess
-            Dim PathList As New List(Of String)
-            Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule?.FileVersionInfo?.CompanyName)
-            If CompanyName <> "" Then
-                PathList.Add(CompanyName)
-            End If
-            Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule?.FileVersionInfo?.ProductName)
-            If ProductName <> "" Then
-                PathList.Add(ProductName)
-            End If
-            If PathList.Count = 0 Then
-                Try
-                    Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
-                    Dim CallingAssemblyName As String = ""
-                    Try
-                        CallingAssemblyName = CallingAssembly.GetName().Name
-                        If CallingAssemblyName = "" Then
-                            Return PathList
-                        End If
-                        PathList.Add(MakeValidFileName(CallingAssemblyName))
-                    Catch ex As SecurityException
-                        Dim CallingAssemblyFullName As String = CallingAssembly.FullName
-                        If CallingAssemblyFullName = "" Then
-                            Return PathList
-                        End If
-                        PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(CallingAssemblyFullName)))
-                    End Try
-                    Return PathList
-                Catch
-                End Try
-            End If
-            Dim Version As String = ExtractBuildNumber(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
-            If Version = "" Then
-                Version = "0.0.0.0"
-            End If
-            PathList.Add(Version)
-            Return PathList
-        End Function
+        '    For Each d As String In PathComponentList
+        '        FullPath = IO.Path.Combine(FullPath, d)
+        '    Next
+        '    Return FullPath
+        'End Function
 
-        ''' <summary>
-        ''' We just want numbers and "."
-        ''' </summary>
-        ''' <param name="productVersion"></param>
-        ''' <returns></returns>
-        Private Shared Function ExtractBuildNumber(productVersion As String) As String
-            Dim Version As String = ""
-            For Each c As Char In productVersion
-                If IsNumeric(c) OrElse c = "." Then
-                    Version &= c
-                Else
-                    Exit For
-                End If
-            Next
-            Return Version
-        End Function
+        '''' <summary>
+        '''' If a path does not exist, one is created in the following format
+        '''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\ProductVersion
+        '''' The first function separates applications by CompanyName, ProductName, ProductVersion.
+        '''' The only catch is that CompanyName and/or ProductName has to be specified in the AssemblyInfo.vb file,
+        '''' otherwise the name of the assembly will be used instead (which still has a level of separation).
+        '''' This function must be kept in sync with the one in coreFx\src\Microsoft.VisualBasic\src\Microsoft\VisualBasic\FileIO\SpecialDirectories.vb
+        '''' </summary>
+        '''' <returns>[CompanyName]\[ProductName]\ProductVersion or Assembly.Name </returns>
+        'Private Shared Function GetCompanyProductVersionList() As List(Of String)
+        '    Dim CurrentProcess As Process = Process.GetCurrentProcess
+        '    Dim PathList As New List(Of String)
+        '    Dim CompanyName As String = MakeValidFileName(CurrentProcess.MainModule?.FileVersionInfo?.CompanyName)
+        '    If CompanyName <> "" Then
+        '        PathList.Add(CompanyName)
+        '    End If
+        '    Dim ProductName As String = MakeValidFileName(CurrentProcess.MainModule?.FileVersionInfo?.ProductName)
+        '    If ProductName <> "" Then
+        '        PathList.Add(ProductName)
+        '    End If
+        '    If PathList.Count = 0 Then
+        '        Try
+        '            Dim CallingAssembly As Reflection.Assembly = Reflection.Assembly.GetCallingAssembly
+        '            Dim CallingAssemblyName As String = ""
+        '            Try
+        '                CallingAssemblyName = CallingAssembly.GetName().Name
+        '                If CallingAssemblyName = "" Then
+        '                    Return PathList
+        '                End If
+        '                PathList.Add(MakeValidFileName(CallingAssemblyName))
+        '            Catch ex As SecurityException
+        '                Dim CallingAssemblyFullName As String = CallingAssembly.FullName
+        '                If CallingAssemblyFullName = "" Then
+        '                    Return PathList
+        '                End If
+        '                PathList.Add(MakeValidFileName(GetTitleFromAssemblyFullName(CallingAssemblyFullName)))
+        '            End Try
+        '            Return PathList
+        '        Catch
+        '        End Try
+        '    End If
+        '    Dim Version As String = ExtractBuildNumber(CurrentProcess.MainModule.FileVersionInfo.ProductVersion)
+        '    If Version = "" Then
+        '        Version = "0.0.0.0"
+        '    End If
+        '    PathList.Add(Version)
+        '    Return PathList
+        'End Function
 
-        ''' <summary>
-        ''' This takes a full assembly name which includes version and other information and extracts just the name upto the comma
-        ''' </summary>
-        ''' <param name="AssemblyFullName"></param>
-        ''' <returns></returns>
-        Private Shared Function GetTitleFromAssemblyFullName(AssemblyFullName As String) As String
-            'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
-            Dim FirstCommaLocation As Integer = AssemblyFullName.IndexOf(","c)
-            If FirstCommaLocation >= 0 Then
-                Return AssemblyFullName.Substring(0, FirstCommaLocation)
-            End If
-            'The name is not in the format we're expecting so return an empty string
-            Return ""
-        End Function
+        '''' <summary>
+        '''' We just want numbers and "."
+        '''' </summary>
+        '''' <param name="productVersion"></param>
+        '''' <returns></returns>
+        'Private Shared Function ExtractBuildNumber(productVersion As String) As String
+        '    Dim Version As String = ""
+        '    For Each c As Char In productVersion
+        '        If IsNumeric(c) OrElse c = "." Then
+        '            Version &= c
+        '        Else
+        '            Exit For
+        '        End If
+        '    Next
+        '    Return Version
+        'End Function
 
-        ''' <summary>
-        ''' Remove any OS specific invalid characters, then trim whitespace, then remove any leading "." because they hide the directory on Unix and don't
-        ''' need them on other Os's, lastly trim remaining whitespace. Specifically deal with names ". Net Foundation" which become "Net Foundation"
-        ''' </summary>
-        ''' <param name="InputName"></param>
-        ''' <returns>A valid directory name on hosted OS</returns>
-        Private Shared Function MakeValidFileName(InputName As String) As String
-            If InputName = "" Then
-                Return ""
-            End If
-            Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
-            For Each c As Char In invalidFileChars
-                InputName = InputName.Replace(c.ToString(), "")
-            Next c
-            Return InputName.Trim.TrimStart("."c).TrimStart
-        End Function
+        '''' <summary>
+        '''' This takes a full assembly name which includes version and other information and extracts just the name upto the comma
+        '''' </summary>
+        '''' <param name="AssemblyFullName"></param>
+        '''' <returns></returns>
+        'Private Shared Function GetTitleFromAssemblyFullName(AssemblyFullName As String) As String
+        '    'Find the text up to the first comma. Note, this fails if the assembly has a comma in its name
+        '    Dim FirstCommaLocation As Integer = AssemblyFullName.IndexOf(","c)
+        '    If FirstCommaLocation >= 0 Then
+        '        Return AssemblyFullName.Substring(0, FirstCommaLocation)
+        '    End If
+        '    'The name is not in the format we're expecting so return an empty string
+        '    Return ""
+        'End Function
+
+        '''' <summary>
+        '''' Remove any OS specific invalid characters, then trim whitespace, then remove any leading "." because they hide the directory on Unix and don't
+        '''' need them on other Os's, lastly trim remaining whitespace. Specifically deal with names ". Net Foundation" which become "Net Foundation"
+        '''' </summary>
+        '''' <param name="InputName"></param>
+        '''' <returns>A valid directory name on hosted OS</returns>
+        'Private Shared Function MakeValidFileName(InputName As String) As String
+        '    If InputName = "" Then
+        '        Return ""
+        '    End If
+        '    Dim invalidFileChars() As Char = IO.Path.GetInvalidFileNameChars()
+        '    For Each c As Char In invalidFileChars
+        '        InputName = InputName.Replace(c.ToString(), "")
+        '    Next c
+        '    Return InputName.Trim.TrimStart("."c).TrimStart
+        'End Function
 
         <Fact>
         Public Shared Sub AllUsersApplicationDataFolderTest()
-            Dim AllUsersApplicationDataRoot As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
+            'Dim AllUsersApplicationDataRoot As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
 
-            If AllUsersApplicationDataRoot = "" Then
-                Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
-            Else
-                If GetCompanyProductVersionList.Any Then
-                    If IO.Directory.Exists(GetExpectedFullPath(AllUsersApplicationDataRoot)) Then
-                        Assert.Equal(GetExpectedFullPath(AllUsersApplicationDataRoot.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.AllUsersApplicationData)
-                    Else
-                        Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
-                    End If
-                Else
-                    Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
-                End If
-            End If
+            'If AllUsersApplicationDataRoot = "" Then
+            '    Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
+            'Else
+            '    If GetCompanyProductVersionList.Any Then
+            '        Dim FullPath As String = GetExpectedFullPath(AllUsersApplicationDataRoot)
+            '        If IO.Directory.Exists(FullPath) Then
+            '            Assert.Equal(FullPath, SpecialDirectories.AllUsersApplicationData)
+            '        Else
+            '            Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
+            '        End If
+            '    Else
+            Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
+            '        End If
+            '    End If
         End Sub
 
         <Fact>
         Public Shared Sub CurrentUserApplicationDataFolderTest()
-            Dim Env_ApplicationData As String = Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.Create).Trim.TrimEnd(Separators).Trim
+            'Dim Env_ApplicationData As String = Environment.GetFolderPath(SpecialFolder.ApplicationData, [option]:=SpecialFolderOption.Create).Trim.TrimEnd(Separators).Trim
 
-            If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData = "" Then
-                Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
-            Else
-                If GetCompanyProductVersionList.Any Then
-                    If IO.Directory.Exists(GetExpectedFullPath(Env_ApplicationData)) Then
-                        Assert.Equal(GetExpectedFullPath(Env_ApplicationData.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
-                    Else
-                        Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
-                    End If
-                Else
-                    Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
-                End If
-            End If
+            'If PlatformDetection.IsWindowsNanoServer OrElse Env_ApplicationData = "" Then
+            '    Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
+            'Else
+            '    If GetCompanyProductVersionList.Any Then
+            '        If IO.Directory.Exists(GetExpectedFullPath(Env_ApplicationData)) Then
+            '            Assert.Equal(GetExpectedFullPath(Env_ApplicationData.TrimEnd(Separators)).TrimEnd(Separators), SpecialDirectories.CurrentUserApplicationData)
+            '        Else
+            '            Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
+            '        End If
+            '    Else
+            Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
+            '    End If
+            'End If
         End Sub
 
         <Fact>

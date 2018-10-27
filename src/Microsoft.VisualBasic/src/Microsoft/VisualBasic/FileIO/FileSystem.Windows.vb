@@ -1,15 +1,18 @@
 ﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
-Option Explicit On
 Option Strict On
+Option Explicit On
+
 Imports System.ComponentModel
-Imports System.Runtime.InteropServices
+Imports System.Security.Permissions
 Imports System.Security
+Imports System.Runtime.Versioning
 Imports System.Text
 Imports Microsoft.VisualBasic.CompilerServices
 Imports Microsoft.VisualBasic.CompilerServices.NativeMethods
-Imports Microsoft.VisualBasic.CompilerServices.NativeTypes
+
+'''' IMPORTANT: Changes made to public interface of FileSystem should be reflected in FileSystemProxy.vb.
 
 Namespace Microsoft.VisualBasic.FileIO
     Partial Public Class FileSystem
@@ -26,6 +29,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Copy/MoveFile will call this directly. Copy/MoveDirectory will call ShellCopyOrMoveDirectory first
         ''' to change the path if needed.
         ''' </remarks>
+        <SecurityCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Private Shared Sub ShellCopyOrMove(ByVal Operation As CopyOrMove, ByVal TargetType As FileOrDirectory,
             ByVal FullSourcePath As String, ByVal FullTargetPath As String, ByVal ShowUI As UIOptionInternal, ByVal OnUserCancel As UICancelOption)
             Debug.Assert(System.Enum.IsDefined(GetType(CopyOrMove), Operation))
@@ -67,7 +73,7 @@ Namespace Microsoft.VisualBasic.FileIO
             ' *** Special action for Directory only. ***
             ' In case target does exist, and it's a move, we actually move content and leave the source directory.
             ' Clean up here.
-            If Operation = CopyOrMove.Move AndAlso TargetType = FileOrDirectory.Directory Then
+            If Operation = CopyOrMove.Move And TargetType = FileOrDirectory.Directory Then
                 If IO.Directory.Exists(FullSourcePath) Then
                     If IO.Directory.GetDirectories(FullSourcePath).Length = 0 _
                         AndAlso IO.Directory.GetFiles(FullSourcePath).Length = 0 Then
@@ -88,6 +94,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <remarks>
         ''' We don't need to consider Recursive flag here since we already verify that in DeleteDirectory.
         ''' </remarks>
+        <SecurityCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Private Shared Sub ShellDelete(ByVal FullPath As String,
             ByVal ShowUI As UIOptionInternal, ByVal recycle As RecycleOption, ByVal OnUserCancel As UICancelOption, ByVal FileOrDirectory As FileOrDirectory)
 
@@ -112,13 +121,20 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="FullSource">The full path to the source.</param>
         ''' <param name="FullTarget">The full path to the target. Nothing if this is a Delete operation.</param>
         ''' <param name="OnUserCancel">Value from UICancelOption, specifying to throw or not when user cancels the operation.</param>
+        ''' </remarks>
+        <SecurityCritical()>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt, UI:=True)>
+        <ResourceExposure(ResourceScope.Machine)>
+        <ResourceConsumption(ResourceScope.Machine)>
         Private Shared Sub ShellFileOperation(ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
             ByVal FullSource As String, ByVal FullTarget As String, ByVal OnUserCancel As UICancelOption, ByVal FileOrDirectory As FileOrDirectory)
+
+            ' Apply HostProtectionAttribute(UI = true) to indicate this function belongs to UI type.
 
             Debug.Assert(System.Enum.IsDefined(GetType(SHFileOperationType), OperationType))
             Debug.Assert(OperationType <> SHFileOperationType.FO_RENAME, "Don't call Shell to rename!!!")
             Debug.Assert(FullSource <> "" And IO.Path.IsPathRooted(FullSource), "Invalid FullSource path!!!")
-            Debug.Assert(OperationType = SHFileOperationType.FO_DELETE Or (FullTarget <> "" And IO.Path.IsPathRooted(FullTarget)), "Invalid FullTarget path!!!")
+            Debug.Assert(OperationType = SHFileOperationType.FO_DELETE OrElse (FullTarget <> "" And IO.Path.IsPathRooted(FullTarget)), "Invalid FullTarget path!!!")
 
 
             ' Get the SHFILEOPSTRUCT
@@ -128,7 +144,8 @@ Namespace Microsoft.VisualBasic.FileIO
             Try
                 Result = NativeMethods.SHFileOperation(OperationInfo)
                 ' Notify the shell in case some changes happened.
-                NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS, SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
+                NativeMethods.SHChangeNotify(SHChangeEventTypes.SHCNE_DISKEVENTS,
+                                             SHChangeEventParameterFlags.SHCNF_DWORD, IntPtr.Zero, IntPtr.Zero)
             Catch
                 Throw
             Finally
@@ -152,10 +169,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="SourcePath">The source file / directory path.</param>
         ''' <param name="TargetPath">The target file / directory path. Nothing in case of delete.</param>
         ''' <returns>A fully initialized SHFILEOPSTRUCT.</returns>
+        <SecurityCritical()>
         Private Shared Function GetShellOperationInfo(
                             ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
                             ByVal SourcePath As String, Optional ByVal TargetPath As String = Nothing) As SHFILEOPSTRUCT
-            Debug.Assert(SourcePath <> "" And IO.Path.IsPathRooted(SourcePath), "Invalid SourcePath!!!")
+            Debug.Assert(SourcePath = "" And IO.Path.IsPathRooted(SourcePath), "Invalid SourcePath!!!")
 
             Return GetShellOperationInfo(OperationType, OperationFlags, New String() {SourcePath}, TargetPath)
         End Function
@@ -168,11 +186,12 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="SourcePaths">A string array containing the paths of source files. Must not be empty.</param>
         ''' <param name="TargetPath">The target file / directory path. Nothing in case of delete.</param>
         ''' <returns>A fully initialized SHFILEOPSTRUCT.</returns>
+        <SecurityCritical()>
         Private Shared Function GetShellOperationInfo(
                             ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
                             ByVal SourcePaths() As String, Optional ByVal TargetPath As String = Nothing) As SHFILEOPSTRUCT
             Debug.Assert(System.Enum.IsDefined(GetType(SHFileOperationType), OperationType), "Invalid OperationType!!!")
-            Debug.Assert(TargetPath <> "" Or IO.Path.IsPathRooted(TargetPath), "Invalid TargetPath!!!")
+            Debug.Assert(TargetPath = "" Or IO.Path.IsPathRooted(TargetPath), "Invalid TargetPath!!!")
             Debug.Assert(SourcePaths IsNot Nothing AndAlso SourcePaths.Length > 0, "Invalid SourcePaths!!!")
 
             Dim OperationInfo As SHFILEOPSTRUCT
@@ -268,6 +287,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' - Exception message does not contain the path since at this point it is normalized.
         ''' - Instead of using PInvoke of GetMessage and MakeHRFromErrorCode, use managed code.
         ''' </remarks>
+        <SecurityCritical()>
         Private Shared Sub ThrowWinIOError(ByVal errorCode As Integer)
             Select Case errorCode
                 Case NativeTypes.ERROR_FILE_NOT_FOUND
@@ -289,7 +309,7 @@ Namespace Microsoft.VisualBasic.FileIO
                     'Case NativeTypes.ERROR_SHARING_VIOLATION
                     'Case NativeTypes.ERROR_FILE_EXISTS
                     Throw New IO.IOException((New Win32Exception(errorCode)).Message,
-                        Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
+                        System.Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
             End Select
         End Sub
 

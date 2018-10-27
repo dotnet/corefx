@@ -232,7 +232,7 @@ namespace Microsoft.VisualBasic
     public sealed partial class Interaction
     {
         internal Interaction() { }
-        public static MsgBoxResult MsgBox(object Prompt, MsgBoxStyle Buttons=MsgBoxStyle.OkOnly, object Title=null) { throw null; }
+        //public static MsgBoxResult MsgBox(object Prompt, MsgBoxStyle Buttons=MsgBoxStyle.OkOnly, object Title=null) { throw null; }
         public enum MsgBoxResult
         {
             Ok = 1,

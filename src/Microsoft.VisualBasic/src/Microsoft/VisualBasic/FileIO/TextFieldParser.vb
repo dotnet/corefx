@@ -1,12 +1,13 @@
 ﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
-Option Explicit On
 Option Strict On
+Option Explicit On
 
 Imports System.ComponentModel
 Imports System.Globalization
 Imports System.IO
+Imports System.Security.Permissions
 Imports System.Text
 Imports System.Text.RegularExpressions
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
@@ -17,6 +18,7 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' <summary>
     '''  Enables parsing very large delimited or fixed width field files
     ''' </summary>
+    ''' <remarks></remarks>
     Public Class TextFieldParser
         Implements IDisposable
 
@@ -24,7 +26,10 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Creates a new TextFieldParser to parse the passed in file
         ''' </summary>
         ''' <param name="path">The path of the file to be parsed</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal path As String)
+
             ' Default to UTF-8 and detect encoding
             InitializeFromPath(path, System.Text.Encoding.UTF8, True)
         End Sub
@@ -34,7 +39,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="path">The path of the file to be parsed</param>
         ''' <param name="defaultEncoding">The decoding to default to if encoding isn't determined from file</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal path As String, ByVal defaultEncoding As System.Text.Encoding)
+
             ' Default to detect encoding
             InitializeFromPath(path, defaultEncoding, True)
         End Sub
@@ -45,7 +53,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="path">The path of the file to be parsed</param>
         ''' <param name="defaultEncoding">The decoding to default to if encoding isn't determined from file</param>
         ''' <param name="detectEncoding">Indicates whether or not to try to detect the encoding from the BOM</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal path As String, ByVal defaultEncoding As System.Text.Encoding, ByVal detectEncoding As Boolean)
+
             InitializeFromPath(path, defaultEncoding, detectEncoding)
         End Sub
 
@@ -53,7 +64,10 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Creates a new TextFieldParser to parse a file represented by the passed in stream
         ''' </summary>
         ''' <param name="stream"></param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal stream As Stream)
+
             ' Default to UTF-8 and detect encoding
             InitializeFromStream(stream, System.Text.Encoding.UTF8, True)
         End Sub
@@ -63,7 +77,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="stream"></param>
         ''' <param name="defaultEncoding">The decoding to default to if encoding isn't determined from file</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal stream As Stream, ByVal defaultEncoding As System.Text.Encoding)
+
             ' Default to detect encoding
             InitializeFromStream(stream, defaultEncoding, True)
         End Sub
@@ -74,7 +91,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="stream"></param>
         ''' <param name="defaultEncoding">The decoding to default to if encoding isn't determined from file</param>
         ''' <param name="detectEncoding">Indicates whether or not to try to detect the encoding from the BOM</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal stream As Stream, ByVal defaultEncoding As System.Text.Encoding, ByVal detectEncoding As Boolean)
+
             InitializeFromStream(stream, defaultEncoding, detectEncoding)
         End Sub
 
@@ -85,7 +105,10 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="defaultEncoding">The decoding to default to if encoding isn't determined from file</param>
         ''' <param name="detectEncoding">Indicates whether or not to try to detect the encoding from the BOM</param>
         ''' <param name="leaveOpen">Indicates whether or not to leave the passed in stream open</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal stream As Stream, ByVal defaultEncoding As System.Text.Encoding, ByVal detectEncoding As Boolean, ByVal leaveOpen As Boolean)
+
             m_LeaveOpen = leaveOpen
             InitializeFromStream(stream, defaultEncoding, detectEncoding)
         End Sub
@@ -94,13 +117,18 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Creates a new TextFieldParser to parse a stream or file represented by the passed in TextReader
         ''' </summary>
         ''' <param name="reader">The TextReader that does the reading</param>
+        ''' <remarks></remarks>
+        <HostProtection(Resources:=HostProtectionResource.ExternalProcessMgmt)>
         Public Sub New(ByVal reader As TextReader)
+
             If reader Is Nothing Then
                 Throw GetArgumentNullException("reader")
             End If
 
             m_Reader = reader
+
             ReadToBuffer()
+
         End Sub
 
         ''' <summary>
@@ -173,6 +201,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Returns the last malformed line if there is one.
         ''' </summary>
         ''' <value>The last malformed line</value>
+        ''' <remarks></remarks>
         Public ReadOnly Property ErrorLine() As String
             Get
                 Return m_ErrorLine
@@ -182,7 +211,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         '''  Returns the line number of last malformed line if there is one.
         ''' </summary>
-        ''' <value>Line number</value>
+        ''' <value>The last malformed line number</value>
+        ''' <remarks></remarks>
         Public ReadOnly Property ErrorLineNumber() As Long
             Get
                 Return m_ErrorLineNumber
@@ -193,6 +223,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Indicates the type of file being read, either fixed width or delimited
         ''' </summary>
         ''' <value>The type of fields in the file</value>
+        ''' <remarks></remarks>
         Public Property TextFieldType() As FieldType
             Get
                 Return m_TextFieldType
@@ -209,6 +240,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Gets or sets the widths of the fields for reading a fixed width file
         ''' </summary>
         ''' <value>An array of the widths</value>
+        ''' <remarks></remarks>
 #Disable Warning CA1819 ' Properties should not return arrays
         Public Property FieldWidths() As Integer()
 #Enable Warning CA1819 ' Properties should not return arrays
@@ -234,6 +266,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Gets or sets the delimiters used in a file
         ''' </summary>
         ''' <value>An array of the delimiters</value>
+        ''' <remarks></remarks>
 #Disable Warning CA1819 ' Properties should not return arrays
         Public Property Delimiters() As String()
 #Enable Warning CA1819 ' Properties should not return arrays
@@ -264,6 +297,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Helper function to enable setting delimiters without diming an array
         ''' </summary>
         ''' <param name="delimiters">A list of the delimiters</param>
+        ''' <remarks></remarks>
         Public Sub SetDelimiters(ByVal ParamArray delimiters As String())
             Me.Delimiters = delimiters
         End Sub
@@ -272,6 +306,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Helper function to enable setting field widths without diming an array
         ''' </summary>
         ''' <param name="fieldWidths">A list of field widths</param>
+        ''' <remarks></remarks>
         Public Sub SetFieldWidths(ByVal ParamArray fieldWidths As Integer())
             Me.FieldWidths = fieldWidths
         End Sub
@@ -280,6 +315,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Indicates whether or not leading and trailing white space should be removed when returning a field
         ''' </summary>
         ''' <value>True if white space should be removed, otherwise False</value>
+        ''' <remarks></remarks>
         Public Property TrimWhiteSpace() As Boolean
             Get
                 Return m_TrimWhiteSpace
@@ -347,6 +383,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>A string consisting of the first NumberOfChars characters of the next line</returns>
         ''' <remarks>If numberOfChars is greater than the next line, only the next line is returned</remarks>
         Public Function PeekChars(ByVal numberOfChars As Integer) As String
+
             If numberOfChars <= 0 Then
                 Throw GetArgumentExceptionWithArgName("numberOfChars", SR.TextFieldParser_NumberOfCharsMustBePositive, "numberOfChars")
             End If
@@ -379,6 +416,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Dim info As New StringInfo(Line)
                 Return info.SubstringByTextElements(0, numberOfChars)
             End If
+
         End Function
 
         ''' <summary>
@@ -388,9 +426,11 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <remarks>This is not a data aware method. Everything in the file from the current position to the end is read</remarks>
         <EditorBrowsable(EditorBrowsableState.Advanced)>
         Public Function ReadToEnd() As String
+
             If m_Reader Is Nothing Or m_Buffer Is Nothing Then
                 Return Nothing
             End If
+
 
             Dim Builder As New System.Text.StringBuilder(m_Buffer.Length)
 
@@ -401,14 +441,16 @@ Namespace Microsoft.VisualBasic.FileIO
             Builder.Append(m_Reader.ReadToEnd())
 
             FinishReading()
-            Return Builder.ToString()
-        End Function
 
+            Return Builder.ToString()
+
+        End Function
 
         ''' <summary>
         '''  Indicates whether or not to handle quotes in a csv friendly way
         ''' </summary>
         ''' <value>True if we escape quotes otherwise false</value>
+        ''' <remarks></remarks>
         <EditorBrowsable(EditorBrowsableState.Advanced)>
         Public Property HasFieldsEnclosedInQuotes() As Boolean
             Get
@@ -422,6 +464,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         '''  Closes the StreamReader
         ''' </summary>
+        ''' <remarks></remarks>
         Public Sub Close()
             CloseReader()
         End Sub
@@ -429,6 +472,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         '''  Closes the StreamReader
         ''' </summary>
+        ''' <remarks></remarks>
         Public Sub Dispose() Implements System.IDisposable.Dispose
             Dispose(True)
             GC.SuppressFinalize(Me)
@@ -440,12 +484,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' this method (MyBase.Dispose(disposing))
         ''' </summary>
         ''' <param name="disposing">Indicates we are called by Dispose and not GC</param>
+        ''' <remarks></remarks>
         Protected Overridable Sub Dispose(ByVal disposing As Boolean)
             If disposing Then
-                If Not m_Disposed Then
+                If Not Me.m_Disposed Then
                     Close()
                 End If
-                m_Disposed = True
+                Me.m_Disposed = True
             End If
         End Sub
 
@@ -453,7 +498,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' Validates that the value being passed as an AudioPlayMode enum is a legal value
         ''' </summary>
         ''' <param name="value"></param>
-        Private Shared Sub ValidateFieldTypeEnumValue(ByVal value As FieldType, ByVal paramName As String)
+        ''' <remarks></remarks>
+        Private Sub ValidateFieldTypeEnumValue(ByVal value As FieldType, ByVal paramName As String)
             If value < FieldType.Delimited OrElse value > FieldType.FixedWidth Then
                 Throw New System.ComponentModel.InvalidEnumArgumentException(paramName, DirectCast(value, Integer), GetType(FieldType))
             End If
@@ -472,7 +518,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         '''  Closes the StreamReader
         ''' </summary>
+        ''' <remarks></remarks>
         Private Sub CloseReader()
+
             FinishReading()
             If m_Reader IsNot Nothing Then
                 If Not m_LeaveOpen Then
@@ -485,12 +533,15 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         '''  Cleans up managed resources except the StreamReader and indicates reading is finished
         ''' </summary>
+        ''' <remarks></remarks>
         Private Sub FinishReading()
+
             m_LineNumber = -1
             m_EndOfData = True
             m_Buffer = Nothing
             m_DelimiterRegex = Nothing
             m_BeginQuotesRegex = Nothing
+
         End Sub
 
         ''' <summary>
@@ -501,6 +552,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="detectEncoding">Indicates whether or not to detect encoding from the BOM</param>
         ''' <remarks>We validate the arguments here for the three Public constructors that take a Path</remarks>
         Private Sub InitializeFromPath(ByVal path As String, ByVal defaultEncoding As System.Text.Encoding, ByVal detectEncoding As Boolean)
+
             If path = "" Then
                 Throw GetArgumentNullException("path")
             End If
@@ -514,6 +566,7 @@ Namespace Microsoft.VisualBasic.FileIO
             m_Reader = New StreamReader(fileStreamTemp, defaultEncoding, detectEncoding)
 
             ReadToBuffer()
+
         End Sub
 
         ''' <summary>
@@ -524,6 +577,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="detectEncoding">Indicates whether or not to detect encoding from the BOM</param>
         ''' <remarks>We validate the arguments here for the three Public constructors that take a Stream</remarks>
         Private Sub InitializeFromStream(ByVal stream As Stream, ByVal defaultEncoding As System.Text.Encoding, ByVal detectEncoding As Boolean)
+
             If stream Is Nothing Then
                 Throw GetArgumentNullException("stream")
             End If
@@ -537,6 +591,7 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
 
             m_Reader = New StreamReader(stream, defaultEncoding, detectEncoding)
+
             ReadToBuffer()
         End Sub
 
@@ -546,7 +601,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="path">The path to be validated</param>
         ''' <returns>The full name and path</returns>
         ''' <remarks>Throws if the file doesn't exist or if the path is malformed</remarks>
-        Private Shared Function ValidatePath(ByVal path As String) As String
+        Private Function ValidatePath(ByVal path As String) As String
+
             ' Validate and get full path
             Dim fullPath As String = FileSystem.NormalizeFilePath(path, "path")
 
@@ -554,6 +610,7 @@ Namespace Microsoft.VisualBasic.FileIO
             If Not File.Exists(fullPath) Then
                 Throw New IO.FileNotFoundException(GetResourceString(SR.IO_FileNotFound_Path, fullPath))
             End If
+
             Return fullPath
         End Function
 
@@ -564,6 +621,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>True if the line should be ignored, otherwise False</returns>
         ''' <remarks>Lines to ignore are blank lines and comments</remarks>
         Private Function IgnoreLine(ByVal line As String) As Boolean
+
             ' If the Line is Nothing, it has meaning (we've reached the end of the file) so don't
             ' ignore it
             If line Is Nothing Then
@@ -587,20 +645,24 @@ Namespace Microsoft.VisualBasic.FileIO
                         Return True
                     End If
 
-                    ' Test original line in case whitespace char is a coment token
+                    ' Test original line in case whitespace char is a comment token
                     If line.StartsWith(Token, StringComparison.Ordinal) Then
                         Return True
                     End If
                 Next
             End If
+
             Return False
+
         End Function
 
         ''' <summary>
         '''  Reads characters from the file into the buffer
         ''' </summary>
         ''' <returns>The number of Chars read. If no Chars are read, we're at the end of the file</returns>
+        ''' <remarks></remarks>
         Private Function ReadToBuffer() As Integer
+
             Debug.Assert(m_Buffer IsNot Nothing, "There's no buffer")
             Debug.Assert(m_Reader IsNot Nothing, "There's no StreamReader")
 
@@ -632,6 +694,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  to the left of the cursor have already been read and can be discarded.
         '''</remarks>
         Private Function SlideCursorToStartOfBuffer() As Integer
+
             Debug.Assert(m_Buffer IsNot Nothing, "There's no buffer")
             Debug.Assert(m_Reader IsNot Nothing, "There's no StreamReader")
             Debug.Assert(m_Position >= 0 And m_Position <= m_Buffer.Length, "The cursor is out of range")
@@ -651,6 +714,7 @@ Namespace Microsoft.VisualBasic.FileIO
 
                 Return CharsRead
             End If
+
             Return 0
         End Function
 
@@ -661,6 +725,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>The number of characters read to fill the new buffer</returns>
         ''' <remarks>This is needed for PeekChars and EndOfData</remarks>
         Private Function IncreaseBufferSize() As Integer
+
             Debug.Assert(m_Buffer IsNot Nothing, "There's no buffer")
             Debug.Assert(m_Reader IsNot Nothing, "There's no StreamReader")
 
@@ -683,6 +748,7 @@ Namespace Microsoft.VisualBasic.FileIO
             m_CharsRead += CharsRead
 
             Debug.Assert(m_CharsRead <= BufferSize, "We've read more chars than we have space for")
+
             Return CharsRead
         End Function
 
@@ -692,6 +758,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns>The next line of data</returns>
         ''' <remarks>Moves the cursor past the line read</remarks>
         Private Function ReadNextDataLine() As String
+
             Dim Line As String
 
             ' Set function to use when we reach the end of the buffer
@@ -705,13 +772,16 @@ Namespace Microsoft.VisualBasic.FileIO
             If Line Is Nothing Then
                 CloseReader()
             End If
+
             Return Line
+
         End Function
 
         ''' <summary>
         '''  Returns the next data line but doesn't move the cursor
         ''' </summary>
         ''' <returns>The next data line, or Nothing if there's no more data</returns>
+        ''' <remarks></remarks>
         Private Function PeekNextDataLine() As String
 
             Dim Line As String
@@ -726,6 +796,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Do
                 Line = ReadNextLine(m_PeekPosition, BufferFunction)
             Loop While IgnoreLine(Line)
+
             Return Line
         End Function
 
@@ -733,17 +804,20 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Function to call when we're at the end of the buffer. We either re fill the buffer
         '''  or change the size of the buffer
         ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
         Private Delegate Function ChangeBufferFunction() As Integer
 
 
         ''' <summary>
-        '''  Gets the next line from the file and moves the pased in cursor past the line
+        '''  Gets the next line from the file and moves the passed in cursor past the line
         ''' </summary>
         ''' <param name="Cursor">Indicates the current position in the buffer</param>
         ''' <param name="ChangeBuffer">Function to call when we've reached the end of the buffer</param>
         ''' <returns>The next line in the file</returns>
         ''' <remarks>Returns Nothing if we are at the end of the file</remarks>
         Private Function ReadNextLine(ByRef Cursor As Integer, ByVal ChangeBuffer As ChangeBufferFunction) As String
+
             Debug.Assert(m_Buffer IsNot Nothing, "There's no buffer")
             Debug.Assert(Cursor >= 0 And Cursor <= m_CharsRead, "The cursor is out of range")
 
@@ -803,6 +877,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Builder.Append(m_Buffer, Cursor, Size)
 
             Loop While ChangeBuffer() > 0
+
             Return Builder.ToString()
         End Function
 
@@ -810,7 +885,9 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Gets the next data line and parses it with the delimiters
         ''' </summary>
         ''' <returns>An array of the fields in the line</returns>
+        ''' <remarks></remarks>
         Private Function ParseDelimitedLine() As String()
+
             Dim Line As String = ReadNextDataLine()
             If Line Is Nothing Then
                 Return Nothing
@@ -863,7 +940,7 @@ Namespace Microsoft.VisualBasic.FileIO
                             ' Get the next data line
                             NewLine = ReadNextDataLine()
 
-                            ' If we didn't get a new line, we're at the end of the file so our original line is mal formed
+                            ' If we didn't get a new line, we're at the end of the file so our original line is malformed
                             If NewLine Is Nothing Then
                                 m_ErrorLine = Line.TrimEnd(Chr(13), Chr(10))
                                 m_ErrorLineNumber = CurrentLineNumber
@@ -914,7 +991,7 @@ Namespace Microsoft.VisualBasic.FileIO
                         ' minus the end of line chars
                         Field = Line.Substring(Index).TrimEnd(Chr(13), Chr(10))
 
-                        If TrimWhiteSpace Then
+                        If m_TrimWhiteSpace Then
                             Field = Field.Trim()
                         End If
                         Fields.Add(Field)
@@ -923,14 +1000,18 @@ Namespace Microsoft.VisualBasic.FileIO
 
                 End If
             End While
+
             Return Fields.ToArray()
+
         End Function
 
         ''' <summary>
         '''  Gets the next data line and parses into fixed width fields
         ''' </summary>
         ''' <returns>An array of the fields in the line</returns>
+        ''' <remarks></remarks>
         Private Function ParseFixedWidthLine() As String()
+
             Debug.Assert(m_FieldWidths IsNot Nothing, "No field widths")
 
             Dim Line As String = ReadNextDataLine()
@@ -953,6 +1034,7 @@ Namespace Microsoft.VisualBasic.FileIO
                 Fields(i) = GetFixedWidthField(LineInfo, Index, m_FieldWidths(i))
                 Index += m_FieldWidths(i)
             Next
+
             Return Fields
         End Function
 
@@ -963,7 +1045,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="Index">The start of the field</param>
         ''' <param name="FieldLength">The length of the field</param>
         ''' <returns>The field</returns>
+        ''' <remarks></remarks>
         Private Function GetFixedWidthField(ByVal Line As StringInfo, ByVal Index As Integer, ByVal FieldLength As Integer) As String
+
             Dim Field As String
             If FieldLength > 0 Then
                 Field = Line.SubstringByTextElements(Index, FieldLength)
@@ -987,9 +1071,9 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Gets the index of the first end of line character
         ''' </summary>
         ''' <param name="Line"></param>
-        ''' <returns>First end of line character</returns>
+        ''' <returns></returns>
         ''' <remarks>When there are no end of line characters, the index is the length (one past the end)</remarks>
-        Private Shared Function GetEndOfLineIndex(ByVal Line As String) As Integer
+        Private Function GetEndOfLineIndex(ByVal Line As String) As Integer
 
             Debug.Assert(Line IsNot Nothing, "We are parsing a Nothing")
 
@@ -1009,6 +1093,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Else
                 Return Length
             End If
+
         End Function
 
         ''' <summary>
@@ -1016,21 +1101,25 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="Line">The line to be tested</param>
         ''' <param name="LineNumber">The line number, used for exception</param>
+        ''' <remarks></remarks>
         Private Sub ValidateFixedWidthLine(ByVal Line As StringInfo, ByVal LineNumber As Long)
             Debug.Assert(Line IsNot Nothing, "No Line sent")
 
-            ' The only mal formed line for fixed length fields is one that's too short
+            ' The only malformed line for fixed length fields is one that's too short
             If Line.LengthInTextElements < m_LineLength Then
                 m_ErrorLine = Line.String
                 m_ErrorLineNumber = m_LineNumber - 1
                 Throw New MalformedLineException(GetResourceString(SR.TextFieldParser_MalFormedFixedWidthLine, LineNumber.ToString(CultureInfo.InvariantCulture)), LineNumber)
             End If
+
         End Sub
 
         ''' <summary>
         '''  Determines whether or not the field widths are valid, and sets the size of a line
         ''' </summary>
+        ''' <remarks></remarks>
         Private Sub ValidateFieldWidths()
+
             If m_FieldWidths Is Nothing Then
                 Throw GetInvalidOperationException(SR.TextFieldParser_FieldWidthsNothing)
             End If
@@ -1049,10 +1138,11 @@ Namespace Microsoft.VisualBasic.FileIO
                 m_LineLength += m_FieldWidths(i)
             Next
 
-            ' add the last field if it's greater than zero (ie not ragged).
+            ' add the last field if it's greater than zero (IE not ragged).
             If m_FieldWidths(WidthBound) > 0 Then
                 m_LineLength += m_FieldWidths(WidthBound)
             End If
+
         End Sub
 
         ''' <summary>
@@ -1063,7 +1153,8 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  All field widths, except the last one, must be greater than zero. If the last width is
         '''  less than one it indicates the last field is ragged
         '''</remarks>
-        Private Shared Sub ValidateFieldWidthsOnInput(ByVal Widths() As Integer)
+        Private Sub ValidateFieldWidthsOnInput(ByVal Widths() As Integer)
+
             Debug.Assert(Widths IsNot Nothing, "There are no field widths")
 
             Dim Bound As Integer = Widths.Length - 1
@@ -1078,6 +1169,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Validates the delimiters and creates the Regex objects for finding delimiters or quotes followed
         '''  by delimiters
         ''' </summary>
+        ''' <remarks></remarks>
         Private Sub ValidateAndEscapeDelimiters()
             If m_Delimiters Is Nothing Then
                 Throw GetArgumentExceptionWithArgName("Delimiters", SR.TextFieldParser_DelimitersNothing, "Delimiters")
@@ -1121,7 +1213,7 @@ Namespace Microsoft.VisualBasic.FileIO
             Builder.Append(vbCr & "|" & vbLf)
             m_DelimiterWithEndCharsRegex = New Regex(Builder.ToString(), REGEX_OPTIONS)
 
-            ' Add end of line (either cr, ln, or nothing) and set regex
+            ' Add end of line (either Cr, Ln, or nothing) and set regex
             QuoteBuilder.Append(vbCr & "|" & vbLf & ")|""$")
         End Sub
 
@@ -1130,6 +1222,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <remarks>Throws if we're not able to read fields with current property settings</remarks>
         Private Sub ValidateReadyToRead()
+
             If m_NeedPropertyCheck Or ArrayHasChanged() Then
                 Select Case m_TextFieldType
                     Case FieldType.Delimited
@@ -1157,15 +1250,17 @@ Namespace Microsoft.VisualBasic.FileIO
                         End If
                     Next
                 End If
+
                 m_NeedPropertyCheck = False
             End If
         End Sub
 
         ''' <summary>
-        '''  Thows if any of the delimiters contain line end characters
+        '''  Throws if any of the delimiters contain line end characters
         ''' </summary>
         ''' <param name="delimiterArray">A string array of delimiters</param>
-        Private Shared Sub ValidateDelimiters(ByVal delimiterArray() As String)
+        ''' <remarks></remarks>
+        Private Sub ValidateDelimiters(ByVal delimiterArray() As String)
             If delimiterArray Is Nothing Then
                 Return
             End If
@@ -1233,9 +1328,10 @@ Namespace Microsoft.VisualBasic.FileIO
         End Function
 
         ''' <summary>
-        '''  Thows if any of the comment tokens contain whitespace
+        '''  Throws if any of the comment tokens contain whitespace
         ''' </summary>
         ''' <param name="tokens">A string array of comment tokens</param>
+        ''' <remarks></remarks>
         Private Sub CheckCommentTokensForWhitespace(ByVal tokens() As String)
             If tokens Is Nothing Then
                 Return
@@ -1251,6 +1347,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Gets the appropriate regex for finding a field beginning with quotes
         ''' </summary>
         ''' <value>The right regex</value>
+        ''' <remarks></remarks>
         Private ReadOnly Property BeginQuotesRegex() As Regex
             Get
                 If m_BeginQuotesRegex Is Nothing Then
@@ -1267,6 +1364,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  Gets the appropriate expression for finding ending quote of a field
         ''' </summary>
         ''' <value>The expression</value>
+        ''' <remarks></remarks>
         Private ReadOnly Property EndQuotePattern() As String
             Get
                 Return String.Format(CultureInfo.InvariantCulture, ENDING_QUOTE, WhitespacePattern)
@@ -1276,6 +1374,8 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <summary>
         ''' Returns a string containing all the characters which are whitespace for parsing purposes
         ''' </summary>
+        ''' <value></value>
+        ''' <remarks></remarks>
         Private ReadOnly Property WhitespaceCharacters() As String
             Get
                 Dim builder As New StringBuilder
@@ -1292,8 +1392,10 @@ Namespace Microsoft.VisualBasic.FileIO
         End Property
 
         ''' <summary>
-        ''' Gets the character set of whitespaces to be used in a regex pattern
+        ''' Gets the character set of white-spaces to be used in a regex pattern
         ''' </summary>
+        ''' <value></value>
+        ''' <remarks></remarks>
         Private ReadOnly Property WhitespacePattern() As String
             Get
                 Dim builder As New StringBuilder()
@@ -1314,7 +1416,9 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="testCharacter">The character to look for</param>
         ''' <returns>True if the character is found in a delimiter, otherwise false</returns>
+        ''' <remarks></remarks>
         Private Function CharacterIsInDelimiter(ByVal testCharacter As Char) As Boolean
+
             Debug.Assert(m_Delimiters IsNot Nothing, "No delimiters set!")
 
             For Each delimiter As String In m_Delimiters
@@ -1340,7 +1444,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ' Flags whether or not there is data left to read. Assume there is at creation
         Private m_EndOfData As Boolean = False
 
-        ' Holds the last mal formed line
+        ' Holds the last malformed line
         Private m_ErrorLine As String = ""
 
         ' Holds the line number of the last malformed line
@@ -1373,7 +1477,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ' Codes for whitespace as used by String.Trim excluding line end chars as those are handled separately
         Private m_WhitespaceCodes() As Integer = {&H9, &HB, &HC, &H20, &H85, &HA0, &H1680, &H2000, &H2001, &H2002, &H2003, &H2004, &H2005, &H2006, &H2007, &H2008, &H2009, &H200A, &H200B, &H2028, &H2029, &H3000, &HFEFF}
 
-        ' Regualr expression used to find beginning quotes ignore spaces and tabs
+        ' Regular expression used to find beginning quotes ignore spaces and tabs
         Private m_BeginQuotesRegex As Regex
 
         ' Regular expression for whitespace
@@ -1433,6 +1537,7 @@ Namespace Microsoft.VisualBasic.FileIO
     ''' <summary>
     '''  Enum used to indicate the kind of file being read, either delimited or fixed length
     ''' </summary>
+    ''' <remarks></remarks>
     Public Enum FieldType As Integer
         '!!!!!!!!!! Changes to this enum must be reflected in ValidateFieldTypeEnumValue()
         Delimited
@@ -1443,9 +1548,10 @@ Namespace Microsoft.VisualBasic.FileIO
     '''  Helper class that when passed a line and an index to a quote delimited field
     '''  will build the field and handle escaped quotes
     ''' </summary>
+    ''' <remarks></remarks>
     Friend Class QuoteDelimitedFieldBuilder
         ''' <summary>
-        '''  Creates an intance of the class and sets some properties
+        '''  Creates an instance of the class and sets some properties
         ''' </summary>
         ''' <param name="DelimiterRegex">The regex used to find any of the delimiters</param>
         ''' <param name="SpaceChars">Characters treated as space (usually space and tab)</param>
@@ -1469,6 +1575,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  The field being built
         ''' </summary>
         ''' <value>The field</value>
+        ''' <remarks></remarks>
         Public ReadOnly Property Field() As String
             Get
                 Return m_Field.ToString()
@@ -1479,6 +1586,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  The current index on the line. Used to indicate how much of the line was used to build the field
         ''' </summary>
         ''' <value>The current position on the line</value>
+        ''' <remarks></remarks>
         Public ReadOnly Property Index() As Integer
             Get
                 Return m_Index
@@ -1489,6 +1597,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''  The length of the closing delimiter if one was found
         ''' </summary>
         ''' <value>The length of the delimiter</value>
+        ''' <remarks></remarks>
         Public ReadOnly Property DelimiterLength() As Integer
             Get
                 Return m_DelimiterLength
@@ -1516,6 +1625,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="Line">The line containing the data</param>
         ''' <param name="StartAt">The index at which we start building the field</param>
+        ''' <remarks></remarks>
         Public Sub BuildField(ByVal Line As String, ByVal StartAt As Integer)
             ' For readability
             Const DoubleQuoteChar As Char = """"c
