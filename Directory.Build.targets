@@ -17,6 +17,7 @@
   </Target>
 
   <Import Project="buildvertical.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)eng\CodeAnalysis.targets" />
 
   <!-- Corefx-specific binplacing properties -->
   <PropertyGroup>
@@ -124,8 +125,13 @@
   </PropertyGroup>
 
   <Import Project="$(ToolsDir)/Build.Common.targets" Condition="Exists('$(ToolsDir)/Build.Common.targets')" />
+  <Import Project="$(MSBuildThisFileDirectory)eng/Resources.targets" />
+  
+  <!-- Temporarily bring in parts of Arcade SDK, remove once we import SDK.Props/targets -->
+  <Import Project="../tools/BuildTasks.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <Import Project="../tools/GenerateResxSource.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
-  <Import Project="$(ProjectDir)artifacts\toolset\Common\Tools.proj.nuget.g.targets" Condition="Exists('$(ProjectDir)artifacts\toolset\Common\Tools.proj.nuget.g.targets')" />
+  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
 
   <!-- permit a wrapping build system to contribute targets to this build -->
   <Import Condition="Exists('$(MSBuildThisFileDirectory)..\open.targets')" Project="$(MSBuildThisFileDirectory)..\open.targets" />
