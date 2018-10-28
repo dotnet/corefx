@@ -107,7 +107,7 @@ namespace System.Data.Tests
 
             Assert.Equal("test", constraintEx.Message);
             Assert.Equal("inner exception", constraintEx.InnerException.Message);
-            Assert.Equal(-2146232022, new ConstraintException("test", constraintEx).HResult);
+            Assert.Equal(-2146232022, constraintEx.HResult);
         }
 
         [Fact]
