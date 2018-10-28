@@ -99,5 +99,50 @@ namespace System.Data.Tests
             // UniqueConstraint Exception - ds.EnforceConstraints 
             Assert.Throws<ConstraintException>(() => ds.EnforceConstraints = true);
         }
+
+        [Fact]
+        public void ArgumentsStored()
+        {
+            var constraintEx = new ConstraintException("test", new Exception("inner exception"));
+
+            Assert.Equal("test", constraintEx.Message);
+            Assert.Equal("inner exception", constraintEx.InnerException.Message);
+            Assert.Equal(-2146232022, new ConstraintException("test", constraintEx).HResult);
+        }
+
+        [Fact]
+        public void ArgumentsFromSerializationInfo()
+        {
+            var si = new System.Runtime.Serialization.SerializationInfo(typeof(CustomConstraintException), new System.Runtime.Serialization.FormatterConverter());
+            si.AddValue("ClassName", string.Empty);
+            si.AddValue("Message", string.Empty);
+            si.AddValue("InnerException", new ArgumentException());
+            si.AddValue("HelpURL", string.Empty);
+            si.AddValue("StackTraceString", string.Empty);
+            si.AddValue("RemoteStackTraceString", string.Empty);
+            si.AddValue("RemoteStackIndex", 0);
+            si.AddValue("ExceptionMethod", string.Empty);
+            si.AddValue("HResult", 1);
+            si.AddValue("Source", string.Empty);
+
+            var sc = new System.Runtime.Serialization.StreamingContext();
+
+            var exFromSerializationInfo = new CustomConstraintException(si, sc);
+
+            Assert.Equal(string.Empty, exFromSerializationInfo.Message);
+            Assert.IsType<ArgumentException>(exFromSerializationInfo.InnerException);
+            Assert.Equal(1, exFromSerializationInfo.HResult);
+        }
+
+        [Serializable]
+        private class CustomConstraintException : ConstraintException
+        {
+            public CustomConstraintException(System.Runtime.Serialization.SerializationInfo info,
+                System.Runtime.Serialization.StreamingContext context)
+                : base(info, context)
+            {
+                // For exposing the protected constructor
+            }
+        }
     }
 }
