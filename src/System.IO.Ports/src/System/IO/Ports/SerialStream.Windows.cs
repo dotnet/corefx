@@ -33,6 +33,9 @@ namespace System.IO.Ports
 
         private const int infiniteTimeoutConst = -2;
 
+        // called when one character is received.
+        internal event SerialDataReceivedEventHandler DataReceived;
+
         // members supporting properties exposed to SerialPort
         private byte _parityReplace = (byte)'?';
         private bool _isAsync = true;

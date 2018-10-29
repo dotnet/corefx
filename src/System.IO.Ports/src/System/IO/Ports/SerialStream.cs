@@ -23,10 +23,6 @@ namespace System.IO.Ports
 
         private SafeFileHandle _handle = null;
 
-        // three different events, also wrapped by SerialPort.
-        // called when one character is received.
-        internal event SerialDataReceivedEventHandler DataReceived;
-
 #pragma warning disable CS0067 // Events shared by Windows and Linux, on Linux we currently never call them
         // called when any of the pin/ring-related triggers occurs
         internal event SerialPinChangedEventHandler PinChanged;

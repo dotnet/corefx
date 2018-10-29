@@ -24,7 +24,9 @@ intptr_t SystemIoPortsNative_SerialPortOpen(const char * name)
     if (ioctl(fd, TIOCEXCL) != 0)
     {
         // We couldn't get exclusive access to the device file
+        int oldErrno = errno;
         close(fd);
+        errno = oldErrno;
         return -1;
     }
 

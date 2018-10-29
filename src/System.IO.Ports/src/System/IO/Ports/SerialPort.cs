@@ -68,7 +68,37 @@ namespace System.IO.Ports
 
         public event SerialErrorReceivedEventHandler ErrorReceived;
         public event SerialPinChangedEventHandler PinChanged;
-        public event SerialDataReceivedEventHandler DataReceived;
+
+        private SerialDataReceivedEventHandler _dataReceivedHandler;
+        private event SerialDataReceivedEventHandler _dataReceived;
+        public event SerialDataReceivedEventHandler DataReceived
+        {
+            add
+            {
+                bool wasNull = _dataReceived == null;
+                _dataReceived += value;
+
+                if (wasNull)
+                {
+                    if (_internalSerialStream != null)
+                    {
+                        _internalSerialStream.DataReceived += _dataReceivedHandler;
+                    }
+                }
+            }
+            remove
+            {
+                _dataReceived -= value;
+
+                if (_dataReceived == null)
+                {
+                    if (_internalSerialStream != null)
+                    {
+                        _internalSerialStream.DataReceived -= _dataReceivedHandler;
+                    }
+                }
+            }
+        }
 
         //--- component properties---------------*
 
@@ -479,14 +509,15 @@ namespace System.IO.Ports
         }
 
         // -------- SECTION: constructors -----------------*
-        public SerialPort(IContainer container)
+        public SerialPort()
+        {
+            _dataReceivedHandler = new SerialDataReceivedEventHandler(CatchReceivedEvents);
+        }
+
+        public SerialPort(IContainer container) : this()
         {
             // Required for Windows.Forms Class Composition Designer support
             container.Add(this);
-        }
-
-        public SerialPort()
-        {
         }
 
         // Non-design SerialPort constructors here chain, using default values for members left unspecified by parameters
@@ -511,7 +542,7 @@ namespace System.IO.Ports
         // all the magic happens in the call to the instance's .Open() method.
         // Internally, the SerialStream constructor opens the file handle, sets the device
         // control block and associated Win32 structures, and begins the event-watching cycle.
-        public SerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
+        public SerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) : this()
         {
             PortName = portName;
             BaudRate = baudRate;
@@ -532,6 +563,7 @@ namespace System.IO.Ports
             {
                 if (IsOpen)
                 {
+                    _internalSerialStream.DataReceived -= _dataReceivedHandler;
                     _internalSerialStream.Flush();
                     _internalSerialStream.Close();
                     _internalSerialStream = null;
@@ -571,7 +603,11 @@ namespace System.IO.Ports
 
             _internalSerialStream.ErrorReceived += new SerialErrorReceivedEventHandler(CatchErrorEvents);
             _internalSerialStream.PinChanged += new SerialPinChangedEventHandler(CatchPinChangedEvents);
-            _internalSerialStream.DataReceived += new SerialDataReceivedEventHandler(CatchReceivedEvents);
+
+            if (_dataReceived != null)
+            {
+                _internalSerialStream.DataReceived += _dataReceivedHandler;
+            }
         }
 
         // Read Design pattern:
@@ -1185,7 +1221,7 @@ namespace System.IO.Ports
 
         private void CatchReceivedEvents(object src, SerialDataReceivedEventArgs e)
         {
-            SerialDataReceivedEventHandler eventHandler = DataReceived;
+            SerialDataReceivedEventHandler eventHandler = _dataReceived;
             SerialStream stream = _internalSerialStream;
 
             if ((eventHandler != null) && (stream != null))

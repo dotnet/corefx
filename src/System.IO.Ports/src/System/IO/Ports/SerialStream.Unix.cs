@@ -18,6 +18,8 @@ namespace System.IO.Ports
     internal sealed partial class SerialStream : Stream
     {
         private const int TimeoutResolution = 30;
+        // time [ms] loop has to be idle before it stops
+        private const int IOLoopIdleTimeout = 2000;
         private bool _ioLoopFinished = false;
 
         private int _baudRate;
@@ -29,8 +31,33 @@ namespace System.IO.Ports
         private int _writeTimeout = 0;
         private byte[] _tempBuf = new byte[1];
         private Task _ioLoop;
+        private object _ioLoopLock = new object();
         private ConcurrentQueue<SerialStreamIORequest> _readQueue = new ConcurrentQueue<SerialStreamIORequest>();
         private ConcurrentQueue<SerialStreamIORequest> _writeQueue = new ConcurrentQueue<SerialStreamIORequest>();
+
+        private long _totalBytesRead = 0;
+        private long TotalBytesAvailable => _totalBytesRead + BytesToRead;
+        private long _lastTotalBytesAvailable;
+
+        // called when one character is received.
+        private event SerialDataReceivedEventHandler _dataReceived;
+        internal event SerialDataReceivedEventHandler DataReceived
+        {
+            add
+            {
+                bool wasNull = _dataReceived == null;
+                _dataReceived += value;
+
+                if (wasNull)
+                {
+                    EnsureIOLoopRunning();
+                }
+            }
+            remove
+            {
+                _dataReceived -= value;
+            }
+        }
 
         // ----SECTION: inherited properties from Stream class ------------*
 
@@ -382,6 +409,8 @@ namespace System.IO.Ports
             SerialStreamIORequest result = new SerialStreamIORequest(cancellationToken, buffer);
             _readQueue.Enqueue(result);
 
+            EnsureIOLoopRunning();
+
             return result.Task;
         }
 
@@ -395,6 +424,9 @@ namespace System.IO.Ports
             Memory<byte> buffer = new Memory<byte>(array, offset, count);
             SerialStreamIORequest result = new SerialStreamIORequest(cancellationToken, buffer);
             _writeQueue.Enqueue(result);
+
+            EnsureIOLoopRunning();
+
             return result.Task;
         }
 
@@ -406,12 +438,13 @@ namespace System.IO.Ports
         // Will wait `timeout` miliseconds or until reading or writing is possible
         // If no operation is requested it will wait.
         // Returns event which has happened
-        private Interop.Sys.PollEvents PollEvents(int timeout, bool pollReadEvents, bool pollWriteEvents)
+        private Interop.Sys.PollEvents PollEvents(int timeout, bool pollReadEvents, bool pollWriteEvents, out Interop.ErrorInfo? error)
         {
             if (!pollReadEvents && !pollWriteEvents)
             {
-                Thread.Sleep(timeout);
-                return Interop.Sys.PollEvents.POLLNONE;
+                // This should not happen
+                Debug.Assert(false);
+                throw new Exception();
             }
 
             Interop.Sys.PollEvents eventsToPoll = Interop.Sys.PollEvents.POLLERR;
@@ -427,10 +460,13 @@ namespace System.IO.Ports
             }
 
             Interop.Sys.PollEvents events = Interop.Sys.PollEvents.POLLNONE;
-            Interop.Sys.Poll(_handle,
-                             eventsToPoll,
-                             timeout,
-                             out events);
+            Interop.Error ret = Interop.Sys.Poll(
+                _handle,
+                eventsToPoll,
+                timeout,
+                out events);
+
+            error = ret != Interop.Error.SUCCESS ? Interop.Sys.GetLastErrorInfo() : (Interop.ErrorInfo?)null;
             return events;
         }
 
@@ -540,32 +576,47 @@ namespace System.IO.Ports
 
             _processReadDelegate = ProcessRead;
             _processWriteDelegate = ProcessWrite;
-            _ioLoop = Task.Factory.StartNew(
-                IOLoop,
-                CancellationToken.None,
-                TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
+            _lastTotalBytesAvailable = TotalBytesAvailable;
         }
 
-        private void FinishPendingIORequests()
+        private void EnsureIOLoopRunning()
         {
+            lock (_ioLoopLock)
+            {
+                if (_ioLoop == null)
+                {
+                    Debug.Assert(_handle != null);
+                    _ioLoop = Task.Factory.StartNew(
+                        IOLoop,
+                        CancellationToken.None,
+                        TaskCreationOptions.LongRunning,
+                        TaskScheduler.Default);
+                }
+            }
+        }
+
+        private void FinishPendingIORequests(Func<Exception> createException = null)
+        {
+            createException = createException ?? InternalResources.FileNotOpenException;
+
             while (_readQueue.TryDequeue(out SerialStreamIORequest r))
             {
-                r.Complete(InternalResources.FileNotOpenException());
+                r.Complete(createException());
             }
 
             while (_writeQueue.TryDequeue(out SerialStreamIORequest r))
             {
-                r.Complete(InternalResources.FileNotOpenException());
+                r.Complete(createException());
             }
         }
 
         protected override void Dispose(bool disposing)
         {
+            _ioLoopFinished = true;
+
             if (disposing)
             {
-                _ioLoopFinished = true;
-                _ioLoop?.Wait();
+                _ioLoop?.GetAwaiter().GetResult();
                 _ioLoop = null;
 
                 FinishPendingIORequests();
@@ -581,6 +632,38 @@ namespace System.IO.Ports
             }
 
             base.Dispose(disposing);
+        }
+
+        // RaiseDataReceivedChars and RaiseDataReceivedEof could be one function
+        // but are currently split to avoid allocation related to context
+        private void RaiseDataReceivedChars()
+        {
+            if (_dataReceived != null)
+            {
+                ThreadPool.QueueUserWorkItem(s => {
+                        var thisRef = (SerialStream)s;
+                        SerialDataReceivedEventHandler dataReceived = thisRef._dataReceived;
+                        if (dataReceived != null)
+                        {
+                            dataReceived(thisRef, new SerialDataReceivedEventArgs(SerialData.Chars));
+                        }
+                    }, this);
+            }
+        }
+
+        private void RaiseDataReceivedEof()
+        {
+            if (_dataReceived != null)
+            {
+                ThreadPool.QueueUserWorkItem(s => {
+                        var thisRef = (SerialStream)s;
+                        SerialDataReceivedEventHandler dataReceived = thisRef._dataReceived;
+                        if (dataReceived != null)
+                        {
+                            dataReceived(thisRef, new SerialDataReceivedEventArgs(SerialData.Eof));
+                        }
+                    }, this);
+            }
         }
 
         // should return non-negative integer meaning numbers of bytes read/written (0 for errors)
@@ -613,10 +696,7 @@ namespace System.IO.Ports
                 }
                 else // numBytes == 0
                 {
-                    ThreadPool.QueueUserWorkItem(s => {
-                            var thisRef = (SerialStream)s;
-                            thisRef.DataReceived(thisRef, new SerialDataReceivedEventArgs(SerialData.Eof));
-                        }, this);
+                    RaiseDataReceivedEof();
                 }
             }
 
@@ -688,52 +768,97 @@ namespace System.IO.Ports
         private unsafe void IOLoop()
         {
             bool eofReceived = false;
-            //bool readyForReceivedEvent = true;
-            long totalBytesRead = 0;
-            // last value of totalBytesRead + BytesToRead
-            long lastTotalBytesAvailable = BytesToRead;
+            // we do not care about bytes we got before - only about changes
+            // loop just got started which means we just got request
+            bool lastIsIdle = false;
+            int ticksWhenIdleStarted = 0;
+
             while (IsOpen && !eofReceived && !_ioLoopFinished)
             {
-                // PollEvents will wait if both flags are false
-                Interop.Sys.PollEvents events = PollEvents(1,
-                                                           pollReadEvents: _readQueue.Count > 0,
-                                                           pollWriteEvents: _writeQueue.Count > 0);
+                bool hasPendingReads = _readQueue.Count > 0;
+                bool hasPendingWrites = _writeQueue.Count > 0;
 
-                if (events.HasFlag(Interop.Sys.PollEvents.POLLNVAL) ||
-                    events.HasFlag(Interop.Sys.PollEvents.POLLERR))
+                bool hasPendingIO = hasPendingReads || hasPendingWrites;
+                bool isIdle = _dataReceived == null && !hasPendingIO;
+
+                if (!hasPendingIO)
                 {
-                    // bad descriptor or some other error we can't handle
-                    FinishPendingIORequests();
-                    break;
+                    if (isIdle)
+                    {
+                        if (!lastIsIdle)
+                        {
+                            // we've just started idling
+                            ticksWhenIdleStarted = Environment.TickCount;
+                        }
+                        else if (Environment.TickCount - ticksWhenIdleStarted > IOLoopIdleTimeout)
+                        {
+                            // we are already idling for a while
+                            // let's stop the loop until there is some work to do
+
+                            lock (_ioLoopLock)
+                            {
+                                // double check we are done under lock
+                                if (_dataReceived == null && _readQueue.Count == 0 && _writeQueue.Count == 0)
+                                {
+                                    _ioLoop = null;
+                                    break;
+                                }
+                                else
+                                {
+                                    // to make sure timer restarts
+                                    lastIsIdle = false;
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    Thread.Sleep(1);
                 }
-
-                if (events.HasFlag(Interop.Sys.PollEvents.POLLIN))
+                else
                 {
-                    int bytesRead = DoIORequest(_readQueue, _processReadDelegate);
-                    totalBytesRead += bytesRead;
+                    Interop.Sys.PollEvents events = PollEvents(1,
+                                                               pollReadEvents: hasPendingReads,
+                                                               pollWriteEvents: hasPendingWrites,
+                                                               out Interop.ErrorInfo? error);
+
+                    if (error.HasValue)
+                    {
+                        FinishPendingIORequests(() => Interop.GetIOException(error.Value));
+                        break;
+                    }
+
+                    if (events.HasFlag(Interop.Sys.PollEvents.POLLNVAL) ||
+                        events.HasFlag(Interop.Sys.PollEvents.POLLERR))
+                    {
+                        // bad descriptor or some other error we can't handle
+                        FinishPendingIORequests();
+                        break;
+                    }
+
+                    if (events.HasFlag(Interop.Sys.PollEvents.POLLIN))
+                    {
+                        int bytesRead = DoIORequest(_readQueue, _processReadDelegate);
+                        _totalBytesRead += bytesRead;
+                    }
+
+                    if (events.HasFlag(Interop.Sys.PollEvents.POLLOUT))
+                    {
+                        DoIORequest(_writeQueue, _processWriteDelegate);
+                    }
                 }
 
                 // check if there is any new data (either already read or in the driver input)
                 // this event is private and handled inside of SerialPort
                 // which then throttles it with the threshold
-                long totalBytesAvailable = totalBytesRead + BytesToRead;
-                if (totalBytesAvailable > lastTotalBytesAvailable)
+                long totalBytesAvailable = TotalBytesAvailable;
+                if (totalBytesAvailable > _lastTotalBytesAvailable)
                 {
-                    lastTotalBytesAvailable = totalBytesAvailable;
-
-                    // We need new task so that this thread doesn't get deadlocked when someone calls
-                    // Read from within the event
-
-                    ThreadPool.QueueUserWorkItem(s => {
-                            var thisRef = (SerialStream)s;
-                            thisRef.DataReceived(thisRef, new SerialDataReceivedEventArgs(SerialData.Chars));
-                        }, this);
+                    _lastTotalBytesAvailable = totalBytesAvailable;
+                    RaiseDataReceivedChars();
                 }
 
-                if (events.HasFlag(Interop.Sys.PollEvents.POLLOUT))
-                {
-                    DoIORequest(_writeQueue, _processWriteDelegate);
-                }
+                lastIsIdle = isIdle;
             }
         }
 

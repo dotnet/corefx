@@ -74,7 +74,6 @@ namespace System.IO.Ports.Tests
                 var ar3 = com1.BaseStream.BeginWrite(new byte[] { 3 }, 0, 1, null, null);
 
                 Thread.Sleep(200);
-
                 Assert.InRange(n, 1, 3);
                 Assert.Equal(1, com2.ReadByte());
                 Assert.Equal(2, com2.ReadByte());
