@@ -8,7 +8,7 @@ using Xunit;
 namespace System.Diagnostics.Tests
 {
     // These tests test the static Debug class. They cannot be run in parallel
-    // DebugTestsNoListeners: when run alone, tests Debug behavior before Debug is set with Trace Listeners.
+    // DebugTestsNoListeners: tests Debug behavior before Debug is set with Trace Listeners.
     [Collection("System.Diagnostics.Debug")]
     public class DebugTestsNoListeners : DebugTests
     {

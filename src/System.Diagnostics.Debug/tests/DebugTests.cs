@@ -10,13 +10,27 @@ namespace System.Diagnostics.Tests
     public abstract class DebugTests
     {
         protected abstract bool DebugUsesTraceListeners { get; }
+        protected static readonly DebugProvider _debugOnlyProvider;
+        protected static readonly DebugProvider _debugTraceProvider;
+
+        static DebugTests()
+        {
+            FieldInfo fieldInfo = typeof(Debug).GetField("s_provider", BindingFlags.Static | BindingFlags.NonPublic);
+            _debugOnlyProvider = (DebugProvider)fieldInfo.GetValue(null);
+            // Triggers code to wire up TraceListeners with Debug
+            Assert.Equal(1, Trace.Listeners.Count);
+            _debugTraceProvider = (DebugProvider)fieldInfo.GetValue(null);
+        }
 
         public DebugTests()
         {
             if (DebugUsesTraceListeners)
             {
-                // Triggers code to wire up TraceListeners with Debug
-                Assert.Equal(1, Trace.Listeners.Count);
+                Debug.SetProvider(_debugTraceProvider);
+            }
+            else
+            {
+                Debug.SetProvider(_debugOnlyProvider);
             }
         }
 
