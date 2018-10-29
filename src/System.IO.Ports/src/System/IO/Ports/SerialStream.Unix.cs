@@ -436,7 +436,7 @@ namespace System.IO.Ports
         }
 
         // Will wait `timeout` miliseconds or until reading or writing is possible
-        // If no operation is requested it will wait.
+        // If no operation is requested it will throw
         // Returns event which has happened
         private Interop.Sys.PollEvents PollEvents(int timeout, bool pollReadEvents, bool pollWriteEvents, out Interop.ErrorInfo? error)
         {
