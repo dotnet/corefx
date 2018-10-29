@@ -138,13 +138,11 @@ namespace System.Diagnostics
         {
             get
             {
-                InitializeSettings();
                 return Debug.IndentSize;
             }
 
             set
             {
-                InitializeSettings();
                 SetIndentSize(value);
             }
         }
@@ -163,7 +161,6 @@ namespace System.Diagnostics
             // Use global lock
             lock (critSec)
             {
-                InitializeSettings();
                 Debug.Indent();
             }
         }
@@ -173,7 +170,6 @@ namespace System.Diagnostics
             // Use global lock
             lock (critSec)
             {
-                InitializeSettings();
                 Debug.Unindent();
             }
         }
