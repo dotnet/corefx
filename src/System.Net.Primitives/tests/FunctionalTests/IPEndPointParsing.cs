@@ -12,13 +12,31 @@ namespace System.Net.Primitives.Functional.Tests
     {
         [Theory]
         [MemberData(nameof(IPAddressParsing.ValidIpv4Addresses), MemberType = typeof(IPAddressParsing))]    // Just borrow the list from IPAddressParsing
-        public void TryParse_ValidEndPoint_IPv4_Success(string address, string expectedAddress)
+        public void Parse_ValidEndPoint_IPv4_Success(string address, string expectedAddress)
+        {
+            Parse_ValidEndPoint_Success(address, expectedAddress, true);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidIpv6AddressesNoPort))]  // We need our own list here to explicitly exclude port numbers and brackets without making the test overly complicated (and less valid)
+        public void Parse_ValidEndPoint_IPv6_Success(string address, string expectedAddress)
+        {
+            Parse_ValidEndPoint_Success(address, expectedAddress, false);
+        }
+
+        private void Parse_ValidEndPoint_Success(string address, string expectedAddress, bool isIPv4)
         {
             // We'll parse just the address alone followed by the address with various port numbers
 
             expectedAddress = expectedAddress.ToLowerInvariant();   // This is done in the IP parse routines
 
+            // TryParse should return true
             Assert.True(IPEndPoint.TryParse(address, out IPEndPoint result));
+            Assert.Equal(expectedAddress, result.Address.ToString());
+            Assert.Equal(0, result.Port);
+
+            // Parse should give us the same result
+            result = IPEndPoint.Parse(address);
             Assert.Equal(expectedAddress, result.Address.ToString());
             Assert.Equal(0, result.Port);
 
@@ -26,7 +44,15 @@ namespace System.Net.Primitives.Functional.Tests
             int portNumber = 1;
             for (int i = 0; i < 5; i++)
             {
-                Assert.True(IPEndPoint.TryParse($"{address}:{i}", out result));
+                var addressAndPort = isIPv4 ? $"{address}:{i}" : $"[{address}]:{i}";
+
+                // TryParse should return true
+                Assert.True(IPEndPoint.TryParse(addressAndPort, out result));
+                Assert.Equal(expectedAddress, result.Address.ToString());
+                Assert.Equal(i, result.Port);
+
+                // Parse should give us the same result
+                result = IPEndPoint.Parse(addressAndPort);
                 Assert.Equal(expectedAddress, result.Address.ToString());
                 Assert.Equal(i, result.Port);
 
@@ -37,29 +63,104 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ValidIpv6AddressesNoPort))]  // We need our own list here to explicitly exclude port numbers and brackets without making the test overly complicated (and less valid)
-        public void TryParse_ValidEndPoint_IPv6_Success(string address, string expectedAddress)
+        [MemberData(nameof(IPAddressParsing.InvalidIpv4Addresses), MemberType = typeof(IPAddressParsing))]
+        [MemberData(nameof(IPAddressParsing.InvalidIpv4AddressesStandalone), MemberType = typeof(IPAddressParsing))]
+        public void Parse_InvalidAddress_IPv4_Throws(string address)
         {
-            // We'll parse just the address alone followed by the address with various port numbers
+            Parse_InvalidAddress_Throws(address, true);            
+        }
 
-            expectedAddress = expectedAddress.ToLowerInvariant();   // This is done in the IP parse routines
+        [Theory]
+        [MemberData(nameof(IPAddressParsing.InvalidIpv6Addresses), MemberType = typeof(IPAddressParsing))]
+        [MemberData(nameof(IPAddressParsing.InvalidIpv6AddressesNoInner), MemberType = typeof(IPAddressParsing))]
+        public void Parse_InvalidAddress_IPv6_Throws(string address)
+        {
+            Parse_InvalidAddress_Throws(address, false);
+        }
 
-            Assert.True(IPEndPoint.TryParse(address, out IPEndPoint result));
-            Assert.Equal(expectedAddress, result.Address.ToString());
-            Assert.Equal(0, result.Port);
+        private void Parse_InvalidAddress_Throws(string address, bool isIPv4)
+        {
+            // TryParse should return false and set result to null
+            var result = new IPEndPoint(IPAddress.Parse("0"), 25);
+            Assert.False(IPEndPoint.TryParse(address, out result));
+            Assert.Null(result);
 
-            // Cover varying lengths of port number
+            // Parse should throw
+            Assert.Throws<FormatException>(() => IPEndPoint.Parse(address));
+
             int portNumber = 1;
             for (int i = 0; i < 5; i++)
             {
-                Assert.True(IPEndPoint.TryParse($"[{address}]:{i}", out result));
-                Assert.Equal(expectedAddress, result.Address.ToString());
-                Assert.Equal(i, result.Port);
+                var addressAndPort = isIPv4 ? $"{address}:{i}" : $"[{address}]:{i}";
+
+                // TryParse should return false and set result to null
+                result = new IPEndPoint(IPAddress.Parse("0"), 25);
+                Assert.False(IPEndPoint.TryParse(addressAndPort, out result));
+                Assert.Null(result);
+
+                // Parse should throw
+                Assert.Throws<FormatException>(() => IPEndPoint.Parse(addressAndPort));
 
                 // i.e.: 1; 12; 123; 1234; 12345
                 portNumber *= 10;
                 portNumber += i + 2;
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(IPAddressParsing.ValidIpv4Addresses), MemberType = typeof(IPAddressParsing))]
+        public void Parse_InvalidPort_IPv4_Throws(string address, string expectedAddress)
+        {
+            Parse_InvalidPort_Throws(address, true);
+        }
+
+        [Theory]
+        [MemberData(nameof(IPAddressParsing.ValidIpv6Addresses), MemberType = typeof(IPAddressParsing))]
+        public void Parse_InvalidPort_IPv6_Throws(string address, string expectedAddress)
+        {
+            Parse_InvalidPort_Throws(address, false);
+        }
+
+        private void Parse_InvalidPort_Throws(string address, bool isIPv4)
+        {
+            InvalidPortHelper(isIPv4 ? $"{address}:65536" : $"[{address}]:65536");  // port exceeds max
+            InvalidPortHelper(isIPv4 ? $"{address}:-300" : $"[{address}]:-300");    // port is negative
+
+            int portNumber = 1;
+            for (int i = 0; i < 5; i++)
+            {
+                InvalidPortHelper(isIPv4 ? $"{address}:a{i}" : $"[{address}]:a{i}");        // character at start of port
+                InvalidPortHelper(isIPv4 ? $"{address}:{i}a" : $"[{address}]:{i}a");        // character at end of port
+                InvalidPortHelper(isIPv4 ? $"{address}]:{i}" : $"[{address}]]:{i}");        // bracket where it should not be
+                InvalidPortHelper(isIPv4 ? $"{address}:]{i}" : $"[{address}]:]{i}");        // bracket after colon
+                InvalidPortHelper(isIPv4 ? $"{address}:{i}]" : $"[{address}]:{i}]");        // trailing bracket
+                InvalidPortHelper(isIPv4 ? $"{address}:{i}:" : $"[{address}]:{i}:");        // trailing colon
+                InvalidPortHelper(isIPv4 ? $"{address}:{i}:{i}" : $"[{address}]:{i}]:{i}"); // double port
+                InvalidPortHelper(isIPv4 ? $"{address}:{i}a{i}" : $"[{address}]:{i}a{i}");  // character in the middle of numbers
+
+                var addressAndPort = isIPv4 ? $"{address}::{i}" : $"[{address}]::{i}";      // double delimiter
+                // Appending two colons to an address may create a valid one (e.g. "0" becomes "0::x").
+                // If and only if the address parsers says it's not valid then we should as well
+                if (!IPAddress.TryParse(addressAndPort, out IPAddress ipAddress))
+                {
+                    InvalidPortHelper(addressAndPort);
+                }
+
+                // i.e.: 1; 12; 123; 1234; 12345
+                portNumber *= 10;
+                portNumber += i + 2;
+            }
+        }
+
+        private void InvalidPortHelper(string addressAndPort)
+        {
+            // TryParse should return false and set result to null
+            var result = new IPEndPoint(IPAddress.Parse("0"), 25);
+            Assert.False(IPEndPoint.TryParse(addressAndPort, out result));
+            Assert.Null(result);
+
+            // Parse should throw
+            Assert.Throws<FormatException>(() => IPEndPoint.Parse(addressAndPort));
         }
 
         public static readonly object[][] ValidIpv6AddressesNoPort =

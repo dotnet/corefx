@@ -119,20 +119,22 @@ namespace System.Net
             }
         }
 
-        public static bool TryParse(string s, out IPEndPoint result)
+        public static bool TryParse(string endPointString, out IPEndPoint result)
         {
-            if (s == null)  // Avoid null ref exception on s.AsSpan()
+            if (endPointString == null)  // Avoid null ref exception on endPointString.AsSpan()
             {
                 result = null;
                 return false;
             }
 
-            return TryParse(s.AsSpan(), out result);
+            return TryParse(endPointString.AsSpan(), out result);
         }
 
-        public static bool TryParse(ReadOnlySpan<char> s, out IPEndPoint result)
+        public static bool TryParse(ReadOnlySpan<char> endPointSpan, out IPEndPoint result)
         {
-            // TODO: We could put some kind of easy fail here. For example, the max IPv6 address with max port length is 47 characters:
+            result = null;
+
+            // TODO: We could potentially put some kind of quick fail here. For example, the max IPv6 address with max port length is 47 characters:
             //
             //          [ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]:65535
             //
@@ -140,25 +142,28 @@ namespace System.Net
             //
             //          fe80::1ff:fe23:4567:890a%eth2
             //
-            //       We'll punt on this idea for now.
+            //       and RFC6874 (Representing IPv6 Zone Identifiers in Address Literals and Uniform Resource Identifiers) does not define
+            //       a maxmium length for that. While we could take 47 and "just double it", that doesn't feel technically correct.
 
-            result = null;
-            if (s != null)
+            if (endPointSpan != null)
             {
-                // Start at the end of the string and work backward, looking for a port delimiter
-                int port = 0;
+                int port = -1;
                 int multiplier = 1;
-                int sliceLength = s.Length;
+                int sliceLength = endPointSpan.Length;
                 bool encounteredInvalidPortCharacter = false;
-                for (int i = s.Length - 1; i >= 0; i--)
+
+                // Start at the end of the string and work backward, looking for a port delimiter. Worst case scenario for this
+                // implementation is we loop through the entire string one time, which is no worse off than one call to IndexOf for a 
+                // character not present in the string.
+                for (int i = endPointSpan.Length - 1; i >= 0; i--)
                 {
-                    char digit = s[i];
+                    char digit = endPointSpan[i];
 
                     // Locating a delimiter ends the sequence. We either have IPv4 with a port or IPv6 (with or without) or we have garbage
                     if (digit == ':')
                     {
                         // IPv6 with a port
-                        if ((i > 0 && s[i - 1] == ']'))
+                        if ((i > 0 && endPointSpan[i - 1] == ']'))
                         {
                             sliceLength = i;
                         }
@@ -169,55 +174,57 @@ namespace System.Net
                             *      with a colon is IPv6. We cannot do that. We have to determine whether to pass the entire span (i.e. this is
                             *      IPv6 without a port) or only a slice of the span (i.e. this is IPv4 with a port) to the address parser.
                             *      
-                            *      Generally, we should be able to check positions 1 through 3 (zero-based) for a "dot".
+                            *      Generally, we should be able to check positions 1 through 3 (zero-based) for a "dot"
+                            *      
                             *          .x..        (invalid leading dot - garbage input)
                             *          x.x.x.x     (dot a pos 1)
                             *          xx.x.x.x    (dot a pos 2)
                             *          xxx.x.x.x   (dot a pos 3)
                             *          
                             *      However, this fails for certain 6/4 interop addresses:
+                            *      
                             *          ::x.x.x.x   (dot a pos 3 - false positive)
                             *      
-                            *      We should be able to look for a leading colon in this case. Be aware that not all interop addresses
-                            *      begin with a colon:
+                            *      While we could look for a leading colon in that scenario, not all interop addresses begin with that:
                             *      
                             *          1::1.0.0.0  (valid)
-                            *  
-                            *      But the first position for a dot to appear in above is pos 4.
                             *      
                             *      Other complications:
                             *           Short IPv4 addresses:   0:1        (valid IPv4 with port)
                             *           IPv4 expressed in hex:  0xFFFFFFFF (valid: 255.255.255.255)
+                            *           
+                            *      Instead of looking for IPv4, we're going to look for indications that this is IPv6. We'll start at the beginning 
+                            *      of the string and loop up to the spot where we saw the last colon. If we see another colon along the way, it's IPv6.
+                            *      
+                            *      This inner loop does not increase our worst case scenario for the entire parse since it's a foward loop that terminates
+                            *      where the backwards loop left off, like two bookends meeting.
                             */
 
-                            // We're going to start at the beginning and loop up to the spot where we see the last colon. If we see another colon, it's IPv6.
-                            // Worse case scenario is one entire loop through the string (start at the end and go backward until we hit a colon, then start
-                            // at the front and go forward until we reach the position just prior to it).
-                            bool isIPv4 = true;
+                            sliceLength = i;    // Assume it's IPv4 with a port
                             for (int j = 0; j < i; j++)
                             {
-                                if (s[j] == ':')
+                                if (endPointSpan[j] == ':')
                                 {
-                                    isIPv4 = false;
+                                    // Nope, it's IPv6 without a port
+                                    sliceLength = endPointSpan.Length;
                                     break;
                                 }
                             }
-
-                            if (isIPv4)
-                            {
-                                sliceLength = i;    // IPv4 with a port
-                            }
-
-                            // If the above check fails, this is IPv6 without a port and we pass the entire span to the address parser.
-                            // sliceLength is set to the entire length by default, so there's nothing to do.
-                            // Also, IPv4 without a port will run through the entire loop and exit without hiting a colon, so we're
-                            // good there too.
+                            
+                            // IPv4 without a port will run through the entire loop and exit without hiting a colon, so we're in that case.
                         }
 
                         break;  // We can break out of the main loop now. We know everything we need to know.
                     }
                     else if ('0' <= digit && digit <= '9')
                     {
+                        // -1 is used to indicate that we have not seen any numeric digits while searching for a port (e.g. 192.168.1.2:)
+                        // We do not want that to be a valid EndPoint.
+                        if (port == -1)
+                        {
+                            port = 0;
+                        }
+
                         // We'll avoid overflow in cases where someone passes in garbage
                         if (port < MaxPort)
                         {
@@ -230,31 +237,29 @@ namespace System.Net
                         // If we see anything other than a numeric digit while processing the port number then we'll note that down for later.
                         // However, we cannot return false here because we do not actually know that there is a port. We won't know that
                         // until later. What we want to avoid is only processing the numeric digits of something like "192.168.0.1:HahaImNotValue37"
-                        // and returning 192.168.0.1 on port 37 while also avoiding returning false for "192.168.0.1" because we encountered
-                        // the last dot.
+                        // and returning 192.168.0.1 on port 37
                         encounteredInvalidPortCharacter = true;
                     }
 
                     // The tendency here is to bail on the loop when we see a dot under the assumption that this is IPv4 without a port.
-                    // That's a bad idea since "::x.x.x.x" is a valid IPv6 address. Leaving this here because the point is subtle.
+                    // That's a bad idea since "::x.x.x.x" is a valid IPv6 address. IPv4 addresses without a port have to loop the entire string.
                     //else if (digit == '.')
                     //{
-
                     //}
                 }
 
                 // We've either hit the delimiter or ran out of characters. Let's see what the IP parser thinks.
-                // TODO: this can likey be optimized in core since we already know what kind of address we have
-                if (IPAddress.TryParse(s.Slice(0, sliceLength), out IPAddress address))
+                if (IPAddress.TryParse(endPointSpan.Slice(0, sliceLength), out IPAddress address))
                 {
                     // If the slice length is the entire span then we do not have a port
-                    if (sliceLength == s.Length)
+                    if (sliceLength == endPointSpan.Length)
                     {
                         port = 0;       // Reset the port calculation
                     }
-                    else if (encounteredInvalidPortCharacter)
+                    else if (encounteredInvalidPortCharacter || port == -1)
                     {
                         return false;   // Now that we know there is a port, it's valid to error upon having seen non-numeric data during port processing
+                                        // or for having never seen any numeric digits while processing (e.g. "192.168.0.1:")
                     }
 
                     // Avoid tossing on invalid port
@@ -267,6 +272,26 @@ namespace System.Net
             }
 
             return false;
+        }
+
+        public static IPEndPoint Parse(string endPointString)
+        {
+            if (endPointString == null)  // Avoid null ref exception on endPointString.AsSpan()
+            {
+                throw new ArgumentNullException(nameof(endPointString));
+            }
+
+            return Parse(endPointString.AsSpan());
+        }
+
+        public static IPEndPoint Parse(ReadOnlySpan<char> endPointSpan)
+        {
+            if (TryParse(endPointSpan, out IPEndPoint result))
+            {
+                return result;
+            }
+
+            throw new FormatException(SR.bad_endpoint_string);
         }
 
         public override string ToString()
