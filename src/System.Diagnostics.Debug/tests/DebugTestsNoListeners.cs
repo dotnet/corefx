@@ -14,6 +14,12 @@ namespace System.Diagnostics.Tests
     {
         protected override bool DebugUsesTraceListeners { get { return false; } }
 
+        protected void GoToNextLine()
+        {
+            // Start from next line before running next test: refer to nameof(Debug_WriteLine_WontIndentAfterWrite)
+            VerifyLogged(() => Debug.WriteLine(""), Environment.NewLine);
+        }
+
         [Fact]
         public void Debug_Write_Indents()
         {
@@ -21,8 +27,7 @@ namespace System.Diagnostics.Tests
             Debug.Indent();
             VerifyLogged(() => Debug.Write("pizza"),        new string(' ', Debug.IndentLevel * Debug.IndentSize) +  "pizza");
             Debug.Unindent();
-
-            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+            GoToNextLine();
         }
 
         [Fact]
@@ -58,11 +63,7 @@ namespace System.Diagnostics.Tests
         public void Debug_WriteNull_SkipsIndentation()
         {
             Debug.Indent();
-
-            VerifyLogged(() => Debug.Write(null), new string(' ', 0));
-            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
-
-            // reset
+            VerifyLogged(() => Debug.Write(null), "");
             Debug.Unindent();
         }
 
@@ -114,7 +115,7 @@ namespace System.Diagnostics.Tests
             string longString = new string('d', 8192);
             VerifyLogged(() => Debug.Write(longString), longString);
 
-            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+            GoToNextLine();
         }
 
         [Fact]
@@ -123,7 +124,7 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Debug.Print("logged"), "logged");
             VerifyLogged(() => Debug.Print("logged {0}", 5), "logged 5");
 
-            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+            GoToNextLine();
         }
 
         [Fact]
@@ -155,7 +156,7 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Debug.WriteIf(true, "logged", "category"), "category: logged");
             VerifyLogged(() => Debug.WriteIf(false, "logged", "category"), "");
 
-            Debug.WriteLine(""); // neutralize indentation for next WriteLine call: refer to nameof(WriteLine_WontIndentAfterWrite)
+            GoToNextLine();
         }
 
         [Fact]

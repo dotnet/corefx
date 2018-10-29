@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Globalization;
 
@@ -19,12 +20,11 @@ namespace System.Diagnostics
     /// </devdoc>
     public class DefaultTraceListener : TraceListener
     {
-        private class DefaultTraceDebugProvider : DebugProvider
-        {
-            public override int IndentLevel { get { return 0; } set { } } // ignores indentation inside base.Write call
-        }
-
-        private static readonly DebugProvider s_provider = new DefaultTraceDebugProvider();
+        private static readonly Action<string> s_WriteCore = 
+            (Action<string>)typeof(DebugProvider).
+            GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic).
+            GetValue(null);
+            
         private bool _assertUIEnabled; 
         private bool _settingsInitialized;
         private string _logFileName;
@@ -118,14 +118,12 @@ namespace System.Diagnostics
 
         private void WriteAssert(string stackTrace, string message, string detailMessage)
         {
-            // Tracked by #32955: WriteAssert should indent "assertMessage" same way Debug.Fail does.
-            string assertMessage = SR.DebugAssertBanner + Environment.NewLine
-                                            + SR.DebugAssertShortMessage + Environment.NewLine
-                                            + message + Environment.NewLine
-                                            + SR.DebugAssertLongMessage + Environment.NewLine +
-                                            detailMessage + Environment.NewLine
-                                            + stackTrace;
-            WriteLine(assertMessage);
+            WriteLine(SR.DebugAssertBanner + Environment.NewLine
+                   + SR.DebugAssertShortMessage + Environment.NewLine
+                   + message + Environment.NewLine
+                   + SR.DebugAssertLongMessage + Environment.NewLine
+                   + detailMessage + Environment.NewLine
+                   + stackTrace);
         }
 
         /// <devdoc>
@@ -160,13 +158,23 @@ namespace System.Diagnostics
 
         private void Write(string message, bool useLogFile)
         {
-            if (NeedIndent && !string.IsNullOrEmpty(message)) 
-                WriteIndent();
+            if (message == null)
+            {
+                Write(string.Empty);
+                return;
+            }
 
-            s_provider.Write(message);
+            if (NeedIndent && !string.IsNullOrEmpty(message))
+            {
+                WriteIndent();
+            }
+
+            s_WriteCore(message);
 
             if (useLogFile && !string.IsNullOrEmpty(LogFileName))
+            {
                 WriteToLogFile(message);
+            }
         }
 
         private void WriteToLogFile(string message)

@@ -15,19 +15,36 @@ namespace System.Diagnostics
         {
             // This is where we override default DebugProvider because we know
             // for sure that we have some Listeners to write to.
-            s_originalProvider = Debug.SetProvider(s_provider);
+            Debug.SetProvider(new TraceProvider());
         }
 
         private class TraceProvider : DebugProvider
         {
-            public override int IndentLevel { get { return TraceInternal.IndentLevel; } set { TraceInternal.IndentLevel = value; } }
-            public override int IndentSize { get { return TraceInternal.IndentSize; } set { TraceInternal.IndentSize = value; } }
+            public override void OnIndentLevelChanged(int indentLevel)
+            {
+                if (Listeners != null)
+                {
+                    foreach (TraceListener listener in Listeners)
+                    {
+                        listener.IndentLevel = indentLevel;
+                    }
+                }
+            }
+
+            public override void OnIndentSizeChanged(int indentSize)
+            {
+                if (Listeners != null)
+                {
+                    foreach (TraceListener listener in Listeners)
+                    {
+                        listener.IndentSize = indentSize;
+                    }
+                }
+            }
             public override void Write(string message) { TraceInternal.Write(message); }
             public override void WriteLine(string message) { TraceInternal.WriteLine(message); }
         }
 
-        private static readonly DebugProvider s_provider = new TraceProvider();
-        private static readonly DebugProvider s_originalProvider;
         private static volatile string s_appName = null;
         private static volatile TraceListenerCollection s_listeners;
         private static volatile bool s_autoFlush;
@@ -54,8 +71,8 @@ namespace System.Diagnostics
                             // DefaultTraceListener to the listener collection.
                             s_listeners = new TraceListenerCollection();
                             TraceListener defaultListener = new DefaultTraceListener();
-                            defaultListener.IndentLevel = s_originalProvider.IndentLevel;
-                            defaultListener.IndentSize = s_originalProvider.IndentSize;
+                            defaultListener.IndentLevel = Debug.IndentLevel;
+                            defaultListener.IndentSize = Debug.IndentSize;
                             s_listeners.Add(defaultListener);
                         }
                     }
@@ -108,28 +125,14 @@ namespace System.Diagnostics
 
         public static int IndentLevel
         {
-            get { return s_originalProvider.IndentLevel; }
+            get { return Debug.IndentLevel; }
 
             set
             {
                 // Use global lock
                 lock (critSec)
                 {
-                    // We don't want to throw here -- it is very bad form to have debug or trace
-                    // code throw exceptions!
-                    if (value < 0)
-                    {
-                        value = 0;
-                    }
-                    s_originalProvider.IndentLevel = value;
-
-                    if (s_listeners != null)
-                    {
-                        foreach (TraceListener listener in Listeners)
-                        {
-                            listener.IndentLevel = s_originalProvider.IndentLevel;
-                        }
-                    }
+                    Debug.IndentLevel = value;
                 }
             }
         }
@@ -139,7 +142,7 @@ namespace System.Diagnostics
             get
             {
                 InitializeSettings();
-                return s_originalProvider.IndentSize;
+                return Debug.IndentSize;
             }
 
             set
@@ -154,22 +157,7 @@ namespace System.Diagnostics
             // Use global lock
             lock (critSec)
             {
-                // We don't want to throw here -- it is very bad form to have debug or trace
-                // code throw exceptions!            
-                if (value < 0)
-                {
-                    value = 0;
-                }
-
-                s_originalProvider.IndentSize = value;
-
-                if (s_listeners != null)
-                {
-                    foreach (TraceListener listener in Listeners)
-                    {
-                        listener.IndentSize = s_originalProvider.IndentSize;
-                    }
-                }
+                Debug.IndentSize = value;
             }
         }
 
@@ -179,14 +167,7 @@ namespace System.Diagnostics
             lock (critSec)
             {
                 InitializeSettings();
-                if (s_originalProvider.IndentLevel < int.MaxValue)
-                {
-                    s_originalProvider.IndentLevel++;
-                }
-                foreach (TraceListener listener in Listeners)
-                {
-                    listener.IndentLevel = s_originalProvider.IndentLevel;
-                }
+                Debug.Indent();
             }
         }
 
@@ -196,14 +177,7 @@ namespace System.Diagnostics
             lock (critSec)
             {
                 InitializeSettings();
-                if (s_originalProvider.IndentLevel > 0)
-                {
-                    s_originalProvider.IndentLevel--;
-                }
-                foreach (TraceListener listener in Listeners)
-                {
-                    listener.IndentLevel = s_originalProvider.IndentLevel;
-                }
+                Debug.Unindent();
             }
         }
 
@@ -352,7 +326,6 @@ namespace System.Diagnostics
                 {
                     if (!s_settingsInitialized)
                     {
-                        SetIndentSize(DiagnosticsConfiguration.IndentSize);
                         s_autoFlush = DiagnosticsConfiguration.AutoFlush;
                         s_useGlobalLock = DiagnosticsConfiguration.UseGlobalLock;
                         s_settingsInitialized = true;
@@ -369,6 +342,7 @@ namespace System.Diagnostics
             {
                 s_settingsInitialized = false;
                 s_listeners = null;
+                SetIndentSize(DiagnosticsConfiguration.IndentSize);
             }
             InitializeSettings();
         }
