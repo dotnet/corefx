@@ -38,7 +38,6 @@ namespace System.Diagnostics
             public override void WriteLine(string message) { TraceInternal.WriteLine(message); }
         }
 
-        internal static readonly DebugProvider provider = new TraceProvider();
         private static volatile string s_appName = null;
         private static volatile TraceListenerCollection s_listeners;
         private static volatile bool s_autoFlush;
@@ -63,7 +62,7 @@ namespace System.Diagnostics
                         {
                             // This is where we override default DebugProvider because we know
                             // for sure that we have some Listeners to write to.
-                            Debug.SetProvider(provider);
+                            Debug.SetProvider(new TraceProvider());
                             // In the absence of config support, the listeners by default add
                             // DefaultTraceListener to the listener collection.
                             s_listeners = new TraceListenerCollection();
