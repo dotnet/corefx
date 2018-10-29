@@ -26,7 +26,7 @@ namespace System.Diagnostics.Tests
 
             // First use our test logger to verify the output
             var originalWriteCoreHook = writeCoreHook.GetValue(null);
-            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
+            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.MockWrite));
 
             try
             {
@@ -54,7 +54,7 @@ namespace System.Diagnostics.Tests
             s_defaultProvider = Debug.SetProvider(WriteLogger.s_instance);
 
             var originalWriteCoreHook = writeCoreHook.GetValue(null);
-            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
+            writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.MockWrite));
 
             try
             {
@@ -101,7 +101,7 @@ namespace System.Diagnostics.Tests
                 AssertUIOutput += stackTrace + message + detailMessage + errorSource;
             }
 
-            public void WriteCore(string message)
+            public void MockWrite(string message)
             {
                 Assert.NotNull(message);
                 LoggedOutput += message;

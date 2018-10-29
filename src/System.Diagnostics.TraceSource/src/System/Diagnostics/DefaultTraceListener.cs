@@ -20,11 +20,6 @@ namespace System.Diagnostics
     /// </devdoc>
     public class DefaultTraceListener : TraceListener
     {
-        private static readonly Action<string> s_WriteCore = 
-            (Action<string>)typeof(DebugProvider).
-            GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic).
-            GetValue(null);
-            
         private bool _assertUIEnabled; 
         private bool _settingsInitialized;
         private string _logFileName;
@@ -169,7 +164,7 @@ namespace System.Diagnostics
                 WriteIndent();
             }
 
-            s_WriteCore(message);
+            TraceInternal.provider.WriteCore(message);
 
             if (useLogFile && !string.IsNullOrEmpty(LogFileName))
             {
