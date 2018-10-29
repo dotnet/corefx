@@ -164,7 +164,7 @@ namespace System.Diagnostics
                 WriteIndent();
             }
 
-            TraceInternal.provider.WriteCore(message);
+            DebugProvider.WriteCore(message);
 
             if (useLogFile && !string.IsNullOrEmpty(LogFileName))
             {

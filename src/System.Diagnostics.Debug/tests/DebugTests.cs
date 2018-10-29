@@ -20,6 +20,7 @@ namespace System.Diagnostics.Tests
             // Triggers code to wire up TraceListeners with Debug
             Assert.Equal(1, Trace.Listeners.Count);
             _debugTraceProvider = (DebugProvider)fieldInfo.GetValue(null);
+            Assert.NotEqual(_debugOnlyProvider.GetType(), _debugTraceProvider.GetType());
         }
 
         public DebugTests()
