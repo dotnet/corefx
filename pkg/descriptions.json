@@ -2275,7 +2275,7 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.Reflection.TypeLoader",
+    "Name": "Microsoft.Reflection.MetataLoadContext",
     "Description": "Provides functionality to reflect on assemblies with different architectures and without interferring with AppDomain contexts.",
     "CommonTypes": []
   }

@@ -1,0 +1,226 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.IO;
+using System.Linq;
+using System.Globalization;
+using System.Collections.Generic;
+
+using Xunit;
+
+namespace System.Reflection.Tests
+{
+    public static partial class MetadataLoadContextTests
+    {
+        [Fact]
+        public static void NoResolver()
+        {
+            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            {
+                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Type t = derived.GetType("Derived1", throwOnError: true);
+
+                Assert.Throws<FileNotFoundException>(() => t.BaseType);
+            }
+        }
+
+        [Fact]
+        public static void ResolverReturnsNull()
+        {
+            var resolver = new ResolverReturnsNull();
+            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            {
+                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.AssemblyName);
+                Assert.False(resolver.Called);
+
+                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Type t = derived.GetType("Derived1", throwOnError: true);
+                Assert.Throws<FileNotFoundException>(() => t.BaseType);
+
+                Assert.Same(tl, resolver.Sender);
+                Assert.Equal(resolver.AssemblyName.Name, "Foo");
+                Assert.True(resolver.Called);
+            }
+        }
+
+        [Fact]
+        public static void ResolverReturnsSomething()
+        {
+            var resolver = new ResolverReturnsSomething();
+            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            {
+                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.AssemblyName);
+                Assert.False(resolver.Called);
+
+                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Type t = derived.GetType("Derived1", throwOnError: true);
+                Type bt = t.BaseType;
+
+                Assert.Same(tl, resolver.Sender);
+                Assert.Equal(resolver.AssemblyName.Name, "Foo");
+                Assert.True(resolver.Called);
+
+                Assembly a = bt.Assembly;
+                Assert.Equal(a, resolver.Assembly);
+            }
+        }
+
+        [Fact]
+        public static void ResolverThrows()
+        {
+            var resolver = new ResolverThrows();
+            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            {
+                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.AssemblyName);
+                Assert.False(resolver.Called);
+
+                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Type t = derived.GetType("Derived1", throwOnError: true);
+                TargetParameterCountException e = Assert.Throws<TargetParameterCountException>(() => t.BaseType);
+
+                Assert.Same(tl, resolver.Sender);
+                Assert.True(resolver.Called);
+                Assert.Equal("Hi!", e.Message);
+            }
+        }
+
+        [Fact]
+        public static void ResolverNoUnnecessaryCalls()
+        {
+            int resolveHandlerCallCount = 0;
+            Assembly resolveEventHandlerResult = null;
+
+            // In a single-threaded scenario at least, MetadataLoadContexts shouldn't ask the resolver to bind the same name twice.
+            using (MetadataLoadContext tl = new MetadataLoadContext(
+                new FuncMetadataAssemblyResolver(
+                    delegate (MetadataLoadContext sender, AssemblyName name)
+                    {
+                        if (name.Name == "Foo")
+                        {
+                            resolveHandlerCallCount++;
+                            resolveEventHandlerResult = sender.LoadFromByteArray(TestData.s_BaseClassesImage);
+                            return resolveEventHandlerResult;
+                        }
+                        return null;
+                    })))
+                {
+                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Type t1 = derived.GetType("Derived1", throwOnError: true);
+                Type bt1 = t1.BaseType;
+                Type t2 = derived.GetType("Derived2", throwOnError: true);
+                Type bt2 = t2.BaseType;
+                Assert.Equal(1, resolveHandlerCallCount);
+                Assert.Equal(resolveEventHandlerResult, bt1.Assembly);
+                Assert.Equal(resolveEventHandlerResult, bt2.Assembly);
+            }
+        }
+
+        [Fact]
+        public static void ResolverMultipleCalls()
+        {
+            var resolver = new ResolverReturnsSomething();
+            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            {
+                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+
+                int expectedCount = 1;
+                foreach (string typeName in new string[] { "Derived1", "Derived3", "Derived4", "Derived5", "Derived6" })
+                {
+                    Type t = derived.GetType(typeName, throwOnError: true);
+                    Type bt = t.BaseType;
+                    Assert.Equal(bt.Assembly, resolver.Assembly);
+                    Assert.Equal(expectedCount++, resolver.CallCount);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ResolverFromReferencedAssembliesUsingFullPublicKeyReference()
+        {
+            // Ecma-335 allows an assembly reference to specify a full public key rather than the token. Ensure that those references
+            // still hand out usable AssemblyNames to resolve handlers.
+
+            AssemblyName assemblyNameReceivedByHandler = null;
+
+            using (MetadataLoadContext tl = new MetadataLoadContext(
+                new FuncMetadataAssemblyResolver(
+                    delegate (MetadataLoadContext sender, AssemblyName name)
+                    {
+                        assemblyNameReceivedByHandler = name;
+                        return null;
+                    })))
+            {
+                Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyRefUsingFullPublicKeyImage);
+                Type t = a.GetType("C", throwOnError: true);
+
+                // We expect this next to call to throw since it asks the MetadataLoadContext to resolve [mscorlib]System.Object and our
+                // resolve handler doesn't return anything for that.
+                Assert.Throws<FileNotFoundException>(() => t.BaseType);
+
+                // But it did get called with a request to resolve "mscorlib" and we got the correct PKT calculated from the PK.
+                // Note that the original PK is not made available (which follows prior precedent with these apis.) It's not like
+                // anyone binds with the full PK...
+                Assert.NotNull(assemblyNameReceivedByHandler); 
+                byte[] expectedPkt = "b77a5c561934e089".HexToByteArray();
+                byte[] actualPkt = assemblyNameReceivedByHandler.GetPublicKeyToken();
+                Assert.Equal<byte>(expectedPkt, actualPkt);
+            }
+        }
+    }
+
+    public class ResolverReturnsNull : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
+        {
+            Sender = context;
+            AssemblyName = assemblyName;
+            Called = true;
+
+            return null;
+        }
+
+        public AssemblyName AssemblyName { get; private set; }
+        public MetadataLoadContext Sender { get; private set; }
+        public bool Called { get; private set; }
+    }
+
+    public class ResolverReturnsSomething : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
+        {
+            Sender = context;
+            AssemblyName = assemblyName;
+            Called = true;
+            CallCount++;
+
+            Assembly = context.LoadFromByteArray(TestData.s_BaseClassesImage);
+            return Assembly;
+        }
+
+        public Assembly Assembly { get; private set; }
+        public AssemblyName AssemblyName { get; private set; }
+        public MetadataLoadContext Sender { get; private set; }
+        public bool Called { get; private set; }
+        public int CallCount { get; private set; }
+    }
+
+    public class ResolverThrows : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
+        {
+            Sender = context;
+            AssemblyName = assemblyName;
+            Called = true;
+
+            throw new TargetParameterCountException("Hi!");
+        }
+
+        public AssemblyName AssemblyName { get; private set; }
+        public MetadataLoadContext Sender { get; private set; }
+        public bool Called { get; private set; }
+    }
+}
