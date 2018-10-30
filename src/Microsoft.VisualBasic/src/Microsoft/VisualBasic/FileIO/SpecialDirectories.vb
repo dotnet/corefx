@@ -28,7 +28,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-
         ''' <summary>
         ''' Return the "My Music" directory.
         ''' </summary>
@@ -107,13 +106,20 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <value>A String containing the path to the directory your application can use to store data for the current user.</value>
         ''' <remarks>
-        ''' We chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
+        ''' If a path does not exist, one is created in the following format
+        ''' C:\Documents and Settings\[UserName]\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
+        '''
+        ''' We choose to use System.Windows.Forms.Application.* instead of System.Environment.GetFolderPath(*)
+        ''' since the second function will only return the C:\Documents and Settings\[UserName]\Application Data.\
+        ''' The first function separates applications by CompanyName, ProductName, ProductVersion.
+        ''' The only catch is that CompanyName, ProductName has to be specified in the AssemblyInfo.vb file,
+        ''' otherwise the name of the assembly will be used instead (which still has a level of separation).
+        '''
+        ''' Also, we chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
         ''' will work with Roaming User as well.
-        ''' </remarks>
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
-                Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectoryNotExist, "ApplicationData"))
-                'Return GetDirectoryPath(System.Windows.Forms.Application.CommonAppDataPath, SR.IO_SpecialDirectory_AllUserAppData)
+                Throw New PlatformNotSupportedException()
             End Get
         End Property
 
@@ -124,16 +130,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <value>A String containing the path to the directory your application can use to store data for all users.</value>
         ''' <remarks>
         ''' If a path does not exist, one is created in the following format
-        ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\ProductVersion
-        ''' Either CompanyName or ProductName may be left out but not both
-        ''' Product version is required but will default to "0.0.0.0"
+        ''' C:\Documents and Settings\All Users\Application Data\[CompanyName]\[ProductName]\[ProductVersion]
         '''
         ''' See above for reason why we don't use System.Environment.GetFolderPath(*).
         ''' </remarks>
         Public Shared ReadOnly Property AllUsersApplicationData() As String
             Get
-                Throw New PlatformNotSupportedException(GetResourceString(SR.IO_SpecialDirectoryNotExist, "ApplicationData"))
-                'Return GetDirectoryPath(System.Windows.Forms.Application.UserAppDataPath, SR.IO_SpecialDirectory_UserAppData)
+                Throw New PlatformNotSupportedException()
             End Get
         End Property
 

@@ -6,13 +6,13 @@ Option Strict On
 
 Imports System.Runtime.InteropServices
 Imports System.Security
-Imports Microsoft.VisualBasic.CompilerServices
+Imports System.Runtime.CompilerServices
 
 Namespace Microsoft.VisualBasic
 
     Partial Public Module Interaction
-        <DllImport("user32.dll", CharSet:=CharSet.Unicode, EntryPoint:="MessageBox", SetLastError:=False)>
-        Friend Function MessageBox(hWnd As Integer, lpText As String, lpCaption As String, uType As UInteger) As Integer
+        <DllImport("user32.dll", CharSet:=CharSet.Unicode, EntryPoint:="MessageBoxW", SetLastError:=False)>
+        Friend Function MessageBox(hWnd As IntPtr, lpText As String, lpCaption As String, uType As UInteger) As Integer
         End Function
 
         Private Function GetTitleFromAssembly(ByVal CallingAssembly As Reflection.Assembly) As String
@@ -42,15 +42,6 @@ Namespace Microsoft.VisualBasic
         Public Function MsgBox(ByVal Prompt As Object, Optional ByVal Buttons As MsgBoxStyle = MsgBoxStyle.OkOnly, Optional ByVal Title As Object = Nothing) As MsgBoxResult
             Dim sPrompt As String = Nothing
             Dim sTitle As String
-            'Dim vbhost As CompilerServices.IVbHost
-            'Dim ParentWindow As System.Windows.Forms.IWin32Window = Nothing
-            ' A read Parent window is need to make this Modal
-            Dim ParentWindow As Integer = Nothing
-
-            'vbhost = CompilerServices.HostServices.VBHost
-            'If Not vbhost Is Nothing Then
-            '    ParentWindow = vbhost.GetParentWindow()
-            'End If
 
             'Only allow legal button combinations to be set, one choice from each group
             'These bit constants are defined in System.Windows.Forms.MessageBox
@@ -93,7 +84,7 @@ Namespace Microsoft.VisualBasic
                 Throw New ArgumentException("Invalid Title", ex)
             End Try
 
-            Return CType(MessageBox(ParentWindow, sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
+            Return CType(MessageBox(CType(0, IntPtr), sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)
         End Function
     End Module
 End Namespace

@@ -1,15 +1,15 @@
 ﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
-Option Strict On
 Option Explicit On
+Option Strict On
 
 Imports System.ComponentModel
 Imports System.Globalization
 Imports System.IO
-Imports System.Security.Permissions
 Imports System.Text
 Imports System.Text.RegularExpressions
+
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 
@@ -234,7 +234,6 @@ Namespace Microsoft.VisualBasic.FileIO
                 m_NeedPropertyCheck = True
             End Set
         End Property
-
 
         ''' <summary>
         '''  Gets or sets the widths of the fields for reading a fixed width file
@@ -1555,6 +1554,7 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' </summary>
         ''' <param name="DelimiterRegex">The regex used to find any of the delimiters</param>
         ''' <param name="SpaceChars">Characters treated as space (usually space and tab)</param>
+        ''' <remarks></remarks>
         Public Sub New(ByVal DelimiterRegex As Regex, ByVal SpaceChars As String)
             m_DelimiterRegex = DelimiterRegex
             m_SpaceChars = SpaceChars
@@ -1604,7 +1604,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Get
         End Property
 
-
         ''' <summary>
         '''  Indicates that the current field breaks the subset of csv rules we enforce
         ''' </summary>
@@ -1627,14 +1626,13 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <param name="StartAt">The index at which we start building the field</param>
         ''' <remarks></remarks>
         Public Sub BuildField(ByVal Line As String, ByVal StartAt As Integer)
-            ' For readability
-            Const DoubleQuoteChar As Char = """"c
+
             m_Index = StartAt
             Dim Length As Integer = Line.Length
 
             While m_Index < Length
 
-                If Line(m_Index) = DoubleQuoteChar Then
+                If Line(m_Index) = """"c Then
 
                     ' Are we at the end of the file?
                     If m_Index + 1 = Length Then
@@ -1647,8 +1645,8 @@ Namespace Microsoft.VisualBasic.FileIO
                         Return
                     End If
                     ' Check to see if this is an escaped quote
-                    If m_Index + 1 < Line.Length And Line(m_Index + 1) = DoubleQuoteChar Then
-                        m_Field.Append(DoubleQuoteChar)
+                    If m_Index + 1 < Line.Length And Line(m_Index + 1) = """"c Then
+                        m_Field.Append(""""c)
                         m_Index += 2
                         Continue While
                     End If

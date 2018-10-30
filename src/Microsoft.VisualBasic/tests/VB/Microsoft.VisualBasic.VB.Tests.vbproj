@@ -13,4 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.VisualBasic.vbproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Microsoft\VisualBasic\CompilerServices\" />
+  </ItemGroup>
 </Project>

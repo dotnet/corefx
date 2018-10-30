@@ -1,12 +1,12 @@
 ﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
-Option Explicit On
 Option Strict On
+Option Explicit On
 
+Imports System.Security
 Imports System.Runtime.InteropServices
 Imports System.Runtime.Versioning
-Imports System.Security
 
 Namespace Microsoft.VisualBasic.CompilerServices
 
@@ -18,10 +18,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Friend Declare Function _
             CloseHandle _
                 Lib "kernel32" (ByVal hObject As IntPtr) As Integer
-
-        <DllImport("user32.dll", CharSet:=CharSet.Unicode, EntryPoint:="MessageBox", SetLastError:=False)>
-        Friend Shared Function MessageBox(hWnd As Integer, lpText As String, lpCaption As String, uType As UInteger) As Integer
-        End Function
 
         ''' <summary>
         ''' Given a 32-bit SHFILEOPSTRUCT, call the appropriate SHFileOperation function
@@ -35,18 +31,18 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Friend Shared Function SHFileOperation(ByRef lpFileOp As SHFILEOPSTRUCT) As Int32
             If (IntPtr.Size = 4) Then ' 32-bit platforms
                 Return SHFileOperation32(lpFileOp)
-            Else ' 64-bit plaforms
+            Else ' 64-bit platforms
+
                 ' Create a new SHFILEOPSTRUCT64. The only difference is the packing, so copy all fields.
-                Dim lpFileOp64 As New SHFILEOPSTRUCT64 With {
-            .hwnd = lpFileOp.hwnd,
-            .wFunc = lpFileOp.wFunc,
-            .pFrom = lpFileOp.pFrom,
-            .pTo = lpFileOp.pTo,
-            .fFlags = lpFileOp.fFlags,
-            .fAnyOperationsAborted = lpFileOp.fAnyOperationsAborted,
-            .hNameMappings = lpFileOp.hNameMappings,
-            .lpszProgressTitle = lpFileOp.lpszProgressTitle
-        }
+                Dim lpFileOp64 As New SHFILEOPSTRUCT64
+                lpFileOp64.hwnd = lpFileOp.hwnd
+                lpFileOp64.wFunc = lpFileOp.wFunc
+                lpFileOp64.pFrom = lpFileOp.pFrom
+                lpFileOp64.pTo = lpFileOp.pTo
+                lpFileOp64.fFlags = lpFileOp.fFlags
+                lpFileOp64.fAnyOperationsAborted = lpFileOp.fAnyOperationsAborted
+                lpFileOp64.hNameMappings = lpFileOp.hNameMappings
+                lpFileOp64.lpszProgressTitle = lpFileOp.lpszProgressTitle
 
                 ' P/Invoke SHFileOperation with the 64 bit structure.
                 Dim result As Int32 = SHFileOperation64(lpFileOp64)
@@ -234,6 +230,32 @@ Namespace Microsoft.VisualBasic.CompilerServices
             ' The dwItem1 and dwItem2 parameters are DWORD values.
             SHCNF_DWORD = &H3
         End Enum
+
+        ''' <summary>
+        ''' The MoveFileEx function moves an existing file or directory.
+        ''' http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/movefileex.asp
+        ''' </summary>
+        <SecurityCritical()>
+        <ResourceExposure(ResourceScope.Machine)>
+        <DllImport("kernel32",
+             PreserveSig:=True,
+             CharSet:=CharSet.Auto,
+             EntryPoint:="MoveFileEx",
+             BestFitMapping:=False,
+             ThrowOnUnmappableChar:=True,
+             SetLastError:=True)>
+        Friend Shared Function MoveFileEx(
+             ByVal lpExistingFileName As String,
+             ByVal lpNewFileName As String,
+             ByVal dwFlags As Integer) As <MarshalAs(UnmanagedType.Bool)> Boolean
+        End Function
+
+        ''' <summary>
+        ''' FxCop violation: Avoid uninstantiated internal class.
+        ''' Adding a private constructor to prevent the compiler from generating a default constructor.
+        ''' </summary>
+        Private Sub New()
+        End Sub
 
     End Class
 

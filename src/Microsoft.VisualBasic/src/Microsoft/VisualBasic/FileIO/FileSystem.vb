@@ -9,7 +9,9 @@ Imports System.Globalization
 Imports System.Security
 Imports System.Runtime.Versioning
 Imports System.Text
+
 Imports Microsoft.VisualBasic.CompilerServices
+Imports Microsoft.VisualBasic.CompilerServices.NativeTypes
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 Namespace Microsoft.VisualBasic.FileIO
@@ -1182,14 +1184,28 @@ Namespace Microsoft.VisualBasic.FileIO
                 '   so call IO.File.Copy to get the exception as well.
                 IO.File.Copy(sourceFileFullPath, destinationFileFullPath, overwrite)
             Else ' MoveFile with support for overwrite flag.
-                If overwrite Then ' User wants to overwrite destination.
-                    IO.File.Delete(destinationFileFullPath)
+                If Environment.OSVersion.Platform = PlatformID.Win32NT Then ' Platforms supporting MoveFileEx.
+                    Try
+                        Dim succeed As Boolean = NativeMethods.MoveFileEx(
+                                sourceFileFullPath, destinationFileFullPath, m_MOVEFILEEX_FLAGS)
+                        ' GetLastWin32Error has to be close to PInvoke call. FxCop rule.
+                        If Not succeed Then
+                            ThrowWinIOError(System.Runtime.InteropServices.Marshal.GetLastWin32Error())
+                        End If
+                    Catch
+                        Throw
+                    End Try
+                Else
+                    If overwrite Then ' User wants to overwrite destination.
+                        IO.File.Delete(destinationFileFullPath)
 
-                    IO.File.Move(sourceFileFullPath, destinationFileFullPath)
-                Else ' Overwrite = False, call Framework.
-                    IO.File.Move(sourceFileFullPath, destinationFileFullPath)
-                End If ' Overwrite
+                        IO.File.Move(sourceFileFullPath, destinationFileFullPath)
+                    Else ' Overwrite = False, call Framework.
+                        IO.File.Move(sourceFileFullPath, destinationFileFullPath)
+                    End If ' Overwrite
+                End If
             End If
+
         End Sub
 
         ''' <summary>
@@ -1703,6 +1719,15 @@ Namespace Microsoft.VisualBasic.FileIO
 
             Throw New InvalidEnumArgumentException(argName, argValue, GetType(UICancelOption))
         End Sub
+
+        ' When calling MoveFileEx, set the following flags:
+        ' - Simulate CopyFile and DeleteFile if copied to a different volume.
+        ' - Replace contents of existing target with the contents of source file.
+        ' - Do not return until the file has actually been moved on the disk.
+        Private Const m_MOVEFILEEX_FLAGS As Integer = CInt(
+            MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
+            MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
+            MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
 
         ' Array containing all the path separator chars. Used to verify that input is a name, not a path.
         Private Shared ReadOnly m_SeparatorChars() As Char = {
