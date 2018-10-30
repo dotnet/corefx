@@ -16,4 +16,8 @@ Namespace Microsoft.VisualBasic.FileIO
             Throw New PlatformNotSupportedException(SR.NoShellDelete)
         End Sub
     End Class
+    Private Shared Sub ThrowWinIOError(ByVal errorCode As Integer)
+        Throw New PlatformNotSupportedException()
+    End Sub
+
 End Namespace

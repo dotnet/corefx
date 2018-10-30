@@ -1199,7 +1199,7 @@ Namespace Microsoft.VisualBasic.FileIO
                             Throw
                         End Try
 
-                    Else ' Win95, Win98, WinME.
+                    Else ' Win95, Win98, WinME, non Windows
                         ' IO.File.Delete will not throw if destinationFileFullPath does not exist
                         ' (user may not have permission to discover this, but have permission to overwrite),
                         ' so always delete the destination.
