@@ -15,16 +15,16 @@ Namespace Microsoft.VisualBasic.FileIO
         Private Shared Sub ShellDelete(directoryFullPath As String, showUI As UIOptionInternal, recycle As RecycleOption, onUserCancel As UICancelOption, directory As FileOrDirectory)
             Throw New PlatformNotSupportedException(SR.NoShellDelete)
         End Sub
-    End Class
 
-    ''' <summary>
-    ''' Stub to prevent compile error, this will not get called on non Windows OS's
-    ''' This would be implemented on non-Windows in the future
-    ''' </summary>
-    ''' <param name="sourceFileFullPath"></param>
-    ''' <param name="destinationFileFullPath"></param>
-    Private Shared Sub WinNTCopyOrMove(sourceFileFullPath As String, destinationFileFullPath As String)
-        Throw New PlatformNotSupportedException()
-    End Sub
+        ''' <summary>
+        ''' Stub to prevent compile error, this will not get called on non Windows OS's
+        ''' This would be implemented on non-Windows in the future
+        ''' </summary>
+        ''' <param name="sourceFileFullPath"></param>
+        ''' <param name="destinationFileFullPath"></param>
+        Private Shared Sub WinNTCopyOrMove(sourceFileFullPath As String, destinationFileFullPath As String)
+            Throw New PlatformNotSupportedException()
+        End Sub
+    End Class
 
 End Namespace
