@@ -119,77 +119,61 @@ namespace System.Net
             }
         }
 
-        public static bool TryParse(string endPointString, out IPEndPoint result)
+        public static bool TryParse(string s, out IPEndPoint result)
         {
-            return TryParse(endPointString.AsSpan(), out result);
+            return TryParse(s.AsSpan(), out result);
         }
 
-        public static bool TryParse(ReadOnlySpan<char> endPointSpan, out IPEndPoint result)
-        {
-            result = null;
-            int sliceLength = endPointSpan.Length;  // If there's no port then send the entire string to the address parser
-            int lastColonPos = endPointSpan.LastIndexOf(':');
+        public static bool TryParse(ReadOnlySpan<char> s, out IPEndPoint result)
+        {   
+            int addressLength = s.Length;  // If there's no port then send the entire string to the address parser
+            int lastColonPos = s.LastIndexOf(':');
 
             // Look to see if this is an IPv6 address with a port.
-            if (lastColonPos > 0 && endPointSpan[lastColonPos - 1] == ']')
+            if (lastColonPos > 0)
             {
-                sliceLength = lastColonPos;
-            }
-            else if(lastColonPos > 0)
-            {
+                if (s[lastColonPos - 1] == ']')
+                {
+                    addressLength = lastColonPos;
+                }
                 // Look to see if this is IPv4 with a port (IPv6 will have another colon)
-
-                int secondToLastColonPos = -1;
-                
-                // Span does not have an overload for LastIndexOf that takes a starting position; we have no choice but to loop
-                for (int i = lastColonPos - 1; i >= 0; i--)
+                else if (s.Slice(0, lastColonPos).LastIndexOf(':') == -1)
                 {
-                    if (endPointSpan[i] == ':')
-                    {
-                        secondToLastColonPos = i;
-                        break;
-                    }
-                }
-                // No additional colon = IPv4 with port
-                if (secondToLastColonPos == -1)
-                {
-                    sliceLength = lastColonPos;
+                    addressLength = lastColonPos;
                 }
             }
 
-            if (IPAddress.TryParse(endPointSpan.Slice(0, sliceLength), out IPAddress address))
+            if (IPAddress.TryParse(s.Slice(0, addressLength), out IPAddress address))
             {
                 int port = 0;
-                if (sliceLength < endPointSpan.Length &&
-                    !int.TryParse(endPointSpan.Slice(sliceLength + 1), out port))
+                if (
+                    (addressLength == s.Length || int.TryParse(s.Slice(addressLength + 1), out port)) &&
+                    port >= MinPort && port <= MaxPort
+                    )
+                    
                 {
-                    return false;
+                    result = new IPEndPoint(address, port);
+                    return true;
                 }
-
-                if (port < MinPort || port > MaxPort)
-                {
-                    return false;
-                }
-
-                result = new IPEndPoint(address, port);
-                return true;
             }
+
+            result = null;
             return false;
         }
 
-        public static IPEndPoint Parse(string endPointString)
+        public static IPEndPoint Parse(string s)
         {
-            if (endPointString == null)  // Avoid null ref exception on endPointString.AsSpan()
+            if (s == null)
             {
-                throw new ArgumentNullException(nameof(endPointString));
+                throw new ArgumentNullException(nameof(s));
             }
 
-            return Parse(endPointString.AsSpan());
+            return Parse(s.AsSpan());
         }
 
-        public static IPEndPoint Parse(ReadOnlySpan<char> endPointSpan)
+        public static IPEndPoint Parse(ReadOnlySpan<char> s)
         {
-            if (TryParse(endPointSpan, out IPEndPoint result))
+            if (TryParse(s, out IPEndPoint result))
             {
                 return result;
             }

@@ -81,8 +81,7 @@ namespace System.Net.Primitives.Functional.Tests
         private void Parse_InvalidAddress_Throws(string address, bool isIPv4)
         {
             // TryParse should return false and set result to null
-            var result = new IPEndPoint(IPAddress.Parse("0"), 25);
-            Assert.False(IPEndPoint.TryParse(address, out result));
+            Assert.False(IPEndPoint.TryParse(address, out IPEndPoint result));
             Assert.Null(result);
 
             // Parse should throw
@@ -91,7 +90,7 @@ namespace System.Net.Primitives.Functional.Tests
             int portNumber = 1;
             for (int i = 0; i < 5; i++)
             {
-                var addressAndPort = isIPv4 ? $"{address}:{i}" : $"[{address}]:{i}";
+                string addressAndPort = isIPv4 ? $"{address}:{i}" : $"[{address}]:{i}";
 
                 // TryParse should return false and set result to null
                 result = new IPEndPoint(IPAddress.Parse("0"), 25);
@@ -138,7 +137,7 @@ namespace System.Net.Primitives.Functional.Tests
                 InvalidPortHelper(isIPv4 ? $"{address}:{i}:{i}" : $"[{address}]:{i}]:{i}"); // double port
                 InvalidPortHelper(isIPv4 ? $"{address}:{i}a{i}" : $"[{address}]:{i}a{i}");  // character in the middle of numbers
 
-                var addressAndPort = isIPv4 ? $"{address}::{i}" : $"[{address}]::{i}";      // double delimiter
+                string addressAndPort = isIPv4 ? $"{address}::{i}" : $"[{address}]::{i}";   // double delimiter
                 // Appending two colons to an address may create a valid one (e.g. "0" becomes "0::x").
                 // If and only if the address parsers says it's not valid then we should as well
                 if (!IPAddress.TryParse(addressAndPort, out IPAddress ipAddress))
@@ -155,8 +154,7 @@ namespace System.Net.Primitives.Functional.Tests
         private void InvalidPortHelper(string addressAndPort)
         {
             // TryParse should return false and set result to null
-            var result = new IPEndPoint(IPAddress.Parse("0"), 25);
-            Assert.False(IPEndPoint.TryParse(addressAndPort, out result));
+            Assert.False(IPEndPoint.TryParse(addressAndPort, out IPEndPoint result));
             Assert.Null(result);
 
             // Parse should throw
@@ -164,7 +162,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         public static readonly object[][] ValidIpv6AddressesNoPort =
-        {
+        {   
             new object[] { "Fe08::1", "fe08::1" },
             new object[] { "0000:0000:0000:0000:0000:0000:0000:0000", "::" },
             new object[] { "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" },
