@@ -147,7 +147,7 @@ namespace System.Net
             {
                 uint port = 0;
                 if (addressLength == s.Length ||
-                    (uint.TryParse(s.Slice(addressLength + 1), NumberStyles.None, CultureInfo.InvariantCulture, out port) && port >= MinPort && port <= MaxPort))
+                    (uint.TryParse(s.Slice(addressLength + 1), NumberStyles.None, CultureInfo.InvariantCulture, out port) && port <= MaxPort))
                     
                 {
                     result = new IPEndPoint(address, (int)port);
