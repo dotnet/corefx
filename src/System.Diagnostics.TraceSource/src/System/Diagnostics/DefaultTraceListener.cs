@@ -154,11 +154,10 @@ namespace System.Diagnostics
         {
             if (message == null)
             {
-                Write(string.Empty, useLogFile);
-                return;
+                message = string.Empty;
             }
 
-            if (NeedIndent && !string.IsNullOrEmpty(message))
+            if (NeedIndent && message.Length != 0)
             {
                 WriteIndent();
             }
