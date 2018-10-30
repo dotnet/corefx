@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1499,6 +1499,33 @@ namespace System.Tests
             Assert.Equal(double.NaN, Math.Round(double.NaN, 3, MidpointRounding.AwayFromZero));
             Assert.Equal(double.PositiveInfinity, Math.Round(double.PositiveInfinity, 3, MidpointRounding.AwayFromZero));
             Assert.Equal(double.NegativeInfinity, Math.Round(double.NegativeInfinity, 3, MidpointRounding.AwayFromZero));
+        }
+
+        [Fact]
+        public static void Round_Double_ToPositiveInfinity()
+        {
+            Assert.Equal(12.0, Math.Round(11.5, 0, MidpointRounding.ToPositiveInfinity));
+            Assert.Equal(13.0, Math.Round(12.5, 0, MidpointRounding.ToPositiveInfinity));
+            Assert.Equal(-11.0, Math.Round(-11.5, 0, MidpointRounding.ToPositiveInfinity));
+            Assert.Equal(-12.0, Math.Round(-12.5, 0, MidpointRounding.ToPositiveInfinity));
+        }
+
+        [Fact]
+        public static void Round_Double_ToNegativeInfinity()
+        {
+            Assert.Equal(11.0, Math.Round(11.5, 0, MidpointRounding.ToNegativeInfinity));
+            Assert.Equal(12.0, Math.Round(12.5, 0, MidpointRounding.ToNegativeInfinity));
+            Assert.Equal(-12.0, Math.Round(-11.5, 0, MidpointRounding.ToNegativeInfinity));
+            Assert.Equal(-13.0, Math.Round(-12.5, 0, MidpointRounding.ToNegativeInfinity));
+        }
+
+        [Fact]
+        public static void Round_Double_ToZero()
+        {
+            Assert.Equal(11.0, Math.Round(11.5, 0, MidpointRounding.ToNegativeInfinity));
+            Assert.Equal(12.0, Math.Round(12.5, 0, MidpointRounding.ToNegativeInfinity));
+            Assert.Equal(-11.0, Math.Round(-11.5, 0, MidpointRounding.ToNegativeInfinity));
+            Assert.Equal(-12.0, Math.Round(-12.5, 0, MidpointRounding.ToNegativeInfinity));
         }
 
         [Fact]
