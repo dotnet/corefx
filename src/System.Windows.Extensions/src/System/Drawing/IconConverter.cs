@@ -17,7 +17,8 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(byte[]) || destinationType == typeof(string);
+            return destinationType == typeof(byte[]) || destinationType == typeof(string) 
+                || destinationType == typeof(Image) || destinationType == typeof(Bitmap);
         }
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
@@ -44,6 +45,13 @@ namespace System.Drawing
                 {
                     ((Icon)value).Save(ms);
                     return ms.ToArray();
+                }
+            }
+            else if (destinationType == typeof(Image) || destinationType == typeof(Bitmap))
+            {
+                if (value is Icon icon)
+                {
+                    return icon.ToBitmap();
                 }
             }
 

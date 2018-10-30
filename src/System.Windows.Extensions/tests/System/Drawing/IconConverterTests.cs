@@ -72,6 +72,10 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.True(_icoConv.CanConvertTo(typeof(byte[])), "byte[] (no context)");
             Assert.True(_icoConv.CanConvertTo(null, typeof(byte[])), "byte[]");
             Assert.True(_icoConv.CanConvertTo(null, _iconBytes.GetType()), "_iconBytes.GetType()");
+            Assert.True(_icoConv.CanConvertTo(typeof(Image)), "Image (no context)");
+            Assert.True(_icoConv.CanConvertTo(null, typeof(Image)), "Image");
+            Assert.True(_icoConv.CanConvertTo(typeof(Bitmap)), "Bitmap (no context)");
+            Assert.True(_icoConv.CanConvertTo(null, typeof(Bitmap)), "Bitmap");
             Assert.False(_icoConv.CanConvertTo(null, typeof(Rectangle)), "Rectangle");
             Assert.False(_icoConv.CanConvertTo(null, typeof(Point)), "Point");
             Assert.False(_icoConv.CanConvertTo(null, typeof(PointF)), "PointF");
@@ -86,6 +90,10 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.True(_icoConvFrmTD.CanConvertTo(typeof(byte[])), "TD byte[] (no context)");
             Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(byte[])), "TD byte[]");
             Assert.True(_icoConvFrmTD.CanConvertTo(null, _iconBytes.GetType()), "TD _iconBytes.GetType()");
+            Assert.True(_icoConvFrmTD.CanConvertTo(typeof(Image)), "TD Image (no context)");
+            Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(Image)), "TD Image");
+            Assert.True(_icoConvFrmTD.CanConvertTo(typeof(Bitmap)), "TD Bitmap (no context)");
+            Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(Bitmap)), "TD Bitmap");
             Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(Rectangle)), "TD Rectangle");
             Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(Point)), "TD Point");
             Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(PointF)), "TD PointF");
