@@ -104,7 +104,7 @@ namespace System.ComponentModel.TypeConverterTests
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Suppor to convert image format from long name was added to .NET Core directly.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Support to convert image format from long name was added to .NET Core directly.")]
         public void ConvertFrom_LongName()
         {
             Guid testGuid = Guid.NewGuid();
@@ -113,7 +113,7 @@ namespace System.ComponentModel.TypeConverterTests
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Suppor to convert image format from long name was added to .NET Core directly.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Support to convert image format from long name was added to .NET Core directly.")]
         public void ConvertFrom_ThrowsFormatExceptionOnInvalidFormatString()
         {
             Assert.Throws<FormatException>(() => _imgFmtConv.ConvertFrom("System.Drawing.String"));
