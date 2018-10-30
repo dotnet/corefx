@@ -23,6 +23,9 @@
 #if HAVE_PIPE2
 #include <fcntl.h>
 #endif
+#ifndef HAVE_PIPE2
+#include <pthread.h>
+#endif
 
 #if HAVE_SCHED_SETAFFINITY || HAVE_SCHED_GETAFFINITY
 #include <sched.h>
@@ -65,6 +68,10 @@ c_static_assert(PAL_LOG_LOCAL7 == LOG_LOCAL7);
 c_static_assert(PAL_PRIO_PROCESS == (int)PRIO_PROCESS);
 c_static_assert(PAL_PRIO_PGRP == (int)PRIO_PGRP);
 c_static_assert(PAL_PRIO_USER == (int)PRIO_USER);
+
+#ifndef HAVE_PIPE2
+static pthread_mutex_t process_create_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 enum
 {
@@ -154,6 +161,9 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t* stdoutFd,
                                       int32_t* stderrFd)
 {
+#ifndef HAVE_PIPE2
+    int have_create_process_lock = 0;
+#endif
     int success = true;
     int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, -1};
     int processId = -1;
@@ -187,6 +197,17 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
+#ifndef HAVE_PIPE2
+    // We do not have pipe2(); take the lock to emulate it race free.
+    if (pthread_mutex_lock(&process_create_lock) != 0)
+    {
+        // This check is pretty much just checking for trashed memory.
+        success = false;
+        goto done;
+    }
+    have_create_process_lock = 1;
+#endif
+
     // Open pipes for any requests to redirect stdin/stdout/stderr and set the
     // close-on-exec flag to the pipe file descriptors.
     if ((redirectStdin  && SystemNative_Pipe(stdinFds,  PAL_O_CLOEXEC) != 0) ||
@@ -197,20 +218,16 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-    // If we have pipe2 and can use O_CLOEXEC, we create a pipe purely for the benefit
-    // of knowing when the child process has called exec.  We can use that to block waiting
-    // on the pipe to be closed, which lets us block the parent from returning until the
-    // child process is actually transitioned to the target program.  This avoids problems
-    // where the parent process uses members of Process, like ProcessName, when the Process
-    // is still the clone of this one. This is a best-effort attempt, so ignore any errors.
+    // We create a pipe purely for the benefit of knowing when the child process has called exec.
+    // We can use that to block waiting on the pipe to be closed, which lets us block the parent
+    // from returning until the child process is actually transitioned to the target program.  This
+    // avoids problems where the parent process uses members of Process, like ProcessName, when the
+    // Process is still the clone of this one. This is a best-effort attempt, so ignore any errors.
     // If the child fails to exec we use the pipe to pass the errno to the parent process.
-    // NOTE: It's tempting to use SystemNative_Pipe here, as that would simulate pipe2 even
-    // on platforms that don't have it.  But it's potentially problematic, in that if another
-    // process is launched between the pipe creation and the fcntl call to set CLOEXEC on it,
-    // that file descriptor will be inherited into the child process, which will in turn cause
-    // the loop below that waits for that pipe to be closed to loop indefinitely.
-#if HAVE_PIPE2
+#ifdef HAVE_PIPE2
     pipe2(waitForChildToExecPipe, O_CLOEXEC);
+#else
+    SystemNative_Pipe(waitForChildToExecPipe, PAL_O_CLOEXEC);
 #endif
 
     // Fork the child process
@@ -288,6 +305,11 @@ done:;
         }
         CloseIfOpen(waitForChildToExecPipe[READ_END_OF_PIPE]);
     }
+
+#ifndef HAVE_PIPE2
+    if (have_create_process_lock)
+        pthread_mutex_unlock(&process_create_lock);
+#endif
 
     // If we failed, close everything else and give back error values in all out arguments.
     if (!success)
