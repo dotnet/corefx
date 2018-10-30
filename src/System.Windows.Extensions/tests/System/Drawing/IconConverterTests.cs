@@ -147,7 +147,6 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Rectangle)));
             Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, _icon.GetType()));
             Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Size)));
-            Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Bitmap)));
             Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Point)));
             Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Metafile)));
             Assert.Throws<NotSupportedException>(() => _icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(object)));
@@ -166,7 +165,6 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Rectangle)));
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, _icon.GetType()));
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Size)));
-            Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Bitmap)));
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Point)));
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Metafile)));
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(object)));
