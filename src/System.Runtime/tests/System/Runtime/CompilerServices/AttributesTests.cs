@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Runtime.CompilerServices.Tests
 {
-    public static class AttributesTests
+    public static partial class AttributesTests
     {
         [Fact]
         public static void AccessedThroughPropertyAttributeTests()
@@ -167,18 +167,6 @@ namespace System.Runtime.CompilerServices.Tests
 
             var attr2 = new InternalsVisibleToAttribute(null);
             Assert.Null(attr2.AssemblyName);
-        }
-
-        [Fact]
-        public static void IsByRefLikeAttributeTests()
-        {
-            new IsByRefLikeAttribute();
-        }
-
-        [Fact]
-        public static void IsReadOnlyAttributeTests()
-        {
-            new IsReadOnlyAttribute();
         }
 
         [Fact]
