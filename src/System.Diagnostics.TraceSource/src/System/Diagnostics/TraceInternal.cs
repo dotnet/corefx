@@ -144,20 +144,12 @@ namespace System.Diagnostics
 
         public static void Indent()
         {
-            // Use global lock
-            lock (critSec)
-            {
-                Debug.IndentLevel++;
-            }
+             Debug.IndentLevel++;
         }
 
         public static void Unindent()
         {
-            // Use global lock
-            lock (critSec)
-            {
-                Debug.IndentLevel--;
-            }
+            Debug.IndentLevel--;
         }
 
         public static void Flush()
