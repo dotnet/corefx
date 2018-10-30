@@ -227,7 +227,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     // avoids problems where the parent process uses members of Process, like ProcessName, when the
     // Process is still the clone of this one. This is a best-effort attempt, so ignore any errors.
     // If the child fails to exec we use the pipe to pass the errno to the parent process.
-#ifdef HAVE_PIPE2
+#if HAVE_PIPE2
     pipe2(waitForChildToExecPipe, O_CLOEXEC);
 #else
     SystemNative_Pipe(waitForChildToExecPipe, PAL_O_CLOEXEC);
