@@ -11,7 +11,6 @@ Imports System.Runtime.Versioning
 Imports System.Text
 
 Imports Microsoft.VisualBasic.CompilerServices
-Imports Microsoft.VisualBasic.CompilerServices.NativeTypes
 Imports ExUtils = Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 Namespace Microsoft.VisualBasic.FileIO
@@ -582,6 +581,10 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
+            While (Not System.Diagnostics.Debugger.IsAttached)
+                System.Threading.Thread.Sleep(1000)
+            End While
+
             CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
                 overwrite:=False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
@@ -1184,28 +1187,34 @@ Namespace Microsoft.VisualBasic.FileIO
                 '   so call IO.File.Copy to get the exception as well.
                 IO.File.Copy(sourceFileFullPath, destinationFileFullPath, overwrite)
             Else ' MoveFile with support for overwrite flag.
-                If Environment.OSVersion.Platform = PlatformID.Win32NT Then ' Platforms supporting MoveFileEx.
-                    Try
-                        Dim succeed As Boolean = NativeMethods.MoveFileEx(
-                                sourceFileFullPath, destinationFileFullPath, m_MOVEFILEEX_FLAGS)
-                        ' GetLastWin32Error has to be close to PInvoke call. FxCop rule.
-                        If Not succeed Then
-                            ThrowWinIOError(System.Runtime.InteropServices.Marshal.GetLastWin32Error())
-                        End If
-                    Catch
-                        Throw
-                    End Try
-                Else
-                    If overwrite Then ' User wants to overwrite destination.
+                If overwrite Then ' User wants to overwrite destination.
+                    ' Why not checking for destination existence: user may not have read permission / ACL,
+                    ' but have write permission / ACL thus cannot see but can delete / overwrite destination.
+
+                    If Environment.OSVersion.Platform = PlatformID.Win32NT Then ' Platforms supporting MoveFileEx.
+                        Try
+                            Dim succeed As Boolean = NativeMethods.MoveFileEx(
+                                    sourceFileFullPath, destinationFileFullPath, m_MOVEFILEEX_FLAGS)
+                            ' GetLastWin32Error has to be close to PInvoke call. FxCop rule.
+                            If Not succeed Then
+                                ThrowWinIOError(System.Runtime.InteropServices.Marshal.GetLastWin32Error())
+                            End If
+                        Catch
+                            Throw
+                        End Try
+
+                    Else ' Win95, Win98, WinME.
+                        ' IO.File.Delete will not throw if destinationFileFullPath does not exist
+                        ' (user may not have permission to discover this, but have permission to overwrite),
+                        ' so always delete the destination.
                         IO.File.Delete(destinationFileFullPath)
 
                         IO.File.Move(sourceFileFullPath, destinationFileFullPath)
-                    Else ' Overwrite = False, call Framework.
-                        IO.File.Move(sourceFileFullPath, destinationFileFullPath)
-                    End If ' Overwrite
-                End If
+                    End If
+                Else ' Overwrite = False, call Framework.
+                    IO.File.Move(sourceFileFullPath, destinationFileFullPath)
+                End If ' Overwrite
             End If
-
         End Sub
 
         ''' <summary>
@@ -1718,6 +1727,19 @@ Namespace Microsoft.VisualBasic.FileIO
 
             Throw New InvalidEnumArgumentException(argName, argValue, GetType(UICancelOption))
         End Sub
+
+        ''' <summary>
+        ''' Flags for MoveFileEx.
+        ''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/movefileex.asp
+        ''' and public\sdk\inc\winbase.h.
+        ''' </summary>
+        <Flags()>
+        Private Enum MoveFileExFlags As Integer
+            MOVEFILE_REPLACE_EXISTING = &H1
+            MOVEFILE_COPY_ALLOWED = &H2
+            MOVEFILE_DELAY_UNTIL_REBOOT = &H4
+            MOVEFILE_WRITE_THROUGH = &H8
+        End Enum
 
         ' When calling MoveFileEx, set the following flags:
         ' - Simulate CopyFile and DeleteFile if copied to a different volume.

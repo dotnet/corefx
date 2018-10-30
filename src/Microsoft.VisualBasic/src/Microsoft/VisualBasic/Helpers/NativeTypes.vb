@@ -188,19 +188,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End Sub
         End Class
 
-        ''' <summary>
-        ''' Flags for MoveFileEx. 
-        ''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/movefileex.asp
-        ''' and public\sdk\inc\winbase.h.
-        ''' </summary>
-        <Flags()>
-        Friend Enum MoveFileExFlags As Integer
-            MOVEFILE_REPLACE_EXISTING = &H1
-            MOVEFILE_COPY_ALLOWED = &H2
-            MOVEFILE_DELAY_UNTIL_REBOOT = &H4
-            MOVEFILE_WRITE_THROUGH = &H8
-        End Enum
-
         ' Handle Values
         Friend Shared ReadOnly INVALID_HANDLE As IntPtr = New IntPtr(-1)
 
