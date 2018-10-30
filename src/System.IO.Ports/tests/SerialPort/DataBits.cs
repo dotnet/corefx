@@ -14,7 +14,7 @@ namespace System.IO.Ports.Tests
     {
         //The default number of bytes to read/write to verify the speed of the port
         //and that the bytes were transfered successfully
-        private const int DEFAULT_BYTE_SIZE = 256;
+        private const int DEFAULT_BYTE_SIZE = 512;
 
         //If the percentage difference between the expected time to transfer with the specified dataBits
         //and the actual time found through Stopwatch is greater then 5% then the DataBits value was not correctly

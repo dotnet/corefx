@@ -69,8 +69,10 @@ namespace System.IO.Ports
         public event SerialErrorReceivedEventHandler ErrorReceived;
         public event SerialPinChangedEventHandler PinChanged;
 
+        // handler for the underlying stream
         private SerialDataReceivedEventHandler _dataReceivedHandler;
-        private event SerialDataReceivedEventHandler _dataReceived;
+
+        private SerialDataReceivedEventHandler _dataReceived;
         public event SerialDataReceivedEventHandler DataReceived
         {
             add

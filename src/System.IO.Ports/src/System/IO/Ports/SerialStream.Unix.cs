@@ -40,7 +40,7 @@ namespace System.IO.Ports
         private long _lastTotalBytesAvailable;
 
         // called when one character is received.
-        private event SerialDataReceivedEventHandler _dataReceived;
+        private SerialDataReceivedEventHandler _dataReceived;
         internal event SerialDataReceivedEventHandler DataReceived
         {
             add
@@ -595,18 +595,29 @@ namespace System.IO.Ports
             }
         }
 
-        private void FinishPendingIORequests(Func<Exception> createException = null)
+        private void FinishPendingIORequests()
         {
-            createException = createException ?? InternalResources.FileNotOpenException;
-
             while (_readQueue.TryDequeue(out SerialStreamIORequest r))
             {
-                r.Complete(createException());
+                r.Complete(InternalResources.FileNotOpenException());
             }
 
             while (_writeQueue.TryDequeue(out SerialStreamIORequest r))
             {
-                r.Complete(createException());
+                r.Complete(InternalResources.FileNotOpenException());
+            }
+        }
+
+        private void FinishPendingIORequestsWithIOException(Interop.ErrorInfo error)
+        {
+            while (_readQueue.TryDequeue(out SerialStreamIORequest r))
+            {
+                r.Complete(Interop.GetIOException(error));
+            }
+
+            while (_writeQueue.TryDequeue(out SerialStreamIORequest r))
+            {
+                r.Complete(Interop.GetIOException(error));
             }
         }
 
@@ -775,8 +786,8 @@ namespace System.IO.Ports
 
             while (IsOpen && !eofReceived && !_ioLoopFinished)
             {
-                bool hasPendingReads = _readQueue.Count > 0;
-                bool hasPendingWrites = _writeQueue.Count > 0;
+                bool hasPendingReads = !_readQueue.IsEmpty;
+                bool hasPendingWrites = !_writeQueue.IsEmpty;
 
                 bool hasPendingIO = hasPendingReads || hasPendingWrites;
                 bool isIdle = _dataReceived == null && !hasPendingIO;
@@ -798,7 +809,7 @@ namespace System.IO.Ports
                             lock (_ioLoopLock)
                             {
                                 // double check we are done under lock
-                                if (_dataReceived == null && _readQueue.Count == 0 && _writeQueue.Count == 0)
+                                if (_dataReceived == null && _readQueue.IsEmpty && _writeQueue.IsEmpty)
                                 {
                                     _ioLoop = null;
                                     break;
@@ -824,7 +835,7 @@ namespace System.IO.Ports
 
                     if (error.HasValue)
                     {
-                        FinishPendingIORequests(() => Interop.GetIOException(error.Value));
+                        FinishPendingIORequestsWithIOException(error.Value);
                         break;
                     }
 
