@@ -312,6 +312,29 @@ Namespace Microsoft.VisualBasic.FileIO
             End Select
         End Sub
 
+
+        Private Shared Sub WinNTCopyOrMove(sourceFileFullPath As String, destinationFileFullPath As String)
+            Try
+                Dim succeed As Boolean = NativeMethods.MoveFileEx(
+                        sourceFileFullPath, destinationFileFullPath, m_MOVEFILEEX_FLAGS)
+                ' GetLastWin32Error has to be close to PInvoke call. FxCop rule.
+                If Not succeed Then
+                    ThrowWinIOError(System.Runtime.InteropServices.Marshal.GetLastWin32Error())
+                End If
+            Catch
+                Throw
+            End Try
+        End Sub
+
+        ' When calling MoveFileEx, set the following flags:
+        ' - Simulate CopyFile and DeleteFile if copied to a different volume.
+        ' - Replace contents of existing target with the contents of source file.
+        ' - Do not return until the file has actually been moved on the disk.
+        Private Const m_MOVEFILEEX_FLAGS As Integer = CInt(
+            MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
+            MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
+            MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
+
         ' Base operation flags used in shell IO operation.
         ' - DON'T move connected files as a group.
         ' - DON'T confirm directory creation - our silent copy / move do not.

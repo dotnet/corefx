@@ -16,7 +16,14 @@ Namespace Microsoft.VisualBasic.FileIO
             Throw New PlatformNotSupportedException(SR.NoShellDelete)
         End Sub
     End Class
-    Private Shared Sub ThrowWinIOError(ByVal errorCode As Integer)
+
+    ''' <summary>
+    ''' Stub to prevent compile error, this will not get called on non Windows OS's
+    ''' This would be implemented on non-Windows in the future
+    ''' </summary>
+    ''' <param name="sourceFileFullPath"></param>
+    ''' <param name="destinationFileFullPath"></param>
+    Private Shared Sub WinNTCopyOrMove(sourceFileFullPath As String, destinationFileFullPath As String)
         Throw New PlatformNotSupportedException()
     End Sub
 

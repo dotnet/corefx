@@ -1188,17 +1188,7 @@ Namespace Microsoft.VisualBasic.FileIO
                     ' but have write permission / ACL thus cannot see but can delete / overwrite destination.
 
                     If Environment.OSVersion.Platform = PlatformID.Win32NT Then ' Platforms supporting MoveFileEx.
-                        Try
-                            Dim succeed As Boolean = NativeMethods.MoveFileEx(
-                                    sourceFileFullPath, destinationFileFullPath, m_MOVEFILEEX_FLAGS)
-                            ' GetLastWin32Error has to be close to PInvoke call. FxCop rule.
-                            If Not succeed Then
-                                ThrowWinIOError(System.Runtime.InteropServices.Marshal.GetLastWin32Error())
-                            End If
-                        Catch
-                            Throw
-                        End Try
-
+                        WinNTCopyOrMove(sourceFileFullPath, destinationFileFullPath)
                     Else ' Win95, Win98, WinME, non Windows
                         ' IO.File.Delete will not throw if destinationFileFullPath does not exist
                         ' (user may not have permission to discover this, but have permission to overwrite),
@@ -1736,15 +1726,6 @@ Namespace Microsoft.VisualBasic.FileIO
             MOVEFILE_DELAY_UNTIL_REBOOT = &H4
             MOVEFILE_WRITE_THROUGH = &H8
         End Enum
-
-        ' When calling MoveFileEx, set the following flags:
-        ' - Simulate CopyFile and DeleteFile if copied to a different volume.
-        ' - Replace contents of existing target with the contents of source file.
-        ' - Do not return until the file has actually been moved on the disk.
-        Private Const m_MOVEFILEEX_FLAGS As Integer = CInt(
-            MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
-            MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
-            MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
 
         ' Array containing all the path separator chars. Used to verify that input is a name, not a path.
         Private Shared ReadOnly m_SeparatorChars() As Char = {
