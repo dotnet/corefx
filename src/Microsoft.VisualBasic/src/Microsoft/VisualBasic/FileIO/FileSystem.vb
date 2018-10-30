@@ -581,10 +581,6 @@ Namespace Microsoft.VisualBasic.FileIO
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
         Public Shared Sub MoveDirectory(ByVal sourceDirectoryName As String, ByVal destinationDirectoryName As String)
-            While (Not System.Diagnostics.Debugger.IsAttached)
-                System.Threading.Thread.Sleep(1000)
-            End While
-
             CopyOrMoveDirectory(CopyOrMove.Move, sourceDirectoryName, destinationDirectoryName,
                 overwrite:=False, UIOptionInternal.NoUI, UICancelOption.ThrowException)
         End Sub
