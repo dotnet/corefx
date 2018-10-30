@@ -17,12 +17,13 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Windows.vb" />
-    <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.vb" />
+    <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.Windows.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeTypes.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
   </ItemGroup>
     <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
+    <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.Unix.vb" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />

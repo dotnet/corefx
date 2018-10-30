@@ -117,6 +117,7 @@ Namespace Microsoft.VisualBasic.FileIO
         '''
         ''' Also, we chose to use UserAppDataPath instead of LocalUserAppDataPath since this directory
         ''' will work with Roaming User as well.
+        ''' </remarks>
         Public Shared ReadOnly Property CurrentUserApplicationData() As String
             Get
                 Throw New PlatformNotSupportedException()
