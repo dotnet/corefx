@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Threading.Tests
@@ -97,7 +98,9 @@ namespace System.Threading.Tests
             }
         }
 
-        [Fact]
+        public static bool IsNotArm64 => RuntimeInformation.ProcessArchitecture != Architecture.Arm64;
+
+        [ConditionalFact(nameof(IsNotArm64))] // issue: https://github.com/dotnet/coreclr/issues/20215
         public void MemoryBarrierProcessWide()
         {
             // Stress MemoryBarrierProcessWide correctness using a simple AsymmetricLock
