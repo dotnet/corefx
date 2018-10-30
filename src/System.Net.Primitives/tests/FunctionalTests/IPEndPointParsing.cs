@@ -124,6 +124,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             InvalidPortHelper(isIPv4 ? $"{address}:65536" : $"[{address}]:65536");  // port exceeds max
             InvalidPortHelper(isIPv4 ? $"{address}:-300" : $"[{address}]:-300");    // port is negative
+            InvalidPortHelper(isIPv4 ? $"{address}:+300" : $"[{address}]:+300");    // plug sign
 
             int portNumber = 1;
             for (int i = 0; i < 5; i++)
