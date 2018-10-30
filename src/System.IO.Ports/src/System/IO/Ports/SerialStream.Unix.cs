@@ -595,29 +595,20 @@ namespace System.IO.Ports
             }
         }
 
-        private void FinishPendingIORequests()
+        private void FinishPendingIORequests(Interop.ErrorInfo? error = null)
         {
             while (_readQueue.TryDequeue(out SerialStreamIORequest r))
             {
-                r.Complete(InternalResources.FileNotOpenException());
+                r.Complete(error.HasValue ?
+                           Interop.GetIOException(error.Value) :
+                           InternalResources.FileNotOpenException());
             }
 
             while (_writeQueue.TryDequeue(out SerialStreamIORequest r))
             {
-                r.Complete(InternalResources.FileNotOpenException());
-            }
-        }
-
-        private void FinishPendingIORequestsWithIOException(Interop.ErrorInfo error)
-        {
-            while (_readQueue.TryDequeue(out SerialStreamIORequest r))
-            {
-                r.Complete(Interop.GetIOException(error));
-            }
-
-            while (_writeQueue.TryDequeue(out SerialStreamIORequest r))
-            {
-                r.Complete(Interop.GetIOException(error));
+                r.Complete(error.HasValue ?
+                           Interop.GetIOException(error.Value) :
+                           InternalResources.FileNotOpenException());
             }
         }
 
@@ -835,7 +826,7 @@ namespace System.IO.Ports
 
                     if (error.HasValue)
                     {
-                        FinishPendingIORequestsWithIOException(error.Value);
+                        FinishPendingIORequests(error);
                         break;
                     }
 
