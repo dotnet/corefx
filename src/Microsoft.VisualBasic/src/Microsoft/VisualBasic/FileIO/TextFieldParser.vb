@@ -351,7 +351,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End If
         End Function
 
-
         ''' <summary>
         '''  Reads a non ignorable line and parses it into fields
         ''' </summary>
@@ -429,7 +428,6 @@ Namespace Microsoft.VisualBasic.FileIO
             If m_Reader Is Nothing Or m_Buffer Is Nothing Then
                 Return Nothing
             End If
-
 
             Dim Builder As New System.Text.StringBuilder(m_Buffer.Length)
 
@@ -806,7 +804,6 @@ Namespace Microsoft.VisualBasic.FileIO
         ''' <returns></returns>
         ''' <remarks></remarks>
         Private Delegate Function ChangeBufferFunction() As Integer
-
 
         ''' <summary>
         '''  Gets the next line from the file and moves the passed in cursor past the line

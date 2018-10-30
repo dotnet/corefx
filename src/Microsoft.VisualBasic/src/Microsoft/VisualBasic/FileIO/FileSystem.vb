@@ -1233,7 +1233,6 @@ Namespace Microsoft.VisualBasic.FileIO
             ' Throw if device path.
             ThrowIfDevicePath(directoryFullPath)
 
-
             If Not IO.Directory.Exists(directoryFullPath) Then
                 Throw ExUtils.GetDirectoryNotFoundException(SR.IO_DirectoryNotFound_Path, directory)
             End If
@@ -1939,7 +1938,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Private m_CheckPreamble As Boolean = True ' True to check for preamble. False otherwise.
             Private m_Preamble() As Byte ' The byte order mark we need to consider.
         End Class 'Private Class TextSearchHelper
-
 
     End Class 'Public Class FileSystem
 
