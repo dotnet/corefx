@@ -23,7 +23,7 @@
 #if HAVE_PIPE2
 #include <fcntl.h>
 #endif
-#ifndef HAVE_PIPE2
+#if !HAVE_PIPE2
 #include <pthread.h>
 #endif
 
@@ -69,8 +69,8 @@ c_static_assert(PAL_PRIO_PROCESS == (int)PRIO_PROCESS);
 c_static_assert(PAL_PRIO_PGRP == (int)PRIO_PGRP);
 c_static_assert(PAL_PRIO_USER == (int)PRIO_USER);
 
-#ifndef HAVE_PIPE2
-static pthread_mutex_t process_create_lock = PTHREAD_MUTEX_INITIALIZER;
+#if !HAVE_PIPE2
+static pthread_mutex_t ProcessCreateLock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 enum
@@ -161,10 +161,10 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t* stdoutFd,
                                       int32_t* stderrFd)
 {
-#ifndef HAVE_PIPE2
-    int have_create_process_lock = 0;
+#if !HAVE_PIPE2
+    bool haveProcessCreateLock = false;
 #endif
-    int success = true;
+    bool success = true;
     int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, -1};
     int processId = -1;
 
@@ -197,15 +197,18 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-#ifndef HAVE_PIPE2
+#if !HAVE_PIPE2
     // We do not have pipe2(); take the lock to emulate it race free.
-    if (pthread_mutex_lock(&process_create_lock) != 0)
+    // If another process were to be launched between the pipe creation and the fcntl call to set CLOEXEC on it, that
+    // file descriptor will be inherited into the other child process, eventually causing a deadlock either in the loop
+    // below that waits for that pipe to be closed or in StreamReader.ReadToEnd() in the calling code.
+    if (pthread_mutex_lock(&ProcessCreateLock) != 0)
     {
         // This check is pretty much just checking for trashed memory.
         success = false;
         goto done;
     }
-    have_create_process_lock = 1;
+    haveProcessCreateLock = 1;
 #endif
 
     // Open pipes for any requests to redirect stdin/stdout/stderr and set the
@@ -306,9 +309,11 @@ done:;
         CloseIfOpen(waitForChildToExecPipe[READ_END_OF_PIPE]);
     }
 
-#ifndef HAVE_PIPE2
-    if (have_create_process_lock)
-        pthread_mutex_unlock(&process_create_lock);
+#if !HAVE_PIPE2
+    if (haveProcessCreateLock)
+    {
+        pthread_mutex_unlock(&ProcessCreateLock);
+    }
 #endif
 
     // If we failed, close everything else and give back error values in all out arguments.
