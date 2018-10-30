@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+#define DEBUG
 using System.Reflection;
 using Xunit;
 
@@ -15,7 +15,7 @@ namespace System.Diagnostics.Tests
         protected override bool DebugUsesTraceListeners { get { return true; } }
         
         [Fact]
-        public void UsingListeners_Write_TraceListenerAlwaysIndentsOnFirstCall()
+        public void Trace_Write_TraceListenerAlwaysIndentsOnFirstCall()
         {
             Trace.Indent();
             int expectedIndentation = Trace.IndentLevel * Trace.IndentSize;
@@ -83,13 +83,13 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Trace.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
             
             // WriteLine wont indent after Write:
-            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine);
+            VerifyLogged(() => Trace.WriteLine("pizza"),    "pizza" + Environment.NewLine);
 
             VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
             VerifyLogged(() => Trace.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
 
             // WriteLine wont indent after Write:
-            VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
+            VerifyLogged(() => Trace.WriteLine("pizza"),    "pizza" + Environment.NewLine); 
             VerifyLogged(() => Trace.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
             Trace.Unindent();
         }

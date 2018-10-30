@@ -154,7 +154,7 @@ namespace System.Diagnostics
         {
             if (message == null)
             {
-                Write(string.Empty);
+                Write(string.Empty, useLogFile);
                 return;
             }
 

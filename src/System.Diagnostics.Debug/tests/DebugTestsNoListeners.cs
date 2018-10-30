@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+#define DEBUG
 using System.Reflection;
 using Xunit;
 
@@ -48,13 +48,13 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Debug.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
             
             // WriteLine wont indent after Write:
-            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine);
+            VerifyLogged(() => Debug.WriteLine("pizza"),    "pizza" + Environment.NewLine);
 
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
             VerifyLogged(() => Debug.Write("pizza"),        new string(' ', expectedIndentation) +  "pizza");
 
             // WriteLine wont indent after Write:
-            VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', 0) +                    "pizza" + Environment.NewLine); 
+            VerifyLogged(() => Debug.WriteLine("pizza"),    "pizza" + Environment.NewLine); 
             VerifyLogged(() => Debug.WriteLine("pizza"),    new string(' ', expectedIndentation) +  "pizza" + Environment.NewLine);
             Debug.Unindent();
         }
@@ -218,11 +218,7 @@ namespace System.Diagnostics.Tests
 
             // Indent once.
             Debug.Indent();
-#if DEBUG
             Assert.Equal(expectedIndentLevel + 1, Debug.IndentLevel);
-#else
-            Assert.Equal(expectedIndentLevel, Debug.IndentLevel);
-#endif
             string expectedIndentTwice = new string(' ', (expectedIndentLevel + 1) * Debug.IndentSize);
             VerifyLogged(() => Debug.WriteLine("pizza"), expectedIndentTwice + "pizza" + Environment.NewLine);
 

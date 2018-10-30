@@ -125,11 +125,7 @@ namespace System.Diagnostics
 
             set
             {
-                // Use global lock
-                lock (critSec)
-                {
-                    Debug.IndentLevel = value;
-                }
+                Debug.IndentLevel = value;
             }
         }
 
@@ -142,15 +138,6 @@ namespace System.Diagnostics
 
             set
             {
-                SetIndentSize(value);
-            }
-        }
-
-        private static void SetIndentSize(int value)
-        {
-            // Use global lock
-            lock (critSec)
-            {
                 Debug.IndentSize = value;
             }
         }
@@ -160,7 +147,7 @@ namespace System.Diagnostics
             // Use global lock
             lock (critSec)
             {
-                Debug.Indent();
+                Debug.IndentLevel++;
             }
         }
 
@@ -169,7 +156,7 @@ namespace System.Diagnostics
             // Use global lock
             lock (critSec)
             {
-                Debug.Unindent();
+                Debug.IndentLevel--;
             }
         }
 
@@ -334,7 +321,7 @@ namespace System.Diagnostics
             {
                 s_settingsInitialized = false;
                 s_listeners = null;
-                SetIndentSize(DiagnosticsConfiguration.IndentSize);
+                Debug.IndentSize = DiagnosticsConfiguration.IndentSize;
             }
             InitializeSettings();
         }

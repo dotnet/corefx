@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+#define DEBUG
 using System.Reflection;
 using Xunit;
 
@@ -47,11 +47,7 @@ namespace System.Diagnostics.Tests
             {
                 WriteLogger.s_instance.Clear();
                 test();
-#if DEBUG
                 Assert.Equal(expectedOutput, WriteLogger.s_instance.LoggedOutput);
-#else
-                Assert.Equal(string.Empty, WriteLogger.s_instance.LoggedOutput);
-#endif
             }
             finally
             {
@@ -67,7 +63,8 @@ namespace System.Diagnostics.Tests
         {
             FieldInfo writeCoreHook = typeof(DebugProvider).GetField("s_WriteCore", BindingFlags.Static | BindingFlags.NonPublic);
             s_defaultProvider = Debug.SetProvider(WriteLogger.s_instance);
-
+            WriteLogger.s_instance.OriginalProvider = s_defaultProvider;
+            
             var originalWriteCoreHook = writeCoreHook.GetValue(null);
             writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.MockWrite));
 
@@ -75,16 +72,11 @@ namespace System.Diagnostics.Tests
             {
                 WriteLogger.s_instance.Clear();
                 test();
-#if DEBUG
                 for (int i = 0; i < expectedOutputStrings.Length; i++)
                 {
                     Assert.Contains(expectedOutputStrings[i], WriteLogger.s_instance.LoggedOutput);
                     Assert.Contains(expectedOutputStrings[i], WriteLogger.s_instance.AssertUIOutput);
                 }
-#else
-                Assert.Equal(string.Empty, WriteLogger.s_instance.LoggedOutput);
-                Assert.Equal(string.Empty, WriteLogger.s_instance.AssertUIOutput);
-#endif
 
             }
             finally
@@ -101,6 +93,8 @@ namespace System.Diagnostics.Tests
 
             private WriteLogger() { }
 
+            public DebugProvider OriginalProvider { get; set; }
+
             public string LoggedOutput { get; private set; }
 
             public string AssertUIOutput { get; private set; }
@@ -115,6 +109,18 @@ namespace System.Diagnostics.Tests
             {
                 AssertUIOutput += stackTrace + message + detailMessage + errorSource;
             }
+
+            public override void OnIndentLevelChanged(int indentLevel)
+            {
+                OriginalProvider.OnIndentLevelChanged(indentLevel);
+            }
+
+            public override void OnIndentSizeChanged(int indentSize)
+            {
+                OriginalProvider.OnIndentLevelChanged(indentSize);
+            }
+            public override void Write(string message) { OriginalProvider.Write(message); }
+            public override void WriteLine(string message) { OriginalProvider.WriteLine(message); }
 
             public void MockWrite(string message)
             {
