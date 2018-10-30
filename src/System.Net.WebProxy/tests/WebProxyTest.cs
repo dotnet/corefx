@@ -207,8 +207,8 @@ namespace System.Net.Tests
             Assert.True(new WebProxy().IsBypassed(new Uri("http://anything.com")));
             Assert.True(new WebProxy((string)null).IsBypassed(new Uri("http://anything.com")));
             Assert.True(new WebProxy((Uri)null).IsBypassed(new Uri("http://anything.com")));
-            Assert.True(new WebProxy("microsoft", true).IsBypassed(new Uri($"http://{IPAddress.Loopback}")));
-            Assert.True(new WebProxy("microsoft", false).IsBypassed(new Uri($"http://{IPAddress.Loopback}")));
+            Assert.True(new WebProxy("microsoft", BypassOnLocal: true).IsBypassed(new Uri($"http://{IPAddress.Loopback}")));
+            Assert.False(new WebProxy("microsoft", BypassOnLocal: false).IsBypassed(new Uri($"http://{IPAddress.Loopback}")));
         }
 
         [Fact]

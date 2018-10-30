@@ -200,7 +200,7 @@ namespace System.Net
 
             return
                 Address == null ||
-                host.IsLoopback ||
+                (BypassProxyOnLocal && host.IsLoopback) ||
                 (BypassProxyOnLocal && IsLocal(host)) ||
                 IsMatchInBypassList(host);
         }
