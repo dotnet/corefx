@@ -180,7 +180,6 @@ namespace System.Linq.Tests
             Assert.Equal(expected, first.Zip(second));
         }
 
-
         [Fact]
         public void Zip2_FirstManyMoreThanSecond()
         {
