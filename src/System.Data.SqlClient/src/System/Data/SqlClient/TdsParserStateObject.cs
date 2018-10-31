@@ -2996,7 +2996,7 @@ namespace System.Data.SqlClient
         //
         // Takes a byte array and writes it to the buffer.
         //
-        internal Task WriteByteArray(ReadOnlySpan<byte> b, int len, int offsetBuffer, bool canAccumulate = true, TaskCompletionSource<object> completion = null,byte[] array = null)
+        internal Task WriteByteArray(ReadOnlySpan<byte> b, int len, int offsetBuffer, bool canAccumulate = true, TaskCompletionSource<object> completion = null, byte[] array = null)
         {
             if (array != null)
             {
@@ -3058,9 +3058,9 @@ namespace System.Data.SqlClient
                             {
                                 byte[] tempArray = new byte[len];
                                 Span<byte> copyTempTo = tempArray.AsSpan();
-                                ReadOnlySpan<byte> copyTempFrom = b.Slice(remainder,len);
+                                ReadOnlySpan<byte> copyTempFrom = b.Slice(remainder, len);
 
-                                Debug.Assert(copyTempTo.Length == copyTempFrom.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length{copyTempFrom.Length:D} should be the same");
+                                Debug.Assert(copyTempTo.Length == copyTempFrom.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length:{copyTempFrom.Length:D} should be the same");
 
                                 copyTempFrom.CopyTo(copyTempTo);
                                 array = tempArray;
@@ -3078,9 +3078,9 @@ namespace System.Data.SqlClient
                         // buffer and then break out of the loop.
 
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, len);
-                        ReadOnlySpan<byte> copyFrom = b.Slice(0,len);
+                        ReadOnlySpan<byte> copyFrom = b.Slice(0, len);
 
-                        Debug.Assert(copyTo.Length == copyFrom.Length, $"copyTo.Length:{copyTo.Length} and copyFrom.Length{copyFrom.Length:D} should be the same");
+                        Debug.Assert(copyTo.Length == copyFrom.Length, $"copyTo.Length:{copyTo.Length} and copyFrom.Length:{copyFrom.Length:D} should be the same");
 
                         copyFrom.CopyTo(copyTo);
 
@@ -3114,8 +3114,9 @@ namespace System.Data.SqlClient
         private void WriteByteArraySetupContinuation(byte[] array, int len, TaskCompletionSource<object> completion, int offset, Task packetTask)
         {
             AsyncHelper.ContinueTask(packetTask, completion,
-                () => WriteByteArray(ReadOnlySpan<byte>.Empty, len: len, offsetBuffer: offset, canAccumulate: false, completion: completion,array),
-                connectionToDoom: _parser.Connection);
+                () => WriteByteArray(ReadOnlySpan<byte>.Empty, len: len, offsetBuffer: offset, canAccumulate: false, completion: completion, array),
+                connectionToDoom: _parser.Connection
+            );
         }
 
         // Dumps contents of buffer to SNI for network write.

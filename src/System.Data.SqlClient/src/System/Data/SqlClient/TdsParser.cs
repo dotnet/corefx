@@ -7160,7 +7160,7 @@ namespace System.Data.SqlClient
                                 throw ADP.VersionDoesNotSupportDataType(mt.TypeName);
                             }
 
-                            Task writeParamTask = TDSExecuteRPCAddParameter(stateObj,param,mt, options);
+                            Task writeParamTask = TDSExecuteRPCAddParameter(stateObj, param, mt, options);
 
                             if (!sync)
                             {

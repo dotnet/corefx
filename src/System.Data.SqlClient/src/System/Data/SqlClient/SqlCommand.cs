@@ -2665,8 +2665,7 @@ namespace System.Data.SqlClient
         // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
         private Task RunExecuteReaderTdsSetupContinuation(RunBehavior runBehavior, SqlDataReader ds, string optionSettings, Task writeTask)
         {
-            Task task;
-            task = AsyncHelper.CreateContinuationTask(writeTask, () =>
+            Task task = AsyncHelper.CreateContinuationTask(writeTask, () =>
             {
                 _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed
                 cachedAsyncState.SetAsyncReaderState(ds, runBehavior, optionSettings);
@@ -3301,7 +3300,7 @@ namespace System.Data.SqlClient
             int userParameterCount = CountSendableParameters(_parameters);
 
             _SqlRPC rpc = null;
-            GetRPCObject(systemParameterCount,userParameterCount, ref rpc);
+            GetRPCObject(systemParameterCount, userParameterCount, ref rpc);
 
             rpc.ProcID = TdsEnums.RPC_PROCID_PREPEXEC;
             rpc.rpcName = TdsEnums.SP_PREPEXEC;
@@ -3385,7 +3384,7 @@ namespace System.Data.SqlClient
         {
             Debug.Assert(this.CommandType == System.Data.CommandType.StoredProcedure, "Command must be a stored proc to execute an RPC");
             int userParameterCount = CountSendableParameters(parameters);
-            GetRPCObject(0,userParameterCount, ref rpc);
+            GetRPCObject(0, userParameterCount, ref rpc);
 
             rpc.ProcID = 0;
             rpc.rpcName = this.CommandText; // just get the raw command text
