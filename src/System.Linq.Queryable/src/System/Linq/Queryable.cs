@@ -592,7 +592,7 @@ namespace System.Linq
                     ));
         }
 
-        public static IQueryable<(TFirst first, TSecond second)> Zip<TFirst, TSecond>(this IQueryable<TFirst> source1, IEnumerable<TSecond> source2)
+        public static IQueryable<(TFirst First, TSecond Second)> Zip<TFirst, TSecond>(this IQueryable<TFirst> source1, IEnumerable<TSecond> source2)
         {
             if (source1 == null)
             {

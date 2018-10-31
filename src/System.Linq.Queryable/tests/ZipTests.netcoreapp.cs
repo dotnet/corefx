@@ -46,8 +46,8 @@ namespace System.Linq.Tests
             int[] first = new int[] { 1 };
             int[] second = new int[] { 2 };
             var tuple = first.AsQueryable().Zip(second.AsQueryable()).First();
-            Assert.Equal(tuple.Item1, tuple.first);
-            Assert.Equal(tuple.Item2, tuple.second);
+            Assert.Equal(tuple.Item1, tuple.First);
+            Assert.Equal(tuple.Item2, tuple.Second);
         }
     }
 }

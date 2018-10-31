@@ -28,7 +28,7 @@ namespace System.Linq
             return ZipIterator(first, second, resultSelector);
         }
 
-        public static IEnumerable<(TFirst first, TSecond second)> Zip<TFirst, TSecond>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second)
+        public static IEnumerable<(TFirst First, TSecond Second)> Zip<TFirst, TSecond>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second)
         {
             if (first is null)
             {

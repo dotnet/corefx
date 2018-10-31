@@ -219,8 +219,8 @@ namespace System.Linq.Tests
         public void Zip2_TupleNames()
         {
             var t = new[] { 1, 2, 3 }.Zip(new[] { 2, 4, 6 }).First();
-            Assert.Equal(t.Item1, t.first);
-            Assert.Equal(t.Item2, t.second);
+            Assert.Equal(t.Item1, t.First);
+            Assert.Equal(t.Item2, t.Second);
         }
     }
 }
