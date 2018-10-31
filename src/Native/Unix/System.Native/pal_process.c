@@ -208,7 +208,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         success = false;
         goto done;
     }
-    haveProcessCreateLock = 1;
+    haveProcessCreateLock = true;
 #endif
 
     // Open pipes for any requests to redirect stdin/stdout/stderr and set the
