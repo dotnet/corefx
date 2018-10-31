@@ -20,8 +20,6 @@ namespace System.Data.SqlClient.SNI
         private int _offset;
         private string _description;
         private SNIAsyncCallback _completionCallback;
-
-        //private ArrayPool<byte>  _arrayPool = ArrayPool<byte>.Shared;
         private bool _isBufferFromArrayPool = false;
 
         public SNIPacket() { }
