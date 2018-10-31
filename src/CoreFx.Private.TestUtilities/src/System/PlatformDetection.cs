@@ -134,6 +134,12 @@ namespace System
         // Tracked in: https://github.com/dotnet/corert/issues/3643 in case we change our mind about this.
         public static bool IsInvokingStaticConstructorsSupported => !PlatformDetection.IsNetNative;
 
+        // Tests that allocate large arrays are constrained to run on Windows and MacOSX because it causes
+        // problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        // succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        // time the memory is accessed which triggers the full memory allocation.
+        public static bool IsRobustUnderMemoryPressure => PlatformDetection.IsWindows | PlatformDetection.IsOSX;
+
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
         public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsUap;

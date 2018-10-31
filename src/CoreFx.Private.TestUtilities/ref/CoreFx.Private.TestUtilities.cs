@@ -115,6 +115,7 @@ namespace System
         public static bool IsWindowsSubsystemForLinux { get { throw null; } }
         public static bool IsInAppContainer { get { throw null; } }
         public static bool IsWinRTSupported { get { throw null; } }
+        public static bool IsRobustUnderMemoryPressure { get { throw null; } }
         public static bool IsXmlDsigXsltTransformSupported { get { throw null; } }
         public static string LibcRelease { get { throw null; } }
         public static string LibcVersion { get { throw null; } }

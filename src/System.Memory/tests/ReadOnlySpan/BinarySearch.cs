@@ -105,13 +105,8 @@ namespace System.SpanTests
             Assert.Throws<ArgumentNullException>(() => new ReadOnlySpan<int>(new int[] { }).BinarySearch<int, IComparer<int>>(0, null));
         }
 
-        // NOTE: BinarySearch_MaxLength_NoOverflow test is constrained to run on Windows and MacOSX because it causes
-        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
-        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
-        //       time the memory is accessed which triggers the full memory allocation.
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
         [OuterLoop]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public unsafe static void BinarySearch_MaxLength_NoOverflow()
         {
             if (sizeof(IntPtr) == sizeof(long))

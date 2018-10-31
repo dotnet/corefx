@@ -10,15 +10,8 @@ namespace System.SpanTests
 {
     public static partial class SpanTests
     {
-        // NOTE: IndexOverflow test is constrained to run on Windows and MacOSX because it
-        //       causes problems on Linux due to the way deferred memory allocation works.
-        //       On Linux, the allocation can succeed even if there is not enough memory
-        //       but then the test may get killed by the OOM killer at the time the memory
-        //       is accessed which triggers the full memory allocation.
-
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
         [OuterLoop]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public static void IndexOverflow()
         {
             // If this test is run in a 32-bit process, the 3GB allocation will fail.
@@ -63,15 +56,8 @@ namespace System.SpanTests
             }
         }
 
-        // NOTE: SliceStartInt32Overflow test is constrained to run on Windows and MacOSX because it
-        //       causes problems on Linux due to the way deferred memory allocation works.
-        //       On Linux, the allocation can succeed even if there is not enough memory
-        //       but then the test may get killed by the OOM killer at the time the memory
-        //       is accessed which triggers the full memory allocation.
-
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
         [OuterLoop()]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public static void SliceStartInt32Overflow()
         {
             // If this test is run in a 32-bit process, the 3GB allocation will fail.
@@ -107,15 +93,8 @@ namespace System.SpanTests
             }
         }
 
-        // NOTE: ReadOnlySliceStartInt32Overflow test is constrained to run on Windows and MacOSX because it
-        //       causes problems on Linux due to the way deferred memory allocation works.
-        //       On Linux, the allocation can succeed even if there is not enough memory
-        //       but then the test may get killed by the OOM killer at the time the memory
-        //       is accessed which triggers the full memory allocation.
-
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
         [OuterLoop()]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public static void ReadOnlySliceStartInt32Overflow()
         {
             // If this test is run in a 32-bit process, the 3GB allocation will fail.

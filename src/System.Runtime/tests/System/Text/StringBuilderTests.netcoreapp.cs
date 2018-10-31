@@ -418,6 +418,7 @@ namespace System.Text.Tests
             }
         }
 
+<<<<<<< HEAD
         [Fact]
         public static void EqualsIgnoresCapacity()
         {
@@ -444,6 +445,33 @@ namespace System.Text.Tests
             sb2.Append("12345");
 
             Assert.True(sb1.Equals(sb2));
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
+        [OuterLoop]
+        public static void Append_OutOfMemory_DoesNotCorruptState()
+        {
+            var sb = new StringBuilder();
+
+            string longString = new string('a', 1000000);
+            try
+            {
+                for(;;) sb.Append(longString);
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                for(;;) sb.Append("xx");
+            }
+            catch (OutOfMemoryException)
+            {
+            }
+
+            Assert.True(sb.Length <= sb.Capacity);
+            Assert.True(sb.Capacity <= sb.MaxCapacity);
         }
     }
 }

@@ -198,9 +198,8 @@ namespace System.SpanTests
         // test the two size selection paths in CoptyTo method - memory size that is multiple of 4GB or,
         // a multiple of 4GB + some more size.
         [ActiveIssue(25254)]
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
         [OuterLoop]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [InlineData(4L * 1024L * 1024L * 1024L)]
         [InlineData((4L * 1024L * 1024L * 1024L) + 256)]
         public static void CopyToLargeSizeTest(long bufferSize)
