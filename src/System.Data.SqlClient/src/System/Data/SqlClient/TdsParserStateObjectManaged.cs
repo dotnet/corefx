@@ -31,14 +31,14 @@ namespace System.Data.SqlClient.SNI
 
         internal override uint Status => _sessionHandle != null ? _sessionHandle.Status : TdsEnums.SNI_UNINITIALIZED;
 
-        internal override object SessionHandle => _sessionHandle;
+        internal override SessionHandle SessionHandle => SessionHandle.FromManagedSession(_sessionHandle);
 
         protected override PacketHandle EmptyReadPacket => default;
 
         protected override bool CheckPacket(PacketHandle packet, TaskCompletionSource<object> source)
         {
             SNIPacket p = packet.ManagedPacket;
-            return p.IsInvalid || (!p.IsInvalid && source != null);
+            return p.IsInvalid || source != null;
         }
 
         protected override void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async)
@@ -153,10 +153,11 @@ namespace System.Data.SqlClient.SNI
             return handle == null ? TdsEnums.SNI_SUCCESS : SNIProxy.Singleton.CheckConnection(handle);
         }
 
-        internal override PacketHandle ReadAsync(out uint error, ref object handle)
-        {
+        internal override PacketHandle ReadAsync(SessionHandle handle, out uint error)
+		{
+            Debug.Assert(handle.Type == SessionHandle.ManagedHandleType, "unexpected handle type when requiring ManagedHandle");
             SNIPacket packet;
-            error = SNIProxy.Singleton.ReadAsync((SNIHandle)handle, out packet);
+            error = SNIProxy.Singleton.ReadAsync(handle.ManagedHandle, out packet);
             return PacketHandle.FromManagedPacket(packet);
         }
 

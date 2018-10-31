@@ -26,19 +26,36 @@ namespace System.Data.SqlClient
         public const int NativePacketType = 2;
         public const int ManagedPacketType = 3;
 
+#if snidll
         public readonly IntPtr NativePointer;
         public readonly SNIPacketHandle NativePacket;
+#endif
         public readonly SNI.SNIPacket ManagedPacket;
         public readonly int Type;
 
-        private PacketHandle(IntPtr nativePointer, SNIPacketHandle nativePacket, SNI.SNIPacket managedPacket,int type)
+        private PacketHandle(IntPtr nativePointer,
+#if snidll
+            SNIPacketHandle
+#else
+            int
+#endif
+
+            nativePacket, SNI.SNIPacket managedPacket,int type)
         {
             Type = type;
+            ManagedPacket = managedPacket;
+#if snidll
             NativePointer = nativePointer;
             NativePacket = nativePacket;
-            ManagedPacket = managedPacket;
+#endif
         }
 
+        public static PacketHandle FromManagedPacket(SNI.SNIPacket managedPacket)
+        {
+            return new PacketHandle(default, default, managedPacket, ManagedPacketType);
+        }
+
+#if snidll
         public static PacketHandle FromNativePointer(IntPtr nativePointer)
         {
             return new PacketHandle(nativePointer,default,default, NativePointerType);
@@ -48,11 +65,55 @@ namespace System.Data.SqlClient
         {
             return new PacketHandle(default, nativePacket, default, NativePacketType);
         }
+#endif
 
-        public static PacketHandle FromManagedPacket(SNI.SNIPacket managedPacket)
+
+    }
+
+    internal readonly ref struct SessionHandle
+    {
+        public const int NativeHandleType = 1;
+        public const int ManagedHandleType = 2;
+
+        public readonly SNI.SNIHandle ManagedHandle;
+#if snidll
+        public readonly SNISessionHandle NativeHandle;
+#endif
+        public readonly int Type;
+
+        public SessionHandle(SNI.SNIHandle managedHandle,
+#if snidll
+            SNISessionHandle 
+#else
+            int
+#endif
+            nativeHandle, 
+            int type
+        )
         {
-            return new PacketHandle(default, default, managedPacket, ManagedPacketType);
+            Type = type;
+            ManagedHandle = managedHandle;
+#if snidll
+            NativeHandle = nativeHandle;
+#endif
         }
+
+        public bool IsNull =>
+#if snidll
+            (Type == NativeHandleType) ? NativeHandle == null : 
+#endif
+            ManagedHandle == null;
+
+        public static SessionHandle FromManagedSession(SNI.SNIHandle managedSessionHandle)
+        {
+            return new SessionHandle(managedSessionHandle, default, ManagedHandleType);
+        }
+#if snidll
+        public static SessionHandle FromNativeHandle(SNISessionHandle nativeSessionHandle)
+        {
+            return new SessionHandle(default, nativeSessionHandle, NativeHandleType);
+        }
+#endif
     }
 
     internal abstract class TdsParserStateObject
@@ -427,7 +488,7 @@ namespace System.Data.SqlClient
             get;
         }
 
-        internal abstract object SessionHandle
+        internal abstract SessionHandle SessionHandle
         {
             get;
         }
@@ -800,7 +861,7 @@ namespace System.Data.SqlClient
 
         internal abstract PacketHandle ReadSyncOverAsync(int timeoutRemaining, out uint error);
 
-        internal abstract PacketHandle ReadAsync(out uint error, ref object handle);
+        internal abstract PacketHandle ReadAsync(SessionHandle handle, out uint error);
 
         internal abstract uint CheckConnection();
 
@@ -890,7 +951,7 @@ namespace System.Data.SqlClient
 
             // NOTE: TdsParserSessionPool may call DecrementPendingCallbacks on a TdsParserStateObject which is already disposed
             // This is not dangerous (since the stateObj is no longer in use), but we need to add a workaround in the assert for it
-            Debug.Assert((remaining == -1 && SessionHandle == null) || (0 <= remaining && remaining < 3), string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
+            Debug.Assert((remaining == -1 && SessionHandle.IsNull ) || (0 <= remaining && remaining < 3), string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
             return remaining;
         }
 
@@ -2352,16 +2413,14 @@ namespace System.Data.SqlClient
                     ChangeNetworkPacketTimeout(msecsRemaining, Timeout.Infinite);
                 }
 
-                object handle = null;
-
                 Interlocked.Increment(ref _readingCount);
 
-                handle = SessionHandle;
-                if (handle != null)
+                SessionHandle handle = SessionHandle;
+                if (!handle.IsNull)
                 {
                     IncrementPendingCallbacks();
 
-                    readPacket = ReadAsync(out error, ref handle);
+                    readPacket = ReadAsync(handle, out error);
 
                     if (!(TdsEnums.SNI_SUCCESS == error || TdsEnums.SNI_SUCCESS_IO_PENDING == error))
                     {
@@ -2371,7 +2430,7 @@ namespace System.Data.SqlClient
 
                 Interlocked.Decrement(ref _readingCount);
                 
-                if (handle == null)
+                if (handle.IsNull)
                 {
                     throw ADP.ClosedConnectionError();
                 }

@@ -24,8 +24,8 @@ namespace System.Data.SqlClient
             uint error = TdsEnums.SNI_SUCCESS;
 
             _pMarsPhysicalConObj.IncrementPendingCallbacks();
-            object handle = _pMarsPhysicalConObj.SessionHandle;
-            temp = _pMarsPhysicalConObj.ReadAsync(out error, ref handle);
+            SessionHandle handle = _pMarsPhysicalConObj.SessionHandle;
+            temp = _pMarsPhysicalConObj.ReadAsync(handle, out error);
 
             Debug.Assert(temp.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
 

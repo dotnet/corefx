@@ -33,7 +33,7 @@ namespace System.Data.SqlClient
 
         internal override uint Status => _sessionHandle != null ? _sessionHandle.Status : TdsEnums.SNI_UNINITIALIZED;
 
-        internal override object SessionHandle => _sessionHandle;
+        internal override SessionHandle SessionHandle => SessionHandle.FromNativeHandle(_sessionHandle);
 
         protected override PacketHandle EmptyReadPacket => default;
 
@@ -205,10 +205,11 @@ namespace System.Data.SqlClient
             return handle == null ? TdsEnums.SNI_SUCCESS : SNINativeMethodWrapper.SNICheckConnection(handle);
         }
 
-        internal override PacketHandle ReadAsync(out uint error, ref object handle)
-        {
+        internal override PacketHandle ReadAsync(SessionHandle handle, out uint error)
+		{
+            Debug.Assert(handle.Type == SessionHandle.NativeHandleType, "unexpected handle type when requiring NativePointer");
             IntPtr readPacketPtr = IntPtr.Zero;
-            error = SNINativeMethodWrapper.SNIReadAsync((SNISessionHandle)handle, ref readPacketPtr);
+            error = SNINativeMethodWrapper.SNIReadAsync(handle.NativeHandle, ref readPacketPtr);
             return PacketHandle.FromNativePointer(readPacketPtr);
         }
 
