@@ -208,6 +208,12 @@ namespace System.Net.Tests
             Assert.True(new WebProxy((string)null).IsBypassed(new Uri("http://anything.com")));
             Assert.True(new WebProxy((Uri)null).IsBypassed(new Uri("http://anything.com")));
             Assert.True(new WebProxy("microsoft", BypassOnLocal: true).IsBypassed(new Uri($"http://{IPAddress.Loopback}")));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not yet fixed in the .NET framework")]
+        public static void WebProxy_BypassOnLocal_ConfiguredToNotBypassLocal()
+        {
             Assert.False(new WebProxy("microsoft", BypassOnLocal: false).IsBypassed(new Uri($"http://{IPAddress.Loopback}")));
         }
 
