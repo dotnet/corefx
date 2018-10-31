@@ -418,7 +418,6 @@ namespace System.Text.Tests
             }
         }
 
-<<<<<<< HEAD
         [Fact]
         public static void EqualsIgnoresCapacity()
         {
@@ -465,6 +464,25 @@ namespace System.Text.Tests
             try
             {
                 for(;;) sb.Append("xx");
+            }
+            catch (OutOfMemoryException)
+            {
+            }
+
+            Assert.True(sb.Length <= sb.Capacity);
+            Assert.True(sb.Capacity <= sb.MaxCapacity);
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
+        [OuterLoop]
+        public static void Replace_OutOfMemory_DoesNotCorruptState()
+        {
+            var sb = new StringBuilder();
+            sb.Append('a', 1_000_000);
+
+            try
+            {
+                sb.Replace("a", new string('b', 1_000_000));
             }
             catch (OutOfMemoryException)
             {
