@@ -79,6 +79,52 @@ namespace System.Net.Http.Tests
         }
 
         [Fact]
+        public void ContentLength_CreateStringContent_HeaderPresentInToString()
+        {
+            var content = new StringContent("This is a test");
+            string headers = content.Headers.ToString();
+            Assert.True(headers.Contains("Content-Length"));
+        }
+
+        [Fact]
+        public void ContentLength_CreateStringContentAndAccessProperty_HeaderPresentInToString()
+        {
+            var content = new StringContent("This is a test");
+            var contentLengthValue = content.Headers.ContentLength;
+            string headers = content.Headers.ToString();
+        }
+
+        [Fact]
+        public void ContentLength_CreateStringContent_ContainsHeader()
+        {
+            var content = new StringContent("This is a test");
+            Assert.True(content.Headers.Contains("Content-Length"));
+        }
+
+        [Fact]
+        public void ContentLength_CreateStringContent_GetValuesIsNotempty()
+        {
+            var content = new StringContent("This is a test");
+            Assert.Equal(1, content.Headers.GetValues("Content-Length").Count());
+        }
+
+        [Fact]
+        public void ContentLength_CreateStringContent_TryGetValuesIsTrue()
+        {
+            var content = new StringContent("This is a test");
+            Assert.True(content.Headers.TryGetValues("Content-Length", out IEnumerable<string> values));
+        }
+
+        [Fact]
+        public void ContentLength_CreateStringContent_HeaderPresentWhileEnumerating()
+        {
+            var content = new StringContent("This is a test");
+            // Linq FirstOrDefault() will enumerate headers.
+            var contentLength = content.Headers.Select(item => item.Key).FirstOrDefault(header => header == "Content-Length");
+            Assert.NotNull(contentLength);
+        }
+
+        [Fact]
         public void ContentType_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
             MediaTypeHeaderValue value = new MediaTypeHeaderValue("text/plain");

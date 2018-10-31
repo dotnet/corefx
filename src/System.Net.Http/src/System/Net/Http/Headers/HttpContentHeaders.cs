@@ -148,5 +148,21 @@ namespace System.Net.Http.Headers
         {
             _parent = parent;
         }
+
+        protected override void EnsureHeaders()
+        {
+            base.EnsureHeaders();
+            if (_parent != null)
+            {
+                // Content-Length is not among headers unless its property is accessed.
+                long? contentLengthValue = ContentLength;
+            }
+        }
+
+        public override string ToString()
+        {
+            EnsureHeaders();
+            return base.ToString();
+        }
     }
 }

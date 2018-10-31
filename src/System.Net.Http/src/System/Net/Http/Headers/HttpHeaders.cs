@@ -206,8 +206,11 @@ namespace System.Net.Http.Headers
             return TryGetValues(descriptor, out values);
         }
 
+        protected virtual void EnsureHeaders() { }
+
         internal bool TryGetValues(HeaderDescriptor descriptor, out IEnumerable<string> values)
         {
+            EnsureHeaders();
             if (_headerStore == null)
             {
                 values = null;
@@ -232,6 +235,7 @@ namespace System.Net.Http.Headers
 
         internal bool Contains(HeaderDescriptor descriptor)
         {
+            EnsureHeaders();
             if (_headerStore == null)
             {
                 return false;
@@ -333,6 +337,7 @@ namespace System.Net.Http.Headers
 
         public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator()
         {
+            EnsureHeaders();
             return _headerStore != null && _headerStore.Count > 0 ?
                 GetEnumeratorCore() :
                 ((IEnumerable<KeyValuePair<string, IEnumerable<string>>>)Array.Empty<KeyValuePair<string, IEnumerable<string>>>()).GetEnumerator();
@@ -366,6 +371,7 @@ namespace System.Net.Http.Headers
 
         internal IEnumerable<KeyValuePair<HeaderDescriptor, string[]>> GetHeaderDescriptorsAndValues()
         {
+            EnsureHeaders();
             return _headerStore != null && _headerStore.Count > 0 ?
                 GetHeaderDescriptorsAndValuesCore() :
                 Array.Empty<KeyValuePair<HeaderDescriptor, string[]>>();
