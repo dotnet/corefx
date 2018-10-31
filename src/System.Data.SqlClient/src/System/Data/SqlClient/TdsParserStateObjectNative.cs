@@ -12,7 +12,7 @@ namespace System.Data.SqlClient
 {
     internal class TdsParserStateObjectNative : TdsParserStateObject
     {
-        private SNISessionHandle _sessionHandle = null;              // the SNI handle we're to work on
+        private SNIHandle _sessionHandle = null;              // the SNI handle we're to work on
 
         private SNIPacketHandle _sniPacket = null;                // Will have to re-vamp this for MARS
         internal SNIPacketHandle _sniAsyncAttnPacket = null;                // Packet to use to send Attn
@@ -29,7 +29,7 @@ namespace System.Data.SqlClient
         {
         }
 
-        internal SNISessionHandle Handle => _sessionHandle;
+        internal SNIHandle Handle => _sessionHandle;
 
         internal override uint Status => _sessionHandle != null ? _sessionHandle.Status : TdsEnums.SNI_UNINITIALIZED;
 
@@ -42,7 +42,7 @@ namespace System.Data.SqlClient
             Debug.Assert(physicalConnection is TdsParserStateObjectNative, "Expected a stateObject of type " + this.GetType());
             TdsParserStateObjectNative nativeSNIObject = physicalConnection as TdsParserStateObjectNative;
             SNINativeMethodWrapper.ConsumerInfo myInfo = CreateConsumerInfo(async);
-            _sessionHandle = new SNISessionHandle(myInfo, nativeSNIObject.Handle);
+            _sessionHandle = new SNIHandle(myInfo, nativeSNIObject.Handle);
         }
 
         private SNINativeMethodWrapper.ConsumerInfo CreateConsumerInfo(bool async)
@@ -94,7 +94,7 @@ namespace System.Data.SqlClient
                 }
             }
 
-            _sessionHandle = new SNISessionHandle(myInfo, serverName, spnBuffer, ignoreSniOpenTimeout, checked((int)timeout), out instanceName, flushCache, !async, fParallel);
+            _sessionHandle = new SNIHandle(myInfo, serverName, spnBuffer, ignoreSniOpenTimeout, checked((int)timeout), out instanceName, flushCache, !async, fParallel);
         }
 
         protected override uint SNIPacketGetData(PacketHandle packet, byte[] _inBuff, ref uint dataSize)
@@ -177,7 +177,7 @@ namespace System.Data.SqlClient
 
         internal override PacketHandle ReadSyncOverAsync(int timeoutRemaining, out uint error)
         {
-            SNISessionHandle handle = Handle;
+            SNIHandle handle = Handle;
             if (handle == null)
             {
                 throw ADP.ClosedConnectionError();
@@ -201,7 +201,7 @@ namespace System.Data.SqlClient
 
         internal override uint CheckConnection()
         {
-            SNISessionHandle handle = Handle;
+            SNIHandle handle = Handle;
             return handle == null ? TdsEnums.SNI_SUCCESS : SNINativeMethodWrapper.SNICheckConnection(handle);
         }
 
@@ -215,7 +215,7 @@ namespace System.Data.SqlClient
 
         internal override PacketHandle CreateAndSetAttentionPacket()
         {
-            SNISessionHandle handle = Handle;
+            SNIHandle handle = Handle;
             SNIPacketHandle attnPacket = new SNIPacketHandle(handle);
             _sniAsyncAttnPacket = attnPacket;
             SetPacketData(PacketHandle.FromNativePacket(attnPacket), SQL.AttentionHeader, TdsEnums.HEADER_LEN);
@@ -331,7 +331,7 @@ namespace System.Data.SqlClient
                 _packets = new Stack<SNIPacketHandle>();
             }
 
-            public SNIPacketHandle Take(SNISessionHandle sniHandle)
+            public SNIPacketHandle Take(SNIHandle sniHandle)
             {
                 SNIPacketHandle packet;
                 if (_packets.Count > 0)

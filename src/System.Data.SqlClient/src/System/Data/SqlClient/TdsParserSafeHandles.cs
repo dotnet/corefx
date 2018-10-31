@@ -131,13 +131,13 @@ namespace System.Data.SqlClient
         }
     }
 
-    internal sealed class SNISessionHandle : SafeHandle
+    internal sealed class SNIHandle : SafeHandle
     {
         private readonly uint _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly bool _fSync = false;
 
         // creates a physical connection
-        internal SNISessionHandle(
+        internal SNIHandle(
             SNINativeMethodWrapper.ConsumerInfo myInfo,
             string serverName,
             byte[] spnBuffer,
@@ -165,7 +165,7 @@ namespace System.Data.SqlClient
         }
 
         // constructs SNI Handle for MARS session
-        internal SNISessionHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNISessionHandle parent) : base(IntPtr.Zero, true)
+        internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent) : base(IntPtr.Zero, true)
         {
             try { }
             finally
@@ -249,7 +249,7 @@ namespace System.Data.SqlClient
             _packets = new Stack<SNIPacketHandle>();
         }
 
-        public SNIPacketHandle Take(SNISessionHandle sniHandle)
+        public SNIPacketHandle Take(SNIHandle sniHandle)
         {
             SNIPacketHandle packet;
             if (_packets.Count > 0)

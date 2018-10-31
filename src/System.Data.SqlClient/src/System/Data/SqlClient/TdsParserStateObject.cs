@@ -77,13 +77,13 @@ namespace System.Data.SqlClient
 
         public readonly SNI.SNIHandle ManagedHandle;
 #if snidll
-        public readonly SNISessionHandle NativeHandle;
+        public readonly SNIHandle NativeHandle;
 #endif
         public readonly int Type;
 
         public SessionHandle(SNI.SNIHandle managedHandle,
 #if snidll
-            SNISessionHandle 
+            SNIHandle 
 #else
             int
 #endif
@@ -109,7 +109,7 @@ namespace System.Data.SqlClient
             return new SessionHandle(managedSessionHandle, default, ManagedHandleType);
         }
 #if snidll
-        public static SessionHandle FromNativeHandle(SNISessionHandle nativeSessionHandle)
+        public static SessionHandle FromNativeHandle(SNIHandle nativeSessionHandle)
         {
             return new SessionHandle(default, nativeSessionHandle, NativeHandleType);
         }
