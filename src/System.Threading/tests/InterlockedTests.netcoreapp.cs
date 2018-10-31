@@ -98,9 +98,7 @@ namespace System.Threading.Tests
             }
         }
 
-        public static bool IsNotArm64 => RuntimeInformation.ProcessArchitecture != Architecture.Arm64;
-
-        [ConditionalFact(nameof(IsNotArm64))] // issue: https://github.com/dotnet/coreclr/issues/20215
+        [ConditionalFact(nameof(PlatformDetection.IsNotArm64Process))] // issue: https://github.com/dotnet/coreclr/issues/20215
         public void MemoryBarrierProcessWide()
         {
             // Stress MemoryBarrierProcessWide correctness using a simple AsymmetricLock
