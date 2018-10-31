@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Reflection.TypeLoading;
 
 namespace System.Reflection
 {
-    //
     // A MetadataLoadContext represents a closed universe of Type objects loaded for inspection-only purposes.
     // Each MetadataLoadContext defines its own binding rules and is isolated from all other MetadataLoadContexts.
     //

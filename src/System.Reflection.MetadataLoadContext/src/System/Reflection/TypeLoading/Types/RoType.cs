@@ -171,38 +171,33 @@ namespace System.Reflection.TypeLoading
         internal RoType[] GetInterfacesNoCopy() => _lazyInterfaces ?? (_lazyInterfaces = ComputeInterfaceClosure());
         private RoType[] ComputeInterfaceClosure()
         {
-            // todo: HashSet<RoType> ifcs = new HashSet<RoType>();
-            Collections.Hashtable ifcs = new Collections.Hashtable(); //todo
+            HashSet<RoType> ifcs = new HashSet<RoType>();
 
             RoType baseType = ComputeBaseTypeWithoutDesktopQuirk();
             if (baseType != null)
             {
                 foreach (RoType ifc in baseType.GetInterfacesNoCopy())
                 {
-                    // ifcs.Add(ifc);
-                    ifcs[ifc] = ifc;
+                    ifcs.Add(ifc);
                 }
             }
 
             foreach (RoType ifc in ComputeDirectlyImplementedInterfaces())
             {
-                //bool notSeenBefore = ifcs.Add(ifc);
-                bool notSeenBefore = ifcs.Contains(ifc);
+                bool notSeenBefore = ifcs.Add(ifc);
                 if (!notSeenBefore)
                 {
-                    ifcs.Add(ifc, ifc);
                     foreach (RoType indirectIfc in ifc.GetInterfacesNoCopy())
                     {
-                        //ifcs.Add(indirectIfc);
-                        ifcs[indirectIfc] = indirectIfc;
+                        ifcs.Add(indirectIfc);
                     }
                 }
             }
 
-            //return ifcs.ToArray();
+            // return ifcs.ToArray(); todo
             RoType[] roType = new RoType[ifcs.Count];
             int i = 0;
-            foreach (var r in ifcs.Values)
+            foreach (var r in ifcs)
             {
                 roType[i++] = (RoType)r;
             }

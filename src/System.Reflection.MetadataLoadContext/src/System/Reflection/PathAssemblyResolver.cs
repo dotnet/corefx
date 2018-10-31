@@ -3,23 +3,69 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 
 namespace System.Reflection
 {
+    /// <summary>
+    /// A MetadataAssemblyResolver used with paths to each assembly.
+    /// </summary>
+    /// <remarks>
+    /// If the corresponding MetadataLoadContext does not have the CoreAssemblyName property set,
+    /// default values are provided which are compatible with .NET Core and .NET Framework.
+    /// </remarks>
     public class PathAssemblyResolver : MetadataAssemblyResolver
     {
-        public PathAssemblyResolver(params string[] fileNames)
-        {
-            return;
-        }
+        private static readonly string[] CoreNames = { "mscorlib", "System.Private.CoreLib", "System.Runtime", "netstandard" };
 
-        public PathAssemblyResolver(IEnumerable<string> fileNames)
+        private Dictionary<string, string> _fileToPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        public PathAssemblyResolver(IEnumerable<string> assemblyPath)
         {
-            return;
+            if (assemblyPath == null)
+                throw new ArgumentNullException(nameof(assemblyPath));
+
+            foreach (string path in assemblyPath)
+            {
+                string file = Path.GetFileNameWithoutExtension(path);
+                _fileToPaths.Add(file, path);
+            }
         }
 
         public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)
         {
+            string assemblyPath = null;
+
+            if (assemblyName != null)
+            {
+                _fileToPaths.TryGetValue(assemblyName.Name, out assemblyPath);
+                if (assemblyPath != null)
+                {
+                    return context.LoadFromAssemblyPath(assemblyPath);
+                }
+            }
+            else
+            {
+                Debug.Assert(context.CoreAssemblyName == null);
+
+                // Try loading the first core assembly that has a path specified
+                foreach (string coreName in CoreNames)
+                {
+                    if (_fileToPaths.TryGetValue(coreName, out assemblyPath))
+                    {
+                        Assembly assembly = context.LoadFromAssemblyPath(assemblyPath);
+                        if (assembly != null)
+                        {
+                            // Set CoreAssemblyName so we don't need to Resolve the core type assembly again
+                            context.CoreAssemblyName = coreName;
+                        }
+
+                        return assembly;
+                    }
+                }
+            }
+
             return null;
         }
     }

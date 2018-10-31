@@ -1,7 +1,7 @@
-﻿<!-- System.Reflection.TypeLoader.dll has two build configurations: NetCore and NetStandard. The functional difference is that the NetCore
+﻿<!-- System.Reflection.MetadataLoadContext.dll has two build configurations: NetCore and NetStandard. The functional difference is that the NetCore
          version supports all of the new NetCore Reflection apis (IsSZArray, etc.) Apps built against NetCore should use the NetCore build
-         of TypeLoader.dll if possible. If they use the NetStandard version, they must refrain from calling NetCore-specific apis on Reflection
-         objects dispensed by TypeLoaders as these apis will not work.
+         of MetadataLoadContext.dll if possible. If they use the NetStandard version, they must refrain from calling NetCore-specific apis on Reflection
+         objects dispensed by MetadataLoadContexts as these apis will not work.
 
          Unfortunately, CoreFxLab does not have support for multiple-TFM builds and at the moment, our immediate prospects need NETFX 4.6 support
          so we're building the inferior netstandard version.
@@ -9,7 +9,7 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <ProjectGuid>{DBB18588-DD89-4F41-9852-484FD4726F0F}</ProjectGuid>
-    <AssemblyName>System.Reflection.TypeLoader</AssemblyName>
+    <AssemblyName>System.Reflection.MetadataLoadContext</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>.NET Core Type Loader</Description>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
@@ -41,7 +41,6 @@
     <Compile Include="FromCoreRt\System\Reflection\SignatureTypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SR2.cs" />
     <Compile Include="System\Reflection\MetadataAssemblyResolver.cs" />
     <Compile Include="System\Reflection\PathAssemblyResolver.cs" />
     <Compile Include="System\Reflection\MetadataLoadContext .Apis.cs" />
@@ -157,11 +156,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Collections.Concurrent" />
-    <Reference Include="System.Collections.Immutable" />
-    <Reference Include="System.IO.FileSystem" />
-    <Reference Include="System.Reflection.Metadata" />
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Collections.Concurrent\src\System.Collections.Concurrent.csproj" />
+    <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
+    <ProjectReference Include="..\..\System.IO.FileSystem\src\System.IO.FileSystem.csproj" />
+    <ProjectReference Include="..\..\System.Reflection.Metadata\src\System.Reflection.Metadata.csproj" />
   </ItemGroup>
 </Project>

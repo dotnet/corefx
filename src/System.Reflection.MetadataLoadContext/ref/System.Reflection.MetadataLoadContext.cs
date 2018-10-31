@@ -16,8 +16,7 @@ namespace System.Reflection
 
     public class PathAssemblyResolver : MetadataAssemblyResolver
     {
-        public PathAssemblyResolver(params string[] fileNames) { }
-        public PathAssemblyResolver(IEnumerable<string> fileNames) { }
+        public PathAssemblyResolver(IEnumerable<string> assemblyPaths) { }
         public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName) { throw null; }
     }
 

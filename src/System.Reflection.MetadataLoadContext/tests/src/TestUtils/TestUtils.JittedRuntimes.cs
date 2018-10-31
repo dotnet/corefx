@@ -62,7 +62,12 @@ namespace System.Reflection.Tests
                     "on an AoT runtime.");
             }
 
-            return File.OpenRead(typeof(object).Assembly.Location);
+            return File.OpenRead(GetPathToCoreAssembly());
+        }
+
+        public static string GetPathToCoreAssembly()
+        {
+            return typeof(object).Assembly.Location;
         }
     }
 }

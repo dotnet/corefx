@@ -18,6 +18,7 @@
     <Compile Include="src\Tests\Event\EventTests.cs" />
     <Compile Include="src\Tests\Field\FieldTests.cs" />
     <Compile Include="src\Tests\Identity\IdentityTests.cs" />
+    <Compile Include="src\Tests\MetadataLoadContext\PathAssemblyResolver.cs" />
     <Compile Include="src\Tests\Method\MethodInvariants.cs" />
     <Compile Include="src\Tests\Method\MethodTests.cs" />
     <Compile Include="src\Tests\Module\ModuleProhibitedApiTests.cs" />

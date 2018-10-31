@@ -20,14 +20,12 @@ namespace System.Reflection
             RoAssembly coreAssembly = _lazyCoreAssembly;
             if (object.ReferenceEquals(coreAssembly, Sentinels.RoAssembly))
             {
+                RoAssemblyName roAssemblyName = null;
                 string coreAssemblyName = GetCommittedCoreAssemblyName();
-                if (coreAssemblyName == null)
+                if (coreAssemblyName != null)
                 {
-                    e = new InvalidOperationException(SR.NoCoreAssemblyDefined);
-                    return null;
+                    roAssemblyName = new AssemblyName(coreAssemblyName).ToRoAssemblyName();
                 }
-
-                RoAssemblyName roAssemblyName = new AssemblyName(coreAssemblyName).ToRoAssemblyName();
                 coreAssembly = _lazyCoreAssembly = TryResolveAssembly(roAssemblyName, out e);
             }
             return coreAssembly;
