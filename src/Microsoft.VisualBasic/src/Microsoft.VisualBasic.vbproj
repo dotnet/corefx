@@ -21,7 +21,7 @@
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeTypes.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\UnsafeNativeMethods.vb" />
   </ItemGroup>
-    <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <ItemGroup Condition="'$(TargetsWindows)' != 'true'">
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
     <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.Unix.vb" />
   </ItemGroup>
