@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <PropertyGroup Condition="'$(IsReferenceAssembly)' != 'true' AND '$(IsTestProject)' != 'true'">
+  <PropertyGroup Condition="'$(IsSourceProject)' == 'true'">
     <ContractProject Condition="'$(ContractProject)' == ''">$(SourceDir)/$(MSBuildProjectName)/ref/$(MSBuildProjectName).csproj</ContractProject>
     <HasMatchingContract Condition="'$(HasMatchingContract)' == '' and Exists('$(ContractProject)')">true</HasMatchingContract>
     <ContractAssemblyPath Condition="'$(ContractAssemblyPath)' == ''">$(ContractOutputPath)/$(MSBuildProjectName).dll</ContractAssemblyPath>
