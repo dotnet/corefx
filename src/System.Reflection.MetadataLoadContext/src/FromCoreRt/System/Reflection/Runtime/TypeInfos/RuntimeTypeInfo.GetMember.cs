@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Collections.Generic;
 using System.Reflection.Runtime.BindingFlagSupport;
 
 namespace System.Reflection.TypeLoading
@@ -115,4 +114,3 @@ namespace System.Reflection.TypeLoading
         }
     }
 }
-

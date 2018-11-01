@@ -25,9 +25,9 @@
 // ahead of the ones I'm much more likely to be interested in.
 //
 
+using System.Collections.Generic;
 using System.IO;
 using System.Security;
-using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {

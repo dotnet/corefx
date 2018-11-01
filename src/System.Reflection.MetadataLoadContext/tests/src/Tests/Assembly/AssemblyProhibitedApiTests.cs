@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -15,10 +11,10 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CannotDoWithReflectionOnlyAssemblies()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 // Storing as ICustomAttributeProvider so we don't accidentally pick up the CustomAttributeExtensions extension methods.
-                ICustomAttributeProvider icp = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                ICustomAttributeProvider icp = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
 
                 Assert.Throws<InvalidOperationException>(() => icp.GetCustomAttributes(inherit: false));
                 Assert.Throws<InvalidOperationException>(() => icp.GetCustomAttributes(null, inherit: false));

@@ -2,13 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 using SampleMetadata;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -391,7 +387,7 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers1()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(
+            using (MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
                     delegate (MetadataLoadContext sender, AssemblyName name)
                     {
@@ -401,7 +397,7 @@ namespace System.Reflection.Tests
                     }),
                     "mscorlib"))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_CustomModifiersImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);
                 Type reqA = a.GetType("ReqA", throwOnError: true);
                 Type reqB = a.GetType("ReqB", throwOnError: true);
@@ -425,9 +421,9 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers2()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_CustomModifiersImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);
                 Type reqA = a.GetType("ReqA", throwOnError: true);
                 Type reqB = a.GetType("ReqB", throwOnError: true);
@@ -449,4 +445,3 @@ namespace System.Reflection.Tests
         }
     }
 }
-

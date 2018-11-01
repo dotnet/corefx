@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
@@ -34,7 +34,7 @@ namespace System.Reflection.TypeLoading
         private readonly RoInstantiationProviderType _declaringType;
         private readonly TMethodDecoder _decoder;
 
-        internal RoDefinitionMethod(RoInstantiationProviderType declaringType, Type reflectedType, TMethodDecoder decoder) 
+        internal RoDefinitionMethod(RoInstantiationProviderType declaringType, Type reflectedType, TMethodDecoder decoder)
             : base(reflectedType)
         {
             Debug.Assert(declaringType != null);

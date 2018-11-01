@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Globalization;
 using System.Collections.Generic;
-
+using System.Linq;
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -16,9 +13,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies_EmptyMetadataLoadContext()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly[] loadedAssemblies = tl.GetAssemblies().ToArray();
+                Assembly[] loadedAssemblies = lc.GetAssemblies().ToArray();
                 Assert.Equal(0, loadedAssemblies.Length);
             }
         }
@@ -26,14 +23,14 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly[] loadedAssemblies = tl.GetAssemblies().ToArray();
+                Assembly[] loadedAssemblies = lc.GetAssemblies().ToArray();
                 Assert.Equal(0, loadedAssemblies.Length);
 
-                Assembly a1 = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
-                Assembly a2 = tl.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
-                loadedAssemblies = tl.GetAssemblies().ToArray();
+                Assembly a1 = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a2 = lc.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
+                loadedAssemblies = lc.GetAssemblies().ToArray();
                 Assert.Equal(2, loadedAssemblies.Length);
                 Assert.Contains<Assembly>(a1, loadedAssemblies);
                 Assert.Contains<Assembly>(a2, loadedAssemblies);
@@ -43,11 +40,11 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies_SnapshotIsAtomic()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a1 = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
-                IEnumerable<Assembly> loadedAssembliesSnapshot = tl.GetAssemblies();
-                Assembly a2 = tl.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
+                Assembly a1 = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                IEnumerable<Assembly> loadedAssembliesSnapshot = lc.GetAssemblies();
+                Assembly a2 = lc.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                 Assembly[] loadedAssemblies = loadedAssembliesSnapshot.ToArray();
                 Assert.Equal(1, loadedAssemblies.Length);
                 Assert.Equal(a1, loadedAssemblies[0]);

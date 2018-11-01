@@ -2,13 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 using SampleMetadata;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -251,10 +247,10 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers1()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
 
-                Assembly a = tl.LoadFromByteArray(TestData.s_CustomModifiersImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);
                 Type reqA = a.GetType("ReqA", throwOnError: true);
                 Type reqB = a.GetType("ReqB", throwOnError: true);
@@ -279,10 +275,10 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestMethodBody1()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
-                Assembly coreAssembly = tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithMethodBodyImage);
+                Assembly coreAssembly = lc.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
+                Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyWithMethodBodyImage);
 
                 Type nonsense = a.GetType("Nonsense`1", throwOnError: true);
                 Type theT = nonsense.GetTypeInfo().GenericTypeParameters[0];
@@ -361,10 +357,10 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestEHClauses()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
             {
-                Assembly coreAssembly = tl.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyWithEhClausesImage);
+                Assembly coreAssembly = lc.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
+                Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyWithEhClausesImage);
 
                 Type gt = a.GetType("G`1", throwOnError: true);
                 Type et = a.GetType("MyException`2", throwOnError: true);
@@ -479,4 +475,3 @@ namespace System.Reflection.Tests
         }
     }
 }
-

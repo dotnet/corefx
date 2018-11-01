@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-
 using SampleMetadata;
-
+using System.Linq;
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -140,4 +135,3 @@ namespace System.Reflection.Tests
         }
     }
 }
-

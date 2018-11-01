@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using System.Diagnostics;
-using CultureInfo = System.Globalization.CultureInfo;
-
 using System.Reflection.TypeLoading;
+using CultureInfo = System.Globalization.CultureInfo;
 
 namespace System
 {

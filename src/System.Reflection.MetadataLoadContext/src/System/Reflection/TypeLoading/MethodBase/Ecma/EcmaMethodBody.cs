@@ -4,8 +4,8 @@
 
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 using System.Collections.Immutable;
+using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
@@ -91,4 +91,3 @@ namespace System.Reflection.TypeLoading.Ecma
         private readonly MethodBodyBlock _neverAccessThisExceptThroughBlockProperty;
     }
 }
-

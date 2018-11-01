@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
-using System;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
+using Xunit;
 
 #pragma warning disable 0414
 #pragma warning disable 0067

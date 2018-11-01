@@ -9,7 +9,7 @@ using System.IO;
 namespace System.Reflection
 {
     /// <summary>
-    /// A MetadataAssemblyResolver used with paths to each assembly.
+    /// A MetadataAssemblyResolver that uses paths to each assembly.
     /// </summary>
     /// <remarks>
     /// If the corresponding MetadataLoadContext does not have the CoreAssemblyName property set,
@@ -57,7 +57,6 @@ namespace System.Reflection
                         Assembly assembly = context.LoadFromAssemblyPath(assemblyPath);
                         if (assembly != null)
                         {
-                            // Set CoreAssemblyName so we don't need to Resolve the core type assembly again
                             context.CoreAssemblyName = coreName;
                         }
 

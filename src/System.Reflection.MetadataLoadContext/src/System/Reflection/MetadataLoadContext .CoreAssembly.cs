@@ -2,18 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Threading;
-using System.Diagnostics;
 using System.Reflection.TypeLoading;
+using System.Threading;
 
 namespace System.Reflection
 {
     public sealed partial class MetadataLoadContext
     {
-        //
         // Cache loaded coreAssembly and core types.
-        //
         internal RoAssembly TryGetCoreAssembly(out Exception e)
         {
             e = null;

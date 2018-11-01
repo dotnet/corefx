@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
+using SampleMetadata;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
-
-using SampleMetadata;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -522,9 +519,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage1()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 // Create big hash collisions in GetTypeCoreCache.
                 for (int i = 0; i < 1000; i++)
                 {
@@ -540,9 +537,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage2()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromAssemblyPath(typeof(SampleMetadata.NS0.SameNamedType).Assembly.Location);
+                Assembly a = lc.LoadFromAssemblyPath(typeof(SampleMetadata.NS0.SameNamedType).Assembly.Location);
                 // Create big hash collisions in GetTypeCoreCache.
                 for (int i = 0; i < 16; i++)
                 {
@@ -558,10 +555,10 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage3()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 // Make sure the tricky corner case of a null/empty namespace is covered.
-                Assembly a = tl.LoadFromAssemblyPath(typeof(TopLevelType).Assembly.Location);
+                Assembly a = lc.LoadFromAssemblyPath(typeof(TopLevelType).Assembly.Location);
                 Type t = a.GetType("TopLevelType", throwOnError: true, ignoreCase: false);
                 Assert.Equal(null, t.Namespace);
                 Assert.Equal("TopLevelType", t.Name);
@@ -592,9 +589,9 @@ namespace System.Reflection.Tests
         public static void TypesWithStrangeCharacters()
         {
             // Make sure types with strange characters are escaped.
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_TypeWithStrangeCharacters);
+                Assembly a = lc.LoadFromByteArray(TestData.s_TypeWithStrangeCharacters);
                 Type[] types = a.GetTypes();
                 Assert.Equal(1, types.Length);
                 Type t = types[0];

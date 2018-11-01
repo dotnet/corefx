@@ -2,11 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -24,9 +19,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_SimpleNameOnly()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                 AssemblyName an = a.GetName(copiedName: false);
 
                 Assert.Equal("SimpleNameOnly", an.Name);
@@ -49,7 +44,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(AssemblyContentType.Default, an.ContentType);
                 Assert.Equal(AssemblyHashAlgorithm.SHA1, an.HashAlgorithm);
 
-                Assembly aAgain = tl.LoadFromAssemblyName(an);
+                Assembly aAgain = lc.LoadFromAssemblyName(an);
                 Assert.Equal(a, aAgain);
             }
         }
@@ -57,9 +52,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_Version1_2_65534_4()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_Version1_2_65534_4Image);
+                Assembly a = lc.LoadFromByteArray(TestData.s_Version1_2_65534_4Image);
                 AssemblyName an = a.GetName(copiedName: false);
                 Assert.Equal("Version1_2_65534_4", an.Name);
 
@@ -70,7 +65,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(65534, v.Build);
                 Assert.Equal(4, v.Revision);
 
-                Assembly aAgain = tl.LoadFromAssemblyName(an);
+                Assembly aAgain = lc.LoadFromAssemblyName(an);
                 Assert.Equal(a, aAgain);
             }
         }
@@ -78,9 +73,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_Version1_2_65535_65535()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_Version1_2_65535_65535Image);
+                Assembly a = lc.LoadFromByteArray(TestData.s_Version1_2_65535_65535Image);
                 AssemblyName an = a.GetName(copiedName: false);
                 Assert.Equal("Version1_2_65535_65535", an.Name);
 
@@ -91,7 +86,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(65535, v.Build);
                 Assert.Equal(65535, v.Revision);
 
-                Assembly aAgain = tl.LoadFromAssemblyName(an);
+                Assembly aAgain = lc.LoadFromAssemblyName(an);
                 Assert.Equal(a, aAgain);
             }
         }
@@ -99,16 +94,16 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_CultureFrCh()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_CultureFrChImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_CultureFrChImage);
                 AssemblyName an = a.GetName(copiedName: false);
                 Assert.Equal("CultureFrCh", an.Name);
 
                 string cultureName = an.CultureName;
                 Assert.Equal("fr-CH", cultureName);
 
-                Assembly aAgain = tl.LoadFromAssemblyName(an);
+                Assembly aAgain = lc.LoadFromAssemblyName(an);
                 Assert.Equal(a, aAgain);
             }
         }
@@ -116,9 +111,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_PublicKeyToken1ee753223f71263d()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PublicKeyToken1ee753223f71263dImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PublicKeyToken1ee753223f71263dImage);
                 AssemblyName an = a.GetName(copiedName: false);
                 Assert.Equal("PublicKeyToken1ee753223f71263d", an.Name);
 
@@ -127,7 +122,7 @@ namespace System.Reflection.Tests
                 byte[] publicKey = an.GetPublicKey();
                 Assert.Equal<byte>(TestData.s_PublicKeyToken1ee753223f71263d_Pk, publicKey);
 
-                Assembly aAgain = tl.LoadFromAssemblyName(an);
+                Assembly aAgain = lc.LoadFromAssemblyName(an);
                 Assert.Equal(a, aAgain);
             }
         }
@@ -135,15 +130,15 @@ namespace System.Reflection.Tests
         [Fact]
         public static void AssemblyName_GetName_HashWithSha256()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_HashWithSha256Image);
+                Assembly a = lc.LoadFromByteArray(TestData.s_HashWithSha256Image);
                 AssemblyName an = a.GetName(copiedName: false);
                 Assert.Equal("HashWithSha256", an.Name);
 
                 Assert.Equal(AssemblyHashAlgorithm.SHA256, an.HashAlgorithm);
 
-                Assembly aAgain = tl.LoadFromAssemblyName(an);
+                Assembly aAgain = lc.LoadFromAssemblyName(an);
                 Assert.Equal(a, aAgain);
             }
         }

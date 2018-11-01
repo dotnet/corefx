@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Reflection.Core.Execution;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Reflection.Runtime.TypeInfos;
-
-using Internal.Reflection.Core.Execution;
-
 using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
@@ -212,4 +210,3 @@ namespace System.Reflection.Runtime.BindingFlagSupport
         private const int Grow = 64;
     }
 }
-

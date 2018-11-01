@@ -135,4 +135,3 @@ namespace System.Reflection.Runtime.BindingFlagSupport
         private QueriedMemberList<M> _queriedMembers;
     }
 }
-

@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
-using System.Reflection;
 using System.Collections.Generic;
 
 namespace System.Reflection.Tests

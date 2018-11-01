@@ -2,13 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-
 using SampleMetadata;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -21,9 +15,9 @@ namespace System.Reflection.Tests
         public static void Scenario_GetAssemblyName()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
+                Assembly a = lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 AssemblyName assemblyName = a.GetName();
                 Console.WriteLine(assemblyName.FullName);
             }
@@ -33,9 +27,9 @@ namespace System.Reflection.Tests
         public static void Scenario_EnumerateDependencies()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
+                Assembly a = lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 foreach (AssemblyName name in a.GetReferencedAssemblies())
                 {
                     Console.WriteLine(name.FullName);
@@ -47,12 +41,12 @@ namespace System.Reflection.Tests
         public static void Scenario_FindACoreAssembly()
         {
             // Ensure you can do all this without setting a core assembly.
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 Assembly[] candidates =
                 {
-                    tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location),
-                    tl.LoadFromAssemblyPath(typeof(object).Assembly.Location),
+                    lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location),
+                    lc.LoadFromAssemblyPath(typeof(object).Assembly.Location),
                 };
 
                 foreach (Assembly candidate in candidates)
@@ -61,7 +55,7 @@ namespace System.Reflection.Tests
                     if (objectType != null)
                     {
                         // Found our core assembly. Ensure it's not too late to set the CoreAssemblyName property.
-                        tl.CoreAssemblyName = objectType.Assembly.GetName().FullName;
+                        lc.CoreAssemblyName = objectType.Assembly.GetName().FullName;
                         return;
                     }
                 }
@@ -74,9 +68,9 @@ namespace System.Reflection.Tests
         public static void Scenario_EnumerateTypesAndMembers()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
+                Assembly a = lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 foreach (TypeInfo t in a.DefinedTypes)
                 {
                     Console.WriteLine(t.FullName);
@@ -114,5 +108,3 @@ namespace System.Reflection.Tests
         public static void WriteLine(string s) { }
     }
 }
-
-

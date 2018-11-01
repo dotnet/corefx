@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Diagnostics;
 using System.Collections.Generic;
-
-using Xunit;
+using System.Linq;
 
 namespace System.Reflection.Tests
 {
@@ -44,5 +40,4 @@ namespace System.Reflection.Tests
 
         public static IEnumerable<object[]> Wrap(this IEnumerable<object[]> tds) => tds.Select(td => td.Wrap());
     }
-
 }

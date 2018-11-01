@@ -4,8 +4,6 @@
 
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -23,9 +21,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module m = a.GetModule("Bob.netmodule");
                     Assert.Equal(a, m.Assembly);
                     Assert.Equal(bobNetModulePath, m.FullyQualifiedName);
@@ -47,9 +45,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module m = a.GetModule("bOB.nEtmODule");
                     Assert.Equal(a, m.Assembly);
                     Assert.Equal(bobNetModulePath, m.FullyQualifiedName);
@@ -71,9 +69,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module m = a.GetModule("NotThere.netmodule");
                     Assert.Null(m);
                 }
@@ -88,9 +86,9 @@ namespace System.Reflection.Tests
                 string assemblyPath = Path.Combine(td.Path, "MultiModule.dll");
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Assert.Throws<FileNotFoundException>(() => a.GetModule("Bob.netmodule"));
                 }
             }
@@ -107,9 +105,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module m1 = a.GetModule("Bob.netmodule");
                     Module m2 = a.GetModule("bob.netmodule");
                     Assert.Equal(m1, m2);
@@ -128,9 +126,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module m = a.GetModule("Main.dll");
                     Assert.Equal(a.ManifestModule, m);
                 }
@@ -148,9 +146,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Assert.Throws<ArgumentNullException>(() => a.GetModule(null));
                 }
             }
@@ -159,9 +157,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadMultiModuleFromByteArray_GetModule()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Assert.Throws<FileNotFoundException>(() => a.GetModule("Bob.netmodule"));
             }
         }
@@ -179,9 +177,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module[] ms = a.GetModules(getResourceModules: getResourceModules);
                     Assert.Equal(2, ms.Length);
                     Module bob = a.GetModule("Bob.netmodule");
@@ -195,9 +193,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadModule_Null()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Assert.Throws<ArgumentNullException>(() => a.LoadModule(null, TestData.s_JoeNetModuleImage));
                 Assert.Throws<ArgumentNullException>(() => a.LoadModule("Bob.netmodule", null));
             }
@@ -206,9 +204,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadModule_CannotLoadModuleManifestModule()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Assert.Throws<ArgumentException>(() => a.LoadModule("Main.dll", TestData.s_JoeNetModuleImage));
             }
         }
@@ -216,9 +214,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadModule_CannotLoadModuleNotInManifest()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Assert.Throws<ArgumentException>(() => a.LoadModule("NotInManifest.dll", TestData.s_JoeNetModuleImage));
             }
         }
@@ -228,9 +226,9 @@ namespace System.Reflection.Tests
         [InlineData("bOB.NETMODULE")]
         public static void LoadModule(string moduleName)
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Module m = a.LoadModule(moduleName, TestData.s_JoeNetModuleImage);
                 Module m1 = a.GetModule(moduleName);
                 Assert.NotNull(m);
@@ -247,9 +245,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadModuleTwiceQuirk()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Module m1 = a.LoadModule("Bob.netmodule", TestData.s_JoeNetModuleImage);
                 Module m2 = a.LoadModule("Bob.netmodule", TestData.s_JoeNetModuleImage);
                 Module winner = a.GetModule("Bob.netmodule");
@@ -266,11 +264,11 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleResolveEvent()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 Module moduleReturnedFromEventHandler = null;
 
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 a.ModuleResolve +=
                     delegate (object sender, ResolveEventArgs e)
                     {
@@ -301,9 +299,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Type[] types = a.GetTypes();
                     AssertContentsOfMultiModule(types, a);
                 }
@@ -321,9 +319,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Type[] types = a.DefinedTypes.ToArray();
                     AssertContentsOfMultiModule(types, a);
                 }
@@ -341,9 +339,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     TestUtils.AssertNewObjectReturnedEachTime(() => a.GetTypes());
                 }
             }
@@ -360,9 +358,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     TestUtils.AssertNewObjectReturnedEachTime(() => a.DefinedTypes);
                 }
             }
@@ -379,9 +377,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Type[] types = a.ManifestModule.GetTypes();
                     Assert.Equal(2, types.Length);
                     AssertMainModuleTypesFound(types, a);
@@ -406,9 +404,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     TestUtils.AssertNewObjectReturnedEachTime(() => a.ManifestModule.GetTypes());
                 }
             }
@@ -425,9 +423,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(assemblyPath, TestData.s_MultiModuleDllImage);
                 File.WriteAllBytes(bobNetModulePath, TestData.s_JoeNetModuleImage); // Note: ScopeName ("Joe") intentionally different from manifest name ("Bob")
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module bob = a.GetModule("Bob.netmodule");
                     Type mainType1 = a.ManifestModule.GetType("MainType1", throwOnError: true, ignoreCase: false);
                     Type baseType = mainType1.BaseType;
@@ -473,9 +471,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(myRes2Path, TestData.s_MyRes2);
                 File.WriteAllBytes(myRes3Path, TestData.s_MyRes3);
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module[] modules1 = a.GetModules(getResourceModules: false);
                     Assert.Equal<Module>(new Module[] { a.ManifestModule }, modules1);
                     Module[] modules2 = a.GetModules(getResourceModules: true);
@@ -509,9 +507,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetLoadModules1()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
 
                 {
                     Module[] loadedModules = a.GetLoadedModules(getResourceModules: true);
@@ -556,9 +554,9 @@ namespace System.Reflection.Tests
                 File.WriteAllBytes(myRes1Path, TestData.s_MyRes1);
                 File.WriteAllBytes(myRes2Path, TestData.s_MyRes2);
 
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    Assembly a = tl.LoadFromAssemblyPath(assemblyPath);
+                    Assembly a = lc.LoadFromAssemblyPath(assemblyPath);
                     Module res1 = a.GetModule("MyRes1");
                     Module res2 = a.GetModule("MyRes2");
 
@@ -582,9 +580,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetLoadModulesReturnsUniqueArrays()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_MultiModuleDllImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_MultiModuleDllImage);
                 Module m1 = a.LoadModule("Bob.netmodule", TestData.s_JoeNetModuleImage);
                 TestUtils.AssertNewObjectReturnedEachTime(() => a.GetLoadedModules(getResourceModules: true));
                 TestUtils.AssertNewObjectReturnedEachTime(() => a.GetLoadedModules(getResourceModules: false));

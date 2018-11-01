@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Diagnostics;
-using System.Collections.Generic;
-
 using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading.Ecma

@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -17,9 +14,9 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
             {
-                using (MetadataLoadContext tl = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(null))
                 {
-                    tl.LoadFromAssemblyPath(tf.Path);
+                    lc.LoadFromAssemblyPath(tf.Path);
                 }
 
                 try
@@ -36,36 +33,36 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ExtraDisposesIgnored()
         {
-            MetadataLoadContext tl = new MetadataLoadContext(null);
-            tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
-            tl.Dispose();
-            tl.Dispose();
-            tl.Dispose();
+            MetadataLoadContext lc = new MetadataLoadContext(null);
+            lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+            lc.Dispose();
+            lc.Dispose();
+            lc.Dispose();
         }
 
         [Fact]
         public static void MetadataLoadContextApisAfterDispose()
         {
-            MetadataLoadContext tl = new MetadataLoadContext(null);
-            tl.Dispose();
+            MetadataLoadContext lc = new MetadataLoadContext(null);
+            lc.Dispose();
 
-            Assert.Throws<ObjectDisposedException>(() => tl.LoadFromAssemblyName(new AssemblyName("Foo")));
-            Assert.Throws<ObjectDisposedException>(() => tl.LoadFromAssemblyName("Foo"));
-            Assert.Throws<ObjectDisposedException>(() => tl.LoadFromAssemblyPath("Foo"));
-            Assert.Throws<ObjectDisposedException>(() => tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage));
-            Assert.Throws<ObjectDisposedException>(() => tl.LoadFromStream(new MemoryStream(TestData.s_SimpleAssemblyImage)));
-            Assert.Throws<ObjectDisposedException>(() => tl.CoreAssemblyName = "Foo");
-            Assert.Throws<ObjectDisposedException>(() => tl.CoreAssemblyName);
-            Assert.Throws<ObjectDisposedException>(() => tl.GetAssemblies());
+            Assert.Throws<ObjectDisposedException>(() => lc.LoadFromAssemblyName(new AssemblyName("Foo")));
+            Assert.Throws<ObjectDisposedException>(() => lc.LoadFromAssemblyName("Foo"));
+            Assert.Throws<ObjectDisposedException>(() => lc.LoadFromAssemblyPath("Foo"));
+            Assert.Throws<ObjectDisposedException>(() => lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage));
+            Assert.Throws<ObjectDisposedException>(() => lc.LoadFromStream(new MemoryStream(TestData.s_SimpleAssemblyImage)));
+            Assert.Throws<ObjectDisposedException>(() => lc.CoreAssemblyName = "Foo");
+            Assert.Throws<ObjectDisposedException>(() => lc.CoreAssemblyName);
+            Assert.Throws<ObjectDisposedException>(() => lc.GetAssemblies());
         }
 
         [Fact]
         public static void MetadataLoadContextDispensedObjectsAfterDispose()
         {
             Assembly a;
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
             }
 
             Assert.Throws<ObjectDisposedException>(() => a.GetTypes());

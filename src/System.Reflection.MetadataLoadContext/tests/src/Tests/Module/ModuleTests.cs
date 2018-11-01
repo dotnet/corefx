@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -15,9 +12,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleAssembly()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Assert.Equal(a, m.Assembly);
             }
@@ -26,9 +23,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleMvid()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Guid mvid = m.ModuleVersionId;
                 Assert.Equal(TestData.s_SimpleAssemblyMvid, mvid);
@@ -38,9 +35,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleMetadataToken()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Assert.Equal(0x00000001, m.MetadataToken);
             }
@@ -49,9 +46,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleIsResource()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Assert.False(m.IsResource());
             }
@@ -61,10 +58,10 @@ namespace System.Reflection.Tests
         public static void ModuleFullyQualifiedNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 string path = tf.Path;
-                Assembly a = tl.LoadFromAssemblyPath(path);
+                Assembly a = lc.LoadFromAssemblyPath(path);
                 Module m = a.ManifestModule;
                 Assert.Equal(path, m.FullyQualifiedName);
             }
@@ -73,9 +70,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleFullyQualifiedNameFromByteArray()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Assert.Equal(string.Empty, m.FullyQualifiedName);
             }
@@ -85,10 +82,10 @@ namespace System.Reflection.Tests
         public static void ModuleGetNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 string path = tf.Path;
-                Assembly a = tl.LoadFromAssemblyPath(path);
+                Assembly a = lc.LoadFromAssemblyPath(path);
                 Module m = a.ManifestModule;
                 string name = Path.GetFileName(path);
                 Assert.Equal(name, m.Name);
@@ -98,9 +95,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleGetNameFromByteArray()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Assert.Equal(string.Empty, m.Name);
             }
@@ -110,10 +107,10 @@ namespace System.Reflection.Tests
         public static void ModuleScopeNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
                 string path = tf.Path;
-                Assembly a = tl.LoadFromAssemblyPath(path);
+                Assembly a = lc.LoadFromAssemblyPath(path);
                 Module m = a.ManifestModule;
                 Assert.Equal("SimpleAssembly.dll", m.ScopeName);
             }
@@ -122,9 +119,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleScopeNameFromByteArray()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
                 Assert.Equal("SimpleAssembly.dll", m.ScopeName);
             }
@@ -133,9 +130,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindAnyCpu()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PlatformAnyCpu);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PlatformAnyCpu);
                 Module m = a.ManifestModule;
 
                 m.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);
@@ -151,9 +148,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindAnyCpu32BitPreferred()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PlatformAnyCpu32BitPreferred);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PlatformAnyCpu32BitPreferred);
                 Module m = a.ManifestModule;
 
                 m.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);
@@ -169,9 +166,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindX86()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PlatformX86);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PlatformX86);
                 Module m = a.ManifestModule;
 
                 m.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);
@@ -187,9 +184,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindX64()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PlatformX64);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PlatformX64);
                 Module m = a.ManifestModule;
 
                 m.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);
@@ -205,9 +202,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindItanium()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PlatformItanium);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PlatformItanium);
                 Module m = a.ManifestModule;
 
                 m.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);
@@ -223,9 +220,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindArm()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PlatformArm);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PlatformArm);
                 Module m = a.ManifestModule;
 
                 m.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);

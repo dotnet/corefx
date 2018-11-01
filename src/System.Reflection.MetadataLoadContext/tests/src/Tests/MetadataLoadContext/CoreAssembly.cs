@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -17,7 +14,7 @@ namespace System.Reflection.Tests
         {
             Assembly actualCoreAssembly = null;
 
-            using (MetadataLoadContext tl = new MetadataLoadContext(
+            using (MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
                     delegate (MetadataLoadContext sender, AssemblyName refName)
                     {
@@ -29,11 +26,11 @@ namespace System.Reflection.Tests
                     }),
                 coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
 
                 // This is a sanity check to ensure that "TestData.s_PhonyCoreAssemblyName" is actually the def-name of this
                 // assembly. It better be since we told our MetadataLoadContext to use it as our core assembly.
-                Assembly aAgain = tl.LoadFromAssemblyName(TestData.s_PhonyCoreAssemblyName);
+                Assembly aAgain = lc.LoadFromAssemblyName(TestData.s_PhonyCoreAssemblyName);
 
                 Type derived = a.GetType("Derived", throwOnError: true, ignoreCase: false);
 
@@ -55,11 +52,11 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreAssemblyDelayedWrite()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null, coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null, coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
                 Type derived = a.GetType("Derived", throwOnError: true, ignoreCase: false);
-                tl.CoreAssemblyName = null;
+                lc.CoreAssemblyName = null;
 
                 // Calling BaseType causes the MetadataLoadContext to parse the typespec "Base<object>". Since "object" is a primitive
                 // type, it should be encoded using the short-form "ELEMENT_TYPE_OBJECT." Hence, the MetadataLoadContext is forced
@@ -67,7 +64,7 @@ namespace System.Reflection.Tests
                 Assert.Throws<FileNotFoundException> (() => derived.BaseType);
 
                 // And verify now, the choice of core assembly (even if a bad one) is committed and can longer change.
-                Assert.Throws<InvalidOperationException>(() => tl.CoreAssemblyName = "mscorlib");
+                Assert.Throws<InvalidOperationException>(() => lc.CoreAssemblyName = "mscorlib");
             }
         }
     }

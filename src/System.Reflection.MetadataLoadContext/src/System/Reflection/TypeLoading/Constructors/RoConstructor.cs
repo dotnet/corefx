@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Reflection.TypeLoading
 {
@@ -13,9 +12,7 @@ namespace System.Reflection.TypeLoading
     /// </summary>
     internal abstract partial class RoConstructor : LeveledConstructorInfo, IRoMethodBase
     {
-        protected RoConstructor()
-        {
-        }
+        protected RoConstructor() { }
 
         public abstract override bool Equals(object obj);
         public abstract override int GetHashCode();
@@ -97,6 +94,3 @@ namespace System.Reflection.TypeLoading
         string IRoMethodBase.GetMethodSigString(int position) => ComputeMethodSigStrings()[position];
     }
 }
-
-
-

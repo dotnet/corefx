@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Collections.Generic;
-
 namespace System.Reflection.TypeLoading
 {
     internal static class Utf8Constants
@@ -66,5 +63,3 @@ namespace System.Reflection.TypeLoading
         public static readonly byte[] DateTimeConstantAttribute = { 68, 97, 116, 101, 84, 105, 109, 101, 67, 111, 110, 115, 116, 97, 110, 116, 65, 116, 116, 114, 105, 98, 117, 116, 101 };
     }
 }
-
-

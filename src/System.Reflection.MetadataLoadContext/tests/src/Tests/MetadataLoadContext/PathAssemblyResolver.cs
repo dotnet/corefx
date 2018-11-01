@@ -15,10 +15,10 @@ namespace System.Reflection.Tests
             // Obtain this test class
             string thisAssemblyPath = typeof(MetadataLoadContextTests).Assembly.Location;
             var resolver = new PathAssemblyResolver(new string[] { thisAssemblyPath });
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 AssemblyName thisAssemblyName = typeof(MetadataLoadContextTests).Assembly.GetName();
-                Assembly assembly = tl.LoadFromAssemblyName(thisAssemblyName);
+                Assembly assembly = lc.LoadFromAssemblyName(thisAssemblyName);
                 Type t = assembly.GetType(typeof(MetadataLoadContextTests).FullName, throwOnError: true);
 
                 Assert.Equal(t.FullName, typeof(MetadataLoadContextTests).FullName);
@@ -38,12 +38,12 @@ namespace System.Reflection.Tests
             string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
             string systemPrivateCoreLibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "System.Private.CoreLib.dll");
             var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath, systemPrivateCoreLibAssemblyPath });
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                tl.CoreAssemblyName = "mscorlib";
-                Assert.Equal(tl.CoreAssemblyName, "mscorlib");
+                lc.CoreAssemblyName = "mscorlib";
+                Assert.Equal(lc.CoreAssemblyName, "mscorlib");
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Type t = derived.GetType("SimpleAssembly", throwOnError: true);
                 Type bt = t.BaseType;
 
@@ -57,11 +57,11 @@ namespace System.Reflection.Tests
             string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
             string systemPrivateCoreLibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "System.Private.CoreLib.dll");
             var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath, systemPrivateCoreLibAssemblyPath });
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assert.Null(tl.CoreAssemblyName);
+                Assert.Null(lc.CoreAssemblyName);
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Type t = derived.GetType("SimpleAssembly", throwOnError: true);
                 Type bt = t.BaseType;
 
@@ -73,12 +73,12 @@ namespace System.Reflection.Tests
         public static void PathAssemblyResolverWithNoPath()
         {
             var resolver = new PathAssemblyResolver(new string[] { });
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                tl.CoreAssemblyName = "mscorlib";
-                Assert.Equal(tl.CoreAssemblyName, "mscorlib");
+                lc.CoreAssemblyName = "mscorlib";
+                Assert.Equal(lc.CoreAssemblyName, "mscorlib");
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Type t = derived.GetType("SimpleAssembly", throwOnError: true);
 
                 Assert.Throws<FileNotFoundException>(() => t.BaseType);
@@ -89,11 +89,11 @@ namespace System.Reflection.Tests
         public static void PathAssemblyResolverWithNoPathAndNoCoreAssemblyName()
         {
             var resolver = new PathAssemblyResolver(new string[] { });
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assert.Null(tl.CoreAssemblyName);
+                Assert.Null(lc.CoreAssemblyName);
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Type t = derived.GetType("SimpleAssembly", throwOnError: true);
 
                 Assert.Throws<FileNotFoundException>(() => t.BaseType);

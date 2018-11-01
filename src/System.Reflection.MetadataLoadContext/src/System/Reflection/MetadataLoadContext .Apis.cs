@@ -9,29 +9,29 @@ using System.Reflection.TypeLoading;
 namespace System.Reflection
 {
     // A MetadataLoadContext represents a closed universe of Type objects loaded for inspection-only purposes.
-    // Each MetadataLoadContext defines its own binding rules and is isolated from all other MetadataLoadContexts.
+    // Each MetadataLoadContext can have its own binding rules and is isolated from all other MetadataLoadContexts.
     //
     // Another way to look at MetadataLoadContexts is as a dictionary binding assembly names to loaded Assembly instances.
     //
     // MetadataLoadContexts treat assemblies strictly as metadata. There are no restrictions on loading assemblies based
     // on target platform, CPU architecture or pointer size. There are no restrictions on the assembly designated
-    // as the core assembly ("mscorlib"). 
+    // as the core assembly ("mscorlib").
     //
-    // Also, as long as the metadata is "syntactically correct", the MetadataLoadContext strives to report it "as is" (as long it 
-    // can do so in a way that can be distinguished from valid data) and refrains from judging whether it's "executable." 
+    // Also, as long as the metadata is "syntactically correct", the MetadataLoadContext strives to report it "as is" (as long it
+    // can do so in a way that can be distinguished from valid data) and refrains from judging whether it's "executable."
     // This is both for performance reasons (checks cost time) and its intended role as metadata inspection tool.
-    // Examples of things that MetadataLoadContexts let go unchecked include creating generic instances that violate generic 
+    // Examples of things that MetadataLoadContexts let go unchecked include creating generic instances that violate generic
     // parameter constraints, and loading type hierachies that would be unloadable in an actual runtime (deriving from sealed classes,
     // overriding members that don't exist in the ancestor classes, failing to implement all abstract methods, etc.)
     //
-    // You cannot invoke methods, set or get field or property values or instantiate objects using 
+    // You cannot invoke methods, set or get field or property values or instantiate objects using
     // the Type objects from a MetadataLoadContext. You can however, use FieldInfo.GetRawConstantValue(),
     // ParameterInfo.RawDefaultValue and PropertyInfo.GetRawConstantValue(). You can retrieve custom attributes
     // in CustomAttributeData format but not as instantiated custom attributes. The CustomAttributeExtensions
     // extension api will not work with these Types nor will the IsDefined() family of api.
     //
     // There is no binding policy baked into the MetadataLoadContext. You must either manually load all dependencies
-    // or subscribe to the Resolving event to load dependencies as needed. The MetadataLoadContext strives to avoid 
+    // or use a MetadataAssemblyResolver-derived class to load dependencies as needed. The MetadataLoadContext strives to avoid
     // loading dependencies unless needed. Therefore, it is possible to do useful analysis of an assembly even
     // in the absence of dependencies. For example, retrieving an assembly's name and the names of its (direct)
     // dependencies can be done without having any of those dependencies on hand.
@@ -83,7 +83,7 @@ namespace System.Reflection
     //
     // Multithreading:
     //    
-    //   The MetadataLoadContext and the reflection objects it hands out are all multithread-safe and logically immutable, 
+    //   The MetadataLoadContext and the reflection objects it hands out are all multithread-safe and logically immutable,
     //   with the following provisos:
     //
     //   - Adding (or removing) handlers to the MetadataLoadContext's events is not thread-safe. These should be done prior
@@ -119,7 +119,7 @@ namespace System.Reflection
 
         /// <summary>
         /// Loads an assembly from a specific path on the disk and binds its assembly name to it in the MetadataLoadContext. If a prior
-        /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the 
+        /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the
         /// two assemblies do not have the same MVID, this method throws a FileLoadException.
         /// </summary>
         public Assembly LoadFromAssemblyPath(string assemblyPath)
@@ -135,7 +135,7 @@ namespace System.Reflection
 
         /// <summary>
         /// Loads an assembly from a byte array and binds its assembly name to it in the MetadataLoadContext. If a prior
-        /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the 
+        /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the
         /// two assemblies do not have the same MVID, this method throws a FileLoadException.
         /// </summary>
         public Assembly LoadFromByteArray(byte[] assembly)
@@ -233,10 +233,10 @@ namespace System.Reflection
         /// Once the MetadataLoadContext has used the CoreAssemblyName, however, you can no longer change this property. Attempting to set the CoreAssemblyName
         /// after this point will trigger an InvalidOperationException.
         /// 
-        /// If you do not specify a core assembly, or the core assembly cannot be bound or if the core assembly is missing types, this will 
+        /// If you do not specify a core assembly, or the core assembly cannot be bound or if the core assembly is missing types, this will
         /// affect the behavior of the MetadataLoadContext as follows:
         /// 
-        /// - Apis that need to parse signatures or typespecs and return the results as Types will throw. For example, 
+        /// - Apis that need to parse signatures or typespecs and return the results as Types will throw. For example,
         ///   MethodBase.ReturnType, MethodBase.GetParameters(), Type.BaseType, Type.GetInterfaces().
         /// 
         /// - Apis that need to compare types to well known core types will not throw and the comparison will evaluate to "false."
@@ -289,7 +289,7 @@ namespace System.Reflection
         /// <summary>
         /// Releases any native resources (such as file locks on assembly files.) After disposal, it is not safe to use
         /// any Assembly objects dispensed by the MetadataLoadContext, nor any Reflection objects dispensed by those Assembly objects.
-        /// Though objects provided by the MetadataLoadContext strive to throw an ObjectDisposedException, this is not guaranteed. 
+        /// Though objects provided by the MetadataLoadContext strive to throw an ObjectDisposedException, this is not guaranteed.
         /// Some apis may return fixed or previously cached data. Accessing objects *during* a Dispose may result in an
         /// unmanaged access violation and failfast.
         /// </summary>

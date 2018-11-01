@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
 using System.Reflection.Metadata;
 using System.Reflection.TypeLoading.Ecma;
 
@@ -23,4 +22,3 @@ namespace System.Reflection
         public sealed override bool Matches(StringHandle stringHandle, MetadataReader reader) => reader.StringComparer.Equals(stringHandle, ExpectedName, true);
     }
 }
-

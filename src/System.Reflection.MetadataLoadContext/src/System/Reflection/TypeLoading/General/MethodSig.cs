@@ -3,11 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
-    //
     // This helper class represents a combined return value info and parameter info array. It is motivated by the fact that
     // the Reflection api surfaces "return types" as a "ParameterInfo at position -1." (and that the Ecma-335 metadata
     // scheme similarly reuses the Parameter table for holding return type custom attributes and stuff.)
@@ -18,7 +16,6 @@ namespace System.Reflection.TypeLoading
     //
     // The name is motivated by System.Reflection.Metadata using the name MethodSignature<T> for a similar concept and
     // that it's far shorter than "ParametersAndReturnType".
-    //
     internal sealed class MethodSig<T>
     {
         public T Return { get; private set; }
@@ -53,4 +50,3 @@ namespace System.Reflection.TypeLoading
         }
     }
 }
-

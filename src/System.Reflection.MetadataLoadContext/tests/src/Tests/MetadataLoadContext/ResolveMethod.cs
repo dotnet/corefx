@@ -3,10 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -16,9 +12,9 @@ namespace System.Reflection.Tests
         [Fact]
         public static void NoResolver()
         {
-            using (MetadataLoadContext tl = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(null))
             {
-                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
 
                 Assert.Throws<FileNotFoundException>(() => t.BaseType);
@@ -29,17 +25,17 @@ namespace System.Reflection.Tests
         public static void ResolverReturnsNull()
         {
             var resolver = new ResolverReturnsNull();
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 Assert.Null(resolver.Sender);
                 Assert.Null(resolver.AssemblyName);
                 Assert.False(resolver.Called);
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 Assert.Throws<FileNotFoundException>(() => t.BaseType);
 
-                Assert.Same(tl, resolver.Sender);
+                Assert.Same(lc, resolver.Sender);
                 Assert.Equal(resolver.AssemblyName.Name, "Foo");
                 Assert.True(resolver.Called);
             }
@@ -49,17 +45,17 @@ namespace System.Reflection.Tests
         public static void ResolverReturnsSomething()
         {
             var resolver = new ResolverReturnsSomething();
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 Assert.Null(resolver.Sender);
                 Assert.Null(resolver.AssemblyName);
                 Assert.False(resolver.Called);
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 Type bt = t.BaseType;
 
-                Assert.Same(tl, resolver.Sender);
+                Assert.Same(lc, resolver.Sender);
                 Assert.Equal(resolver.AssemblyName.Name, "Foo");
                 Assert.True(resolver.Called);
 
@@ -72,17 +68,17 @@ namespace System.Reflection.Tests
         public static void ResolverThrows()
         {
             var resolver = new ResolverThrows();
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 Assert.Null(resolver.Sender);
                 Assert.Null(resolver.AssemblyName);
                 Assert.False(resolver.Called);
 
-                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 TargetParameterCountException e = Assert.Throws<TargetParameterCountException>(() => t.BaseType);
 
-                Assert.Same(tl, resolver.Sender);
+                Assert.Same(lc, resolver.Sender);
                 Assert.True(resolver.Called);
                 Assert.Equal("Hi!", e.Message);
             }
@@ -95,7 +91,7 @@ namespace System.Reflection.Tests
             Assembly resolveEventHandlerResult = null;
 
             // In a single-threaded scenario at least, MetadataLoadContexts shouldn't ask the resolver to bind the same name twice.
-            using (MetadataLoadContext tl = new MetadataLoadContext(
+            using (MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
                     delegate (MetadataLoadContext sender, AssemblyName name)
                     {
@@ -108,7 +104,7 @@ namespace System.Reflection.Tests
                         return null;
                     })))
                 {
-                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t1 = derived.GetType("Derived1", throwOnError: true);
                 Type bt1 = t1.BaseType;
                 Type t2 = derived.GetType("Derived2", throwOnError: true);
@@ -123,9 +119,9 @@ namespace System.Reflection.Tests
         public static void ResolverMultipleCalls()
         {
             var resolver = new ResolverReturnsSomething();
-            using (MetadataLoadContext tl = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assembly derived = tl.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
+                Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
 
                 int expectedCount = 1;
                 foreach (string typeName in new string[] { "Derived1", "Derived3", "Derived4", "Derived5", "Derived6" })
@@ -146,7 +142,7 @@ namespace System.Reflection.Tests
 
             AssemblyName assemblyNameReceivedByHandler = null;
 
-            using (MetadataLoadContext tl = new MetadataLoadContext(
+            using (MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
                     delegate (MetadataLoadContext sender, AssemblyName name)
                     {
@@ -154,7 +150,7 @@ namespace System.Reflection.Tests
                         return null;
                     })))
             {
-                Assembly a = tl.LoadFromByteArray(TestData.s_AssemblyRefUsingFullPublicKeyImage);
+                Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyRefUsingFullPublicKeyImage);
                 Type t = a.GetType("C", throwOnError: true);
 
                 // We expect this next to call to throw since it asks the MetadataLoadContext to resolve [mscorlib]System.Object and our

@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
@@ -139,6 +139,3 @@ namespace System.Reflection.TypeLoading
         internal TypeContext TypeContext => _declaringType.Instantiation.ToTypeContext();
     }
 }
-
-
-

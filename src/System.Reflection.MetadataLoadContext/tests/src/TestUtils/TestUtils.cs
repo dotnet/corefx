@@ -2,15 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Text;
-using System.Linq;
+using SampleMetadata;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Collections.Generic;
-
+using System.IO;
+using System.Linq;
+using System.Text;
 using Xunit;
-using SampleMetadata;
 
 namespace System.Reflection.Tests
 {
@@ -250,7 +249,7 @@ namespace System.Reflection.Tests
         private static MetadataLoadContext TestMetadataLoadContext => s_lazyTestMetadataLoadContext.Value;
         private static readonly Lazy<MetadataLoadContext> s_lazyTestMetadataLoadContext = new Lazy<MetadataLoadContext>(() =>
         {
-            MetadataLoadContext tl = new MetadataLoadContext(
+            MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
                     delegate (MetadataLoadContext sender, AssemblyName assemblyName)
                     {
@@ -268,7 +267,7 @@ namespace System.Reflection.Tests
                     }),
                     "mscorlib");
 
-            return tl;
+            return lc;
         });
 
         private static readonly Lazy<bool> s_useRuntimeTypesForTests = new Lazy<bool>(() =>

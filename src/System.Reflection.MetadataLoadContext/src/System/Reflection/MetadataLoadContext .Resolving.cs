@@ -2,17 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Reflection.TypeLoading;
 
 namespace System.Reflection
 {
     public sealed partial class MetadataLoadContext
     {
-        //
         // List of ref AssemblyNames to successfully bound assemblies. This is not the same as _loadedAssemblies.
         // _loadedAssemblies keeps track of canonical Assembly instances.
         //
@@ -21,7 +18,6 @@ namespace System.Reflection
         // to appear multiple times (once for each variation that was used to bind to it.) 
         //
         // We also latch failures. That is, _binds can bind a RuntimeAssemblyName to a RoFailedBindAssembly.
-        //
         private readonly ConcurrentDictionary<RoAssemblyName, RoAssembly> _binds = new ConcurrentDictionary<RoAssemblyName, RoAssembly>();
 
         internal RoAssembly ResolveAssembly(RoAssemblyName refName)
