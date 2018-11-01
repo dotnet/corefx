@@ -25,7 +25,9 @@ namespace System.Reflection
         /// MetadataLoadContexts cannot consume assemblies from other MetadataLoadContexts or other type providers (such as the underlying runtime's own Reflection system.)
         /// If a handler returns such an assembly, the MetadataLoadContext throws a FileLoadException.
         /// </summary>
-        /// <param name="assemblyName">The assembly to resolve. If null, this is a request to resolve the core assembly.</param>
+        /// <param name="assemblyName">The assembly to resolve. If null, this is a request to resolve the core assembly whose name is not known
+        /// because MetadataLoadContext.CoreAssemblyName is null.
+        /// </param>
         public abstract Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName);
     }
 }

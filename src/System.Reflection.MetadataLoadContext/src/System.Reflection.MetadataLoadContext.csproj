@@ -43,12 +43,12 @@
   <ItemGroup>
     <Compile Include="System\Reflection\MetadataAssemblyResolver.cs" />
     <Compile Include="System\Reflection\PathAssemblyResolver.cs" />
-    <Compile Include="System\Reflection\MetadataLoadContext .Apis.cs" />
-    <Compile Include="System\Reflection\MetadataLoadContext .CoreAssembly.cs" />
-    <Compile Include="System\Reflection\MetadataLoadContext .Disposing.cs" />
-    <Compile Include="System\Reflection\MetadataLoadContext .KnownConstructors.cs" />
-    <Compile Include="System\Reflection\MetadataLoadContext .Loading.cs" />
-    <Compile Include="System\Reflection\MetadataLoadContext .Resolving.cs" />
+    <Compile Include="System\Reflection\MetadataLoadContext.Apis.cs" />
+    <Compile Include="System\Reflection\MetadataLoadContext.CoreAssembly.cs" />
+    <Compile Include="System\Reflection\MetadataLoadContext.Disposing.cs" />
+    <Compile Include="System\Reflection\MetadataLoadContext.KnownConstructors.cs" />
+    <Compile Include="System\Reflection\MetadataLoadContext.Loading.cs" />
+    <Compile Include="System\Reflection\MetadataLoadContext.Resolving.cs" />
     <Compile Include="System\Reflection\TypeLoading\Assemblies\AssemblyFileInfo.cs" />
     <Compile Include="System\Reflection\TypeLoading\Assemblies\Ecma\EcmaAssembly.cs" />
     <Compile Include="System\Reflection\TypeLoading\Assemblies\Ecma\EcmaAssembly.GetName.cs" />

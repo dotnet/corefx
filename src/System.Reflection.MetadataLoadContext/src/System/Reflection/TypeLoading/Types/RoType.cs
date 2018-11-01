@@ -192,16 +192,11 @@ namespace System.Reflection.TypeLoading
                 }
             }
 
-            // return ifcs.ToArray(); todo
-            RoType[] roType = new RoType[ifcs.Count];
-            int i = 0;
-            foreach (var r in ifcs)
-            {
-                roType[i++] = (RoType)r;
-            }
-
-            return roType;
+            // todo: use IEnumerable<T> extension: return ifcs.ToArray()
+            List<RoType> list = new List<RoType>(ifcs);
+            return list.ToArray();
         }
+
         private volatile RoType[] _lazyInterfaces;
 
         public sealed override InterfaceMapping GetInterfaceMap(Type interfaceType) => throw new NotSupportedException(SR.NotSupported_InterfaceMapping);

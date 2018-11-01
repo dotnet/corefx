@@ -28,7 +28,7 @@ namespace System.Reflection.TypeLoading
 
         public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> enumeration)
         {
-            //todo: return new ReadOnlyCollection<T>(enumeration.ToArray());
+            // todo: use IEnumerable<T> extension: return new ReadOnlyCollection<T>(enumeration.ToArray());
             List<T> list = new List<T>(enumeration);
             return new ReadOnlyCollection<T>(list.ToArray());
         }
