@@ -36,8 +36,8 @@ namespace System.Reflection
     // in the absence of dependencies. For example, retrieving an assembly's name and the names of its (direct)
     // dependencies can be done without having any of those dependencies on hand.
     //
-    // To bind assemblies, the MetadataLoadContext raises the Resolving event. You implement the binding algorithm by
-    // subscribing to that event. The event should load the requested assembly and return it. To do this,
+    // To bind assemblies, the MetadataLoadContext calls the Resolving method. You implement the binding algorithm by
+    // creating or using a class that overrides that method. The method should load the requested assembly and return it. To do this,
     // it can use LoadFromAssemblyPath() or one of its variants (LoadFromStream(), LoadFromByteArray()).
     //
     // Once an assembly has been bound, no assembly with the same assembly name identity
@@ -171,10 +171,10 @@ namespace System.Reflection
 
         /// <summary>
         /// Resolves the supplied assembly name to an assembly. If an assembly was previously bound by to this name, that assembly is returned.
-        /// Otherwise, the MetadataLoadContext raises the Resolving event. If the event handler returns null, this method throws a FileNotFoundException.
+        /// Otherwise, the MetadataLoadContext calls the specified MetadataAssemblyResolver. If the resolver returns null, this method throws a FileNotFoundException.
         /// 
-        /// Note that this behavior matches the behavior of AssemblyLoadContext.LoadFromAssemblyName() but does not match the behavior of 
-        /// Assembly.ReflectionOnlyLoad() (the latter gives up without raising the resolve event.)
+        /// Note that this behavior matches the behavior of AssemblyLoadContext.LoadFromAssemblyName() resolve event but does not match the behavior of 
+        /// Assembly.ReflectionOnlyLoad(). (the latter gives up without raising its resolve event.)
         /// </summary>
         public Assembly LoadFromAssemblyName(string assemblyName)
         {
@@ -191,10 +191,10 @@ namespace System.Reflection
 
         /// <summary>
         /// Resolves the supplied assembly name to an assembly. If an assembly was previously bound by to this name, that assembly is returned.
-        /// Otherwise, the MetadataLoadContext raises the Resolving event. If the event handler returns null, this method throws a FileNotFoundException.
+        /// Otherwise, the MetadataLoadContext calls the specified MetadataAssemblyResolver. If the resolver returns null, this method throws a FileNotFoundException.
         /// 
-        /// Note that this behavior matches the behavior of AssemblyLoadContext.LoadFromAssemblyName() but does not match the behavior of 
-        /// Assembly.ReflectionOnlyLoad(). (the latter gives up without raising the resolve event.)
+        /// Note that this behavior matches the behavior of AssemblyLoadContext.LoadFromAssemblyName() resolve event but does not match the behavior of 
+        /// Assembly.ReflectionOnlyLoad(). (the latter gives up without raising its resolve event.)
         /// </summary>
         public Assembly LoadFromAssemblyName(AssemblyName assemblyName)
         {

@@ -3,13 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection.TypeLoading;
-using System.Threading;
 
 namespace System.Reflection
 {
     public sealed partial class MetadataLoadContext
     {
-        private static readonly string[] CoreNames = { "mscorlib", "netstandard" };
+        private static readonly string[] CoreNames = { "mscorlib", "System.Runtime", "netstandard" };
 
         // Cache loaded coreAssembly and core types.
         internal RoAssembly TryGetCoreAssembly(out Exception e)
