@@ -170,6 +170,8 @@ namespace System.Numerics
         public static readonly System.Numerics.Complex ImaginaryOne;
         public static readonly System.Numerics.Complex One;
         public static readonly System.Numerics.Complex Zero;
+        public static readonly System.Numerics.Complex NaN;
+        public static readonly System.Numerics.Complex Infinity;
         public Complex(double real, double imaginary) { throw null; }
         public double Imaginary { get { throw null; } }
         public double Magnitude { get { throw null; } }
@@ -246,5 +248,8 @@ namespace System.Numerics
         public string ToString(System.IFormatProvider provider) { throw null; }
         public string ToString(string format) { throw null; }
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
+        public static bool IsFinite(System.Numerics.Complex value) { throw null; }
+        public static bool IsNaN(System.Numerics.Complex value) { throw null; }
+        public static bool IsInfinity(System.Numerics.Complex value) { throw null; }
     }
 }
