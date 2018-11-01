@@ -500,7 +500,7 @@ namespace Microsoft.VisualBasic.FileIO
         Delimited = 0,
         FixedWidth = 1,
     }
-    public sealed partial class FileSystem
+    public partial class FileSystem
     {
         public FileSystem() { }
         public static string CurrentDirectory { get { throw null; } set { } }
