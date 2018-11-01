@@ -69,7 +69,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
                         for (int i = 0; i < parameterInfos.Length; i++)
                         {
                             // a null argument type implies a null arg which is always a perfect match
-                            if ((object)argumentTypes[i] != null && !argumentTypes[i].MatchesParameterTypeExactly(parameterInfos[i]))
+                            if (!(argumentTypes[i] is null) && !argumentTypes[i].MatchesParameterTypeExactly(parameterInfos[i]))
                                 return false;
                         }
                     }
@@ -91,16 +91,12 @@ namespace System.Reflection.Runtime.BindingFlagSupport
         public static M GetImplicitlyOverriddenBaseClassMember<M>(this M member) where M : MemberInfo
         {
             MemberPolicies<M> policies = MemberPolicies<M>.Default;
-            MethodAttributes visibility;
-            bool isStatic;
-            bool isVirtual;
-            bool isNewSlot;
-            policies.GetMemberAttributes(member, out visibility, out isStatic, out isVirtual, out isNewSlot);
+            policies.GetMemberAttributes(member, out MethodAttributes visibility, out bool isStatic, out bool isVirtual, out bool isNewSlot);
             if (isNewSlot || !isVirtual)
             {
                 return null;
             }
-            String name = member.Name;
+            string name = member.Name;
             TypeInfo typeInfo = member.DeclaringType.GetTypeInfo();
             for (;;)
             {
@@ -116,11 +112,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
                     {
                         continue;
                     }
-                    MethodAttributes candidateVisibility;
-                    bool isCandidateStatic;
-                    bool isCandidateVirtual;
-                    bool isCandidateNewSlot;
-                    policies.GetMemberAttributes(member, out candidateVisibility, out isCandidateStatic, out isCandidateVirtual, out isCandidateNewSlot);
+                    policies.GetMemberAttributes(member, out MethodAttributes candidateVisibility, out bool isCandidateStatic, out bool isCandidateVirtual, out bool isCandidateNewSlot);
                     if (!isCandidateVirtual)
                     {
                         continue;

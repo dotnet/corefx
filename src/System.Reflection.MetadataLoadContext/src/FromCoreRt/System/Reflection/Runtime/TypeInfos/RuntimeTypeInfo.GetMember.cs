@@ -39,26 +39,19 @@ namespace System.Reflection.TypeLoading
                 predicate = (member => member.Name.StartsWith(prefix, comparisonType));
             }
 
-            QueryResult<MethodInfo> methods;
-            QueryResult<ConstructorInfo> constructors;
-            QueryResult<PropertyInfo> properties;
-            QueryResult<EventInfo> events;
-            QueryResult<FieldInfo> fields;
-            QueryResult<Type> nestedTypes;
-
             MemberInfo[] results;
 
-            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Method, out methods)) != null)
+            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Method, out QueryResult<MethodInfo>  methods)) != null)
                 return results;
-            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Constructor, out constructors)) != null)
+            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Constructor, out QueryResult<ConstructorInfo>  constructors)) != null)
                 return results;
-            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Property, out properties)) != null)
+            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Property, out QueryResult<PropertyInfo> properties)) != null)
                 return results;
-            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Event, out events)) != null)
+            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Event, out QueryResult<EventInfo> events)) != null)
                 return results;
-            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Field, out fields)) != null)
+            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.Field, out QueryResult<FieldInfo> fields)) != null)
                 return results;
-            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.NestedType, out nestedTypes)) != null)
+            if ((results = QuerySpecificMemberTypeIfRequested(type, optionalName, bindingAttr, predicate, MemberTypes.NestedType, out QueryResult<Type> nestedTypes)) != null)
                 return results;
             if ((type & (MemberTypes.NestedType | MemberTypes.TypeInfo)) == MemberTypes.TypeInfo)
             {
@@ -98,7 +91,7 @@ namespace System.Reflection.TypeLoading
             if ((memberType & targetMemberType) == 0)
             {
                 // This type of member was not requested.
-                queryResult = default(QueryResult<M>);
+                queryResult = default;
                 return null;
             }
 

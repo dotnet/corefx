@@ -15,10 +15,12 @@ namespace System.Reflection.TypeLoading.Ecma
         {
             MetadataReader reader = Reader;
             AssemblyDefinition ad = AssemblyDefinition;
-            AssemblyNameData data = new AssemblyNameData();
-            data.Name = ad.Name.GetString(reader);
-            data.Version = ad.Version;
-            data.CultureName = ad.Culture.GetStringOrNull(reader) ?? string.Empty;
+            AssemblyNameData data = new AssemblyNameData
+            {
+                Name = ad.Name.GetString(reader),
+                Version = ad.Version,
+                CultureName = ad.Culture.GetStringOrNull(reader) ?? string.Empty
+            };
             byte[] pk = ad.PublicKey.GetBlobBytes(reader);
             data.PublicKey = pk;
             if (pk.Length != 0)

@@ -60,7 +60,7 @@ namespace System.Reflection.TypeLoading.Ecma
             string name = tr.Name.GetString(reader);
             if (tr.ResolutionScope.Kind == HandleKind.TypeDefinition || tr.ResolutionScope.Kind == HandleKind.TypeReference)
             {
-                string declaringTypeName = tr.ResolutionScope.ToTypeString(default(TypeContext), reader);
+                string declaringTypeName = tr.ResolutionScope.ToTypeString(default, reader);
                 name = declaringTypeName + "+" + name;
             }
             return ns.AppendTypeName(name);

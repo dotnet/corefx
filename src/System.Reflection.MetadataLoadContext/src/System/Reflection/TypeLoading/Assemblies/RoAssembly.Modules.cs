@@ -38,8 +38,10 @@ namespace System.Reflection.TypeLoading
 
         public sealed override Module[] GetLoadedModules(bool getResourceModules)
         {
-            List<Module> modules = new List<Module>(_loadedModules.Length + 1);
-            modules.Add(GetRoManifestModule());
+            List<Module> modules = new List<Module>(_loadedModules.Length + 1)
+            {
+                GetRoManifestModule()
+            };
             for (int i = 0; i < _loadedModules.Length; i++)
             {
                 RoModule module = Volatile.Read(ref _loadedModules[i]);

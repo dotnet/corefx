@@ -26,17 +26,20 @@ namespace System.Reflection.TypeLoading
         // Creates a newly allocated AssemblyName that is safe to return out of an api.
         public AssemblyName CreateAssemblyName()
         {
-            AssemblyName an = new AssemblyName();
-            an.Flags = Flags;
-            an.Name = Name;
-            an.Version = Version;
-            an.CultureName = CultureName;
+            AssemblyName an = new AssemblyName
+            {
+                Flags = Flags,
+                Name = Name,
+                Version = Version,
+                CultureName = CultureName,
+                ContentType = ContentType,
+                HashAlgorithm = HashAlgorithm,
+                ProcessorArchitecture = ProcessorArchitecture
+            };
+
             // Yes, *we* have to clone the array. AssemblyName.SetPublicKey() violates framework guidelines and doesn't make a copy.
             an.SetPublicKey(PublicKey.CloneArray());
             an.SetPublicKeyToken(PublicKeyToken.CloneArray());
-            an.ContentType = ContentType;
-            an.HashAlgorithm = HashAlgorithm;
-            an.ProcessorArchitecture = ProcessorArchitecture;
             return an;
         }
     }

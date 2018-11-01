@@ -128,11 +128,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
 
                 foreach (M member in policies.CoreGetDeclaredMembers(type, nameFilter, reflectedType))
                 {
-                    MethodAttributes visibility;
-                    bool isStatic;
-                    bool isVirtual;
-                    bool isNewSlot;
-                    policies.GetMemberAttributes(member, out visibility, out isStatic, out isVirtual, out isNewSlot);
+                    policies.GetMemberAttributes(member, out MethodAttributes visibility, out bool isStatic, out bool isVirtual, out bool isNewSlot);
 
                     if (inBaseClass && visibility == MethodAttributes.Private)
                         continue;
@@ -140,7 +136,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
                     if (numCandidatesInDerivedTypes != 0 && policies.IsSuppressedByMoreDerivedMember(member, queriedMembers._members, startIndex: 0, endIndex: numCandidatesInDerivedTypes))
                         continue;
 
-                    BindingFlags allFlagsThatMustMatch = default(BindingFlags);
+                    BindingFlags allFlagsThatMustMatch = default;
                     allFlagsThatMustMatch |= (isStatic ? BindingFlags.Static : BindingFlags.Instance);
                     if (isStatic && inBaseClass)
                         allFlagsThatMustMatch |= BindingFlags.FlattenHierarchy;

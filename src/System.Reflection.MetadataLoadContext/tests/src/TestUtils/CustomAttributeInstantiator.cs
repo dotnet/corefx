@@ -83,9 +83,7 @@ namespace System.Reflection.Tests
                             break;
                         }
                         Type baseType = walk.BaseType;
-                        if (baseType == null)
-                            throw new CustomAttributeFormatException("No such field: " + name);
-                        walk = baseType;
+                        walk = baseType ?? throw new CustomAttributeFormatException("No such field: " + name);
                     }
                 }
                 else
@@ -100,9 +98,7 @@ namespace System.Reflection.Tests
                             break;
                         }
                         Type baseType = walk.BaseType;
-                        if (baseType == null)
-                            throw new CustomAttributeFormatException("No such property: " + name);
-                        walk = baseType;
+                        walk = baseType ?? throw new CustomAttributeFormatException("No such property: " + name);
                     }
                 }
             }

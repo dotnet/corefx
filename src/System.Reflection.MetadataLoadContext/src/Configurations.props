@@ -3,12 +3,11 @@
   <PropertyGroup>
     <PackageConfigurations>
       netstandard;
-      netcoreapp2.0-Unix;
-      netcoreapp2.0-Windows_NT;
+      netcoreapp
     </PackageConfigurations>
     <BuildConfigurations>
-      netcoreapp-Unix;
-      netcoreapp-Windows_NT;
+      netstandard;
+      netcoreapp
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

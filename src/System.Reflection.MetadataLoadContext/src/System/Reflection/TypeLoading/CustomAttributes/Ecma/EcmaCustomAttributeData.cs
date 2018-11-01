@@ -52,7 +52,7 @@ namespace System.Reflection.TypeLoading.Ecma
             if (declaringTypeHandle.IsNil)
                 throw new BadImageFormatException();
 
-            return declaringTypeHandle.ResolveTypeDefRefOrSpec(_module, default(TypeContext));
+            return declaringTypeHandle.ResolveTypeDefRefOrSpec(_module, default);
         }
 
         protected sealed override ConstructorInfo ComputeConstructor()

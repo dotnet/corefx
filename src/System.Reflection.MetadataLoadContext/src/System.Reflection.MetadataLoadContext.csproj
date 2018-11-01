@@ -156,12 +156,18 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="System.Private.CoreLib" />
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
-    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
-    <ProjectReference Include="..\..\System.Collections.Concurrent\src\System.Collections.Concurrent.csproj" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.Concurrent" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Reflection.Metadata" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Threading" />
     <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
-    <ProjectReference Include="..\..\System.IO.FileSystem\src\System.IO.FileSystem.csproj" />
-    <ProjectReference Include="..\..\System.Reflection.Metadata\src\System.Reflection.Metadata.csproj" />
   </ItemGroup>
 </Project>

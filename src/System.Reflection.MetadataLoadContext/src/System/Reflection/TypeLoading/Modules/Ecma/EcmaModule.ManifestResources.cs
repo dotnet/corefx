@@ -48,7 +48,7 @@ namespace System.Reflection.TypeLoading.Ecma
                         if (resource.Implementation.Kind == HandleKind.AssemblyFile)
                         {
                             // Get file name
-                            result.ResourceLocation = default(ResourceLocation);
+                            result.ResourceLocation = default;
                             AssemblyFile file = ((AssemblyFileHandle)resource.Implementation).GetAssemblyFile(reader);
                             result.FileName = file.Name.GetString(reader);
                             if (file.ContainsMetadata)
