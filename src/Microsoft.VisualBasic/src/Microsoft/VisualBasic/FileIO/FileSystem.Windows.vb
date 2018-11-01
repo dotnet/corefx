@@ -8,12 +8,15 @@ Imports System.ComponentModel
 Imports System.Security
 Imports System.Runtime.Versioning
 Imports System.Text
+
 Imports Microsoft.VisualBasic.CompilerServices
 Imports Microsoft.VisualBasic.CompilerServices.NativeMethods
+Imports Microsoft.VisualBasic.CompilerServices.NativeTypes
 
 '''' IMPORTANT: Changes made to public interface of FileSystem should be reflected in FileSystemProxy.vb.
 
 Namespace Microsoft.VisualBasic.FileIO
+
     Partial Public Class FileSystem
         ''' <summary>
         ''' Sets relevant flags on the SHFILEOPSTRUCT and calls SHFileOperation to copy move file / directory.
@@ -311,7 +314,6 @@ Namespace Microsoft.VisualBasic.FileIO
                         System.Runtime.InteropServices.Marshal.GetHRForLastWin32Error())
             End Select
         End Sub
-
 
         Private Shared Sub WinNTCopyOrMove(sourceFileFullPath As String, destinationFileFullPath As String)
             Try

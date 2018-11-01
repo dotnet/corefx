@@ -1714,19 +1714,6 @@ Namespace Microsoft.VisualBasic.FileIO
             Throw New InvalidEnumArgumentException(argName, argValue, GetType(UICancelOption))
         End Sub
 
-        ''' <summary>
-        ''' Flags for MoveFileEx.
-        ''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/movefileex.asp
-        ''' and public\sdk\inc\winbase.h.
-        ''' </summary>
-        <Flags()>
-        Private Enum MoveFileExFlags As Integer
-            MOVEFILE_REPLACE_EXISTING = &H1
-            MOVEFILE_COPY_ALLOWED = &H2
-            MOVEFILE_DELAY_UNTIL_REBOOT = &H4
-            MOVEFILE_WRITE_THROUGH = &H8
-        End Enum
-
         ' Array containing all the path separator chars. Used to verify that input is a name, not a path.
         Private Shared ReadOnly m_SeparatorChars() As Char = {
             IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar, IO.Path.VolumeSeparatorChar}

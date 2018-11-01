@@ -75,7 +75,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         ''' <remarks>
         ''' The handles in PROCESS_INFORMATION are initialized in unmanaged function.
         ''' We can't use SafeHandle here because Interop doesn't support [out] SafeHandles in structure / classes yet.
-        ''' This class makes no attempt to free the handles. To use the handle, first copy it to a SafeHandle class 
+        ''' This class makes no attempt to free the handles. To use the handle, first copy it to a SafeHandle class
         ''' (using LateInitSafeHandleZeroOrMinusOneIsInvalid.InitialSetHandle) to correctly use and dispose the handle.
         ''' </remarks>
         <StructLayout(LayoutKind.Sequential)>
@@ -188,6 +188,19 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End Sub
         End Class
 
+        ''' <summary>
+        ''' Flags for MoveFileEx.
+        ''' See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/movefileex.asp
+        ''' and public\sdk\inc\winbase.h.
+        ''' </summary>
+        <Flags()>
+        Friend Enum MoveFileExFlags As Integer
+            MOVEFILE_REPLACE_EXISTING = &H1
+            MOVEFILE_COPY_ALLOWED = &H2
+            MOVEFILE_DELAY_UNTIL_REBOOT = &H4
+            MOVEFILE_WRITE_THROUGH = &H8
+        End Enum
+
         ' Handle Values
         Friend Shared ReadOnly INVALID_HANDLE As IntPtr = New IntPtr(-1)
 
@@ -230,7 +243,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
         ''' ;New
         ''' <summary>
-        ''' FxCop violation: Avoid uninstantiated internal class. 
+        ''' FxCop violation: Avoid uninstantiated internal class.
         ''' Adding a private constructor to prevent the compiler from generating a default constructor.
         ''' </summary>
         Private Sub New()
