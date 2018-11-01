@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -2207,6 +2208,21 @@ namespace System.Tests
                 foreach (TimeZoneInfo.AdjustmentRule ar in tzi.GetAdjustmentRules())
                 {
                     Assert.True(Math.Abs(ar.DaylightDelta.TotalHours) <= 12.0);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DisplayNameStartsWithOffset()
+        {
+            foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
+            {
+                if (tzi.Id != "UTC")
+                {
+                    Assert.False(string.IsNullOrWhiteSpace(tzi.StandardName));
+                    Assert.Matches(@"^\(UTC(\+|-)[0-9]{2}:[0-9]{2}\) \S.*", tzi.DisplayName);
+                    string offset = Regex.Match(tzi.DisplayName, @"(-|)[0-9]{2}:[0-9]{2}").Value;
+                    Assert.Equal(tzi.BaseUtcOffset, TimeSpan.Parse(offset));
                 }
             }
         }
