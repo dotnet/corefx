@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{6371299B-8F39-4A0A-A9CD-70F80FF205F6}</ProjectGuid>
+    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System.Text.Json.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
+    <Reference Include="System.Runtime" />
+  </ItemGroup>
+</Project>

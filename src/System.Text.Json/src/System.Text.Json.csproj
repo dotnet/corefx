@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{79E7EE4E-E8DF-4D67-B103-6930DAAF6EF4}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System\Text\Json\JsonTokenType.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap'">
+    <Reference Include="System.Runtime" />
+  </ItemGroup>
+</Project>
