@@ -7,6 +7,15 @@
 
 namespace Microsoft.VisualBasic
 {
+    public enum AppWinStyle : short
+    {
+        Hide = (short)0,
+        MaximizedFocus = (short)3,
+        MinimizedFocus = (short)2,
+        MinimizedNoFocus = (short)6,
+        NormalFocus = (short)1,
+        NormalNoFocus = (short)4,
+    }
     public enum CallType
     {
         Get = 2,
@@ -100,6 +109,70 @@ namespace Microsoft.VisualBasic
         public static System.DateTime Now { get { throw null; } }
         public static System.DateTime Today { get { throw null; } }
     }
+    public enum DateFormat
+    {
+        GeneralDate = 0,
+        LongDate = 1,
+        LongTime = 3,
+        ShortDate = 2,
+        ShortTime = 4,
+    }
+    public enum DateInterval
+    {
+        Day = 4,
+        DayOfYear = 3,
+        Hour = 7,
+        Minute = 8,
+        Month = 2,
+        Quarter = 1,
+        Second = 9,
+        Weekday = 6,
+        WeekOfYear = 5,
+        Year = 0,
+    }
+    public enum DueDate
+    {
+        BegOfPeriod = 1,
+        EndOfPeriod = 0,
+    }
+    [System.FlagsAttribute]
+    public enum FileAttribute
+    {
+        Archive = 32,
+        Directory = 16,
+        Hidden = 2,
+        Normal = 0,
+        ReadOnly = 1,
+        System = 4,
+        Volume = 8,
+    }
+    public enum FirstDayOfWeek
+    {
+        Friday = 6,
+        Monday = 2,
+        Saturday = 7,
+        Sunday = 1,
+        System = 0,
+        Thursday = 5,
+        Tuesday = 3,
+        Wednesday = 4,
+    }
+    public enum FirstWeekOfYear
+    {
+        FirstFourDays = 2,
+        FirstFullWeek = 3,
+        Jan1 = 1,
+        System = 0,
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Globals
+    {
+        internal Globals() { }
+        public static string ScriptEngine { get { throw null; } }
+        public static int ScriptEngineBuildVersion { get { throw null; } }
+        public static int ScriptEngineMajorVersion { get { throw null; } }
+        public static int ScriptEngineMinorVersion { get { throw null; } }
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class HideModuleNameAttribute : System.Attribute
@@ -134,6 +207,35 @@ namespace Microsoft.VisualBasic
         public string DefaultInstanceAlias { get { throw null; } }
         public string DisposeMethod { get { throw null; } }
         public string MyGroupName { get { throw null; } }
+    }
+    public enum OpenAccess
+    {
+        Default = -1,
+        Read = 1,
+        ReadWrite = 3,
+        Write = 2,
+    }
+    public enum OpenMode
+    {
+        Append = 8,
+        Binary = 32,
+        Input = 1,
+        Output = 2,
+        Random = 4,
+    }
+    public enum OpenShare
+    {
+        Default = -1,
+        LockRead = 2,
+        LockReadWrite = 0,
+        LockWrite = 1,
+        Shared = 3,
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct SpcInfo
+    {
+        public short Count;
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class Strings
@@ -177,6 +279,18 @@ namespace Microsoft.VisualBasic
         public static string Right(string str, int Length) { throw null; }
         public static string RTrim(string str) { throw null; }
         public static string Trim(string str) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct TabInfo
+    {
+        public short Column;
+    }
+    public enum TriState
+    {
+        False = 0,
+        True = -1,
+        UseDefault = -2,
     }
     public enum VariantType
     {
@@ -223,6 +337,21 @@ namespace Microsoft.VisualBasic
         public static void Randomize(double Number) { }
         public static float Rnd() { throw null; }
         public static float Rnd(float Number) { throw null; }
+    }
+    [System.FlagsAttribute]
+    public enum VbStrConv
+    {
+        Hiragana = 32,
+        Katakana = 16,
+        LinguisticCasing = 1024,
+        Lowercase = 2,
+        Narrow = 8,
+        None = 0,
+        ProperCase = 3,
+        SimplifiedChinese = 256,
+        TraditionalChinese = 512,
+        Uppercase = 1,
+        Wide = 4,
     }
 }
 namespace Microsoft.VisualBasic.ApplicationServices
