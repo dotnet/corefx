@@ -1964,7 +1964,7 @@
   },
   {
     "Name": "System.Text.Json",
-    "Description": "Low allocations UTF-8 JSON reader/writer and serializer/deserializer.",
+    "Description": "Low allocation UTF-8 JSON reader/writer.",
     "CommonTypes": [
       "System.Text.Json.JsonUtf8Reader"
     ]
