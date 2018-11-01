@@ -244,5 +244,62 @@ namespace System.Diagnostics.Tests
             VerifyLogged(() => Trace.WriteLineIf(true, "logged", "category"), "category: logged" + Environment.NewLine);
             VerifyLogged(() => Trace.WriteLineIf(false, "logged", "category"), "");     
         }
+
+        [Fact]
+        public void Trace_AssertUiEnabledFalse_SkipsShowDialog()
+        {
+            var initialListener = (DefaultTraceListener)Trace.Listeners[0];
+            Trace.Listeners.Clear();
+            Trace.Fail("Fail won't show dialog");
+            Debug.Fail("Fail won't show dialog");
+
+            initialListener.AssertUiEnabled = false;
+            Trace.Listeners.Add(initialListener);
+            Debug.Fail("Fail won't show dialog");
+            Trace.Fail("Fail won't show dialog");
+
+            var myListener = new MyTraceListener();
+            string expectedDialog = $"Mock dialog - message: short, detailed message: long";
+            Trace.Listeners.Clear();
+            Trace.Listeners.Add(myListener);
+
+            try
+            {
+                myListener.AssertUiEnabled = false;
+                Debug.Fail("short", "long");
+                Assert.Equal("", myListener.OutputString);
+                Trace.Fail("short", "long");
+                Assert.Equal("", myListener.OutputString);
+
+                myListener.AssertUiEnabled = true;
+                Debug.Fail("short", "long");
+                Assert.Equal(expectedDialog, myListener.OutputString);
+                Trace.Fail("short", "long");
+                Assert.Equal(expectedDialog + expectedDialog, myListener.OutputString);
+            }
+            finally
+            {
+                Trace.Listeners.Clear();
+                Trace.Listeners.Add(initialListener);
+            }
+        }
+
+        class MyTraceListener : DefaultTraceListener
+        {
+            private void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource) 
+            {
+                OutputString += $"Mock dialog - message: {message}, detailed message: {detailMessage}";
+            }
+            public string OutputString { get; private set; } = string.Empty;
+
+            public override void Fail(string message, string detailMessage)
+            {
+                WriteLine(message, detailMessage);
+                if (AssertUiEnabled)
+                {
+                    ShowDialog(string.Empty, message, detailMessage, "Assertion Failed");
+                }
+            }
+        }
     }
 }
