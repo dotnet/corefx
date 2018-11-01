@@ -452,20 +452,29 @@ namespace System.Text.Tests
         {
             var sb = new StringBuilder();
 
-            string longString = new string('a', 1000000);
+            string longString = new string('a', 1_000_000 + new Random().Next(1_000_000));
             try
             {
                 for(;;) sb.Append(longString);
             }
-            catch
+            catch (OutOfMemoryException)
             {
             }
+            catch (ArgumentException)
+            {
+            }
+
+            Assert.True(sb.Length <= sb.Capacity);
+            Assert.True(sb.Capacity <= sb.MaxCapacity);
 
             try
             {
                 for(;;) sb.Append("xx");
             }
             catch (OutOfMemoryException)
+            {
+            }
+            catch (ArgumentException)
             {
             }
 
