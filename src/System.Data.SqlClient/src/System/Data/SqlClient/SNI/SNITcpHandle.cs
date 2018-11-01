@@ -226,7 +226,7 @@ namespace System.Data.SqlClient.SNI
 #if FEATURE_TCPKEEPALIVE
                         // enable keep-alive on socket
                         sockets[i].SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 1000);
+                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 1);
                         sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 30);
 #endif                        
                         sockets[i].Connect(ipAddresses[i], port);
