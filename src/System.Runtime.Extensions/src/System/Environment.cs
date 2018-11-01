@@ -49,10 +49,9 @@ namespace System
                 {
                     hashTable.Add(pair.Key, pair.Value);                 
                 }
-                catch (Exception ex)
+                catch (ArgumentException)
                 {
                     // Throw and catch intentionally to provide non-fatal notification about corrupted environment block
-                    Debug.WriteLine(SR.Diagnostic_ThrowingException, ex.ToString());
                 }
             }
             return hashTable;
