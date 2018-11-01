@@ -23,7 +23,6 @@
   </ItemGroup>
     <ItemGroup Condition="'$(TargetsWindows)' != 'true'">
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
-    <Compile Include="Microsoft\VisualBasic\Helpers\NativeMethods.Unix.vb" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />

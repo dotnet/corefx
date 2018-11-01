@@ -48,9 +48,8 @@ Namespace Microsoft.VisualBasic
             'Low-order 4 bits (0x000f), legal values: 0, 1, 2, 3, 4, 5
             '     next 4 bits (0x00f0), legal values: 0, &H10, &H20, &H30, &H40
             '     next 4 bits (0x0f00), legal values: 0, &H100, &H200
-            If ((Buttons And &HFI) > MsgBoxStyle.RetryCancel) OrElse
-                ((Buttons And &HF0I) > MsgBoxStyle.Information) OrElse
-                ((Buttons And &HF00I) > MsgBoxStyle.DefaultButton3) Then
+            If ((Buttons And &HFI) > MsgBoxStyle.RetryCancel) OrElse ((Buttons And &HF0I) > MsgBoxStyle.Information) _
+                OrElse ((Buttons And &HF00I) > MsgBoxStyle.DefaultButton3) Then
                 Buttons = MsgBoxStyle.OkOnly
             End If
 
@@ -65,7 +64,7 @@ Namespace Microsoft.VisualBasic
             Catch ex As System.Threading.ThreadAbortException
                 Throw ex
             Catch ex As Exception
-                Throw New ArgumentException("Invalid Prompt", ex)
+                Throw New ArgumentException("Argument 'Prompt' cannot be converted to type 'String'.")
             End Try
 
             Try
@@ -81,7 +80,7 @@ Namespace Microsoft.VisualBasic
             Catch ex As Threading.ThreadAbortException
                 Throw ex
             Catch ex As Exception
-                Throw New ArgumentException("Invalid Title", ex)
+                Throw New ArgumentException("Argument 'Title' cannot be converted to type 'String'.")
             End Try
 
             Return CType(MessageBox(CType(0, IntPtr), sPrompt, sTitle, CUInt(Buttons)), MsgBoxResult)

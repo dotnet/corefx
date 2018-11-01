@@ -18,7 +18,6 @@ Namespace Microsoft.VisualBasic.FileIO
 
         ''' <summary>
         ''' Stub to prevent compile error, this will not get called on non Windows OS's
-        ''' This would be implemented on non-Windows in the future
         ''' </summary>
         ''' <param name="sourceFileFullPath"></param>
         ''' <param name="destinationFileFullPath"></param>
