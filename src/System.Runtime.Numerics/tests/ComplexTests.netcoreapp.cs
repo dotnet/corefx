@@ -14,13 +14,15 @@ namespace System.Numerics.Tests
     {
         [Fact]
         public static void NaN()
-        {
-            var complexNaN = new Complex(double.NaN, double.NaN);
+        {   
+            Assert.True(Complex.IsNaN(new Complex(double.NaN, double.NaN)));
+            Assert.True(Complex.IsNaN(new Complex(1, double.NaN)));
+            Assert.True(Complex.IsNaN(new Complex(double.NaN, 1)));
 
-            Assert.True(Complex.IsNaN(complexNaN));
-            Assert.Equal(complexNaN, Complex.NaN);
-            Assert.Equal(double.NaN, Complex.NaN.Real);
-            Assert.Equal(double.NaN, Complex.NaN.Imaginary);
+            Assert.False(Complex.IsNaN(new Complex(double.PositiveInfinity, double.NaN)));
+            Assert.False(Complex.IsNaN(new Complex(double.NaN, double.PositiveInfinity)));
+
+
             VerifyRealImaginaryProperties(Complex.NaN, double.NaN, double.NaN);
             VerifyMagnitudePhaseProperties(Complex.NaN, double.NaN, double.NaN);
         }
@@ -28,19 +30,36 @@ namespace System.Numerics.Tests
         [Fact]
         public static void Infinity()
         {
-            var complexInfinity = new Complex(double.PositiveInfinity, double.PositiveInfinity);
+            Assert.True(Complex.IsInfinity(new Complex(double.PositiveInfinity, double.PositiveInfinity)));
+            Assert.True(Complex.IsInfinity(new Complex(1, double.PositiveInfinity)));
+            Assert.True(Complex.IsInfinity(new Complex(double.PositiveInfinity, 1)));
 
-            Assert.True(Complex.IsInfinity(complexInfinity));
-            Assert.False(Complex.IsFinite(complexInfinity));
-            Assert.Equal(complexInfinity, Complex.Infinity);
-            Assert.Equal(double.PositiveInfinity, Complex.Infinity.Real);
-            Assert.Equal(double.PositiveInfinity, Complex.Infinity.Imaginary);
+            Assert.True(Complex.IsInfinity(new Complex(double.NegativeInfinity, double.NegativeInfinity)));
+            Assert.True(Complex.IsInfinity(new Complex(1, double.NegativeInfinity)));
+            Assert.True(Complex.IsInfinity(new Complex(double.NegativeInfinity, 1)));
+
             VerifyRealImaginaryProperties(Complex.Infinity, double.PositiveInfinity, double.PositiveInfinity);
             VerifyMagnitudePhaseProperties(Complex.Infinity, double.PositiveInfinity, Math.PI / 4);
+        }
+
+        [Fact]
+        public static void Finite()
+        {
+            Assert.False(Complex.IsFinite(new Complex(double.NaN, double.NaN)));
+            Assert.False(Complex.IsFinite(new Complex(1, double.NaN)));
+            Assert.False(Complex.IsFinite(new Complex(double.NaN, 1)));
+
+            Assert.False(Complex.IsFinite(new Complex(double.PositiveInfinity, double.PositiveInfinity)));
+            Assert.False(Complex.IsFinite(new Complex(1, double.PositiveInfinity)));
+            Assert.False(Complex.IsFinite(new Complex(double.PositiveInfinity, 1)));
+
+            Assert.False(Complex.IsFinite(new Complex(double.NegativeInfinity, double.NegativeInfinity)));
+            Assert.False(Complex.IsFinite(new Complex(1, double.NegativeInfinity)));
+            Assert.False(Complex.IsFinite(new Complex(double.NegativeInfinity, 1)));
+
+            Assert.False(Complex.IsFinite(Complex.Infinity));
 
             Assert.True(Complex.IsFinite(Complex.ImaginaryOne));
-            Assert.False(Complex.IsInfinity(new Complex(double.PositiveInfinity, 12)));
-            Assert.False(Complex.IsInfinity(new Complex(12, double.PositiveInfinity)));
         }
     }
 }

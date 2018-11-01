@@ -865,10 +865,10 @@ namespace System.Numerics
             return new Complex((double)value, 0.0);
         }
 
-        public static bool IsFinite(Complex value) => !Infinity.Equals(value);
+        public static bool IsFinite(Complex value) => double.IsFinite(value.m_real) && double.IsFinite(value.m_imaginary);
 
-        public static bool IsNaN(Complex value) => NaN.Equals(value);
+        public static bool IsNaN(Complex value) => !IsInfinity(value) && !IsFinite(value);
 
-        public static bool IsInfinity(Complex value) => Infinity.Equals(value);
+        public static bool IsInfinity(Complex value) => double.IsInfinity(value.m_real) || double.IsInfinity(value.m_imaginary);
     }
 }
