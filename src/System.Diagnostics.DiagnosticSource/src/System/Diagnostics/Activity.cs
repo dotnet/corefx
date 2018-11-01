@@ -223,6 +223,7 @@ namespace System.Diagnostics
             else
             {
                 ParentId = parentId;
+                IsW3CId = IsW3CId(ParentId);
             }
             return this;
         }
@@ -309,7 +310,10 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                Id = GenerateId();
+                if (IsW3CId || UseW3CFormat)
+                    Id = GenerateW3CId();
+                else
+                    Id = GenerateId();
                 SetCurrent(this);
             }
             return this;
@@ -343,7 +347,77 @@ namespace System.Diagnostics
             }
         }
 
+
+        /* W3C support functionality (see https://w3c.github.io/trace-context) */
+
+        /// <summary>
+        /// Holds the W3C 'tracestate' header.   This is typically used by logging systems
+        /// to store vendor-specific information that must flow.
+        /// Logically it is just a kind of baggage (if flows just like baggage), but because
+        /// it is expected to be special cased (it has its own HTTP header), it is more 
+        /// convenient/efficient if it is not lumped in with other baggage.   
+        /// </summary>
+        public string TraceState
+        {
+            get
+            {
+                for (var activity = this; activity != null; activity = activity.Parent)
+                {
+                    var val = activity._traceState;
+                    if (val != null)
+                        return val;
+                }
+                return null;
+            }
+            set
+            {
+                _traceState = value;
+            }
+        }
+  
+        /// <summary>
+        /// Activity tries to use the same format for IDs as its parent it has a parent.  
+        /// However if the activity has no parent, it has to do something.   
+        /// This sets it so that WC3 format is used in this case.  
+        /// </summary>
+        static public bool UseW3CFormat { get; set; }
+
+        /// <summary>
+        /// Returns true if the ID happens to be in W3C format XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
+        /// this is a convenience method.  
+        /// </summary>
+        public bool IsW3CFormat { get; private set; }
+
         #region private 
+        /// <summary>
+        /// Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context
+        /// </summary>
+        private static bool IsW3CId(string id)
+        {
+            // A W3CId is  
+            //  * 2 chars Version
+            //  * 32 chars traceId
+            //  * 16 chars spanId
+            //  * 2 chars flags 
+            //  * 3 chars - separators.  
+            //  = 55 chars (see https://w3c.github.io/trace-context)
+            // We require that all non-WC3IDs NOT start with a digit.  
+            return id.Length == 55 && char.IdDigit(id[0]);
+        }
+        private string GenerateW3CId()
+        {
+            string newSpanId = Guid.NewGuid().ToString("n").Substring(16, 16);
+            if (ParentId != null)
+            {
+                return ParentId.SubString(0, 36) + newSpanId + ParentId.SubString(52, 3);
+            }
+            else
+            {
+                string newTraceId = Guid.NewGuid().ToString("n");
+                return "00-" + newTraceId + "-" + newSpanId + "-00";
+            }
+        }
+
         private static void NotifyError(Exception exception)
         {
             // Throw and catch the exception.  This lets it be seen by the debugger
@@ -394,6 +468,11 @@ namespace System.Diagnostics
 
         private string GetRootId(string id)
         {
+            // If this is a W3C ID it has the format Version2-TraceId32-SpanId16-Flags2
+            // and the root ID is the TraceId.   
+            if (IsW3CId)
+                return id.SubString(3, 32);
+
             //id MAY start with '|' and contain '.'. We return substring between them
             //ParentId MAY NOT have hierarchical structure and we don't know if initially rootId was started with '|',
             //so we must NOT include first '|' to allow mixed hierarchical and non-hierarchical request id scenarios
@@ -482,6 +561,7 @@ namespace System.Diagnostics
 
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
+        private string _traceState;
         private bool isFinished;
         #endregion // private
     }
