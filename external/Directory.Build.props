@@ -1,10 +1,10 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
-    <NugetRuntimeIdentifier>None</NugetRuntimeIdentifier>
     <ContainsPackageReferences>true</ContainsPackageReferences>
     <IncludeVSTestReferences Condition="'$(IncludeVSTestReferences)' == ''">true</IncludeVSTestReferences>
     <!-- We need configuration-specific assets files. -->
     <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
+    <ProjectAssetsFile>$(RestoreOutputPath)/project.assets.json</ProjectAssetsFile>
   </PropertyGroup>
 </Project>
