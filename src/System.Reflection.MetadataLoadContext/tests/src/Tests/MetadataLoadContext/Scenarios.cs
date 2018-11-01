@@ -54,8 +54,7 @@ namespace System.Reflection.Tests
                     Type objectType = candidate.GetType("System.Object", throwOnError: false);
                     if (objectType != null)
                     {
-                        // Found our core assembly. Ensure it's not too late to set the CoreAssemblyName property.
-                        lc.CoreAssemblyName = objectType.Assembly.GetName().FullName;
+                        // Found our core assembly.
                         return;
                     }
                 }

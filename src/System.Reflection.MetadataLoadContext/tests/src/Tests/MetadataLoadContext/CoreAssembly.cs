@@ -48,24 +48,5 @@ namespace System.Reflection.Tests
                 Assert.Equal(actualCoreAssembly, retrievedObjectType.Assembly);
             }
         }
-
-        [Fact]
-        public static void CoreAssemblyDelayedWrite()
-        {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null, coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
-            {
-                Assembly a = lc.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
-                Type derived = a.GetType("Derived", throwOnError: true, ignoreCase: false);
-                lc.CoreAssemblyName = null;
-
-                // Calling BaseType causes the MetadataLoadContext to parse the typespec "Base<object>". Since "object" is a primitive
-                // type, it should be encoded using the short-form "ELEMENT_TYPE_OBJECT." Hence, the MetadataLoadContext is forced
-                // to look up "System.Object" in the core assembly we assigned to it, which in this case is null and should force an exception.
-                Assert.Throws<FileNotFoundException> (() => derived.BaseType);
-
-                // And verify now, the choice of core assembly (even if a bad one) is committed and can longer change.
-                Assert.Throws<InvalidOperationException>(() => lc.CoreAssemblyName = "mscorlib");
-            }
-        }
     }
 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection.TypeLoading;
 
@@ -24,6 +25,8 @@ namespace System.Reflection
 
         internal RoAssembly ResolveAssembly(RoAssemblyName refName)
         {
+            Debug.Assert(refName != null);
+
             RoAssembly assembly = TryResolveAssembly(refName, out Exception e);
             return assembly ?? throw e;
         }
@@ -43,38 +46,23 @@ namespace System.Reflection
 
         internal RoAssembly ResolveToAssemblyOrExceptionAssembly(RoAssemblyName refName)
         {
-            if (refName != null)
-            {
-                if (_binds.TryGetValue(refName, out RoAssembly prior))
-                    return prior;
-            }
+            Debug.Assert(refName != null);
+
+            if (_binds.TryGetValue(refName, out RoAssembly prior))
+                return prior;
 
             RoAssembly assembly = TryFindAssemblyByRaisingResolveEvent(refName);
-            if (refName == null)
-            {
-                if (assembly is RoExceptionAssembly)
-                {
-                    // No core assembly was found
-                    return assembly;
-                }
-                refName = assembly.GetName().ToRoAssemblyName();
-            }
-
             return _binds.GetOrAdd(refName, assembly);
         }
 
         private RoAssembly TryFindAssemblyByRaisingResolveEvent(RoAssemblyName refName)
         {
-            Assembly assembly = resolver?.Resolve(this, refName?.ToAssemblyName());
+            Debug.Assert(refName != null);
+
+            Assembly assembly = resolver?.Resolve(this, refName.ToAssemblyName());
 
             if (assembly == null)
-            {
-                if (refName == null)
-                {
-                    return new RoExceptionAssembly(new FileNotFoundException(SR.UnableToDetermineCoreAssembly));
-                }
                 return new RoExceptionAssembly(new FileNotFoundException(SR.Format(SR.FileNotFoundAssembly, refName.FullName)));
-            }
 
             if (!(assembly is RoAssembly roAssembly && roAssembly.Loader == this))
                 throw new FileLoadException(SR.ExternalAssemblyReturnedByMetadataAssemblyResolver);

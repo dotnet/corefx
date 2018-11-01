@@ -17,16 +17,14 @@ namespace System.Reflection
     /// </remarks>
     public class PathAssemblyResolver : MetadataAssemblyResolver
     {
-        private static readonly string[] CoreNames = { "mscorlib", "System.Private.CoreLib", "System.Runtime", "netstandard" };
-
         private Dictionary<string, string> _fileToPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        public PathAssemblyResolver(IEnumerable<string> assemblyPath)
+        public PathAssemblyResolver(IEnumerable<string> assemblyPaths)
         {
-            if (assemblyPath == null)
-                throw new ArgumentNullException(nameof(assemblyPath));
+            if (assemblyPaths == null)
+                throw new ArgumentNullException(nameof(assemblyPaths));
 
-            foreach (string path in assemblyPath)
+            foreach (string path in assemblyPaths)
             {
                 string file = Path.GetFileNameWithoutExtension(path);
                 _fileToPaths.Add(file, path);
@@ -35,37 +33,16 @@ namespace System.Reflection
 
         public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)
         {
-            string assemblyPath = null;
+            Debug.Assert(context != null);
+            Debug.Assert(assemblyName != null);
 
-            if (assemblyName != null)
+            Assembly assembly = null;
+            if (_fileToPaths.TryGetValue(assemblyName.Name, out string assemblyPath))
             {
-                _fileToPaths.TryGetValue(assemblyName.Name, out assemblyPath);
-                if (assemblyPath != null)
-                {
-                    return context.LoadFromAssemblyPath(assemblyPath);
-                }
-            }
-            else
-            {
-                Debug.Assert(context.CoreAssemblyName == null);
-
-                // Try loading the first core assembly that has a path specified
-                foreach (string coreName in CoreNames)
-                {
-                    if (_fileToPaths.TryGetValue(coreName, out assemblyPath))
-                    {
-                        Assembly assembly = context.LoadFromAssemblyPath(assemblyPath);
-                        if (assembly != null)
-                        {
-                            context.CoreAssemblyName = coreName;
-                        }
-
-                        return assembly;
-                    }
-                }
+                assembly = context.LoadFromAssemblyPath(assemblyPath);
             }
 
-            return null;
+            return assembly;
         }
     }
 }

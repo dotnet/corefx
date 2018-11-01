@@ -9,6 +9,8 @@ namespace System.Reflection
 {
     public sealed partial class MetadataLoadContext
     {
+        private static readonly string[] CoreNames = { "mscorlib", "netstandard" };
+
         // Cache loaded coreAssembly and core types.
         internal RoAssembly TryGetCoreAssembly(out Exception e)
         {
@@ -17,17 +19,42 @@ namespace System.Reflection
             if (object.ReferenceEquals(coreAssembly, Sentinels.RoAssembly))
             {
                 RoAssemblyName roAssemblyName = null;
-                string coreAssemblyName = GetCommittedCoreAssemblyName();
-                if (coreAssemblyName != null)
+                if (CoreAssemblyName == null)
                 {
-                    roAssemblyName = new AssemblyName(coreAssemblyName).ToRoAssemblyName();
+                    coreAssembly = _lazyCoreAssembly = TryGetDefaultCoreAssembly(out e);
                 }
-                coreAssembly = _lazyCoreAssembly = TryResolveAssembly(roAssemblyName, out e);
+                else
+                {
+                    roAssemblyName = new AssemblyName(CoreAssemblyName).ToRoAssemblyName();
+                    coreAssembly = _lazyCoreAssembly = TryResolveAssembly(roAssemblyName, out e);
+                }
             }
             return coreAssembly;
         }
 
-        private volatile RoAssembly _lazyCoreAssembly = Sentinels.RoAssembly;
+        private RoAssembly TryGetDefaultCoreAssembly(out Exception e)
+        {
+            e = null;
+            RoAssembly roAssembly = null;
+
+            // Try loading the first core assembly that has a path specified
+            foreach (string coreName in CoreNames)
+            {
+                RoAssemblyName roAssemblyName = new AssemblyName(coreName).ToRoAssemblyName();
+                roAssembly = TryResolveAssembly(roAssemblyName, out e);
+
+                if (roAssembly != null)
+                {
+                    break;
+                }
+
+                e = null;
+            }
+
+            return roAssembly;
+        }
+
+        private RoAssembly _lazyCoreAssembly = Sentinels.RoAssembly;
 
         /// <summary>
         /// Returns a lazily created and cached Type instance corresponding to the indicated core type. This method throws 
@@ -59,18 +86,6 @@ namespace System.Reflection
         /// </summary>
         internal CoreTypes GetAllFoundCoreTypes() => _lazyCoreTypes ?? (_lazyCoreTypes = new CoreTypes(this));
         private volatile CoreTypes _lazyCoreTypes;
-
-        /// <summary>
-        /// Calling this commits the MetadataLoadContext to use the currently set CoreAssemblyName. The CoreAssemblyName property can no longer be set after this.
-        /// </summary>
-        private string GetCommittedCoreAssemblyName()
-        {
-            Interlocked.CompareExchange(ref _lazyCommitedCoreAssemblyName, CoreAssemblyName, s_committedCoreAssemblyNameSentinel);
-            return (string)_lazyCommitedCoreAssemblyName;
-        }
-
-        private volatile object _lazyCommitedCoreAssemblyName = s_committedCoreAssemblyNameSentinel;
-        private static readonly object s_committedCoreAssemblyNameSentinel = new object();
 
         //
         // Seriously, ugh - the default binder for Reflection has a dependency on checking types for equality with System.Object - for that

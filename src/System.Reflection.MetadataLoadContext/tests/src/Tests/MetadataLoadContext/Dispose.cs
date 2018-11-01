@@ -51,7 +51,6 @@ namespace System.Reflection.Tests
             Assert.Throws<ObjectDisposedException>(() => lc.LoadFromAssemblyPath("Foo"));
             Assert.Throws<ObjectDisposedException>(() => lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage));
             Assert.Throws<ObjectDisposedException>(() => lc.LoadFromStream(new MemoryStream(TestData.s_SimpleAssemblyImage)));
-            Assert.Throws<ObjectDisposedException>(() => lc.CoreAssemblyName = "Foo");
             Assert.Throws<ObjectDisposedException>(() => lc.CoreAssemblyName);
             Assert.Throws<ObjectDisposedException>(() => lc.GetAssemblies());
         }

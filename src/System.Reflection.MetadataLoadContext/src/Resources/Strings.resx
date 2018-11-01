@@ -261,9 +261,6 @@
   <data name="NotSupported_SatelliteAssembly" xml:space="preserve">
     <value>Satellite assemblies are not supported on assemblies loaded by a MetadataLoadContext.</value>
   </data>
-  <data name="TooLateToSetCoreAssemblyName" xml:space="preserve">
-    <value>This MetadataLoadContext has already loaded the core assembly using a previously supplied name.</value>
-  </data>
   <data name="TypeNotFound" xml:space="preserve">
     <value>Could not find type '{0}' in assembly '{1}'</value>
   </data>

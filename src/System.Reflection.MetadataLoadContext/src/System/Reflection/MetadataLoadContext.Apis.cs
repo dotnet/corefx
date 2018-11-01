@@ -257,13 +257,10 @@ namespace System.Reflection
                 return _userSuppliedCoreAssemblyName;
             }
 
-            set
+            private set
             {
                 if (IsDisposed)
                     throw new ObjectDisposedException(nameof(MetadataLoadContext));
-
-                if (_lazyCommitedCoreAssemblyName != s_committedCoreAssemblyNameSentinel)
-                    throw new InvalidOperationException(SR.TooLateToSetCoreAssemblyName);
 
                 if (value != null)
                 {
