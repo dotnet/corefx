@@ -126,6 +126,7 @@ namespace System.Net
                 accepted.Close();
                 return;
             }
+
             lock (epl._unregisteredConnections)
             {
                 epl._unregisteredConnections[conn] = conn;
