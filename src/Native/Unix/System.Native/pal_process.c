@@ -282,6 +282,13 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     *stderrFd = stderrFds[READ_END_OF_PIPE];
 
 done:;
+#if !HAVE_PIPE2
+    if (haveProcessCreateLock)
+    {
+        pthread_mutex_unlock(&ProcessCreateLock);
+    }
+#endif
+
     int priorErrno = errno;
 
     // Regardless of success or failure, close the parent's copy of the child's end of
@@ -308,13 +315,6 @@ done:;
         }
         CloseIfOpen(waitForChildToExecPipe[READ_END_OF_PIPE]);
     }
-
-#if !HAVE_PIPE2
-    if (haveProcessCreateLock)
-    {
-        pthread_mutex_unlock(&ProcessCreateLock);
-    }
-#endif
 
     // If we failed, close everything else and give back error values in all out arguments.
     if (!success)
