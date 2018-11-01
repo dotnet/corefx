@@ -5,7 +5,6 @@ Option Explicit On
 Option Strict On
 
 Imports System.Environment
-Imports System.Security
 Imports Microsoft.VisualBasic.FileIO
 Imports Xunit
 Namespace Microsoft.VisualBasic.Tests.VB

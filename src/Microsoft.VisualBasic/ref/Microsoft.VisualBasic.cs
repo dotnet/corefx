@@ -583,7 +583,7 @@ namespace Microsoft.VisualBasic.FileIO
         SearchAllSubDirectories = 3,
         SearchTopLevelOnly = 2,
     }
-    public sealed partial class SpecialDirectories
+    public partial class SpecialDirectories
     {
         public SpecialDirectories() { }
         public static string AllUsersApplicationData { get { throw null; } }
