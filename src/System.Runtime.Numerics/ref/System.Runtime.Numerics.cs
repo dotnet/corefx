@@ -195,6 +195,9 @@ namespace System.Numerics
         public static System.Numerics.Complex Exp(System.Numerics.Complex value) { throw null; }
         public static System.Numerics.Complex FromPolarCoordinates(double magnitude, double phase) { throw null; }
         public override int GetHashCode() { throw null; }
+        public static bool IsFinite(System.Numerics.Complex value) { throw null; }
+        public static bool IsInfinity(System.Numerics.Complex value) { throw null; }
+        public static bool IsNaN(System.Numerics.Complex value) { throw null; }
         public static System.Numerics.Complex Log(System.Numerics.Complex value) { throw null; }
         public static System.Numerics.Complex Log(System.Numerics.Complex value, double baseValue) { throw null; }
         public static System.Numerics.Complex Log10(System.Numerics.Complex value) { throw null; }
@@ -248,8 +251,5 @@ namespace System.Numerics
         public string ToString(System.IFormatProvider provider) { throw null; }
         public string ToString(string format) { throw null; }
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
-        public static bool IsFinite(System.Numerics.Complex value) { throw null; }
-        public static bool IsNaN(System.Numerics.Complex value) { throw null; }
-        public static bool IsInfinity(System.Numerics.Complex value) { throw null; }
     }
 }
