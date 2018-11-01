@@ -486,12 +486,14 @@ namespace System.Text.Tests
         [OuterLoop]
         public static void Replace_OutOfMemory_DoesNotCorruptState()
         {
+            var random = new Random();
+
             var sb = new StringBuilder();
-            sb.Append('a', 1_000_000);
+            sb.Append('a', 100_000 + random.Next(10_000_000));
 
             try
             {
-                sb.Replace("a", new string('b', 1_000_000));
+                sb.Replace("a", new string('b', 100_000 + random.Next(10_000_000)));
             }
             catch (OutOfMemoryException)
             {
