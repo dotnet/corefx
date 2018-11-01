@@ -11,9 +11,9 @@
   - These APIs will be targeting .NET Core specifically as part of v1.
     Providing a netstandard implementation can be considered in the future.
 
-![Core Components Overview](images/diagram-1.svg)
+![Core Components Overview](images/diagram-1.png)
 
-![Higher-level Components Overview](images/diagram-2.svg)
+![Higher-level Components Overview](images/diagram-2.png)
 
 ## Design Requirements
 
@@ -104,4 +104,4 @@
 
 ## PlantUML License
 
-![PlantUML License](images/PlantUML-license.svg)
+![PlantUML License](images/PlantUML-license.png)
