@@ -310,7 +310,7 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                if (IsW3CId || DefaultIdFormat == ActivityIDFormat.W3C)
+                if (IsW3CId || (ParentId == null && DefaultIdFormat == ActivityIDFormat.W3C))
                 {
                     IsW3CFormat = true;
                     Id = GenerateW3CId();
