@@ -32,3 +32,13 @@ intptr_t SystemIoPortsNative_SerialPortOpen(const char * name)
 
     return fd;
 }
+
+int SystemIoPortsNative_SerialPortClose(intptr_t fd)
+{
+    // some devices don't unlock handles from exclusive access
+    // preventing reopening after closing the handle
+
+    // ignoring the error - best effort
+    ioctl(fd, TIOCNXCL);
+    return close(fd);
+}
