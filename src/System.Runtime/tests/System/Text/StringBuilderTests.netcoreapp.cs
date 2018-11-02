@@ -464,8 +464,7 @@ namespace System.Text.Tests
             {
             }
 
-            Assert.True(sb.Length <= sb.Capacity);
-            Assert.True(sb.Capacity <= sb.MaxCapacity);
+            Assert.InRange(sb.Capacity, sb.Length, sb.MaxCapacity);
 
             try
             {
@@ -478,8 +477,7 @@ namespace System.Text.Tests
             {
             }
 
-            Assert.True(sb.Length <= sb.Capacity);
-            Assert.True(sb.Capacity <= sb.MaxCapacity);
+            Assert.InRange(sb.Capacity, sb.Length, sb.MaxCapacity);
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsRobustUnderMemoryPressure))]
@@ -499,8 +497,7 @@ namespace System.Text.Tests
             {
             }
 
-            Assert.True(sb.Length <= sb.Capacity);
-            Assert.True(sb.Capacity <= sb.MaxCapacity);
+            Assert.InRange(sb.Capacity, sb.Length, sb.MaxCapacity);
         }
     }
 }
