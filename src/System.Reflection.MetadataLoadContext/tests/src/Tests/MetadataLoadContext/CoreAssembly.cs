@@ -13,26 +13,30 @@ namespace System.Reflection.Tests
         public static void CoreAssemblyCanBeAFacade()
         {
             Assembly actualCoreAssembly = null;
+            Assembly testAssembly = null;
 
-            using (MetadataLoadContext lc = new MetadataLoadContext(
-                new FuncMetadataAssemblyResolver(
-                    delegate (MetadataLoadContext sender, AssemblyName refName)
+            var resolver = new FuncMetadataAssemblyResolver(
+                delegate (MetadataLoadContext sender, AssemblyName refName)
+                {
+                    if (refName.Name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (refName.Name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return actualCoreAssembly = sender.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
-                        }
-                        return null;
-                    }),
-                coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
-            {
-                Assembly a = lc.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
+                        return actualCoreAssembly = sender.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
+                    }
+                    //else if (refName.Equals(new AssemblyName(TestData.s_PhonyCoreAssemblyName)))
+                    else if (refName.Name == new AssemblyName(TestData.s_PhonyCoreAssemblyName).Name)
+                    {
+                        return testAssembly = sender.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
+                    }
+                    return null;
+                });
 
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver, coreAssemblyName: TestData.s_PhonyCoreAssemblyName))
+            {
                 // This is a sanity check to ensure that "TestData.s_PhonyCoreAssemblyName" is actually the def-name of this
                 // assembly. It better be since we told our MetadataLoadContext to use it as our core assembly.
                 Assembly aAgain = lc.LoadFromAssemblyName(TestData.s_PhonyCoreAssemblyName);
 
-                Type derived = a.GetType("Derived", throwOnError: true, ignoreCase: false);
+                Type derived = testAssembly.GetType("Derived", throwOnError: true, ignoreCase: false);
 
                 // Calling BaseType causes the MetadataLoadContext to parse the typespec "Base<object>". Since "object" is a primitive
                 // type, it should be encoded using the short-form "ELEMENT_TYPE_OBJECT." Hence, the MetadataLoadContext is forced
@@ -41,7 +45,7 @@ namespace System.Reflection.Tests
                 Type baseType = derived.BaseType;
 
                 Assert.NotNull(actualCoreAssembly); // Ensure our resolve handler actually ran.
-                Assert.NotEqual(a, actualCoreAssembly);
+                Assert.NotEqual(testAssembly, actualCoreAssembly);
                 Assert.True(baseType.IsConstructedGenericType);
                 Type retrievedObjectType = baseType.GenericTypeArguments[0];
                 Assert.Equal("System.Object", retrievedObjectType.FullName);

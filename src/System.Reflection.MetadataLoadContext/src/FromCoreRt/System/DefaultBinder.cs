@@ -36,15 +36,14 @@ namespace System
         // 
         public sealed override MethodBase BindToMethod(
             BindingFlags bindingAttr, MethodBase[] match, ref object[] args,
-            ParameterModifier[] modifiers, CultureInfo cultureInfo, string[] names, out object state) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+            ParameterModifier[] modifiers, CultureInfo cultureInfo, string[] names, out object state) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         // Given a set of fields that match the base criteria, select a field.
         // if value is null then we have no way to select a field
-        public sealed override FieldInfo BindToField(BindingFlags bindingAttr, FieldInfo[] match, object value, CultureInfo cultureInfo) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override FieldInfo BindToField(BindingFlags bindingAttr, FieldInfo[] match, object value, CultureInfo cultureInfo) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
-        // Given a set of methods that match the base criteria, select a method based
-        // upon an array of types.  This method should return null if no method matchs
-        // the criteria.
+        // Given a set of methods that match the base criteria, select a method based upon an array of types.
+        // This method should return null if no method matches the criteria.
         public sealed override MethodBase SelectMethod(BindingFlags bindingAttr, MethodBase[] match, Type[] types, ParameterModifier[] modifiers)
         {
             int i;
@@ -65,8 +64,8 @@ namespace System
 
             MethodBase[] candidates = (MethodBase[])match.Clone();
 
-            // Find all the methods that can be described by the types parameter. 
-            //  Remove all of them that cannot.
+            // Find all the methods that can be described by the types parameter.
+            // Remove all of them that cannot.
             int CurIdx = 0;
             for (i = 0; i < candidates.Length; i++)
             {
@@ -121,7 +120,9 @@ namespace System
             {
                 int newMin = FindMostSpecificMethod(candidates[currentMin], paramOrder, null, candidates[i], paramOrder, null, types, null);
                 if (newMin == 0)
+                {
                     ambig = true;
+                }
                 else
                 {
                     if (newMin == 2)
@@ -256,9 +257,9 @@ namespace System
         // ChangeType
         // The default binder doesn't support any change type functionality.
         // This is because the default is built into the low level invoke code.
-        public override object ChangeType(object value, Type type, CultureInfo cultureInfo) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public override object ChangeType(object value, Type type, CultureInfo cultureInfo) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
-        public sealed override void ReorderArgumentArray(ref object[] args, object state) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override void ReorderArgumentArray(ref object[] args, object state) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         // Return any exact bindings that may exist. (This method is not defined on the
         //  Binder and is used by RuntimeType.)

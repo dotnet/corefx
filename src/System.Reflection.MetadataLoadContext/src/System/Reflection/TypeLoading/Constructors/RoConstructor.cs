@@ -35,9 +35,9 @@ namespace System.Reflection.TypeLoading
         public abstract override IEnumerable<CustomAttributeData> CustomAttributes { get; }
         public sealed override IList<CustomAttributeData> GetCustomAttributesData() => CustomAttributes.ToReadOnlyCollection();
 
-        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         public sealed override bool IsConstructedGenericMethod => false;
         public sealed override bool IsGenericMethodDefinition => false;
@@ -85,7 +85,7 @@ namespace System.Reflection.TypeLoading
         // Not valid in a ReflectionOnly context
         public sealed override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyInvoke);
         public sealed override object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyInvoke);
-        public sealed override RuntimeMethodHandle MethodHandle => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override RuntimeMethodHandle MethodHandle => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         MethodBase IRoMethodBase.MethodBase => this;
         public MetadataLoadContext Loader => GetRoModule().Loader;

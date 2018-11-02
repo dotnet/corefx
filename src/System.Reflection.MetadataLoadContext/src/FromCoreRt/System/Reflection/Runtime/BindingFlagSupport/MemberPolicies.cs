@@ -9,17 +9,14 @@ using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
 {
-    //=================================================================================================================
-    // This class encapsulates the minimum set of arcane desktop CLR policies needed to implement the Get*(BindingFlags) apis.
-    //
-    // In particular, it encapsulates behaviors such as what exactly determines the "visibility" of a property and event, and
-    // what determines whether and how they are overridden.
-    //=================================================================================================================
+    /// <summary>
+    /// This class encapsulates the minimum set of arcane desktop CLR policies needed to implement the Get*(BindingFlags) apis.
+    /// In particular, it encapsulates behaviors such as what exactly determines the "visibility" of a property and event, and
+    /// what determines whether and how they are overridden.
+    /// </summary>
     internal abstract class MemberPolicies<M> where M : MemberInfo
     {
-        //=================================================================================================================
         // Subclasses for specific MemberInfo types must override these:
-        //=================================================================================================================
 
         //
         // Returns all of the directly declared members on the given TypeInfo.

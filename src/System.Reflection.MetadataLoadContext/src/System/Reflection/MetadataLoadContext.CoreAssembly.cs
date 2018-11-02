@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.IO;
 using System.Reflection.TypeLoading;
 
 namespace System.Reflection
@@ -14,46 +16,40 @@ namespace System.Reflection
         internal RoAssembly TryGetCoreAssembly(out Exception e)
         {
             e = null;
-            RoAssembly coreAssembly = _lazyCoreAssembly;
-            if (object.ReferenceEquals(coreAssembly, Sentinels.RoAssembly))
+            Debug.Assert(_coreAssembly == null);
+            if (_userSuppliedCoreAssemblyName == null)
             {
-                RoAssemblyName roAssemblyName = null;
-                if (CoreAssemblyName == null)
-                {
-                    coreAssembly = _lazyCoreAssembly = TryGetDefaultCoreAssembly(out e);
-                }
-                else
-                {
-                    roAssemblyName = new AssemblyName(CoreAssemblyName).ToRoAssemblyName();
-                    coreAssembly = _lazyCoreAssembly = TryResolveAssembly(roAssemblyName, out e);
-                }
+                _coreAssembly = TryGetDefaultCoreAssembly(out e);
             }
-            return coreAssembly;
+            else
+            {
+                RoAssemblyName roAssemblyName = new AssemblyName(_userSuppliedCoreAssemblyName).ToRoAssemblyName();
+                _coreAssembly = TryResolveAssembly(roAssemblyName, out e);
+            }
+
+            return _coreAssembly;
         }
 
         private RoAssembly TryGetDefaultCoreAssembly(out Exception e)
         {
-            e = null;
-            RoAssembly roAssembly = null;
-
-            // Try loading the first core assembly that has a path specified
             foreach (string coreName in CoreNames)
             {
                 RoAssemblyName roAssemblyName = new AssemblyName(coreName).ToRoAssemblyName();
-                roAssembly = TryResolveAssembly(roAssemblyName, out e);
+                RoAssembly roAssembly = TryResolveAssembly(roAssemblyName, out e);
 
+                // Stop on the first core assembly we find
                 if (roAssembly != null)
                 {
-                    break;
+                    e = null;
+                    return roAssembly;
                 }
-
-                e = null;
             }
 
-            return roAssembly;
+            e = new FileNotFoundException(SR.Format(SR.UnableToDetermineCoreAssembly));
+            return null;
         }
 
-        private RoAssembly _lazyCoreAssembly = Sentinels.RoAssembly;
+        private RoAssembly _coreAssembly = null;
 
         /// <summary>
         /// Returns a lazily created and cached Type instance corresponding to the indicated core type. This method throws 
@@ -79,12 +75,12 @@ namespace System.Reflection
         }
 
         /// <summary>
-        /// Returns a lazily created and cached array containing the resolved CoreTypes, indexed by the CoreType enum cast to an int.
+        /// Returns a cached array containing the resolved CoreTypes, indexed by the CoreType enum cast to an int.
         /// If the core assembly was not specified, not locatable or if one or more core types aren't present in the core assembly,
         /// the corresponding elements will be null.
         /// </summary>
-        internal CoreTypes GetAllFoundCoreTypes() => _lazyCoreTypes ?? (_lazyCoreTypes = new CoreTypes(this));
-        private volatile CoreTypes _lazyCoreTypes;
+        internal CoreTypes GetAllFoundCoreTypes() => _coreTypes;
+        private CoreTypes _coreTypes;
 
         //
         // Seriously, ugh - the default binder for Reflection has a dependency on checking types for equality with System.Object - for that

@@ -76,11 +76,11 @@ namespace System.Reflection.TypeLoading
         public sealed override bool IsMulticast => Loader.GetCoreType(CoreType.MulticastDelegate).IsAssignableFrom(EventHandlerType);
 
         // Operations that are not allowed for Reflection-only.
-        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override void AddEventHandler(object target, Delegate handler) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override void RemoveEventHandler(object target, Delegate handler) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override void AddEventHandler(object target, Delegate handler) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override void RemoveEventHandler(object target, Delegate handler) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         private MetadataLoadContext Loader => GetRoModule().Loader;
         internal TypeContext TypeContext => _declaringType.Instantiation.ToTypeContext();

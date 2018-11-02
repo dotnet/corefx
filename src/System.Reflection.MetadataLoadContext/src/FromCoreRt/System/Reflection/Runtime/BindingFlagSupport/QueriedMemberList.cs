@@ -23,7 +23,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
     //
     // QueryMemberList's come in two flavors: ImmediateTypeOnly and full. The immediateTypeOnly only holds the results for one type, not any of its
     // base types. This is used when the binding flags passed to a Get() api limit the search to the immediate type only in order to avoid triggering
-    // unnecessary Resolving events and a lot of unnecessary ParameterInfo creation and comparison checks.
+    // unnecessary assembly resolving and a lot of unnecessary ParameterInfo creation and comparison checks.
     //
     internal sealed class QueriedMemberList<M> where M : MemberInfo
     {

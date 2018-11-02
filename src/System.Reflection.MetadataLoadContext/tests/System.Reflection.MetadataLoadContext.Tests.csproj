@@ -6,8 +6,12 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src\FromCoreFx\TempDirectory.cs" />
-    <Compile Include="src\FromCoreFx\TempFile.cs" />
+    <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
+      <Link>Common\System\IO\TempDirectory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
+      <Link>Common\System\IO\TempFile.cs</Link>
+    </Compile>
     <Compile Include="src\SampleMetadata\SampleMetadata.cs" />
     <Compile Include="src\Tests\Assembly\AssemblyGetNameTests.cs" />
     <Compile Include="src\Tests\Assembly\AssemblyProhibitedApiTests.cs" />

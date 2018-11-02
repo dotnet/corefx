@@ -99,14 +99,14 @@ namespace System.Reflection.TypeLoading
         public sealed override bool IsSecurityTransparent => throw new InvalidOperationException(SR.InvalidOperation_IsSecurity);
 
         // Operations that are not allowed for Reflection-only.
-        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override RuntimeFieldHandle FieldHandle => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object GetValue(object obj) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object GetValueDirect(TypedReference obj) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override void SetValueDirect(TypedReference obj, object value) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override RuntimeFieldHandle FieldHandle => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object GetValue(object obj) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object GetValueDirect(TypedReference obj) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override void SetValueDirect(TypedReference obj, object value) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         private MetadataLoadContext Loader => GetRoModule().Loader;
         internal TypeContext TypeContext => _declaringType.Instantiation.ToTypeContext();

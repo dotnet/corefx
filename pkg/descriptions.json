@@ -2276,7 +2276,7 @@
   },
   {
     "Name": "Microsoft.Reflection.MetataLoadContext",
-    "Description": "Provides functionality to reflect on assemblies with different architectures and without interferring with AppDomain contexts.",
+    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
     "CommonTypes": []
   }
 ]

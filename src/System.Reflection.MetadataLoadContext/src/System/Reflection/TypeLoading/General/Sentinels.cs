@@ -13,7 +13,6 @@ namespace System.Reflection.TypeLoading
     {
         public static readonly RoType RoType = new SentinelType();
         public static readonly RoMethod RoMethod = new SentinelMethod();
-        public static readonly RoAssembly RoAssembly = new SentinelAssembly();
 
         private sealed class SentinelType : RoStubType
         {

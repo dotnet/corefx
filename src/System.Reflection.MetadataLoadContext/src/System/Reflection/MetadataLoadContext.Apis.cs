@@ -36,9 +36,9 @@ namespace System.Reflection
     // in the absence of dependencies. For example, retrieving an assembly's name and the names of its (direct)
     // dependencies can be done without having any of those dependencies on hand.
     //
-    // To bind assemblies, the MetadataLoadContext calls the Resolving method. You implement the binding algorithm by
-    // creating or using a class that overrides that method. The method should load the requested assembly and return it. To do this,
-    // it can use LoadFromAssemblyPath() or one of its variants (LoadFromStream(), LoadFromByteArray()).
+    // To bind assemblies, the MetadataLoadContext calls the Resolve method on the correspding MetadataAssemblyResolver.
+    // That method should load the requested assembly and return it.
+    // To do this, it can use LoadFromAssemblyPath() or one of its variants (LoadFromStream(), LoadFromByteArray()).
     //
     // Once an assembly has been bound, no assembly with the same assembly name identity
     // can be bound again from a different location unless the MVID's are identical.
@@ -84,12 +84,7 @@ namespace System.Reflection
     // Multithreading:
     //    
     //   The MetadataLoadContext and the reflection objects it hands out are all multithread-safe and logically immutable,
-    //   with the following provisos:
-    //
-    //   - Adding (or removing) handlers to the MetadataLoadContext's events is not thread-safe. These should be done prior
-    //     to any multithreaded access to the MetadataLoadContext.
-    //
-    //   - No Loads or inspections of reflection objects can be done during or after disposing the owning MetadataLoadContext.
+    //   except that no Loads or inspections of reflection objects can be done during or after disposing the owning MetadataLoadContext.
     //
     // Support for NetCore Reflection apis:
     //
@@ -114,7 +109,17 @@ namespace System.Reflection
         public MetadataLoadContext(MetadataAssemblyResolver resolver, string coreAssemblyName = null)
         {
             this.resolver = resolver;
-            CoreAssemblyName = coreAssemblyName;
+
+            if (coreAssemblyName != null)
+            {
+                // Validate now that the value is a parsable assembly name.
+                new AssemblyName(coreAssemblyName);
+
+                _userSuppliedCoreAssemblyName = coreAssemblyName;
+            }
+
+            // Resolve the core assembly now
+            _coreTypes = new CoreTypes(this);
         }
 
         /// <summary>
@@ -209,9 +214,17 @@ namespace System.Reflection
         }
 
         /// <summary>
-        /// Returns the assembly name that denotes the "system assembly" that houses the well-known types such as System.Int32.
-        /// Typically, this assembly is named "mscorlib", or "netstandard". If the system assembly cannot
-        /// be found, many methods, including those that parse method signatures, will throw.
+        /// Returns the assembly that denotes the "system assembly" that houses the well-known types such as System.Int32.
+        /// The core assembly is treated differently than other assemblies because references to these well-known types do
+        /// not include the assembly reference, unlike normal types.
+        /// 
+        /// Typically, this assembly is named "mscorlib", or "netstandard". If the core assembly cannot be found, the value will be
+        /// null and many other reflection methods, including those that parse method signatures, will throw.
+        /// 
+        /// The CoreAssembly is determined by passing the coreAssemblyName parameter passed to the MetadataAssemblyResolver constructor
+        /// to the MetadataAssemblyResolver's Resolve method.
+        /// If no coreAssemblyName argument was specified in the constructor of MetadataLoadContext, then default values are used
+        /// including "mscorlib", "System.Runtime" and "netstandard".
         /// 
         /// The designated core assembly does not need to contain the core types directly. It can type forward them to other assemblies.
         /// Thus, it is perfectly permissible to use the mscorlib facade as the designated core assembly.
@@ -220,21 +233,14 @@ namespace System.Reflection
         /// such as DllImportAttribute. However, it can serve if you have no interest in those attributes. The CustomAttributes api
         /// will skip those attributes if the core assembly does not include the necessary types.
         /// 
-        /// Setting the CoreAssemblyName can be deferred until after MetadataLoadContext creation. You can safely use the following apis:
-        /// 
+        /// The CoreAssembly is not loaded until necessary. These APIs do not trigger the search for the core assembly:
         ///    MetadataLoadContext.LoadFromStream(), LoadFromAssemblyPath(), LoadFromByteArray()
         ///    Assembly.GetName(), Assembly.FullName, Assembly.GetReferencedAssemblies()
         ///    Assembly.GetTypes(), Assembly.DefinedTypes, Assembly.GetExportedTypes(), Assembly.GetForwardedTypes()
         ///    Assembly.GetType(string, bool, bool)
         ///    Type.Name, Type.FullName, Type.AssemblyQualifiedName
-        ///    
-        /// as none of these will trigger an internal search of the core assembly. These may be useful in identifying the core assembly.
         /// 
-        /// Once the MetadataLoadContext has used the CoreAssemblyName, however, you can no longer change this property. Attempting to set the CoreAssemblyName
-        /// after this point will trigger an InvalidOperationException.
-        /// 
-        /// If you do not specify a core assembly, or the core assembly cannot be bound or if the core assembly is missing types, this will
-        /// affect the behavior of the MetadataLoadContext as follows:
+        /// If a core assembly cannot be found or if the core assembly is missing types, this will affect the behavior of the MetadataLoadContext as follows:
         /// 
         /// - Apis that need to parse signatures or typespecs and return the results as Types will throw. For example,
         ///   MethodBase.ReturnType, MethodBase.GetParameters(), Type.BaseType, Type.GetInterfaces().
@@ -247,28 +253,14 @@ namespace System.Reflection
         ///   type, the necessary constructor or any of the parameter types of the constructor, the MetadataLoadContext will not throw. It will omit the pseudo-custom
         ///   attribute from the list of returned attributes.
         /// </summary>
-        public string CoreAssemblyName
+        public Assembly CoreAssembly
         {
             get
             {
                 if (IsDisposed)
                     throw new ObjectDisposedException(nameof(MetadataLoadContext));
 
-                return _userSuppliedCoreAssemblyName;
-            }
-
-            private set
-            {
-                if (IsDisposed)
-                    throw new ObjectDisposedException(nameof(MetadataLoadContext));
-
-                if (value != null)
-                {
-                    // Validate now that the value is a parsable assembly name.
-                    new AssemblyName(value);
-                }
-
-                _userSuppliedCoreAssemblyName = value;
+                return _coreAssembly;
             }
         }
 

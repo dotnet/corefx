@@ -7,9 +7,9 @@ using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
 {
-    //==========================================================================================================================
-    // Policies for methods.
-    //==========================================================================================================================
+    /// <summary>
+    /// Policies for methods.
+    /// </summary>
     internal sealed class MethodPolicies : MemberPolicies<MethodInfo>
     {
         public sealed override IEnumerable<MethodInfo> GetDeclaredMembers(TypeInfo typeInfo)
@@ -35,7 +35,6 @@ namespace System.Reflection.Runtime.BindingFlagSupport
 
         public sealed override bool ImplicitlyOverrides(MethodInfo baseMember, MethodInfo derivedMember)
         {
-            // TODO (https://github.com/dotnet/corert/issues/1896) Comparing signatures is lame. The runtime and/or toolchain should have a way of sharing this info.
             return AreNamesAndSignaturesEqual(baseMember, derivedMember);
         }
 

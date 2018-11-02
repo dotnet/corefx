@@ -18,13 +18,17 @@ namespace System.Reflection.Tests
                 new FuncMetadataAssemblyResolver(
                     delegate (MetadataLoadContext sender, AssemblyName an)
                     {
-                        return runtimeAssembly;
+                        if (an.Name == "SomeAssembly")
+                        {
+                            return runtimeAssembly;
+                        }
+                        return null;
                     }
                     )))
             {
                 string location = runtimeAssembly.Location;
 
-                Assert.Throws<FileLoadException>(() => lc.LoadFromAssemblyName("DontCare"));
+                Assert.Throws<FileLoadException>(() => lc.LoadFromAssemblyName("SomeAssembly"));
             }
         }
     }

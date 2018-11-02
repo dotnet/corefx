@@ -41,7 +41,7 @@ namespace System
             String = 1 << (int)TypeCode.String,
         }
 
-        private static Primitives[] _primitiveConversions = new Primitives[]
+        private static readonly Primitives[] _primitiveConversions = new Primitives[]
         {
                 /* Empty    */  0, // not primitive
                 /* Object   */  0, // not primitive

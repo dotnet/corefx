@@ -12,9 +12,9 @@ namespace System.Reflection.TypeLoading.Ecma
     // This SignatureProvider is used to generate the Type portion of ToString() values for fields, methods, parameters, events
     // and properties.
     // 
-    // Though this may seem like something that belongs at the format-agnostic layer, it is not acceptable for ToString() to 
-    // trigger Resolving events or to commit the CoreAssemblyName. Thus, ToString() must be built up using only the raw data in the
-    // metadata and without creating or resolving Type objects.
+    // Though this may seem like something that belongs at the format-agnostic layer, it is not acceptable for ToString() to
+    // trigger resolving. Thus, ToString() must be built up using only the raw data in the metadata and without creating or
+    // resolving Type objects.
     //
     // Compat: Since this a new library, we are choosing not to carry forth the ancient oddities of runtime 
     // Reflection's ToString() ("ByRef" instead of "&", "Int32" rather than "System.Int32"), etc.

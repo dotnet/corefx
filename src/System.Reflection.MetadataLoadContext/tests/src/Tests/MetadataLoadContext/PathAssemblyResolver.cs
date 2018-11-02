@@ -40,8 +40,6 @@ namespace System.Reflection.Tests
             var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath, systemPrivateCoreLibAssemblyPath });
             using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assert.Null(lc.CoreAssemblyName);
-
                 Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Type t = derived.GetType("SimpleAssembly", throwOnError: true);
                 Type bt = t.BaseType;
@@ -70,8 +68,6 @@ namespace System.Reflection.Tests
             var resolver = new PathAssemblyResolver(new string[] { });
             using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assert.Null(lc.CoreAssemblyName);
-
                 Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Type t = derived.GetType("SimpleAssembly", throwOnError: true);
 

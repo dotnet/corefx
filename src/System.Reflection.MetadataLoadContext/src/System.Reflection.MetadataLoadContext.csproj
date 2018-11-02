@@ -2,23 +2,22 @@
          version supports all of the new NetCore Reflection apis (IsSZArray, etc.) Apps built against NetCore should use the NetCore build
          of MetadataLoadContext.dll if possible. If they use the NetStandard version, they must refrain from calling NetCore-specific apis on Reflection
          objects dispensed by MetadataLoadContexts as these apis will not work.
-
-         Unfortunately, CoreFxLab does not have support for multiple-TFM builds and at the moment, our immediate prospects need NETFX 4.6 support
-         so we're building the inferior netstandard version.
     -->
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <ProjectGuid>{DBB18588-DD89-4F41-9852-484FD4726F0F}</ProjectGuid>
     <AssemblyName>System.Reflection.MetadataLoadContext</AssemblyName>
+    <RootNamespace>System.Reflection</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>.NET Core Type Loader</Description>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FromCoreRt\CoreRtBridge.cs" />
-    <Compile Include="FromCoreRt\System\DefaultBinder.CanConvert.cs" />
     <Compile Include="FromCoreRt\System\DefaultBinder.cs" />
+    <Compile Include="FromCoreRt\System\DefaultBinder.CanConvert.cs" />
     <Compile Include="FromCoreRt\System\Reflection\AssemblyNameHelpers.cs" />
+    <Compile Include="FromCoreRt\System\Reflection\SignatureTypeExtensions.cs" />
     <Compile Include="FromCoreRt\System\Reflection\Runtime\BindingFlagSupport\ConstructorPolicies.cs" />
     <Compile Include="FromCoreRt\System\Reflection\Runtime\BindingFlagSupport\EventPolicies.cs" />
     <Compile Include="FromCoreRt\System\Reflection\Runtime\BindingFlagSupport\FieldPolicies.cs" />
@@ -38,7 +37,6 @@
     <Compile Include="FromCoreRt\System\Reflection\Runtime\TypeInfos\RuntimeTypeInfo.BindingFlags.cs" />
     <Compile Include="FromCoreRt\System\Reflection\Runtime\TypeInfos\RuntimeTypeInfo.GetMember.cs" />
     <Compile Include="FromCoreRt\System\Reflection\Runtime\TypeInfos\RuntimeTypeInfo.TypeComponentsCache.cs" />
-    <Compile Include="FromCoreRt\System\Reflection\SignatureTypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Reflection\MetadataAssemblyResolver.cs" />

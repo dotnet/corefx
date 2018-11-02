@@ -8,19 +8,15 @@ using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
 {
-    //==========================================================================================================================
-    // Policies for nested types.
-    //
-    // Nested types enumerate a little differently than other members:
-    //
-    //    Base classes are never searched, regardless of BindingFlags.DeclaredOnly value.
-    //
-    //    Public|NonPublic|IgnoreCase are the only relevant BindingFlags. The apis ignore any other bits.
-    //
-    //    There is no such thing as a "static" or "instanced" nested type. For enumeration purposes,
-    //    we'll arbitrarily denote all nested types as "static."
-    //
-    //==========================================================================================================================
+    /// <summary>
+    /// Policies for nested types.
+    ///
+    /// Nested types enumerate a little differently than other members:
+    ///    Base classes are never searched, regardless of BindingFlags.DeclaredOnly value.
+    ///    Public|NonPublic|IgnoreCase are the only relevant BindingFlags. The apis ignore any other bits.
+    ///    There is no such thing as a "static" or "instanced" nested type. For enumeration purposes,
+    ///    we'll arbitrarily denote all nested types as "static."
+    /// </summary>
     internal sealed class NestedTypePolicies : MemberPolicies<Type>
     {
         public sealed override IEnumerable<Type> GetDeclaredMembers(TypeInfo typeInfo)

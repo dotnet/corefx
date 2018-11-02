@@ -13,14 +13,14 @@ namespace System.Reflection.TypeLoading
 {
     internal abstract partial class RoType
     {
-        //================================================================================================================
-        // TypeComponentsCache objects are allocated on-demand on a per-Type basis to cache hot data for key scenarios.
-        // To maximize throughput once the cache is created, the object creates all of its internal caches up front
-        // and holds entries strongly (and relying on the fact that Types themselves are held weakly to avoid immortality.)
-        //
-        // Note that it is possible that two threads racing to query the same TypeInfo may allocate and query two different
-        // cache objects. Thus, this object must not be relied upon to preserve object identity.
-        //================================================================================================================
+        /// <summary>
+        /// TypeComponentsCache objects are allocated on-demand on a per-Type basis to cache hot data for key scenarios.
+        /// To maximize throughput once the cache is created, the object creates all of its internal caches up front
+        /// and holds entries strongly (and relying on the fact that Types themselves are held weakly to avoid immortality.)
+        ///
+        /// Note that it is possible that two threads racing to query the same TypeInfo may allocate and query two different
+        /// cache objects. Thus, this object must not be relied upon to preserve object identity.
+        /// </summary>
 
         private sealed class TypeComponentsCache
         {

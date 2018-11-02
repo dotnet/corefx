@@ -154,13 +154,13 @@
     <value>{0} is not a GenericTypeDefinition. MakeGenericType may only be called on a type for which Type.IsGenericTypeDefinition is true.</value>
   </data>
   <data name="Arg_ReflectionOnlyCA" xml:space="preserve">
-    <value>The requested operation is invalid on objects loaded by a MetadataLoadContext. Use CustomAttributeData instead.</value>
+    <value>The requested operation cannot be used on objects loaded by a MetadataLoadContext. Use CustomAttributeData instead.</value>
   </data>
-  <data name="Arg_ReflectionOnlyIllegal" xml:space="preserve">
-    <value>The requested operation is invalid on objects loaded by a MetadataLoadContext.</value>
+  <data name="Arg_InvalidOperation_Reflection" xml:space="preserve">
+    <value>The requested operation cannot be used on objects loaded by a MetadataLoadContext.</value>
   </data>
   <data name="Arg_ReflectionOnlyInvoke" xml:space="preserve">
-    <value>It is illegal to invoke a method on a Type loaded by a MetadataLoadContext.</value>
+    <value>Cannot invoke a method on objects loaded by a MetadataLoadContext.</value>
   </data>
   <data name="Arg_ReflectionOnlyParameterDefaultValue" xml:space="preserve">
     <value>It is illegal to request the default value on a ParameterInfo loaded by a MetadataLoadContext. Use RawDefaultValue instead.</value>
@@ -184,13 +184,13 @@
     <value>Could not find assembly '{0}'. Either explicitly load this assembly using a method such as LoadFromAssemblyPath() or use a MetadataAssemblyResolver that returns a valid assembly.</value>
   </data>
   <data name="FileNotFoundModule" xml:space="preserve">
-    <value>Could not find the module file for '{0}'</value>
+    <value>Could not find the module file for '{0}'.</value>
   </data>
   <data name="GenericMethodParamIndexOutOfRange" xml:space="preserve">
-    <value>A type specification contained an out of range index for a generic method parameter: {0}</value>
+    <value>A type specification contained an out of range index for a generic method parameter: {0}.</value>
   </data>
   <data name="GenericTypeParamIndexOutOfRange" xml:space="preserve">
-    <value>A type specification contained an out of range index for a generic type parameter: {0}</value>
+    <value>A type specification contained an out of range index for a generic type parameter: {0}.</value>
   </data>
   <data name="InvalidOperation_IsSecurity" xml:space="preserve">
     <value>This property is not supported on assemblies loaded by a MetadataLoadContext as there is no trust level to evaluate these against.</value>
@@ -202,22 +202,19 @@
     <value>This type {0} was not loaded by the MetadataLoadContext that loaded the generic type or method.</value>
   </data>
   <data name="ManifestResourceInfoReferencedBadModule" xml:space="preserve">
-    <value>A manifest resource entry specified a filename that does not appear in the assembly manifest: '{0}'</value>
+    <value>A manifest resource entry specified a filename that does not appear in the assembly manifest: '{0}'.</value>
   </data>
   <data name="MetadataLoadContextDisposed" xml:space="preserve">
     <value>This object is no longer valid because the MetadataLoadContext that created it has been disposed.</value>
   </data>
   <data name="MissingCustomAttributeConstructor" xml:space="preserve">
-    <value>The constructor invoked by a custom attribute cannot be found on type {0}</value>
+    <value>The constructor invoked by a custom attribute cannot be found on type {0}.</value>
   </data>
   <data name="ModuleResolveEventReturnedExternalModule" xml:space="preserve">
     <value>ModuleResolve handlers may only return Modules loaded by the MetadataLoadContext that loaded the parent assembly.</value>
   </data>
-  <data name="NoCoreAssemblyDefined" xml:space="preserve">
-    <value>This operation could not be completed because this MetadataLoadContext's CoreAssemblyName property was not set to a valid assembly name.</value>
-  </data>
   <data name="NoInvokeMember" xml:space="preserve">
-    <value>Types loaded by a MetadataLoadContext cannot pass any of these BindingFlags: InvokeMethod, CreateInstance, GetProperty, SetProperty</value>
+    <value>Types loaded by a MetadataLoadContext cannot pass any of these BindingFlags: InvokeMethod, CreateInstance, GetProperty, SetProperty.</value>
   </data>
   <data name="NoMetadataInPeImage" xml:space="preserve">
     <value>This PE image is not a managed executable.</value>
@@ -253,7 +250,7 @@
     <value>Resolving tokens is not supported on assemblies loaded by a MetadataLoadContext.</value>
   </data>
   <data name="ResourceOnlyModule" xml:space="preserve">
-    <value>It is illegal to perform this operation on a Module that returns true for IsResource()</value>
+    <value>It is illegal to perform this operation on a Module that returns true for IsResource().</value>
   </data>
   <data name="SpecifiedFileNameInvalid" xml:space="preserve">
     <value>The module or file name '{0}' is not specified in the assembly's manifest.</value>
@@ -262,12 +259,12 @@
     <value>Satellite assemblies are not supported on assemblies loaded by a MetadataLoadContext.</value>
   </data>
   <data name="TypeNotFound" xml:space="preserve">
-    <value>Could not find type '{0}' in assembly '{1}'</value>
+    <value>Could not find type '{0}' in assembly '{1}'.</value>
   </data>
   <data name="UnexpectedUnderlyingEnumType" xml:space="preserve">
-    <value>Enum {0} has invalid underlying type: {1}</value>
+    <value>Enum {0} has invalid underlying type: {1}.</value>
   </data>
   <data name="UnableToDetermineCoreAssembly" xml:space="preserve">
-    <value>Could not find core assembly. Either explicitly load this assembly using a method such as LoadFromAssemblyPath() or set MetadataLoadContext's CoreAssemblyName property to a valid assembly name.</value>
+    <value>Could not find core assembly. Either specify a valid coreAssemblyName in the MetadataLoadContext constructor or provide a MetadataAssemblyResolver that can load the core assembly.</value>
   </data>
 </root>

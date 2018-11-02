@@ -11,10 +11,6 @@ namespace System.Reflection
     /// <summary>
     /// A MetadataAssemblyResolver that uses paths to each assembly.
     /// </summary>
-    /// <remarks>
-    /// If the corresponding MetadataLoadContext does not have the CoreAssemblyName property set,
-    /// default values are provided which are compatible with .NET Core and .NET Framework.
-    /// </remarks>
     public class PathAssemblyResolver : MetadataAssemblyResolver
     {
         private Dictionary<string, string> _fileToPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

@@ -280,7 +280,7 @@ namespace System.Reflection.TypeLoading
         public sealed override Type GetEnumUnderlyingType() => _lazyUnderlyingEnumType ?? (_lazyUnderlyingEnumType = ComputeEnumUnderlyingType());
         protected internal abstract RoType ComputeEnumUnderlyingType();
         private volatile RoType _lazyUnderlyingEnumType;
-        public sealed override Array GetEnumValues() => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override Array GetEnumValues() => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         // No trust environment to apply these to.
         public sealed override bool IsSecurityCritical => throw new InvalidOperationException(SR.InvalidOperation_IsSecurity);
@@ -288,7 +288,7 @@ namespace System.Reflection.TypeLoading
         public sealed override bool IsSecurityTransparent => throw new InvalidOperationException(SR.InvalidOperation_IsSecurity);
 
         // Prohibited for ReflectionOnly types
-        public sealed override RuntimeTypeHandle TypeHandle => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override RuntimeTypeHandle TypeHandle => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
         public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyCA);
         public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyCA);
         public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyCA);

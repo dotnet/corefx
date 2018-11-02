@@ -129,12 +129,12 @@ namespace System.Reflection.TypeLoading
         public abstract override Type[] GetRequiredCustomModifiers();
 
         // Operations that are not allowed for Reflection-only.
-        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object GetConstantValue() => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
-        public sealed override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_ReflectionOnlyIllegal);
+        public sealed override object[] GetCustomAttributes(bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object[] GetCustomAttributes(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override bool IsDefined(Type attributeType, bool inherit) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object GetConstantValue() => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
+        public sealed override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
 
         internal TypeContext TypeContext => _declaringType.Instantiation.ToTypeContext();
     }
