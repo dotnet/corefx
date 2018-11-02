@@ -611,8 +611,7 @@ namespace System.IO.Ports
 
                 FinishPendingIORequests();
 
-                // Signal the other side that we're closing
-                if (_handle != null && !_handle.IsInvalid)
+                if (_handle != null)
                 {
                     _handle.Dispose();
                     _handle = null;
@@ -665,7 +664,7 @@ namespace System.IO.Ports
             fixed (byte* bufPtr = buff)
             {
                 // assumes dequeue-ing happens on a single thread
-                int numBytes = Interop.Serial.Read(_handle, bufPtr, buff.Length);
+                int numBytes = Interop.Sys.Read(_handle, bufPtr, buff.Length);
 
                 if (numBytes < 0)
                 {
@@ -697,7 +696,7 @@ namespace System.IO.Ports
             fixed (byte* bufPtr = buff)
             {
                 // assumes dequeue-ing happens on a single thread
-                int numBytes = Interop.Serial.Write(_handle, bufPtr, buff.Length);
+                int numBytes = Interop.Sys.Write(_handle, bufPtr, buff.Length);
 
                 if (numBytes <= 0)
                 {

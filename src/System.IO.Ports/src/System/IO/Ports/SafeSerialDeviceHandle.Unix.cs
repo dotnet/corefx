@@ -5,15 +5,15 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Ports
 {
-    internal sealed class SafeSerialDeviceHandle : SafeHandle
+    internal sealed class SafeSerialDeviceHandle : SafeHandleMinusOneIsInvalid
     {
-        private SafeSerialDeviceHandle() : base(new IntPtr(-1), ownsHandle: true)
+        private SafeSerialDeviceHandle() : base(ownsHandle: true)
         {
         }
 
@@ -26,7 +26,7 @@ namespace System.IO.Ports
             {
                 // exception type is matching Windows
                 throw new UnauthorizedAccessException(
-                    string.Format(SR.UnauthorizedAccess_IODenied_Port, portName),
+                    SR.Format(SR.UnauthorizedAccess_IODenied_Port, portName),
                     Interop.GetIOException(Interop.Sys.GetLastErrorInfo()));
             }
 
@@ -35,12 +35,7 @@ namespace System.IO.Ports
 
         protected override bool ReleaseHandle()
         {
-            if (IsInvalid)
-            {
-                return false;
-            }
-
-            Interop.Serial.Shutdown(handle, SocketShutdown.Both);
+            Interop.Sys.Shutdown(handle, SocketShutdown.Both);
             int result = Interop.Serial.SerialPortClose(handle);
 
             Debug.Assert(result == 0, string.Format(
@@ -48,14 +43,6 @@ namespace System.IO.Ports
                              result, Interop.Sys.GetLastErrorInfo()));
 
             return result == 0;
-        }
-
-        public override bool IsInvalid
-        {
-            get
-            {
-                return (long)handle == -1;
-            }
         }
     }
 }
