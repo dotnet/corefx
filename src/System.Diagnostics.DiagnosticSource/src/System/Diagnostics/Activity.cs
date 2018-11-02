@@ -223,7 +223,7 @@ namespace System.Diagnostics
             else
             {
                 ParentId = parentId;
-                IsW3CId = IsW3CId(ParentId);
+                IsW3CFormat = IsW3CId(ParentId);
             }
             return this;
         }
@@ -310,8 +310,11 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                if (IsW3CId || UseW3CFormat)
+                if (IsW3CId || DefaultIdFormat == ActivityIDFormat.W3C)
+                {
+                    IsW3CFormat = true;
                     Id = GenerateW3CId();
+                }
                 else
                     Id = GenerateId();
                 SetCurrent(this);
@@ -347,7 +350,6 @@ namespace System.Diagnostics
             }
         }
 
-
         /* W3C support functionality (see https://w3c.github.io/trace-context) */
 
         /// <summary>
@@ -374,17 +376,29 @@ namespace System.Diagnostics
                 _traceState = value;
             }
         }
-  
+
         /// <summary>
         /// Activity tries to use the same format for IDs as its parent it has a parent.  
         /// However if the activity has no parent, it has to do something.   
-        /// This sets it so that WC3 format is used in this case.  
+        /// This determines the default format we use.  
         /// </summary>
-        static public bool UseW3CFormat { get; set; }
+        public static ActivityIDFormat DefaultIdFormat
+        {
+            get { return s_DefaultIdFormat; }
+            set
+            {
+                if (!(ActivityIDFormat.RequestID <= value && value <= ActivityIDFormat.W3C))
+                    throw new ArgumentException($"value must be a valid ActivityIDFormat value");
+                s_DefaultIdFormat = value;
+            }
+        }
 
         /// <summary>
         /// Returns true if the ID happens to be in W3C format XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
-        /// this is a convenience method.  
+        /// this is a convenience method.  Note that it is intended to be used to determine
+        /// what HTTP headers that carry this ID (that is do you use the tracestate HTTP header)
+        /// Thus if new IDs come along that also use the tracestate HTTP header, then this should return
+        /// true for them as well.  
         /// </summary>
         public bool IsW3CFormat { get; private set; }
 
@@ -559,10 +573,22 @@ namespace System.Diagnostics
             public KeyValueListNode Next;
         }
 
+        private static ActivityIDFormat s_DefaultIdFormat;
+
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
         private string _traceState;
         private bool isFinished;
         #endregion // private
     }
+
+    /// <summary>
+    /// The possibilities for the format of the ID
+    /// </summary>
+    public enum ActivityIDFormat : byte
+    {
+        Unknown,     // ID format is not known.     
+        RequestID,   // |XXXX.XX.XX ...
+        W3C,         // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
+    };
 }
