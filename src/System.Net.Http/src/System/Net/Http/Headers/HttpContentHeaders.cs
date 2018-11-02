@@ -149,7 +149,7 @@ namespace System.Net.Http.Headers
             _parent = parent;
         }
 
-        protected override void EnsureHeaders()
+        internal override void EnsureHeaders()
         {
             base.EnsureHeaders();
             if (_parent != null)

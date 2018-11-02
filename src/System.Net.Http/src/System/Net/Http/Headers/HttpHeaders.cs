@@ -206,7 +206,7 @@ namespace System.Net.Http.Headers
             return TryGetValues(descriptor, out values);
         }
 
-        protected virtual void EnsureHeaders() { }
+        internal virtual void EnsureHeaders() { }
 
         internal bool TryGetValues(HeaderDescriptor descriptor, out IEnumerable<string> values)
         {
