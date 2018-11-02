@@ -225,9 +225,7 @@ namespace System.Data.SqlClient.SNI
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 #if FEATURE_TCPKEEPALIVE
                         // enable keep-alive on socket
-                        sockets[i].SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 1);
-                        sockets[i].SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 30);
+                        SNITcpHandle.SetKeepAliveValues(ref sockets[i]);
 #endif                        
                         sockets[i].Connect(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
