@@ -144,7 +144,7 @@ namespace System.Text.Json
             _lineNumber = state._lineNumber;
             _lineBytePosition = state._lineBytePosition;
             _currentDepth = state._currentDepth;
-            _maxDepth = state._maxDepth;
+            _maxDepth = state._maxDepth == 0 ? JsonReaderState.StackFreeMaxDepth : state._maxDepth;
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
             _tokenType = state._tokenType;
@@ -502,7 +502,7 @@ namespace System.Text.Json
                     }
                     else
                     {
-                        // JsonReaderOptions.SkipComments
+                        // JsonCommentHandling.SkipComments
                         if (marker == JsonConstants.Solidus)
                         {
                             if (SkipComment())

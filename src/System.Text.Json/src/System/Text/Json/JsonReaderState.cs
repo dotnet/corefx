@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 
 namespace System.Text.Json
@@ -54,63 +53,58 @@ namespace System.Text.Json
         public long BytesConsumed => _bytesConsumed;
 
         /// <summary>
-        /// Gets or sets the custom behaviour when reading JSON
-        /// using the <see cref="JsonUtf8Reader"/> that may deviate from strict adherence
+        /// Constructs a new <see cref="JsonReaderState"/> instance.
+        /// </summary>
+        /// <param name="maxDepth">Sets the maximum depth allowed when reading JSON, with the default set as 64.
+        /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.</param>
+        /// <param name="commentHandling">Defines how the <see cref="JsonUtf8Reader"/> should handle comments when reading through the JSON.
+        /// By default, the <see cref="JsonUtf8Reader"/> treats comments within the JSON as invalid.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the max depth is set to a non-positive value (&lt;= 0)
+        /// </exception>
+        /// <remarks>
+        /// An instance of this state must be passed to the <see cref="JsonUtf8Reader"/> ctor with the JSON data.
+        /// Unlike the <see cref="JsonUtf8Reader"/>, which is a ref struct, the state can survive
+        /// across async/await boundaries and hence this type is required to provide support for reading
+        /// in more data asynchronously before continuing with a new instance of the <see cref="JsonUtf8Reader"/>.
+        /// </remarks>
+        public JsonReaderState(int maxDepth = StackFreeMaxDepth, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
+        {
+            if (maxDepth <= 0)
+                ThrowHelper.ThrowArgumentException_MaxDepthMustBePositive();
+
+            _stackFreeContainer = default;
+            _lineNumber = default;
+            _lineBytePosition = default;
+            _bytesConsumed = default;
+            _currentDepth = default;
+            _maxDepth = maxDepth;
+            _inObject = default;
+            _isNotPrimitive = default;
+            _tokenType = default;
+            _readerOptions = new JsonReaderOptions { CommentHandling = commentHandling };
+            _sequencePosition = default;
+
+            // Only allocate the stack if the user explicitly sets the JsonReaderOptions
+            // by providing a custom JsonCommentHandling OR if the user explicitly sets the
+            // max depth to be larger than 64. This way we avoid allocations in the common, default cases.
+            if (commentHandling == JsonCommentHandling.AllowComments || maxDepth > StackFreeMaxDepth)
+                _stack = new Stack<JsonTokenType>();
+            else
+                _stack = null;
+        }
+
+        /// <summary>
+        /// Gets the custom behaviour when reading JSON using
+        /// the <see cref="JsonUtf8Reader"/> that may deviate from strict adherence
         /// to the JSON specification, which is the default behaviour.
         /// </summary>
-        public JsonReaderOptions Options
-        {
-            get
-            {
-                return _readerOptions;
-            }
-            set
-            {
-                _readerOptions = value;
-                // Only allocate the stack if the user explicitly sets the JsonReaderOptions
-                // to avoid allocations in the common, default case.
-                if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments && _stack == null)
-                    _stack = new Stack<JsonTokenType>();
-            }
-        }
+        public JsonReaderOptions Options => _readerOptions;
 
         /// <summary>
         /// Gets or sets the maximum depth allowed when reading JSON.
         /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the max depth is set to a non-positive value (&lt;= 0)
-        /// </exception>
-        public int MaxDepth
-        {
-            get
-            {
-                return _maxDepth == default ? StackFreeMaxDepth : _maxDepth;
-            }
-            set
-            {
-                if (value <= 0)
-                    ThrowHelper.ThrowArgumentException_MaxDepthMustBePositive();
-                _maxDepth = value;
-                // Only allocate the stack if the user explicitly sets the MaxDepth to be larger
-                // than 64, to avoid allocations in the common, default case.
-                if (_maxDepth > StackFreeMaxDepth && _stack == null)
-                    _stack = new Stack<JsonTokenType>();
-            }
-        }
-
-        internal bool IsDefault =>
-            _stackFreeContainer == default &&
-            _lineNumber == default &&
-            _lineBytePosition == default &&
-            _bytesConsumed == default &&
-            _currentDepth == default &&
-            _maxDepth == default &&
-            _inObject == default &&
-            _isNotPrimitive == default &&
-            _tokenType == default &&
-            _readerOptions.IsDefault &&
-            _stack == null &&
-            _sequencePosition.GetObject() == null;
+        public int MaxDepth => _maxDepth;
     }
 }

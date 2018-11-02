@@ -4,6 +4,16 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PlaceHolder.cs" />
+    <Compile Include="JsonTestHelper.cs" />
+    <Compile Include="JsonUtf8ReaderTests.cs" />
+    <Compile Include="TestCaseType.cs" />
+  </ItemGroup>
+    <ItemGroup>
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Resources.ResourceManager" />
+  </ItemGroup>
+  <ItemGroup>
+    <ReferenceFromRuntime Include="Newtonsoft.Json" />
   </ItemGroup>
 </Project>

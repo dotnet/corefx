@@ -21,13 +21,17 @@ namespace System.Text.Json
     }
     public partial struct JsonReaderOptions
     {
+        private int _dummyPrimitive;
         public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
     }
     public partial struct JsonReaderState
     {
+        private object _dummy;
+        private int _dummyPrimitive;
+        public JsonReaderState(int maxDepth = 64, System.Text.Json.JsonCommentHandling commentHandling = System.Text.Json.JsonCommentHandling.Default) { throw null; }
         public long BytesConsumed { get { throw null; } }
-        public int MaxDepth { get { throw null; } set { } }
-        public System.Text.Json.JsonReaderOptions Options { get { throw null; } set { } }
+        public int MaxDepth { get { throw null; } }
+        public System.Text.Json.JsonReaderOptions Options { get { throw null; } }
         public System.SequencePosition Position { get { throw null; } }
     }
     public enum JsonTokenType : byte
@@ -47,6 +51,8 @@ namespace System.Text.Json
     }
     public ref partial struct JsonUtf8Reader
     {
+        private object _dummy;
+        private int _dummyPrimitive;
         public JsonUtf8Reader(System.ReadOnlySpan<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
@@ -57,5 +63,7 @@ namespace System.Text.Json
         public System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
         public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
         public bool Read() { throw null; }
+        public bool TryGetValueAsDouble(out double value) { throw null; }
+        public bool TryGetValueAsString(out string value) { throw null; }
     }
 }

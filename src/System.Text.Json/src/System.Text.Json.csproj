@@ -17,6 +17,7 @@
     <Compile Include="System\Text\Json\JsonReaderState.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
     <Compile Include="System\Text\Json\JsonUtf8Reader.cs" />
+    <Compile Include="System\Text\Json\JsonUtf8Reader_TryGet.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -28,5 +29,6 @@
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+    <Reference Include="System.Text.Encoding.Extensions" />
   </ItemGroup>
 </Project>
