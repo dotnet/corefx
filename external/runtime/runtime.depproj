@@ -66,7 +66,7 @@
   </ItemGroup>
   
   <!-- Setup the testing shared framework host -->
-  <Target Name="SetupTestingHost" AfterTargets="ResolvePackageAssets" Condition="'$(BinPlaceTestSharedFramework)' == 'true'">
+  <Target Name="SetupTestingHost" AfterTargets="AfterResolveReferences" Condition="'$(BinPlaceTestSharedFramework)' == 'true'">
 
     <PropertyGroup>
       <HostFxrFileName Condition="'$(OSGroup)'=='Windows_NT'">hostfxr</HostFxrFileName>
@@ -114,7 +114,7 @@
   </Target>
 
   <Target Name="BinPlaceCoreCLRSymbols"
-          AfterTargets="ResolvePackageAssets"
+          AfterTargets="AfterResolveReferences"
           DependsOnTargets="CalculateCoreCLRSymbolPackageProperties;DownloadAndUnzipSymbolPackage"
           Condition="'$(CoreCLROverridePath)' == '' AND '$(DownloadCoreCLRSymbols)' != 'false'">
 
@@ -136,7 +136,7 @@
 
   <Target Name="OverrideRuntime"
           Condition="'$(CoreCLROverridePath)' != ''"
-          AfterTargets="ResolvePackageAssets;FilterNugetPackages">
+          AfterTargets="AfterResolveReferences;FilterNugetPackages">
     <Warning Condition="!Exists('$(CoreCLROverridePath)')" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not exist." />
     <PropertyGroup>
       <CoreCLRPDBOverridePath Condition="'$(CoreCLRPDBOverridePath)' == '' and Exists('$(CoreCLROverridePath)/PDB')">$(CoreCLROverridePath)/PDB</CoreCLRPDBOverridePath>
