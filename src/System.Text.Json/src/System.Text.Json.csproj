@@ -11,10 +11,16 @@
     <Compile Include="System\Text\Json\JsonConstants.cs" />
     <Compile Include="System\Text\Json\JsonReaderException.cs" />
     <Compile Include="System\Text\Json\JsonReaderOptions.cs" />
+    <Compile Include="System\Text\Json\JsonReaderState.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
     <Compile Include="System\Text\Json\JsonUtf8Reader.cs" />
+    <Compile Include="System\Text\Json\ThrowHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Tools\src\System.Diagnostics.Tools.csproj" />
+    <ProjectReference Include="..\..\System.Memory\src\System.Memory.csproj" />
+    <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
   <ItemGroup>

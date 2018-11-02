@@ -16,5 +16,7 @@ namespace System.Text.Json
         /// Defines how the <see cref="JsonUtf8Reader"/> should handle comments when reading through the JSON.
         /// </summary>
         public JsonCommentHandling CommentHandling { get; set; }
+
+        internal bool IsDefault => CommentHandling == JsonCommentHandling.Default;
     }
 }
