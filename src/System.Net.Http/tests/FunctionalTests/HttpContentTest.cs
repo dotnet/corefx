@@ -476,15 +476,17 @@ namespace System.Net.Http.Functional.Tests
             _output.WriteLine(content.Headers.ToString());
         }
 
-        [Fact]
-        public async Task ReadAsStringAsync_SetInvalidQuotedCharset_ThrowsInvalidOperationException()
+        [Theory]
+        [InlineData("\"\"utf-16", Encoding.UnicodeEncoding)]
+        [InlineData("\"\"utf-8\"\"", Encoding.UTF8)]
+        [InlineData("utf-8\"\"", Encoding.UTF8)]
+        public async Task ReadAsStringAsync_SetInvalidQuotedCharset_ThrowsInvalidOperationException(string charset, Encoding encoding)
         {
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (var client = new HttpClient()) 
                 {
-                    byte[] contentArray = Encoding.UTF8.GetBytes("hello world");
-                    var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteArrayContent(contentArray) };
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri);
 
                     HttpResponseMessage reponse = await client.SendAsync(request);
 
@@ -496,9 +498,9 @@ namespace System.Net.Http.Functional.Tests
             {
                 await server.AcceptConnectionAsync(async connection =>
                 {
-                    byte[] contentArray = Encoding.UTF8.GetBytes("hello world");
+                    byte[] contentArray = encoding.GetBytes("hello world");
 
-                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nContent-Type:text/plain;charset=\"\"utf-8\r\nConnection: close\r\nContent-Length: {contentArray.Length}\r\nTest-Tag:invalidcharset\r\n\r\n");
+                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nContent-Type:text/plain;charset={charset}\r\nConnection: close\r\nContent-Length: {contentArray.Length}\r\nTest-Tag:invalidcharset\r\n\r\n");
                     await connection.Socket.SendAsync(new ArraySegment<byte>(contentArray), SocketFlags.None);
                     while (await connection.Socket.ReceiveAsync(new ArraySegment<byte>(new byte[1000]), SocketFlags.None) > 0); // Read and ignore the request.
                 });
