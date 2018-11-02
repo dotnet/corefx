@@ -279,6 +279,7 @@
     <AdditionalFiles Include="$(MSBuildProjectDirectory)/*.analyzerdata.windows" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsUAPAssembly)' == 'true'">
+    <Compile Include="System\Data\SqlClient\SNI\SNITcpHandle.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Managed.cs" />
     <Compile Include="System\Data\SqlClient\LocalDBAPI.uap.cs" />
     <Compile Include="System\Data\SqlClient\SNI\LocalDB.uap.cs" />
