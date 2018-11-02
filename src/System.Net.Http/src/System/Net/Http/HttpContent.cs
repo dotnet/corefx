@@ -202,7 +202,19 @@ namespace System.Net.Http
             {
                 try
                 {
+                    /*if (headers.ContentType.CharSet.Length > 2 &&
+                        headers.ContentType.CharSet[0] == '\"' &&
+                        headers.ContentType.CharSet[headers.ContentType.CharSet.Length - 1] == '\"')
+                    {
+                        encoding = Encoding.GetEncoding(headers.ContentType.CharSet.Substring(1, headers.ContentType.CharSet.Length - 2));
+                    }
+                    else
+                    {
+                        encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
+                    }*/
+
                     encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
+
 
                     // Byte-order-mark (BOM) characters may be present even if a charset was specified.
                     bomLength = GetPreambleLength(buffer, encoding);

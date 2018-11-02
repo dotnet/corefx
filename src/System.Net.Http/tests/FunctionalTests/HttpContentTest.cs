@@ -4,6 +4,8 @@
 
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
+using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -431,6 +433,21 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public async Task ReadAsStringAsync_SetQuotedCharset_ParsesContent()
+        {
+            string sourceString = "some string";
+            byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
+
+            var content = new MockContent(contentBytes);
+            content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+            content.Headers.ContentType.CharSet = "\"utf-8\"";
+
+            string result = await content.ReadAsStringAsync();
+
+            Assert.Equal(sourceString, result);
+        }
+
+        [Fact]
         public async Task ReadAsByteArrayAsync_EmptyContent_EmptyArray()
         {
             var content = new MockContent(new byte[0]);
@@ -457,6 +474,35 @@ namespace System.Net.Http.Functional.Tests
             // only require members to throw ObjectDisposedExcpetion for members "that cannot be used after the object 
             // has been disposed of".
             _output.WriteLine(content.Headers.ToString());
+        }
+
+        [Fact]
+        public async Task ReadAsStringAsync_SetInvalidQuotedCharset_ThrowsInvalidOperationException()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = new HttpClient()) 
+                {
+                    byte[] contentArray = Encoding.UTF8.GetBytes("hello world");
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteArrayContent(contentArray) };
+
+                    HttpResponseMessage reponse = await client.SendAsync(request);
+
+                    // This will throw because we have an invalid charset.
+                    Task t = reponse.Content.ReadAsStringAsync();
+                    await Assert.ThrowsAsync<InvalidOperationException>(() => t);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    byte[] contentArray = Encoding.UTF8.GetBytes("hello world");
+
+                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nContent-Type:text/plain;charset=\"\"utf-8\r\nConnection: close\r\nContent-Length: {contentArray.Length}\r\nTest-Tag:invalidcharset\r\n\r\n");
+                    await connection.Socket.SendAsync(new ArraySegment<byte>(contentArray), SocketFlags.None);
+                    while (await connection.Socket.ReceiveAsync(new ArraySegment<byte>(new byte[1000]), SocketFlags.None) > 0); // Read and ignore the request.
+                });
+            });
         }
 
         #region Helper methods
