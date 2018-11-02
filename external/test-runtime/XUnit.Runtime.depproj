@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uapaot'">
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- reset parts so that they can be re-inferred -->
+    <TargetFrameworkIdentifier />
+    <TargetFrameworkVersion />
+  </PropertyGroup>
   <PropertyGroup>
     <!-- Given that xunit packages bring with them part of the framework, we need to specify a runtime in order to get the assets
          The only asset that we copy which is RID-specific is sni.dll which is only used in windows, which is why we default to Windows as the RID -->
@@ -15,7 +21,6 @@
     <XUnitAdapter Condition="'$(TargetGroup)' == 'netfx'">xunit.runner.visualstudio.testadapter</XUnitAdapter>
     <TestPlatformHostPackageId>microsoft.testplatform.testhost</TestPlatformHostPackageId>
     <TestPlatformHost>testhost</TestPlatformHost>
-    <TargetFramework Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uapaot'">.NETStandard,Version=v2.0</TargetFramework>
     <!-- Coverlet related properties -->
     <CoverletPackageId>coverlet.msbuild</CoverletPackageId>
     <CoverletPackageVersion>2.3.0</CoverletPackageVersion>
@@ -160,7 +165,7 @@
   </ItemGroup>
 
   <!-- Ensure that the native components of TraceEvent are restored into the runtime directory so that TraceEvent can pinvoke into them. -->
-  <Target Name="CopyTraceEventNativeFiles" AfterTargets="RestorePackages">
+  <Target Name="CopyTraceEventNativeFiles" AfterTargets="AfterResolveReferences">
     <ItemGroup>
       <TraceEventNativeFiles
         Include="$(PackagesDir)\Microsoft.Diagnostics.Tracing.TraceEvent\$(TraceEventPackageVersion)\lib\native\**\*.*" />
@@ -194,7 +199,7 @@
 
   <!-- Retrieve the UAP Tools to the TestHost folder -->
   <Target Name="CopyUAPToolsToTestHost"
-          AfterTargets="RestorePackages"
+          AfterTargets="AfterResolveReferences"
           Condition="'$(TargetGroup)'=='uap'" >
 
     <PropertyGroup>
@@ -229,7 +234,7 @@
   </Target>
 
   <Target Name="CopyTestILCToolsToTestHost"
-          AfterTargets="RestorePackages"
+          AfterTargets="AfterResolveReferences"
           Condition="'$(TargetsAOT)'=='true'">
     <PropertyGroup>
       <TestILCToolsPackageName>TestILC</TestILCToolsPackageName>

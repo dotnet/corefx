@@ -40,8 +40,6 @@ See the LICENSE file in the project root for more information.
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <!-- We don't need the SDK to validate that we get runtime packages -->
     <EnsureRuntimePackageDependencies>false</EnsureRuntimePackageDependencies>
-    <!-- let us control the output path -->
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <!-- don't generate netcoreapp files -->
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>

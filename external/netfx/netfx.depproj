@@ -12,7 +12,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsNetFx)' != 'true'">
     <!-- For things not .NETFramework we need the net472 targeting pack to generate facades -->
-    <TargetFramework>net472</TargetFramework>
+    <AssetTargetFallback>net472</AssetTargetFallback>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
     <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.2</TargetingPackNugetPackageId>
   </PropertyGroup>
 
