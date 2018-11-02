@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 
 namespace System.Text.Json
@@ -39,8 +40,17 @@ namespace System.Text.Json
         internal Stack<JsonTokenType> _stack;
         internal SequencePosition _sequencePosition;
 
+        /// <summary>
+        /// Returns the current <see cref="SequencePosition"/> within the provided UTF-8 encoded
+        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="JsonUtf8Reader"/> was constructed
+        /// with a ReadOnlySpan&lt;byte&gt; instead, this will always return a default <see cref="SequencePosition"/>.
+        /// </summary>
         public SequencePosition Position => _sequencePosition;
 
+        /// <summary>
+        /// Returns the total amount of bytes consumed by the <see cref="JsonUtf8Reader"/> so far
+        /// for the given UTF-8 encoded input text.
+        /// </summary>
         public long BytesConsumed => _bytesConsumed;
 
         /// <summary>

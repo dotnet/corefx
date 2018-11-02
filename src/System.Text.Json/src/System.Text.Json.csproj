@@ -7,9 +7,12 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Text\Json\ConsumeNumberResult.cs" />
+    <Compile Include="System\Text\Json\ConsumeTokenResult.cs" />
     <Compile Include="System\Text\Json\JsonCommentHandling.cs" />
     <Compile Include="System\Text\Json\JsonConstants.cs" />
     <Compile Include="System\Text\Json\JsonReaderException.cs" />
+    <Compile Include="System\Text\Json\JsonReaderHelper.cs" />
     <Compile Include="System\Text\Json\JsonReaderOptions.cs" />
     <Compile Include="System\Text\Json\JsonReaderState.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
@@ -18,9 +21,12 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Memory" />
+    <Reference Include="System.Numerics.Vectors" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
   </ItemGroup>
 </Project>

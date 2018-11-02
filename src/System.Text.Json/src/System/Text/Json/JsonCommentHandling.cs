@@ -24,6 +24,6 @@ namespace System.Text.Json
         /// Allow comments within the JSON input and ignore them.
         /// The <see cref="JsonUtf8Reader"/> will behave as if no comments were present.
         /// </summary>
-        SkipComments = 2,  // Allow and Skip comments
+        SkipComments = 2,
     }
 }
