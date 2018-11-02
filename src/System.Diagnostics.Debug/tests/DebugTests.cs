@@ -65,9 +65,9 @@ namespace System.Diagnostics.Tests
             var originalWriteCoreHook = writeCoreHook.GetValue(null);
             writeCoreHook.SetValue(null, new Action<string>(WriteLogger.s_instance.WriteCore));
             
-            FieldInfo showDialogHook = typeof(DebugProvider).GetField("s_ShowDialog", BindingFlags.Static | BindingFlags.Public);
-            var originalShowDialogHook = showDialogHook.GetValue(null);
-            showDialogHook.SetValue(null, new Action<string, string, string, string>(WriteLogger.s_instance.ShowDialog));
+            FieldInfo failCoreHook = typeof(DebugProvider).GetField("s_FailCore", BindingFlags.Static | BindingFlags.NonPublic);
+            var originalFailCoreHook = failCoreHook.GetValue(null);
+            failCoreHook.SetValue(null, new Action<string, string, string, string>(WriteLogger.s_instance.FailCore));
 
             try
             {
@@ -83,7 +83,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 writeCoreHook.SetValue(null, originalWriteCoreHook);
-                showDialogHook.SetValue(null, originalShowDialogHook);
+                failCoreHook.SetValue(null, originalFailCoreHook);
             }
         }
 
@@ -103,7 +103,7 @@ namespace System.Diagnostics.Tests
                 AssertUIOutput = string.Empty;
             }
 
-            public void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource)
+            public void FailCore(string stackTrace, string message, string detailMessage, string errorSource)
             {
                 AssertUIOutput += stackTrace + message + detailMessage + errorSource;
             }

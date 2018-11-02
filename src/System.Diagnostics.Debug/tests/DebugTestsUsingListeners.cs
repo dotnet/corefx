@@ -246,17 +246,17 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void Trace_AssertUiEnabledFalse_SkipsShowDialog()
+        public void Trace_AssertUiEnabledFalse_SkipsFail()
         {
             var initialListener = (DefaultTraceListener)Trace.Listeners[0];
             Trace.Listeners.Clear();
-            Trace.Fail("Fail won't show dialog");
-            Debug.Fail("Fail won't show dialog");
+            Trace.Fail("Skips fail fast");
+            Debug.Fail("Skips fail fast");
 
             initialListener.AssertUiEnabled = false;
             Trace.Listeners.Add(initialListener);
-            Debug.Fail("Fail won't show dialog");
-            Trace.Fail("Fail won't show dialog");
+            Debug.Fail("Skips fail fast");
+            Trace.Fail("Skips fail fast");
 
             var myListener = new MyTraceListener();
             string expectedDialog = $"Mock dialog - message: short, detailed message: long";
@@ -286,7 +286,7 @@ namespace System.Diagnostics.Tests
 
         class MyTraceListener : DefaultTraceListener
         {
-            private void ShowDialog(string stackTrace, string message, string detailMessage, string errorSource) 
+            private void FailCore(string stackTrace, string message, string detailMessage, string errorSource) 
             {
                 OutputString += $"Mock dialog - message: {message}, detailed message: {detailMessage}";
             }
@@ -297,7 +297,7 @@ namespace System.Diagnostics.Tests
                 WriteLine(message, detailMessage);
                 if (AssertUiEnabled)
                 {
-                    ShowDialog(string.Empty, message, detailMessage, "Assertion Failed");
+                    FailCore(string.Empty, message, detailMessage, "Assertion Failed");
                 }
             }
         }

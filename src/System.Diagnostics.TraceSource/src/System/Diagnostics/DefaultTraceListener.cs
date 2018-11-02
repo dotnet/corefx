@@ -92,7 +92,7 @@ namespace System.Diagnostics
             WriteAssert(stackTrace, message, detailMessage);
             if (AssertUiEnabled)
             {
-                DebugProvider.ShowDialog(stackTrace, message, detailMessage, "Assertion Failed");
+                DebugProvider.FailCore(stackTrace, message, detailMessage, "Assertion Failed");
             }
         }
 
