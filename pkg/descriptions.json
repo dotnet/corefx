@@ -1964,7 +1964,7 @@
   },
   {
     "Name": "System.Text.Json",
-    "Description": "Low allocation UTF-8 JSON reader/writer.",
+    "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
     "CommonTypes": [
       "System.Text.Json.JsonUtf8Reader"
     ]

@@ -66,7 +66,7 @@
 * Builds on top of the JsonReader and JsonWriter.
 * Optimized for performance over feature richness for v1.
 * The deserializer will be based on `Reflection.Emit`.
-* More details to follow - @glennc, @terrajobst
+* More details to follow - @glennc, @terrajobst, @steveharter
 
 ## Higher-level types
 
