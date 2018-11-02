@@ -4054,7 +4054,7 @@ public static partial class DataContractSerializerTests
         Assert.NotNull(actual);
     }
 
-    [Fact]
+    //[Fact]
     public static void DCS_DeeplyLinkedData()
     {
         TypeWithLinkedProperty head = new TypeWithLinkedProperty();
