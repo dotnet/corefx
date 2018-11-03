@@ -25,5 +25,12 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
             Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
             Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         }
+
+        [Fact, PlatformSpecific(~TestPlatforms.FreeBSD)]
+        public void CheckFreeBSDOnOtherPlatforms()
+        {
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")));
+        }
     }
 }
