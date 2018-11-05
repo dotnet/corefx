@@ -279,6 +279,13 @@ namespace System.IO.Tests
         InlineData(@"", @""),
         InlineData(@"/", @"/"),
         InlineData(@"\", @"\"),
+        InlineData(@"\\server\share\", @"\\server\share"),
+        InlineData(@"\\server\share\folder\", @"\\server\share\folder"),
+        InlineData(@"\\?\C:\", @"\\?\C:\"),
+        InlineData(@"\\?\C:\folder\", @"\\?\C:\folder"),
+        InlineData(@"\\?\UNC\", @"\\?\UNC\"),
+        InlineData(@"\\?\UNC\a\", @"\\?\UNC\a\"),
+        InlineData(@"\\?\UNC\a\folder\", @"\\?\UNC\a\folder"),
         InlineData(null, null)]
         unsafe public void TrimEndingDirectorySeparator_CoreTests(string path, string expected)
         {
