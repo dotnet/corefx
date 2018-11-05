@@ -101,7 +101,3 @@
 
 * [JsonReader API Review](https://github.com/ahsonkhan/apireviews/tree/JsonReaderReview/2018/System.Text.Json)
 * Placeholder for future API proposal issues
-
-## PlantUML License
-
-![PlantUML License](images/PlantUML-license.png)

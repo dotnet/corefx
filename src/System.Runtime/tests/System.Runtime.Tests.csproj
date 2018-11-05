@@ -31,9 +31,6 @@
     <Compile Include="$(CommonTestPath)\System\Collections\TestBase.NonGeneric.cs">
       <Link>Common\System\Collections\TestBase.NonGeneric.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
-      <Link>Common\System\IO\TempFile.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
       <Link>System\StringTests.cs</Link>
     </Compile>
@@ -173,15 +170,12 @@
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
     <Compile Include="System\Reflection\AssemblyAttributesTests.cs" />
-    <Compile Include="System\Reflection\AssemblyTests.cs" />
-    <Compile Include="System\Reflection\AssemblyNameTests.cs" />
-    <Compile Include="System\Reflection\DefaultMemberAttributeTests.cs" />
     <Compile Include="System\Reflection\CustomAttributeDataTests.cs" />
     <Compile Include="System\Reflection\CustomAttributesTestData.cs" />
     <Compile Include="System\Reflection\CustomAttribute_Named_Typed_ArgumentTests.cs" />
+    <Compile Include="System\Reflection\DefaultMemberAttributeTests.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.cs" />
     <Compile Include="System\Reflection\MethodBodyTests.cs" />
-    <Compile Include="System\Reflection\MethodInfoTests.cs" />
     <Compile Include="System\Reflection\ModuleTests.cs" />
     <Compile Include="System\Reflection\PointerTests.cs" />
     <Compile Include="System\Reflection\ReflectionTypeLoadExceptionTests.cs" />
@@ -245,7 +239,6 @@
     <Compile Include="System\UInt64Tests.netcoreapp.cs" />
     <Compile Include="System\VersionTests.netcoreapp.cs" />
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\AssemblyTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\BindingFlagsDoNotWrap.netcoreapp.cs" />
     <Compile Include="System\Reflection\InvokeRefReturn.netcoreapp.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
@@ -292,21 +285,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="TestAssembly\TestAssembly.csproj">
-      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
-      <Name>TestAssembly</Name>
-    </ProjectReference>
     <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj">
       <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
       <Name>TestLoadAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="ForwardedTypesAssembly\ForwardedTypesAssembly.csproj">
-      <Project>{3A3DE9F8-6295-4B68-BAAB-406F1CA0CD9C}</Project>
-      <Name>ForwardedTypesAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="UnloadableAssembly\UnloadableAssembly.csproj">
-      <Project>{CA43AAD6-59A6-4BEB-AC9E-52DC9FD04B8B}</Project>
-      <Name>UnloadableAssembly</Name>
     </ProjectReference>
     <Reference Include="TestModule\System.Reflection.TestModule.dll">
     </Reference>

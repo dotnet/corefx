@@ -13,7 +13,7 @@ namespace System.Diagnostics
     /// </summary>
     public static partial class Debug
     {
-        private static DebugProvider s_provider = new DebugProvider();
+        private static volatile DebugProvider s_provider = new DebugProvider();
 
         public static DebugProvider SetProvider(DebugProvider provider)
         {
@@ -25,27 +25,32 @@ namespace System.Diagnostics
 
         public static bool AutoFlush { get { return true; } set { } }
 
+        [ThreadStatic]
+        private static int t_indentLevel;
         public static int IndentLevel
         {
             get
             {
-                return DebugProvider.IndentLevel;
+                return t_indentLevel;
             }
             set
             {
-                DebugProvider.IndentLevel = value;
+                t_indentLevel = value < 0 ? 0 : value;
+                s_provider.OnIndentLevelChanged(t_indentLevel);
             }
         }
 
+        private static volatile int s_indentSize = 4;
         public static int IndentSize
         {
             get
             {
-                return DebugProvider.IndentSize;
+                return s_indentSize;
             }
             set
             {
-                DebugProvider.IndentSize = value;
+                s_indentSize = value < 0 ? 0 : value;
+                s_provider.OnIndentSizeChanged(s_indentSize);
             }
         }
 
@@ -96,17 +101,7 @@ namespace System.Diagnostics
         {
             if (!condition)
             {
-                string stackTrace;
-                try
-                {
-                    stackTrace = new StackTrace(0, true).ToString(System.Diagnostics.StackTrace.TraceFormat.Normal);
-                }
-                catch
-                {
-                    stackTrace = "";
-                }
-                WriteLine(FormatAssert(stackTrace, message, detailMessage));
-                s_provider.ShowDialog(stackTrace, message, detailMessage, "Assertion Failed");
+                Fail(message, detailMessage);
             }
         }
 
@@ -123,32 +118,21 @@ namespace System.Diagnostics
                 {
                     stackTrace = "";
                 }
-                WriteLine(FormatAssert(stackTrace, message, detailMessage));
-                s_provider.ShowDialog(stackTrace, message, detailMessage, SR.GetResourceString(failureKindMessage));
+                s_provider.WriteAssert(stackTrace, message, detailMessage);
+                DebugProvider.FailCore(stackTrace, message, detailMessage, SR.GetResourceString(failureKindMessage));
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Fail(string message)
         {
-            Assert(false, message, string.Empty);
+            Fail(message, string.Empty);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Fail(string message, string detailMessage)
         {
-            Assert(false, message, detailMessage);
-        }
-
-        private static string FormatAssert(string stackTrace, string message, string detailMessage)
-        {
-            string newLine = DebugProvider.GetIndentString() + Environment.NewLine;
-            return SR.DebugAssertBanner + newLine
-                   + SR.DebugAssertShortMessage + newLine
-                   + message + newLine
-                   + SR.DebugAssertLongMessage + newLine
-                   + detailMessage + newLine
-                   + stackTrace;
+            s_provider.Fail(message, detailMessage);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -160,7 +144,7 @@ namespace System.Diagnostics
         [System.Diagnostics.Conditional("DEBUG")]
         public static void WriteLine(string message)
         {
-            Write(message + Environment.NewLine);
+            s_provider.WriteLine(message);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -196,7 +180,7 @@ namespace System.Diagnostics
             }
             else
             {
-                WriteLine(category + ":" + message);
+                WriteLine(category + ": " + message);
             }
         }
 
@@ -215,7 +199,7 @@ namespace System.Diagnostics
             }
             else
             {
-                Write(category + ":" + message);
+                Write(category + ": " + message);
             }
         }
 
