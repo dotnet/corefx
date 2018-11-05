@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
@@ -272,18 +274,21 @@ namespace System.IO.Tests
         InlineData(@"C:/folder/", @"C:/folder"),
         InlineData(@"/folder/", @"/folder"),
         InlineData(@"\folder\", @"\folder"),
-        InlineData(@"/folder//", @"/folder/"),
-        InlineData(@"\folder\\", @"\folder\"),
         InlineData(@"C:\", @"C:\"),
         InlineData(@"C:/", @"C:/"),
-        InlineData(@"", @""),        
+        InlineData(@"", @""),
         InlineData(@"/", @"/"),
         InlineData(@"\", @"\"),
         InlineData(null, null)]
-        public void TrimEndingDirectorySeparator_CoreTests(string path, string expected)
+        unsafe public void TrimEndingDirectorySeparator_CoreTests(string path, string expected)
         {
-            Assert.Equal(expected, Path.TrimEndingDirectorySeparator(path));
-            PathAssert.Equal(expected, Path.TrimEndingDirectorySeparator(path.AsSpan()));
+            string trimmed = Path.TrimEndingDirectorySeparator(path);
+            Assert.Equal(expected, trimmed);
+            Assert.Same(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
+
+            ReadOnlySpan<char> trimmedROS = Path.TrimEndingDirectorySeparator(path.AsSpan());
+            PathAssert.Equal(expected, trimmedROS);
+            Assert.Equal((IntPtr)Unsafe.AsPointer(ref MemoryMarshal.GetReference(trimmedROS)), (IntPtr)Unsafe.AsPointer(ref MemoryMarshal.GetReference(Path.TrimEndingDirectorySeparator(trimmedROS))));
         }
     }
 }
