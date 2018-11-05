@@ -36,7 +36,6 @@ namespace System.Net.NameResolution.PalTests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
-        [Fact]
         public void TryGetAddrInfo_HostName()
         {
             string hostName = NameResolutionPal.GetHostName();
