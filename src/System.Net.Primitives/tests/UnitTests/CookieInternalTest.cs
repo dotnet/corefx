@@ -68,5 +68,43 @@ namespace NetPrimitivesUnitTests
             int expectedCookieCount = expectedStrings.Length >> 1;
             Assert.Equal(expectedCookieCount, cookieCount);
         }
+
+        // This assumes that the default cookie behavior is RFC 6265, which it
+        // is not ("Default = Rfc2109" in Cookie.cs:20)
+        // TODO: Will the Default behavior change to RFC 6265? If not, specify appropriate CookieVariant
+        [Theory]
+        [InlineData("https://contoso.com/", "/")]
+        [InlineData("https://contoso.com", "/")]
+        [InlineData("https://contoso.com/path", "/")]
+        [InlineData("https://contoso.com/path/subpath", "/path")]
+        [InlineData("https://contoso.com/path/subpath/", "/path/subpath")]
+        [InlineData("https://contoso.com/path/subpath?query=queryString", "/path")]
+        public void SetCookies_Sets_Rfc6265_Default_Path_From_Url(string url, string expectedPath)
+        {
+            var uri = new Uri(url);
+            var cc = new CookieContainer();
+            cc.SetCookies(uri, "name=value");
+
+            Assert.Equal(expectedPath, cc.GetCookies(uri)["name"].Path);
+        }
+
+        // This assumes that the default cookie behavior is RFC 6265, which it
+        // is not ("Default = Rfc2109" in Cookie.cs:20)
+        // TODO: Will the Default behavior change to RFC 6265? If not, specify appropriate CookieVariant
+        [Theory]
+        [InlineData("/", "/")]
+        [InlineData("", "/")]
+        [InlineData("Path=path", "/")]
+        [InlineData("Path=/path/subpath", "/path/subpath")]
+        [InlineData("Path=/path", "/path")]
+        [InlineData("Path=/path/", "/path/")]
+        public void SetCookies_Sets_Rfc6265_Path_From_Header_Path(string path, string expectedPath)
+        {
+            var uri = new Uri("https://contoso.com/");
+            var cc = new CookieContainer();
+            cc.SetCookies(uri, $"name=value; Path={path}");
+
+            Assert.Equal(expectedPath, cc.GetCookies(uri)["name"].Path);
+        }
     }
 }
