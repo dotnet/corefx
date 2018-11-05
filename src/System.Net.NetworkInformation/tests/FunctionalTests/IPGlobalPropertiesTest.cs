@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Net;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -27,6 +28,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void IPGlobalProperties_AccessAllMethods_NoErrors()
         {
             IPGlobalProperties gp = IPGlobalProperties.GetIPGlobalProperties();
@@ -52,6 +54,8 @@ namespace System.Net.NetworkInformation.Tests
 
         [Theory]
         [MemberData(nameof(Loopbacks))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(33257, TestPlatforms.Linux)]
         public void IPGlobalProperties_TcpListeners_Succeed(IPAddress address)
         {
             using (var server = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
@@ -77,6 +81,8 @@ namespace System.Net.NetworkInformation.Tests
 
         [Theory]
         [MemberData(nameof(Loopbacks))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(33257, TestPlatforms.Linux)]
         public async Task IPGlobalProperties_TcpActiveConnections_Succeed(IPAddress address)
         {
             using (var server = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
@@ -87,6 +93,7 @@ namespace System.Net.NetworkInformation.Tests
                 _log.WriteLine($"listening on {server.LocalEndPoint}");
 
                 await client.ConnectAsync(server.LocalEndPoint);
+                _log.WriteLine($"Looking for connection {client.LocalEndPoint} <-> {client.RemoteEndPoint});
 
                 TcpConnectionInformation[] tcpCconnections = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections();
                 bool found = false;
@@ -106,6 +113,7 @@ namespace System.Net.NetworkInformation.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(33257, TestPlatforms.Linux)]
         public void IPGlobalProperties_TcpActiveConnections_NotListening()
         {
             TcpConnectionInformation[] tcpCconnections = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections();
