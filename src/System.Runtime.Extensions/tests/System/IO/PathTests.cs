@@ -295,7 +295,7 @@ namespace System.IO.Tests
 
             ReadOnlySpan<char> trimmedROS = Path.TrimEndingDirectorySeparator(path.AsSpan());
             PathAssert.Equal(expected, trimmedROS);
-            Assert.Equal((IntPtr)Unsafe.AsPointer(ref MemoryMarshal.GetReference(trimmedROS)), (IntPtr)Unsafe.AsPointer(ref MemoryMarshal.GetReference(Path.TrimEndingDirectorySeparator(trimmedROS))));
+            PathAssert.Equal(trimmedROS, Path.TrimEndingDirectorySeparator(trimmedROS));
         }
     }
 }
