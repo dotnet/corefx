@@ -266,5 +266,24 @@ namespace System.IO.Tests
         {
             Assert.Equal(expected, Path.GetFullPath(path));
         }
+
+        [Theory,
+        InlineData(@"C:\folder\", @"C:\folder"),
+        InlineData(@"C:/folder/", @"C:/folder"),
+        InlineData(@"/folder/", @"/folder"),
+        InlineData(@"\folder\", @"\folder"),
+        InlineData(@"/folder//", @"/folder/"),
+        InlineData(@"\folder\\", @"\folder\"),
+        InlineData(@"C:\", @"C:\"),
+        InlineData(@"C:/", @"C:/"),
+        InlineData(@"", @""),        
+        InlineData(@"/", @"/"),
+        InlineData(@"\", @"\"),
+        InlineData(null, null)]
+        public void TrimEndingDirectorySeparator_CoreTests(string path, string expected)
+        {
+            Assert.Equal(expected, Path.TrimEndingDirectorySeparator(path));
+            PathAssert.Equal(expected, Path.TrimEndingDirectorySeparator(path.AsSpan()));
+        }
     }
 }

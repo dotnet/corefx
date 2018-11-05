@@ -1222,6 +1222,8 @@ namespace System.IO
         public static string Combine(string path1, string path2, string path3) { throw null; }
         public static string Combine(string path1, string path2, string path3, string path4) { throw null; }
         public static string Combine(params string[] paths) { throw null; }
+        public static string TrimEndingDirectorySeparator(string path) { throw null; }
+        public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) { throw null; }
         public static string GetDirectoryName(string path) { throw null; }
         public static ReadOnlySpan<char> GetDirectoryName(ReadOnlySpan<char> path) { throw null; }
         public static string GetExtension(string path) { throw null; }
