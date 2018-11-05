@@ -106,5 +106,18 @@ namespace NetPrimitivesUnitTests
 
             Assert.Equal(expectedPath, cc.GetCookies(uri)["name"].Path);
         }
+
+        // This assumes that the default cookie behavior is RFC 6265, which it
+        // is not ("Default = Rfc2109" in Cookie.cs:20)
+        // TODO: Will the Default behavior change to RFC 6265? If not, specify appropriate CookieVariant
+        [Fact]
+        public void Rfc6265_DoesNotThrow_When_Header_Path_Differs_From_Url()
+        {
+            var uri = new Uri("https://contoso.com/some/path");
+            var cc = new CookieContainer();
+
+            // Assert.DoesNotThrow
+            cc.SetCookies(uri, "name=value; Path=/another/path");
+        }
     }
 }
