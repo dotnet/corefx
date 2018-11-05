@@ -119,5 +119,20 @@ namespace NetPrimitivesUnitTests
             // Assert.DoesNotThrow
             cc.SetCookies(uri, "name=value; Path=/another/path");
         }
+
+        // This assumes that the default cookie behavior is RFC 6265, which it
+        // is not ("Default = Rfc2109" in Cookie.cs:20)
+        // TODO: Will the Default behavior change to RFC 6265? If not, specify appropriate CookieVariant
+        [Fact]
+        public void Rfc6265_Sends_Appropriate_Cookies_For_Different_Path()
+        {
+            var uri1 = new Uri("https://contoso.com/some/path");
+            var cc = new CookieContainer();
+            cc.SetCookies(uri1, "name=value; Path=/another/path");
+
+            var uri2 = new Uri("https://contoso.com/another/path");
+
+            Assert.NotEmpty(cc.GetCookies(uri2));
+        }
     }
 }
