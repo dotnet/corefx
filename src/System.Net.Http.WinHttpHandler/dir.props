@@ -3,7 +3,7 @@
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <AssemblyVersion>4.0.3.1</AssemblyVersion>
-    <PackageVersion>4.5.1</PackageVersion>
+    <PackageVersion>4.5.2</PackageVersion>
     <AssemblyKey>MSFT</AssemblyKey>
   </PropertyGroup>
 </Project>
