@@ -20,6 +20,7 @@ namespace System.Reflection.TypeLoading
             RoAssembly coreAssembly = loader.TryGetCoreAssembly(out Exception e);
             if (coreAssembly == null)
             {
+                // Populate exceptions[] in case there is subsquent access to the missing types
                 for (int i = 0; i < numCoreTypes; i++)
                 {
                     exceptions[i] = e;
@@ -40,6 +41,12 @@ namespace System.Reflection.TypeLoading
             }
             _coreTypes = coreTypes;
             _exceptions = exceptions;
+
+            // If the core assembly was not found, don't continue
+            if (coreAssembly == null)
+            {
+                throw e;
+            }
         }
 
         /// <summary>

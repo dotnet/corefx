@@ -1,7 +1,7 @@
 ﻿<!-- System.Reflection.MetadataLoadContext.dll has two build configurations: NetCore and NetStandard. The functional difference is that the NetCore
-         version supports all of the new NetCore Reflection apis (IsSZArray, etc.) Apps built against NetCore should use the NetCore build
-         of MetadataLoadContext.dll if possible. If they use the NetStandard version, they must refrain from calling NetCore-specific apis on Reflection
-         objects dispensed by MetadataLoadContexts as these apis will not work.
+  version supports all of the new NetCore Reflection apis (IsSZArray, etc.) Apps built against NetCore should use the NetCore build
+  of MetadataLoadContext.dll if possible. If they use the NetStandard version, they must refrain from calling NetCore-specific apis on Reflection
+  objects dispensed by MetadataLoadContexts as these apis will not work.
     -->
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
@@ -10,8 +10,11 @@
     <RootNamespace>System.Reflection</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>.NET Core Type Loader</Description>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
+
+<!-- The ItemGroup represents types originally obtained from CoreRt. Keep the FromCoreRt path as we may want to move these
+  to a common location in the future.-->
   <ItemGroup>
     <Compile Include="FromCoreRt\CoreRtBridge.cs" />
     <Compile Include="FromCoreRt\System\DefaultBinder.cs" />

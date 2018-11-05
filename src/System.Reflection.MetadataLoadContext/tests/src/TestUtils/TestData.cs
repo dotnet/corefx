@@ -6,7 +6,6 @@ namespace System.Reflection.Tests
 {
     internal static class TestData
     {
-
         // // Metadata version: v4.0.30319
         // .assembly extern mscorlib
         // {
@@ -78,8 +77,6 @@ namespace System.Reflection.Tests
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
             );
-
-
 
         // .assembly extern mscorlib
         // {
@@ -155,9 +152,7 @@ namespace System.Reflection.Tests
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
         );
 
-
         // (NetFX20AsssemblyImage was built with v3.5 C# compiler - has v2.0.50727 ImageRuntimeVersion)
-
         // // Metadata version: v2.0.50727
         // .assembly extern mscorlib
         // {
@@ -284,7 +279,6 @@ namespace System.Reflection.Tests
         //   } // end of method MainType2::.ctor
         // 
         // } // end of class MainType2
-
         public static readonly Guid s_MultiModuleDllMvid = new Guid("7B43F7C7-A795-48C8-9DD2-C00D4FACA4CC");
         public static readonly byte[] s_MultiModuleDllImage = Convert.FromBase64String(
             "TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFt" +
@@ -361,7 +355,6 @@ namespace System.Reflection.Tests
         //   } // end of method JoeType2::.ctor
         // 
         // } // end of class JoeType2
-
         public static readonly string s_JoeScopeName = "Joe.netmodule";
         public static readonly Guid s_JoeNetModuleMvid = new Guid("0B58D7F6-4E0D-49FB-870A-1D492B846154");
         public static readonly byte[] s_JoeNetModuleImage = Convert.FromBase64String(
@@ -642,7 +635,6 @@ namespace System.Reflection.Tests
         //   .hash algorithm 0x00008004
         //   .ver 0:0:0:0
         // }
-
         public static readonly byte[] s_PublicKeyToken1ee753223f71263d_Pk =
             (
                 "0024000004800000940000000602000000240000525341310004000001000100" +
@@ -1070,7 +1062,6 @@ namespace System.Reflection.Tests
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
             );
-
 
         // // Metadata version: v4.0.30319
         // .assembly extern mscorlib
@@ -2249,7 +2240,6 @@ namespace System.Reflection.Tests
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
             );
-
 
         // // Metadata version: v4.0.30319
         // .assembly extern mscorlib

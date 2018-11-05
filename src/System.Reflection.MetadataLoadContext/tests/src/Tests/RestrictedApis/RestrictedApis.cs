@@ -11,7 +11,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestRestrictions()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromAssemblyPath(typeof(TopLevelType).Assembly.Location);
 

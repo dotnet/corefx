@@ -12,7 +12,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleAssembly()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -23,7 +23,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleMvid()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -35,7 +35,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleMetadataToken()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -46,7 +46,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleIsResource()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -58,7 +58,7 @@ namespace System.Reflection.Tests
         public static void ModuleFullyQualifiedNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 string path = tf.Path;
                 Assembly a = lc.LoadFromAssemblyPath(path);
@@ -70,7 +70,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleFullyQualifiedNameFromByteArray()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -82,7 +82,7 @@ namespace System.Reflection.Tests
         public static void ModuleGetNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 string path = tf.Path;
                 Assembly a = lc.LoadFromAssemblyPath(path);
@@ -95,7 +95,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleGetNameFromByteArray()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -107,7 +107,7 @@ namespace System.Reflection.Tests
         public static void ModuleScopeNameFromPath()
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 string path = tf.Path;
                 Assembly a = lc.LoadFromAssemblyPath(path);
@@ -119,7 +119,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void ModuleScopeNameFromByteArray()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Module m = a.ManifestModule;
@@ -130,7 +130,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindAnyCpu()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_PlatformAnyCpu);
                 Module m = a.ManifestModule;
@@ -148,7 +148,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindAnyCpu32BitPreferred()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_PlatformAnyCpu32BitPreferred);
                 Module m = a.ManifestModule;
@@ -166,7 +166,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindX86()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_PlatformX86);
                 Module m = a.ManifestModule;
@@ -184,7 +184,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindX64()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_PlatformX64);
                 Module m = a.ManifestModule;
@@ -202,7 +202,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindItanium()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_PlatformItanium);
                 Module m = a.ManifestModule;
@@ -220,7 +220,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetPEKindArm()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_PlatformArm);
                 Module m = a.ManifestModule;

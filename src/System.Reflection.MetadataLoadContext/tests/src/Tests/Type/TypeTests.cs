@@ -519,7 +519,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage1()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 // Create big hash collisions in GetTypeCoreCache.
@@ -537,7 +537,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage2()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromAssemblyPath(typeof(SampleMetadata.NS0.SameNamedType).Assembly.Location);
                 // Create big hash collisions in GetTypeCoreCache.
@@ -555,7 +555,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void CoreGetTypeCacheCoverage3()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 // Make sure the tricky corner case of a null/empty namespace is covered.
                 Assembly a = lc.LoadFromAssemblyPath(typeof(TopLevelType).Assembly.Location);
@@ -589,7 +589,7 @@ namespace System.Reflection.Tests
         public static void TypesWithStrangeCharacters()
         {
             // Make sure types with strange characters are escaped.
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_TypeWithStrangeCharacters);
                 Type[] types = a.GetTypes();

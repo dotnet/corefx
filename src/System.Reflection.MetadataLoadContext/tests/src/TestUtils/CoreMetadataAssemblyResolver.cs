@@ -4,11 +4,9 @@
 
 namespace System.Reflection.Tests
 {
-    public class CoreAssemblyMetadataAssemblyResolver : MetadataAssemblyResolver
+    public class CoreMetadataAssemblyResolver : MetadataAssemblyResolver
     {
-        public CoreAssemblyMetadataAssemblyResolver()
-        {
-        }
+        public CoreMetadataAssemblyResolver() { }
 
         public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
         {

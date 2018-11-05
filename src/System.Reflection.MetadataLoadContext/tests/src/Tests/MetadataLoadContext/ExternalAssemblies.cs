@@ -16,11 +16,15 @@ namespace System.Reflection.Tests
 
             using (MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
-                    delegate (MetadataLoadContext sender, AssemblyName an)
+                    delegate (MetadataLoadContext context, AssemblyName assemblyName)
                     {
-                        if (an.Name == "SomeAssembly")
+                        if (assemblyName.Name == "SomeAssembly")
                         {
                             return runtimeAssembly;
+                        }
+                        else if (assemblyName.Name == "mscorlib")
+                        {
+                            return context.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                         }
                         return null;
                     }

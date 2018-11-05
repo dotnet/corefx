@@ -218,7 +218,7 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers1()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreMetadataAssemblyResolver(), "mscorlib"))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);

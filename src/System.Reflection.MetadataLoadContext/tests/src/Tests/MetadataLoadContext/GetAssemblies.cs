@@ -13,21 +13,22 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies_EmptyMetadataLoadContext()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly[] loadedAssemblies = lc.GetAssemblies().ToArray();
-                Assert.Equal(0, loadedAssemblies.Length);
+                Assert.Equal(1, loadedAssemblies.Length);
             }
         }
 
         [Fact]
         public static void GetAssemblies()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly[] loadedAssemblies = lc.GetAssemblies().ToArray();
-                Assert.Equal(0, loadedAssemblies.Length);
+                Assert.Equal(1, loadedAssemblies.Length);
 
+                // EmptyCoreMetadataAssemblyResolver already loaded s_SimpleNameOnlyImage
                 Assembly a1 = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assembly a2 = lc.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                 loadedAssemblies = lc.GetAssemblies().ToArray();
@@ -40,9 +41,21 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssemblies_SnapshotIsAtomic()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            Assembly a1 = null;
+
+            var resolver = new FuncMetadataAssemblyResolver(
+                delegate (MetadataLoadContext context, AssemblyName refName)
+                {
+                    if (a1 == null)
+                    {
+                        // Initial request to load core assembly
+                        return a1 = context.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
+                    }
+                    return null;
+                });
+
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assembly a1 = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 IEnumerable<Assembly> loadedAssembliesSnapshot = lc.GetAssemblies();
                 Assembly a2 = lc.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                 Assembly[] loadedAssemblies = loadedAssembliesSnapshot.ToArray();

@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         public static void Scenario_GetAssemblyName()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 AssemblyName assemblyName = a.GetName();
@@ -27,7 +27,7 @@ namespace System.Reflection.Tests
         public static void Scenario_EnumerateDependencies()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 foreach (AssemblyName name in a.GetReferencedAssemblies())
@@ -41,7 +41,7 @@ namespace System.Reflection.Tests
         public static void Scenario_FindACoreAssembly()
         {
             // Ensure you can do all this without setting a core assembly.
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly[] candidates =
                 {
@@ -67,7 +67,7 @@ namespace System.Reflection.Tests
         public static void Scenario_EnumerateTypesAndMembers()
         {
             // Ensure you can do all this without resolving dependencies.
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromAssemblyPath(typeof(GenericClass1<>).Assembly.Location);
                 foreach (TypeInfo t in a.DefinedTypes)

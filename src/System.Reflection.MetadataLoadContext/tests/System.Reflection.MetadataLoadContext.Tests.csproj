@@ -62,8 +62,9 @@
     <Compile Include="src\Tests\Type\TypeTests.Interfaces.cs" />
     <Compile Include="src\Tests\Type\TypeTests.StructLayoutAttribute.cs" />
     <Compile Include="src\Tests\Type\TypeTests.TypeFactories.cs" />
-    <Compile Include="src\TestUtils\CoreAssemblyMetadataAssemblyResolver.cs" />
+    <Compile Include="src\TestUtils\CoreMetadataAssemblyResolver.cs" />
     <Compile Include="src\TestUtils\CustomAttributeInstantiator.cs" />
+    <Compile Include="src\TestUtils\EmptyCoreMetadataAssemblyResolver.cs" />
     <Compile Include="src\TestUtils\FuncMetadataAssemblyResolver.cs" />
     <Compile Include="src\TestUtils\NetStandardBridge.cs" />
     <Compile Include="src\TestUtils\TestData.cs" />

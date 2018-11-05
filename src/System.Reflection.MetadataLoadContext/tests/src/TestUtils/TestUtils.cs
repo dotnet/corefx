@@ -251,7 +251,7 @@ namespace System.Reflection.Tests
         {
             MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
-                    delegate (MetadataLoadContext sender, AssemblyName assemblyName)
+                    delegate (MetadataLoadContext context, AssemblyName assemblyName)
                     {
                         string name = assemblyName.Name;
                         if (name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase) ||
@@ -260,7 +260,7 @@ namespace System.Reflection.Tests
                             name.Equals("System.Runtime.InteropServices", StringComparison.OrdinalIgnoreCase) ||
                             name.Equals("netstandard", StringComparison.OrdinalIgnoreCase))
                         {
-                            return sender.LoadFromStream(CreateStreamForCoreAssembly());
+                            return context.LoadFromStream(CreateStreamForCoreAssembly());
                         }
 
                         return null;

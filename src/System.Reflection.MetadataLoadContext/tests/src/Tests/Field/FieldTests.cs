@@ -389,10 +389,10 @@ namespace System.Reflection.Tests
         {
             using (MetadataLoadContext lc = new MetadataLoadContext(
                 new FuncMetadataAssemblyResolver(
-                    delegate (MetadataLoadContext sender, AssemblyName name)
+                    delegate (MetadataLoadContext context, AssemblyName name)
                     {
                         if (name.Name == "mscorlib")
-                            return sender.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
+                            return context.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                         return null;
                     }),
                     "mscorlib"))
@@ -421,7 +421,7 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers2()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreMetadataAssemblyResolver(), "mscorlib"))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_CustomModifiersImage);
                 Type t = a.GetType("N", throwOnError: true);

@@ -12,7 +12,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void NoResolver()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
@@ -22,21 +22,21 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        public static void ResolverReturnsNull()
+        public static void ResolverMissingCore()
         {
             var resolver = new ResolverReturnsNull();
-            using (MetadataLoadContext lc = new MetadataLoadContext(resolver, "SkipCore"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver, "EmptyCore"))
             {
-                Assert.Null(resolver.Sender);
-                Assert.Equal(0, resolver.CallCount);
+                Assert.Same(lc, resolver.Context);
+                Assert.Equal(1, resolver.CallCount);
 
                 Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 Assert.Throws<FileNotFoundException>(() => t.BaseType);
 
-                Assert.Same(lc, resolver.Sender);
+                Assert.Same(lc, resolver.Context);
                 Assert.Equal(resolver.AssemblyName.Name, "Foo");
-                Assert.Equal(1, resolver.CallCount);
+                Assert.Equal(2, resolver.CallCount);
             }
         }
 
@@ -46,14 +46,14 @@ namespace System.Reflection.Tests
             var resolver = new ResolverReturnsSomething();
             using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
-                Assert.Same(lc, resolver.Sender);
+                Assert.Same(lc, resolver.Context);
                 Assert.Equal(1, resolver.CallCount);
 
                 Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 Type bt = t.BaseType;
 
-                Assert.Same(lc, resolver.Sender);
+                Assert.Same(lc, resolver.Context);
                 Assert.Equal(resolver.AssemblyName.Name, "Foo");
                 Assert.Equal(2, resolver.CallCount);
 
@@ -66,16 +66,16 @@ namespace System.Reflection.Tests
         public static void ResolverThrows()
         {
             var resolver = new ResolverThrows();
-            using (MetadataLoadContext lc = new MetadataLoadContext(resolver, "SkipCore"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver, "EmptyCore"))
             {
-                Assert.Null(resolver.Sender);
+                Assert.Null(resolver.Context);
                 Assert.Equal(0, resolver.CallCount);
 
                 Assembly derived = lc.LoadFromByteArray(TestData.s_DerivedClassWithVariationsOnFooImage);
                 Type t = derived.GetType("Derived1", throwOnError: true);
                 TargetParameterCountException e = Assert.Throws<TargetParameterCountException>(() => t.BaseType);
 
-                Assert.Same(lc, resolver.Sender);
+                Assert.Same(lc, resolver.Context);
                 Assert.Equal(1, resolver.CallCount);
                 Assert.Equal("Hi!", e.Message);
             }
@@ -88,14 +88,20 @@ namespace System.Reflection.Tests
             Assembly resolveEventHandlerResult = null;
 
             var resolver = new FuncMetadataAssemblyResolver(
-                delegate (MetadataLoadContext sender, AssemblyName name)
+                delegate (MetadataLoadContext context, AssemblyName name)
                 {
                     if (name.Name == "Foo")
                     {
                         resolveHandlerCallCount++;
-                        resolveEventHandlerResult = sender.LoadFromByteArray(TestData.s_BaseClassesImage);
+                        resolveEventHandlerResult = context.LoadFromByteArray(TestData.s_BaseClassesImage);
                         return resolveEventHandlerResult;
                     }
+
+                    if (name.Name == "mscorlib")
+                    {
+                        return context.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
+                    }
+
                     return null;
                 });
 
@@ -141,20 +147,25 @@ namespace System.Reflection.Tests
             AssemblyName assemblyNameReceivedByHandler = null;
 
             var resolver = new FuncMetadataAssemblyResolver(
-                delegate (MetadataLoadContext sender, AssemblyName name)
+                delegate (MetadataLoadContext context, AssemblyName name)
                 {
+                    if (name.Name == "RedirectCore")
+                    {
+                        return context.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
+                    }
+
                     assemblyNameReceivedByHandler = name;
                     return null;
                 });
 
-            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
+            using (MetadataLoadContext lc = new MetadataLoadContext(resolver, "RedirectCore"))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyRefUsingFullPublicKeyImage);
                 Type t = a.GetType("C", throwOnError: true);
 
                 // We expect this next to call to throw since it asks the MetadataLoadContext to resolve [mscorlib]System.Object and our
                 // resolve handler doesn't return anything for that.
-                Assert.Throws<FileNotFoundException>(() => t.BaseType);
+                Assert.Throws<FileNotFoundException> (() => t.BaseType);
 
                 // But it did get called with a request to resolve "mscorlib" and we got the correct PKT calculated from the PK.
                 // Note that the original PK is not made available (which follows prior precedent with these apis.) It's not like
@@ -171,18 +182,20 @@ namespace System.Reflection.Tests
     {
         public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
         {
-            if (assemblyName.Name != "SkipCore")
+            Context = context;
+            AssemblyName = assemblyName;
+            CallCount++;
+
+            if (assemblyName.Name == "EmptyCore")
             {
-                Sender = context;
-                AssemblyName = assemblyName;
-                CallCount++;
+                return context.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
             }
 
             return null;
         }
 
         public AssemblyName AssemblyName { get; private set; }
-        public MetadataLoadContext Sender { get; private set; }
+        public MetadataLoadContext Context { get; private set; }
         public int CallCount { get; private set; }
     }
 
@@ -190,7 +203,7 @@ namespace System.Reflection.Tests
     {
         public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
         {
-            Sender = context;
+            Context = context;
             AssemblyName = assemblyName;
             CallCount++;
 
@@ -200,7 +213,7 @@ namespace System.Reflection.Tests
 
         public Assembly Assembly { get; private set; }
         public AssemblyName AssemblyName { get; private set; }
-        public MetadataLoadContext Sender { get; private set; }
+        public MetadataLoadContext Context { get; private set; }
         public int CallCount { get; private set; }
     }
 
@@ -208,12 +221,12 @@ namespace System.Reflection.Tests
     {
         public override Assembly Resolve(System.Reflection.MetadataLoadContext context, AssemblyName assemblyName)
         {
-            if (assemblyName.Name == "SkipCore")
+            if (assemblyName.Name == "EmptyCore")
             {
-                return null;
+                return context.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
             }
 
-            Sender = context;
+            Context = context;
             AssemblyName = assemblyName;
             CallCount++;
 
@@ -221,7 +234,7 @@ namespace System.Reflection.Tests
         }
 
         public AssemblyName AssemblyName { get; private set; }
-        public MetadataLoadContext Sender { get; private set; }
+        public MetadataLoadContext Context { get; private set; }
         public int CallCount { get; private set; }
     }
 }

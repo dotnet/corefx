@@ -12,9 +12,12 @@ namespace System.Reflection.Tests
         [Fact]
         public static void PathAssemblyResolverBasicPath()
         {
+            string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
+
             // Obtain this test class
             string thisAssemblyPath = typeof(MetadataLoadContextTests).Assembly.Location;
-            var resolver = new PathAssemblyResolver(new string[] { thisAssemblyPath });
+
+            var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath, thisAssemblyPath });
             using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 AssemblyName thisAssemblyName = typeof(MetadataLoadContextTests).Assembly.GetName();
@@ -52,7 +55,8 @@ namespace System.Reflection.Tests
         [Fact]
         public static void PathAssemblyResolverWithNoPath()
         {
-            var resolver = new PathAssemblyResolver(new string[] { });
+            string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
+            var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath });
             using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
@@ -65,7 +69,8 @@ namespace System.Reflection.Tests
         [Fact]
         public static void PathAssemblyResolverWithNoPathAndNoCoreAssemblyName()
         {
-            var resolver = new PathAssemblyResolver(new string[] { });
+            string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
+            var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath });
             using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
             {
                 Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);

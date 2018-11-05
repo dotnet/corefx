@@ -10,22 +10,34 @@ namespace System.Reflection.Tests
     public static partial class MetadataLoadContextTests
     {
         [Fact]
+        public static void MissingResolver()
+        {
+            Assert.Throws<ArgumentNullException>(() => new MetadataLoadContext(null));
+        }
+
+        [Fact]
+        public static void InvalidAssemblyName()
+        {
+            Assert.Throws<ArgumentException>(() => new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver(), ""));
+        }
+
+        [Fact]
         public static void CoreAssemblyCanBeAFacade()
         {
             Assembly actualCoreAssembly = null;
             Assembly testAssembly = null;
 
             var resolver = new FuncMetadataAssemblyResolver(
-                delegate (MetadataLoadContext sender, AssemblyName refName)
+                delegate (MetadataLoadContext context, AssemblyName refName)
                 {
                     if (refName.Name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase))
                     {
-                        return actualCoreAssembly = sender.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
+                        return actualCoreAssembly = context.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                     }
                     //else if (refName.Equals(new AssemblyName(TestData.s_PhonyCoreAssemblyName)))
                     else if (refName.Name == new AssemblyName(TestData.s_PhonyCoreAssemblyName).Name)
                     {
-                        return testAssembly = sender.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
+                        return testAssembly = context.LoadFromByteArray(TestData.s_PhonyCoreAssemblyImage);
                     }
                     return null;
                 });

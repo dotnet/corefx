@@ -247,7 +247,7 @@ namespace System.Reflection.Tests
         [Fact]
         public unsafe static void TestCustomModifiers1()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreMetadataAssemblyResolver(), "mscorlib"))
             {
 
                 Assembly a = lc.LoadFromByteArray(TestData.s_CustomModifiersImage);
@@ -275,7 +275,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestMethodBody1()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreMetadataAssemblyResolver(), "mscorlib"))
             {
                 Assembly coreAssembly = lc.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                 Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyWithMethodBodyImage);
@@ -357,7 +357,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestEHClauses()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreAssemblyMetadataAssemblyResolver(), "mscorlib"))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new CoreMetadataAssemblyResolver(), "mscorlib"))
             {
                 Assembly coreAssembly = lc.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());
                 Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyWithEhClausesImage);

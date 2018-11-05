@@ -12,7 +12,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromByteArraySimpleAssembly()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.NotNull(a);
@@ -32,7 +32,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
             {
-                using (MetadataLoadContext lc = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
                 {
                     Assembly a = lc.LoadFromAssemblyPath(tf.Path);
                     Assert.NotNull(a);
@@ -51,7 +51,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromStreamMemorySimpleAssembly()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Stream peStream = new MemoryStream(TestData.s_SimpleAssemblyImage);
                 Assembly a = lc.LoadFromStream(peStream);
@@ -72,7 +72,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf = TempFile.Create(TestData.s_SimpleAssemblyImage))
             {
-                using (MetadataLoadContext lc = new MetadataLoadContext(null))
+                using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
                 {
                     Stream fs = File.OpenRead(tf.Path);
                     Assembly a = lc.LoadFromStream(fs);
@@ -92,7 +92,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromNonZeroPositionedStreamMemorySimpleAssembly()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Stream peStream = new MemoryStream(TestData.s_SimpleAssemblyImage);
                 peStream.Position = 1; 
@@ -114,7 +114,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyName()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Stream peStream = new MemoryStream(TestData.s_SimpleAssemblyImage);
                 Assembly a = lc.LoadFromStream(peStream);
@@ -133,7 +133,7 @@ namespace System.Reflection.Tests
         {
             using (TempFile tf1 = TempFile.Create(TestData.s_SimpleAssemblyImage))
             using (TempFile tf2 = TempFile.Create(TestData.s_SimpleAssemblyImage))
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 // As long as the MVID matches, you can load the same assembly from multiple locations.
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
@@ -156,7 +156,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromDifferentLocationsMvidMismatch()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.Equal(TestData.s_SimpleAssemblyName, a.GetName().FullName);
@@ -164,7 +164,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(TestData.s_SimpleAssemblyMvid, mvid);
             }
 
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyRecompiledImage);
                 Assert.Equal(TestData.s_SimpleAssemblyName, a.GetName().FullName);
@@ -172,7 +172,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(TestData.s_SimpleAssemblyRecompiledMvid, mvid);
             }
 
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
                 Assert.Throws<FileLoadException>(() => lc.LoadFromByteArray(TestData.s_SimpleAssemblyRecompiledImage));
@@ -182,7 +182,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyNameNullString()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assert.Throws<ArgumentNullException>(() => lc.LoadFromAssemblyName((string)null));
             }
@@ -191,7 +191,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyNameNullAssemblyName()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assert.Throws<ArgumentNullException>(() => lc.LoadFromAssemblyName((AssemblyName)null));
             }
@@ -200,7 +200,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyPathNull()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assert.Throws<ArgumentNullException>(() => lc.LoadFromAssemblyPath(null));
             }
@@ -209,7 +209,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromByteArrayNull()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assert.Throws<ArgumentNullException>(() => lc.LoadFromByteArray(null));
             }
@@ -218,7 +218,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromStreamNull()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assert.Throws<ArgumentNullException>(() => lc.LoadFromStream(null));
             }
@@ -227,7 +227,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void BadImageFormat()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 for (int i = 0; i < 100; i++)
                 {
@@ -240,7 +240,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void LoadFromAssemblyNameNeverLoadedAssembly()
         {
-            using (MetadataLoadContext lc = new MetadataLoadContext(null))
+            using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assert.Throws<FileNotFoundException>(() => lc.LoadFromAssemblyName("NeverSawThis"));
             }
