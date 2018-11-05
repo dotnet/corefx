@@ -7,6 +7,8 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using Internal.Runtime.CompilerServices;
+
 namespace System.Text.Json
 {
     internal static class JsonReaderHelper
