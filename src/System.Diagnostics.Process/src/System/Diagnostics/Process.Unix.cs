@@ -517,15 +517,19 @@ namespace System.Diagnostics
                     resolvedFilename = uri.LocalPath;
                 }
             }
-            // filename is a relative path in the working directory
-            else if (File.Exists(filename))
-            {
-                resolvedFilename = filename;
-            }
-            // find filename on PATH
             else
             {
-                resolvedFilename = FindProgramInPath(filename);
+                string relativeFile = Path.Combine(Directory.GetCurrentDirectory(), filename);
+                // filename is a relative path in the working directory
+                if (File.Exists(relativeFile))
+                {
+                    resolvedFilename = relativeFile;
+                }
+                // find filename on PATH
+                else
+                {
+                    resolvedFilename = FindProgramInPath(filename);
+                }
             }
 
             if (resolvedFilename == null)

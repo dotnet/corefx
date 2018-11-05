@@ -218,6 +218,87 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProcessStart_UseShellExecute_Executes(bool filenameAsUrl)
+        {
+            string filename = GetTestFilePath();
+            if (PlatformDetection.IsWindows)
+            {
+                filename += ".bat";
+            }
+            WriteScriptFile(filename, returnValue: 42);
+
+            if (filenameAsUrl)
+            {
+                filename = new Uri(filename).ToString();
+            }
+
+            using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = filename }))
+            {
+                process.WaitForExit();
+                Assert.Equal(42, process.ExitCode);
+            }
+        }
+
+        [Fact]
+        public void ProcessStart_UseShellExecute_ExecuteOrder()
+        {
+            // Create a directory that we will use as PATH
+            string path = GetTestFileName();
+            Directory.CreateDirectory(path);
+
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.StartInfo.UseShellExecute = true;
+            options.StartInfo.EnvironmentVariables["PATH"] = path;
+            RemoteInvoke(pathDirectory =>
+            {
+                // Create two identically named scripts, one in the working directory and one on PATH.
+                string scriptFilename = $"script_{nameof(ProcessStart_UseShellExecute_ExecuteOrder)}";
+                if (PlatformDetection.IsWindows)
+                {
+                    scriptFilename += ".bat";
+                }
+                const int workingDirReturnValue = 1;
+                const int pathDirReturnValue = 2;
+                WriteScriptFile(Path.Combine(pathDirectory, scriptFilename), returnValue: pathDirReturnValue);
+                WriteScriptFile(Path.Combine(Directory.GetCurrentDirectory(), scriptFilename), returnValue: workingDirReturnValue);
+
+                // Execute the script and verify we prefer the one in the working directory.
+                using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
+                {
+                    process.WaitForExit();
+                    Assert.Equal(workingDirReturnValue, process.ExitCode);
+                }
+
+                // Remove the script in the working directory and verify we now use the one on PATH.
+                File.Delete(scriptFilename);
+                using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
+                {
+                    process.WaitForExit();
+                    Assert.Equal(pathDirReturnValue, process.ExitCode);
+                }
+
+                return SuccessExitCode;
+            }, path, options).Dispose();
+        }
+
+        private void WriteScriptFile(string filename, int returnValue)
+        {
+            if (PlatformDetection.IsWindows)
+            {
+                File.WriteAllText(filename, $"exit {returnValue}");
+            }
+            else
+            {
+                File.WriteAllText(filename, $"#!/bin/sh\nexit {returnValue}\n");
+                // set x-bit
+                int mode = Convert.ToInt32("744", 8);
+                Assert.Equal(0, chmod(filename, mode));
+            }
+        }
+
         [Fact]
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestExitCode()
