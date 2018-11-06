@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers.Text;
+using System.Diagnostics;
 
 namespace System.Text.Json
 {
@@ -34,12 +35,113 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Reads the next JSON token value from the source as a <see cref="bool"/>.
+        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// parsed to a <see cref="bool"/> value.
+        /// Returns false otherwise, or if the token type is not JsonTokenType.Number.
+        /// </summary>
+        public bool TryGetValueAsBoolean(out bool value)
+        {
+            bool result = true;
+            if (TokenType == JsonTokenType.True)
+            {
+                Debug.Assert(ValueSpan.Length == 4);
+                value = true;
+            }
+            else if (TokenType == JsonTokenType.False)
+            {
+                Debug.Assert(ValueSpan.Length == 5);
+                value = false;
+            }
+            else
+            {
+                value = default;
+                result = false;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads the next JSON token value from the source as a <see cref="int"/>.
+        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// parsed to a <see cref="int"/> value.
+        /// Returns false otherwise, or if the token type is not JsonTokenType.Number.
+        /// </summary>
+        public bool TryGetValueAsInt32(out int value)
+        {
+            value = default;
+            if (TokenType != JsonTokenType.Number)
+                return false;
+
+            return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
+        }
+
+        /// <summary>
+        /// Reads the next JSON token value from the source as a <see cref="long"/>.
+        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// parsed to a <see cref="long"/> value.
+        /// Returns false otherwise, or if the token type is not JsonTokenType.Number.
+        /// </summary>
+        public bool TryGetValueAsInt64(out long value)
+        {
+            value = default;
+            if (TokenType != JsonTokenType.Number)
+                return false;
+
+            return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
+        }
+
+        /// <summary>
+        /// Reads the next JSON token value from the source as a <see cref="float"/>.
+        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// parsed to a <see cref="float"/> value.
+        /// Returns false otherwise, or if the token type is not JsonTokenType.Number.
+        /// </summary>
+        public bool TryGetValueAsSingle(out float value)
+        {
+            value = default;
+            if (TokenType != JsonTokenType.Number)
+                return false;
+
+            if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
+            {
+                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
+            }
+            else
+            {
+                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat: 'e') && ValueSpan.Length == bytesConsumed;
+            }
+        }
+
+        /// <summary>
         /// Reads the next JSON token value from the source as a <see cref="double"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
-        /// parsed to a double value.
-        /// Returns false if the token type is not JsonTokenType.Number.
+        /// parsed to a <see cref="double"/> value.
+        /// Returns false otherwise, or if the token type is not JsonTokenType.Number.
         /// </summary>
         public bool TryGetValueAsDouble(out double value)
+        {
+            value = default;
+            if (TokenType != JsonTokenType.Number)
+                return false;
+
+            if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
+            {
+                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
+            }
+            else
+            {
+                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat: 'e') && ValueSpan.Length == bytesConsumed;
+            }
+        }
+
+        /// <summary>
+        /// Reads the next JSON token value from the source as a <see cref="decimal"/>.
+        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// parsed to a <see cref="decimal"/> value.
+        /// Returns false otherwise, or if the token type is not JsonTokenType.Number.
+        /// </summary>
+        public bool TryGetValueAsDecimal(out decimal value)
         {
             value = default;
             if (TokenType != JsonTokenType.Number)

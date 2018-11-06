@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static class Utf8JsonReaderTests
+    public static partial class Utf8JsonReaderTests
     {
         // TestCaseType is only used to give the json strings a descriptive name.
         [Theory]
