@@ -9,6 +9,9 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonReader
     {
+        // Reject any invalid UTF-8 data rather than silently replacing.
+        private static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
         /// <summary>
         /// Reads the next JSON token value from the source as a <see cref="string"/>.
         /// Returns true if the UTF-8 encoded token value can be successfully transcoded
@@ -22,17 +25,13 @@ namespace System.Text.Json
         public bool TryGetValueAsString(out string value)
         {
             value = default;
-            if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName)
+            if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.Comment)
             {
                 return false;
             }
 
-            byte[] valueArray = ValueSpan.ToArray();
-
-            var utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
             //TODO: Perform additional validation and unescaping if necessary
-            value = utf8.GetString(valueArray);
+            value = s_utf8Encoding.GetString(ValueSpan);
             return true;
         }
 

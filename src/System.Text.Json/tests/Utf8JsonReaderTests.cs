@@ -855,7 +855,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan);
+                        Assert.True(json.TryGetValueAsString(out string actualComment));
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -917,7 +917,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan);
+                        Assert.True(json.TryGetValueAsString(out string actualComment));
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -943,7 +943,7 @@ namespace System.Text.Json.Tests
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
                             Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                            string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan);
+                            Assert.True(jsonSlice.TryGetValueAsString(out string actualComment));
                             Assert.Equal(expectedComment, actualComment);
                             break;
                     }
@@ -966,7 +966,7 @@ namespace System.Text.Json.Tests
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
                                 Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                                string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan);
+                                Assert.True(jsonSlice.TryGetValueAsString(out string actualComment));
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
                         }
