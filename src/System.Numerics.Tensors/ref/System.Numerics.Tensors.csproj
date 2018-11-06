@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System.Numerics.Tensors.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Memory" />
+  </ItemGroup>
+</Project>
