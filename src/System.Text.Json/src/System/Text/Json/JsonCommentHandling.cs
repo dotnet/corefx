@@ -5,7 +5,7 @@
 namespace System.Text.Json
 {
     /// <summary>
-    /// This enum defines the various ways the <see cref="JsonUtf8Reader"/> can deal with comments.
+    /// This enum defines the various ways the <see cref="Utf8JsonReader"/> can deal with comments.
     /// </summary>
     public enum JsonCommentHandling : byte
     {
@@ -22,7 +22,7 @@ namespace System.Text.Json
         AllowComments = 1,
         /// <summary>
         /// Allow comments within the JSON input and ignore them.
-        /// The <see cref="JsonUtf8Reader"/> will behave as if no comments were present.
+        /// The <see cref="Utf8JsonReader"/> will behave as if no comments were present.
         /// </summary>
         SkipComments = 2,
     }

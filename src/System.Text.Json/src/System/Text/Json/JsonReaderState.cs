@@ -8,11 +8,11 @@ namespace System.Text.Json
 {
     /// <summary>
     /// Defines an opaque type that holds and saves all the relevant state information which must be provided
-    /// to the <see cref="JsonUtf8Reader"/> to continue reading after processing incomplete data.
+    /// to the <see cref="Utf8JsonReader"/> to continue reading after processing incomplete data.
     /// This type is required to support reentrancy when reading incomplete data, and to continue
-    /// reading once more data is available. Unlike the <see cref="JsonUtf8Reader"/>, which is a ref struct,
+    /// reading once more data is available. Unlike the <see cref="Utf8JsonReader"/>, which is a ref struct,
     /// this type can survive across async/await boundaries and hence this type is required to provide
-    /// support for reading in more data asynchronously before continuing with a new instance of the <see cref="JsonUtf8Reader"/>.
+    /// support for reading in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
     /// </summary>
     public struct JsonReaderState
     {
@@ -41,13 +41,13 @@ namespace System.Text.Json
 
         /// <summary>
         /// Returns the current <see cref="SequencePosition"/> within the provided UTF-8 encoded
-        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="JsonUtf8Reader"/> was constructed
+        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="Utf8JsonReader"/> was constructed
         /// with a ReadOnlySpan&lt;byte&gt; instead, this will always return a default <see cref="SequencePosition"/>.
         /// </summary>
         public SequencePosition Position => _sequencePosition;
 
         /// <summary>
-        /// Returns the total amount of bytes consumed by the <see cref="JsonUtf8Reader"/> so far
+        /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
         /// for the given UTF-8 encoded input text.
         /// </summary>
         public long BytesConsumed => _bytesConsumed;
@@ -57,16 +57,16 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="maxDepth">Sets the maximum depth allowed when reading JSON, with the default set as 64.
         /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.</param>
-        /// <param name="commentHandling">Defines how the <see cref="JsonUtf8Reader"/> should handle comments when reading through the JSON.
-        /// By default, the <see cref="JsonUtf8Reader"/> treats comments within the JSON as invalid.</param>
+        /// <param name="commentHandling">Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
+        /// By default, the <see cref="Utf8JsonReader"/> treats comments within the JSON as invalid.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the max depth is set to a non-positive value (&lt;= 0)
         /// </exception>
         /// <remarks>
-        /// An instance of this state must be passed to the <see cref="JsonUtf8Reader"/> ctor with the JSON data.
-        /// Unlike the <see cref="JsonUtf8Reader"/>, which is a ref struct, the state can survive
+        /// An instance of this state must be passed to the <see cref="Utf8JsonReader"/> ctor with the JSON data.
+        /// Unlike the <see cref="Utf8JsonReader"/>, which is a ref struct, the state can survive
         /// across async/await boundaries and hence this type is required to provide support for reading
-        /// in more data asynchronously before continuing with a new instance of the <see cref="JsonUtf8Reader"/>.
+        /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
         /// </remarks>
         public JsonReaderState(int maxDepth = StackFreeMaxDepth, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
         {
@@ -96,7 +96,7 @@ namespace System.Text.Json
 
         /// <summary>
         /// Gets the custom behaviour when reading JSON using
-        /// the <see cref="JsonUtf8Reader"/> that may deviate from strict adherence
+        /// the <see cref="Utf8JsonReader"/> that may deviate from strict adherence
         /// to the JSON specification, which is the default behaviour.
         /// </summary>
         public JsonReaderOptions Options => _readerOptions;

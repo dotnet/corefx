@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static class JsonUtf8ReaderTests
+    public static class Utf8JsonReaderTests
     {
         // TestCaseType is only used to give the json strings a descriptive name.
         [Theory]
@@ -102,7 +102,7 @@ namespace System.Text.Json.Tests
             for (int i = 0; i < dataUtf8.Length; i++)
             {
                 JsonReaderState state = default;
-                var json = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                 byte[] output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length, out int firstLength, ref json);
                 output.AsSpan(0, firstLength).CopyTo(outputSpan);
                 int written = firstLength;
@@ -115,7 +115,7 @@ namespace System.Text.Json.Tests
                 if (type == TestCaseType.DeepTree || type == TestCaseType.BroadTree || type == TestCaseType.LotsOfNumbers
                     || type == TestCaseType.LotsOfStrings || type == TestCaseType.Json4KB)
                 {
-                    json = new JsonUtf8Reader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, jsonState);
+                    json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, jsonState);
                     output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length - written, out int length, ref json);
                     output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                     written += length;
@@ -131,14 +131,14 @@ namespace System.Text.Json.Tests
                     for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                     {
                         written = firstLength;
-                        json = new JsonUtf8Reader(dataUtf8.AsSpan((int)consumed, (int)j), isFinalBlock: false, jsonState);
+                        json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed, (int)j), isFinalBlock: false, jsonState);
                         output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length - written, out int length, ref json);
                         output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                         written += length;
 
                         long consumedInner = json.BytesConsumed;
                         Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
-                        json = new JsonUtf8Reader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
+                        json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                         output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length - written, out length, ref json);
                         output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                         written += length;
@@ -164,7 +164,7 @@ namespace System.Text.Json.Tests
                 for (int i = 0; i < dataUtf8.Length; i++)
                 {
                     var state = new JsonReaderState(commentHandling: commentHandling);
-                    var json = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
+                    var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                     while (json.Read())
                         ;
 
@@ -173,13 +173,13 @@ namespace System.Text.Json.Tests
                     JsonReaderState jsonState = json.CurrentState;
                     for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                     {
-                        json = new JsonUtf8Reader(dataUtf8.AsSpan((int)consumed, (int)j), isFinalBlock: false, jsonState);
+                        json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed, (int)j), isFinalBlock: false, jsonState);
                         while (json.Read())
                             ;
 
                         long consumedInner = json.BytesConsumed;
                         Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
-                        json = new JsonUtf8Reader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
+                        json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                         while (json.Read())
                             ;
                         Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
@@ -212,7 +212,7 @@ namespace System.Text.Json.Tests
                 Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
 
                 var state = new JsonReaderState(maxDepth: depth);
-                var json = new JsonUtf8Reader(data, isFinalBlock: true, state);
+                var json = new Utf8JsonReader(data, isFinalBlock: true, state);
 
                 int actualDepth = 0;
                 while (json.Read())
@@ -261,7 +261,7 @@ namespace System.Text.Json.Tests
             Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
 
             var state = new JsonReaderState(maxDepth: depth - 1);
-            var json = new JsonUtf8Reader(data, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(data, isFinalBlock: true, state);
 
             try
             {
@@ -337,13 +337,13 @@ namespace System.Text.Json.Tests
                 for (int i = 0; i < dataUtf8.Length; i++)
                 {
                     var state = new JsonReaderState(commentHandling: commentHandling);
-                    var json = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), false, state);
+                    var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), false, state);
                     while (json.Read())
                         ;
 
                     long consumed = json.BytesConsumed;
                     Assert.Equal(consumed, json.CurrentState.BytesConsumed);
-                    json = new JsonUtf8Reader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
+                    json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                         ;
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
@@ -376,13 +376,13 @@ namespace System.Text.Json.Tests
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 var state = new JsonReaderState(commentHandling: commentHandling);
-                var json = new JsonUtf8Reader(dataUtf8.AsSpan(0, splitLocation), false, state);
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), false, state);
                 while (json.Read())
                     ;
                 Assert.Equal(consumed, json.BytesConsumed);
                 Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
-                json = new JsonUtf8Reader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
                 while (json.Read())
                     ;
                 Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
@@ -405,13 +405,13 @@ namespace System.Text.Json.Tests
             {
                 var state = new JsonReaderState(commentHandling: commentHandling);
                 byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-                var json = new JsonUtf8Reader(dataUtf8.AsSpan(0, splitLocation), false, state);
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), false, state);
                 while (json.Read())
                     ;
                 Assert.Equal(consumed, json.BytesConsumed);
                 Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
-                json = new JsonUtf8Reader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
                 try
                 {
                     while (json.Read())
@@ -460,7 +460,7 @@ namespace System.Text.Json.Tests
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 var state = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
-                var json = new JsonUtf8Reader(dataUtf8, false, state);
+                var json = new Utf8JsonReader(dataUtf8, false, state);
 
                 try
                 {
@@ -486,7 +486,7 @@ namespace System.Text.Json.Tests
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 var state = new JsonReaderState(commentHandling: commentHandling);
-                var json = new JsonUtf8Reader(dataUtf8, false, state);
+                var json = new Utf8JsonReader(dataUtf8, false, state);
 
                 try
                 {
@@ -568,7 +568,7 @@ namespace System.Text.Json.Tests
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 var state = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
-                var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
                 try
                 {
@@ -650,7 +650,7 @@ namespace System.Text.Json.Tests
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 var state = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
-                var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
                 try
                 {
@@ -669,7 +669,7 @@ namespace System.Text.Json.Tests
                     try
                     {
                         var stateInner = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
-                        var jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
+                        var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
                         while (jsonSlice.Read())
                             ;
 
@@ -677,7 +677,7 @@ namespace System.Text.Json.Tests
                         Assert.Equal(consumed, jsonSlice.CurrentState.BytesConsumed);
                         JsonReaderState jsonState = jsonSlice.CurrentState;
 
-                        jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, jsonState);
+                        jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, jsonState);
                         while (jsonSlice.Read())
                             ;
 
@@ -736,7 +736,7 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             bool foundComment = false;
             long indexAfterFirstComment = 0;
@@ -798,7 +798,7 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             bool foundComment = false;
             long indexAfterFirstComment = 0;
@@ -824,7 +824,7 @@ namespace System.Text.Json.Tests
             for (int i = 0; i < dataUtf8.Length; i++)
             {
                 var stateInner = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
-                var jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
+                var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
 
                 foundComment = false;
                 indexAfterFirstComment = 0;
@@ -847,7 +847,7 @@ namespace System.Text.Json.Tests
 
                 int consumed = (int)jsonSlice.BytesConsumed;
                 Assert.Equal(consumed, jsonSlice.CurrentState.BytesConsumed);
-                jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan(consumed), isFinalBlock: true, jsonSlice.CurrentState);
+                jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(consumed), isFinalBlock: true, jsonSlice.CurrentState);
 
                 if (!foundComment)
                 {
@@ -913,7 +913,7 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(commentHandling: JsonCommentHandling.SkipComments);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             JsonTokenType prevTokenType = JsonTokenType.None;
             while (json.Read())
@@ -970,7 +970,7 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(commentHandling: JsonCommentHandling.SkipComments);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             JsonTokenType prevTokenType = JsonTokenType.None;
             while (json.Read())
@@ -991,7 +991,7 @@ namespace System.Text.Json.Tests
             for (int i = 0; i < dataUtf8.Length; i++)
             {
                 var stateInner = new JsonReaderState(commentHandling: JsonCommentHandling.SkipComments);
-                var jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
+                var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
 
                 prevTokenType = JsonTokenType.None;
                 while (jsonSlice.Read())
@@ -1009,7 +1009,7 @@ namespace System.Text.Json.Tests
 
                 int prevConsumed = (int)jsonSlice.BytesConsumed;
                 Assert.Equal(prevConsumed, jsonSlice.CurrentState.BytesConsumed);
-                jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan(prevConsumed), isFinalBlock: true, jsonSlice.CurrentState);
+                jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(prevConsumed), isFinalBlock: true, jsonSlice.CurrentState);
 
                 while (jsonSlice.Read())
                 {
@@ -1066,7 +1066,7 @@ namespace System.Text.Json.Tests
         public static void CommentsAreInvalidByDefault(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, default);
 
             try
             {
@@ -1126,7 +1126,7 @@ namespace System.Text.Json.Tests
         public static void CommentsAreInvalidByDefaultSingleSegment(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, default);
 
             try
             {
@@ -1150,7 +1150,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
-                var jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan(0, i), isFinalBlock: false, default);
+                var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, default);
                 try
                 {
                     while (jsonSlice.Read())
@@ -1165,7 +1165,7 @@ namespace System.Text.Json.Tests
                     }
 
                     Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
-                    jsonSlice = new JsonUtf8Reader(dataUtf8.AsSpan((int)jsonSlice.BytesConsumed), isFinalBlock: true, jsonSlice.CurrentState);
+                    jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan((int)jsonSlice.BytesConsumed), isFinalBlock: true, jsonSlice.CurrentState);
                     while (jsonSlice.Read())
                     {
                         JsonTokenType tokenType = jsonSlice.TokenType;
@@ -1243,7 +1243,7 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             try
             {
@@ -1314,7 +1314,7 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
-            var json = new JsonUtf8Reader(dataUtf8, isFinalBlock: true, state);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             try
             {

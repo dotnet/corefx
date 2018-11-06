@@ -5,7 +5,7 @@
 namespace System.Text.Json
 {
     /// <summary>
-    /// Defines a custom exception object that is thrown by the <see cref="JsonUtf8Reader"/> whenever it
+    /// Defines a custom exception object that is thrown by the <see cref="Utf8JsonReader"/> whenever it
     /// encounters an invalid JSON text while reading through it. This exception is also thrown
     /// whenever you read past the defined maximum depth.
     /// </summary>

@@ -21,13 +21,12 @@ namespace System.Text.Json
     }
     public partial struct JsonReaderOptions
     {
-        private int _dummyPrimitive;
+        private object _dummy;
         public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
     }
     public partial struct JsonReaderState
     {
         private object _dummy;
-        private int _dummyPrimitive;
         public JsonReaderState(int maxDepth = 64, System.Text.Json.JsonCommentHandling commentHandling = System.Text.Json.JsonCommentHandling.Default) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int MaxDepth { get { throw null; } }
@@ -49,11 +48,10 @@ namespace System.Text.Json
         String = (byte)6,
         True = (byte)8,
     }
-    public ref partial struct JsonUtf8Reader
+    public ref partial struct Utf8JsonReader
     {
         private object _dummy;
-        private int _dummyPrimitive;
-        public JsonUtf8Reader(System.ReadOnlySpan<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
+        public Utf8JsonReader(System.ReadOnlySpan<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
         public System.Text.Json.JsonReaderState CurrentState { get { throw null; } }

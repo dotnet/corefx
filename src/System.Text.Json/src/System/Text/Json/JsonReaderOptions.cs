@@ -6,14 +6,14 @@ namespace System.Text.Json
 {
     /// <summary>
     /// Provides the ability for the user to define custom behaviour when reading JSON
-    /// using the <see cref="JsonUtf8Reader"/> that may deviate from strict adherence
+    /// using the <see cref="Utf8JsonReader"/> that may deviate from strict adherence
     /// to the JSON specification (as per the JSON RFC - https://tools.ietf.org/html/rfc8259),
     /// which is the default behaviour.
     /// </summary>
     public struct JsonReaderOptions
     {
         /// <summary>
-        /// Defines how the <see cref="JsonUtf8Reader"/> should handle comments when reading through the JSON.
+        /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
         /// </summary>
         public JsonCommentHandling CommentHandling { get; set; }
     }

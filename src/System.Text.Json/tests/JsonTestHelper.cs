@@ -51,14 +51,14 @@ namespace System.Text.Json.Tests
         public static byte[] JsonLabReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
         {
             var state = new JsonReaderState(commentHandling: commentHandling);
-            var reader = new JsonUtf8Reader(data, true, state);
+            var reader = new Utf8JsonReader(data, true, state);
             return JsonLabReaderLoop(data.Length, out length, ref reader);
         }
 
         public static object JsonLabReturnObjectHelper(byte[] data, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
         {
             var state = new JsonReaderState(commentHandling: commentHandling);
-            var reader = new JsonUtf8Reader(data, true, state);
+            var reader = new Utf8JsonReader(data, true, state);
             return JsonLabReaderLoop(ref reader);
         }
 
@@ -102,7 +102,7 @@ namespace System.Text.Json.Tests
             return builder.ToString();
         }
 
-        public static byte[] JsonLabReaderLoop(int inpuDataLength, out int length, ref JsonUtf8Reader json)
+        public static byte[] JsonLabReaderLoop(int inpuDataLength, out int length, ref Utf8JsonReader json)
         {
             byte[] outputArray = new byte[inpuDataLength];
             Span<byte> destination = outputArray;
@@ -158,7 +158,7 @@ namespace System.Text.Json.Tests
             return outputArray;
         }
 
-        public static object JsonLabReaderLoop(ref JsonUtf8Reader json)
+        public static object JsonLabReaderLoop(ref Utf8JsonReader json)
         {
             object root = null;
 
@@ -200,7 +200,7 @@ namespace System.Text.Json.Tests
             return root;
         }
 
-        public static Dictionary<string, object> JsonLabReaderDictionaryLoop(ref JsonUtf8Reader json)
+        public static Dictionary<string, object> JsonLabReaderDictionaryLoop(ref Utf8JsonReader json)
         {
             Dictionary<string, object> dictionary = new Dictionary<string, object>();
 
@@ -295,7 +295,7 @@ namespace System.Text.Json.Tests
             return dictionary;
         }
 
-        public static List<object> JsonLabReaderListLoop(ref JsonUtf8Reader json)
+        public static List<object> JsonLabReaderListLoop(ref Utf8JsonReader json)
         {
             List<object> arrayList = new List<object>();
 

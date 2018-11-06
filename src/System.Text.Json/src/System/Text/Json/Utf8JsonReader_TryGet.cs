@@ -7,7 +7,7 @@ using System.Buffers.Text;
 
 namespace System.Text.Json
 {
-    public ref partial struct JsonUtf8Reader
+    public ref partial struct Utf8JsonReader
     {
         /// <summary>
         /// Reads the next JSON token value from the source as a <see cref="string"/>.

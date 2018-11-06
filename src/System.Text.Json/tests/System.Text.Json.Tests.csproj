@@ -5,8 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="JsonTestHelper.cs" />
-    <Compile Include="JsonUtf8ReaderTests.cs" />
     <Compile Include="TestCaseType.cs" />
+    <Compile Include="Utf8JsonReaderTests.cs" />
   </ItemGroup>
     <ItemGroup>
     <Reference Include="System.Collections" />

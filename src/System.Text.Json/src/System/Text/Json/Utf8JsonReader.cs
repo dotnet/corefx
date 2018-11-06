@@ -19,7 +19,7 @@ namespace System.Text.Json
     /// To be able to set max depth while reading OR allow skipping comments, create an instance of 
     /// <see cref="JsonReaderState"/> and pass that in to the reader.
     /// </summary>
-    public ref partial struct JsonUtf8Reader
+    public ref partial struct Utf8JsonReader
     {
         private ReadOnlySpan<byte> _buffer;
 
@@ -74,7 +74,7 @@ namespace System.Text.Json
         public ReadOnlySequence<byte> ValueSequence { get; private set; }
 
         /// <summary>
-        /// Returns the total amount of bytes consumed by the <see cref="JsonUtf8Reader"/> so far
+        /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
         /// for the given UTF-8 encoded input text.
         /// </summary>
         public long BytesConsumed => _totalConsumed + _consumed;
@@ -93,7 +93,7 @@ namespace System.Text.Json
 
         /// <summary>
         /// Returns the current <see cref="SequencePosition"/> within the provided UTF-8 encoded
-        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="JsonUtf8Reader"/> was constructed
+        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="Utf8JsonReader"/> was constructed
         /// with a ReadOnlySpan&lt;byte&gt; instead, this will always return a default <see cref="SequencePosition"/>.
         /// </summary>
         public SequencePosition Position
@@ -109,11 +109,11 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Returns the current snapshot of the <see cref="JsonUtf8Reader"/> state which must
-        /// be captured by the caller and passed back in to the <see cref="JsonUtf8Reader"/> ctor with more data.
-        /// Unlike the <see cref="JsonUtf8Reader"/>, which is a ref struct, the state can survive
+        /// Returns the current snapshot of the <see cref="Utf8JsonReader"/> state which must
+        /// be captured by the caller and passed back in to the <see cref="Utf8JsonReader"/> ctor with more data.
+        /// Unlike the <see cref="Utf8JsonReader"/>, which is a ref struct, the state can survive
         /// across async/await boundaries and hence this type is required to provide support for reading
-        /// in more data asynchronously before continuing with a new instance of the <see cref="JsonUtf8Reader"/>.
+        /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
         /// </summary>
         public JsonReaderState CurrentState => new JsonReaderState
         {
@@ -132,18 +132,18 @@ namespace System.Text.Json
         };
 
         /// <summary>
-        /// Constructs a new <see cref="JsonUtf8Reader"/> instance.
+        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
         /// </summary>
         /// <param name="jsonData">The ReadOnlySpan&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
         /// <param name="isFinalBlock">True when the input span contains the entire data to process.
         /// Set to false only if it is known that the input span contains partial data with more data to follow.</param>
         /// <param name="state">If this is the first call to the ctor, pass in a default state. Otherwise,
-        /// capture the state from the previous instance of the <see cref="JsonUtf8Reader"/> and pass that back.</param>
+        /// capture the state from the previous instance of the <see cref="Utf8JsonReader"/> and pass that back.</param>
         /// <remarks>
         /// Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
         /// This is the reason why the ctor accepts a <see cref="JsonReaderState"/>.
         /// </remarks>
-        public JsonUtf8Reader(ReadOnlySpan<byte> jsonData, bool isFinalBlock, JsonReaderState state)
+        public Utf8JsonReader(ReadOnlySpan<byte> jsonData, bool isFinalBlock, JsonReaderState state)
         {
             _buffer = jsonData;
 
