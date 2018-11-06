@@ -712,9 +712,6 @@ namespace System.Diagnostics.Tests
         }
 
         [DllImport("libc")]
-        private static extern int chmod(string path, int mode);
-
-        [DllImport("libc")]
         private static extern uint geteuid();
 
         [DllImport("libc")]

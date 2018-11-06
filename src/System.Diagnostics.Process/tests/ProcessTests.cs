@@ -1813,5 +1813,8 @@ namespace System.Diagnostics.Tests
 
             return secureString;
         }
+
+        [DllImport("libc")]
+        private static extern int chmod(string path, int mode);
     }
 }
