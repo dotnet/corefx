@@ -19,9 +19,14 @@
       <_ProcessorCountArg> --numproc $(MSBuildNodeCount)</_ProcessorCountArg>
       <_StripSymbolsArg Condition="'$(BuildNativeStripSymbols)' == 'true'"> stripsymbols</_StripSymbolsArg>
       <_PortableBuildArg Condition="'$(PortableBuild)' == 'true'"> -portable</_PortableBuildArg>
-      <_ClangBuildArg Condition="'$(Clang)' != ''"> $(Clang)</_ClangBuildArg>
 
-      <_BuildNativeUnixArgs>$(_BuildNativeArgs)$(_ProcessCountArg)$(_StripSymbolsArg)$(_PortableBuildArg)$(_ClangBuildArg)</_BuildNativeUnixArgs>
+      <!--
+        BuildNativeClang is a pass-through argument, to pass an argument to build-native.sh. It is intended to be
+        used to force a specific clang toolset. E.g., pass to msbuild "/p:BuildNativeClang=--clang5.0"
+      -->
+      <_BuildNativeClangArg Condition="'$(BuildNativeClang)' != ''"> $(BuildNativeClang)</_BuildNativeClangArg>
+
+      <_BuildNativeUnixArgs>$(_BuildNativeArgs)$(_ProcessCountArg)$(_StripSymbolsArg)$(_PortableBuildArg)$(_BuildNativeClangArg)</_BuildNativeUnixArgs>
     </PropertyGroup>
 
     <Message Text="$(MSBuildProjectDirectory)/build-native.sh $(_BuildNativeUnixArgs)" Importance="High"/>
