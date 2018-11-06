@@ -41,89 +41,89 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static string GetResourceString(ref Utf8JsonReader json, ExceptionResource resource, char character, string characters)
         {
-            Debug.Assert(Enum.IsDefined(typeof(ExceptionResource), resource),
-                "The enum value is not defined, please check the ExceptionResource Enum.");
-
             string message = "";
             switch (resource)
             {
                 case ExceptionResource.ArrayDepthTooLarge:
-                    message = string.Format(SR.ArrayDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
+                    message = SR.Format(SR.ArrayDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
                     break;
                 case ExceptionResource.ArrayEndWithinObject:
                     message = json.CurrentDepth <= 0 ?
-                        string.Format(SR.DepthMustBePositive, json.CurrentDepth) :
-                        string.Format(SR.ArrayEndWithinObject);
+                        SR.Format(SR.DepthMustBePositive, json.CurrentDepth) :
+                        SR.Format(SR.ArrayEndWithinObject);
                     break;
                 case ExceptionResource.EndOfStringNotFound:
                     message = SR.EndOfStringNotFound;
                     break;
                 case ExceptionResource.ExpectedDigitNotFound:
-                    message = string.Format(SR.ExpectedDigitNotFound, character);
+                    message = SR.Format(SR.ExpectedDigitNotFound, character);
                     break;
                 case ExceptionResource.ExpectedDigitNotFoundEndOfData:
-                    message = string.Format(SR.ExpectedDigitNotFoundEndOfData, character);
+                    message = SR.Format(SR.ExpectedDigitNotFoundEndOfData, character);
                     break;
                 case ExceptionResource.ExpectedEndAfterSingleJson:
-                    message = string.Format(SR.ExpectedEndAfterSingleJson, character);
+                    message = SR.Format(SR.ExpectedEndAfterSingleJson, character);
                     break;
                 case ExceptionResource.ExpectedEndOfDigitNotFound:
-                    message = string.Format(SR.ExpectedEndOfDigitNotFound, character);
+                    message = SR.Format(SR.ExpectedEndOfDigitNotFound, character);
                     break;
                 case ExceptionResource.ExpectedNextDigitComponentNotFound:
-                    message = string.Format(SR.ExpectedNextDigitComponentNotFound, character);
+                    message = SR.Format(SR.ExpectedNextDigitComponentNotFound, character);
                     break;
                 case ExceptionResource.ExpectedNextDigitEValueNotFound:
-                    message = string.Format(SR.ExpectedNextDigitEValueNotFound, character);
+                    message = SR.Format(SR.ExpectedNextDigitEValueNotFound, character);
                     break;
                 case ExceptionResource.ExpectedSeparaterAfterPropertyNameNotFound:
-                    message = string.Format(SR.ExpectedSeparaterAfterPropertyNameNotFound, character);
+                    message = SR.Format(SR.ExpectedSeparaterAfterPropertyNameNotFound, character);
                     break;
                 case ExceptionResource.ExpectedStartOfPropertyNotFound:
-                    message = string.Format(SR.ExpectedStartOfPropertyNotFound, character);
+                    message = SR.Format(SR.ExpectedStartOfPropertyNotFound, character);
                     break;
                 case ExceptionResource.ExpectedStartOfPropertyOrValueNotFound:
                     message = SR.ExpectedStartOfPropertyOrValueNotFound;
                     break;
                 case ExceptionResource.ExpectedStartOfValueNotFound:
-                    message = string.Format(SR.ExpectedStartOfValueNotFound, character);
+                    message = SR.Format(SR.ExpectedStartOfValueNotFound, character);
                     break;
                 case ExceptionResource.ExpectedValueAfterPropertyNameNotFound:
                     message = SR.ExpectedValueAfterPropertyNameNotFound;
                     break;
                 case ExceptionResource.FoundInvalidCharacter:
-                    message = string.Format(SR.FoundInvalidCharacter, character);
+                    message = SR.Format(SR.FoundInvalidCharacter, character);
                     break;
                 case ExceptionResource.InvalidEndOfJson:
-                    message = string.Format(SR.InvalidEndOfJson, json.TokenType);
+                    message = SR.Format(SR.InvalidEndOfJson, json.TokenType);
                     break;
                 case ExceptionResource.ObjectDepthTooLarge:
-                    message = string.Format(SR.ObjectDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
+                    message = SR.Format(SR.ObjectDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
                     break;
                 case ExceptionResource.ObjectEndWithinArray:
                     message = json.CurrentDepth <= 0 ?
-                        string.Format(SR.DepthMustBePositive, json.CurrentDepth) :
-                        string.Format(SR.ObjectEndWithinArray);
+                        SR.Format(SR.DepthMustBePositive, json.CurrentDepth) :
+                        SR.Format(SR.ObjectEndWithinArray);
                     break;
                 case ExceptionResource.Default:
                     break;
                 case ExceptionResource.ExpectedFalse:
-                    message = string.Format(SR.ExpectedFalse, characters);
+                    message = SR.Format(SR.ExpectedFalse, characters);
                     break;
                 case ExceptionResource.ExpectedNull:
-                    message = string.Format(SR.ExpectedNull, characters);
+                    message = SR.Format(SR.ExpectedNull, characters);
                     break;
                 case ExceptionResource.ExpectedTrue:
-                    message = string.Format(SR.ExpectedTrue, characters);
+                    message = SR.Format(SR.ExpectedTrue, characters);
                     break;
                 // This case is covered between ArrayEndWithinObject and ObjectEndWithinArray
                 /*case ExceptionResource.DepthMustBePositive:
                     break;*/
                 case ExceptionResource.InvalidCharacterWithinString:
-                    message = string.Format(SR.InvalidCharacterWithinString, character);
+                    message = SR.Format(SR.InvalidCharacterWithinString, character);
                     break;
                 case ExceptionResource.EndOfCommentNotFound:
                     message = SR.EndOfCommentNotFound;
+                    break;
+                default:
+                    Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
             }
 
