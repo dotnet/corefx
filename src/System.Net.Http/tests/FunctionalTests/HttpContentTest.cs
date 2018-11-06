@@ -476,37 +476,6 @@ namespace System.Net.Http.Functional.Tests
             _output.WriteLine(content.Headers.ToString());
         }
 
-        [Theory]
-        [InlineData("\"\"utf-16", Encoding.UnicodeEncoding)]
-        [InlineData("\"\"utf-8\"\"", Encoding.UTF8)]
-        [InlineData("utf-8\"\"", Encoding.UTF8)]
-        public async Task ReadAsStringAsync_SetInvalidQuotedCharset_ThrowsInvalidOperationException(string charset, Encoding encoding)
-        {
-            await LoopbackServer.CreateClientAndServerAsync(async uri =>
-            {
-                using (var client = new HttpClient()) 
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Post, uri);
-
-                    HttpResponseMessage reponse = await client.SendAsync(request);
-
-                    // This will throw because we have an invalid charset.
-                    Task t = reponse.Content.ReadAsStringAsync();
-                    await Assert.ThrowsAsync<InvalidOperationException>(() => t);
-                }
-            }, async server =>
-            {
-                await server.AcceptConnectionAsync(async connection =>
-                {
-                    byte[] contentArray = encoding.GetBytes("hello world");
-
-                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nContent-Type:text/plain;charset={charset}\r\nConnection: close\r\nContent-Length: {contentArray.Length}\r\nTest-Tag:invalidcharset\r\n\r\n");
-                    await connection.Socket.SendAsync(new ArraySegment<byte>(contentArray), SocketFlags.None);
-                    while (await connection.Socket.ReceiveAsync(new ArraySegment<byte>(new byte[1000]), SocketFlags.None) > 0); // Read and ignore the request.
-                });
-            });
-        }
-
         #region Helper methods
 
         private byte[] EncodeStringWithBOM(Encoding encoding, string str)

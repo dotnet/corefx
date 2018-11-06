@@ -202,7 +202,8 @@ namespace System.Net.Http
             {
                 try
                 {
-                    /*if (headers.ContentType.CharSet.Length > 2 &&
+                    // Remove at most a single set of quotes.
+                    if (headers.ContentType.CharSet.Length > 2 &&
                         headers.ContentType.CharSet[0] == '\"' &&
                         headers.ContentType.CharSet[headers.ContentType.CharSet.Length - 1] == '\"')
                     {
@@ -211,10 +212,7 @@ namespace System.Net.Http
                     else
                     {
                         encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
-                    }*/
-
-                    encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
-
+                    }
 
                     // Byte-order-mark (BOM) characters may be present even if a charset was specified.
                     bomLength = GetPreambleLength(buffer, encoding);
