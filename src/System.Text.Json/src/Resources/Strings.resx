@@ -124,7 +124,7 @@
     <value>We are within an object but observed a ']'.</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>An error occurred while reading the json.</value>
+    <value>An error occurred while reading the JSON.</value>
   </data>
   <data name="DepthMustBePositive" xml:space="preserve">
     <value>Mismatched number of start/end objects or arrays. Depth is {0} but must be greater than 0.</value>
@@ -142,7 +142,7 @@
     <value>Invalid number. Last character read: '{0}'. Expected a digit ('0'-'9') but reached end of data.</value>
   </data>
   <data name="ExpectedEndAfterSingleJson" xml:space="preserve">
-    <value>Expected end of json after a single value but additional data found. Last character read: '{0}'.</value>
+    <value>Expected end of JSON after a single value but additional data found. Last character read: '{0}'.</value>
   </data>
   <data name="ExpectedEndOfDigitNotFound" xml:space="preserve">
     <value>Invalid end of number. Last character read: '{0}'. Expected a delimiter.</value>
@@ -181,10 +181,10 @@
     <value>Expected either ',', '}}', or ']', but instead got '{0}'.</value>
   </data>
   <data name="InvalidCharacterWithinString" xml:space="preserve">
-    <value>Found an invalid character within a json string: '{0}'. It is expected that the string is properly escaped.</value>
+    <value>Found an invalid character within a JSON string: '{0}'. It is expected that the string is properly escaped.</value>
   </data>
   <data name="InvalidEndOfJson" xml:space="preserve">
-    <value>Expected valid end of json payload with TokenType either EndArray or EndObject. Current token type is '{0}'.</value>
+    <value>Expected valid end of JSON payload with TokenType either EndArray or EndObject. Current token type is '{0}'.</value>
   </data>
   <data name="MaxDepthMustBePositive" xml:space="preserve">
     <value>Max depth must be positive.</value>
