@@ -432,11 +432,11 @@ namespace System.Text.Json
             else
             {
                 //Create local copy to avoid bounds checks.
-                ReadOnlySpan<byte> localCopy = _buffer;
+                ReadOnlySpan<byte> localBuffer = _buffer;
 
                 if ((uint)(first - '0') <= '9' - '0' || first == '-')
                 {
-                    if (!TryGetNumber(localCopy.Slice(_consumed), out int numberOfBytes))
+                    if (!TryGetNumber(localBuffer.Slice(_consumed), out int numberOfBytes))
                     {
                         return false;
                     }
@@ -453,15 +453,15 @@ namespace System.Text.Json
                 return false;
 
             Done:
-                if (_consumed >= (uint)localCopy.Length)
+                if (_consumed >= (uint)localBuffer.Length)
                 {
                     return true;
                 }
 
-                if (localCopy[_consumed] <= JsonConstants.Space)
+                if (localBuffer[_consumed] <= JsonConstants.Space)
                 {
                     SkipWhiteSpace();
-                    if (_consumed >= (uint)localCopy.Length)
+                    if (_consumed >= (uint)localBuffer.Length)
                     {
                         return true;
                     }
@@ -471,7 +471,7 @@ namespace System.Text.Json
                 {
                     if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                     {
-                        if (_tokenType == JsonTokenType.Comment || localCopy[_consumed] == JsonConstants.Solidus)
+                        if (_tokenType == JsonTokenType.Comment || localBuffer[_consumed] == JsonConstants.Solidus)
                         {
                             return true;
                         }
@@ -486,7 +486,7 @@ namespace System.Text.Json
                         return true;
                     }
                 }
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, localCopy[_consumed]);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, localBuffer[_consumed]);
             }
             return true;
         }
@@ -494,10 +494,10 @@ namespace System.Text.Json
         private void SkipWhiteSpace()
         {
             //Create local copy to avoid bounds checks.
-            ReadOnlySpan<byte> localCopy = _buffer;
-            for (; _consumed < localCopy.Length; _consumed++)
+            ReadOnlySpan<byte> localBuffer = _buffer;
+            for (; _consumed < localBuffer.Length; _consumed++)
             {
-                byte val = localCopy[_consumed];
+                byte val = localBuffer[_consumed];
                 if (val != JsonConstants.Space &&
                     val != JsonConstants.CarriageReturn &&
                     val != JsonConstants.LineFeed &&
@@ -747,9 +747,9 @@ namespace System.Text.Json
             Debug.Assert(_buffer[_consumed] == JsonConstants.Quote);
 
             //Create local copy to avoid bounds checks.
-            ReadOnlySpan<byte> localCopy = _buffer;
+            ReadOnlySpan<byte> localBuffer = _buffer;
 
-            int idx = localCopy.Slice(_consumed + 1).IndexOf(JsonConstants.Quote);
+            int idx = localBuffer.Slice(_consumed + 1).IndexOf(JsonConstants.Quote);
             if (idx < 0)
             {
                 if (IsLastSpan)
@@ -762,14 +762,14 @@ namespace System.Text.Json
                 }
             }
 
-            if (localCopy[idx + _consumed] != JsonConstants.ReverseSolidus)
+            if (localBuffer[idx + _consumed] != JsonConstants.ReverseSolidus)
             {
-                localCopy = localCopy.Slice(_consumed + 1, idx);
+                localBuffer = localBuffer.Slice(_consumed + 1, idx);
 
-                if (localCopy.IndexOfAnyControlOrEscape() != -1)
+                if (localBuffer.IndexOfAnyControlOrEscape() != -1)
                 {
                     _lineBytePosition++;
-                    ValidateEscapingAndHex(localCopy);
+                    ValidateEscapingAndHex(localBuffer);
                     goto Done;
                 }
 
@@ -777,7 +777,7 @@ namespace System.Text.Json
 
             Done:
                 _lineBytePosition++;
-                ValueSpan = localCopy;
+                ValueSpan = localBuffer;
                 _tokenType = JsonTokenType.String;
                 _consumed += idx + 2;
                 return true;
@@ -836,12 +836,12 @@ namespace System.Text.Json
 
         FoundEndOfString:
             int startIndex = _consumed + 1;
-            ReadOnlySpan<byte> localCopy = _buffer.Slice(startIndex, i - startIndex);
+            ReadOnlySpan<byte> foundStringToken = _buffer.Slice(startIndex, i - startIndex);
 
-            if (localCopy.IndexOfAnyControlOrEscape() != -1)
+            if (foundStringToken.IndexOfAnyControlOrEscape() != -1)
             {
                 _lineBytePosition++;
-                ValidateEscapingAndHex(localCopy);
+                ValidateEscapingAndHex(foundStringToken);
                 goto Done;
             }
 
@@ -849,7 +849,7 @@ namespace System.Text.Json
 
         Done:
             _lineBytePosition++;
-            ValueSpan = localCopy;
+            ValueSpan = foundStringToken;
             _tokenType = JsonTokenType.String;
             _consumed = i + 1;
             return true;
@@ -1367,18 +1367,18 @@ namespace System.Text.Json
         private bool SkipComment()
         {
             //Create local copy to avoid bounds checks.
-            ReadOnlySpan<byte> localCopy = _buffer.Slice(_consumed + 1);
+            ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
 
-            if (localCopy.Length > 0)
+            if (localBuffer.Length > 0)
             {
-                byte marker = localCopy[0];
+                byte marker = localBuffer[0];
                 if (marker == JsonConstants.Solidus)
                 {
-                    return SkipSingleLineComment(localCopy.Slice(1), out _);
+                    return SkipSingleLineComment(localBuffer.Slice(1), out _);
                 }
                 else if (marker == '*')
                 {
-                    return SkipMultiLineComment(localCopy.Slice(1), out _);
+                    return SkipMultiLineComment(localBuffer.Slice(1), out _);
                 }
                 else
                 {
@@ -1393,17 +1393,17 @@ namespace System.Text.Json
             return false;
         }
 
-        private bool SkipSingleLineComment(ReadOnlySpan<byte> localCopy, out int idx)
+        private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
             //TODO: Match Json.NET's end of comment semantics
-            idx = localCopy.IndexOf(JsonConstants.LineFeed);
+            idx = localBuffer.IndexOf(JsonConstants.LineFeed);
             if (idx == -1)
             {
                 if (IsLastSpan)
                 {
-                    idx = localCopy.Length;
+                    idx = localBuffer.Length;
                     // Assume everything on this line is a comment and there is no more data.
-                    _lineBytePosition += 2 + localCopy.Length;
+                    _lineBytePosition += 2 + localBuffer.Length;
                     goto Done;
                 }
                 else
@@ -1420,12 +1420,12 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool SkipMultiLineComment(ReadOnlySpan<byte> localCopy, out int idx)
+        private bool SkipMultiLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
             idx = 0;
             while (true)
             {
-                int foundIdx = localCopy.Slice(idx).IndexOf(JsonConstants.Solidus);
+                int foundIdx = localBuffer.Slice(idx).IndexOf(JsonConstants.Solidus);
                 if (foundIdx == -1)
                 {
                     if (IsLastSpan)
@@ -1435,7 +1435,7 @@ namespace System.Text.Json
                         return false;
                     }
                 }
-                if (foundIdx != 0 && localCopy[foundIdx + idx - 1] == '*')
+                if (foundIdx != 0 && localBuffer[foundIdx + idx - 1] == '*')
                 {
                     idx += foundIdx;
                     break;
@@ -1446,7 +1446,7 @@ namespace System.Text.Json
             Debug.Assert(idx >= 1);
             _consumed += 3 + idx;
 
-            (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localCopy.Slice(0, idx - 1));
+            (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx - 1));
             _lineNumber += newLines;
             if (newLineIndex != -1)
             {
@@ -1462,18 +1462,18 @@ namespace System.Text.Json
         private bool ConsumeComment()
         {
             //Create local copy to avoid bounds checks.
-            ReadOnlySpan<byte> localCopy = _buffer.Slice(_consumed + 1);
+            ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
 
-            if (localCopy.Length > 0)
+            if (localBuffer.Length > 0)
             {
-                byte marker = localCopy[0];
+                byte marker = localBuffer[0];
                 if (marker == JsonConstants.Solidus)
                 {
-                    return ConsumeSingleLineComment(localCopy.Slice(1));
+                    return ConsumeSingleLineComment(localBuffer.Slice(1));
                 }
                 else if (marker == '*')
                 {
-                    return ConsumeMultiLineComment(localCopy.Slice(1));
+                    return ConsumeMultiLineComment(localBuffer.Slice(1));
                 }
                 else
                 {
@@ -1488,27 +1488,27 @@ namespace System.Text.Json
             return false;
         }
 
-        private bool ConsumeSingleLineComment(ReadOnlySpan<byte> localCopy)
+        private bool ConsumeSingleLineComment(ReadOnlySpan<byte> localBuffer)
         {
-            if (!SkipSingleLineComment(localCopy, out int idx))
+            if (!SkipSingleLineComment(localBuffer, out int idx))
             {
                 return false;
             }
 
-            ValueSpan = localCopy.Slice(0, idx);
+            ValueSpan = localBuffer.Slice(0, idx);
             _stack.Push(_tokenType);
             _tokenType = JsonTokenType.Comment;
             return true;
         }
 
-        private bool ConsumeMultiLineComment(ReadOnlySpan<byte> localCopy)
+        private bool ConsumeMultiLineComment(ReadOnlySpan<byte> localBuffer)
         {
-            if (!SkipMultiLineComment(localCopy, out int idx))
+            if (!SkipMultiLineComment(localBuffer, out int idx))
             {
                 return false;
             }
 
-            ValueSpan = localCopy.Slice(0, idx - 1);
+            ValueSpan = localBuffer.Slice(0, idx - 1);
             _stack.Push(_tokenType);
             _tokenType = JsonTokenType.Comment;
             return true;
