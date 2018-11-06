@@ -250,7 +250,6 @@ namespace System.Diagnostics.Tests
             Directory.CreateDirectory(path);
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
-            options.StartInfo.UseShellExecute = true;
             options.StartInfo.EnvironmentVariables["PATH"] = path;
             RemoteInvoke(pathDirectory =>
             {

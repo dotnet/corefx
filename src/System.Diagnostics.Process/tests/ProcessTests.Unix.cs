@@ -155,6 +155,40 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Fact]
+        public void ProcessStart_UseShellExecute_OnUnix_FallsBackWhenNotRealExecutable()
+        {
+            // Create a script that we'll use to 'open' the file by putting it on PATH
+            // with the appropriate name.
+            string path = GetTestFileName();
+            Directory.CreateDirectory(path);
+            WriteScriptFile(Path.Combine(path, s_allowedProgramsToRun[0]), returnValue: 42);
+
+            // Create a file that has the x-bit set, but which isn't a valid script.
+            string filename = GetTestFileName();
+            WriteScriptFile(filename, returnValue: 0);
+            File.WriteAllText(filename, $"not a script");
+            int mode = Convert.ToInt32("744", 8);
+            Assert.Equal(0, chmod(filename, mode));
+
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.StartInfo.EnvironmentVariables["PATH"] = path;
+            RemoteInvoke(fileToOpen =>
+            {
+                using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
+                {
+                    Assert.NotNull(px);
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // on OSX, process name is dotnet for some reason. Refer to #23972
+                    {
+                        Assert.Equal(s_allowedProgramsToRun[0], px.ProcessName);
+                    }
+                    px.WaitForExit();
+                    Assert.True(px.HasExited);
+                    Assert.Equal(42, px.ExitCode);
+                }
+            }, filename, options).Dispose();
+        }
+
         [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
