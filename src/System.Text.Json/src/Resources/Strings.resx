@@ -121,7 +121,7 @@
     <value>Depth of {0} within an array is larger than max depth of {1}.</value>
   </data>
   <data name="ArrayEndWithinObject" xml:space="preserve">
-    <value>We are within an object but observed an ']'.</value>
+    <value>We are within an object but observed a ']'.</value>
   </data>
   <data name="Default" xml:space="preserve">
     <value>An error occurred while reading the json.</value>
