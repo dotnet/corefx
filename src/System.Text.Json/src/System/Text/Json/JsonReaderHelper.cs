@@ -36,14 +36,14 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAnyControlOrEscape(this ReadOnlySpan<byte> span)
         {
-            return IndexOfAny(
+            return IndexOfOrLessThan(
                     ref MemoryMarshal.GetReference(span),
                     JsonConstants.ReverseSolidus,
                     lessThan: 32,   // Space ' '
                     span.Length);
         }
 
-        private static unsafe int IndexOfAny(ref byte searchSpace, byte value0, byte lessThan, int length)
+        private static unsafe int IndexOfOrLessThan(ref byte searchSpace, byte value0, byte lessThan, int length)
         {
             Debug.Assert(length >= 0);
 
