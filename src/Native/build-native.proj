@@ -22,7 +22,7 @@
 
       <!--
         BuildNativeClang is a pass-through argument, to pass an argument to build-native.sh. It is intended to be
-        used to force a specific clang toolset. E.g., pass to msbuild "/p:BuildNativeClang=--clang5.0"
+        used to force a specific clang toolset.
       -->
       <_BuildNativeClangArg Condition="'$(BuildNativeClang)' != ''"> $(BuildNativeClang)</_BuildNativeClangArg>
 
