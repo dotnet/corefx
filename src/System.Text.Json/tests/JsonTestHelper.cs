@@ -110,7 +110,7 @@ namespace System.Text.Json.Tests
             while (json.Read())
             {
                 JsonTokenType tokenType = json.TokenType;
-                ReadOnlySpan<byte> valueSpan = json.IsValueMultiSegment ? json.ValueSequence.ToArray() : json.ValueSpan;
+                ReadOnlySpan<byte> valueSpan = json.ValueSpan;
                 switch (tokenType)
                 {
                     case JsonTokenType.PropertyName:

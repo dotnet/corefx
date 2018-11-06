@@ -37,14 +37,6 @@ namespace System.Text.Json
         internal JsonTokenType _tokenType;
         internal JsonReaderOptions _readerOptions;
         internal Stack<JsonTokenType> _stack;
-        internal SequencePosition _sequencePosition;
-
-        /// <summary>
-        /// Returns the current <see cref="SequencePosition"/> within the provided UTF-8 encoded
-        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="Utf8JsonReader"/> was constructed
-        /// with a ReadOnlySpan&lt;byte&gt; instead, this will always return a default <see cref="SequencePosition"/>.
-        /// </summary>
-        public SequencePosition Position => _sequencePosition;
 
         /// <summary>
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
@@ -83,7 +75,6 @@ namespace System.Text.Json
             _isNotPrimitive = default;
             _tokenType = default;
             _readerOptions = new JsonReaderOptions { CommentHandling = commentHandling };
-            _sequencePosition = default;
 
             // Only allocate the stack if the user explicitly sets the JsonReaderOptions
             // by providing a custom JsonCommentHandling OR if the user explicitly sets the

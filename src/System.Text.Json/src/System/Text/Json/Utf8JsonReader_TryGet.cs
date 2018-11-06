@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Buffers.Text;
 
 namespace System.Text.Json
@@ -25,7 +24,7 @@ namespace System.Text.Json
             if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName)
                 return false;
 
-            byte[] valueArray = IsValueMultiSegment ? ValueSequence.ToArray() : ValueSpan.ToArray();
+            byte[] valueArray = ValueSpan.ToArray();
 
             var utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
@@ -46,15 +45,13 @@ namespace System.Text.Json
             if (TokenType != JsonTokenType.Number)
                 return false;
 
-            ReadOnlySpan<byte> valueSpan = IsValueMultiSegment ? ValueSequence.ToArray() : ValueSpan;
-
-            if (valueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
+            if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
             {
-                return Utf8Parser.TryParse(valueSpan, out value, out int bytesConsumed) && valueSpan.Length == bytesConsumed;
+                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
             }
             else
             {
-                return Utf8Parser.TryParse(valueSpan, out value, out int bytesConsumed, standardFormat: 'e') && valueSpan.Length == bytesConsumed;
+                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat: 'e') && ValueSpan.Length == bytesConsumed;
             }
         }
     }

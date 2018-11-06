@@ -40,20 +40,8 @@ namespace System.Text.Json
         private long _totalConsumed;
         private bool _isLastSegment;
         private readonly bool _isSingleSegment;
-        private SequencePosition _currentPosition;
-        //private SequencePosition _nextPosition; //TODO: Required for reading JSON from a ReadOnlySequeunce.
-        private ReadOnlySequence<byte> _sequence;
 
         private bool IsLastSpan => _isFinalBlock && (_isSingleSegment || _isLastSegment);
-
-        /// <summary>
-        /// Lets the caller know which of the two 'Value' properties to read to get the 
-        /// token value. For input data within a ReadOnlySequence&lt;byte&gt; this will
-        /// always return false. For input data within a ReadOnlySequence&lt;byte&gt;, this
-        /// will only return true if the token straddles more than a single segment and
-        /// hence couldn't be represented as a span.
-        /// </summary>
-        public bool IsValueMultiSegment { get; private set; }
 
         /// <summary>
         /// Gets the value of the last processed token as a ReadOnlySpan&lt;byte&gt; slice
@@ -62,16 +50,6 @@ namespace System.Text.Json
         /// ValueSpan will contain the sliced value since it can be represented as a span.
         /// </summary>
         public ReadOnlySpan<byte> ValueSpan { get; private set; }
-
-        /// <summary>
-        /// Gets the value of the last processed token as a ReadOnlySequence&lt;byte&gt; slice
-        /// of the input payload. If the JSON is provided within a ReadOnlySpan&lt;byte&gt;
-        /// this will always return an empty sequence. Also, if the JSON is provided within a
-        /// ReadOnlySequence&lt;byte&gt; and the slice that represents the token value fits in
-        /// a single segment, then ValueSpan will contain the sliced value since it can be
-        /// represented as a span.
-        /// </summary>
-        public ReadOnlySequence<byte> ValueSequence { get; private set; }
 
         /// <summary>
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
@@ -90,23 +68,6 @@ namespace System.Text.Json
         /// Gets the type of the last processed JSON token in the UTF-8 encoded JSON text.
         /// </summary>
         public JsonTokenType TokenType => _tokenType;
-
-        /// <summary>
-        /// Returns the current <see cref="SequencePosition"/> within the provided UTF-8 encoded
-        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="Utf8JsonReader"/> was constructed
-        /// with a ReadOnlySpan&lt;byte&gt; instead, this will always return a default <see cref="SequencePosition"/>.
-        /// </summary>
-        public SequencePosition Position
-        {
-            get
-            {
-                if (_currentPosition.GetObject() == null)
-                    return default;
-
-                return _sequence.GetPosition(BytesConsumed);
-                // TODO: This fails - return _data.GetPosition(_consumed - _leftOverLength, _currentPosition);
-            }
-        }
 
         /// <summary>
         /// Returns the current snapshot of the <see cref="Utf8JsonReader"/> state which must
@@ -128,7 +89,6 @@ namespace System.Text.Json
             _tokenType = _tokenType,
             _readerOptions = _readerOptions,
             _stack = _stack,
-            _sequencePosition = Position,
         };
 
         /// <summary>
@@ -165,13 +125,8 @@ namespace System.Text.Json
             _totalConsumed = 0;
             _isLastSegment = _isFinalBlock;
             _isSingleSegment = true;
-            _currentPosition = default;
-            //_nextPosition = default;
-            _sequence = default;
-
-            IsValueMultiSegment = false;
+            
             ValueSpan = ReadOnlySpan<byte>.Empty;
-            ValueSequence = ReadOnlySequence<byte>.Empty;
         }
 
         /// <summary>
@@ -267,7 +222,6 @@ namespace System.Text.Json
         private bool ReadSingleSegment()
         {
             bool retVal = false;
-            IsValueMultiSegment = false;
 
             if (!HasMoreData())
                 goto Done;

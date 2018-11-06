@@ -31,7 +31,6 @@ namespace System.Text.Json
         public long BytesConsumed { get { throw null; } }
         public int MaxDepth { get { throw null; } }
         public System.Text.Json.JsonReaderOptions Options { get { throw null; } }
-        public System.SequencePosition Position { get { throw null; } }
     }
     public enum JsonTokenType : byte
     {
@@ -55,10 +54,7 @@ namespace System.Text.Json
         public long BytesConsumed { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
         public System.Text.Json.JsonReaderState CurrentState { get { throw null; } }
-        public bool IsValueMultiSegment { get { throw null; } }
-        public System.SequencePosition Position { get { throw null; } }
         public System.Text.Json.JsonTokenType TokenType { get { throw null; } }
-        public System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
         public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
         public bool Read() { throw null; }
         public bool TryGetValueAsDouble(out double value) { throw null; }
