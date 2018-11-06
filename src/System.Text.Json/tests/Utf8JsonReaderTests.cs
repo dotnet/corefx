@@ -170,9 +170,17 @@ namespace System.Text.Json.Tests
 
                     long consumed = json.BytesConsumed;
                     Assert.Equal(consumed, json.CurrentState.BytesConsumed);
-                    JsonReaderState jsonState = json.CurrentState;
+                    
                     for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                     {
+                        // Need to re-initialize the state and reader to avoid using the previous state stack.
+                        state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                        json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
+                        while (json.Read())
+                            ;
+
+                        JsonReaderState jsonState = json.CurrentState;
+
                         json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed, (int)j), isFinalBlock: false, jsonState);
                         while (json.Read())
                             ;
@@ -206,39 +214,144 @@ namespace System.Text.Json.Tests
         [InlineData(512)]
         public static void TestDepth(int depth)
         {
-            for (int i = 0; i < depth; i++)
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                string jsonStr = JsonTestHelper.WriteDepth(i);
-                Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
-
-                var state = new JsonReaderState(maxDepth: depth);
-                var json = new Utf8JsonReader(data, isFinalBlock: true, state);
-
-                int actualDepth = 0;
-                while (json.Read())
+                for (int i = 0; i < depth; i++)
                 {
-                    if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
-                        actualDepth = json.CurrentDepth;
+                    string jsonStr = JsonTestHelper.WriteDepth(i, commentHandling == JsonCommentHandling.AllowComments);
+                    Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
+
+                    var state = new JsonReaderState(maxDepth: depth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+                    var json = new Utf8JsonReader(data, isFinalBlock: true, state);
+
+                    int actualDepth = 0;
+                    while (json.Read())
+                    {
+                        if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                            actualDepth = json.CurrentDepth;
+                    }
+
+                    int expectedDepth = 0;
+                    var newtonJson = new JsonTextReader(new StringReader(jsonStr))
+                    {
+                        MaxDepth = depth
+                    };
+                    while (newtonJson.Read())
+                    {
+                        if (newtonJson.TokenType == JsonToken.String)
+                        {
+                            expectedDepth = newtonJson.Depth;
+                        }
+                    }
+
+                    Assert.Equal(expectedDepth, actualDepth);
+                    Assert.Equal(i + 1, actualDepth);
                 }
+            }
+        }
 
-                Stream stream = new MemoryStream(data.ToArray());
-                TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
-                int expectedDepth = 0;
-                var newtonJson = new JsonTextReader(reader)
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(4)]
+        [InlineData(8)]
+        [InlineData(16)]
+        [InlineData(32)]
+        [InlineData(62)]
+        [InlineData(63)]
+        [InlineData(64)]
+        [InlineData(65)]
+        [InlineData(66)]
+        [InlineData(128)]
+        [InlineData(256)]
+        [InlineData(512)]
+        public static void TestDepthWithObjectArrayMismatch(int depth)
+        {
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                for (int i = 0; i < depth; i++)
                 {
-                    MaxDepth = depth
-                };
+                    string jsonStr = JsonTestHelper.WriteDepthWithArray(i, commentHandling == JsonCommentHandling.AllowComments);
+                    Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
+
+                    var state = new JsonReaderState(maxDepth: depth + 1, options: new JsonReaderOptions { CommentHandling = commentHandling });
+                    var json = new Utf8JsonReader(data, isFinalBlock: true, state);
+
+                    int actualDepth = 0;
+                    while (json.Read())
+                    {
+                        if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                            actualDepth = json.CurrentDepth;
+                    }
+
+                    int expectedDepth = 0;
+                    var newtonJson = new JsonTextReader(new StringReader(jsonStr))
+                    {
+                        MaxDepth = depth + 1
+                    };
+                    while (newtonJson.Read())
+                    {
+                        if (newtonJson.TokenType == JsonToken.String)
+                        {
+                            expectedDepth = newtonJson.Depth;
+                        }
+                    }
+
+                    Assert.Equal(expectedDepth, actualDepth);
+                    Assert.Equal(i + 2, actualDepth);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("[123, 456]", "123456", "123456")]
+        [InlineData("/*a*/[{\"testA\":[{\"testB\":[{\"testC\":123}]}]}]", "testAtestBtestC123", "atestAtestBtestC123")]
+        [InlineData("{\"testA\":[1/*hi*//*bye*/, 2, 3], \"testB\": 4}", "testA123testB4", "testA1hibye23testB4")]
+        [InlineData("{\"test\":[[[123,456]]]}", "test123456", "test123456")]
+        [InlineData("/*a*//*z*/[/*b*//*z*/123/*c*//*z*/,/*d*//*z*/456/*e*//*z*/]/*f*//*z*/", "123456", "azbz123czdz456ezfz")]
+        [InlineData("[123,/*hi*/456/*bye*/]", "123456", "123hi456bye")]
+        [InlineData("/*a*//*z*/{/*b*//*z*/\"test\":/*c*//*z*/[/*d*//*z*/[/*e*//*z*/[/*f*//*z*/123/*g*//*z*/,/*h*//*z*/456/*i*//*z*/]/*j*//*z*/]/*k*//*z*/]/*l*//*z*/}/*m*//*z*/",
+    "test123456", "azbztestczdzezfz123gzhz456izjzkzlzmz")]
+        [InlineData("//a\n//z\n{//b\n//z\n\"test\"://c\n//z\n[//d\n//z\n[//e\n//z\n[//f\n//z\n123//g\n//z\n,//h\n//z\n456//i\n//z\n]//j\n//z\n]//k\n//z\n]//l\n//z\n}//m\n//z\n",
+    "test123456", "azbztestczdzezfz123gzhz456izjzkzlzmz")]
+        public static void AllowCommentStackMismatch(string jsonString, string expectedWithoutComments, string expectedWithComments)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(jsonString);
+
+            var builder = new StringBuilder();
+            using (var newtonJson = new JsonTextReader(new StringReader(jsonString)))
+            {
                 while (newtonJson.Read())
                 {
-                    if (newtonJson.TokenType == JsonToken.String)
-                    {
-                        expectedDepth = newtonJson.Depth;
-                    }
+                    if (newtonJson.TokenType == JsonToken.Integer || newtonJson.TokenType == JsonToken.Comment || newtonJson.TokenType == JsonToken.PropertyName)
+                        builder.Append(newtonJson.Value.ToString());
                 }
-
-                Assert.Equal(expectedDepth, actualDepth);
-                Assert.Equal(i + 1, actualDepth);
             }
+            Assert.Equal(expectedWithComments, builder.ToString());
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
+            var json = new Utf8JsonReader(data, isFinalBlock: true, state);
+
+            builder = new StringBuilder();
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
+                    builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+            }
+
+            Assert.Equal(expectedWithComments, builder.ToString());
+
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
+            json = new Utf8JsonReader(data, isFinalBlock: true, state);
+
+            builder = new StringBuilder();
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
+                    builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+            }
+
+            Assert.Equal(expectedWithoutComments, builder.ToString());
         }
 
         [Theory]
@@ -519,6 +632,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"age\":30, \"ints\":[1, 2, 3, 4, 5.1e7.3]}", 0, 36)]
         [InlineData("{\"age\":30, \r\n \"num\":-0.e, \r\n \"ints\":[1, 2, 3, 4, 5]}", 1, 10)]
         [InlineData("{{}}", 0, 1)]
+        [InlineData("[[]", 0, 3)]
         [InlineData("[[{{}}]]", 0, 3)]
         [InlineData("[1, 2, 3, ]", 0, 10)]
         [InlineData("{\"ints\":[1, 2, 3, 4, 5", 0, 22)]

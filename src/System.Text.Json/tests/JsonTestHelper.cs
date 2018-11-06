@@ -25,7 +25,7 @@ namespace System.Text.Json.Tests
             return sb.ToString();
         }
 
-        public static string WriteDepth(int depth)
+        public static string WriteDepth(int depth, bool writeComment = false)
         {
             var sb = new StringBuilder();
             var textWriter = new StringWriter();
@@ -36,8 +36,47 @@ namespace System.Text.Json.Tests
                 json.WritePropertyName("message" + i);
                 json.WriteStartObject();
             }
+            if (writeComment)
+                json.WriteComment("Random comment string");
             json.WritePropertyName("message" + depth);
             json.WriteValue("Hello, World!");
+            for (int i = 0; i < depth; i++)
+            {
+                json.WriteEndObject();
+            }
+            json.WriteEndObject();
+            json.Flush();
+
+            return textWriter.ToString();
+        }
+
+        public static string WriteDepthWithArray(int depth, bool writeComment = false)
+        {
+            var sb = new StringBuilder();
+            var textWriter = new StringWriter();
+            var json = new JsonTextWriter(textWriter);
+            json.WriteStartObject();
+            for (int i = 0; i < depth; i++)
+            {
+                json.WritePropertyName("message" + i);
+                json.WriteStartObject();
+            }
+            if (writeComment)
+                json.WriteComment("Random comment string");
+            json.WritePropertyName("message" + depth);
+            json.WriteStartArray();
+            json.WriteValue("string1");
+            json.WriteValue("string2");
+            json.WriteEndArray();
+            json.WritePropertyName("address");
+            json.WriteStartObject();
+            json.WritePropertyName("street");
+            json.WriteValue("1 Microsoft Way");
+            json.WritePropertyName("city");
+            json.WriteValue("Redmond");
+            json.WritePropertyName("zip");
+            json.WriteValue(98052);
+            json.WriteEndObject();
             for (int i = 0; i < depth; i++)
             {
                 json.WriteEndObject();
