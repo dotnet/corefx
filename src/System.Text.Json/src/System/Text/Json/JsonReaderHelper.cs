@@ -39,7 +39,7 @@ namespace System.Text.Json
             return IndexOfAny(
                     ref MemoryMarshal.GetReference(span),
                     JsonConstants.ReverseSolidus,
-                    JsonConstants.Space,
+                    lessThan: 32,   // Space ' '
                     span.Length);
         }
 
