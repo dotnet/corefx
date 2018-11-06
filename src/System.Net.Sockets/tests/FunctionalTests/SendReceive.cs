@@ -1143,7 +1143,6 @@ namespace System.Net.Sockets.Tests
             using (var receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 receiver.BindToAnonymousPort(IPAddress.Loopback);
-                receiver.ReceiveTimeout = TestSettings.PassingTestTimeout;
                 sender.Connect(receiver.LocalEndPoint);
                 sender.SendBufferSize = 1500;
 
@@ -1176,7 +1175,6 @@ namespace System.Net.Sockets.Tests
 
                 // Now, we should be able to get same message again.
                 tcs = new TaskCompletionSource<bool>();
-                args.Completed += delegate { tcs.SetResult(true); };
                 args.SocketFlags = SocketFlags.None;
                 if (receiver.ReceiveAsync(args))
                 {
@@ -1189,7 +1187,6 @@ namespace System.Net.Sockets.Tests
 
                 // Set buffer smaller than message.
                 tcs = new TaskCompletionSource<bool>();
-                args.Completed += delegate { tcs.SetResult(true); };
                 args.SetBuffer(receiveBufer, 0, 100);
                 if (receiver.ReceiveAsync(args))
                 {
