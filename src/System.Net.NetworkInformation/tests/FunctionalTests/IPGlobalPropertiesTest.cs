@@ -93,7 +93,7 @@ namespace System.Net.NetworkInformation.Tests
                 _log.WriteLine($"listening on {server.LocalEndPoint}");
 
                 await client.ConnectAsync(server.LocalEndPoint);
-                _log.WriteLine($"Looking for connection {client.LocalEndPoint} <-> {client.RemoteEndPoint});
+                _log.WriteLine($"Looking for connection {client.LocalEndPoint} <-> {client.RemoteEndPoint}");
 
                 TcpConnectionInformation[] tcpCconnections = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections();
                 bool found = false;
