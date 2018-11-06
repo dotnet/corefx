@@ -12,19 +12,16 @@ namespace System.Reflection.TypeLoading
         private readonly RoType[] _coreTypes;
         private readonly Exception[] _exceptions;
 
-        internal CoreTypes(MetadataLoadContext loader)
+        internal CoreTypes(MetadataLoadContext loader, string coreAssemblyName)
         {
             int numCoreTypes = (int)CoreType.NumCoreTypes;
             RoType[] coreTypes = new RoType[numCoreTypes];
             Exception[] exceptions = new Exception[numCoreTypes];
-            RoAssembly coreAssembly = loader.TryGetCoreAssembly(out Exception e);
+            RoAssembly coreAssembly = loader.TryGetCoreAssembly(coreAssemblyName, out Exception e);
             if (coreAssembly == null)
             {
-                // Populate exceptions[] in case there is subsquent access to the missing types
-                for (int i = 0; i < numCoreTypes; i++)
-                {
-                    exceptions[i] = e;
-                }
+                // If the core assembly was not found, don't continue.
+                throw e;
             }
             else
             {
@@ -41,12 +38,6 @@ namespace System.Reflection.TypeLoading
             }
             _coreTypes = coreTypes;
             _exceptions = exceptions;
-
-            // If the core assembly was not found, don't continue
-            if (coreAssembly == null)
-            {
-                throw e;
-            }
         }
 
         /// <summary>

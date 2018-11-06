@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Reflection.Runtime.BindingFlagSupport;
+using System.Reflection.Runtime.General;
 
 namespace System.Reflection.TypeLoading
 {

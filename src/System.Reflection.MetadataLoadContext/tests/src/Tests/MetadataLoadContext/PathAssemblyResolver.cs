@@ -10,6 +10,36 @@ namespace System.Reflection.Tests
     public static partial class MetadataLoadContextTests
     {
         [Fact]
+        public static void PathAssemblyResolverNullPaths()
+        {
+            Assert.Throws<ArgumentNullException>(() => new PathAssemblyResolver(null));
+        }
+
+        [Fact]
+        public static void PathAssemblyResolverNullPath()
+        {
+            Assert.Throws<ArgumentException>(() => new PathAssemblyResolver(new string[] { null }));
+        }
+
+        [Fact]
+        public static void PathAssemblyResolverEmptyPath()
+        {
+            Assert.Throws<ArgumentException>(() => new PathAssemblyResolver(new string[] { "" }));
+        }
+
+        [Fact]
+        public static void PathAssemblyResolverEmptyFile()
+        {
+            Assert.Throws<ArgumentException>(() => new PathAssemblyResolver(new string[] { Path.DirectorySeparatorChar.ToString() }));
+        }
+
+        [Fact]
+        public static void PathAssemblyDuplicateAssemblyNames()
+        {
+            Assert.Throws<ArgumentException>(() => new PathAssemblyResolver(new string[] { "Hello", "Hello" }));
+        }
+
+        [Fact]
         public static void PathAssemblyResolverBasicPath()
         {
             string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
@@ -27,12 +57,6 @@ namespace System.Reflection.Tests
                 Assert.Equal(t.FullName, typeof(MetadataLoadContextTests).FullName);
                 Assert.Equal(t.Assembly.Location, thisAssemblyPath);
             }
-        }
-
-        [Fact]
-        public static void PathAssemblyResolverNullPaths()
-        {
-            Assert.Throws<ArgumentNullException>(() => new PathAssemblyResolver(null));
         }
 
         [Fact]

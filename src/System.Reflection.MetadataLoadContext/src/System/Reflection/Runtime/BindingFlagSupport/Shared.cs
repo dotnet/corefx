@@ -25,9 +25,6 @@ namespace System.Reflection.Runtime.BindingFlagSupport
         {
             Debug.Assert(methodBase != null);
             Debug.Assert(argumentTypes != null);
-#if DEBUG
-            bindingFlags &= ~(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.FlattenHierarchy | BindingFlags.IgnoreCase);
-#endif
 
             #region Check CallingConvention
             if ((callConv & CallingConventions.Any) == 0)

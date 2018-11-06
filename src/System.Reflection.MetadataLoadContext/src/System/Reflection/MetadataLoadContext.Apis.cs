@@ -118,12 +118,10 @@ namespace System.Reflection
             {
                 // Validate now that the value is a parsable assembly name.
                 new AssemblyName(coreAssemblyName);
-
-                _userSuppliedCoreAssemblyName = coreAssemblyName;
             }
 
             // Resolve the core assembly now
-            _coreTypes = new CoreTypes(this);
+            _coreTypes = new CoreTypes(this, coreAssemblyName);
         }
 
         /// <summary>
@@ -293,6 +291,5 @@ namespace System.Reflection
         }
 
         private MetadataAssemblyResolver resolver;
-        private volatile string _userSuppliedCoreAssemblyName;
     }
 }

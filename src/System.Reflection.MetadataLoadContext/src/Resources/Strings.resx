@@ -267,4 +267,7 @@
   <data name="UnableToDetermineCoreAssembly" xml:space="preserve">
     <value>Could not find core assembly. Either specify a valid coreAssemblyName in the MetadataLoadContext constructor or provide a MetadataAssemblyResolver that can load the core assembly.</value>
   </data>
+  <data name="Arg_InvalidPath" xml:space="preserve">
+    <value>The path {0} is not valid.</value>
+  </data>
 </root>

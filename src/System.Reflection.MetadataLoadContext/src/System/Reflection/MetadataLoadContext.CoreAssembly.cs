@@ -13,17 +13,17 @@ namespace System.Reflection
         private static readonly string[] CoreNames = { "mscorlib", "System.Runtime", "netstandard" };
 
         // Cache loaded coreAssembly and core types.
-        internal RoAssembly TryGetCoreAssembly(out Exception e)
+        internal RoAssembly TryGetCoreAssembly(string coreAssemblyName, out Exception e)
         {
             e = null;
             Debug.Assert(_coreAssembly == null);
-            if (_userSuppliedCoreAssemblyName == null)
+            if (coreAssemblyName == null)
             {
                 _coreAssembly = TryGetDefaultCoreAssembly(out e);
             }
             else
             {
-                RoAssemblyName roAssemblyName = new AssemblyName(_userSuppliedCoreAssemblyName).ToRoAssemblyName();
+                RoAssemblyName roAssemblyName = new AssemblyName(coreAssemblyName).ToRoAssemblyName();
                 _coreAssembly = TryResolveAssembly(roAssemblyName, out e);
             }
 

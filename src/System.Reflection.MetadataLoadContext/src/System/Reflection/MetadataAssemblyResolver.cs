@@ -4,12 +4,16 @@
 
 namespace System.Reflection
 {
+    /// <summary>
+    /// The base class for binding algorithms used by ref="System.Reflection.MetadataLoadContext".>
+    /// </summary>
     public abstract class MetadataAssemblyResolver
     {
         /// <summary>
         /// The binding algorithm. It should use MetadataLoadContext.LoadFromStream(), LoadFromAssemblyPath()
         /// or LoadFromByteArray() to load the requested assembly and return it.
-        ///
+        /// </summary>
+        ///<remarks>
         /// To indicate the failure to find an assembly, the handler should return null rather than throwing an exception. Returning null commits
         /// the failure so that future attempts to load that name will fail without re-invoking the handler.
         ///
@@ -19,12 +23,12 @@ namespace System.Reflection
         /// The handler will generally not be called more than once for the same name, unless two threads race to load the same assembly.
         /// Even in that case, one result will win and be atomically bound to the name.
         ///
-        /// The MetadataLoadContext intentionally performs no ref-def matching on the returned assembly as what constitutes a ref-def match is a policy. 
+        /// The MetadataLoadContext intentionally performs no ref-def matching on the returned assembly as what constitutes a ref-def match is a policy.
         /// It is also the kind of arbitrary restriction that MetadataLoadContext strives to avoid.
         ///
-        /// MetadataLoadContexts cannot consume assemblies from other MetadataLoadContexts or other type providers (such as the underlying runtime's own Reflection system.)
+        /// The MetadataLoadContext cannot consume assemblies from other MetadataLoadContexts or other type providers (such as the underlying runtime's own Reflection system.)
         /// If a handler returns such an assembly, the MetadataLoadContext throws a FileLoadException.
-        /// </summary>
+        /// </remarks>
         public abstract Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName);
     }
 }

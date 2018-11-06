@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-namespace System
+namespace System.Reflection.Runtime.General
 {
     //
     // Struct-based list builder that's special cased to avoid allocations for lists of one element.
