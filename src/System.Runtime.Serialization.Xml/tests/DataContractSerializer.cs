@@ -4059,7 +4059,7 @@ public static partial class DataContractSerializerTests
     {
         TypeWithLinkedProperty head = new TypeWithLinkedProperty();
         TypeWithLinkedProperty cur = head;
-        for (int i = 0; i < 300; i++)
+        for (int i = 0; i < 5; i++)
         {
             cur.Child = new TypeWithLinkedProperty();
             cur = cur.Child;
