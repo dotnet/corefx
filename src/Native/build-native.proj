@@ -19,8 +19,9 @@
       <_ProcessorCountArg> --numproc $(MSBuildNodeCount)</_ProcessorCountArg>
       <_StripSymbolsArg Condition="'$(BuildNativeStripSymbols)' == 'true'"> stripsymbols</_StripSymbolsArg>
       <_PortableBuildArg Condition="'$(PortableBuild)' == 'true'"> -portable</_PortableBuildArg>
+      <_ClangBuildArg Condition="'$(Clang)' != ''"> $(Clang)</_ClangBuildArg>
 
-      <_BuildNativeUnixArgs>$(_BuildNativeArgs)$(_ProcessCountArg)$(_StripSymbolsArg)$(_PortableBuildArg)</_BuildNativeUnixArgs>
+      <_BuildNativeUnixArgs>$(_BuildNativeArgs)$(_ProcessCountArg)$(_StripSymbolsArg)$(_PortableBuildArg)$(_ClangBuildArg)</_BuildNativeUnixArgs>
     </PropertyGroup>
 
     <Message Text="$(MSBuildProjectDirectory)/build-native.sh $(_BuildNativeUnixArgs)" Importance="High"/>
