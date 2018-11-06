@@ -301,6 +301,10 @@ namespace System.Diagnostics
                     if (parent != null)
                     {
                         ParentId = parent.Id;
+
+                        // The parent change should not form a loop.   We are actually guaranteed this because
+                        // 1. Unstarted activities can't be 'Current' (thus can't be 'parent'), we throw if you try.  
+                        // 2. All started activities have a finite parent change (by inductive reasoning).  
                         Parent = parent;
                     }
                 }
@@ -353,8 +357,14 @@ namespace System.Diagnostics
         /* W3C support functionality (see https://w3c.github.io/trace-context) */
 
         /// <summary>
-        /// Holds the W3C 'tracestate' header.   This is typically used by logging systems
-        /// to store vendor-specific information that must flow.
+        /// Holds the W3C 'tracestate' header.   
+        /// 
+        /// Tracestate is intended to carry information supplemental to trace identity contained 
+        /// in traceparent. List of key value pairs carried by tracestate convey information 
+        /// about request position in multiple distributed tracing graphs. It is typically used 
+        /// by distributed tracing systems and should not be used as a general purpose baggage
+        /// as this use may break correlation of a distributed trace.
+        /// 
         /// Logically it is just a kind of baggage (if flows just like baggage), but because
         /// it is expected to be special cased (it has its own HTTP header), it is more 
         /// convenient/efficient if it is not lumped in with other baggage.   
@@ -378,6 +388,16 @@ namespace System.Diagnostics
         }
 
         /// <summary>
+        /// Returns true if the ID happens to be in W3C format XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
+        /// this is a convenience method.  Note that it is intended to be used to determine
+        /// what HTTP headers that carry this ID (that is do you use the tracestate HTTP header)
+        /// Thus if new IDs come along that also use the tracestate HTTP header, then this should return
+        /// true for them as well.  
+        /// </summary>
+        public bool IsW3CFormat { get; private set; }
+
+        /* static state (configuration) */
+        /// <summary>
         /// Activity tries to use the same format for IDs as its parent it has a parent.  
         /// However if the activity has no parent, it has to do something.   
         /// This determines the default format we use.  
@@ -387,22 +407,12 @@ namespace System.Diagnostics
             get { return s_DefaultIdFormat; }
             set
             {
-                if (!(ActivityIDFormat.RequestID <= value && value <= ActivityIDFormat.W3C))
+                if (!(ActivityIDFormat.Hierarchical <= value && value <= ActivityIDFormat.W3C))
                     throw new ArgumentException($"value must be a valid ActivityIDFormat value");
                 s_DefaultIdFormat = value;
             }
         }
-
-        /// <summary>
-        /// Returns true if the ID happens to be in W3C format XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
-        /// this is a convenience method.  Note that it is intended to be used to determine
-        /// what HTTP headers that carry this ID (that is do you use the tracestate HTTP header)
-        /// Thus if new IDs come along that also use the tracestate HTTP header, then this should return
-        /// true for them as well.  
-        /// </summary>
-        public bool IsW3CFormat { get; private set; }
-
-        #region private 
+      #region private 
         /// <summary>
         /// Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context
         /// </summary>
@@ -529,7 +539,7 @@ namespace System.Diagnostics
             // It is important that the part that changes frequently be first, because
             // many hash functions don't 'randomize' the tail of a string.   This makes
             // sampling based on the hash produce poor samples.
-            return  '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
+            return '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
         }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [SecuritySafeCritical]
@@ -574,7 +584,7 @@ namespace System.Diagnostics
         }
 
         private static ActivityIDFormat s_DefaultIdFormat;
-
+    
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
         private string _traceState;
@@ -587,8 +597,8 @@ namespace System.Diagnostics
     /// </summary>
     public enum ActivityIDFormat : byte
     {
-        Unknown,     // ID format is not known.     
-        RequestID,   // |XXXX.XX.XX ...
-        W3C,         // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
+        Unknown,      // ID format is not known.     
+        Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
+        W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
     };
 }
