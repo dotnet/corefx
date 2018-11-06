@@ -110,14 +110,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
-            {
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
-            }
-            else
-            {
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat: 'e') && ValueSpan.Length == bytesConsumed;
-            }
+            char standardFormat = ValueSpan.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat) && ValueSpan.Length == bytesConsumed;
         }
 
         /// <summary>
@@ -134,14 +128,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
-            {
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
-            }
-            else
-            {
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat: 'e') && ValueSpan.Length == bytesConsumed;
-            }
+            char standardFormat = ValueSpan.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat) && ValueSpan.Length == bytesConsumed;
         }
 
         /// <summary>
@@ -158,14 +146,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
-            {
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
-            }
-            else
-            {
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat: 'e') && ValueSpan.Length == bytesConsumed;
-            }
+            char standardFormat = ValueSpan.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, standardFormat) && ValueSpan.Length == bytesConsumed;
         }
     }
 }
