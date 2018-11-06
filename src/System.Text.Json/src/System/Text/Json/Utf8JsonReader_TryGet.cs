@@ -23,7 +23,9 @@ namespace System.Text.Json
         {
             value = default;
             if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName)
+            {
                 return false;
+            }
 
             byte[] valueArray = ValueSpan.ToArray();
 
@@ -71,7 +73,9 @@ namespace System.Text.Json
         {
             value = default;
             if (TokenType != JsonTokenType.Number)
+            {
                 return false;
+            }
 
             return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
         }
@@ -86,7 +90,9 @@ namespace System.Text.Json
         {
             value = default;
             if (TokenType != JsonTokenType.Number)
+            {
                 return false;
+            }
 
             return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
         }
@@ -101,7 +107,9 @@ namespace System.Text.Json
         {
             value = default;
             if (TokenType != JsonTokenType.Number)
+            {
                 return false;
+            }
 
             if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
             {
@@ -123,7 +131,9 @@ namespace System.Text.Json
         {
             value = default;
             if (TokenType != JsonTokenType.Number)
+            {
                 return false;
+            }
 
             if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
             {
@@ -145,7 +155,9 @@ namespace System.Text.Json
         {
             value = default;
             if (TokenType != JsonTokenType.Number)
+            {
                 return false;
+            }
 
             if (ValueSpan.IndexOfAny((byte)'e', (byte)'E') == -1)
             {

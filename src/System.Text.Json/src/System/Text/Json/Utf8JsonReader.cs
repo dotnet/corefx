@@ -140,18 +140,22 @@ namespace System.Text.Json
 
         private void StartObject()
         {
-            _currentDepth++;
-            if (_currentDepth > _maxDepth)
+            if (_currentDepth >= _maxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ObjectDepthTooLarge);
 
+            _currentDepth++;
             _consumed++;
             _lineBytePosition++;
 
             if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments &&
                 _currentDepth <= JsonReaderState.StackFreeMaxDepth)
+            {
                 _stackFreeContainer = (_stackFreeContainer << 1) | 1;
+            }
             else
+            {
                 _stack.Push(JsonTokenType.StartObject);
+            }
 
             _tokenType = JsonTokenType.StartObject;
             _inObject = true;
@@ -177,9 +181,13 @@ namespace System.Text.Json
                     Debug.Assert(_stack.Count > 0);
                     _stack.Pop();
                     if (_stack.Count < JsonReaderState.StackFreeMaxDepth)
+                    {
                         _inObject = (_stackFreeContainer & 1) != 0;
+                    }
                     else
+                    {
                         _inObject = _stack.Peek() != JsonTokenType.StartArray;
+                    }
                 }
             }
             else
@@ -195,18 +203,22 @@ namespace System.Text.Json
 
         private void StartArray()
         {
-            _currentDepth++;
-            if (_currentDepth > _maxDepth)
+            if (_currentDepth >= _maxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge);
 
+            _currentDepth++;
             _consumed++;
             _lineBytePosition++;
 
             if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments &&
                 _currentDepth <= JsonReaderState.StackFreeMaxDepth)
+            {
                 _stackFreeContainer = _stackFreeContainer << 1;
+            }
             else
+            {
                 _stack.Push(JsonTokenType.StartArray);
+            }
 
             _tokenType = JsonTokenType.StartArray;
             _inObject = false;
@@ -232,9 +244,13 @@ namespace System.Text.Json
                     Debug.Assert(_stack.Count > 0);
                     _stack.Pop();
                     if (_stack.Count < JsonReaderState.StackFreeMaxDepth)
+                    {
                         _inObject = (_stackFreeContainer & 1) != 0;
+                    }
                     else
+                    {
                         _inObject = _stack.Peek() != JsonTokenType.StartArray;
+                    }
                 }
             }
             else
@@ -253,7 +269,9 @@ namespace System.Text.Json
             bool retVal = false;
 
             if (!HasMoreData())
+            {
                 goto Done;
+            }
 
             byte first = _buffer[_consumed];
 
@@ -261,12 +279,16 @@ namespace System.Text.Json
             {
                 SkipWhiteSpace();
                 if (!HasMoreData())
+                {
                     goto Done;
+                }
                 first = _buffer[_consumed];
             }
 
             if (_tokenType == JsonTokenType.None)
+            {
                 goto ReadFirstToken;
+            }
 
             if (first == JsonConstants.Solidus)
             {
@@ -277,11 +299,15 @@ namespace System.Text.Json
             if (_tokenType == JsonTokenType.StartObject)
             {
                 if (first == JsonConstants.CloseBrace)
+                {
                     EndObject();
+                }
                 else
                 {
                     if (first != JsonConstants.Quote)
+                    {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                    }
 
                     int prevConsumed = _consumed;
                     long prevPosition = _lineBytePosition;
@@ -301,7 +327,9 @@ namespace System.Text.Json
             else if (_tokenType == JsonTokenType.StartArray)
             {
                 if (first == JsonConstants.CloseBracket)
+                {
                     EndArray();
+                }
                 else
                 {
                     retVal = ConsumeValue(first);
@@ -362,7 +390,9 @@ namespace System.Text.Json
             if (_consumed >= (uint)_buffer.Length)
             {
                 if (IsLastSpan)
+                {
                     ThrowHelper.ThrowJsonReaderException(ref this, resource);
+                }
                 return false;
             }
             return true;
@@ -374,9 +404,13 @@ namespace System.Text.Json
             {
                 _currentDepth++;
                 if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments)
+                {
                     _stackFreeContainer = 1;
+                }
                 else
+                {
                     _stack.Push(JsonTokenType.StartObject);
+                }
                 _tokenType = JsonTokenType.StartObject;
                 _consumed++;
                 _lineBytePosition++;
@@ -387,7 +421,9 @@ namespace System.Text.Json
             {
                 _currentDepth++;
                 if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
+                {
                     _stack.Push(JsonTokenType.StartArray);
+                }
                 _tokenType = JsonTokenType.StartArray;
                 _consumed++;
                 _lineBytePosition++;
@@ -401,26 +437,34 @@ namespace System.Text.Json
                 if ((uint)(first - '0') <= '9' - '0' || first == '-')
                 {
                     if (!TryGetNumber(localCopy.Slice(_consumed), out int numberOfBytes))
+                    {
                         return false;
+                    }
                     _tokenType = JsonTokenType.Number;
                     _consumed += numberOfBytes;
                     _lineBytePosition += numberOfBytes;
                     goto Done;
                 }
                 else if (ConsumeValue(first))
+                {
                     goto Done;
+                }
 
                 return false;
 
             Done:
                 if (_consumed >= (uint)localCopy.Length)
+                {
                     return true;
+                }
 
                 if (localCopy[_consumed] <= JsonConstants.Space)
                 {
                     SkipWhiteSpace();
                     if (_consumed >= (uint)localCopy.Length)
+                    {
                         return true;
+                    }
                 }
 
                 if (_readerOptions.CommentHandling != JsonCommentHandling.Default)
@@ -428,7 +472,9 @@ namespace System.Text.Json
                     if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                     {
                         if (_tokenType == JsonTokenType.Comment || localCopy[_consumed] == JsonConstants.Solidus)
+                        {
                             return true;
+                        }
                     }
                     else
                     {
@@ -479,43 +525,55 @@ namespace System.Text.Json
         private bool ConsumeValue(byte marker)
         {
             if (marker == JsonConstants.Quote)
+            {
                 return ConsumeString();
+            }
             else if (marker == JsonConstants.OpenBrace)
+            {
                 StartObject();
+            }
             else if (marker == JsonConstants.OpenBracket)
+            {
                 StartArray();
+            }
             else if ((uint)(marker - '0') <= '9' - '0' || marker == '-')
+            {
                 return ConsumeNumber();
+            }
             else if (marker == 'f')
+            {
                 return ConsumeLiteral(JsonConstants.FalseValue, JsonTokenType.False);
+            }
             else if (marker == 't')
+            {
                 return ConsumeLiteral(JsonConstants.TrueValue, JsonTokenType.True);
+            }
             else if (marker == 'n')
+            {
                 return ConsumeLiteral(JsonConstants.NullValue, JsonTokenType.Null);
+            }
             else
             {
-                if (_readerOptions.CommentHandling != JsonCommentHandling.Default)
+                switch (_readerOptions.CommentHandling)
                 {
-                    if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
-                    {
+                    case JsonCommentHandling.Default:
+                        break;
+                    case JsonCommentHandling.AllowComments:
                         if (marker == JsonConstants.Solidus)
                         {
                             return ConsumeComment();
                         }
-                    }
-                    else
-                    {
-                        // JsonCommentHandling.SkipComments
+                        break;
+                    case JsonCommentHandling.SkipComments:
                         if (marker == JsonConstants.Solidus)
                         {
                             if (SkipComment())
                             {
                                 if (_consumed >= (uint)_buffer.Length)
                                 {
-                                    if (_isNotPrimitive && IsLastSpan)
+                                    if (_isNotPrimitive && IsLastSpan && _tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
                                     {
-                                        if (_tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
-                                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJson);
+                                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJson);
                                     }
                                     return false;
                                 }
@@ -526,7 +584,9 @@ namespace System.Text.Json
                                 {
                                     SkipWhiteSpace();
                                     if (!HasMoreData())
+                                    {
                                         return false;
+                                    }
                                     first = _buffer[_consumed];
                                 }
 
@@ -534,9 +594,8 @@ namespace System.Text.Json
                             }
                             return false;
                         }
-                    }
+                        break;
                 }
-
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
             }
             return true;
@@ -550,7 +609,9 @@ namespace System.Text.Json
             Debug.Assert(span[0] == 'n' || span[0] == 't' || span[0] == 'f');
 
             if (!span.StartsWith(literal))
+            {
                 return CheckLiteral(span, literal);
+            }
 
             ValueSpan = span.Slice(0, literal.Length);
             _tokenType = tokenType;
@@ -595,18 +656,30 @@ namespace System.Text.Json
         private void ThrowInvalidLiteral(ReadOnlySpan<byte> span)
         {
             byte firstByte = span[0];
-            ExceptionResource resource = ExceptionResource.ExpectedNull;
-            if (firstByte == 't')
-                resource = ExceptionResource.ExpectedTrue;
-            else if (firstByte == 'f')
-                resource = ExceptionResource.ExpectedFalse;
+
+            ExceptionResource resource;
+            switch (firstByte)
+            {
+                case (byte)'t':
+                    resource = ExceptionResource.ExpectedTrue;
+                    break;
+                case (byte)'f':
+                    resource = ExceptionResource.ExpectedFalse;
+                    break;
+                default:
+                    Debug.Assert(firstByte == 'n');
+                    resource = ExceptionResource.ExpectedNull;
+                    break;
+            }
             ThrowHelper.ThrowJsonReaderException(ref this, resource, bytes: span);
         }
 
         private bool ConsumeNumber()
         {
             if (!TryGetNumber(_buffer.Slice(_consumed), out int consumed))
+            {
                 return false;
+            }
 
             _tokenType = JsonTokenType.Number;
             _consumed += consumed;
@@ -615,26 +688,34 @@ namespace System.Text.Json
             if (_consumed >= (uint)_buffer.Length)
             {
                 if (IsLastSpan)
+                {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
+                }
                 else
+                {
                     return false;
+                }
             }
 
             // TODO: Is this check necessary or is it redundant and can be removed?
-            if (JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) >= 0)
-                return true;
-
-            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed]);
-            return false;
+            if (JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) < 0)
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed]);
+            }
+            return true;
         }
 
         private bool ConsumePropertyName()
         {
             if (!ConsumeString())
+            {
                 return false;
+            }
 
             if (!HasMoreData(ExceptionResource.ExpectedValueAfterPropertyNameNotFound))
+            {
                 return false;
+            }
 
             byte first = _buffer[_consumed];
 
@@ -642,13 +723,17 @@ namespace System.Text.Json
             {
                 SkipWhiteSpace();
                 if (!HasMoreData(ExceptionResource.ExpectedValueAfterPropertyNameNotFound))
+                {
                     return false;
+                }
                 first = _buffer[_consumed];
             }
 
             // The next character must be a key / value seperator. Validate and skip.
             if (first != JsonConstants.KeyValueSeperator)
+            {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedSeparaterAfterPropertyNameNotFound, first);
+            }
 
             _consumed++;
             _lineBytePosition++;
@@ -668,9 +753,13 @@ namespace System.Text.Json
             if (idx < 0)
             {
                 if (IsLastSpan)
+                {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
+                }
                 else
+                {
                     return false;
+                }
             }
 
             if (localCopy[idx + _consumed] != JsonConstants.ReverseSolidus)
@@ -714,12 +803,18 @@ namespace System.Text.Json
                 if (foundIdx == -1)
                 {
                     if (IsLastSpan)
+                    {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
+                    }
                     else
+                    {
                         return false;
+                    }
                 }
                 if (foundIdx == 0)
+                {
                     break;
+                }
                 for (int j = i + foundIdx - 1; j >= i; j--)
                 {
                     if (_buffer[j] != JsonConstants.ReverseSolidus)
@@ -732,7 +827,9 @@ namespace System.Text.Json
                         break;
                     }
                     else
+                    {
                         counter++;
+                    }
                 }
                 i += foundIdx + 1;
             }
@@ -767,12 +864,16 @@ namespace System.Text.Json
             {
                 byte currentByte = data[i];
                 if (currentByte == JsonConstants.ReverseSolidus)
+                {
                     nextCharEscaped = !nextCharEscaped;
+                }
                 else if (nextCharEscaped)
                 {
                     int index = JsonConstants.EscapableChars.IndexOf(currentByte);
                     if (index == -1)
+                    {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
+                    }
 
                     if (currentByte == 'n')
                     {
@@ -793,7 +894,9 @@ namespace System.Text.Json
                                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
                             }
                             if (j - startIndex >= 4)
+                            {
                                 break;
+                            }
                             _lineBytePosition++;
                         }
                         i += 4;
@@ -801,7 +904,9 @@ namespace System.Text.Json
                     nextCharEscaped = false;
                 }
                 else if (currentByte < JsonConstants.Space)
+                {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
+                }
 
                 _lineBytePosition++;
             }
@@ -819,7 +924,9 @@ namespace System.Text.Json
 
             ConsumeNumberResult signResult = ConsumeNegativeSign(ref data, ref i);
             if (signResult == ConsumeNumberResult.NeedMoreData)
+            {
                 return false;
+            }
 
             Debug.Assert(signResult == ConsumeNumberResult.OperationIncomplete);
 
@@ -830,9 +937,13 @@ namespace System.Text.Json
             {
                 ConsumeNumberResult result = ConsumeZero(ref data, ref i);
                 if (result == ConsumeNumberResult.NeedMoreData)
+                {
                     return false;
+                }
                 if (result == ConsumeNumberResult.Success)
+                {
                     goto Done;
+                }
 
                 nextByte = data[i];
             }
@@ -841,10 +952,13 @@ namespace System.Text.Json
                 i++;
                 ConsumeNumberResult result = ConsumeIntegerDigits(ref data, ref i);
                 if (result == ConsumeNumberResult.NeedMoreData)
+                {
                     return false;
+                }
                 if (result == ConsumeNumberResult.Success)
+                {
                     goto Done;
-
+                }
                 nextByte = data[i];
                 if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
                 {
@@ -860,9 +974,13 @@ namespace System.Text.Json
                 i++;
                 ConsumeNumberResult result = ConsumeDecimalDigits(ref data, ref i, nextByte);
                 if (result == ConsumeNumberResult.NeedMoreData)
+                {
                     return false;
+                }
                 if (result == ConsumeNumberResult.Success)
+                {
                     goto Done;
+                }
 
                 nextByte = data[i];
                 if (nextByte != 'E' && nextByte != 'e')
@@ -877,16 +995,22 @@ namespace System.Text.Json
 
             signResult = ConsumeSign(ref data, ref i, nextByte);
             if (signResult == ConsumeNumberResult.NeedMoreData)
+            {
                 return false;
+            }
 
             Debug.Assert(signResult == ConsumeNumberResult.OperationIncomplete);
 
             i++;
             ConsumeNumberResult resultExponent = ConsumeIntegerDigits(ref data, ref i);
             if (resultExponent == ConsumeNumberResult.NeedMoreData)
+            {
                 return false;
+            }
             if (resultExponent == ConsumeNumberResult.Success)
+            {
                 goto Done;
+            }
             if (resultExponent == ConsumeNumberResult.OperationIncomplete)
             {
                 _lineBytePosition += i;
@@ -914,7 +1038,9 @@ namespace System.Text.Json
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFoundEndOfData, nextByte);
                     }
                     else
+                    {
                         return ConsumeNumberResult.NeedMoreData;
+                    }
                 }
 
                 nextByte = data[i];
@@ -935,14 +1061,20 @@ namespace System.Text.Json
             {
                 nextByte = data[i];
                 if (JsonConstants.Delimiters.IndexOf(nextByte) >= 0)
+                {
                     return ConsumeNumberResult.Success;
+                }
             }
             else
             {
                 if (IsLastSpan)
+                {
                     return ConsumeNumberResult.Success;
+                }
                 else
+                {
                     return ConsumeNumberResult.NeedMoreData;
+                }
             }
             nextByte = data[i];
             if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
@@ -961,17 +1093,25 @@ namespace System.Text.Json
             {
                 nextByte = data[i];
                 if ((uint)(nextByte - '0') > '9' - '0')
+                {
                     break;
+                }
             }
             if (i >= data.Length)
             {
                 if (IsLastSpan)
+                {
                     return ConsumeNumberResult.Success;
+                }
                 else
+                {
                     return ConsumeNumberResult.NeedMoreData;
+                }
             }
             if (JsonConstants.Delimiters.IndexOf(nextByte) >= 0)
+            {
                 return ConsumeNumberResult.Success;
+            }
 
             return ConsumeNumberResult.OperationIncomplete;
         }
@@ -986,7 +1126,9 @@ namespace System.Text.Json
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFoundEndOfData, nextByte);
                 }
                 else
+                {
                     return ConsumeNumberResult.NeedMoreData;
+                }
             }
             nextByte = data[i];
             if ((uint)(nextByte - '0') > '9' - '0')
@@ -1009,7 +1151,9 @@ namespace System.Text.Json
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFoundEndOfData, nextByte);
                 }
                 else
+                {
                     return ConsumeNumberResult.NeedMoreData;
+                }
             }
 
             nextByte = data[i];
@@ -1024,7 +1168,9 @@ namespace System.Text.Json
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFoundEndOfData, nextByte);
                     }
                     else
+                    {
                         return ConsumeNumberResult.NeedMoreData;
+                    }
                 }
                 nextByte = data[i];
             }
@@ -1072,14 +1218,20 @@ namespace System.Text.Json
                 if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                 {
                     if (marker == JsonConstants.Solidus)
+                    {
                         return ConsumeComment() ? ConsumeTokenResult.Success : ConsumeTokenResult.IncompleteRollback;
+                    }
                     if (_tokenType == JsonTokenType.Comment)
                     {
                         JsonTokenType lastTokenType = _stack.Pop();
                         if (lastTokenType >= JsonTokenType.String && lastTokenType <= JsonTokenType.Null)
+                        {
                             _tokenType = _inObject ? JsonTokenType.StartObject : JsonTokenType.StartArray;
+                        }
                         else
+                        {
                             _tokenType = lastTokenType;
+                        }
 
                         if (!HasMoreData())
                         {
@@ -1103,13 +1255,17 @@ namespace System.Text.Json
                         if (!_isNotPrimitive)
                         {
                             if (first != JsonConstants.Solidus && _tokenType != JsonTokenType.None && _tokenType != JsonTokenType.Comment)
+                            {
                                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, first);
+                            }
                         }
 
                         if (first == JsonConstants.ListSeperator || first == JsonConstants.CloseBrace || first == JsonConstants.CloseBracket)
                         {
                             if (ConsumeNextToken(first) == ConsumeTokenResult.Success)
+                            {
                                 return ConsumeTokenResult.Success;
+                            }
                             else
                             {
                                 _stack.Push(_tokenType);
@@ -1119,7 +1275,9 @@ namespace System.Text.Json
                         else
                         {
                             if (ReadSingleSegment())
+                            {
                                 return ConsumeTokenResult.Success;
+                            }
                             else
                             {
                                 _stack.Push(_tokenType);
@@ -1135,9 +1293,7 @@ namespace System.Text.Json
                     {
                         if (SkipComment())
                         {
-                            if (ReadSingleSegment())
-                                return ConsumeTokenResult.Success;
-                            return ConsumeTokenResult.IncompleteNoRollback;
+                            return ReadSingleSegment() ? ConsumeTokenResult.Success : ConsumeTokenResult.IncompleteNoRollback;
                         }
                         return ConsumeTokenResult.IncompleteRollback;
                     }
@@ -1163,7 +1319,9 @@ namespace System.Text.Json
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                     }
                     else
+                    {
                         return ConsumeTokenResult.IncompleteRollback;
+                    }
                 }
                 byte first = _buffer[_consumed];
 
@@ -1172,25 +1330,37 @@ namespace System.Text.Json
                     SkipWhiteSpace();
                     // The next character must be a start of a property name or value.
                     if (!HasMoreData(ExceptionResource.ExpectedStartOfPropertyOrValueNotFound))
+                    {
                         return ConsumeTokenResult.IncompleteRollback;
+                    }
                     first = _buffer[_consumed];
                 }
 
                 if (_inObject)
                 {
                     if (first != JsonConstants.Quote)
+                    {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                    }
                     return ConsumePropertyName() ? ConsumeTokenResult.Success : ConsumeTokenResult.IncompleteRollback;
                 }
                 else
+                {
                     return ConsumeValue(first) ? ConsumeTokenResult.Success : ConsumeTokenResult.IncompleteRollback;
+                }
             }
             else if (marker == JsonConstants.CloseBrace)
+            {
                 EndObject();
+            }
             else if (marker == JsonConstants.CloseBracket)
+            {
                 EndArray();
+            }
             else
+            {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.FoundInvalidCharacter, marker);
+            }
             return ConsumeTokenResult.Success;
         }
 
@@ -1203,19 +1373,24 @@ namespace System.Text.Json
             {
                 byte marker = localCopy[0];
                 if (marker == JsonConstants.Solidus)
+                {
                     return SkipSingleLineComment(localCopy.Slice(1), out _);
+                }
                 else if (marker == '*')
+                {
                     return SkipMultiLineComment(localCopy.Slice(1), out _);
+                }
                 else
+                {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                }
             }
 
             if (IsLastSpan)
+            {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Solidus);
-            else
-                return false;
-
-            return true;
+            }
+            return false;
         }
 
         private bool SkipSingleLineComment(ReadOnlySpan<byte> localCopy, out int idx)
@@ -1232,7 +1407,9 @@ namespace System.Text.Json
                     goto Done;
                 }
                 else
+                {
                     return false;
+                }
             }
 
             _consumed++;
@@ -1254,7 +1431,9 @@ namespace System.Text.Json
                     if (IsLastSpan)
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfCommentNotFound);
                     else
+                    {
                         return false;
+                    }
                 }
                 if (foundIdx != 0 && localCopy[foundIdx + idx - 1] == '*')
                 {
@@ -1270,9 +1449,13 @@ namespace System.Text.Json
             (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localCopy.Slice(0, idx - 1));
             _lineNumber += newLines;
             if (newLineIndex != -1)
+            {
                 _lineBytePosition = idx - newLineIndex;
+            }
             else
+            {
                 _lineBytePosition += 4 + idx - 1;
+            }
             return true;
         }
 
@@ -1285,25 +1468,32 @@ namespace System.Text.Json
             {
                 byte marker = localCopy[0];
                 if (marker == JsonConstants.Solidus)
+                {
                     return ConsumeSingleLineComment(localCopy.Slice(1));
+                }
                 else if (marker == '*')
+                {
                     return ConsumeMultiLineComment(localCopy.Slice(1));
+                }
                 else
+                {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                }
             }
 
             if (IsLastSpan)
+            {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Solidus);
-            else
-                return false;
-
-            return true;
+            }
+            return false;
         }
 
         private bool ConsumeSingleLineComment(ReadOnlySpan<byte> localCopy)
         {
             if (!SkipSingleLineComment(localCopy, out int idx))
+            {
                 return false;
+            }
 
             ValueSpan = localCopy.Slice(0, idx);
             _stack.Push(_tokenType);
@@ -1314,7 +1504,9 @@ namespace System.Text.Json
         private bool ConsumeMultiLineComment(ReadOnlySpan<byte> localCopy)
         {
             if (!SkipMultiLineComment(localCopy, out int idx))
+            {
                 return false;
+            }
 
             ValueSpan = localCopy.Slice(0, idx - 1);
             _stack.Push(_tokenType);

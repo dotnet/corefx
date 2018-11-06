@@ -48,13 +48,12 @@ namespace System.Text.Json
             switch (resource)
             {
                 case ExceptionResource.ArrayDepthTooLarge:
-                    message = string.Format(SR.ArrayDepthTooLarge, json.CurrentDepth, json.CurrentState.MaxDepth);
+                    message = string.Format(SR.ArrayDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
                     break;
                 case ExceptionResource.ArrayEndWithinObject:
-                    if (json.CurrentDepth <= 0)
-                        message = string.Format(SR.DepthMustBePositive, json.CurrentDepth);
-                    else
-                        message = string.Format(SR.ArrayEndWithinObject);
+                    message = json.CurrentDepth <= 0 ?
+                        string.Format(SR.DepthMustBePositive, json.CurrentDepth) :
+                        string.Format(SR.ArrayEndWithinObject);
                     break;
                 case ExceptionResource.EndOfStringNotFound:
                     message = SR.EndOfStringNotFound;
@@ -99,13 +98,12 @@ namespace System.Text.Json
                     message = string.Format(SR.InvalidEndOfJson, json.TokenType);
                     break;
                 case ExceptionResource.ObjectDepthTooLarge:
-                    message = string.Format(SR.ObjectDepthTooLarge, json.CurrentDepth, json.CurrentState.MaxDepth);
+                    message = string.Format(SR.ObjectDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
                     break;
                 case ExceptionResource.ObjectEndWithinArray:
-                    if (json.CurrentDepth <= 0)
-                        message = string.Format(SR.DepthMustBePositive, json.CurrentDepth);
-                    else
-                        message = string.Format(SR.ObjectEndWithinArray);
+                    message = json.CurrentDepth <= 0 ?
+                        string.Format(SR.DepthMustBePositive, json.CurrentDepth) :
+                        string.Format(SR.ObjectEndWithinArray);
                     break;
                 case ExceptionResource.Default:
                     break;

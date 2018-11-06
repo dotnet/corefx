@@ -81,9 +81,13 @@ namespace System.Text.Json
             // by providing a custom JsonCommentHandling OR if the user explicitly sets the
             // max depth to be larger than 64. This way we avoid allocations in the common, default cases.
             if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments || maxDepth > StackFreeMaxDepth)
+            {
                 _stack = new Stack<JsonTokenType>();
+            }
             else
+            {
                 _stack = null;
+            }
         }
 
         /// <summary>
