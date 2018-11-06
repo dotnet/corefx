@@ -17,8 +17,8 @@ namespace System.Text.Json
         public const byte ListSeperator = (byte)',';
         public const byte KeyValueSeperator = (byte)':';
         public const byte Quote = (byte)'"';
-        public const byte ReverseSolidus = (byte)'\\';
-        public const byte Solidus = (byte)'/';
+        public const byte BackSlash = (byte)'\\';
+        public const byte Slash = (byte)'/';
         public const byte BackSpace = (byte)'\b';
         public const byte FormFeed = (byte)'\f';
         public const byte Asterisk = (byte)'*';
@@ -28,13 +28,13 @@ namespace System.Text.Json
         public static ReadOnlySpan<byte> NullValue => new byte[] { (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
 
         // Used to search for the end of a number
-        public static ReadOnlySpan<byte> Delimiters => new byte[] { ListSeperator, CloseBrace, CloseBracket, Space, LineFeed, CarriageReturn, Tab, Solidus };
+        public static ReadOnlySpan<byte> Delimiters => new byte[] { ListSeperator, CloseBrace, CloseBracket, Space, LineFeed, CarriageReturn, Tab, Slash };
 
         public static ReadOnlySpan<byte> WhiteSpace => new byte[] { Space, LineFeed, CarriageReturn, Tab };
 
-        public static ReadOnlySpan<byte> EndOfComment => new byte[] { Asterisk, Solidus };
+        public static ReadOnlySpan<byte> EndOfComment => new byte[] { Asterisk, Slash };
 
         // Explicitly skipping ReverseSolidus since that is handled separately
-        public static ReadOnlySpan<byte> EscapableChars => new byte[] { Quote, (byte)'n', (byte)'r', (byte)'t', Solidus, (byte)'u', (byte)'b', (byte)'f' };
+        public static ReadOnlySpan<byte> EscapableChars => new byte[] { Quote, (byte)'n', (byte)'r', (byte)'t', Slash, (byte)'u', (byte)'b', (byte)'f' };
     }
 }

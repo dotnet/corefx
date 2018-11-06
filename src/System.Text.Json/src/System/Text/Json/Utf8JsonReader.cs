@@ -290,7 +290,7 @@ namespace System.Text.Json
                 goto ReadFirstToken;
             }
 
-            if (first == JsonConstants.Solidus)
+            if (first == JsonConstants.Slash)
             {
                 retVal = ConsumeNextTokenOrRollback(first);
                 goto Done;
@@ -471,7 +471,7 @@ namespace System.Text.Json
                 {
                     if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                     {
-                        if (_tokenType == JsonTokenType.Comment || localBuffer[_consumed] == JsonConstants.Solidus)
+                        if (_tokenType == JsonTokenType.Comment || localBuffer[_consumed] == JsonConstants.Slash)
                         {
                             return true;
                         }
@@ -559,13 +559,13 @@ namespace System.Text.Json
                     case JsonCommentHandling.Default:
                         break;
                     case JsonCommentHandling.AllowComments:
-                        if (marker == JsonConstants.Solidus)
+                        if (marker == JsonConstants.Slash)
                         {
                             return ConsumeComment();
                         }
                         break;
                     case JsonCommentHandling.SkipComments:
-                        if (marker == JsonConstants.Solidus)
+                        if (marker == JsonConstants.Slash)
                         {
                             if (SkipComment())
                             {
@@ -762,7 +762,7 @@ namespace System.Text.Json
                 }
             }
 
-            if (localBuffer[idx + _consumed] != JsonConstants.ReverseSolidus)
+            if (localBuffer[idx + _consumed] != JsonConstants.BackSlash)
             {
                 localBuffer = localBuffer.Slice(_consumed + 1, idx);
 
@@ -817,7 +817,7 @@ namespace System.Text.Json
                 }
                 for (int j = i + foundIdx - 1; j >= i; j--)
                 {
-                    if (_buffer[j] != JsonConstants.ReverseSolidus)
+                    if (_buffer[j] != JsonConstants.BackSlash)
                     {
                         if ((counter & 1) == 0)
                         {
@@ -863,7 +863,7 @@ namespace System.Text.Json
             for (int i = 0; i < data.Length; i++)
             {
                 byte currentByte = data[i];
-                if (currentByte == JsonConstants.ReverseSolidus)
+                if (currentByte == JsonConstants.BackSlash)
                 {
                     nextCharEscaped = !nextCharEscaped;
                 }
@@ -1217,7 +1217,7 @@ namespace System.Text.Json
                 //TODO: Re-evaluate use of ConsumeTokenResult enum for the common case
                 if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                 {
-                    if (marker == JsonConstants.Solidus)
+                    if (marker == JsonConstants.Slash)
                     {
                         return ConsumeComment() ? ConsumeTokenResult.Success : ConsumeTokenResult.IncompleteRollback;
                     }
@@ -1254,7 +1254,7 @@ namespace System.Text.Json
 
                         if (!_isNotPrimitive)
                         {
-                            if (first != JsonConstants.Solidus && _tokenType != JsonTokenType.None && _tokenType != JsonTokenType.Comment)
+                            if (first != JsonConstants.Slash && _tokenType != JsonTokenType.None && _tokenType != JsonTokenType.Comment)
                             {
                                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, first);
                             }
@@ -1289,7 +1289,7 @@ namespace System.Text.Json
                 else
                 {
                     // JsonCommentHandling.SkipComments
-                    if (marker == JsonConstants.Solidus)
+                    if (marker == JsonConstants.Slash)
                     {
                         if (SkipComment())
                         {
@@ -1372,11 +1372,11 @@ namespace System.Text.Json
             if (localBuffer.Length > 0)
             {
                 byte marker = localBuffer[0];
-                if (marker == JsonConstants.Solidus)
+                if (marker == JsonConstants.Slash)
                 {
                     return SkipSingleLineComment(localBuffer.Slice(1), out _);
                 }
-                else if (marker == '*')
+                else if (marker == JsonConstants.Asterisk)
                 {
                     return SkipMultiLineComment(localBuffer.Slice(1), out _);
                 }
@@ -1388,7 +1388,7 @@ namespace System.Text.Json
 
             if (IsLastSpan)
             {
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Solidus);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
             }
             return false;
         }
@@ -1425,7 +1425,7 @@ namespace System.Text.Json
             idx = 0;
             while (true)
             {
-                int foundIdx = localBuffer.Slice(idx).IndexOf(JsonConstants.Solidus);
+                int foundIdx = localBuffer.Slice(idx).IndexOf(JsonConstants.Slash);
                 if (foundIdx == -1)
                 {
                     if (IsLastSpan)
@@ -1435,7 +1435,7 @@ namespace System.Text.Json
                         return false;
                     }
                 }
-                if (foundIdx != 0 && localBuffer[foundIdx + idx - 1] == '*')
+                if (foundIdx != 0 && localBuffer[foundIdx + idx - 1] == JsonConstants.Asterisk)
                 {
                     idx += foundIdx;
                     break;
@@ -1467,11 +1467,11 @@ namespace System.Text.Json
             if (localBuffer.Length > 0)
             {
                 byte marker = localBuffer[0];
-                if (marker == JsonConstants.Solidus)
+                if (marker == JsonConstants.Slash)
                 {
                     return ConsumeSingleLineComment(localBuffer.Slice(1));
                 }
-                else if (marker == '*')
+                else if (marker == JsonConstants.Asterisk)
                 {
                     return ConsumeMultiLineComment(localBuffer.Slice(1));
                 }
@@ -1483,7 +1483,7 @@ namespace System.Text.Json
 
             if (IsLastSpan)
             {
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Solidus);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
             }
             return false;
         }
