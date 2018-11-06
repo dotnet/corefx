@@ -178,10 +178,6 @@ namespace System.Diagnostics.Tests
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
                     Assert.NotNull(px);
-                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // on OSX, process name is dotnet for some reason. Refer to #23972
-                    {
-                        Assert.Equal(s_allowedProgramsToRun[0], px.ProcessName);
-                    }
                     px.WaitForExit();
                     Assert.True(px.HasExited);
                     Assert.Equal(42, px.ExitCode);
