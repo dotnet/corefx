@@ -401,15 +401,17 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(string.Empty, actualContent);
         }
 
-        [Fact]
-        public async Task ReadAsStringAsync_SetInvalidCharset_ThrowsInvalidOperationException()
+        [Theory]
+        [InlineData("invalid")]
+        [InlineData("\"\"")]
+        public async Task ReadAsStringAsync_SetInvalidCharset_ThrowsInvalidOperationException(string charset)
         {
             string sourceString = "some string";
             byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
 
             var content = new MockContent(contentBytes);
             content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
-            content.Headers.ContentType.CharSet = "invalid";
+            content.Headers.ContentType.CharSet = charset;
 
             // This will throw because we have an invalid charset.
             Task t = content.ReadAsStringAsync();
@@ -445,6 +447,40 @@ namespace System.Net.Http.Functional.Tests
             string result = await content.ReadAsStringAsync();
 
             Assert.Equal(sourceString, result);
+        }
+
+        [Theory]
+        [InlineData("\"\"invalid")]
+        [InlineData("invalid\"\"")]
+        [InlineData("\"\"invalid\"\"")]
+        [InlineData("\"invalid")]
+        [InlineData("invalid\"")]
+        public async Task ReadAsStringAsync_SetInvalidContentTypeHeader_DefaultCharsetUsed(string charset)
+        {
+            string sourceString = "hello world";
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri);
+
+                    HttpResponseMessage reponse = await client.SendAsync(request);
+
+                    string t = await reponse.Content.ReadAsStringAsync();
+                    Assert.Equal(sourceString, t);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Because the Content-Type header is invalid, we expect the client to default to UTF-8.
+                    byte[] contentArray = Encoding.UTF8.GetBytes(sourceString);
+
+                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nContent-Type:text/plain;charset={charset}\r\nConnection: close\r\nContent-Length: {contentArray.Length}\r\n\r\n");
+                    await connection.Socket.SendAsync(new ArraySegment<byte>(contentArray), SocketFlags.None);
+                    while (await connection.Socket.ReceiveAsync(new ArraySegment<byte>(new byte[1000]), SocketFlags.None) > 0); // Read and ignore the request.
+                });
+            });
         }
 
         [Fact]
