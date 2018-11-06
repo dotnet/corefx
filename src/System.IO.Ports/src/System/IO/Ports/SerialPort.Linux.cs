@@ -25,7 +25,9 @@ namespace System.IO.Ports
                 var entries = di.EnumerateFileSystemInfos(@"*", SearchOption.TopDirectoryOnly);
                 foreach (var entry in entries)
                 {
-                    if (Directory.Exists(entry.FullName + "/device/tty") || Directory.Exists(sysUsbDir + entry.Name))
+                    if (Directory.Exists(entry.FullName + "/device/id") ||
+                        Directory.Exists(entry.FullName + "/device/of_node") ||
+                        Directory.Exists(sysUsbDir + entry.Name))
                     {
                         string deviceName = devDir + entry.Name;
                         if (File.Exists(deviceName))
@@ -47,7 +49,8 @@ namespace System.IO.Ports
                     if (portName.StartsWith("/dev/ttyS") ||
                         portName.StartsWith("/dev/ttyUSB") ||
                         portName.StartsWith("/dev/ttyACM") ||
-                        portName.StartsWith("/dev/ttyAMA"))
+                        portName.StartsWith("/dev/ttyAMA") ||
+                        portName.StartsWith("/dev/ttymxc"))
                     {
                         ports.Add(portName);
                     }
