@@ -50,14 +50,14 @@ namespace System.Text.Json.Tests
 
         public static byte[] JsonLabReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
         {
-            var state = new JsonReaderState(commentHandling: commentHandling);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
             var reader = new Utf8JsonReader(data, true, state);
             return JsonLabReaderLoop(data.Length, out length, ref reader);
         }
 
         public static object JsonLabReturnObjectHelper(byte[] data, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
         {
-            var state = new JsonReaderState(commentHandling: commentHandling);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
             var reader = new Utf8JsonReader(data, true, state);
             return JsonLabReaderLoop(ref reader);
         }

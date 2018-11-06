@@ -49,8 +49,9 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="maxDepth">Sets the maximum depth allowed when reading JSON, with the default set as 64.
         /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.</param>
-        /// <param name="commentHandling">Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
-        /// By default, the <see cref="Utf8JsonReader"/> treats comments within the JSON as invalid.</param>
+        /// <param name="options">Defines the customized behaviour of the <see cref="Utf8JsonReader"/>
+        /// that is different from the JSON RFC (for example how to handle comments).
+        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid).</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the max depth is set to a non-positive value (&lt;= 0)
         /// </exception>
@@ -60,7 +61,7 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
         /// </remarks>
-        public JsonReaderState(int maxDepth = StackFreeMaxDepth, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
+        public JsonReaderState(int maxDepth = StackFreeMaxDepth, JsonReaderOptions options = default)
         {
             if (maxDepth <= 0)
                 ThrowHelper.ThrowArgumentException_MaxDepthMustBePositive();
@@ -74,12 +75,12 @@ namespace System.Text.Json
             _inObject = default;
             _isNotPrimitive = default;
             _tokenType = default;
-            _readerOptions = new JsonReaderOptions { CommentHandling = commentHandling };
+            _readerOptions = options;
 
             // Only allocate the stack if the user explicitly sets the JsonReaderOptions
             // by providing a custom JsonCommentHandling OR if the user explicitly sets the
             // max depth to be larger than 64. This way we avoid allocations in the common, default cases.
-            if (commentHandling == JsonCommentHandling.AllowComments || maxDepth > StackFreeMaxDepth)
+            if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments || maxDepth > StackFreeMaxDepth)
                 _stack = new Stack<JsonTokenType>();
             else
                 _stack = null;

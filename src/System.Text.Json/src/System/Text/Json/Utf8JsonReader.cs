@@ -125,7 +125,7 @@ namespace System.Text.Json
             _totalConsumed = 0;
             _isLastSegment = _isFinalBlock;
             _isSingleSegment = true;
-            
+
             ValueSpan = ReadOnlySpan<byte>.Empty;
         }
 

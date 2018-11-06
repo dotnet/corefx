@@ -4,6 +4,7 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="JsonReaderStateTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
     <Compile Include="TestCaseType.cs" />
     <Compile Include="Utf8JsonReaderTests.cs" />

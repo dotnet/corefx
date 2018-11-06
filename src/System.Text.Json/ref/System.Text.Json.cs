@@ -27,7 +27,7 @@ namespace System.Text.Json
     public partial struct JsonReaderState
     {
         private object _dummy;
-        public JsonReaderState(int maxDepth = 64, System.Text.Json.JsonCommentHandling commentHandling = System.Text.Json.JsonCommentHandling.Default) { throw null; }
+        public JsonReaderState(int maxDepth = 64, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int MaxDepth { get { throw null; } }
         public System.Text.Json.JsonReaderOptions Options { get { throw null; } }

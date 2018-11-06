@@ -163,7 +163,7 @@ namespace System.Text.Json.Tests
             {
                 for (int i = 0; i < dataUtf8.Length; i++)
                 {
-                    var state = new JsonReaderState(commentHandling: commentHandling);
+                    var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                     while (json.Read())
                         ;
@@ -278,20 +278,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public static void TestDepthInvalid(int depth)
-        {
-            try
-            {
-                var state = new JsonReaderState(maxDepth: depth);
-                Assert.True(false, "Expected ArgumentException was not thrown. Max depth must be set to greater than 0.");
-            }
-            catch (ArgumentException)
-            { }
-        }
-
-        [Theory]
         [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Default, "nam\\\"e, ah\\\"son, ")]
         [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
             JsonCommentHandling.Default,
@@ -336,7 +322,7 @@ namespace System.Text.Json.Tests
             {
                 for (int i = 0; i < dataUtf8.Length; i++)
                 {
-                    var state = new JsonReaderState(commentHandling: commentHandling);
+                    var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), false, state);
                     while (json.Read())
                         ;
@@ -375,7 +361,7 @@ namespace System.Text.Json.Tests
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                var state = new JsonReaderState(commentHandling: commentHandling);
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), false, state);
                 while (json.Read())
                     ;
@@ -403,7 +389,7 @@ namespace System.Text.Json.Tests
         {
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                var state = new JsonReaderState(commentHandling: commentHandling);
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), false, state);
                 while (json.Read())
@@ -459,7 +445,7 @@ namespace System.Text.Json.Tests
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                var state = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
+                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8, false, state);
 
                 try
@@ -485,7 +471,7 @@ namespace System.Text.Json.Tests
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                var state = new JsonReaderState(commentHandling: commentHandling);
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8, false, state);
 
                 try
@@ -567,7 +553,7 @@ namespace System.Text.Json.Tests
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                var state = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
+                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
                 try
@@ -649,7 +635,7 @@ namespace System.Text.Json.Tests
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                var state = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
+                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
                 try
@@ -668,7 +654,7 @@ namespace System.Text.Json.Tests
                 {
                     try
                     {
-                        var stateInner = new JsonReaderState(maxDepth: maxDepth, commentHandling: commentHandling);
+                        var stateInner = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
                         var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
                         while (jsonSlice.Read())
                             ;
@@ -735,7 +721,7 @@ namespace System.Text.Json.Tests
         public static void AllowComments(string jsonString, string expectedComment, int expectedIndex)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             bool foundComment = false;
@@ -797,7 +783,7 @@ namespace System.Text.Json.Tests
         public static void AllowCommentsSingleSegment(string jsonString, string expectedComment, int expectedIndex)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             bool foundComment = false;
@@ -823,7 +809,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
-                var stateInner = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
+                var stateInner = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
                 var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
 
                 foundComment = false;
@@ -912,7 +898,7 @@ namespace System.Text.Json.Tests
         public static void SkipComments(string jsonString, int expectedConsumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(commentHandling: JsonCommentHandling.SkipComments);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             JsonTokenType prevTokenType = JsonTokenType.None;
@@ -969,7 +955,7 @@ namespace System.Text.Json.Tests
         public static void SkipCommentsSingleSegment(string jsonString, int expectedConsumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(commentHandling: JsonCommentHandling.SkipComments);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             JsonTokenType prevTokenType = JsonTokenType.None;
@@ -990,7 +976,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
-                var stateInner = new JsonReaderState(commentHandling: JsonCommentHandling.SkipComments);
+                var stateInner = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
                 var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
 
                 prevTokenType = JsonTokenType.None;
@@ -1222,7 +1208,7 @@ namespace System.Text.Json.Tests
         [InlineData("/*/*/漢字}", 0, 5)]
         [InlineData("//T漢字his is a comment before json\n\"hello\"漢字{", 1, 7)]
         [InlineData("\"h漢字ello\"//This is a comment after json\n漢字{", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment",3, 28)]
+        [InlineData("\"g漢字amma\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 3, 28)]
         [InlineData("\"d漢字elta\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 4, 18)]
         [InlineData("\"h漢字ello\"//This is a comment after json with new line\n漢字{", 1, 0)]
         [InlineData("{\"a漢字ge\" : \n//This is a comment between key-value pairs\n 30}漢字{", 2, 4)]
@@ -1242,7 +1228,7 @@ namespace System.Text.Json.Tests
         public static void InvalidJsonWithComments(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             try
@@ -1313,7 +1299,7 @@ namespace System.Text.Json.Tests
         public static void InvalidJsonWithCommentsSingleSegment(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(commentHandling: JsonCommentHandling.AllowComments);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             try
