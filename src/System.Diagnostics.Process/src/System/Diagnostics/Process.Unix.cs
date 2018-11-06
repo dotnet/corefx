@@ -305,6 +305,11 @@ namespace System.Diagnostics
 
             if (startInfo.UseShellExecute)
             {
+                if (!IsValidVerb(startInfo.Verb))
+                {
+                    throw new Win32Exception(Interop.Errors.ERROR_NO_ASSOCIATION);
+                }
+
                 // On Windows, UseShellExecute of executables and scripts causes those files to be executed.
                 // To achieve this on Unix, we check if the file is executable (x-bit).
                 // Some files may have the x-bit set even when they are not executable. This happens for example
@@ -756,6 +761,21 @@ namespace System.Diagnostics
                 _waitStateHolder = new ProcessWaitState.Holder(_processId);
             }
             return _waitStateHolder._state;
+        }
+
+        private static readonly string[] s_validVerbs = new string[] { null, "", "open" };
+
+        private static bool IsValidVerb(string verb)
+        {
+            for (int i = 0; i < s_validVerbs.Length; i++)
+            {
+                if (s_validVerbs[i] == verb)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static (uint userId, uint groupId) GetUserAndGroupIds(ProcessStartInfo startInfo)

@@ -185,6 +185,41 @@ namespace System.Diagnostics.Tests
             }, filename, options).Dispose();
         }
 
+        [Theory]
+        [InlineData((string)null, true)]
+        [InlineData("", true)]
+        [InlineData("open", true)]
+        [InlineData("invalid", false)]
+        public void ProcessStart_UseShellExecute_OnUnix_ValidVerbs(string verb, bool isValid)
+        {
+            // Create a script that we'll use to 'open' the file by putting it on PATH
+            // with the appropriate name.
+            string path = GetTestFileName();
+            Directory.CreateDirectory(path);
+            WriteScriptFile(Path.Combine(path, s_allowedProgramsToRun[0]), returnValue: 42);
+
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.StartInfo.EnvironmentVariables["PATH"] = path;
+            RemoteInvoke((argVerb, argValid) =>
+            {
+                var psi = new ProcessStartInfo { UseShellExecute = true, FileName = "/", Verb = argVerb };
+                if (bool.Parse(argValid))
+                {
+                    using (var px = Process.Start(psi))
+                    {
+                        Assert.NotNull(px);
+                        px.WaitForExit();
+                        Assert.True(px.HasExited);
+                        Assert.Equal(42, px.ExitCode);
+                    }
+                }
+                else
+                {
+                    Assert.Throws<Win32Exception>(() => Process.Start(psi));
+                }
+            }, verb, isValid.ToString(), options).Dispose();
+        }
+
         [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]

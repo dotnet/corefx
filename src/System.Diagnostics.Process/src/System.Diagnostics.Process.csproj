@@ -39,6 +39,9 @@
     <Compile Include="..\..\Common\src\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
+      <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcessModules.cs">
@@ -222,9 +225,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreatePipe_SafeFileHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.CreatePipe.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
-      <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ThreadOptions.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.ThreadOptions.cs</Link>
