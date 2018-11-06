@@ -170,7 +170,7 @@ namespace System.Text.Json.Tests
 
                     long consumed = json.BytesConsumed;
                     Assert.Equal(consumed, json.CurrentState.BytesConsumed);
-                    
+
                     for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                     {
                         // Need to re-initialize the state and reader to avoid using the previous state stack.
@@ -623,6 +623,10 @@ namespace System.Text.Json.Tests
         [InlineData("true,", 0, 4)]
         [InlineData("null,", 0, 4)]
         [InlineData("\"h漢字ello\",", 0, 13)]
+        [InlineData("\"\\u12z3\"", 0, 5)]
+        [InlineData("\"\\u12]3\"", 0, 5)]
+        [InlineData("\"\\u12=3\"", 0, 5)]
+        [InlineData("\"\\u12$3\"", 0, 5)]
         [InlineData("01", 0, 1)]
         [InlineData("1a", 0, 1)]
         [InlineData("-01", 0, 2)]

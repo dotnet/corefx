@@ -889,7 +889,7 @@ namespace System.Text.Json
                         for (int j = startIndex; j < data.Length; j++)
                         {
                             byte nextByte = data[j];
-                            if ((uint)(nextByte - '0') > '9' - '0' && (uint)(nextByte - 'A') > 'F' - 'A' && (uint)(nextByte - 'a') > 'f' - 'a')
+                            if (!JsonReaderHelper.IsHexDigit(nextByte))
                             {
                                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
                             }
@@ -1044,7 +1044,7 @@ namespace System.Text.Json
                 }
 
                 nextByte = data[i];
-                if ((uint)(nextByte - '0') > '9' - '0')
+                if (!JsonReaderHelper.IsDigit(nextByte))
                 {
                     _lineBytePosition += i;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFound, nextByte);
@@ -1092,7 +1092,7 @@ namespace System.Text.Json
             for (; i < data.Length; i++)
             {
                 nextByte = data[i];
-                if ((uint)(nextByte - '0') > '9' - '0')
+                if (!JsonReaderHelper.IsDigit(nextByte))
                 {
                     break;
                 }
@@ -1131,7 +1131,7 @@ namespace System.Text.Json
                 }
             }
             nextByte = data[i];
-            if ((uint)(nextByte - '0') > '9' - '0')
+            if (!JsonReaderHelper.IsDigit(nextByte))
             {
                 _lineBytePosition += i;
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFound, nextByte);
@@ -1175,7 +1175,7 @@ namespace System.Text.Json
                 nextByte = data[i];
             }
 
-            if ((uint)(nextByte - '0') > '9' - '0')
+            if (!JsonReaderHelper.IsDigit(nextByte))
             {
                 _lineBytePosition += i;
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedDigitNotFound, nextByte);

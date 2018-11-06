@@ -28,6 +28,17 @@ namespace System.Text.Json
             return (newLines, lastLineFeedIndex);
         }
 
+        // A digit is valid if it is in the range: [0..9]
+        // Otherwise, return false.
+        public static bool IsDigit(byte nextByte) => (uint)(nextByte - '0') <= '9' - '0';
+
+        // A hex digit is valid if it is in the range: [0..9] | [A..F] | [a..f]
+        // Otherwise, return false.
+        public static bool IsHexDigit(byte nextByte) =>
+            (uint)(nextByte - '0') <= '9' - '0' ||
+            (uint)(nextByte - 'A') <= 'F' - 'A' ||
+            (uint)(nextByte - 'a') <= 'f' - 'a';
+
         // https://tools.ietf.org/html/rfc8259
         // Does the span contain '\' or any control characters (i.e. 0 to 31)
         // IndexOfAny(92, < 32)
