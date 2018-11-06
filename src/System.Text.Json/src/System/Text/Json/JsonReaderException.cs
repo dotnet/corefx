@@ -9,7 +9,7 @@ namespace System.Text.Json
     /// encounters an invalid JSON text while reading through it. This exception is also thrown
     /// whenever you read past the defined maximum depth.
     /// </summary>
-    public class JsonReaderException : Exception
+    public sealed class JsonReaderException : Exception
     {
         /// <summary>
         /// Creates a new exception object to relay error information to the user.

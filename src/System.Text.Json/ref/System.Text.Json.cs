@@ -13,7 +13,7 @@ namespace System.Text.Json
         Default = (byte)0,
         SkipComments = (byte)2,
     }
-    public partial class JsonReaderException : System.Exception
+    public sealed partial class JsonReaderException : System.Exception
     {
         public JsonReaderException(string message, long lineNumber, long lineBytePosition) { }
         public long LineBytePosition { get { throw null; } }
