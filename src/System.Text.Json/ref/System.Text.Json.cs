@@ -15,8 +15,8 @@ namespace System.Text.Json
     }
     public sealed partial class JsonReaderException : System.Exception
     {
-        public JsonReaderException(string message, long lineNumber, long lineBytePosition) { }
-        public long LineBytePosition { get { throw null; } }
+        public JsonReaderException(string message, long lineNumber, long bytePositionInLine) { }
+        public long BytePositionInLine { get { throw null; } }
         public long LineNumber { get { throw null; } }
     }
     public partial struct JsonReaderOptions

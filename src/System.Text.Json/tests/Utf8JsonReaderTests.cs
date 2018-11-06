@@ -407,7 +407,7 @@ namespace System.Text.Json.Tests
                 catch (JsonReaderException ex)
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
-                    Assert.Equal(expectedBytePosition, ex.LineBytePosition);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
             }
         }
@@ -457,7 +457,7 @@ namespace System.Text.Json.Tests
                 catch (JsonReaderException ex)
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
-                    Assert.Equal(expectedBytePosition, ex.LineBytePosition);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
             }
         }
@@ -483,7 +483,7 @@ namespace System.Text.Json.Tests
                 catch (JsonReaderException ex)
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
-                    Assert.Equal(expectedBytePosition, ex.LineBytePosition);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
             }
         }
@@ -565,7 +565,7 @@ namespace System.Text.Json.Tests
                 catch (JsonReaderException ex)
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
-                    Assert.Equal(expectedBytePosition, ex.LineBytePosition);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
             }
         }
@@ -647,7 +647,7 @@ namespace System.Text.Json.Tests
                 catch (JsonReaderException ex)
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
-                    Assert.Equal(expectedBytePosition, ex.LineBytePosition);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
 
                 for (int i = 0; i < dataUtf8.Length; i++)
@@ -676,9 +676,9 @@ namespace System.Text.Json.Tests
                         string secondSegmentString = Encoding.UTF8.GetString(dataUtf8.AsSpan(i));
                         errorMessage += " | " + firstSegmentString + " | " + secondSegmentString;
                         Assert.True(expectedlineNumber == ex.LineNumber, errorMessage);
-                        errorMessage = $"expectedBytePosition: {expectedBytePosition} | actual: {ex.LineBytePosition} | index: {i} | option: {commentHandling}";
+                        errorMessage = $"expectedBytePosition: {expectedBytePosition} | actual: {ex.BytePositionInLine} | index: {i} | option: {commentHandling}";
                         errorMessage += " | " + firstSegmentString + " | " + secondSegmentString;
-                        Assert.True(expectedBytePosition == ex.LineBytePosition, errorMessage);
+                        Assert.True(expectedBytePosition == ex.BytePositionInLine, errorMessage);
                     }
                 }
             }
@@ -1071,7 +1071,7 @@ namespace System.Text.Json.Tests
             catch (JsonReaderException ex)
             {
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
-                Assert.Equal(expectedPosition, ex.LineBytePosition);
+                Assert.Equal(expectedPosition, ex.BytePositionInLine);
             }
         }
 
@@ -1131,7 +1131,7 @@ namespace System.Text.Json.Tests
             catch (JsonReaderException ex)
             {
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
-                Assert.Equal(expectedPosition, ex.LineBytePosition);
+                Assert.Equal(expectedPosition, ex.BytePositionInLine);
             }
 
             for (int i = 0; i < dataUtf8.Length; i++)
@@ -1168,7 +1168,7 @@ namespace System.Text.Json.Tests
                 catch (JsonReaderException ex)
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
-                    Assert.Equal(expectedPosition, ex.LineBytePosition);
+                    Assert.Equal(expectedPosition, ex.BytePositionInLine);
                 }
             }
         }
@@ -1240,7 +1240,7 @@ namespace System.Text.Json.Tests
             catch (JsonReaderException ex)
             {
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
-                Assert.Equal(expectedPosition, ex.LineBytePosition);
+                Assert.Equal(expectedPosition, ex.BytePositionInLine);
             }
         }
 
@@ -1311,7 +1311,7 @@ namespace System.Text.Json.Tests
             catch (JsonReaderException ex)
             {
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
-                Assert.Equal(expectedPosition, ex.LineBytePosition);
+                Assert.Equal(expectedPosition, ex.BytePositionInLine);
             }
         }
 

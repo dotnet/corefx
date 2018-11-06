@@ -16,14 +16,14 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="message">The context specific error message.</param>
         /// <param name="lineNumber">The line number at which the invalid JSON was encountered (starting at 0).</param>
-        /// <param name="lineBytePosition">The byte count within the current line where the invalid JSON was encountered (starting at 0).</param>
+        /// <param name="bytePositionInLine">The byte count within the current line where the invalid JSON was encountered (starting at 0).</param>
         /// <remarks>
-        /// Note that the <paramref name="lineBytePosition"/> counts the number of bytes (i.e. UTF-8 code units) and not characters or scalars.
+        /// Note that the <paramref name="bytePositionInLine"/> counts the number of bytes (i.e. UTF-8 code units) and not characters or scalars.
         /// </remarks>
-        public JsonReaderException(string message, long lineNumber, long lineBytePosition) : base(message)
+        public JsonReaderException(string message, long lineNumber, long bytePositionInLine) : base(message)
         {
             LineNumber = lineNumber;
-            LineBytePosition = lineBytePosition;
+            BytePositionInLine = bytePositionInLine;
         }
 
         /// <summary>
@@ -34,6 +34,6 @@ namespace System.Text.Json
         /// <summary>
         /// The number of bytes read within the current line before the exception (starting at 0).
         /// </summary>
-        public long LineBytePosition { get; }
+        public long BytePositionInLine { get; }
     }
 }
