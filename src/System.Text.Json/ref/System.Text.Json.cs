@@ -18,6 +18,7 @@ namespace System.Text.Json
         public JsonReaderException(string message, long lineNumber, long bytePositionInLine) { }
         public long BytePositionInLine { get { throw null; } }
         public long LineNumber { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
     }
     public partial struct JsonReaderOptions
     {
