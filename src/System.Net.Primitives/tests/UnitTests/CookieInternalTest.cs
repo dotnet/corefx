@@ -134,5 +134,28 @@ namespace NetPrimitivesUnitTests
 
             Assert.NotEmpty(cc.GetCookies(uri2));
         }
+
+        // This assumes that the default cookie behavior is RFC 6265, which it
+        // is not ("Default = Rfc2109" in Cookie.cs:20)
+        // TODO: Will the Default behavior change to RFC 6265? If not, specify appropriate CookieVariant
+        [Theory]
+        [InlineData("name=value; Domain=contoso.com", "contoso.com")]
+        [InlineData("name=value; Domain=.contoso.com", "contoso.com")]
+        [InlineData("name=value; Domain=.CONTOSO.COM", "contoso.com")]
+        [InlineData("name=value; Domain=subdomain.contoso.com", "subdomain.contoso.com")]
+        [InlineData("name=value; Domain=.subdomain.contoso.com", "subdomain.contoso.com")]
+        public void Rfc6265_Domain(string cookieHeader, string expectedDomain)
+        {
+            var uri = new Uri("https://contoso.com/");
+            var cc = new CookieContainer();
+
+            // Assert.DoesNotThrow
+            cc.SetCookies(uri, cookieHeader);
+
+            var cookie = cc.GetCookies(uri);
+            Assert.NotEmpty(cookie);
+            Assert.Equal(expectedDomain, cookie["name"].Domain);
+
+        }
     }
 }
