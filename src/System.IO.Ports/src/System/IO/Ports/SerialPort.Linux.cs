@@ -35,7 +35,7 @@ namespace System.IO.Ports
                     bool isTtyS = entry.Name.StartsWith("ttyS");
                     if ((isTtyS &&
                          (File.Exists(entry.FullName + "/device/id") ||
-                          File.Exists(entry.FullName + "/device/of_node"))) ||
+                          Directory.Exists(entry.FullName + "/device/of_node"))) ||
                         (!isTtyS && Directory.Exists(entry.FullName + "/device/tty")) ||
                         Directory.Exists(sysUsbDir + entry.Name))
                     {
