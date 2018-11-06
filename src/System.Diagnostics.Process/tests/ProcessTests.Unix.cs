@@ -125,6 +125,7 @@ namespace System.Diagnostics.Tests
 
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
+        [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
         {
             string programToOpen = s_allowedProgramsToRun.FirstOrDefault(program => IsProgramInstalled(program));
@@ -156,6 +157,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_FallsBackWhenNotRealExecutable()
         {
             // Create a script that we'll use to 'open' the file by putting it on PATH
@@ -190,6 +192,7 @@ namespace System.Diagnostics.Tests
         [InlineData("", true)]
         [InlineData("open", true)]
         [InlineData("invalid", false)]
+        [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_ValidVerbs(string verb, bool isValid)
         {
             // Create a script that we'll use to 'open' the file by putting it on PATH
