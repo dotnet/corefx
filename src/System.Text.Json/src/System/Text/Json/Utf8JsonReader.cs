@@ -53,11 +53,10 @@ namespace System.Text.Json
 
         /// <summary>
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
-        /// for the given UTF-8 encoded input text.
+        /// for the current instance of the <see cref="Utf8JsonReader"/> with the given UTF-8 encoded input text.
         /// </summary>
         public long BytesConsumed => _totalConsumed + _consumed;
 
-        // Depth tracks the recursive depth of the nested objects / arrays within the JSON data.
         /// <summary>
         /// Tracks the recursive depth of the nested objects / arrays within the JSON text
         /// processed so far. This provides the depth of the current token.
