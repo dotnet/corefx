@@ -205,6 +205,11 @@ namespace System.Diagnostics.Tests
             options.StartInfo.EnvironmentVariables["PATH"] = path;
             RemoteInvoke((argVerb, argValid) =>
             {
+                if (argVerb == "<null>")
+                {
+                    argVerb = null;
+                }
+
                 var psi = new ProcessStartInfo { UseShellExecute = true, FileName = "/", Verb = argVerb };
                 if (bool.Parse(argValid))
                 {
@@ -220,7 +225,7 @@ namespace System.Diagnostics.Tests
                 {
                     Assert.Throws<Win32Exception>(() => Process.Start(psi));
                 }
-            }, verb, isValid.ToString(), options).Dispose();
+            }, verb ?? "<null>", isValid.ToString(), options).Dispose();
         }
 
         [Theory, InlineData("vi")]
