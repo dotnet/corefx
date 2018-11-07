@@ -440,7 +440,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("  \"h漢字ello\"  ")]
+        [InlineData("  \"h\u6F22\u5B57ello\"  ")]   // "\u6F22\u5B57" is Chinese for "Chinese character" (from the Han script)
         [InlineData("  \"he\\r\\n\\\"l\\\\\\\"lo\\\\\"  ")]
         [InlineData("  12345  ")]
         [InlineData("  null  ")]
@@ -471,22 +471,22 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("\"h漢字ello\"", 1, 0)] // "\""
+        [InlineData("\"h\u6F22\u5B57ello\"", 1, 0)] // "\""
         [InlineData("12345", 3, 0)]   // "123"
         [InlineData("null", 3, 0)]   // "nul"
         [InlineData("true", 3, 0)]   // "tru"
         [InlineData("false", 4, 0)]  // "fals"
-        [InlineData("   {\"a漢字ge\":30}   ", 16, 16)] // "   {\"a漢字ge\":"
-        [InlineData("{\"n漢字ame\":\"A漢字hson\"}", 15, 14)]  // "{\"n漢字ame\":\"A漢字hso"
+        [InlineData("   {\"a\u6F22\u5B57ge\":30}   ", 16, 16)] // "   {\"a\u6F22\u5B57ge\":"
+        [InlineData("{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hson\"}", 15, 14)]  // "{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hso"
         [InlineData("-123456789", 1, 0)] // "-"
         [InlineData("0.5", 2, 0)]    // "0."
         [InlineData("10.5e+3", 5, 0)] // "10.5e"
         [InlineData("10.5e-1", 6, 0)]    // "10.5e-"
-        [InlineData("{\"i漢字nts\":[1, 2, 3, 4, 5]}", 27, 25)]    // "{\"i漢字nts\":[1, 2, 3, 4, "
-        [InlineData("{\"s漢字trings\":[\"a漢字bc\", \"def\"], \"ints\":[1, 2, 3, 4, 5]}", 36, 36)]  // "{\"s漢字trings\":[\"a漢字bc\", \"def\""
-        [InlineData("{\"a漢字ge\":30, \"name\":\"test}:[]\", \"another 漢字string\" : \"tests\"}", 25, 24)]   // "{\"a漢字ge\":30, \"name\":\"test}"
-        [InlineData("   [[[[{\r\n\"t漢字emp1\":[[[[{\"t漢字emp2:[]}]]]]}]]]]\":[]}]]]]}]]]]   ", 54, 29)] // "   [[[[{\r\n\"t漢字emp1\":[[[[{\"t漢字emp2:[]}]]]]}]]]]"
-        [InlineData("{\r\n\"is漢字Active\": false, \"in漢字valid\"\r\n : \"now its 漢字valid\"}", 26, 26)]  // "{\r\n\"is漢字Active\": false, \"in漢字valid\"\r\n}"
+        [InlineData("{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, 5]}", 27, 25)]    // "{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, "
+        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"], \"ints\":[1, 2, 3, 4, 5]}", 36, 36)]  // "{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\""
+        [InlineData("{\"a\u6F22\u5B57ge\":30, \"name\":\"test}:[]\", \"another \u6F22\u5B57string\" : \"tests\"}", 25, 24)]   // "{\"a\u6F22\u5B57ge\":30, \"name\":\"test}"
+        [InlineData("   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]\":[]}]]]]}]]]]   ", 54, 29)] // "   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]"
+        [InlineData("{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n : \"now its \u6F22\u5B57valid\"}", 26, 26)]  // "{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n}"
         [InlineData("{\"property\\u1234Name\": \"String value with hex: \\uABCD in the middle.\"}", 51, 23)]  // "{\"property\\u1234Name\": \"String value with hex: \\uAB"
         [InlineData("{ \"number\": 0}", 13, 12)]    // "{ \"number\": 0"
         public static void PartialJson(string jsonString, int splitLocation, int consumed)
@@ -511,14 +511,14 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false \"in漢字valid\"\r\n}", 30, 30, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false \"in漢字valid\"\r\n}", 31, 31, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false, \"in漢字valid\"\r\n}", 30, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false, \"in漢字valid\"\r\n}", 31, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false, \"in漢字valid\"\r\n}", 32, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false, 5\r\n}", 30, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false, 5\r\n}", 31, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct漢字ive\": false, 5\r\n}", 32, 30, 2, 22)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 21)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 2, 21)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 3, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 3, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 3, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 2, 22)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 2, 22)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 2, 22)]
         public static void InvalidJsonSplitRemainsInvalid(string jsonString, int splitLocation, int consumed, int expectedlineNumber, int expectedBytePosition)
         {
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -552,7 +552,7 @@ namespace System.Text.Json.Tests
         [InlineData("nulz", 0, 3)]
         [InlineData("truz", 0, 3)]
         [InlineData("falsz", 0, 4)]
-        [InlineData("\"a漢字ge\":", 0, 11)]
+        [InlineData("\"a\u6F22\u5B57ge\":", 0, 11)]
         [InlineData("12345.1.", 0, 7)]
         [InlineData("-f", 0, 1)]
         [InlineData("1.f", 0, 2)]
@@ -562,17 +562,17 @@ namespace System.Text.Json.Tests
         [InlineData("01", 0, 1)]
         [InlineData("-01", 0, 2)]
         [InlineData("10.5e-0.2", 0, 7)]
-        [InlineData("{\"a漢字ge\":30, \"ints\":[1, 2, 3, 4, 5.1e7.3]}", 0, 42)]
-        [InlineData("{\"a漢字ge\":30, \r\n \"num\":-0.e, \r\n \"ints\":[1, 2, 3, 4, 5]}", 1, 10)]
+        [InlineData("{\"a\u6F22\u5B57ge\":30, \"ints\":[1, 2, 3, 4, 5.1e7.3]}", 0, 42)]
+        [InlineData("{\"a\u6F22\u5B57ge\":30, \r\n \"num\":-0.e, \r\n \"ints\":[1, 2, 3, 4, 5]}", 1, 10)]
         [InlineData("{{}}", 0, 1)]
         [InlineData("[[{{}}]]", 0, 3)]
         [InlineData("[1, 2, 3, ]", 0, 10)]
-        [InlineData("{\"a漢字ge\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 38)]
+        [InlineData("{\"a\u6F22\u5B57ge\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 38)]
         [InlineData("{\r\n\"isActive\": false \"\r\n}", 1, 18)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
         [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
-        [InlineData("{\"Here is a 漢字string: \\\"\\\"\":\"Here is 漢字a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
         public static void InvalidJsonWhenPartial(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -597,8 +597,8 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("{\"text\": \"๏ แผ่นดินฮั่นเสื่อมโทรมแสนสังเวช\\uABCZ พระปกเกศกองบู๊กู้ขึ้นใหม่\"}", 0, 109)]
-        [InlineData("{\"text\": \"๏ แผ่นดินฮั่นเสื่อมโ\\nทรมแสนสังเวช\\uABCZ พระปกเกศกองบู๊กู้ขึ้นใหม่\"}", 1, 41)]
+        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 37)]   // * Hello\\uABCZ World in thai
+        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 1, 14)]    // * High\\nlow\\uABCZ World in thai
         public static void PositionInCodeUnits(string jsonString, int expectedlineNumber, int expectedBytePosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -629,9 +629,9 @@ namespace System.Text.Json.Tests
         [InlineData("nul", 0, 3)]
         [InlineData("tru", 0, 3)]
         [InlineData("fals", 0, 4)]
-        [InlineData("\"a漢字ge\":", 0, 11)]
-        [InlineData("{\"a漢字ge\":", 0, 13)]
-        [InlineData("{\"name\":\"A漢字hso", 0, 8)]
+        [InlineData("\"a\u6F22\u5B57ge\":", 0, 11)]
+        [InlineData("{\"a\u6F22\u5B57ge\":", 0, 13)]
+        [InlineData("{\"name\":\"A\u6F22\u5B57hso", 0, 8)]
         [InlineData("12345.1.", 0, 7)]
         [InlineData("-", 0, 1)]
         [InlineData("-f", 0, 1)]
@@ -643,7 +643,7 @@ namespace System.Text.Json.Tests
         [InlineData("false,", 0, 5)]
         [InlineData("true,", 0, 4)]
         [InlineData("null,", 0, 4)]
-        [InlineData("\"h漢字ello\",", 0, 13)]
+        [InlineData("\"h\u6F22\u5B57ello\",", 0, 13)]
         [InlineData("\"\\u12z3\"", 0, 5)]
         [InlineData("\"\\u12]3\"", 0, 5)]
         [InlineData("\"\\u12=3\"", 0, 5)]
@@ -664,15 +664,15 @@ namespace System.Text.Json.Tests
         [InlineData("[[{{}}]]", 0, 3)]
         [InlineData("[1, 2, 3, ]", 0, 10)]
         [InlineData("{\"ints\":[1, 2, 3, 4, 5", 0, 22)]
-        [InlineData("{\"s漢字trings\":[\"a漢字bc\", \"def\"", 0, 36)]
+        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"", 0, 36)]
         [InlineData("{\"age\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 32)]
         [InlineData("{\"age\":30, \"name\":\"test}", 0, 18)]
         [InlineData("{\r\n\"isActive\": false \"\r\n}", 1, 18)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
         [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
-        [InlineData("{\"Here is a 漢字string: \\\"\\\"\":\"Here is 漢字a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
         [InlineData("\"hel\rlo\"", 0, 4)]
         [InlineData("\"hel\nlo\"", 0, 4)]
         [InlineData("\"hel\\uABCXlo\"", 0, 9)]
@@ -719,9 +719,9 @@ namespace System.Text.Json.Tests
         [InlineData("nul", 0, 3)]
         [InlineData("tru", 0, 3)]
         [InlineData("fals", 0, 4)]
-        [InlineData("\"a漢字ge\":", 0, 11)]
-        [InlineData("{\"a漢字ge\":", 0, 13)]
-        [InlineData("{\"name\":\"A漢字hso", 0, 8)]
+        [InlineData("\"a\u6F22\u5B57ge\":", 0, 11)]
+        [InlineData("{\"a\u6F22\u5B57ge\":", 0, 13)]
+        [InlineData("{\"name\":\"A\u6F22\u5B57hso", 0, 8)]
         [InlineData("12345.1.", 0, 7)]
         [InlineData("-", 0, 1)]
         [InlineData("-f", 0, 1)]
@@ -733,7 +733,7 @@ namespace System.Text.Json.Tests
         [InlineData("false,", 0, 5)]
         [InlineData("true,", 0, 4)]
         [InlineData("null,", 0, 4)]
-        [InlineData("\"h漢字ello\",", 0, 13)]
+        [InlineData("\"h\u6F22\u5B57ello\",", 0, 13)]
         [InlineData("01", 0, 1)]
         [InlineData("1a", 0, 1)]
         [InlineData("-01", 0, 2)]
@@ -746,15 +746,15 @@ namespace System.Text.Json.Tests
         [InlineData("[[{{}}]]", 0, 3)]
         [InlineData("[1, 2, 3, ]", 0, 10)]
         [InlineData("{\"ints\":[1, 2, 3, 4, 5", 0, 22)]
-        [InlineData("{\"s漢字trings\":[\"a漢字bc\", \"def\"", 0, 36)]
+        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"", 0, 36)]
         [InlineData("{\"age\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 32)]
         [InlineData("{\"age\":30, \"name\":\"test}", 0, 18)]
         [InlineData("{\r\n\"isActive\": false \"\r\n}", 1, 18)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19)]
-        [InlineData("[[[[{\r\n\"t漢字emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
         [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
-        [InlineData("{\"Here is a 漢字string: \\\"\\\"\":\"Here is 漢字a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
         [InlineData("\"hel\rlo\"", 0, 4)]
         [InlineData("\"hel\nlo\"", 0, 4)]
         [InlineData("\"hel\\uABCXlo\"", 0, 9)]
@@ -832,34 +832,34 @@ namespace System.Text.Json.Tests
         [InlineData("/**/", "", 4)]
         [InlineData("/*/*/", "/", 5)]
 
-        [InlineData("//T漢字his is a 漢字comment before json\n\"hello\"", "T漢字his is a 漢字comment before json", 44)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json", "This is a 漢字comment after json", 49)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json\n", "This is a 漢字comment after json", 50)]
-        [InlineData("\"a漢字lpha\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a 漢字comment after json", 53)]
-        [InlineData("\"b漢字eta\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a 漢字comment after json", 52)]
-        [InlineData("\"g漢字amma\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a 漢字comment after json", 53)]
-        [InlineData("\"d漢字elta\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a 漢字comment after json", 53)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json with new line\n", "This is a 漢字comment after json with new line", 64)]
-        [InlineData("{\"a漢字ge\" : \n//This is a 漢字comment between key-value pairs\n 30}", "This is a 漢字comment between key-value pairs", 66)]
-        [InlineData("{\"a漢字ge\" : 30//This is a 漢字comment between key-value pairs on the same line\n}", "This is a 漢字comment between key-value pairs on the same line", 84)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", "T\u6F22\u5B57his is a \u6F22\u5B57comment before json", 44)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", "This is a \u6F22\u5B57comment after json", 49)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", "This is a \u6F22\u5B57comment after json", 50)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a \u6F22\u5B57comment after json", 53)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a \u6F22\u5B57comment after json", 52)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a \u6F22\u5B57comment after json", 53)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a \u6F22\u5B57comment after json", 53)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", "This is a \u6F22\u5B57comment after json with new line", 64)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", "This is a \u6F22\u5B57comment between key-value pairs", 66)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", "This is a \u6F22\u5B57comment between key-value pairs on the same line", 84)]
 
-        [InlineData("/*T漢字his is a multi-line 漢字comment before json*/\"hello\"", "T漢字his is a multi-line 漢字comment before json", 56)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line 漢字comment after json*/", "This is a multi-line 漢字comment after json", 62)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a multi-line 漢字comment after json", 65)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line 漢字comment after json", 64)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a multi-line 漢字comment after json", 65)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line 漢字comment after json", 65)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a 漢字comment between key-value pairs*/ 30}", "This is a 漢字comment between key-value pairs", 67)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a 漢字comment between key-value pairs on the same line*/}", "This is a 漢字comment between key-value pairs on the same line", 85)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", "T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json", 56)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", "This is a multi-line \u6F22\u5B57comment after json", 62)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a multi-line \u6F22\u5B57comment after json", 65)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line \u6F22\u5B57comment after json", 64)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a multi-line \u6F22\u5B57comment after json", 65)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line \u6F22\u5B57comment after json", 65)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", "This is a \u6F22\u5B57comment between key-value pairs", 67)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", "This is a \u6F22\u5B57comment between key-value pairs on the same line", 85)]
 
-        [InlineData("/*T漢字his is a split multi-line \n漢字comment before json*/\"hello\"", "T漢字his is a split multi-line \n漢字comment before json", 63)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \n漢字comment after json*/", "This is a split multi-line \n漢字comment after json", 69)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n漢字comment after json", 72)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n漢字comment after json", 71)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n漢字comment after json", 72)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n漢字comment after json", 72)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \n漢字comment between key-value pairs*/ 30}", "This is a split multi-line \n漢字comment between key-value pairs", 85)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \n漢字comment between key-value pairs on the same line*/}", "This is a split multi-line \n漢字comment between key-value pairs on the same line", 103)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", "T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json", 63)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 69)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 71)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", "This is a split multi-line \n\u6F22\u5B57comment between key-value pairs", 85)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", "This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line", 103)]
         public static void AllowComments(string jsonString, string expectedComment, int expectedIndex)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -894,34 +894,34 @@ namespace System.Text.Json.Tests
         [InlineData("/**/", "", 4)]
         [InlineData("/*/*/", "/", 5)]
 
-        [InlineData("//T漢字his is a 漢字comment before json\n\"hello\"", "T漢字his is a 漢字comment before json", 44)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json", "This is a 漢字comment after json", 49)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json\n", "This is a 漢字comment after json", 50)]
-        [InlineData("\"a漢字lpha\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a 漢字comment after json", 53)]
-        [InlineData("\"b漢字eta\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a 漢字comment after json", 52)]
-        [InlineData("\"g漢字amma\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a 漢字comment after json", 53)]
-        [InlineData("\"d漢字elta\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a 漢字comment after json", 53)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json with new line\n", "This is a 漢字comment after json with new line", 64)]
-        [InlineData("{\"a漢字ge\" : \n//This is a 漢字comment between key-value pairs\n 30}", "This is a 漢字comment between key-value pairs", 66)]
-        [InlineData("{\"a漢字ge\" : 30//This is a 漢字comment between key-value pairs on the same line\n}", "This is a 漢字comment between key-value pairs on the same line", 84)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", "T\u6F22\u5B57his is a \u6F22\u5B57comment before json", 44)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", "This is a \u6F22\u5B57comment after json", 49)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", "This is a \u6F22\u5B57comment after json", 50)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a \u6F22\u5B57comment after json", 53)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a \u6F22\u5B57comment after json", 52)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a \u6F22\u5B57comment after json", 53)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a \u6F22\u5B57comment after json", 53)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", "This is a \u6F22\u5B57comment after json with new line", 64)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", "This is a \u6F22\u5B57comment between key-value pairs", 66)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", "This is a \u6F22\u5B57comment between key-value pairs on the same line", 84)]
 
-        [InlineData("/*T漢字his is a multi-line 漢字comment before json*/\"hello\"", "T漢字his is a multi-line 漢字comment before json", 56)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line 漢字comment after json*/", "This is a multi-line 漢字comment after json", 62)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a multi-line 漢字comment after json", 65)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line 漢字comment after json", 64)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a multi-line 漢字comment after json", 65)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line 漢字comment after json", 65)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a 漢字comment between key-value pairs*/ 30}", "This is a 漢字comment between key-value pairs", 67)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a 漢字comment between key-value pairs on the same line*/}", "This is a 漢字comment between key-value pairs on the same line", 85)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", "T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json", 56)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", "This is a multi-line \u6F22\u5B57comment after json", 62)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a multi-line \u6F22\u5B57comment after json", 65)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line \u6F22\u5B57comment after json", 64)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a multi-line \u6F22\u5B57comment after json", 65)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a multi-line \u6F22\u5B57comment after json", 65)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", "This is a \u6F22\u5B57comment between key-value pairs", 67)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", "This is a \u6F22\u5B57comment between key-value pairs on the same line", 85)]
 
-        [InlineData("/*T漢字his is a split multi-line \n漢字comment before json*/\"hello\"", "T漢字his is a split multi-line \n漢字comment before json", 63)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \n漢字comment after json*/", "This is a split multi-line \n漢字comment after json", 69)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n漢字comment after json", 72)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n漢字comment after json", 71)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n漢字comment after json", 72)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n漢字comment after json", 72)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \n漢字comment between key-value pairs*/ 30}", "This is a split multi-line \n漢字comment between key-value pairs", 85)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \n漢字comment between key-value pairs on the same line*/}", "This is a split multi-line \n漢字comment between key-value pairs on the same line", 103)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", "T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json", 63)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 69)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 71)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", "This is a split multi-line \n\u6F22\u5B57comment between key-value pairs", 85)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", "This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line", 103)]
         public static void AllowCommentsSingleSegment(string jsonString, string expectedComment, int expectedIndex)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1009,34 +1009,34 @@ namespace System.Text.Json.Tests
         [InlineData("/**/", 4)]
         [InlineData("/*/*/", 5)]
 
-        [InlineData("//T漢字his is a 漢字comment before json\n\"hello\"", 32)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json", 37)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json\n", 38)]
-        [InlineData("\"a漢字lpha\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"b漢字eta\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
-        [InlineData("\"g漢字amma\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"d漢字elta\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json with new line\n", 52)]
-        [InlineData("{\"a漢字ge\" : \n//This is a 漢字comment between key-value pairs\n 30}", 54)]
-        [InlineData("{\"a漢字ge\" : 30//This is a 漢字comment between key-value pairs on the same line\n}", 72)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
 
-        [InlineData("/*T漢字his is a multi-line 漢字comment before json*/\"hello\"", 44)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line 漢字comment after json*/", 50)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a 漢字comment between key-value pairs*/ 30}", 55)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a 漢字comment between key-value pairs on the same line*/}", 73)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
 
-        [InlineData("/*T漢字his is a split multi-line \n漢字comment before json*/\"hello\"", 51)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \n漢字comment after json*/", 57)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \n漢字comment between key-value pairs*/ 30}", 73)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \n漢字comment between key-value pairs on the same line*/}", 91)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
         public static void SkipComments(string jsonString, int expectedConsumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1050,7 +1050,7 @@ namespace System.Text.Json.Tests
                 switch (tokenType)
                 {
                     case JsonTokenType.Comment:
-                        Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                        Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                         break;
                 }
                 Assert.NotEqual(tokenType, prevTokenType);
@@ -1066,34 +1066,34 @@ namespace System.Text.Json.Tests
         [InlineData("/**/", 4)]
         [InlineData("/*/*/", 5)]
 
-        [InlineData("//T漢字his is a 漢字comment before json\n\"hello\"", 32)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json", 37)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json\n", 38)]
-        [InlineData("\"a漢字lpha\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"b漢字eta\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
-        [InlineData("\"g漢字amma\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"d漢字elta\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json with new line\n", 52)]
-        [InlineData("{\"a漢字ge\" : \n//This is a 漢字comment between key-value pairs\n 30}", 54)]
-        [InlineData("{\"a漢字ge\" : 30//This is a 漢字comment between key-value pairs on the same line\n}", 72)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
 
-        [InlineData("/*T漢字his is a multi-line 漢字comment before json*/\"hello\"", 44)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line 漢字comment after json*/", 50)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a 漢字comment between key-value pairs*/ 30}", 55)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a 漢字comment between key-value pairs on the same line*/}", 73)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
 
-        [InlineData("/*T漢字his is a split multi-line \n漢字comment before json*/\"hello\"", 51)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \n漢字comment after json*/", 57)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \n漢字comment between key-value pairs*/ 30}", 73)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \n漢字comment between key-value pairs on the same line*/}", 91)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
         public static void SkipCommentsSingleSegment(string jsonString, int expectedConsumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1107,7 +1107,7 @@ namespace System.Text.Json.Tests
                 switch (tokenType)
                 {
                     case JsonTokenType.Comment:
-                        Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                        Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                         break;
                 }
                 Assert.NotEqual(tokenType, prevTokenType);
@@ -1128,7 +1128,7 @@ namespace System.Text.Json.Tests
                     switch (tokenType)
                     {
                         case JsonTokenType.Comment:
-                            Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                             break;
                     }
                     Assert.NotEqual(tokenType, prevTokenType);
@@ -1145,7 +1145,7 @@ namespace System.Text.Json.Tests
                     switch (tokenType)
                     {
                         case JsonTokenType.Comment:
-                            Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                             break;
                     }
                     Assert.NotEqual(tokenType, prevTokenType);
@@ -1163,34 +1163,34 @@ namespace System.Text.Json.Tests
         [InlineData("/**/", 0, 0)]
         [InlineData("/*/*/", 0, 0)]
 
-        [InlineData("//T漢字his is a 漢字comment before json\n\"hello\"", 0, 0)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json", 0, 13)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json\n", 0, 13)]
-        [InlineData("\"a漢字lpha\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"b漢字eta\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"d漢字elta\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json with new line\n", 0, 13)]
-        [InlineData("{\"a漢字ge\" : \n//This is a 漢字comment between key-value pairs\n 30}", 1, 0)]
-        [InlineData("{\"a漢字ge\" : 30//This is a 漢字comment between key-value pairs on the same line\n}", 0, 17)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 0, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 0, 13)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 0, 13)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 0, 13)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 0, 17)]
 
-        [InlineData("/*T漢字his is a multi-line 漢字comment before json*/\"hello\"", 0, 0)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line 漢字comment after json*/", 0, 13)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a 漢字comment between key-value pairs*/ 30}", 1, 0)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a 漢字comment between key-value pairs on the same line*/}", 0, 17)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 0, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 0, 13)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 0, 17)]
 
-        [InlineData("/*T漢字his is a split multi-line \n漢字comment before json*/\"hello\"", 0, 0)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \n漢字comment after json*/", 0, 13)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \n漢字comment between key-value pairs*/ 30}", 1, 0)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \n漢字comment between key-value pairs on the same line*/}", 0, 17)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 0, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 0, 13)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 0, 17)]
         public static void CommentsAreInvalidByDefault(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1204,7 +1204,7 @@ namespace System.Text.Json.Tests
                     switch (tokenType)
                     {
                         case JsonTokenType.Comment:
-                            Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                             break;
                     }
                 }
@@ -1223,34 +1223,34 @@ namespace System.Text.Json.Tests
         [InlineData("/**/", 0, 0)]
         [InlineData("/*/*/", 0, 0)]
 
-        [InlineData("//T漢字his is a 漢字comment before json\n\"hello\"", 0, 0)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json", 0, 13)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json\n", 0, 13)]
-        [InlineData("\"a漢字lpha\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"b漢字eta\" \r\n//This is a 漢字comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"d漢字elta\" \r\n//This is a 漢字comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"h漢字ello\"//This is a 漢字comment after json with new line\n", 0, 13)]
-        [InlineData("{\"a漢字ge\" : \n//This is a 漢字comment between key-value pairs\n 30}", 1, 0)]
-        [InlineData("{\"a漢字ge\" : 30//This is a 漢字comment between key-value pairs on the same line\n}", 0, 17)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 0, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 0, 13)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 0, 13)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 0, 13)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 0, 17)]
 
-        [InlineData("/*T漢字his is a multi-line 漢字comment before json*/\"hello\"", 0, 0)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line 漢字comment after json*/", 0, 13)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line 漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a 漢字comment between key-value pairs*/ 30}", 1, 0)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a 漢字comment between key-value pairs on the same line*/}", 0, 17)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 0, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 0, 13)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 0, 17)]
 
-        [InlineData("/*T漢字his is a split multi-line \n漢字comment before json*/\"hello\"", 0, 0)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \n漢字comment after json*/", 0, 13)]
-        [InlineData("\"a漢字lpha\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"b漢字eta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \n漢字comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \n漢字comment between key-value pairs*/ 30}", 1, 0)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \n漢字comment between key-value pairs on the same line*/}", 0, 17)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 0, 0)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 0, 13)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 1, 0)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 0, 17)]
         public static void CommentsAreInvalidByDefaultSingleSegment(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1264,7 +1264,7 @@ namespace System.Text.Json.Tests
                     switch (tokenType)
                     {
                         case JsonTokenType.Comment:
-                            Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                             break;
                     }
                 }
@@ -1287,7 +1287,7 @@ namespace System.Text.Json.Tests
                         switch (tokenType)
                         {
                             case JsonTokenType.Comment:
-                                Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                                Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                                 break;
                         }
                     }
@@ -1300,7 +1300,7 @@ namespace System.Text.Json.Tests
                         switch (tokenType)
                         {
                             case JsonTokenType.Comment:
-                                Assert.True(false, "TokenType should never be Comment when we are skipping them.");
+                                Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                                 break;
                         }
                     }
@@ -1342,31 +1342,31 @@ namespace System.Text.Json.Tests
         [InlineData("{\"age\" : \n/*This is a split multi-line \ncomment between key-value pairs*/ 30}{", 2, 37)]
         [InlineData("{\"age\" : 30/*This is a split multi-line \ncomment between key-value pairs on the same line*/}{", 1, 51)]
 
-        [InlineData("//\n漢字}", 1, 0)]
-        [InlineData("//c漢字omment\n漢字}", 1, 0)]
-        [InlineData("/**/漢字}", 0, 4)]
-        [InlineData("/*\n*/漢字}", 1, 2)]
-        [InlineData("/*c漢字omment\n*/漢字}", 1, 2)]
-        [InlineData("/*/*/漢字}", 0, 5)]
-        [InlineData("//T漢字his is a comment before json\n\"hello\"漢字{", 1, 7)]
-        [InlineData("\"h漢字ello\"//This is a comment after json\n漢字{", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 3, 28)]
-        [InlineData("\"d漢字elta\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 4, 18)]
-        [InlineData("\"h漢字ello\"//This is a comment after json with new line\n漢字{", 1, 0)]
-        [InlineData("{\"a漢字ge\" : \n//This is a comment between key-value pairs\n 30}漢字{", 2, 4)]
-        [InlineData("{\"a漢字ge\" : 30//This is a comment between key-value pairs on the same line\n}漢字{", 1, 1)]
-        [InlineData("/*T漢字his is a multi-line comment before json*/\"hello\"漢字{", 0, 57)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line comment after json*/漢字{", 0, 56)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 2, 28)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 3, 18)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a comment between key-value pairs*/ 30}漢字{", 1, 49)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a comment between key-value pairs on the same line*/}漢字{", 0, 80)]
-        [InlineData("/*T漢字his is a split multi-line \ncomment before json*/\"hello\"漢字{", 1, 28)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \ncomment after json*/漢字{", 1, 20)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 3, 28)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 4, 18)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \ncomment between key-value pairs*/ 30}漢字{", 2, 37)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \ncomment between key-value pairs on the same line*/}漢字{", 1, 51)]
+        [InlineData("//\n\u6F22\u5B57}", 1, 0)]
+        [InlineData("//c\u6F22\u5B57omment\n\u6F22\u5B57}", 1, 0)]
+        [InlineData("/**/\u6F22\u5B57}", 0, 4)]
+        [InlineData("/*\n*/\u6F22\u5B57}", 1, 2)]
+        [InlineData("/*c\u6F22\u5B57omment\n*/\u6F22\u5B57}", 1, 2)]
+        [InlineData("/*/*/\u6F22\u5B57}", 0, 5)]
+        [InlineData("//T\u6F22\u5B57his is a comment before json\n\"hello\"\u6F22\u5B57{", 1, 7)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a comment after json\n\u6F22\u5B57{", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*/\u6F22\u5B57{//Another single-line comment", 3, 28)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/\u6F22\u5B57{", 4, 18)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a comment after json with new line\n\u6F22\u5B57{", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a comment between key-value pairs\n 30}\u6F22\u5B57{", 2, 4)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a comment between key-value pairs on the same line\n}\u6F22\u5B57{", 1, 1)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line comment before json*/\"hello\"\u6F22\u5B57{", 0, 57)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line comment after json*/\u6F22\u5B57{", 0, 56)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*/\u6F22\u5B57{//Another single-line comment", 2, 28)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/\u6F22\u5B57{", 3, 18)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a comment between key-value pairs*/ 30}\u6F22\u5B57{", 1, 49)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a comment between key-value pairs on the same line*/}\u6F22\u5B57{", 0, 80)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \ncomment before json*/\"hello\"\u6F22\u5B57{", 1, 28)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \ncomment after json*/\u6F22\u5B57{", 1, 20)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*/\u6F22\u5B57{//Another single-line comment", 3, 28)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/\u6F22\u5B57{", 4, 18)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \ncomment between key-value pairs*/ 30}\u6F22\u5B57{", 2, 37)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \ncomment between key-value pairs on the same line*/}\u6F22\u5B57{", 1, 51)]
 
         [InlineData("{   // comment \n   ]", 1, 3)]
         [InlineData("[   // comment \n   }", 1, 3)]
@@ -1377,6 +1377,21 @@ namespace System.Text.Json.Tests
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.AllowComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(expectedlineNumber, ex.LineNumber);
+                Assert.Equal(expectedPosition, ex.BytePositionInLine);
+            }
+
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
+            json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             try
             {
@@ -1418,31 +1433,31 @@ namespace System.Text.Json.Tests
         [InlineData("{\"age\" : \n/*This is a split multi-line \ncomment between key-value pairs*/ 30}{", 2, 37)]
         [InlineData("{\"age\" : 30/*This is a split multi-line \ncomment between key-value pairs on the same line*/}{", 1, 51)]
 
-        [InlineData("//\n漢字}", 1, 0)]
-        [InlineData("//c漢字omment\n漢字}", 1, 0)]
-        [InlineData("/**/漢字}", 0, 4)]
-        [InlineData("/*\n*/漢字}", 1, 2)]
-        [InlineData("/*c漢字omment\n*/漢字}", 1, 2)]
-        [InlineData("/*/*/漢字}", 0, 5)]
-        [InlineData("//T漢字his is a comment before json\n\"hello\"漢字{", 1, 7)]
-        [InlineData("\"h漢字ello\"//This is a comment after json\n漢字{", 1, 0)]
-        [InlineData("\"g漢字amma\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 3, 28)]
-        [InlineData("\"d漢字elta\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 4, 18)]
-        [InlineData("\"h漢字ello\"//This is a comment after json with new line\n漢字{", 1, 0)]
-        [InlineData("{\"a漢字ge\" : \n//This is a comment between key-value pairs\n 30}漢字{", 2, 4)]
-        [InlineData("{\"a漢字ge\" : 30//This is a comment between key-value pairs on the same line\n}漢字{", 1, 1)]
-        [InlineData("/*T漢字his is a multi-line comment before json*/\"hello\"漢字{", 0, 57)]
-        [InlineData("\"h漢字ello\"/*This is a multi-line comment after json*/漢字{", 0, 56)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 2, 28)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 3, 18)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a comment between key-value pairs*/ 30}漢字{", 1, 49)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a comment between key-value pairs on the same line*/}漢字{", 0, 80)]
-        [InlineData("/*T漢字his is a split multi-line \ncomment before json*/\"hello\"漢字{", 1, 28)]
-        [InlineData("\"h漢字ello\"/*This is a split multi-line \ncomment after json*/漢字{", 1, 20)]
-        [InlineData("\"g漢字amma\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*/漢字{//Another single-line comment", 3, 28)]
-        [InlineData("\"d漢字elta\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/漢字{", 4, 18)]
-        [InlineData("{\"a漢字ge\" : \n/*This is a split multi-line \ncomment between key-value pairs*/ 30}漢字{", 2, 37)]
-        [InlineData("{\"a漢字ge\" : 30/*This is a split multi-line \ncomment between key-value pairs on the same line*/}漢字{", 1, 51)]
+        [InlineData("//\n\u6F22\u5B57}", 1, 0)]
+        [InlineData("//c\u6F22\u5B57omment\n\u6F22\u5B57}", 1, 0)]
+        [InlineData("/**/\u6F22\u5B57}", 0, 4)]
+        [InlineData("/*\n*/\u6F22\u5B57}", 1, 2)]
+        [InlineData("/*c\u6F22\u5B57omment\n*/\u6F22\u5B57}", 1, 2)]
+        [InlineData("/*/*/\u6F22\u5B57}", 0, 5)]
+        [InlineData("//T\u6F22\u5B57his is a comment before json\n\"hello\"\u6F22\u5B57{", 1, 7)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a comment after json\n\u6F22\u5B57{", 1, 0)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*/\u6F22\u5B57{//Another single-line comment", 3, 28)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/\u6F22\u5B57{", 4, 18)]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a comment after json with new line\n\u6F22\u5B57{", 1, 0)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a comment between key-value pairs\n 30}\u6F22\u5B57{", 2, 4)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a comment between key-value pairs on the same line\n}\u6F22\u5B57{", 1, 1)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line comment before json*/\"hello\"\u6F22\u5B57{", 0, 57)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line comment after json*/\u6F22\u5B57{", 0, 56)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*/\u6F22\u5B57{//Another single-line comment", 2, 28)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/\u6F22\u5B57{", 3, 18)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a comment between key-value pairs*/ 30}\u6F22\u5B57{", 1, 49)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a comment between key-value pairs on the same line*/}\u6F22\u5B57{", 0, 80)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \ncomment before json*/\"hello\"\u6F22\u5B57{", 1, 28)]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \ncomment after json*/\u6F22\u5B57{", 1, 20)]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*/\u6F22\u5B57{//Another single-line comment", 3, 28)]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \ncomment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/\u6F22\u5B57{", 4, 18)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \ncomment between key-value pairs*/ 30}\u6F22\u5B57{", 2, 37)]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \ncomment between key-value pairs on the same line*/}\u6F22\u5B57{", 1, 51)]
         public static void InvalidJsonWithCommentsSingleSegment(string jsonString, int expectedlineNumber, int expectedPosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1572,7 +1587,7 @@ namespace System.Text.Json.Tests
                 {
                     Assert.True(isTokenPrimitive || json.TokenType == JsonTokenType.Comment);
                 }
-                
+
                 switch (json.TokenType)
                 {
                     case JsonTokenType.Null:
@@ -1657,7 +1672,7 @@ namespace System.Text.Json.Tests
                 };
             }
         }
-        
+
         public static IEnumerable<object[]> LotsOfCommentsTests
         {
             get
