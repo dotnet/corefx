@@ -11,14 +11,14 @@
     <NoWarn>0436</NoWarn>
     <IsTestProject>true</IsTestProject>
     <IsBenchmarkDotNetProject>true</IsBenchmarkDotNetProject>
-    <Configurations>netstandard-Debug;netstandard-Release;</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;</Configurations>
     <ExcludeFromCodeCoverage>true</ExcludeFromCodeCoverage>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BenchmarksRunner.cs" />
     <Compile Include="CoreFxToolchain.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup>
     <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
       <Link>Common\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>
     </Compile>

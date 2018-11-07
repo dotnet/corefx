@@ -12,8 +12,7 @@
     <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
   
-    <!-- Perf testing -->
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'uapaot'">
+  <ItemGroup>
     <PackageReference Include="BenchmarkDotNet">
       <Version>$(BenchmarkDotNetPackageVersion)</Version>
     </PackageReference>
