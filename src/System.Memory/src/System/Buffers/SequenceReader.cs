@@ -322,31 +322,28 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Peek forward the number of items in <paramref name="copyBuffer"/> (at most), copying into
-        /// <paramref name="copyBuffer"/> if needed.
+        /// Copies data from the current <see cref="Position"/> to the given <paramref name="destination"/> span.
         /// </summary>
-        /// <param name="copyBuffer">
-        /// Temporary buffer to copy into if there isn't a contiguous span within the existing data to return.
-        /// Also describes the maximum count of items to peek.
-        /// </param>
-        /// <returns>
-        /// Span over the peeked data. The length may be shorter than <paramref name="copyBuffer"/> if there
-        /// is not enough data left to fill the requested length.
-        /// </returns>
+        /// <param name="destination">Destination to copy to.</param>
+        /// <returns>True if there is enough data to copy to the <paramref name="destination"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<T> Peek(Span<T> copyBuffer)
+        public bool TryCopyTo(Span<T> destination)
         {
             ReadOnlySpan<T> firstSpan = UnreadSpan;
-            if (firstSpan.Length >= copyBuffer.Length)
+            if (firstSpan.Length >= destination.Length)
             {
-                return firstSpan.Slice(0, copyBuffer.Length);
+                firstSpan.Slice(0, destination.Length).CopyTo(destination);
+                return true;
             }
 
-            return PeekSlow(copyBuffer);
+            return TryCopyMultisegment(destination);
         }
 
-        internal ReadOnlySpan<T> PeekSlow(Span<T> destination)
+        internal bool TryCopyMultisegment(Span<T> destination)
         {
+            if (Remaining < destination.Length)
+                return false;
+
             ReadOnlySpan<T> firstSpan = UnreadSpan;
             Debug.Assert(firstSpan.Length < destination.Length);
             firstSpan.CopyTo(destination);
@@ -368,7 +365,7 @@ namespace System.Buffers
                 }
             }
 
-            return destination.Slice(0, copied);
+            return true;
         }
     }
 }

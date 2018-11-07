@@ -27,14 +27,14 @@ namespace System.Buffers
         {
             ReadOnlySpan<byte> span = reader.UnreadSpan;
             if (span.Length < sizeof(T))
-                return TryReadSlow(ref reader, out value);
+                return TryReadMultisegment(ref reader, out value);
 
             value = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(span));
             reader.Advance(sizeof(T));
             return true;
         }
 
-        private static unsafe bool TryReadSlow<T>(ref SequenceReader<byte> reader, out T value) where T : unmanaged
+        private static unsafe bool TryReadMultisegment<T>(ref SequenceReader<byte> reader, out T value) where T : unmanaged
         {
             Debug.Assert(reader.UnreadSpan.Length < sizeof(T));
 
@@ -42,7 +42,7 @@ namespace System.Buffers
             T buffer = default;
             Span<byte> tempSpan = new Span<byte>(&buffer, sizeof(T));
 
-            if (reader.Peek(tempSpan).Length < sizeof(T))
+            if (!reader.TryCopyTo(tempSpan))
             {
                 value = default;
                 return false;

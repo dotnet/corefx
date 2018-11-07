@@ -514,32 +514,6 @@ namespace System.Memory.Tests.SequenceReader
         }
 
         [Fact]
-        public void CopyToLargerBufferWorks()
-        {
-            T[] content = (T[])_inputData.Clone();
-
-            Span<T> buffer = new T[content.Length + 1];
-            SequenceReader<T> reader = new SequenceReader<T>(Factory.CreateWithContent(content));
-
-            // this loop skips more and more items in the reader
-            for (int i = 0; i < content.Length; i++)
-            {
-                int copied = reader.Peek(buffer).Length;
-                Assert.Equal(content.Length - i, copied);
-                Assert.True(buffer.Slice(0, copied).SequenceEqual(content.AsSpan(i)));
-
-                // make sure that nothing more got written, i.e. tail is empty
-                for (int r = copied; r < buffer.Length; r++)
-                {
-                    Assert.Equal(default, buffer[r]);
-                }
-
-                reader.Advance(1);
-                buffer.Clear();
-            }
-        }
-
-        [Fact]
         public void CopyToSmallerBufferWorks()
         {
             T[] content = (T[])_inputData.Clone();
@@ -555,10 +529,10 @@ namespace System.Memory.Tests.SequenceReader
                 {
                     Span<T> bufferSlice = buffer.Slice(0, j);
                     bufferSlice.Clear();
-                    ReadOnlySpan<T> peeked = reader.Peek(bufferSlice);
-                    Assert.Equal(Math.Min(bufferSlice.Length, content.Length - i), peeked.Length);
+                    Assert.True(reader.TryCopyTo(bufferSlice));
+                    Assert.Equal(Math.Min(bufferSlice.Length, content.Length - i), bufferSlice.Length);
 
-                    Assert.True(peeked.SequenceEqual(content.AsSpan(i, j)));
+                    Assert.True(bufferSlice.SequenceEqual(content.AsSpan(i, j)));
                 }
 
                 reader.Advance(1);

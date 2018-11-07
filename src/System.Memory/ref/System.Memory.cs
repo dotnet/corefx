@@ -210,10 +210,10 @@ namespace System.Buffers
         public long AdvancePastAny(T value0, T value1, T value2, T value3) { throw null; }
         public bool IsNext(System.ReadOnlySpan<T> next, bool advancePast = false) { throw null; }
         public bool IsNext(T next, bool advancePast = false) { throw null; }
-        public System.ReadOnlySpan<T> Peek(System.Span<T> copyBuffer) { throw null; }
         public void Rewind(long count) { }
         public bool TryAdvanceTo(T delimiter, bool advancePastDelimiter = true) { throw null; }
         public bool TryAdvanceToAny(System.ReadOnlySpan<T> delimiters, bool advancePastDelimiter = true) { throw null; }
+        public bool TryCopyTo(System.Span<T> destination) { throw null; }
         public bool TryPeek(out T value) { throw null; }
         public bool TryRead(out T value) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, System.ReadOnlySpan<T> delimiter, bool advancePastDelimiter = true) { throw null; }
