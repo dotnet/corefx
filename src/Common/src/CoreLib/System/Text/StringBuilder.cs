@@ -1211,6 +1211,8 @@ namespace System.Text
             return this;
         }
 
+        public StringBuilder Append(ReadOnlyMemory<char> value) => Append(value.Span);
+
         #region AppendJoin
 
         public unsafe StringBuilder AppendJoin(string separator, params object[] values)
@@ -2088,7 +2090,10 @@ namespace System.Text
                 fixed (char* valuePtr = value)
                 {
                     // calculate the total amount of extra space or space needed for all the replacements.
-                    int delta = (value.Length - removeCount) * replacementsCount;
+                    long longDelta = (value.Length - removeCount) * (long)replacementsCount;
+                    int delta = (int)longDelta;
+                    if (delta != longDelta)
+                        throw new OutOfMemoryException();
 
                     StringBuilder targetChunk = sourceChunk;        // the target as we copy chars down
                     int targetIndexInChunk = replacements[0];
@@ -2337,19 +2342,20 @@ namespace System.Text
             //     really big chunks even if the string gets really big.
             int newBlockLength = Math.Max(minBlockCharCount, Math.Min(Length, MaxChunkSize));
 
+            // Check for integer overflow (logical buffer size > int.MaxValue)
+            if (m_ChunkOffset + m_ChunkLength + newBlockLength < newBlockLength)
+                throw new OutOfMemoryException();
+
+            // Allocate the array before updating any state to avoid leaving inconsistent state behind in case of out of memory exception
+            char[] chunkChars = new char[newBlockLength];
+
             // Move all of the data from this chunk to a new one, via a few O(1) pointer adjustments.
             // Then, have this chunk point to the new one as its predecessor.
             m_ChunkPrevious = new StringBuilder(this);
             m_ChunkOffset += m_ChunkLength;
             m_ChunkLength = 0;
 
-            // Check for integer overflow (logical buffer size > int.MaxValue)
-            if (m_ChunkOffset + newBlockLength < newBlockLength)
-            {
-                m_ChunkChars = null;
-                throw new OutOfMemoryException();
-            }
-            m_ChunkChars = new char[newBlockLength];
+            m_ChunkChars = chunkChars;
 
             AssertInvariants();
         }

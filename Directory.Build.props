@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Base repo layout properties -->
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <RepositoryEngineeringDir>$(RepoRoot)eng\</RepositoryEngineeringDir>
+  </PropertyGroup>
 
   <PropertyGroup>
     <!--
@@ -33,7 +38,7 @@
   </PropertyGroup>
 
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
-  <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
+  <Import Project="$(RepositoryEngineeringDir)dependencies.props" />
 
   <!-- Need to set ProjectAssetsFile to something so it doesn't get set to the Tools.proj assets file when we import the generated props -->
   <PropertyGroup>
@@ -46,25 +51,18 @@
 
   <!-- Common repo directories -->
   <PropertyGroup>
-    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <!-- Properties to remove with buildtools removal -->
+    <ProjectDir>$(RepoRoot)</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>
+    <BinDir>$(ProjectDir)artifacts\bin\</BinDir>
 
-    <!-- This name is used to create a GIT repository URL https://github.com/dotnet/$(GitHubRepositoryName) used to find source code for debugging -->
-    <GitHubRepositoryName Condition="'$(GitHubRepositoryName)' == ''">corefx</GitHubRepositoryName>
-
-    <!-- Output directories -->
-    <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
-    <RootIntermediateOutputPath>$(MSBuildThisFileDirectory)bin/obj/</RootIntermediateOutputPath>
-
+    <!-- CoreFx sepcific paths -->
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
-    <PackageOutputRoot Condition="'$(PackageOutputRoot)'=='' and '$(NonShippingPackage)' == 'true'">$(BinDir)packages_noship/</PackageOutputRoot>
-    <PackageOutputRoot Condition="'$(PackageOutputRoot)'==''">$(BinDir)packages/</PackageOutputRoot>
 
     <!-- Input Directories -->
     <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
-    <PackagesDir Condition="'$(PackagesDir)'==''">$(NuGetPackageRoot)/</PackagesDir>
-    <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
-    <RestorePackagesPath Condition="'$(RestorePackagesPath)'==''">$(PackagesDir)</RestorePackagesPath>
+    <PackagesDir Condition="'$(PackagesDir)'=='' AND '$(NuGetPackageRoot)' != ''">$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))</PackagesDir>
+    <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir).packages/</PackagesDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
     <IlasmToolPath>$(ToolsDir)ilasm/ilasm</IlasmToolPath>
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
@@ -89,6 +87,15 @@
     <ExcludeResourcesImport>true</ExcludeResourcesImport>
     <ExcludeVersioningImport>true</ExcludeVersioningImport>
     <ExcludeSigningImport>true</ExcludeSigningImport>
+    <ExcludeDepProjImport>true</ExcludeDepProjImport>
+    <ExcludeResolveContractImport>true</ExcludeResolveContractImport>
+    <ExcludePackageResolveImport>true</ExcludePackageResolveImport>
+  </PropertyGroup>
+
+  <!-- workaround https://github.com/dotnet/sdk/issues/2288
+       remove once we have a new CLI -->
+  <PropertyGroup>
+    <LanguageTargets Condition="'$(LanguageTargets)' == '' AND '$(MSBuildProjectExtension)' != '.csproj' AND '$(MSBuildProjectExtension)' != '.vbproj' AND '$(MSBuildProjectExtension)' != '.fsproj'">$(MSBuildToolsPath)\Microsoft.Common.targets</LanguageTargets>
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -141,9 +148,9 @@
     <Platform>AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <!-- Default any assembly not specifying a key to use the Open Key -->
-    <AssemblyKey>Open</AssemblyKey>
+    <StrongNameKeyId>Open</StrongNameKeyId>
     <RunApiCompat Condition="'$(TargetGroup)' != 'netcoreappaot'">true</RunApiCompat>
-    <ApiCompatExcludeAttributeList>$(MSBuildThisFileDirectory)tools-local/DefaultGenApiDocIds.txt</ApiCompatExcludeAttributeList>
+    <ApiCompatExcludeAttributeList>$(RepositoryEngineeringDir)DefaultGenApiDocIds.txt</ApiCompatExcludeAttributeList>
     <!-- Build as portable by default -->
     <PortableBuild Condition="'$(PortableBuild)' == ''">true</PortableBuild>
     <Performance Condition="'$(Performance)' == ''">false</Performance>
@@ -180,7 +187,7 @@
     <BuildConfigurations Condition="'$(MSBuildProjectExtension)' == '.pkgproj' AND '$(BuildConfigurations)' == ''">package</BuildConfigurations>
 
     <!-- Need to try and keep the same logic as the native builds as we need this for packaging -->
-    <NativeBinDir>$(BinDir)$(OSGroup).$(ArchGroup).$(ConfigurationGroup)/native</NativeBinDir>
+    <NativeBinDir>$(BinDir)native/$(BuildConfiguration)</NativeBinDir>
   </PropertyGroup>
 
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
@@ -225,7 +232,7 @@
   </PropertyGroup>
 
   <!-- Import packaging props -->
-  <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>
+  <Import Project="$(RepositoryEngineeringDir)Packaging.props"/>
 
   <!-- set properties for each vertical -->
   <PropertyGroup>
@@ -269,8 +276,8 @@
     <!-- Empty DebugType when building for netfx and in windows so that it is set to full or pdbonly later -->
     <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(RunningOnUnix)' != 'true'"></DebugType>
 
-    <!-- Rhel 6 doesn't support the source control git package so disable SourceLink -->
-    <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6'))">false</EnableSourceLink>
+    <!-- Rhel 6 and FreeBSD doesn't support the source control git package so disable SourceLink -->
+    <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6')) OR '$(_runtimeOSFamily)' == 'FreeBSD'">false</EnableSourceLink>
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -292,24 +299,6 @@
       </PropertyGroup>
     </When>
   </Choose>
-
-  <PropertyGroup>
-    <IsRedistAssembly Condition="'$(IsRedistAssembly)'=='' AND ($(MSBuildProjectFullPath.Contains('\redist\')) OR $(MSBuildProjectFullPath.Contains('/redist/')))">true</IsRedistAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(IsRedistAssembly)'=='true'">
-    <NuGetRuntimeIdentifier Condition="'$(TargetGroup)' == 'netcore50'">win8</NuGetRuntimeIdentifier>
-    <NuGetRuntimeIdentifier Condition="'$(TargetGroup)' == 'netcore50aot'">win8-aot</NuGetRuntimeIdentifier>
-
-    <!-- workaround Dev14 issue with nuget targets, misspelling is intentional to align with Dev14 RTM targets -->
-    <RuntimeIndentifier>$(NuGetRuntimeIdentifier)</RuntimeIndentifier>
-  </PropertyGroup>
-
-  <!-- If there is a target group, try to find project.json and lockfile in a subfolder named as that target. -->
-  <PropertyGroup Condition="'$(TargetGroup)'!=''">
-    <ProjectJson Condition="Exists('$(MSBuildProjectDirectory)/$(TargetGroup)/project.json')">$(MSBuildProjectDirectory)/$(TargetGroup)/project.json</ProjectJson>
-    <!-- Check for both project.json and lockfile to avoid using a stale lockfile. -->
-    <ProjectLockJson Condition="Exists('$(MSBuildProjectDirectory)/$(TargetGroup)/project.json') AND Exists('$(MSBuildProjectDirectory)/$(TargetGroup)/project.lock.json')">$(MSBuildProjectDirectory)/$(TargetGroup)/project.lock.json</ProjectLockJson>
-  </PropertyGroup>
 
   <!-- Disable some standard properties for building our projects -->
   <PropertyGroup>
@@ -333,6 +322,9 @@
 
     <!-- We decided to keep this disabled by default to see some history of way have a look at https://github.com/dotnet/corefx/issues/3140 -->
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+
+    <!-- Suppress preview message as we are usually using preview SDK versions. -->
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
   </PropertyGroup>
 
   <!-- Set up some common paths -->
@@ -349,18 +341,14 @@
     -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 
-    <!-- Suppress preview message as we are usually using preview SDK versions. -->
-    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
-
+    <!--
+      OSPlatformConfig and TargetOutputRelPath are used by the test archiving targets in
+      corefx and in our publish test targets (https://github.com/dotnet/buildtools/blob/17f28536524248603108c56a16b5b16dcb5a87ff/src/Microsoft.DotNet.Build.Tasks/PackageFiles/publishtest.targets#L54)
+      Once we refactor our test targets we should try to break this tight coupling so it is only
+      on the corefx side as these are specific to corefx.
+    -->
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
-
-    <BaseOutputPath>$(BinDir)</BaseOutputPath>
-
-    <OutputPath>$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
-
-    <BaseIntermediateOutputPath>$(RootIntermediateOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(TargetOutputRelPath)</IntermediateOutputPath>
 
     <RuntimePath Condition="'$(RuntimePath)' == ''">$(BinDir)runtime/$(BuildConfiguration)/</RuntimePath>
     <ShimsTargetRuntimeRoot>$(BinDir)shimsTargetRuntime/</ShimsTargetRuntimeRoot>
@@ -406,10 +394,6 @@
     <UseDotNetNativeToolchain Condition="$(_bc_TargetGroup.EndsWith('aot'))">true</UseDotNetNativeToolchain>
     <!-- System.Private.* comes from test ilc, so the symbol packages for those versions will no exist, this is to avoid warnings -->
     <DownloadCoreCLRSymbols Condition="'$(UseDotNetNativeToolchain)' == 'true' OR '$(BuildAllConfigurations)' == 'true' OR '$(DotNetBuildFromSource)' == 'true'">false</DownloadCoreCLRSymbols>
-
-    <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
-    <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
-    <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
 
     <!-- interop is not available on NETStandard1.0 -->
     <IncludeDllSafeSearchPathAttribute Condition="'$(TargetGroup)' == 'netstandard1.0'">false</IncludeDllSafeSearchPathAttribute>
