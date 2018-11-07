@@ -539,6 +539,8 @@ namespace System.Text.Json
         /// </summary>
         private bool ConsumeValue(byte marker)
         {
+            // Using goto to avoid recursive calls.
+        Begin:
             if (marker == JsonConstants.Quote)
             {
                 return ConsumeString();
@@ -593,20 +595,21 @@ namespace System.Text.Json
                                     return false;
                                 }
 
-                                byte first = _buffer[_consumed];
+                                marker = _buffer[_consumed];
 
                                 // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
-                                if (first <= JsonConstants.Space)
+                                if (marker <= JsonConstants.Space)
                                 {
                                     SkipWhiteSpace();
                                     if (!HasMoreData())
                                     {
                                         return false;
                                     }
-                                    first = _buffer[_consumed];
+                                    marker = _buffer[_consumed];
                                 }
 
-                                return ConsumeValue(first);
+                                // Skip comments and consume the actual JSON value.
+                                goto Begin;
                             }
                             return false;
                         }
@@ -703,6 +706,10 @@ namespace System.Text.Json
 
             if (_consumed >= (uint)_buffer.Length)
             {
+                if (!_isNotPrimitive)
+                {
+                    return true;
+                }
                 if (IsLastSpan)
                 {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
@@ -710,7 +717,7 @@ namespace System.Text.Json
                 return false;
             }
 
-            // TODO: Is this check necessary or is it redundant and can be removed?
+            // TODO: https://github.com/dotnet/corefx/issues/33294
             if (JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) < 0)
             {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed]);
@@ -763,10 +770,27 @@ namespace System.Text.Json
             Debug.Assert(_buffer[_consumed] == JsonConstants.Quote);
 
             // Create local copy to avoid bounds checks.
-            ReadOnlySpan<byte> localBuffer = _buffer;
+            ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
 
-            int idx = localBuffer.Slice(_consumed + 1).IndexOf(JsonConstants.Quote);
-            if (idx < 0)
+            int idx = localBuffer.IndexOfQuoteOrAnyControlOrBaskSlash();
+
+            if (idx >= 0)
+            {
+                byte foundByte = localBuffer[idx];
+                if (foundByte == JsonConstants.Quote)
+                {
+                    _bytePositionInLine += idx + 2; // Add 2 for the start and end quotes.
+                    ValueSpan = localBuffer.Slice(0, idx);
+                    _tokenType = JsonTokenType.String;
+                    _consumed += idx + 2;
+                    return true;
+                }
+                else
+                {
+                    return ConsumeStringAndValidate(localBuffer, idx);
+                }
+            }
+            else
             {
                 if (IsLastSpan)
                 {
@@ -774,110 +798,35 @@ namespace System.Text.Json
                 }
                 return false;
             }
-
-            if (localBuffer[idx + _consumed] != JsonConstants.BackSlash)
-            {
-                localBuffer = localBuffer.Slice(_consumed + 1, idx);
-
-                if (localBuffer.IndexOfAnyControlOrEscape() != -1)
-                {
-                    _bytePositionInLine++;
-                    ValidateEscapingAndHex(localBuffer);
-                    goto Done;
-                }
-
-                _bytePositionInLine += idx + 1;
-
-            Done:
-                _bytePositionInLine++;
-                ValueSpan = localBuffer;
-                _tokenType = JsonTokenType.String;
-                _consumed += idx + 2;
-                return true;
-            }
-            else
-            {
-                return ConsumeStringWithNestedQuotes();
-            }
         }
 
-        private bool ConsumeStringWithNestedQuotes()
-        {
-            // TODO: Optimize looking for nested quotes
-            // TODO: Avoid redoing first IndexOf search
-            int i = _consumed + 1;
-
-            Debug.Assert(_buffer.Length >= i);
-
-            while (true)
-            {
-                int counter = 0;
-                int foundIdx = _buffer.Slice(i).IndexOf(JsonConstants.Quote);
-                if (foundIdx == -1)
-                {
-                    if (IsLastSpan)
-                    {
-                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
-                    }
-                    return false;
-                }
-                if (foundIdx == 0)
-                {
-                    // We found a quote right after the first quote, which gaurantees it wasn't escaped.
-                    break;
-                }
-                for (int j = i + foundIdx - 1; j >= i; j--)
-                {
-                    if (_buffer[j] != JsonConstants.BackSlash)
-                    {
-                        // If number of backslashes is even, we have found the end quote
-                        // Otherwise, the quote is escaped and should be ignored.
-                        if ((counter & 1) == 0)
-                        {
-                            i += foundIdx;
-                            goto FoundEndOfString;
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        counter++;
-                    }
-                }
-                // Search for the next quote character after the current one.
-                i += foundIdx + 1;
-            }
-
-        FoundEndOfString:
-            int startIndex = _consumed + 1;
-            ReadOnlySpan<byte> foundStringToken = _buffer.Slice(startIndex, i - startIndex);
-
-            if (foundStringToken.IndexOfAnyControlOrEscape() != -1)
-            {
-                _bytePositionInLine++;
-                ValidateEscapingAndHex(foundStringToken);
-                goto Done;
-            }
-
-            _bytePositionInLine = i;
-
-        Done:
-            _bytePositionInLine++;
-            ValueSpan = foundStringToken;
-            _tokenType = JsonTokenType.String;
-            _consumed = i + 1;
-            return true;
-        }
-
+        // Found a backslash or control characters which are considered invalid within a string.
+        // Search through the rest of the string one byte at a time.
         // https://tools.ietf.org/html/rfc8259#section-7
-        private void ValidateEscapingAndHex(ReadOnlySpan<byte> data)
+        private bool ConsumeStringAndValidate(ReadOnlySpan<byte> data, int idx)
         {
-            // TODO: Optimize validating string contents
+            Debug.Assert(idx >= 0 && idx < data.Length);
+            Debug.Assert(data[idx] != JsonConstants.Quote);
+            Debug.Assert(data[idx] == JsonConstants.BackSlash || data[idx] < JsonConstants.Space);
+
+            long prevLineBytePosition = _bytePositionInLine;
+            long prevLineNumber = _lineNumber;
+
+            _bytePositionInLine += idx + 1; // Add 1 for the first quote
+
             bool nextCharEscaped = false;
-            for (int i = 0; i < data.Length; i++)
+            for (; idx < data.Length; idx++)
             {
-                byte currentByte = data[i];
-                if (currentByte == JsonConstants.BackSlash)
+                byte currentByte = data[idx];
+                if (currentByte == JsonConstants.Quote)
+                {
+                    if (!nextCharEscaped)
+                    {
+                        goto Done;
+                    }
+                    nextCharEscaped = false;
+                }
+                else if (currentByte == JsonConstants.BackSlash)
                 {
                     nextCharEscaped = !nextCharEscaped;
                 }
@@ -889,31 +838,33 @@ namespace System.Text.Json
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
                     }
 
-                    if (currentByte == 'n')
+                    if (currentByte == JsonConstants.Quote)
+                    {
+                        // Ignore an escaped quote.
+                        // This is likely the most common case, so adding an explicit check
+                        // to avoid doing the unnecessary checks below.
+                    }
+                    else if (currentByte == 'n')
                     {
                         // Escaped new line character
-                        _bytePositionInLine = -1; // Should be 0, but we increment _lineBytePosition below already
+                        _bytePositionInLine = -1; // Should be 0, but we increment _bytePositionInLine below already
                         _lineNumber++;
                     }
                     else if (currentByte == 'u')
                     {
                         // Expecting 4 hex digits to follow the escaped 'u'
-                        _bytePositionInLine++;
-                        int startIndex = i + 1;
-                        for (int j = startIndex; j < data.Length; j++)
+                        _bytePositionInLine++;  // move past the 'u'
+                        if (ValidateHexDigits(data, idx + 1))
                         {
-                            byte nextByte = data[j];
-                            if (!JsonReaderHelper.IsHexDigit(nextByte))
-                            {
-                                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
-                            }
-                            if (j - startIndex >= 4)
-                            {
-                                break;
-                            }
-                            _bytePositionInLine++;
+                            idx += 4;   // Skip the 4 hex digits, the for loop accounts for idx incrementing past the 'u'
                         }
-                        i += 4;
+                        else
+                        {
+                            // We found less than 4 hex digits. Check if there is more data to follow, otherwise throw.
+                            idx = data.Length;
+                            break;
+                        }
+
                     }
                     nextCharEscaped = false;
                 }
@@ -924,13 +875,49 @@ namespace System.Text.Json
 
                 _bytePositionInLine++;
             }
+
+            if (idx >= data.Length)
+            {
+                if (IsLastSpan)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
+                }
+                _lineNumber = prevLineNumber;
+                _bytePositionInLine = prevLineBytePosition;
+                return false;
+            }
+
+        Done:
+            _bytePositionInLine++;  // Add 1 for the end quote
+            ValueSpan = data.Slice(0, idx);
+            _tokenType = JsonTokenType.String;
+            _consumed += idx + 2;
+            return true;
+        }
+
+        private bool ValidateHexDigits(ReadOnlySpan<byte> data, int idx)
+        {
+            for (int j = idx; j < data.Length; j++)
+            {
+                byte nextByte = data[j];
+                if (!JsonReaderHelper.IsHexDigit(nextByte))
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
+                }
+                if (j - idx >= 3)
+                {
+                    return true;
+                }
+                _bytePositionInLine++;
+            }
+
+            return false;
         }
 
         // https://tools.ietf.org/html/rfc7159#section-6
         private bool TryGetNumber(ReadOnlySpan<byte> data, out int consumed)
         {
-            // TODO: Optimize number processing and validation
-            // TODO: Cache the type of number into a private field (int, long, double, etc.)
+            // TODO: https://github.com/dotnet/corefx/issues/33294
             Debug.Assert(data.Length > 0);
 
             consumed = 0;
@@ -1224,10 +1211,8 @@ namespace System.Text.Json
         /// </summary>
         private ConsumeTokenResult ConsumeNextToken(byte marker)
         {
-            // TODO: Avoid unconstrained recursive calls
             if (_readerOptions.CommentHandling != JsonCommentHandling.Default)
             {
-                // TODO: Re-evaluate use of ConsumeTokenResult enum for the common case
                 if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                 {
                     if (marker == JsonConstants.Slash)
@@ -1236,81 +1221,13 @@ namespace System.Text.Json
                     }
                     if (_tokenType == JsonTokenType.Comment)
                     {
-                        JsonTokenType lastTokenType = _stack.Pop();
-                        if (lastTokenType >= JsonTokenType.String && lastTokenType <= JsonTokenType.Null)
-                        {
-                            _tokenType = _inObject ? JsonTokenType.StartObject : JsonTokenType.StartArray;
-                        }
-                        else
-                        {
-                            _tokenType = lastTokenType;
-                        }
-
-                        if (!HasMoreData())
-                        {
-                            _stack.Push(_tokenType);
-                            return ConsumeTokenResult.NotEnoughDataRollBackState;
-                        }
-
-                        byte first = _buffer[_consumed];
-
-                        // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
-                        if (first <= JsonConstants.Space)
-                        {
-                            SkipWhiteSpace();
-                            if (!HasMoreData())
-                            {
-                                _stack.Push(_tokenType);
-                                return ConsumeTokenResult.NotEnoughDataRollBackState;
-                            }
-                            first = _buffer[_consumed];
-                        }
-
-                        if (!_isNotPrimitive)
-                        {
-                            if (first != JsonConstants.Slash && _tokenType != JsonTokenType.None && _tokenType != JsonTokenType.Comment)
-                            {
-                                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, first);
-                            }
-                        }
-
-                        if (first == JsonConstants.ListSeperator || first == JsonConstants.CloseBrace || first == JsonConstants.CloseBracket)
-                        {
-                            if (ConsumeNextToken(first) == ConsumeTokenResult.Success)
-                            {
-                                return ConsumeTokenResult.Success;
-                            }
-                            else
-                            {
-                                _stack.Push(_tokenType);
-                                return ConsumeTokenResult.NotEnoughDataRollBackState;
-                            }
-                        }
-                        else
-                        {
-                            if (ReadSingleSegment())
-                            {
-                                return ConsumeTokenResult.Success;
-                            }
-                            else
-                            {
-                                _stack.Push(_tokenType);
-                                return ConsumeTokenResult.NotEnoughDataRollBackState;
-                            }
-                        }
+                        return ConsumeNextTokenFromLastNonCommentToken();
                     }
                 }
                 else
                 {
                     Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.SkipComments);
-                    if (marker == JsonConstants.Slash)
-                    {
-                        if (SkipComment())
-                        {
-                            return ReadSingleSegment() ? ConsumeTokenResult.Success : ConsumeTokenResult.IncompleteNoRollBackNecessary;
-                        }
-                        return ConsumeTokenResult.NotEnoughDataRollBackState;
-                    }
+                    return ConsumeNextTokenUntilAfterAllCommentsAreSkipped(marker);
                 }
             }
 
@@ -1376,6 +1293,330 @@ namespace System.Text.Json
             return ConsumeTokenResult.Success;
         }
 
+        private ConsumeTokenResult ConsumeNextTokenFromLastNonCommentToken()
+        {
+            JsonTokenType prevTokenType = _stack.Pop();
+            if (prevTokenType >= JsonTokenType.String && prevTokenType <= JsonTokenType.Null)
+            {
+                _tokenType = _inObject ? JsonTokenType.StartObject : JsonTokenType.StartArray;
+            }
+            else
+            {
+                _tokenType = prevTokenType;
+            }
+
+            Debug.Assert(_tokenType != JsonTokenType.Comment);
+
+            if (!HasMoreData())
+            {
+                goto RollBack;
+            }
+
+            byte first = _buffer[_consumed];
+
+            // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
+            if (first <= JsonConstants.Space)
+            {
+                SkipWhiteSpace();
+                if (!HasMoreData())
+                {
+                    goto RollBack;
+                }
+                first = _buffer[_consumed];
+            }
+
+            if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, first);
+            }
+
+            Debug.Assert(first != JsonConstants.Slash);
+
+            if (first == JsonConstants.ListSeperator)
+            {
+                _consumed++;
+                _bytePositionInLine++;
+
+                if (_consumed >= (uint)_buffer.Length)
+                {
+                    if (IsLastSpan)
+                    {
+                        _consumed--;
+                        _bytePositionInLine--;
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                    }
+                    goto RollBack;
+                }
+                first = _buffer[_consumed];
+
+                // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
+                if (first <= JsonConstants.Space)
+                {
+                    SkipWhiteSpace();
+                    // The next character must be a start of a property name or value.
+                    if (!HasMoreData(ExceptionResource.ExpectedStartOfPropertyOrValueNotFound))
+                    {
+                        goto RollBack;
+                    }
+                    first = _buffer[_consumed];
+                }
+
+                if (_inObject)
+                {
+                    if (first != JsonConstants.Quote)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                    }
+                    if (ConsumePropertyName())
+                    {
+                        goto Done;
+                    }
+                    else
+                    {
+                        goto RollBack;
+                    }
+                }
+                else
+                {
+                    if (ConsumeValue(first))
+                    {
+                        goto Done;
+                    }
+                    else
+                    {
+                        goto RollBack;
+                    }
+                }
+            }
+            else if (first == JsonConstants.CloseBrace)
+            {
+                EndObject();
+            }
+            else if (first == JsonConstants.CloseBracket)
+            {
+                EndArray();
+            }
+            else if (_tokenType == JsonTokenType.None)
+            {
+                if (ReadFirstToken(first))
+                {
+                    goto Done;
+                }
+                else
+                {
+                    goto RollBack;
+                }
+            }
+            else if (_tokenType == JsonTokenType.StartObject)
+            {
+                if (first == JsonConstants.CloseBrace)
+                {
+                    EndObject();
+                }
+                else
+                {
+                    if (first != JsonConstants.Quote)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                    }
+
+                    int prevConsumed = _consumed;
+                    long prevPosition = _bytePositionInLine;
+                    long prevLineNumber = _lineNumber;
+                    if (!ConsumePropertyName())
+                    {
+                        // roll back potential changes
+                        _consumed = prevConsumed;
+                        _tokenType = JsonTokenType.StartObject;
+                        _bytePositionInLine = prevPosition;
+                        _lineNumber = prevLineNumber;
+                        goto RollBack;
+                    }
+                    goto Done;
+                }
+            }
+            else if (_tokenType == JsonTokenType.StartArray)
+            {
+                if (first == JsonConstants.CloseBracket)
+                {
+                    EndArray();
+                }
+                else
+                {
+                    if (!ConsumeValue(first))
+                    {
+                        goto RollBack;
+                    }
+                    goto Done;
+                }
+            }
+            else if (_tokenType == JsonTokenType.PropertyName)
+            {
+                if (!ConsumeValue(first))
+                {
+                    goto RollBack;
+                }
+                goto Done;
+            }
+            else
+            {
+                goto RollBack;
+            }
+
+        Done:
+            return ConsumeTokenResult.Success;
+
+        RollBack:
+            _stack.Push(_tokenType);
+            return ConsumeTokenResult.NotEnoughDataRollBackState;
+        }
+
+        private ConsumeTokenResult ConsumeNextTokenUntilAfterAllCommentsAreSkipped(byte marker)
+        {
+            while (marker == JsonConstants.Slash)
+            {
+                if (SkipComment())
+                {
+                    if (!HasMoreData())
+                    {
+                        goto IncompleteNoRollback;
+                    }
+
+                    marker = _buffer[_consumed];
+
+                    // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
+                    if (marker <= JsonConstants.Space)
+                    {
+                        SkipWhiteSpace();
+                        if (!HasMoreData())
+                        {
+                            goto IncompleteNoRollback;
+                        }
+                        marker = _buffer[_consumed];
+                    }
+                }
+                else
+                {
+                    goto IncompleteNoRollback;
+                }
+            }
+
+            if (_tokenType == JsonTokenType.StartObject)
+            {
+                if (marker == JsonConstants.CloseBrace)
+                {
+                    EndObject();
+                }
+                else
+                {
+                    if (marker != JsonConstants.Quote)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
+                    }
+
+                    int prevConsumed = _consumed;
+                    long prevPosition = _bytePositionInLine;
+                    long prevLineNumber = _lineNumber;
+                    if (!ConsumePropertyName())
+                    {
+                        // roll back potential changes
+                        _consumed = prevConsumed;
+                        _tokenType = JsonTokenType.StartObject;
+                        _bytePositionInLine = prevPosition;
+                        _lineNumber = prevLineNumber;
+                        goto IncompleteNoRollback;
+                    }
+                    goto Done;
+                }
+            }
+            else if (_tokenType == JsonTokenType.StartArray)
+            {
+                if (marker == JsonConstants.CloseBracket)
+                {
+                    EndArray();
+                }
+                else
+                {
+                    if (!ConsumeValue(marker))
+                    {
+                        goto IncompleteNoRollback;
+                    }
+                    goto Done;
+                }
+            }
+            else if (_tokenType == JsonTokenType.PropertyName)
+            {
+                if (!ConsumeValue(marker))
+                {
+                    goto IncompleteNoRollback;
+                }
+                goto Done;
+            }
+            else if (!_isNotPrimitive)
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, marker);
+            }
+            else if (marker == JsonConstants.ListSeperator)
+            {
+                _consumed++;
+                _bytePositionInLine++;
+
+                if (_consumed >= (uint)_buffer.Length)
+                {
+                    if (IsLastSpan)
+                    {
+                        _consumed--;
+                        _bytePositionInLine--;
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                    }
+                    return ConsumeTokenResult.NotEnoughDataRollBackState;
+                }
+                byte first = _buffer[_consumed];
+
+                // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
+                if (first <= JsonConstants.Space)
+                {
+                    SkipWhiteSpace();
+                    // The next character must be a start of a property name or value.
+                    if (!HasMoreData(ExceptionResource.ExpectedStartOfPropertyOrValueNotFound))
+                    {
+                        return ConsumeTokenResult.NotEnoughDataRollBackState;
+                    }
+                    first = _buffer[_consumed];
+                }
+
+                if (_inObject)
+                {
+                    if (first != JsonConstants.Quote)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                    }
+                    return ConsumePropertyName() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
+                }
+                else
+                {
+                    return ConsumeValue(first) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
+                }
+            }
+            else if (marker == JsonConstants.CloseBrace)
+            {
+                EndObject();
+            }
+            else if (marker == JsonConstants.CloseBracket)
+            {
+                EndArray();
+            }
+            else
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.FoundInvalidCharacter, marker);
+            }
+
+        Done:
+            return ConsumeTokenResult.Success;
+        IncompleteNoRollback:
+            return ConsumeTokenResult.IncompleteNoRollBackNecessary;
+        }
+
         private bool SkipComment()
         {
             // Create local copy to avoid bounds checks.
@@ -1407,7 +1648,7 @@ namespace System.Text.Json
 
         private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
-            // TODO: Match Json.NET's end of comment semantics
+            // TODO: https://github.com/dotnet/corefx/issues/33293
             idx = localBuffer.IndexOf(JsonConstants.LineFeed);
             if (idx == -1)
             {
@@ -1508,7 +1749,10 @@ namespace System.Text.Json
             }
 
             ValueSpan = localBuffer.Slice(0, idx);
-            _stack.Push(_tokenType);
+            if (_tokenType != JsonTokenType.Comment)
+            {
+                _stack.Push(_tokenType);
+            }
             _tokenType = JsonTokenType.Comment;
             return true;
         }
@@ -1521,7 +1765,10 @@ namespace System.Text.Json
             }
 
             ValueSpan = localBuffer.Slice(0, idx - 1);
-            _stack.Push(_tokenType);
+            if (_tokenType != JsonTokenType.Comment)
+            {
+                _stack.Push(_tokenType);
+            }
             _tokenType = JsonTokenType.Comment;
             return true;
         }

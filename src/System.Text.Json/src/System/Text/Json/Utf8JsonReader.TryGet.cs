@@ -35,7 +35,7 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidCastException_ExpectedString(TokenType);
             }
 
-            // TODO: Perform additional validation and unescaping if necessary
+            // TODO: https://github.com/dotnet/corefx/issues/33292
             value = s_utf8Encoding.GetString(ValueSpan);
             return true;
         }
