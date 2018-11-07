@@ -1390,6 +1390,15 @@
     ]
   },
   {
+    "Name": "System.Reflection.MetataLoadContext",
+    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
+    "CommonTypes": [
+      "System.Reflection.MetadataLoadContext",
+      "System.Reflection.MetadataAssemblyResolver",
+      "System.Reflection.PathAssemblyResolver"
+	]
+  },
+  {
     "Name": "System.Reflection.Primitives",
     "Description": "Provides common enumerations for reflection-based libraries.",
     "CommonTypes": [
@@ -2272,11 +2281,6 @@
   {
     "Name": "Microsoft.IO.Redist",
     "Description": "Downlevel support package for System.IO classes.",
-    "CommonTypes": []
-  },
-  {
-    "Name": "System.Reflection.MetataLoadContext",
-    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
     "CommonTypes": []
   }
 ]

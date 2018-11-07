@@ -79,8 +79,9 @@
     <Compile Include="System\Reflection\TypeLoading\General\Ecma\MetadataTable.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\HashHelpers.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\Helpers.cs" />
+    <Compile Include="System\Reflection\TypeLoading\General\Interop.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
+    <Compile Include="System\Reflection\TypeLoading\General\Interop.netstandard.cs" Condition="'$(TargetGroup)' == 'netstandard'" />
     <Compile Include="System\Reflection\TypeLoading\General\MethodSig.cs" />
-    <Compile Include="System\Reflection\TypeLoading\General\NetStandardBridge.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\RoAssemblyName.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\Sentinels.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\TypeContext.cs" />
@@ -142,7 +143,7 @@
     <Compile Include="System\Reflection\TypeLoading\Types\RoType.TypeClassification.cs" />
     <Compile Include="System\Reflection\TypeLoading\Types\RoWrappedType.cs" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Runtime.Extensions" />

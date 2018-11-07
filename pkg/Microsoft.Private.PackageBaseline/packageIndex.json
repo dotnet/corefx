@@ -3466,10 +3466,9 @@
       }
     },
     "System.Reflection.MetadataLoadContext": {
-        "BaselineVersion": "4.0.0",
         "InboxOn": {},
         "AssemblyVersionInPackageVersion": {
-            "4.0.0.0": "4.0.0"
+            "4.0.0.0": "4.6.0"
         }
     },
     "System.Reflection.Primitives": {
