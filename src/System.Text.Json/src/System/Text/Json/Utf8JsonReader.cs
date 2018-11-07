@@ -153,11 +153,22 @@ namespace System.Text.Json
             }
             else
             {
-                _stack.Push(JsonTokenType.StartObject);
+                EnsureAndPushStack(JsonTokenType.StartObject);
             }
 
             _tokenType = JsonTokenType.StartObject;
             _inObject = true;
+        }
+
+        // Allocate the stack lazily only when it is absolutely necessary
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnsureAndPushStack(JsonTokenType tokenType)
+        {
+            if (_stack == null)
+            {
+                _stack = new Stack<JsonTokenType>();
+            }
+            _stack.Push(tokenType);
         }
 
         private void EndObject()
@@ -216,7 +227,7 @@ namespace System.Text.Json
             }
             else
             {
-                _stack.Push(JsonTokenType.StartArray);
+                EnsureAndPushStack(JsonTokenType.StartArray);
             }
 
             _tokenType = JsonTokenType.StartArray;
@@ -415,7 +426,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    _stack.Push(JsonTokenType.StartObject);
+                    EnsureAndPushStack(JsonTokenType.StartObject);
                 }
                 _tokenType = JsonTokenType.StartObject;
                 _consumed++;
@@ -428,7 +439,7 @@ namespace System.Text.Json
                 _currentDepth++;
                 if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
                 {
-                    _stack.Push(JsonTokenType.StartArray);
+                    EnsureAndPushStack(JsonTokenType.StartArray);
                 }
                 _tokenType = JsonTokenType.StartArray;
                 _consumed++;
@@ -1475,7 +1486,7 @@ namespace System.Text.Json
             return ConsumeTokenResult.Success;
 
         RollBack:
-            _stack.Push(_tokenType);
+            EnsureAndPushStack(_tokenType);
             return ConsumeTokenResult.NotEnoughDataRollBackState;
         }
 
@@ -1815,7 +1826,7 @@ namespace System.Text.Json
             ValueSpan = localBuffer.Slice(0, idx);
             if (_tokenType != JsonTokenType.Comment)
             {
-                _stack.Push(_tokenType);
+                EnsureAndPushStack(_tokenType);
             }
             _tokenType = JsonTokenType.Comment;
             return true;
@@ -1831,7 +1842,7 @@ namespace System.Text.Json
             ValueSpan = localBuffer.Slice(0, idx - 1);
             if (_tokenType != JsonTokenType.Comment)
             {
-                _stack.Push(_tokenType);
+                EnsureAndPushStack(_tokenType);
             }
             _tokenType = JsonTokenType.Comment;
             return true;

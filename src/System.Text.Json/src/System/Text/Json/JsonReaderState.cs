@@ -78,9 +78,8 @@ namespace System.Text.Json
             _readerOptions = options;
 
             // Only allocate the stack if the user explicitly sets the JsonReaderOptions
-            // by providing a custom JsonCommentHandling OR if the user explicitly sets the
-            // max depth to be larger than 64. This way we avoid allocations in the common, default cases.
-            if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments || maxDepth > StackFreeMaxDepth)
+            // by providing a custom JsonCommentHandling. This way we avoid allocations in the common, default cases.
+            if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
             {
                 _stack = new Stack<JsonTokenType>();
             }
