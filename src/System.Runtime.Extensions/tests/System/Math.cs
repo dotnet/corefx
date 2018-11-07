@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1502,6 +1502,22 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(11, 11, MidpointRounding.ToEven)]
+        [InlineData(11.4, 11, MidpointRounding.ToEven)]
+        [InlineData(11.5, 12, MidpointRounding.ToEven)]
+        [InlineData(11.6, 12, MidpointRounding.ToEven)]
+        [InlineData(-11, -11, MidpointRounding.ToEven)]
+        [InlineData(-11.4, -11, MidpointRounding.ToEven)]
+        [InlineData(-11.5, -12, MidpointRounding.ToEven)]
+        [InlineData(-11.6, -12, MidpointRounding.ToEven)]
+        [InlineData(11, 11, MidpointRounding.AwayFromZero)]
+        [InlineData(11.4, 11, MidpointRounding.AwayFromZero)]
+        [InlineData(11.5, 12, MidpointRounding.AwayFromZero)]
+        [InlineData(11.6, 12, MidpointRounding.AwayFromZero)]
+        [InlineData(-11, -11, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.4, -11, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.5, -12, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.6, -12, MidpointRounding.AwayFromZero)]
         [InlineData(11, 11, MidpointRounding.ToPositiveInfinity)]
         [InlineData(11.4, 12, MidpointRounding.ToPositiveInfinity)]
         [InlineData(11.5, 12, MidpointRounding.ToPositiveInfinity)]
@@ -1532,6 +1548,22 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(11, 11, MidpointRounding.ToEven)]
+        [InlineData(11.4, 11, MidpointRounding.ToEven)]
+        [InlineData(11.5, 12, MidpointRounding.ToEven)]
+        [InlineData(11.6, 12, MidpointRounding.ToEven)]
+        [InlineData(-11, -11, MidpointRounding.ToEven)]
+        [InlineData(-11.4, -11, MidpointRounding.ToEven)]
+        [InlineData(-11.5, -12, MidpointRounding.ToEven)]
+        [InlineData(-11.6, -12, MidpointRounding.ToEven)]
+        [InlineData(11, 11, MidpointRounding.AwayFromZero)]
+        [InlineData(11.4, 11, MidpointRounding.AwayFromZero)]
+        [InlineData(11.5, 12, MidpointRounding.AwayFromZero)]
+        [InlineData(11.6, 12, MidpointRounding.AwayFromZero)]
+        [InlineData(-11, -11, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.4, -11, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.5, -12, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.6, -12, MidpointRounding.AwayFromZero)]
         [InlineData(11, 11, MidpointRounding.ToPositiveInfinity)]
         [InlineData(11.4, 12, MidpointRounding.ToPositiveInfinity)]
         [InlineData(11.5, 12, MidpointRounding.ToPositiveInfinity)]
@@ -1562,6 +1594,22 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(11, 11, MidpointRounding.ToEven)]
+        [InlineData(11.4, 11, MidpointRounding.ToEven)]
+        [InlineData(11.5, 12, MidpointRounding.ToEven)]
+        [InlineData(11.6, 12, MidpointRounding.ToEven)]
+        [InlineData(-11, -11, MidpointRounding.ToEven)]
+        [InlineData(-11.4, -11, MidpointRounding.ToEven)]
+        [InlineData(-11.5, -12, MidpointRounding.ToEven)]
+        [InlineData(-11.6, -12, MidpointRounding.ToEven)]
+        [InlineData(11, 11, MidpointRounding.AwayFromZero)]
+        [InlineData(11.4, 11, MidpointRounding.AwayFromZero)]
+        [InlineData(11.5, 12, MidpointRounding.AwayFromZero)]
+        [InlineData(11.6, 12, MidpointRounding.AwayFromZero)]
+        [InlineData(-11, -11, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.4, -11, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.5, -12, MidpointRounding.AwayFromZero)]
+        [InlineData(-11.6, -12, MidpointRounding.AwayFromZero)]
         [InlineData(11, 11, MidpointRounding.ToPositiveInfinity)]
         [InlineData(11.4, 12, MidpointRounding.ToPositiveInfinity)]
         [InlineData(11.5, 12, MidpointRounding.ToPositiveInfinity)]
