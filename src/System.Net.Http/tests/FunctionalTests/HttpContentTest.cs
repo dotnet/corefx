@@ -421,8 +421,8 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task ReadAsStringAsync_SetNoCharset_DefaultCharsetUsed()
         {
-            // Use content with umlaut characters.
-            string sourceString = "ÄäüÜ"; // c4 e4 fc dc
+            // Assorted latin letters with diaeresis
+            string sourceString = "\u00C4\u00E4\u00FC\u00DC";
             Encoding defaultEncoding = Encoding.GetEncoding("utf-8");
             byte[] contentBytes = defaultEncoding.GetBytes(sourceString);
 
@@ -435,6 +435,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public async Task ReadAsStringAsync_SetQuotedCharset_ParsesContent()
         {
             string sourceString = "some string";
@@ -457,7 +458,8 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("invalid\"")]
         public async Task ReadAsStringAsync_SetInvalidContentTypeHeader_DefaultCharsetUsed(string charset)
         {
-            string sourceString = "some string";
+            // Assorted latin letters with diaeresis
+            string sourceString = "\u00C4\u00E4\u00FC\u00DC";
 
             // Because the Content-Type header is invalid, we expect to default to UTF-8.
             byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
