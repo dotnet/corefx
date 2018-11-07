@@ -50,19 +50,19 @@ namespace System.Memory.Tests.SequenceReader
             Assert.True(reader.TryRead(out int intValue));
             Assert.Equal(BitConverter.ToInt32(new byte[] { 0, 1, 0, 2 }), intValue);
 
-            Assert.True(reader.TryReadInt32BigEndian(out intValue));
+            Assert.True(reader.TryReadBigEndian(out intValue));
             Assert.Equal(BitConverter.ToInt32(new byte[] { 4, 3, 2, 1 }), intValue);
 
-            Assert.True(reader.TryReadInt64LittleEndian(out long longValue));
+            Assert.True(reader.TryReadLittleEndian(out long longValue));
             Assert.Equal(BitConverter.ToInt64(new byte[] { 5, 6, 7, 8, 9, 0, 1, 2 }), longValue);
 
-            Assert.True(reader.TryReadInt64BigEndian(out longValue));
+            Assert.True(reader.TryReadBigEndian(out longValue));
             Assert.Equal(BitConverter.ToInt64(new byte[] { 0, 9, 8, 7, 6, 5, 4, 3 }), longValue);
 
-            Assert.True(reader.TryReadInt16LittleEndian(out short shortValue));
+            Assert.True(reader.TryReadLittleEndian(out short shortValue));
             Assert.Equal(BitConverter.ToInt16(new byte[] { 1, 2 }), shortValue);
 
-            Assert.True(reader.TryReadInt16BigEndian(out shortValue));
+            Assert.True(reader.TryReadBigEndian(out shortValue));
             Assert.Equal(BitConverter.ToInt16(new byte[] { 4, 3 }), shortValue);
         }
     }

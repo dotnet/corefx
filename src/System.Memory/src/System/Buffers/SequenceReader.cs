@@ -18,29 +18,24 @@ namespace System.Buffers
         /// Create a <see cref="SequenceReader{T}"/> over the given <see cref="ReadOnlySequence{T}"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SequenceReader(ReadOnlySequence<T> buffer)
+        public SequenceReader(ReadOnlySequence<T> sequence)
         {
             CurrentSpanIndex = 0;
             Consumed = 0;
-            Sequence = buffer;
-            _currentPosition = buffer.Start;
+            Sequence = sequence;
+            _currentPosition = sequence.Start;
             _length = -1;
 
-            buffer.GetFirstSpan(out ReadOnlySpan<T> first, out _nextPosition);
+            sequence.GetFirstSpan(out ReadOnlySpan<T> first, out _nextPosition);
             CurrentSpan = first;
             _moreData = first.Length > 0;
 
-            if (!_moreData && !buffer.IsSingleSegment)
+            if (!_moreData && !sequence.IsSingleSegment)
             {
                 _moreData = true;
                 GetNextSpan();
             }
         }
-
-        /// <summary>
-        /// Return true if we're in the last segment
-        /// </summary>
-        public bool IsLastSegment => _nextPosition.GetObject() == null;
 
         /// <summary>
         /// True when there is no more data in the <see cref="Sequence"/>.
@@ -59,7 +54,7 @@ namespace System.Buffers
             => Sequence.GetPosition(CurrentSpanIndex, _currentPosition);
 
         /// <summary>
-        /// The current segment in the <see cref="Sequence"/>.
+        /// The current segment in the <see cref="Sequence"/> as a span.
         /// </summary>
         public ReadOnlySpan<T> CurrentSpan { get; private set; }
 
@@ -96,6 +91,7 @@ namespace System.Buffers
             {
                 if (_length < 0)
                 {
+                    // Cache the length
                     _length = Sequence.Length;
                 }
                 return _length;
@@ -149,7 +145,7 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Move the reader back the specified number of positions.
+        /// Move the reader back the specified number of items.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Rewind(long count)
@@ -168,7 +164,7 @@ namespace System.Buffers
             }
             else
             {
-                // Current segment doesn't have enough space, scan backward through segments
+                // Current segment doesn't have enough data, scan backward through segments
                 RetreatToPreviousSpan(Consumed);
             }
         }
@@ -194,7 +190,7 @@ namespace System.Buffers
                 if (memory.Length == 0)
                 {
                     CurrentSpan = default;
-                    // No space in the first span, move to one with space
+                    // No data in the first span, move to one with data
                     GetNextSpan();
                 }
                 else
@@ -204,14 +200,14 @@ namespace System.Buffers
             }
             else
             {
-                // No space in any spans and at end of sequence
+                // No data in any spans and at end of sequence
                 _moreData = false;
                 CurrentSpan = default;
             }
         }
 
         /// <summary>
-        /// Get the next segment with available space, if any.
+        /// Get the next segment with available data, if any.
         /// </summary>
         private void GetNextSpan()
         {
@@ -239,7 +235,7 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Move the reader ahead the specified number of positions.
+        /// Move the reader ahead the specified number of items.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Advance(long count)
@@ -312,24 +308,26 @@ namespace System.Buffers
                 GetNextSpan();
 
                 if (count == 0)
+                {
                     break;
+                }
             }
 
             if (count != 0)
             {
-                // Not enough space left- adjust for where we actually ended and throw
+                // Not enough data left- adjust for where we actually ended and throw
                 Consumed -= count;
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count);
             }
         }
 
         /// <summary>
-        /// Peek forward the number of positions in <paramref name="copyBuffer"/> (at most), copying into
+        /// Peek forward the number of items in <paramref name="copyBuffer"/> (at most), copying into
         /// <paramref name="copyBuffer"/> if needed.
         /// </summary>
         /// <param name="copyBuffer">
         /// Temporary buffer to copy into if there isn't a contiguous span within the existing data to return.
-        /// Also describes the maximum count of positions to peek.
+        /// Also describes the maximum count of items to peek.
         /// </param>
         /// <returns>
         /// Span over the peeked data. The length may be shorter than <paramref name="copyBuffer"/> if there
@@ -350,20 +348,23 @@ namespace System.Buffers
         internal ReadOnlySpan<T> PeekSlow(Span<T> destination)
         {
             ReadOnlySpan<T> firstSpan = UnreadSpan;
+            Debug.Assert(firstSpan.Length < destination.Length);
             firstSpan.CopyTo(destination);
             int copied = firstSpan.Length;
 
             SequencePosition next = _nextPosition;
             while (Sequence.TryGet(ref next, out ReadOnlyMemory<T> nextSegment, true))
             {
-                ReadOnlySpan<T> nextSpan = nextSegment.Span;
-                if (nextSpan.Length > 0)
+                if (nextSegment.Length > 0)
                 {
+                    ReadOnlySpan<T> nextSpan = nextSegment.Span;
                     int toCopy = Math.Min(nextSpan.Length, destination.Length - copied);
                     nextSpan.Slice(0, toCopy).CopyTo(destination.Slice(copied));
                     copied += toCopy;
                     if (copied >= destination.Length)
+                    {
                         break;
+                    }
                 }
             }
 

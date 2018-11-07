@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers
@@ -486,17 +487,17 @@ namespace System.Buffers
             {
                 SequencePosition end = End;
                 int endIndex = end.GetInteger();
-                bool isMultiSegment = startObject != end.GetObject();
+                bool hasMultipleSegments = startObject != end.GetObject();
 
-                // A == 0 && B == 0 means SequenceType.MultiSegment
                 if (startIndex >= 0)
                 {
-                    if (endIndex >= 0)  // SequenceType.MultiSegment
+                    if (endIndex >= 0)
                     {
+                        // Positive start and end index == ReadOnlySequenceSegment<T>
                         ReadOnlySequenceSegment<T> segment = (ReadOnlySequenceSegment<T>)startObject;
                         next = new SequencePosition(segment.Next, 0);
                         first = segment.Memory.Span;
-                        if (isMultiSegment)
+                        if (hasMultipleSegments)
                         {
                             first = first.Slice(startIndex);
                         }
@@ -507,7 +508,8 @@ namespace System.Buffers
                     }
                     else
                     {
-                        if (isMultiSegment)
+                        // Positive start and negative end index == T[]
+                        if (hasMultipleSegments)
                             ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
                         first = new ReadOnlySpan<T>((T[])startObject, startIndex, (endIndex & ReadOnlySequence.IndexBitMask) - startIndex);
@@ -515,30 +517,29 @@ namespace System.Buffers
                 }
                 else
                 {
-                    first = GetFirstSpanSlow(startObject, startIndex, endIndex, isMultiSegment);
+                    first = GetFirstSpanSlow(startObject, startIndex, endIndex, hasMultipleSegments);
                 }
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ReadOnlySpan<T> GetFirstSpanSlow(object startObject, int startIndex, int endIndex, bool isMultiSegment)
+        private static ReadOnlySpan<T> GetFirstSpanSlow(object startObject, int startIndex, int endIndex, bool hasMultipleSegments)
         {
-            Debug.Assert(startIndex < 0 || endIndex < 0);
-            if (isMultiSegment)
+            Debug.Assert(startIndex < 0);
+            if (hasMultipleSegments)
                 ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
             // The type == char check here is redundant. However, we still have it to allow
             // the JIT to see when that the code is unreachable and eliminate it.
-            // A == 1 && B == 1 means SequenceType.String
             if (typeof(T) == typeof(char) && endIndex < 0)
             {
-                var memory = (ReadOnlyMemory<T>)(object)((string)startObject).AsMemory();
-
-                // No need to remove the FlagBitMask since (endIndex - startIndex) == (endIndex & ReadOnlySequence.IndexBitMask) - (startIndex & ReadOnlySequence.IndexBitMask)
-                return memory.Span.Slice(startIndex & ReadOnlySequence.IndexBitMask, endIndex - startIndex);
+                // Negative start and negative end index == string
+                ReadOnlySpan<char> spanOfChar = ((string)startObject).AsSpan(startIndex & ReadOnlySequence.IndexBitMask, endIndex - startIndex);
+                return MemoryMarshal.CreateSpan(ref Unsafe.As<char, T>(ref MemoryMarshal.GetReference(spanOfChar)), spanOfChar.Length);
             }
-            else // endIndex >= 0, A == 1 && B == 0 means SequenceType.MemoryManager
+            else
             {
+                // Negative start and positive end index == MemoryManager<T>
                 startIndex &= ReadOnlySequence.IndexBitMask;
                 return ((MemoryManager<T>)startObject).Memory.Span.Slice(startIndex, endIndex - startIndex);
             }

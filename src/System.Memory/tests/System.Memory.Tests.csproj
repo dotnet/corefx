@@ -16,8 +16,7 @@
     <Compile Include="ReadOnlySpan\Contains.T.cs" />
     <Compile Include="Span\Reflection.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AllocationHelper.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="SequenceReader\Advance.cs" />
     <Compile Include="SequenceReader\BasicTests.cs" />
     <Compile Include="SequenceReader\BinaryExtensions.cs" />
@@ -29,6 +28,9 @@
     <Compile Include="SequenceReader\SequenceFactory.cs" />
     <Compile Include="SequenceReader\SkipDelimiter.cs" />
     <Compile Include="SequenceReader\SpanLiteralExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AllocationHelper.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
