@@ -457,30 +457,17 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("invalid\"")]
         public async Task ReadAsStringAsync_SetInvalidContentTypeHeader_DefaultCharsetUsed(string charset)
         {
-            string sourceString = "hello world";
-            await LoopbackServer.CreateClientAndServerAsync(async uri =>
-            {
-                using (var client = new HttpClient())
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Post, uri);
+            string sourceString = "some string";
 
-                    HttpResponseMessage reponse = await client.SendAsync(request);
+            // Because the Content-Type header is invalid, we expect to default to UTF-8.
+            byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
+            var content = new MockContent(contentBytes);
 
-                    string t = await reponse.Content.ReadAsStringAsync();
-                    Assert.Equal(sourceString, t);
-                }
-            }, async server =>
-            {
-                await server.AcceptConnectionAsync(async connection =>
-                {
-                    // Because the Content-Type header is invalid, we expect the client to default to UTF-8.
-                    byte[] contentArray = Encoding.UTF8.GetBytes(sourceString);
+            Assert.True(content.Headers.TryAddWithoutValidation("Content-Type", $"text/plain;charset={charset}"));
 
-                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nContent-Type:text/plain;charset={charset}\r\nConnection: close\r\nContent-Length: {contentArray.Length}\r\n\r\n");
-                    await connection.Socket.SendAsync(new ArraySegment<byte>(contentArray), SocketFlags.None);
-                    while (await connection.Socket.ReceiveAsync(new ArraySegment<byte>(new byte[1000]), SocketFlags.None) > 0); // Read and ignore the request.
-                });
-            });
+            string result = await content.ReadAsStringAsync();
+
+            Assert.Equal(sourceString, result);
         }
 
         [Fact]
