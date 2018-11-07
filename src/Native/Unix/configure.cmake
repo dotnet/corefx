@@ -327,6 +327,15 @@ check_c_source_compiles(
     "
     HAVE_SENDFILE_6)
 
+check_c_source_runs(
+    "
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <unistd.h>
+    int main(void) { volatile int shm = 1; int status; pid_t pid; if ((pid = vfork()) == 0) { shm = 0; _exit(0); } if (pid > 0) waitpid(pid, &status, 0); return shm; }
+    "
+    HAVE_VFORK_SHM)
+
 check_symbol_exists(
     fcopyfile
     copyfile.h

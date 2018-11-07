@@ -94,6 +94,7 @@ static int Dup2WithInterruptedRetry(int oldfd, int newfd)
     return result;
 }
 
+#if !HAVE_VFORK_SHM
 static ssize_t WriteSize(int fd, const void* buffer, size_t count)
 {
     ssize_t rv = 0;
@@ -145,6 +146,7 @@ static void ExitChild(int pipeToParent, int error)
     }
     _exit(error != 0 ? error : EXIT_FAILURE);
 }
+#endif
 
 int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       char* const argv[],
@@ -165,8 +167,17 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     bool haveProcessCreateLock = false;
 #endif
     bool success = true;
-    int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, -1};
-    int processId = -1;
+    int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1};
+    pid_t processId = -1;
+
+#if HAVE_VFORK_SHM
+    // Gets written to by child; initial value is -1 because it really can't happen while 0 is merely a bug elsewhere
+    volatile int captureErrno = -1;
+#define ExitChildOnError(err) (void)_exit(captureErrno = err) /* this can't be a function */
+#else
+    int waitForChildToExecPipe[2] = {-1, -1};
+#define ExitChildOnError(err) ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], err)
+#endif
 
     // Validate arguments
     if (NULL == filename || NULL == argv || NULL == envp || NULL == stdinFd || NULL == stdoutFd ||
@@ -221,6 +232,34 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
+#if HAVE_VFORK_SHM
+    // This platform has the shared-memory implementation of vfork(). For a one gigabyte process
+    // the expected performance gain of using vfork() rather than fork() is 99.5% merely due to
+    // avoiding page faults as the kernel does not need to set all writable pages in the parent
+    // process to copy-on-write because the child process is allowed to write to the parent process
+    // memory pages. Eliding the pipe for sending the error from execve() back to the parent is pure
+    // gravy.
+
+    // The thing to remember about shared memory vfork() is the documentation is way out of date.
+    // It does the following things:
+    // * creates a new process in the memory space of the calling process.
+    // * blocks the calling thread (not process!) in an uninterruptable sleep
+    // * sets up the process records so the following happen:
+    //   + execve() replaces the memory space in the child and unblocks the parent
+    //   + process exit by any means unblocks the parent
+    //   + ptrace() makes a security demand against the parent process
+    //   + accessing the terminal with read() or write() fail in system-dependent ways
+    // Due to lack of documentation, changing signals in the vfork() child is a bad idea. We don't
+    // do this, but it's worth pointing out.
+
+    // All platforms that provide shared memory vfork() check the parent process's context when
+    // ptrace() is used on the child, thus making setuid() safe to use after vfork(). The fabled vfork()
+    // security hole is the other way around; if a multithreaded host were to execute setuid()
+    // on another thread while a vfork() child is still pending, bad things are possible; however we
+    // do not do that.
+
+    if ((processId = vfork()) == 0) // processId == 0 if this is child process
+#else
     // We create a pipe purely for the benefit of knowing when the child process has called exec.
     // We can use that to block waiting on the pipe to be closed, which lets us block the parent
     // from returning until the child process is actually transitioned to the target program.  This
@@ -233,14 +272,8 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     SystemNative_Pipe(waitForChildToExecPipe, PAL_O_CLOEXEC);
 #endif
 
-    // Fork the child process
-    if ((processId = fork()) == -1)
-    {
-        success = false;
-        goto done;
-    }
-
-    if (processId == 0) // processId == 0 if this is child process
+    if ((processId = fork()) == 0) // processId == 0 if this is child process
+#endif
     {
         // For any redirections that should happen, dup the pipe descriptors onto stdin/out/err.
         // We don't need to explicitly close out the old pipe descriptors as they will be closed on the 'execve' call.
@@ -248,14 +281,14 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
             (redirectStdout && Dup2WithInterruptedRetry(stdoutFds[WRITE_END_OF_PIPE], STDOUT_FILENO) == -1) ||
             (redirectStderr && Dup2WithInterruptedRetry(stderrFds[WRITE_END_OF_PIPE], STDERR_FILENO) == -1))
         {
-            ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
+            ExitChildOnError(errno);
         }
 
         if (setCredentials)
         {
             if (setgid(groupId) == -1 || setuid(userId) == -1)
             {
-                ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
+                ExitChildOnError(errno);
             }
         }
 
@@ -266,14 +299,20 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
             while (CheckInterrupted(result = chdir(cwd)));
             if (result == -1)
             {
-                ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
+                ExitChildOnError(errno);
             }
         }
 
         // Finally, execute the new process.  execve will not return if it's successful.
         execve(filename, argv, envp);
-        ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno); // execve failed
+        ExitChildOnError(errno); // execve failed
     }
+    else if (processId < 0)
+    {
+        success = false;
+        goto done;
+    }
+#undef ExitChildOnError
 
     // This is the parent process. processId == pid of the child
     *childPid = processId;
@@ -297,6 +336,14 @@ done:;
     CloseIfOpen(stdoutFds[WRITE_END_OF_PIPE]);
     CloseIfOpen(stderrFds[WRITE_END_OF_PIPE]);
 
+#if HAVE_VFORK_SHM
+    int childError = captureErrno; // Don't read volatile more than necessary
+    if (childError != -1)
+    {
+        success = false;
+        priorErrno = childError;
+    }
+#else
     // Also close the write end of the exec waiting pipe, and wait for the pipe to be closed
     // by trying to read from it (the read will wake up when the pipe is closed and broken).
     // Ignore any errors... this is a best-effort attempt.
@@ -315,6 +362,7 @@ done:;
         }
         CloseIfOpen(waitForChildToExecPipe[READ_END_OF_PIPE]);
     }
+#endif
 
     // If we failed, close everything else and give back error values in all out arguments.
     if (!success)
