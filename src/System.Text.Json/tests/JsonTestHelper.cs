@@ -25,7 +25,7 @@ namespace System.Text.Json.Tests
             return sb.ToString();
         }
 
-        public static string WriteDepth(int depth, bool writeComment = false)
+        public static string WriteDepthObject(int depth, bool writeComment = false)
         {
             var sb = new StringBuilder();
             var textWriter = new StringWriter();
@@ -50,7 +50,30 @@ namespace System.Text.Json.Tests
             return textWriter.ToString();
         }
 
-        public static string WriteDepthWithArray(int depth, bool writeComment = false)
+        public static string WriteDepthArray(int depth, bool writeComment = false)
+        {
+            var sb = new StringBuilder();
+            var textWriter = new StringWriter();
+            var json = new JsonTextWriter(textWriter);
+            json.WriteStartArray();
+            for (int i = 0; i < depth; i++)
+            {
+                json.WriteStartArray();
+            }
+            if (writeComment)
+                json.WriteComment("Random comment string");
+            json.WriteValue("Hello, World!");
+            for (int i = 0; i < depth; i++)
+            {
+                json.WriteEndArray();
+            }
+            json.WriteEndArray();
+            json.Flush();
+
+            return textWriter.ToString();
+        }
+
+        public static string WriteDepthObjectWithArray(int depth, bool writeComment = false)
         {
             var sb = new StringBuilder();
             var textWriter = new StringWriter();

@@ -218,7 +218,7 @@ namespace System.Text.Json.Tests
             {
                 for (int i = 0; i < depth; i++)
                 {
-                    string jsonStr = JsonTestHelper.WriteDepth(i, commentHandling == JsonCommentHandling.AllowComments);
+                    string jsonStr = JsonTestHelper.WriteDepthObject(i, commentHandling == JsonCommentHandling.AllowComments);
                     Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
 
                     var state = new JsonReaderState(maxDepth: depth, options: new JsonReaderOptions { CommentHandling = commentHandling });
@@ -271,7 +271,7 @@ namespace System.Text.Json.Tests
             {
                 for (int i = 0; i < depth; i++)
                 {
-                    string jsonStr = JsonTestHelper.WriteDepthWithArray(i, commentHandling == JsonCommentHandling.AllowComments);
+                    string jsonStr = JsonTestHelper.WriteDepthObjectWithArray(i, commentHandling == JsonCommentHandling.AllowComments);
                     Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
 
                     var state = new JsonReaderState(maxDepth: depth + 1, options: new JsonReaderOptions { CommentHandling = commentHandling });
@@ -370,11 +370,30 @@ namespace System.Text.Json.Tests
         [InlineData(512)]
         public static void TestDepthBeyondLimit(int depth)
         {
-            string jsonStr = JsonTestHelper.WriteDepth(depth - 1);
+            string jsonStr = JsonTestHelper.WriteDepthObject(depth - 1);
             Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
 
             var state = new JsonReaderState(maxDepth: depth - 1);
             var json = new Utf8JsonReader(data, isFinalBlock: true, state);
+
+            try
+            {
+                int maxDepth = 0;
+                while (json.Read())
+                {
+                    if (maxDepth < json.CurrentDepth)
+                        maxDepth = json.CurrentDepth;
+                }
+                Assert.True(false, $"Expected JsonReaderException was not thrown. Max depth allowed = {json.CurrentState.MaxDepth} | Max depth reached = {maxDepth}");
+            }
+            catch (JsonReaderException)
+            { }
+
+            jsonStr = JsonTestHelper.WriteDepthArray(depth - 1);
+            data = Encoding.UTF8.GetBytes(jsonStr);
+
+            state = new JsonReaderState(maxDepth: depth - 1);
+            json = new Utf8JsonReader(data, isFinalBlock: true, state);
 
             try
             {

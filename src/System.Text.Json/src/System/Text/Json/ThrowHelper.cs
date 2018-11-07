@@ -31,10 +31,10 @@ namespace System.Text.Json
             string message = GetResourceString(ref json, resource, nextByte, Encoding.UTF8.GetString(bytes.ToArray(), 0, bytes.Length));
 
             long lineNumber = json.CurrentState._lineNumber;
-            long position = json.CurrentState._lineBytePosition;
+            long bytePositionInLine = json.CurrentState._bytePositionInLine;
 
-            message += $" LineNumber: {lineNumber} | BytePosition: {position}.";
-            return new JsonReaderException(message, lineNumber, position);
+            message += $" LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
+            return new JsonReaderException(message, lineNumber, bytePositionInLine);
         }
 
         private static bool IsPrintable(byte value) => value >= 0x20 && value < 0x7F;
@@ -57,8 +57,11 @@ namespace System.Text.Json
                 case ExceptionResource.EndOfStringNotFound:
                     message = SR.EndOfStringNotFound;
                     break;
-                case ExceptionResource.RequiredDigitNotFound:
-                    message = SR.Format(SR.RequiredDigitNotFound, character);
+                case ExceptionResource.RequiredDigitNotFoundAfterSign:
+                    message = SR.Format(SR.RequiredDigitNotFoundAfterSign, character);
+                    break;
+                case ExceptionResource.RequiredDigitNotFoundAfterDecimal:
+                    message = SR.Format(SR.RequiredDigitNotFoundAfterDecimal, character);
                     break;
                 case ExceptionResource.RequiredDigitNotFoundEndOfData:
                     message = SR.Format(SR.RequiredDigitNotFoundEndOfData, character);
@@ -113,6 +116,9 @@ namespace System.Text.Json
                 case ExceptionResource.EndOfCommentNotFound:
                     message = SR.EndOfCommentNotFound;
                     break;
+                case ExceptionResource.ZeroDepthAtEnd:
+                    message = SR.Format(SR.ZeroDepthAtEnd, json.CurrentDepth);
+                    break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -128,7 +134,8 @@ namespace System.Text.Json
         Default,
         EndOfCommentNotFound,
         EndOfStringNotFound,
-        RequiredDigitNotFound,
+        RequiredDigitNotFoundAfterDecimal,
+        RequiredDigitNotFoundAfterSign,
         RequiredDigitNotFoundEndOfData,
         ExpectedEndAfterSingleJson,
         ExpectedEndOfDigitNotFound,
@@ -146,5 +153,6 @@ namespace System.Text.Json
         InvalidEndOfJsonNonPrimitive,
         MismatchedObjectArray,
         ObjectDepthTooLarge,
+        ZeroDepthAtEnd,
     }
 }

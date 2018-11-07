@@ -28,7 +28,7 @@ namespace System.Text.Json
         // depths up to 64 (which is the default max depth).
         internal ulong _stackFreeContainer;
         internal long _lineNumber;
-        internal long _lineBytePosition;
+        internal long _bytePositionInLine;
         internal long _bytesConsumed;
         internal int _currentDepth;
         internal int _maxDepth;
@@ -68,7 +68,7 @@ namespace System.Text.Json
 
             _stackFreeContainer = default;
             _lineNumber = default;
-            _lineBytePosition = default;
+            _bytePositionInLine = default;
             _bytesConsumed = default;
             _currentDepth = default;
             _maxDepth = maxDepth;
