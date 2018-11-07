@@ -64,7 +64,7 @@ namespace System.Text.Json
         public JsonReaderState(int maxDepth = StackFreeMaxDepth, JsonReaderOptions options = default)
         {
             if (maxDepth <= 0)
-                ThrowHelper.ThrowArgumentException_MaxDepthMustBePositive();
+                throw ThrowHelper.GetArgumentException_MaxDepthMustBePositive();
 
             _stackFreeContainer = default;
             _lineNumber = default;

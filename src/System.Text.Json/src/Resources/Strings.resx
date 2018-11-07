@@ -118,28 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ArrayDepthTooLarge" xml:space="preserve">
-    <value>Depth of {0} within an array is larger than max depth of {1}.</value>
-  </data>
-  <data name="ArrayEndWithinObject" xml:space="preserve">
-    <value>We are within an object but observed a ']'.</value>
+    <value>CurrentDepth({0}) is larger than the maximum configured depth of {1}. Cannot read next JSON array.</value>
   </data>
   <data name="Default" xml:space="preserve">
     <value>An error occurred while reading the JSON.</value>
   </data>
-  <data name="DepthMustBePositive" xml:space="preserve">
-    <value>Mismatched number of start/end objects or arrays. Depth is {0} but must be greater than 0.</value>
-  </data>
   <data name="EndOfCommentNotFound" xml:space="preserve">
-    <value>Expected either a '\n' or '*/' to indicate end of comment, but instead reached end of data.</value>
+    <value>Expected end of comment, but instead reached end of data.</value>
   </data>
   <data name="EndOfStringNotFound" xml:space="preserve">
     <value>Expected a '"' to indicate end of string, but instead reached end of data.</value>
-  </data>
-  <data name="ExpectedDigitNotFound" xml:space="preserve">
-    <value>Invalid number. Last character read: '{0}'. Expected a digit ('0'-'9').</value>
-  </data>
-  <data name="ExpectedDigitNotFoundEndOfData" xml:space="preserve">
-    <value>Invalid number. Last character read: '{0}'. Expected a digit ('0'-'9') but reached end of data.</value>
   </data>
   <data name="ExpectedEndAfterSingleJson" xml:space="preserve">
     <value>Expected end of JSON after a single value but additional data found. Last character read: '{0}'.</value>
@@ -150,23 +138,20 @@
   <data name="ExpectedFalse" xml:space="preserve">
     <value>Expected a 'false' value, but instead got '{0}'.</value>
   </data>
-  <data name="ExpectedNextDigitComponentNotFound" xml:space="preserve">
-    <value>Invalid number. Last character read: '{0}'. Expected '.' or 'E' or 'e'.</value>
-  </data>
   <data name="ExpectedNextDigitEValueNotFound" xml:space="preserve">
     <value>Invalid number. Last character read: '{0}'. Expected 'E' or 'e'.</value>
   </data>
   <data name="ExpectedNull" xml:space="preserve">
     <value>Expected a 'null' value, but instead got '{0}'.</value>
   </data>
-  <data name="ExpectedSeparaterAfterPropertyNameNotFound" xml:space="preserve">
+  <data name="ExpectedSeparatorAfterPropertyNameNotFound" xml:space="preserve">
     <value>Expected a ':' following the property name, but instead got '{0}'.</value>
   </data>
   <data name="ExpectedStartOfPropertyNotFound" xml:space="preserve">
-    <value>Expected '"' for start of property name. Instead reached '{0}'.</value>
+    <value>Expected '"' for start of a property name. Instead got '{0}'.</value>
   </data>
   <data name="ExpectedStartOfPropertyOrValueNotFound" xml:space="preserve">
-    <value>Expected a start of a property name or value after ',', but reached end of data instead.</value>
+    <value>Expected a start of a property name or value after ',', but instead reached end of data.</value>
   </data>
   <data name="ExpectedStartOfValueNotFound" xml:space="preserve">
     <value>Expected start of a value, but instead got '{0}'.</value>
@@ -181,18 +166,24 @@
     <value>Expected either ',', '}}', or ']', but instead got '{0}'.</value>
   </data>
   <data name="InvalidCharacterWithinString" xml:space="preserve">
-    <value>Found an invalid character within a JSON string: '{0}'. It is expected that the string is properly escaped.</value>
+    <value>Found an invalid character within a JSON string: '{0}'. The string should be correctly escaped.</value>
   </data>
-  <data name="InvalidEndOfJson" xml:space="preserve">
+  <data name="InvalidEndOfJsonNonPrimitive" xml:space="preserve">
     <value>Expected valid end of JSON payload with TokenType either EndArray or EndObject. Current token type is '{0}'.</value>
   </data>
   <data name="MaxDepthMustBePositive" xml:space="preserve">
     <value>Max depth must be positive.</value>
   </data>
-  <data name="ObjectDepthTooLarge" xml:space="preserve">
-    <value>Depth of {0} within an object is larger than max depth of {1}.</value>
+  <data name="MismatchedObjectArray" xml:space="preserve">
+    <value>'{0}' encountered without a matching open.</value>
   </data>
-  <data name="ObjectEndWithinArray" xml:space="preserve">
-    <value>We are within an array but observed an '}}'.</value>
+  <data name="ObjectDepthTooLarge" xml:space="preserve">
+    <value>CurrentDepth({0}) is larger than the maximum configured depth of {1}. Cannot read next JSON object.</value>
+  </data>
+  <data name="RequiredDigitNotFound" xml:space="preserve">
+    <value>Invalid number. Last character read: '{0}'. Expected a digit ('0'-'9').</value>
+  </data>
+  <data name="RequiredDigitNotFoundEndOfData" xml:space="preserve">
+    <value>Invalid number. Last character read: '{0}'. Expected a digit ('0'-'9'), but instead reached end of data.</value>
   </data>
 </root>

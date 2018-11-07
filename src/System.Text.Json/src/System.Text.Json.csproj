@@ -18,7 +18,7 @@
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
     <Compile Include="System\Text\Json\Utf8JsonReader.cs" />
-    <Compile Include="System\Text\Json\Utf8JsonReader_TryGet.cs" />
+    <Compile Include="System\Text\Json\Utf8JsonReader.TryGet.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />

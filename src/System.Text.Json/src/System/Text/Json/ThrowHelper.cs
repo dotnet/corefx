@@ -9,9 +9,9 @@ namespace System.Text.Json
 {
     internal static class ThrowHelper
     {
-        public static void ThrowArgumentException_MaxDepthMustBePositive()
+        public static ArgumentException GetArgumentException_MaxDepthMustBePositive()
         {
-            throw GetArgumentException(SR.MaxDepthMustBePositive);
+            return GetArgumentException(SR.MaxDepthMustBePositive);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -28,7 +28,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static JsonReaderException GetJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, ReadOnlySpan<byte> bytes)
         {
-            string message = GetResourceString(ref json, resource, (char)nextByte, Encoding.UTF8.GetString(bytes.ToArray(), 0, bytes.Length));
+            string message = GetResourceString(ref json, resource, nextByte, Encoding.UTF8.GetString(bytes.ToArray(), 0, bytes.Length));
 
             long lineNumber = json.CurrentState._lineNumber;
             long position = json.CurrentState._lineBytePosition;
@@ -37,29 +37,31 @@ namespace System.Text.Json
             return new JsonReaderException(message, lineNumber, position);
         }
 
+        private static bool IsPrintable(byte value) => value >= 0x20 && value < 0x7F;
+
         // This function will convert an ExceptionResource enum value to the resource string.
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static string GetResourceString(ref Utf8JsonReader json, ExceptionResource resource, char character, string characters)
+        private static string GetResourceString(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, string characters)
         {
+            string character = IsPrintable(nextByte) ? ((char)nextByte).ToString() : $"0x{nextByte:X2}";
+
             string message = "";
             switch (resource)
             {
                 case ExceptionResource.ArrayDepthTooLarge:
                     message = SR.Format(SR.ArrayDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
                     break;
-                case ExceptionResource.ArrayEndWithinObject:
-                    message = json.CurrentDepth <= 0 ?
-                        SR.Format(SR.DepthMustBePositive, json.CurrentDepth) :
-                        SR.Format(SR.ArrayEndWithinObject);
+                case ExceptionResource.MismatchedObjectArray:
+                    message = SR.Format(SR.MismatchedObjectArray, character);
                     break;
                 case ExceptionResource.EndOfStringNotFound:
                     message = SR.EndOfStringNotFound;
                     break;
-                case ExceptionResource.ExpectedDigitNotFound:
-                    message = SR.Format(SR.ExpectedDigitNotFound, character);
+                case ExceptionResource.RequiredDigitNotFound:
+                    message = SR.Format(SR.RequiredDigitNotFound, character);
                     break;
-                case ExceptionResource.ExpectedDigitNotFoundEndOfData:
-                    message = SR.Format(SR.ExpectedDigitNotFoundEndOfData, character);
+                case ExceptionResource.RequiredDigitNotFoundEndOfData:
+                    message = SR.Format(SR.RequiredDigitNotFoundEndOfData, character);
                     break;
                 case ExceptionResource.ExpectedEndAfterSingleJson:
                     message = SR.Format(SR.ExpectedEndAfterSingleJson, character);
@@ -67,14 +69,11 @@ namespace System.Text.Json
                 case ExceptionResource.ExpectedEndOfDigitNotFound:
                     message = SR.Format(SR.ExpectedEndOfDigitNotFound, character);
                     break;
-                case ExceptionResource.ExpectedNextDigitComponentNotFound:
-                    message = SR.Format(SR.ExpectedNextDigitComponentNotFound, character);
-                    break;
                 case ExceptionResource.ExpectedNextDigitEValueNotFound:
                     message = SR.Format(SR.ExpectedNextDigitEValueNotFound, character);
                     break;
-                case ExceptionResource.ExpectedSeparaterAfterPropertyNameNotFound:
-                    message = SR.Format(SR.ExpectedSeparaterAfterPropertyNameNotFound, character);
+                case ExceptionResource.ExpectedSeparatorAfterPropertyNameNotFound:
+                    message = SR.Format(SR.ExpectedSeparatorAfterPropertyNameNotFound, character);
                     break;
                 case ExceptionResource.ExpectedStartOfPropertyNotFound:
                     message = SR.Format(SR.ExpectedStartOfPropertyNotFound, character);
@@ -91,16 +90,11 @@ namespace System.Text.Json
                 case ExceptionResource.FoundInvalidCharacter:
                     message = SR.Format(SR.FoundInvalidCharacter, character);
                     break;
-                case ExceptionResource.InvalidEndOfJson:
-                    message = SR.Format(SR.InvalidEndOfJson, json.TokenType);
+                case ExceptionResource.InvalidEndOfJsonNonPrimitive:
+                    message = SR.Format(SR.InvalidEndOfJsonNonPrimitive, json.TokenType);
                     break;
                 case ExceptionResource.ObjectDepthTooLarge:
                     message = SR.Format(SR.ObjectDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
-                    break;
-                case ExceptionResource.ObjectEndWithinArray:
-                    message = json.CurrentDepth <= 0 ?
-                        SR.Format(SR.DepthMustBePositive, json.CurrentDepth) :
-                        SR.Format(SR.ObjectEndWithinArray);
                     break;
                 case ExceptionResource.Default:
                     break;
@@ -113,9 +107,6 @@ namespace System.Text.Json
                 case ExceptionResource.ExpectedTrue:
                     message = SR.Format(SR.ExpectedTrue, characters);
                     break;
-                // This case is covered between ArrayEndWithinObject and ObjectEndWithinArray
-                /*case ExceptionResource.DepthMustBePositive:
-                    break;*/
                 case ExceptionResource.InvalidCharacterWithinString:
                     message = SR.Format(SR.InvalidCharacterWithinString, character);
                     break;
@@ -134,20 +125,17 @@ namespace System.Text.Json
     internal enum ExceptionResource
     {
         ArrayDepthTooLarge,
-        ArrayEndWithinObject,
         Default,
-        DepthMustBePositive,
         EndOfCommentNotFound,
         EndOfStringNotFound,
-        ExpectedDigitNotFound,
-        ExpectedDigitNotFoundEndOfData,
+        RequiredDigitNotFound,
+        RequiredDigitNotFoundEndOfData,
         ExpectedEndAfterSingleJson,
         ExpectedEndOfDigitNotFound,
         ExpectedFalse,
-        ExpectedNextDigitComponentNotFound,
         ExpectedNextDigitEValueNotFound,
         ExpectedNull,
-        ExpectedSeparaterAfterPropertyNameNotFound,
+        ExpectedSeparatorAfterPropertyNameNotFound,
         ExpectedStartOfPropertyNotFound,
         ExpectedStartOfPropertyOrValueNotFound,
         ExpectedStartOfValueNotFound,
@@ -155,8 +143,8 @@ namespace System.Text.Json
         ExpectedValueAfterPropertyNameNotFound,
         FoundInvalidCharacter,
         InvalidCharacterWithinString,
-        InvalidEndOfJson,
+        InvalidEndOfJsonNonPrimitive,
+        MismatchedObjectArray,
         ObjectDepthTooLarge,
-        ObjectEndWithinArray,
     }
 }
