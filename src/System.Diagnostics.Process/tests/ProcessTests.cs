@@ -252,8 +252,13 @@ namespace System.Diagnostics.Tests
             string path = GetTestFileName();
             Directory.CreateDirectory(path);
 
+            // Create a directory that will be our working directory
+            string wd = GetTestFileName();
+            Directory.CreateDirectory(wd);
+
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
+            options.startInfo.WorkingDirectory = wd;
             RemoteInvoke(pathDirectory =>
             {
                 // Create two identically named scripts, one in the working directory and one on PATH.
