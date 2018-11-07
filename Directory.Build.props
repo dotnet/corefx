@@ -109,7 +109,6 @@
       https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
-      https://ci.appveyor.com/nuget/benchmarkdotnet;
       $(OverridePackageSource);
       $(RestoreSources)
     </RestoreSources>

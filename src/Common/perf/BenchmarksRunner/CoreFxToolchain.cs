@@ -101,7 +101,8 @@ internal class CoreFxBuilder : IBuilder
             generateResult: generateResult,
             logger: logger,
             buildPartition: buildPartition,
-            environmentVariables: Array.Empty<EnvironmentVariable>()
+            environmentVariables: Array.Empty<EnvironmentVariable>(),
+            timeout: TimeSpan.FromMinutes(1.0)
         );
 
         return DotNetCliCommandExecutor.Execute(buildCommand).ToBuildResult(generateResult);
