@@ -249,5 +249,84 @@ namespace System.Text.Json.Tests
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
             Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
+
+        [Fact]
+        public static void TryGetInvalidCast()
+        {
+            string jsonString = "[\"stringValue\", true, 1234]";
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, true, default);
+            while (json.Read())
+            {
+                if (json.TokenType != JsonTokenType.String)
+                {
+                    try
+                    {
+                        json.TryGetValueAsString(out string value);
+                        Assert.True(false, "Expected TryGetValueAsString to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+                }
+
+                if (json.TokenType != JsonTokenType.True && json.TokenType != JsonTokenType.False)
+                {
+                    try
+                    {
+                        json.TryGetValueAsBoolean(out bool value);
+                        Assert.True(false, "Expected TryGetValueAsBoolean to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+                }
+
+                if (json.TokenType != JsonTokenType.Number)
+                {
+                    try
+                    {
+                        json.TryGetValueAsInt32(out int value);
+                        Assert.True(false, "Expected TryGetValueAsInt32 to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetValueAsInt64(out long value);
+                        Assert.True(false, "Expected TryGetValueAsInt64 to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetValueAsSingle(out float value);
+                        Assert.True(false, "Expected TryGetValueAsSingle to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetValueAsDouble(out double value);
+                        Assert.True(false, "Expected TryGetValueAsDouble to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetValueAsDecimal(out decimal value);
+                        Assert.True(false, "Expected TryGetValueAsDecimal to throw InvalidCastException due to mismatch token type.");
+                    }
+                    catch (InvalidCastException)
+                    { }
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
     }
 }

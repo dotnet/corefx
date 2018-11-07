@@ -20,6 +20,27 @@ namespace System.Text.Json
             return new ArgumentException(message);
         }
 
+        public static InvalidCastException GetInvalidCastException_ExpectedNumber(JsonTokenType tokenType)
+        {
+            return GetInvalidCastException("number", tokenType);
+        }
+
+        public static InvalidCastException GetInvalidCastException_ExpectedBoolean(JsonTokenType tokenType)
+        {
+            return GetInvalidCastException("boolean", tokenType);
+        }
+
+        public static InvalidCastException GetInvalidCastException_ExpectedString(JsonTokenType tokenType)
+        {
+            return GetInvalidCastException("string", tokenType);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static InvalidCastException GetInvalidCastException(string message, JsonTokenType tokenType)
+        {
+            return new InvalidCastException(SR.Format(SR.InvalidCast, tokenType, message));
+        }
+
         public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
         {
             throw GetJsonReaderException(ref json, resource, nextByte, bytes);

@@ -162,6 +162,9 @@
   <data name="FoundInvalidCharacter" xml:space="preserve">
     <value>'{0}' is invalid after a value. Expected either ',', '}}', or ']'.</value>
   </data>
+  <data name="InvalidCast" xml:space="preserve">
+    <value>Cannot get the value of a token type '{0}' as a {1}.</value>
+  </data>
   <data name="InvalidCharacterWithinString" xml:space="preserve">
     <value>'{0}' is invalid within a JSON string. The string should be correctly escaped.</value>
   </data>
