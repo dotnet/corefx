@@ -18,11 +18,11 @@ namespace System.Text.Json
         /// Observed incomplete data but progressed state partially in looking ahead.
         /// Return false and roll-back to a previously saved state.
         /// </summary>
-        IncompleteRollback,
+        NotEnoughDataRollBackState,
         /// <summary>
         /// Observed incomplete data but no change was made to the state.
         /// Return false, but do not roll-back anything since nothing changed.
         /// </summary>
-        IncompleteNoRollback,
+        IncompleteNoRollBackNecessary,
     }
 }

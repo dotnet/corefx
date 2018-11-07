@@ -20,7 +20,7 @@ namespace System.Text.Json
             return new ArgumentException(message);
         }
 
-        public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource = ExceptionResource.Default, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
+        public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
         {
             throw GetJsonReaderException(ref json, resource, nextByte, bytes);
         }
@@ -64,7 +64,7 @@ namespace System.Text.Json
                     message = SR.Format(SR.RequiredDigitNotFoundAfterDecimal, character);
                     break;
                 case ExceptionResource.RequiredDigitNotFoundEndOfData:
-                    message = SR.Format(SR.RequiredDigitNotFoundEndOfData, character);
+                    message = SR.RequiredDigitNotFoundEndOfData;
                     break;
                 case ExceptionResource.ExpectedEndAfterSingleJson:
                     message = SR.Format(SR.ExpectedEndAfterSingleJson, character);
@@ -99,8 +99,6 @@ namespace System.Text.Json
                 case ExceptionResource.ObjectDepthTooLarge:
                     message = SR.Format(SR.ObjectDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
                     break;
-                case ExceptionResource.Default:
-                    break;
                 case ExceptionResource.ExpectedFalse:
                     message = SR.Format(SR.ExpectedFalse, characters);
                     break;
@@ -131,7 +129,6 @@ namespace System.Text.Json
     internal enum ExceptionResource
     {
         ArrayDepthTooLarge,
-        Default,
         EndOfCommentNotFound,
         EndOfStringNotFound,
         RequiredDigitNotFoundAfterDecimal,

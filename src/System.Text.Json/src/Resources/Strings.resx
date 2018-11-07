@@ -120,9 +120,6 @@
   <data name="ArrayDepthTooLarge" xml:space="preserve">
     <value>CurrentDepth({0}) is larger than the maximum configured depth of {1}. Cannot read next JSON array.</value>
   </data>
-  <data name="Default" xml:space="preserve">
-    <value>An error occurred while reading the JSON.</value>
-  </data>
   <data name="EndOfCommentNotFound" xml:space="preserve">
     <value>Expected end of comment, but instead reached end of data.</value>
   </data>

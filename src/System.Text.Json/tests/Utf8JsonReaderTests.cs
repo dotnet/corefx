@@ -34,7 +34,7 @@ namespace System.Text.Json.Tests
             }
 
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            byte[] result = JsonTestHelper.JsonLabReturnBytesHelper(dataUtf8, out int length);
+            byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length);
             string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
             Stream stream = new MemoryStream(dataUtf8);
@@ -46,19 +46,19 @@ namespace System.Text.Json.Tests
             // Json payload contains numbers that are too large for .NET (need BigInteger+)
             if (type != TestCaseType.FullSchema1 && type != TestCaseType.BasicLargeNum)
             {
-                object jsonValues = JsonTestHelper.JsonLabReturnObjectHelper(dataUtf8);
+                object jsonValues = JsonTestHelper.ReturnObjectHelper(dataUtf8);
                 string str = JsonTestHelper.ObjectToString(jsonValues);
                 ReadOnlySpan<char> expectedSpan = expectedStr.AsSpan(0, expectedStr.Length - 2);
                 ReadOnlySpan<char> actualSpan = str.AsSpan(0, str.Length - 2);
                 Assert.True(expectedSpan.SequenceEqual(actualSpan));
             }
 
-            result = JsonTestHelper.JsonLabReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.SkipComments);
+            result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.SkipComments);
             actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
             Assert.Equal(expectedStr, actualStr);
 
-            result = JsonTestHelper.JsonLabReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.AllowComments);
+            result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.AllowComments);
             actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
             Assert.Equal(expectedStr, actualStr);
@@ -92,7 +92,7 @@ namespace System.Text.Json.Tests
 
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            byte[] result = JsonTestHelper.JsonLabReturnBytesHelper(dataUtf8, out int outputLength);
+            byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int outputLength);
             Span<byte> outputSpan = new byte[outputLength];
 
             Stream stream = new MemoryStream(dataUtf8);
@@ -103,7 +103,7 @@ namespace System.Text.Json.Tests
             {
                 JsonReaderState state = default;
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
-                byte[] output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length, out int firstLength, ref json);
+                byte[] output = JsonTestHelper.ReaderLoop(outputSpan.Length, out int firstLength, ref json);
                 output.AsSpan(0, firstLength).CopyTo(outputSpan);
                 int written = firstLength;
 
@@ -116,7 +116,7 @@ namespace System.Text.Json.Tests
                     || type == TestCaseType.LotsOfStrings || type == TestCaseType.Json4KB)
                 {
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, jsonState);
-                    output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length - written, out int length, ref json);
+                    output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out int length, ref json);
                     output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                     written += length;
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
@@ -132,14 +132,14 @@ namespace System.Text.Json.Tests
                     {
                         written = firstLength;
                         json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed, (int)j), isFinalBlock: false, jsonState);
-                        output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length - written, out int length, ref json);
+                        output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out int length, ref json);
                         output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                         written += length;
 
                         long consumedInner = json.BytesConsumed;
                         Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                         json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
-                        output = JsonTestHelper.JsonLabReaderLoop(outputSpan.Length - written, out length, ref json);
+                        output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out length, ref json);
                         output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                         written += length;
                         Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
@@ -427,12 +427,12 @@ namespace System.Text.Json.Tests
         public static void TestJsonReaderUtf8SpecialString(string jsonString, JsonCommentHandling commentHandling, string expectedStr)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            byte[] result = JsonTestHelper.JsonLabReturnBytesHelper(dataUtf8, out int length, commentHandling);
+            byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
             string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
             Assert.Equal(expectedStr, actualStr);
 
-            object jsonValues = JsonTestHelper.JsonLabReturnObjectHelper(dataUtf8, commentHandling);
+            object jsonValues = JsonTestHelper.ReturnObjectHelper(dataUtf8, commentHandling);
             string str = JsonTestHelper.ObjectToString(jsonValues);
             ReadOnlySpan<char> expectedSpan = expectedStr.AsSpan(0, expectedStr.Length - 2);
             ReadOnlySpan<char> actualSpan = str.AsSpan(0, str.Length - 2);
@@ -1460,14 +1460,13 @@ namespace System.Text.Json.Tests
                 {
                     new object[] { true, TestCaseType.Basic, SR.BasicJson},
                     new object[] { true, TestCaseType.BasicLargeNum, SR.BasicJsonWithLargeNum}, // Json.NET treats numbers starting with 0 as octal (0425 becomes 277)
-                    new object[] { true, TestCaseType.BroadTree, SR.BroadTree}, // \r\n behavior is different between Json.NET and JsonLab
+                    new object[] { true, TestCaseType.BroadTree, SR.BroadTree}, // \r\n behavior is different between Json.NET and System.Text.Json
                     new object[] { true, TestCaseType.DeepTree, SR.DeepTree},
                     new object[] { true, TestCaseType.FullSchema1, SR.FullJsonSchema1},
                     new object[] { true, TestCaseType.HelloWorld, SR.HelloWorld},
                     new object[] { true, TestCaseType.LotsOfNumbers, SR.LotsOfNumbers},
                     new object[] { true, TestCaseType.LotsOfStrings, SR.LotsOfStrings},
                     new object[] { true, TestCaseType.ProjectLockJson, SR.ProjectLockJson},
-                    //new object[] { true, TestCaseType.SpecialStrings, SR.JsonWithSpecialStrings},    // Behavior of escaping is different between Json.NET and JsonLab
                     new object[] { true, TestCaseType.Json400B, SR.Json400B},
                     new object[] { true, TestCaseType.Json4KB, SR.Json4KB},
                     new object[] { true, TestCaseType.Json40KB, SR.Json40KB},
@@ -1475,14 +1474,13 @@ namespace System.Text.Json.Tests
 
                     new object[] { false, TestCaseType.Basic, SR.BasicJson},
                     new object[] { false, TestCaseType.BasicLargeNum, SR.BasicJsonWithLargeNum}, // Json.NET treats numbers starting with 0 as octal (0425 becomes 277)
-                    new object[] { false, TestCaseType.BroadTree, SR.BroadTree}, // \r\n behavior is different between Json.NET and JsonLab
+                    new object[] { false, TestCaseType.BroadTree, SR.BroadTree}, // \r\n behavior is different between Json.NET and System.Text.Json
                     new object[] { false, TestCaseType.DeepTree, SR.DeepTree},
                     new object[] { false, TestCaseType.FullSchema1, SR.FullJsonSchema1},
                     new object[] { false, TestCaseType.HelloWorld, SR.HelloWorld},
                     new object[] { false, TestCaseType.LotsOfNumbers, SR.LotsOfNumbers},
                     new object[] { false, TestCaseType.LotsOfStrings, SR.LotsOfStrings},
                     new object[] { false, TestCaseType.ProjectLockJson, SR.ProjectLockJson},
-                    //new object[] { false, TestCaseType.SpecialStrings, SR.JsonWithSpecialStrings},    // Behavior of escaping is different between Json.NET and JsonLab
                     new object[] { false, TestCaseType.Json400B, SR.Json400B},
                     new object[] { false, TestCaseType.Json4KB, SR.Json4KB},
                     new object[] { false, TestCaseType.Json40KB, SR.Json40KB},

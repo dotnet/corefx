@@ -30,7 +30,7 @@ namespace System.Text.Json
                 return false;
             }
 
-            //TODO: Perform additional validation and unescaping if necessary
+            // TODO: Perform additional validation and unescaping if necessary
             value = s_utf8Encoding.GetString(ValueSpan);
             return true;
         }
