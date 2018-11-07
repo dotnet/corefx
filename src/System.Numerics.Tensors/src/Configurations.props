@@ -2,11 +2,11 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackageConfigurations>
-      netstandard;
       netstandard1.1;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

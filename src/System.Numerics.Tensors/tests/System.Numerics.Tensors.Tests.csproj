@@ -16,7 +16,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>TensorOperations.tt</DependentUpon>
     </Compile>
-    <Compile Include="TensorSliceTests.cs" />
     <Compile Include="TensorTests.cs" />
     <Compile Include="TensorTestsBase.cs" />
   </ItemGroup>

@@ -3,8 +3,6 @@
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <IsNETCoreApp>true</IsNETCoreApp>
-    <IsUAP>true</IsUAP>
     <StrongNameKeyId>Open</StrongNameKeyId>
   </PropertyGroup>
 </Project>

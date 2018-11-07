@@ -6,11 +6,10 @@
     <MinClientVersion>2.8.6</MinClientVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ref\System.Numerics.Tensors.csproj" />
+    <ProjectReference Include="..\ref\System.Numerics.Tensors.csproj">
+      <SupportedFramework>netstandard1.1</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\src\System.Numerics.Tensors.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <HarvestIncludePaths Include="ref/netstandard1.1;lib/netstandard1.1" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

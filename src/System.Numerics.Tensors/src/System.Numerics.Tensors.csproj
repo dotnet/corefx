@@ -13,7 +13,6 @@
     <Compile Include="System\Numerics\Tensors\DenseTensor.cs" />
     <Compile Include="System\Numerics\Tensors\SparseTensor.cs" />
     <Compile Include="System\Numerics\Tensors\Tensor.cs" />
-    <Compile Include="System\Numerics\Tensors\TensorView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Memory" />
