@@ -17,7 +17,7 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(byte[]) || destinationType == typeof(string) 
+            return destinationType == typeof(byte[]) || destinationType == typeof(string)
                 || destinationType == typeof(Image) || destinationType == typeof(Bitmap);
         }
 
@@ -41,10 +41,13 @@ namespace System.Drawing
             }
             else if (destinationType == typeof(byte[]))
             {
-                using (MemoryStream ms = new MemoryStream())
+                if (value is Icon icon)
                 {
-                    ((Icon)value).Save(ms);
-                    return ms.ToArray();
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        icon.Save(ms);
+                        return ms.ToArray();
+                    }
                 }
             }
             else if (destinationType == typeof(Image) || destinationType == typeof(Bitmap))

@@ -44,12 +44,11 @@ namespace System.Drawing
                 {
                     return Array.Empty<byte>();
                 }
-                else
+                else if (value is Image image)
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        Image imageValue = (Image)value;
-                        imageValue.Save(ms, imageValue.RawFormat);
+                        image.Save(ms, image.RawFormat);
                         return ms.ToArray();
                     }
                 }

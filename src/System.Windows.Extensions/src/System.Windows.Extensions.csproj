@@ -46,12 +46,12 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="System.Buffers" />
-    <Reference Include="System.Memory" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Drawing.Common" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
