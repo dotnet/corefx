@@ -3465,7 +3465,7 @@
         "1.4.4.0": "1.7.0"
       }
     },
-    "System.Reflection.MetataLoadContext": {
+    "System.Reflection.MetadataLoadContext": {
         "StableVersions": [
             "4.0.0"
         ],

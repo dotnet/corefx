@@ -40,6 +40,20 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        public static void PathAssemblyResolverWithNoPath()
+        {
+            var resolver = new PathAssemblyResolver(new string[] { });
+            Assert.Throws<FileNotFoundException>(() => new MetadataLoadContext(resolver, "mscorlib"));
+        }
+
+        [Fact]
+        public static void PathAssemblyResolverWithNoPathAndNoCoreAssemblyName()
+        {
+            var resolver = new PathAssemblyResolver(new string[] { });
+            Assert.Throws<FileNotFoundException>(() => new MetadataLoadContext(resolver));
+        }
+
+        [Fact]
         public static void PathAssemblyResolverBasicPath()
         {
             string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
@@ -73,34 +87,6 @@ namespace System.Reflection.Tests
 
                 // Allow for both locations for netfx and netcore behavior
                 Assert.Contains(bt.Assembly.Location, new string[] { mscorlibAssemblyPath, systemPrivateCoreLibAssemblyPath });
-            }
-        }
-
-        [Fact]
-        public static void PathAssemblyResolverWithNoPath()
-        {
-            string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
-            var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath });
-            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
-            {
-                Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
-                Type t = derived.GetType("SimpleAssembly", throwOnError: true);
-
-                Assert.Throws<FileNotFoundException>(() => t.BaseType);
-            }
-        }
-
-        [Fact]
-        public static void PathAssemblyResolverWithNoPathAndNoCoreAssemblyName()
-        {
-            string mscorlibAssemblyPath = Path.Combine(Path.GetDirectoryName(TestUtils.GetPathToCoreAssembly()), "mscorlib.dll");
-            var resolver = new PathAssemblyResolver(new string[] { mscorlibAssemblyPath });
-            using (MetadataLoadContext lc = new MetadataLoadContext(resolver))
-            {
-                Assembly derived = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
-                Type t = derived.GetType("SimpleAssembly", throwOnError: true);
-
-                Assert.Throws<FileNotFoundException>(() => t.BaseType);
             }
         }
     }

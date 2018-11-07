@@ -13,11 +13,9 @@ namespace System.Reflection
 {
     public sealed partial class MetadataLoadContext
     {
-        //
         // This maintains the canonical list of Assembly instances for a given def name. Each defname can only appear
-        // once in the list and its appearance prevents further assemblies with the same identity from loading unless the MVID's match.
+        // once in the list and its appearance prevents further assemblies with the same identity from loading unless the ModuleVersionID's match.
         // Null entries do *not* appear here.
-        //
         private readonly ConcurrentDictionary<RoAssemblyName, RoAssembly> _loadedAssemblies = new ConcurrentDictionary<RoAssemblyName, RoAssembly>();
 
         private RoAssembly LoadFromStreamCore(Stream peStream)
@@ -58,7 +56,7 @@ namespace System.Reflection
                 }
                 else
                 {
-                    // We lost the race but check for a MVID mismatch.
+                    // We lost the race but check for a ModuleVersionID mismatch.
                     if (candidate.ManifestModule.ModuleVersionId != winner.ManifestModule.ModuleVersionId)
                         throw new FileLoadException(SR.Format(SR.FileLoadDuplicateAssemblies, defName));
                 }

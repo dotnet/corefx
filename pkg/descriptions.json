@@ -2275,7 +2275,7 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.Reflection.MetataLoadContext",
+    "Name": "System.Reflection.MetataLoadContext",
     "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
     "CommonTypes": []
   }

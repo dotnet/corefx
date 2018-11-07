@@ -9,96 +9,92 @@ using System.Reflection.TypeLoading;
 
 namespace System.Reflection
 {
-    // A MetadataLoadContext represents a closed universe of Type objects loaded for inspection-only purposes.
-    // Each MetadataLoadContext can have its own binding rules and is isolated from all other MetadataLoadContexts.
-    //
-    // Another way to look at MetadataLoadContexts is as a dictionary binding assembly names to loaded Assembly instances.
-    //
-    // MetadataLoadContexts treat assemblies strictly as metadata. There are no restrictions on loading assemblies based
-    // on target platform, CPU architecture or pointer size. There are no restrictions on the assembly designated
-    // as the core assembly ("mscorlib").
-    //
-    // Also, as long as the metadata is "syntactically correct", the MetadataLoadContext strives to report it "as is" (as long it
-    // can do so in a way that can be distinguished from valid data) and refrains from judging whether it's "executable."
-    // This is both for performance reasons (checks cost time) and its intended role as metadata inspection tool.
-    // Examples of things that MetadataLoadContexts let go unchecked include creating generic instances that violate generic
-    // parameter constraints, and loading type hierachies that would be unloadable in an actual runtime (deriving from sealed classes,
-    // overriding members that don't exist in the ancestor classes, failing to implement all abstract methods, etc.)
-    //
-    // You cannot invoke methods, set or get field or property values or instantiate objects using
-    // the Type objects from a MetadataLoadContext. You can however, use FieldInfo.GetRawConstantValue(),
-    // ParameterInfo.RawDefaultValue and PropertyInfo.GetRawConstantValue(). You can retrieve custom attributes
-    // in CustomAttributeData format but not as instantiated custom attributes. The CustomAttributeExtensions
-    // extension api will not work with these Types nor will the IsDefined() family of api.
-    //
-    // There is no binding policy baked into the MetadataLoadContext. You must either manually load all dependencies
-    // or use a MetadataAssemblyResolver-derived class to load dependencies as needed. The MetadataLoadContext strives to avoid
-    // loading dependencies unless needed. Therefore, it is possible to do useful analysis of an assembly even
-    // in the absence of dependencies. For example, retrieving an assembly's name and the names of its (direct)
-    // dependencies can be done without having any of those dependencies on hand.
-    //
-    // To bind assemblies, the MetadataLoadContext calls the Resolve method on the correspding MetadataAssemblyResolver.
-    // That method should load the requested assembly and return it.
-    // To do this, it can use LoadFromAssemblyPath() or one of its variants (LoadFromStream(), LoadFromByteArray()).
-    //
-    // Once an assembly has been bound, no assembly with the same assembly name identity
-    // can be bound again from a different location unless the MVID's are identical.
-    //
-    // Once loaded, the underlying file may be locked for the duration of the MetadataLoadContext's lifetime. You can
-    // release the locks by disposing the MetadataLoadContext object. The behavior of any Type, Assembly or other reflection
-    // objects handed out by the MetadataLoadContext is undefined after disposal. Though objects provided by the MetadataLoadContext
-    // strive to throw an ObjectDisposedException, this is not guaranteed. Some apis may return fixed or previously
-    // cached data. Accessing objects *during* a Dispose may result in a unmanaged access violation and failfast.
-    //
-    // Comparing Type, Member and Assembly objects:
-    //
-    //   The right way to compare two Reflection objects dispensed by the MetadataLoadContext are:
-    //
-    //       m1 == m2
-    //       m1.Equals(m2)
-    //
-    //   but not
-    //
-    //       object.ReferenceEquals(m1, m2)   // WRONG
-    //       (object)m1 == (object)m2         // WRONG
-    //
-    //   Note that the following descriptions are not literal descriptions of how Equals() is implemented. The MetadataLoadContext
-    //   reserves the right to implement Equals() as "object.ReferenceEquals()" and intern the associated objects in such
-    //   a way that Equals() works "as if" it were comparing those things.
-    //
-    // - Each MetadataLoadContext permits only one Assembly instance per assembly identity so equality of assemblies is the same as the
-    //   equality of their assembly identity.
-    // 
-    // - Modules are compared by comparing their containing assemblies and their row indices in the assembly's manifest file table.
-    // 
-    // - Defined types are compared by comparing their containing modules and their row indices in the module's TypeDefinition table.
-    // 
-    // - Constructed types (arrays, byrefs, pointers, generic instances) are compared by comparing all of their component types.
-    // 
-    // - Generic parameter types are compared by comparing their containing Modules and their row indices in the module's GenericParameter table.
-    // 
-    // - Constructors, methods, fields, events and properties are compared by comparing their declaring types, their row indices in their respective
-    //   token tables and their ReflectedType property.
-    // 
-    // - Parameters are compared by comparing their declaring member and their position index.
-    //
-    // Multithreading:
-    //    
-    //   The MetadataLoadContext and the reflection objects it hands out are all multithread-safe and logically immutable,
-    //   except that no Loads or inspections of reflection objects can be done during or after disposing the owning MetadataLoadContext.
-    //
-    // Support for NetCore Reflection apis:
-    //
-    //   .NETCore added a number of apis (IsSZArray, IsVariableBoundArray, IsTypeDefinition, IsGenericTypeParameter, IsGenericMethodParameter,
-    //      HasSameMetadataDefinitionAs, to name a few.) to the Reflection surface area.
-    //
-    //   The Reflection objects dispensed by MetadataLoadContexts support all the new apis *provided* that you are using the netcore build of System.Reflection.MetadataLoadContext.dll.
-    //
-    //   If you are using the netstandard build of System.Reflection.MetadataLoadContext.dll, the NetCore-specific apis are not supported. Attempting to invoke
-    //   them will generate a NotImplementedException or NullReferenceException (unfortunately, we can't improve the exceptions thrown because
-    //   they are being thrown by code this library doesn't control.) Because of this, it is recommended that apps built against NetCore use the NetCore build of
-    //   MetadataLoadContext.dll.
-    //
+    /// <summary>
+    /// A MetadataLoadContext represents a closed universe of Type objects loaded for inspection-only purposes.
+    /// Each MetadataLoadContext can have its own binding rules and is isolated from all other MetadataLoadContexts.
+    ///
+    /// A MetadataLoadContext serves as a dictionary that binds assembly names to Assembly instances that were previously
+    /// loaded into the context or need to be loaded.
+    ///
+    /// Assemblies are treated strictly as metadata. There are no restrictions on loading assemblies based
+    /// on target platform, CPU architecture or pointer size. There are no restrictions on the assembly designated
+    /// as the core assembly ("mscorlib").
+    /// </summary>
+    /// <remarks>
+    /// Also, as long as the metadata is "syntactically correct", the MetadataLoadContext strives to report it "as is" (as long it
+    /// can do so in a way that can be distinguished from valid data) and refrains from judging whether it's "executable."
+    /// This is both for performance reasons (checks cost time) and its intended role as metadata inspection tool.
+    /// Examples of things that MetadataLoadContexts let go unchecked include creating generic instances that violate generic
+    /// parameter constraints, and loading type hierachies that would be unloadable in an actual runtime (deriving from sealed classes,
+    /// overriding members that don't exist in the ancestor classes, failing to implement all abstract methods, etc.)
+    ///
+    /// You cannot invoke methods, set or get field or property values or instantiate objects using
+    /// the Type objects from a MetadataLoadContext. You can however, use FieldInfo.GetRawConstantValue(),
+    /// ParameterInfo.RawDefaultValue and PropertyInfo.GetRawConstantValue(). You can retrieve custom attributes
+    /// in CustomAttributeData format but not as instantiated custom attributes. The CustomAttributeExtensions
+    /// extension api will not work with these Types nor will the IsDefined() family of api.
+    ///
+    /// There is no default binding policy. You must use a MetadataAssemblyResolver-derived class to load dependencies as needed.
+    /// The MetadataLoadContext strives to avoid loading dependencies unless needed.
+    /// Therefore, it is possible to do useful analysis of an assembly even
+    /// in the absence of dependencies. For example, retrieving an assembly's name and the names of its (direct)
+    /// dependencies can be done without having any of those dependencies on hand.
+    ///
+    /// To bind assemblies, the MetadataLoadContext calls the Resolve method on the correspding MetadataAssemblyResolver.
+    /// That method should load the requested assembly and return it.
+    /// To do this, it can use LoadFromAssemblyPath() or one of its variants (LoadFromStream(), LoadFromByteArray()).
+    ///
+    /// Once an assembly has been bound, no assembly with the same assembly name identity
+    /// can be bound again from a different location unless the ModuleVersionIDs are identical.
+    ///
+    /// Once loaded, the underlying file may be locked for the duration of the MetadataLoadContext's lifetime. You can
+    /// release the locks by disposing the MetadataLoadContext object. The behavior of any Type, Assembly or other reflection
+    /// objects handed out by the MetadataLoadContext is undefined after disposal. Though objects provided by the MetadataLoadContext
+    /// strive to throw an ObjectDisposedException, this is not guaranteed. Some apis may return fixed or previously
+    /// cached data. Accessing objects *during* a Dispose may result in a unmanaged access violation and failfast.
+    ///
+    /// Comparing Type, Member and Assembly objects:
+    ///   The right way to compare two Reflection objects dispensed by the MetadataLoadContext are:
+    ///       m1 == m2
+    ///       m1.Equals(m2)
+    ///   but not
+    ///       object.ReferenceEquals(m1, m2)   /// WRONG
+    ///       (object)m1 == (object)m2         /// WRONG
+    ///
+    ///   Note that the following descriptions are not literal descriptions of how Equals() is implemented. The MetadataLoadContext
+    ///   reserves the right to implement Equals() as "object.ReferenceEquals()" and intern the associated objects in such
+    ///   a way that Equals() works "as if" it were comparing those things.
+    ///
+    /// - Each MetadataLoadContext permits only one Assembly instance per assembly identity so equality of assemblies is the same as the
+    ///   equality of their assembly identity.
+    /// 
+    /// - Modules are compared by comparing their containing assemblies and their row indices in the assembly's manifest file table.
+    /// 
+    /// - Defined types are compared by comparing their containing modules and their row indices in the module's TypeDefinition table.
+    /// 
+    /// - Constructed types (arrays, byrefs, pointers, generic instances) are compared by comparing all of their component types.
+    /// 
+    /// - Generic parameter types are compared by comparing their containing Modules and their row indices in the module's GenericParameter table.
+    /// 
+    /// - Constructors, methods, fields, events and properties are compared by comparing their declaring types, their row indices in their respective
+    ///   token tables and their ReflectedType property.
+    /// 
+    /// - Parameters are compared by comparing their declaring member and their position index.
+    ///
+    /// Multithreading:
+    ///   The MetadataLoadContext and the reflection objects it hands out are all multithread-safe and logically immutable,
+    ///   except that no Loads or inspections of reflection objects can be done during or after disposing the owning MetadataLoadContext.
+    ///
+    /// Support for NetCore Reflection apis:
+    ///   .NETCore added a number of apis (IsSZArray, IsVariableBoundArray, IsTypeDefinition, IsGenericTypeParameter, IsGenericMethodParameter,
+    ///      HasSameMetadataDefinitionAs, to name a few.) to the Reflection surface area.
+    ///
+    ///   The Reflection objects dispensed by MetadataLoadContexts support all the new apis *provided* that you are using the netcore build of System.Reflection.MetadataLoadContext.dll.
+    ///
+    ///   If you are using the netstandard build of System.Reflection.MetadataLoadContext.dll, the NetCore-specific apis are not supported. Attempting to invoke
+    ///   them will generate a NotImplementedException or NullReferenceException (unfortunately, we can't improve the exceptions thrown because
+    ///   they are being thrown by code this library doesn't control.)
+    /// </remarks>
     public sealed partial class MetadataLoadContext : IDisposable
     {
         /// <summary>
@@ -127,7 +123,7 @@ namespace System.Reflection
         /// <summary>
         /// Loads an assembly from a specific path on the disk and binds its assembly name to it in the MetadataLoadContext. If a prior
         /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the
-        /// two assemblies do not have the same MVID, this method throws a FileLoadException.
+        /// two assemblies do not have the same ModuleVersionID, this method throws a FileLoadException.
         /// </summary>
         public Assembly LoadFromAssemblyPath(string assemblyPath)
         {
@@ -143,7 +139,7 @@ namespace System.Reflection
         /// <summary>
         /// Loads an assembly from a byte array and binds its assembly name to it in the MetadataLoadContext. If a prior
         /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the
-        /// two assemblies do not have the same MVID, this method throws a FileLoadException.
+        /// two assemblies do not have the same ModuleVersionID, this method throws a FileLoadException.
         /// </summary>
         public Assembly LoadFromByteArray(byte[] assembly)
         {
@@ -159,7 +155,7 @@ namespace System.Reflection
         /// <summary>
         /// Loads an assembly from a stream and binds its assembly name to it in the MetadataLoadContext. If a prior
         /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the 
-        /// two assemblies do not have the same MVID, this method throws a FileLoadException.
+        /// two assemblies do not have the same ModuleVersionID, this method throws a FileLoadException.
         /// 
         /// The MetadataLoadContext takes ownership of the Stream passed into this method. The original owner must not mutate its position, dispose the Stream or 
         /// assume that its position will stay unchanged.
