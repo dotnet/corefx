@@ -18,6 +18,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
+    <Compile Include="SequenceReader\Advance.cs" />
+    <Compile Include="SequenceReader\BasicTests.cs" />
+    <Compile Include="SequenceReader\BinaryExtensions.cs" />
+    <Compile Include="SequenceReader\IsNext.cs" />
+    <Compile Include="SequenceReader\OwnedArray.cs" />
+    <Compile Include="SequenceReader\ReadTo.cs" />
+    <Compile Include="SequenceReader\Rewind.cs" />
+    <Compile Include="SequenceReader\SequenceSegment.cs" />
+    <Compile Include="SequenceReader\SequenceFactory.cs" />
+    <Compile Include="SequenceReader\SkipDelimiter.cs" />
+    <Compile Include="SequenceReader\SpanLiteralExtensions.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />

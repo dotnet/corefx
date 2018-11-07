@@ -2543,6 +2543,7 @@
       ],
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0",
+        "netcoreapp3.0": "4.2.0.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
         "uap10.0.16300": "4.1.0.0",
@@ -2553,7 +2554,8 @@
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.1.0": "4.5.0",
-        "4.1.0.0": "4.6.0"
+        "4.1.0.0": "4.6.0",
+        "4.2.0.0": "4.7.0"
       }
     },
     "System.Messaging": {

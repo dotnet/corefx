@@ -8,6 +8,9 @@
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreappaot-Windows_NT-Debug;netcoreappaot-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Buffers\SequenceReaderExtensions_binary.cs" />
+    <Compile Include="System\Buffers\SequenceReader.cs" />
+    <Compile Include="System\Buffers\SequenceReader_search.cs" />
     <Compile Include="System\SequencePosition.cs" />
     <Compile Include="System\ThrowHelper.cs" />
     <Compile Include="System\Buffers\ArrayMemoryPool.cs" />
