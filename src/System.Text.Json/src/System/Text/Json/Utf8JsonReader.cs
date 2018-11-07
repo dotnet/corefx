@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -539,7 +538,7 @@ namespace System.Text.Json
         /// </summary>
         private bool ConsumeValue(byte marker)
         {
-            // Using goto to avoid recursive calls.
+        // Using goto to avoid recursive calls.
         Begin:
             if (marker == JsonConstants.Quote)
             {
@@ -772,6 +771,10 @@ namespace System.Text.Json
             // Create local copy to avoid bounds checks.
             ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
 
+            // Vectorized search for either quote, backslash, or any control character.
+            // If the first found byte is a quote, we have reached an end of string, and
+            // can avoid validation.
+            // Otherwise, in the uncommon case, iterate one character at a time and validate.
             int idx = localBuffer.IndexOfQuoteOrAnyControlOrBaskSlash();
 
             if (idx >= 0)
@@ -1265,6 +1268,11 @@ namespace System.Text.Json
                     first = _buffer[_consumed];
                 }
 
+                if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments && first == JsonConstants.Slash)
+                {
+                    return ConsumeComment() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
+                }
+
                 if (_inObject)
                 {
                     if (first != JsonConstants.Quote)
@@ -1471,7 +1479,7 @@ namespace System.Text.Json
             return ConsumeTokenResult.NotEnoughDataRollBackState;
         }
 
-        private ConsumeTokenResult ConsumeNextTokenUntilAfterAllCommentsAreSkipped(byte marker)
+        private bool SkipAllComments(ref byte marker)
         {
             while (marker == JsonConstants.Slash)
             {
@@ -1499,6 +1507,55 @@ namespace System.Text.Json
                 {
                     goto IncompleteNoRollback;
                 }
+            }
+            return true;
+
+        IncompleteNoRollback:
+            return false;
+        }
+
+        private bool SkipAllComments(ref byte marker, ExceptionResource resource)
+        {
+            while (marker == JsonConstants.Slash)
+            {
+                if (SkipComment())
+                {
+                    // The next character must be a start of a property name or value.
+                    if (!HasMoreData(resource/*ExceptionResource.ExpectedStartOfPropertyOrValueNotFound*/))
+                    {
+                        goto IncompleteRollback;
+                    }
+
+                    marker = _buffer[_consumed];
+
+                    // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
+                    if (marker <= JsonConstants.Space)
+                    {
+                        SkipWhiteSpace();
+                        // The next character must be a start of a property name or value.
+                        if (!HasMoreData(resource))
+                        {
+                            goto IncompleteRollback;
+                        }
+                        marker = _buffer[_consumed];
+                    }
+                }
+                else
+                {
+                    goto IncompleteRollback;
+                }
+            }
+            return true;
+
+        IncompleteRollback:
+            return false;
+        }
+
+        private ConsumeTokenResult ConsumeNextTokenUntilAfterAllCommentsAreSkipped(byte marker)
+        {
+            if (!SkipAllComments(ref marker))
+            {
+                goto IncompleteNoRollback;
             }
 
             if (_tokenType == JsonTokenType.StartObject)
@@ -1571,10 +1628,10 @@ namespace System.Text.Json
                     }
                     return ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
-                byte first = _buffer[_consumed];
+                marker = _buffer[_consumed];
 
                 // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
-                if (first <= JsonConstants.Space)
+                if (marker <= JsonConstants.Space)
                 {
                     SkipWhiteSpace();
                     // The next character must be a start of a property name or value.
@@ -1582,20 +1639,25 @@ namespace System.Text.Json
                     {
                         return ConsumeTokenResult.NotEnoughDataRollBackState;
                     }
-                    first = _buffer[_consumed];
+                    marker = _buffer[_consumed];
+                }
+
+                if (!SkipAllComments(ref marker, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound))
+                {
+                    goto IncompleteRollback;
                 }
 
                 if (_inObject)
                 {
-                    if (first != JsonConstants.Quote)
+                    if (marker != JsonConstants.Quote)
                     {
-                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
                     }
                     return ConsumePropertyName() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
                 else
                 {
-                    return ConsumeValue(first) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
+                    return ConsumeValue(marker) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
             }
             else if (marker == JsonConstants.CloseBrace)
@@ -1615,6 +1677,8 @@ namespace System.Text.Json
             return ConsumeTokenResult.Success;
         IncompleteNoRollback:
             return ConsumeTokenResult.IncompleteNoRollBackNecessary;
+        IncompleteRollback:
+            return ConsumeTokenResult.NotEnoughDataRollBackState;
         }
 
         private bool SkipComment()
@@ -1695,7 +1759,7 @@ namespace System.Text.Json
             Debug.Assert(idx >= 1);
 
             // Consume the /* and */ characters that are part of the multi-line comment.
-            // Since idx is pointing at right after the final * (i.e. before the last /), we don't need to count that character.
+            // Since idx is pointing at right after the final '*' (i.e. before the last '/'), we don't need to count that character.
             // Hence, we increment consumed by 3 (instead of 4).
             _consumed += 4 + idx - 1;
 

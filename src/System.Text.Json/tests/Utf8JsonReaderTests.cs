@@ -922,6 +922,10 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "This is a split multi-line \n\u6F22\u5B57comment after json", 72)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", "This is a split multi-line \n\u6F22\u5B57comment between key-value pairs", 85)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", "This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line", 103)]
+
+        [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", " yes, it's mis-spelled ", 50)]
+        [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]",
+            " Isn't it \"nice\" that JSON provides no limits on the length of numbers? ", 98)]
         public static void AllowCommentsSingleSegment(string jsonString, string expectedComment, int expectedIndex)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1094,13 +1098,15 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
+
+        [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", 50)]
+        [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]", 98)]
         public static void SkipCommentsSingleSegment(string jsonString, int expectedConsumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
-            JsonTokenType prevTokenType = JsonTokenType.None;
             while (json.Read())
             {
                 JsonTokenType tokenType = json.TokenType;
@@ -1110,8 +1116,6 @@ namespace System.Text.Json.Tests
                         Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                         break;
                 }
-                Assert.NotEqual(tokenType, prevTokenType);
-                prevTokenType = tokenType;
             }
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
             Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
@@ -1121,7 +1125,6 @@ namespace System.Text.Json.Tests
                 var stateInner = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.SkipComments });
                 var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
 
-                prevTokenType = JsonTokenType.None;
                 while (jsonSlice.Read())
                 {
                     JsonTokenType tokenType = jsonSlice.TokenType;
@@ -1131,8 +1134,6 @@ namespace System.Text.Json.Tests
                             Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                             break;
                     }
-                    Assert.NotEqual(tokenType, prevTokenType);
-                    prevTokenType = tokenType;
                 }
 
                 int prevConsumed = (int)jsonSlice.BytesConsumed;
@@ -1148,8 +1149,6 @@ namespace System.Text.Json.Tests
                             Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
                             break;
                     }
-                    Assert.NotEqual(tokenType, prevTokenType);
-                    prevTokenType = tokenType;
                 }
 
                 Assert.Equal(dataUtf8.Length - prevConsumed, jsonSlice.BytesConsumed);
