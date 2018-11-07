@@ -45,7 +45,7 @@ namespace System.Reflection
     /// To do this, it can use LoadFromAssemblyPath() or one of its variants (LoadFromStream(), LoadFromByteArray()).
     ///
     /// Once an assembly has been bound, no assembly with the same assembly name identity
-    /// can be bound again from a different location unless the ModuleVersionIDs are identical.
+    /// can be bound again from a different location unless the Mvids are identical.
     ///
     /// Once loaded, the underlying file may be locked for the duration of the MetadataLoadContext's lifetime. You can
     /// release the locks by disposing the MetadataLoadContext object. The behavior of any Type, Assembly or other reflection
@@ -123,7 +123,7 @@ namespace System.Reflection
         /// <summary>
         /// Loads an assembly from a specific path on the disk and binds its assembly name to it in the MetadataLoadContext. If a prior
         /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the
-        /// two assemblies do not have the same ModuleVersionID, this method throws a FileLoadException.
+        /// two assemblies do not have the same Mvid, this method throws a FileLoadException.
         /// </summary>
         public Assembly LoadFromAssemblyPath(string assemblyPath)
         {
@@ -139,7 +139,7 @@ namespace System.Reflection
         /// <summary>
         /// Loads an assembly from a byte array and binds its assembly name to it in the MetadataLoadContext. If a prior
         /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the
-        /// two assemblies do not have the same ModuleVersionID, this method throws a FileLoadException.
+        /// two assemblies do not have the same Mvid, this method throws a FileLoadException.
         /// </summary>
         public Assembly LoadFromByteArray(byte[] assembly)
         {
@@ -155,7 +155,7 @@ namespace System.Reflection
         /// <summary>
         /// Loads an assembly from a stream and binds its assembly name to it in the MetadataLoadContext. If a prior
         /// assembly with the same name was already loaded into the MetadataLoadContext, the prior assembly will be returned. If the 
-        /// two assemblies do not have the same ModuleVersionID, this method throws a FileLoadException.
+        /// two assemblies do not have the same Mvid, this method throws a FileLoadException.
         /// 
         /// The MetadataLoadContext takes ownership of the Stream passed into this method. The original owner must not mutate its position, dispose the Stream or 
         /// assume that its position will stay unchanged.
