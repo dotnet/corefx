@@ -1109,6 +1109,18 @@ namespace System.Runtime.Intrinsics.X86
         public static ulong ResetLowestSetBit(ulong value) { throw null; }
         public static uint TrailingZeroCount(uint value) { throw null; }
         public static ulong TrailingZeroCount(ulong value) { throw null; }
+        public abstract class X64
+        {
+            internal X64() { }
+            public static bool IsSupported { get { throw null; } }
+            public static ulong AndNot(ulong left, ulong right) { throw null; }
+            public static ulong BitFieldExtract(ulong value, byte start, byte length) { throw null; }
+            public static ulong BitFieldExtract(ulong value, ushort control) { throw null; }
+            public static ulong ExtractLowestSetBit(ulong value) { throw null; }
+            public static ulong GetMaskUpToLowestSetBit(ulong value) { throw null; }
+            public static ulong ResetLowestSetBit(ulong value) { throw null; }
+            public static ulong TrailingZeroCount(ulong value) { throw null; }
+        }
     }
     public abstract class Bmi2
     {
@@ -1122,6 +1134,15 @@ namespace System.Runtime.Intrinsics.X86
         public static ulong ParallelBitDeposit(ulong value, ulong mask) { throw null; }
         public static uint ParallelBitExtract(uint value, uint mask) { throw null; }
         public static ulong ParallelBitExtract(ulong value, ulong mask) { throw null; } 
+        public abstract class X64
+        {
+            internal X64() { }
+            public static bool IsSupported { get { throw null; } }
+            public static ulong ZeroHighBits(ulong value, ulong index) { throw null; }
+            public static unsafe ulong MultiplyNoFlags(ulong left, ulong right, ulong* high) { throw null; }
+            public static ulong ParallelBitDeposit(ulong value, ulong mask) { throw null; }
+            public static ulong ParallelBitExtract(ulong value, ulong mask) { throw null; } 
+        }
     }
     public enum FloatComparisonMode : byte
     {
@@ -1220,6 +1241,12 @@ namespace System.Runtime.Intrinsics.X86
         public static bool IsSupported { get { throw null; } }
         public static uint LeadingZeroCount(uint value) { throw null; }
         public static ulong LeadingZeroCount(ulong value) { throw null; }
+        public abstract class X64
+        {
+            internal X64() { }
+            public static bool IsSupported { get { throw null; } }
+            public static ulong LeadingZeroCount(ulong value) { throw null; }
+        }
     }
     public abstract class Pclmulqdq : Sse2
     {
@@ -1234,11 +1261,17 @@ namespace System.Runtime.Intrinsics.X86
         public new static bool IsSupported { get { throw null; } }
         public static uint PopCount(uint value) { throw null; }
         public static ulong PopCount(ulong value) { throw null; }
+        public new abstract class X64 : Sse41.X64
+        {
+            internal X64() { }
+            public new static bool IsSupported { get { throw null; } }
+            public static ulong PopCount(ulong value) { throw null; }
+        }
     }
     public abstract class Sse
     {
         internal Sse() { }
-        public static bool IsSupported { get { return false; } }
+        public static bool IsSupported { get { throw null; } }
         public static Vector128<float> Add(Vector128<float> left, Vector128<float> right) { throw null; }
         public static Vector128<float> AddScalar(Vector128<float> left, Vector128<float> right) { throw null; }
         public static Vector128<float> And(Vector128<float> left, Vector128<float> right) { throw null; }
@@ -1335,11 +1368,19 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<float> UnpackHigh(Vector128<float> left, Vector128<float> right) { throw null; }
         public static Vector128<float> UnpackLow(Vector128<float> left, Vector128<float> right) { throw null; }
         public static Vector128<float> Xor(Vector128<float> left, Vector128<float> right) { throw null; }
+        public abstract class X64
+        {
+            internal X64() { }
+            public static bool IsSupported { get { throw null; } }
+            public static long ConvertToInt64(Vector128<float> value) { throw null; }
+            public static Vector128<float> ConvertScalarToVector128Single(Vector128<float> upper, long value) { throw null; }
+            public static long ConvertToInt64WithTruncation(Vector128<float> value) { throw null; }
+        }
     }
     public abstract class Sse2 : Sse
     {
         internal Sse2() { }
-        public new static bool IsSupported { get { return false; } }
+        public new static bool IsSupported { get { throw null; } }
         public static Vector128<byte> Add(Vector128<byte> left, Vector128<byte> right) { throw null; }
         public static Vector128<sbyte> Add(Vector128<sbyte> left, Vector128<sbyte> right) { throw null; }
         public static Vector128<short> Add(Vector128<short> left, Vector128<short> right) { throw null; }
@@ -1667,6 +1708,20 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<long> Xor(Vector128<long> left, Vector128<long> right) { throw null; }
         public static Vector128<ulong> Xor(Vector128<ulong> left, Vector128<ulong> right) { throw null; }
         public static Vector128<double> Xor(Vector128<double> left, Vector128<double> right) { throw null; }
+        public new abstract class X64 : Sse.X64
+        {
+            internal X64() { }
+            public new static bool IsSupported { get { throw null; } }
+            public static long ConvertToInt64(Vector128<double> value) { throw null; }
+            public static long ConvertToInt64(Vector128<long> value) { throw null; }
+            public static ulong ConvertToUInt64(Vector128<ulong> value) { throw null; }
+            public static Vector128<double> ConvertScalarToVector128Double(Vector128<double> upper, long value) { throw null; }
+            public static Vector128<long> ConvertScalarToVector128Int64(long value) { throw null; }
+            public static Vector128<ulong> ConvertScalarToVector128UInt64(ulong value) { throw null; }
+            public static long ConvertToInt64WithTruncation(Vector128<double> value) { throw null; }
+            public static unsafe void StoreNonTemporal(long* address, long value) { throw null; }
+            public static unsafe void StoreNonTemporal(ulong* address, ulong value) { throw null; }
+        }
     }
     public abstract class Sse3 : Sse2
     {
@@ -1850,6 +1905,15 @@ namespace System.Runtime.Intrinsics.X86
         public static bool TestZ(Vector128<uint> left, Vector128<uint> right) { throw null; }
         public static bool TestZ(Vector128<long> left, Vector128<long> right) { throw null; }
         public static bool TestZ(Vector128<ulong> left, Vector128<ulong> right) { throw null; }
+        public new abstract class X64 : Sse2.X64
+        {
+            internal X64() { }
+            public new static bool IsSupported { get { throw null; } }
+            public static long Extract(Vector128<long> value, byte index) { throw null; }
+            public static ulong Extract(Vector128<ulong> value, byte index) { throw null; }
+            public static Vector128<long> Insert(Vector128<long> value, long data, byte index) { throw null; }
+            public static Vector128<ulong> Insert(Vector128<ulong> value, ulong data, byte index) { throw null; }
+        }
     }
     public abstract class Sse42 : Sse41
     {
@@ -1892,6 +1956,12 @@ namespace System.Runtime.Intrinsics.X86
         public static uint Crc32(uint crc, ushort data) { throw null; }
         public static uint Crc32(uint crc, uint data) { throw null; }
         public static ulong Crc32(ulong crc, ulong data) { throw null; }
+        public new abstract class X64 : Sse41.X64
+        {
+            internal X64() { }
+            public new static bool IsSupported { get { throw null; } }
+            public static ulong Crc32(ulong crc, ulong data) { throw null; }
+        }
     }
     public abstract class Ssse3 : Sse3
     {
