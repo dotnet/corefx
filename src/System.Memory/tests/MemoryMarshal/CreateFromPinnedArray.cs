@@ -42,8 +42,6 @@ namespace System.SpanTests
             Memory<int> pinnedMemory = MemoryMarshal.CreateFromPinnedArray(a, 3, 5);
             pinnedMemory.Validate(93, 94, 95, 96, 97);
 
-            TestMemory<int> testPinnedMemory = Unsafe.As<Memory<int>, TestMemory<int>>(ref pinnedMemory);
-
             Memory<int> slice = pinnedMemory.Slice(0);
             TestMemory<int> testSlice = Unsafe.As<Memory<int>, TestMemory<int>>(ref slice);
             Assert.Equal(3 | (1 << 31), testSlice._index);
@@ -71,8 +69,6 @@ namespace System.SpanTests
             int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
             ReadOnlyMemory<int> pinnedMemory = MemoryMarshal.CreateFromPinnedArray(a, 3, 5);
             pinnedMemory.Validate(93, 94, 95, 96, 97);
-
-            TestMemory<int> testPinnedMemory = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref pinnedMemory);
 
             ReadOnlyMemory<int> slice = pinnedMemory.Slice(0);
             TestMemory<int> testSlice = Unsafe.As<ReadOnlyMemory<int>, TestMemory<int>>(ref slice);
