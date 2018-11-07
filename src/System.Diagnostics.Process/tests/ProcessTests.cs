@@ -244,12 +244,9 @@ namespace System.Diagnostics.Tests
         public void ProcessStart_UseShellExecute_ExecuteOrder()
         {
             // Create a directory that we will use as PATH
-            string path = GetTestFileName();
-            Directory.CreateDirectory(path);
-
+            string path = CreateTestDirectory();
             // Create a directory that will be our working directory
-            string wd = GetTestFileName();
-            Directory.CreateDirectory(wd);
+            string wd = CreateTestDirectory();
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;

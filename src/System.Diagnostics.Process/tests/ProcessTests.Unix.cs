@@ -162,8 +162,7 @@ namespace System.Diagnostics.Tests
         {
             // Create a script that we'll use to 'open' the file by putting it on PATH
             // with the appropriate name.
-            string path = GetTestFileName();
-            Directory.CreateDirectory(path);
+            string path = CreateTestDirectory();
             WriteScriptFile(path, s_allowedProgramsToRun[0], returnValue: 42);
 
             // Create a file that has the x-bit set, but which isn't a valid script.
@@ -197,8 +196,7 @@ namespace System.Diagnostics.Tests
         {
             // Create a script that we'll use to 'open' the file by putting it on PATH
             // with the appropriate name.
-            string path = GetTestFileName();
-            Directory.CreateDirectory(path);
+            string path = CreateTestDirectory();
             WriteScriptFile(path, s_allowedProgramsToRun[0], returnValue: 42);
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
