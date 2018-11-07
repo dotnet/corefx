@@ -191,6 +191,7 @@ namespace System.Diagnostics.Tests
         [InlineData((string)null, true)]
         [InlineData("", true)]
         [InlineData("open", true)]
+        [InlineData("Open", true)]
         [InlineData("invalid", false)]
         [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_ValidVerbs(string verb, bool isValid)

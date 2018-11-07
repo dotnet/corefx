@@ -305,7 +305,19 @@ namespace System.Diagnostics
 
             if (startInfo.UseShellExecute)
             {
-                if (!IsValidVerb(startInfo.Verb))
+                string verb = startInfo.Verb;
+                if (string.IsNullOrEmpty(verb))
+                {
+                    // Default to 'open'.
+                    verb = "open";
+                }
+                else
+                {
+                    // Verbs are case-insensitive.
+                    verb = verb.ToLowerInvariant();
+                }
+
+                if (verb != "open")
                 {
                     throw new Win32Exception(Interop.Errors.ERROR_NO_ASSOCIATION);
                 }
@@ -761,21 +773,6 @@ namespace System.Diagnostics
                 _waitStateHolder = new ProcessWaitState.Holder(_processId);
             }
             return _waitStateHolder._state;
-        }
-
-        private static readonly string[] s_validVerbs = new string[] { null, "", "open" };
-
-        private static bool IsValidVerb(string verb)
-        {
-            for (int i = 0; i < s_validVerbs.Length; i++)
-            {
-                if (s_validVerbs[i] == verb)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static (uint userId, uint groupId) GetUserAndGroupIds(ProcessStartInfo startInfo)
