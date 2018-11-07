@@ -1159,7 +1159,7 @@ namespace System.Net.Sockets.Tests
                 var receiveBufer = new byte[600];
                 receiveBufer[0] = data[499] = 0;
 
-                args.SetBuffer(receiveBufer);
+                args.SetBuffer(receiveBufer, 0, receiveBufer.Length);
                 args.Completed += delegate { tcs.SetResult(true); };
 
                 // First peek at the message.
