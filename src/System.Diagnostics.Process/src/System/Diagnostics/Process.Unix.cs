@@ -306,18 +306,8 @@ namespace System.Diagnostics
             if (startInfo.UseShellExecute)
             {
                 string verb = startInfo.Verb;
-                if (string.IsNullOrEmpty(verb))
-                {
-                    // Default to 'open'.
-                    verb = "open";
-                }
-                else
-                {
-                    // Verbs are case-insensitive.
-                    verb = verb.ToLowerInvariant();
-                }
-
-                if (verb != "open")
+                if (!string.IsNullOrEmpty(verb) &&
+                    !string.Equals(verb, "open", StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new Win32Exception(Interop.Errors.ERROR_NO_ASSOCIATION);
                 }
