@@ -2235,14 +2235,24 @@ namespace System
         [CLSCompliant(false)]
         public unsafe Utf8String(char* value) { }
         public Utf8String(string value) { }
+        public ref readonly System.Text.Utf8Char this[int index] => throw null;
         public int Length => throw null;
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
-        public static implicit operator ReadOnlySpan<System.Text.Utf8Char>(Utf8String value) =>throw null;
+        public static implicit operator ReadOnlySpan<System.Text.Utf8Char>(Utf8String value) => throw null;
         public static Utf8String Concat(Utf8String str0, Utf8String str1) => throw null;
         public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2) => throw null;
         public static Utf8String Concat(Utf8String str0, Utf8String str1, Utf8String str2, Utf8String str3) => throw null;
+        public bool Contains(char value) => throw null;
+        public bool Contains(char value, StringComparison comparisonType) => throw null;
+        public bool Contains(Utf8String value) => throw null;
+        public bool Contains(Utf8String value, StringComparison comparisonType) => throw null;
+        public bool Contains(System.Text.UnicodeScalar value) => throw null;
+        public bool Contains(System.Text.UnicodeScalar value, StringComparison comparisonType) => throw null;
+        public void CopyTo(Span<byte> destination) => throw null;
+        public void CopyTo(Span<System.Text.Utf8Char> destination) => throw null;
         public static Utf8String Create(ReadOnlySpan<byte> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
+        public static Utf8String Create(ReadOnlySpan<System.Text.Utf8Char> value, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public static Utf8String Create<TState>(int length, TState state, System.Buffers.SpanAction<byte, TState> action, System.Text.InvalidSequenceBehavior behavior = System.Text.InvalidSequenceBehavior.ReplaceInvalidSequence) => throw null;
         public bool EndsWith(char value) => throw null;
         public bool EndsWith(System.Text.UnicodeScalar value) => throw null;
@@ -7873,11 +7883,51 @@ namespace System.Text
         public static UnicodeScalar ToUpper(UnicodeScalar s, System.Globalization.CultureInfo culture) => throw null;
         public static UnicodeScalar ToUpperInvariant(UnicodeScalar s) => throw null;
     }
-    public enum Utf8Char : byte { }
+    public readonly struct Utf8Char : IComparable<Utf8Char>, IEquatable<Utf8Char>
+    {
+        private readonly int _dummy;
+        public Utf8Char(byte value) => throw null;
+        public static bool operator ==(Utf8Char a, Utf8Char b) => throw null;
+        public static bool operator !=(Utf8Char a, Utf8Char b) => throw null;
+        public static bool operator <(Utf8Char a, Utf8Char b) => throw null;
+        public static bool operator <=(Utf8Char a, Utf8Char b) => throw null;
+        public static bool operator >(Utf8Char a, Utf8Char b) => throw null;
+        public static bool operator >=(Utf8Char a, Utf8Char b) => throw null;
+        public static implicit operator byte(Utf8Char value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator sbyte(Utf8Char value) => throw null;
+        public static explicit operator char(Utf8Char value) => throw null;
+        public static implicit operator short(Utf8Char value) => throw null;
+        [CLSCompliant(false)]
+        public static implicit operator ushort(Utf8Char value) => throw null;
+        public static implicit operator int(Utf8Char value) => throw null;
+        [CLSCompliant(false)]
+        public static implicit operator uint(Utf8Char value) => throw null;
+        public static implicit operator long(Utf8Char value) => throw null;
+        [CLSCompliant(false)]
+        public static implicit operator ulong(Utf8Char value) => throw null;
+        public static implicit operator Utf8Char(byte value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Utf8Char(sbyte value) => throw null;
+        public static explicit operator Utf8Char(char value) => throw null;
+        public static explicit operator Utf8Char(short value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Utf8Char(ushort value) => throw null;
+        public static explicit operator Utf8Char(int value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Utf8Char(uint value) => throw null;
+        public static explicit operator Utf8Char(long value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Utf8Char(ulong value) => throw null;
+        public int CompareTo(Utf8Char other) => throw null;
+        public override bool Equals(object obj) => throw null;
+        public bool Equals(Utf8Char other) => throw null;
+        public override int GetHashCode() => throw null;
+        public override string ToString() => throw null;
+    }
     public static partial class Utf8Extensions
     {
         public static bool Equals(this ReadOnlySpan<Utf8Char> span, ReadOnlySpan<Utf8Char> other, StringComparison comparisonType) => throw null;
-        public static ScalarCollection GetScalars(this ReadOnlySpan<Utf8Char> span) => throw null;
         public static bool IsWhiteSpace(this ReadOnlySpan<Utf8Char> span) => throw null;
         public static int ToLowerInvariant(this ReadOnlySpan<Utf8Char> source, Span<Utf8Char> destination) => throw null;
         public static int ToUpperInvariant(this ReadOnlySpan<Utf8Char> source, Span<Utf8Char> destination) => throw null;
@@ -7888,17 +7938,6 @@ namespace System.Text
         public static ReadOnlySpan<Utf8Char> TrimEnd(this ReadOnlySpan<Utf8Char> span) => throw null;
         public static ReadOnlyMemory<Utf8Char> TrimStart(this ReadOnlyMemory<Utf8Char> memory) => throw null;
         public static ReadOnlySpan<Utf8Char> TrimStart(this ReadOnlySpan<Utf8Char> span) => throw null;
-        public readonly ref struct ScalarCollection
-        {
-            private readonly int _dummy;
-            public Enumerator GetEnumerator() => throw null;
-            public ref struct Enumerator
-            {
-                private readonly int _dummy;
-                public UnicodeScalar Current => throw null;
-                public bool MoveNext() => throw null;
-            }
-        }
     }
 }
 namespace System.Text.Unicode
@@ -7907,6 +7946,59 @@ namespace System.Text.Unicode
     {
         public static System.Buffers.OperationStatus TranscodeUtf8ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int bytesConsumed, out int charsWritten) => throw null;
         public static System.Buffers.OperationStatus TranscodeUtf16ToUtf8(ReadOnlySpan<char> source, Span<byte> destination, bool isFinalChunk, InvalidSequenceBehavior behavior, out int charsConsumed, out int bytesWritten) => throw null;
+    }
+    public static partial class ScalarEnumerator
+    {
+        public static CharSpanScalarEnumerator GetScalars(ReadOnlySpan<char> value) => throw null;
+        public static Utf8CharSpanScalarEnumerator GetScalars(ReadOnlySpan<Utf8Char> value) => throw null;
+        public static StringScalarEnumerator GetScalars(string value) => throw null;
+        public static Utf8StringScalarEnumerator GetScalars(Utf8String value) => throw null;
+        public struct StringScalarEnumerator
+            : System.Collections.Generic.IEnumerable<(System.Text.UnicodeScalar? ScalarValue, int StartIndex, int Length)>
+            , System.Collections.Generic.IEnumerator<(System.Text.UnicodeScalar? ScalarValue, int StartIndex, int Length)>
+        {
+            private int _dummy;
+            public (System.Text.UnicodeScalar? ScalarValue, int StartIndex, int Length) Current => throw null;
+            [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+            public StringScalarEnumerator GetEnumerator() => throw null;
+            public bool MoveNext() => throw null;
+            void IDisposable.Dispose() { }
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => throw null;
+            System.Collections.Generic.IEnumerator<(UnicodeScalar? ScalarValue, int StartIndex, int Length)> System.Collections.Generic.IEnumerable<(UnicodeScalar? ScalarValue, int StartIndex, int Length)>.GetEnumerator() => throw null;
+            object System.Collections.IEnumerator.Current => Current;
+            void System.Collections.IEnumerator.Reset() { }
+        }
+        public ref struct CharSpanScalarEnumerator
+        {
+            private int _dummy;
+            public (UnicodeScalar? ScalarValue, int StartIndex, int Length) Current => throw null;
+            [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+            public CharSpanScalarEnumerator GetEnumerator() => throw null;
+            public bool MoveNext() => throw null;
+        }
+        public struct Utf8StringScalarEnumerator
+            : System.Collections.Generic.IEnumerable<(System.Text.UnicodeScalar? ScalarValue, int StartIndex, int Length)>
+            , System.Collections.Generic.IEnumerator<(System.Text.UnicodeScalar? ScalarValue, int StartIndex, int Length)>
+        {
+            private int _dummy;
+            public (System.Text.UnicodeScalar? ScalarValue, int StartIndex, int Length) Current => throw null;
+            [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+            public Utf8StringScalarEnumerator GetEnumerator() => throw null;
+            public bool MoveNext() => throw null;
+            void IDisposable.Dispose() { }
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => throw null;
+            System.Collections.Generic.IEnumerator<(UnicodeScalar? ScalarValue, int StartIndex, int Length)> System.Collections.Generic.IEnumerable<(UnicodeScalar? ScalarValue, int StartIndex, int Length)>.GetEnumerator() => throw null;
+            object System.Collections.IEnumerator.Current => Current;
+            void System.Collections.IEnumerator.Reset() { }
+        }
+        public ref struct Utf8CharSpanScalarEnumerator
+        {
+            private int _dummy;
+            public (UnicodeScalar? ScalarValue, int StartIndex, int Length) Current => throw null;
+            [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+            public Utf8CharSpanScalarEnumerator GetEnumerator() => throw null;
+            public bool MoveNext() => throw null;
+        }
     }
 }
 namespace System.Threading

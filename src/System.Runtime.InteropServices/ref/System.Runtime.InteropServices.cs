@@ -650,6 +650,10 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr StringToHGlobalAuto(string s) { throw null; }
         public static System.IntPtr StringToHGlobalUni(string s) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [CLSCompliant(false)]
+        public static unsafe IntPtr GetStringLength(char* pStringData) { throw null; }
+        [CLSCompliant(false)]
+        public static unsafe IntPtr GetStringLengthUtf8(byte* pUtf8StringData) { throw null; }
         public static void StructureToPtr(object structure, System.IntPtr ptr, bool fDeleteOld) { }
         public static void StructureToPtr<T>(T structure, System.IntPtr ptr, bool fDeleteOld) { }
         public static void ThrowExceptionForHR(int errorCode) { }

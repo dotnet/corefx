@@ -20,6 +20,3 @@ MembersMustExist : Member 'System.IO.TextWriter.WriteLine(System.Utf8StringSegme
 MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.StringSegment)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.Utf8String)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.IO.TextWriter.WriteLineAsync(System.Utf8StringSegment)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.BitConverter.ByteSwap(System.UInt16)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.BitConverter.ByteSwap(System.UInt32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.BitConverter.ByteSwap(System.UInt64)' does not exist in the implementation but it does exist in the contract.
