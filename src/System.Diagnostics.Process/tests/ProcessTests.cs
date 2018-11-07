@@ -224,12 +224,7 @@ namespace System.Diagnostics.Tests
         [InlineData(true), InlineData(false)]
         public void ProcessStart_UseShellExecute_Executes(bool filenameAsUrl)
         {
-            string filename = GetTestFilePath();
-            if (PlatformDetection.IsWindows)
-            {
-                filename += ".bat";
-            }
-            WriteScriptFile(filename, returnValue: 42);
+            string filename = WriteScriptFile(TestDirectory, GetTestFileName(), returnValue: 42);
 
             if (filenameAsUrl)
             {
@@ -258,19 +253,16 @@ namespace System.Diagnostics.Tests
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
-            options.startInfo.WorkingDirectory = wd;
+            options.StartInfo.WorkingDirectory = wd;
             RemoteInvoke(pathDirectory =>
             {
                 // Create two identically named scripts, one in the working directory and one on PATH.
-                string scriptFilename = $"script_{nameof(ProcessStart_UseShellExecute_ExecuteOrder)}";
-                if (PlatformDetection.IsWindows)
-                {
-                    scriptFilename += ".bat";
-                }
                 const int workingDirReturnValue = 1;
                 const int pathDirReturnValue = 2;
-                WriteScriptFile(Path.Combine(pathDirectory, scriptFilename), returnValue: pathDirReturnValue);
-                WriteScriptFile(Path.Combine(Directory.GetCurrentDirectory(), scriptFilename), returnValue: workingDirReturnValue);
+                string pathScriptFile = WriteScriptFile(pathDirectory,                 "script", returnValue: pathDirReturnValue);
+                string wdScriptFile = WriteScriptFile(Directory.GetCurrentDirectory(), "script", returnValue: workingDirReturnValue);
+                string scriptFilename = Path.GetFileName(pathScriptFile);
+                Assert.Equal(scriptFilename, Path.GetFileName(wdScriptFile));
 
                 // Execute the script and verify we prefer the one in the working directory.
                 using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
@@ -291,10 +283,12 @@ namespace System.Diagnostics.Tests
             }, path, options).Dispose();
         }
 
-        private void WriteScriptFile(string filename, int returnValue)
+        private string WriteScriptFile(string directory, string name, int returnValue)
         {
+            string filename = Path.Combine(directory, name);
             if (PlatformDetection.IsWindows)
             {
+                filename += ".bat";
                 File.WriteAllText(filename, $"exit {returnValue}");
             }
             else
@@ -304,6 +298,7 @@ namespace System.Diagnostics.Tests
                 int mode = Convert.ToInt32("744", 8);
                 Assert.Equal(0, chmod(filename, mode));
             }
+            return filename;
         }
 
         [Fact]

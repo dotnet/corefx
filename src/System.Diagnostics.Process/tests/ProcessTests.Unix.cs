@@ -164,11 +164,10 @@ namespace System.Diagnostics.Tests
             // with the appropriate name.
             string path = GetTestFileName();
             Directory.CreateDirectory(path);
-            WriteScriptFile(Path.Combine(path, s_allowedProgramsToRun[0]), returnValue: 42);
+            WriteScriptFile(path, s_allowedProgramsToRun[0], returnValue: 42);
 
             // Create a file that has the x-bit set, but which isn't a valid script.
-            string filename = GetTestFileName();
-            WriteScriptFile(filename, returnValue: 0);
+            string filename = WriteScriptFile(TestDirectory, GetTestFileName(), returnValue: 0);
             File.WriteAllText(filename, $"not a script");
             int mode = Convert.ToInt32("744", 8);
             Assert.Equal(0, chmod(filename, mode));
@@ -200,7 +199,7 @@ namespace System.Diagnostics.Tests
             // with the appropriate name.
             string path = GetTestFileName();
             Directory.CreateDirectory(path);
-            WriteScriptFile(Path.Combine(path, s_allowedProgramsToRun[0]), returnValue: 42);
+            WriteScriptFile(path, s_allowedProgramsToRun[0], returnValue: 42);
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
