@@ -7,7 +7,7 @@
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup Condition="'$(IncludePartialFacadeTests)' == 'true'">
-    <!-- Tests specific to the fast span -->
+    <!-- Tests specific to netcoreapp and uap -->
     <Compile Include="MemoryMarshal\AsRef.cs" />
     <Compile Include="MemoryMarshal\AsReadOnlyRef.cs" />
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
@@ -15,8 +15,6 @@
     <Compile Include="ReadOnlySpan\Contains.byte.cs" />
     <Compile Include="ReadOnlySpan\Contains.T.cs" />
     <Compile Include="Span\Reflection.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="SequenceReader\Advance.cs" />
     <Compile Include="SequenceReader\BasicTests.cs" />
     <Compile Include="SequenceReader\BinaryExtensions.cs" />
