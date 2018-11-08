@@ -398,8 +398,8 @@ namespace XDocumentTests.SDMSample
 
             Assert.Throws<FormatException>(() => (float)e1);
             Assert.Throws<FormatException>(() => (float)e2);
-            Assert.Throws<OverflowException>(() => (float)e3);
 
+            Assert.Equal(float.PositiveInfinity, (float)e3);
             Assert.Equal(5.0f, (float)e4);
         }
 
@@ -420,8 +420,8 @@ namespace XDocumentTests.SDMSample
 
             Assert.Throws<FormatException>(() => (double)e1);
             Assert.Throws<FormatException>(() => (double)e2);
-            Assert.Throws<OverflowException>(() => (double)e3);
 
+            Assert.Equal(double.PositiveInfinity, (double)e3);
             Assert.Equal(5.0, (double)e4);
         }
 

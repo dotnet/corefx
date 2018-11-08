@@ -193,12 +193,6 @@ namespace System.Json.Tests
         }
 
         [Fact]
-        public void Parse_DoubleTooLarge_ThrowsOverflowException()
-        {
-            Assert.Throws<OverflowException>(() => JsonValue.Parse("1.7976931348623157E+309"));
-        }
-
-        [Fact]
         public void Parse_InvalidNumericString_ThrowsFormatException()
         {
             Assert.Throws<FormatException>(() => JsonValue.Parse("1E!"));
@@ -225,6 +219,7 @@ namespace System.Json.Tests
         [InlineData("\"Infinity\"", double.PositiveInfinity)]
         [InlineData("\"-Infinity\"", double.NegativeInfinity)]
         [InlineData("0.000000000000000000000000000011", 1.1E-29)]
+        [InlineData("1.7976931348623157E+309", double.PositiveInfinity)]
         public void JsonValue_Parse_Double(string json, double expected)
         {
             foreach (string culture in new[] { "en", "fr", "de" })

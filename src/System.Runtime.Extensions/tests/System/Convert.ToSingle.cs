@@ -99,7 +99,7 @@ namespace System.Tests
             VerifyFromString(Convert.ToSingle, Convert.ToSingle, testValues, expectedValues);
 
             string[] overflowValues = { Double.MinValue.ToString(), Double.MaxValue.ToString() };
-            VerifyFromStringThrows<OverflowException>(Convert.ToSingle, Convert.ToSingle, overflowValues);
+            VerifyFromString(Convert.ToSingle, Convert.ToSingle, overflowValues, new float[] { float.NegativeInfinity, float.PositiveInfinity });
 
             string[] formatExceptionValues = { "1f2d" };
             VerifyFromStringThrows<FormatException>(Convert.ToSingle, Convert.ToSingle, formatExceptionValues);

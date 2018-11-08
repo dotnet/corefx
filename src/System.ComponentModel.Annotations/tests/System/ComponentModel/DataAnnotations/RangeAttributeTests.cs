@@ -927,15 +927,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Throws<OverflowException>(() => attribute.Validate(value, new ValidationContext(new object())));
         }
 
-        [Theory]
-        [InlineData(1.0, 2.0, "2E+308")]
-        [InlineData(1.0, 2.0, "-2E+308")]
-        public static void Validate_DoubleConversionOverflows_ThrowsOverflowException(double minimum, double maximum, object value)
-        {
-            RangeAttribute attribute = new RangeAttribute(minimum, maximum);
-            Assert.Throws<OverflowException>(() => attribute.Validate(value, new ValidationContext(new object())));
-        }
-
         [Fact]
         public static void Validate_IConvertibleThrowsCustomException_IsNotCaught()
         {

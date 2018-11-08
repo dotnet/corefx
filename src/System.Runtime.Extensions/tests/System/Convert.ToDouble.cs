@@ -99,7 +99,7 @@ namespace System.Tests
             VerifyFromString(Convert.ToDouble, Convert.ToDouble, testValues, expectedValues);
 
             string[] overflowValues = { Double.MaxValue.ToString(), Double.MinValue.ToString() };
-            VerifyFromStringThrows<OverflowException>(Convert.ToDouble, Convert.ToDouble, overflowValues);
+            VerifyFromString(Convert.ToDouble, Convert.ToDouble, overflowValues, new double[] { double.PositiveInfinity, double.NegativeInfinity });
 
             string[] formatExceptionValues = { "123xyz" };
             VerifyFromStringThrows<FormatException>(Convert.ToDouble, Convert.ToDouble, formatExceptionValues);
