@@ -386,7 +386,6 @@ namespace System.Net.Http.Headers
         public byte[] ContentMD5 { get { throw null; } set { } }
         public System.Net.Http.Headers.ContentRangeHeaderValue ContentRange { get { throw null; } set { } }
         public System.Net.Http.Headers.MediaTypeHeaderValue ContentType { get { throw null; } set { } }
-        internal override void EnsureHeaders() { }
         public System.Nullable<System.DateTimeOffset> Expires { get { throw null; } set { } }
         public System.Nullable<System.DateTimeOffset> LastModified { get { throw null; } set { } }
     }
@@ -397,7 +396,6 @@ namespace System.Net.Http.Headers
         public void Add(string name, string value) { }
         public void Clear() { }
         public bool Contains(string name) { throw null; }
-        internal virtual void EnsureHeaders() { }
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Collections.Generic.IEnumerable<string>>> GetEnumerator() { throw null; }
         public System.Collections.Generic.IEnumerable<string> GetValues(string name) { throw null; }
         public bool Remove(string name) { throw null; }
