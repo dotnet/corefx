@@ -20,25 +20,25 @@ namespace System.Text.Json
             return new ArgumentException(message);
         }
 
-        public static InvalidCastException GetInvalidCastException_ExpectedNumber(JsonTokenType tokenType)
+        public static InvalidOperationException GetInvalidOperationException_ExpectedNumber(JsonTokenType tokenType)
         {
-            return GetInvalidCastException("number", tokenType);
+            return GetInvalidOperationException("number", tokenType);
         }
 
-        public static InvalidCastException GetInvalidCastException_ExpectedBoolean(JsonTokenType tokenType)
+        public static InvalidOperationException GetInvalidOperationException_ExpectedBoolean(JsonTokenType tokenType)
         {
-            return GetInvalidCastException("boolean", tokenType);
+            return GetInvalidOperationException("boolean", tokenType);
         }
 
-        public static InvalidCastException GetInvalidCastException_ExpectedString(JsonTokenType tokenType)
+        public static InvalidOperationException GetInvalidOperationException_ExpectedString(JsonTokenType tokenType)
         {
-            return GetInvalidCastException("string", tokenType);
+            return GetInvalidOperationException("string", tokenType);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static InvalidCastException GetInvalidCastException(string message, JsonTokenType tokenType)
+        private static InvalidOperationException GetInvalidOperationException(string message, JsonTokenType tokenType)
         {
-            return new InvalidCastException(SR.Format(SR.InvalidCast, tokenType, message));
+            return new InvalidOperationException(SR.Format(SR.InvalidCast, tokenType, message));
         }
 
         public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)

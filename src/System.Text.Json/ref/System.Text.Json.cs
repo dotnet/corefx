@@ -57,13 +57,13 @@ namespace System.Text.Json
         public System.Text.Json.JsonReaderState CurrentState { get { throw null; } }
         public System.Text.Json.JsonTokenType TokenType { get { throw null; } }
         public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
+        public bool GetBooleanValue() { throw null; }
+        public string GetStringValue() { throw null; }
         public bool Read() { throw null; }
-        public bool TryGetValueAsBoolean(out bool value) { throw null; }
-        public bool TryGetValueAsDecimal(out decimal value) { throw null; }
-        public bool TryGetValueAsDouble(out double value) { throw null; }
-        public bool TryGetValueAsInt32(out int value) { throw null; }
-        public bool TryGetValueAsInt64(out long value) { throw null; }
-        public bool TryGetValueAsSingle(out float value) { throw null; }
-        public bool TryGetValueAsString(out string value) { throw null; }
+        public bool TryGetDecimalValue(out decimal value) { throw null; }
+        public bool TryGetDoubleValue(out double value) { throw null; }
+        public bool TryGetInt32Value(out int value) { throw null; }
+        public bool TryGetInt64Value(out long value) { throw null; }
+        public bool TryGetSingleValue(out float value) { throw null; }
     }
 }

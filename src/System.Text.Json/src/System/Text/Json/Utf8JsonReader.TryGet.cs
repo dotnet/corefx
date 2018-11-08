@@ -13,116 +13,108 @@ namespace System.Text.Json
         private static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="string"/>.
-        /// Returns true if the UTF-8 encoded token value can be successfully transcoded
-        /// to a UTF-16 string.
+        /// Reads the next JSON token value from the source transcoded as a <see cref="string"/>.
         /// </summary>
-        /// <remarks>
-        /// This method never returns false. If the JSON token is a string and the data is valid UTF-8, the cast is always successful.
-        /// Otherwise, it throws.
-        /// </remarks>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a string
-        /// (i.e. JsonTokenType.String, JsonTokenType.PropertyName, or JsonTokenType.Comment).
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of the JSON token that is not a string
+        /// (i.e. other than <see cref="JsonTokenType.String"/>, <see cref="JsonTokenType.PropertyName"/>, or <see cref="JsonTokenType.Comment"/>).
+        /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown if invalid byte sequence are detected while transcoding.
+        /// Thrown if invalid UTF-8 byte sequences are detected while transcoding.
         /// </exception>
-        public bool TryGetValueAsString(out string value)
+        public string GetStringValue()
         {
             if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.Comment)
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedString(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }
 
             // TODO: https://github.com/dotnet/corefx/issues/33292
-            value = s_utf8Encoding.GetString(ValueSpan);
-            return true;
+            return s_utf8Encoding.GetString(ValueSpan);
         }
 
         /// <summary>
         /// Reads the next JSON token value from the source as a <see cref="bool"/>.
-        /// Returns true if the entire UTF-8 encoded token value can be successfully 
-        /// parsed to a <see cref="bool"/> value.
+        /// Returns true if the TokenType is JsonTokenType.True and false if the TokenType is JsonTokenType.False.
         /// </summary>
-        /// <remarks>
-        /// This method never returns false. If the JSON token is a boolean, the cast is always successful.
-        /// Otherwise, it throws.
-        /// </remarks>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a boolean (i.e. JsonTokenType.True or JsonTokenType.False).
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of JSON token that is not a boolean (i.e. <see cref="JsonTokenType.True"/> or <see cref="JsonTokenType.False"/>).
+        /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetValueAsBoolean(out bool value)
+        public bool GetBooleanValue()
         {
             if (TokenType == JsonTokenType.True)
             {
                 Debug.Assert(ValueSpan.Length == 4);
-                value = true;
+                return true;
             }
             else if (TokenType == JsonTokenType.False)
             {
                 Debug.Assert(ValueSpan.Length == 5);
-                value = false;
+                return false;
             }
             else
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedBoolean(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedBoolean(TokenType);
             }
-            return true;
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="int"/>.
+        /// Reads the next JSON token value from the source and parses it to a <see cref="int"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="int"/> value.
         /// Returns false otherwise.
         /// </summary>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a JsonTokenType.Number.
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetValueAsInt32(out int value)
+        public bool TryGetInt32Value(out int value)
         {
             if (TokenType != JsonTokenType.Number)
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedNumber(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
             }
 
             return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="long"/>.
+        /// Reads the next JSON token value from the source and parses it to a <see cref="long"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="long"/> value.
         /// Returns false otherwise.
         /// </summary>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a JsonTokenType.Number.
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetValueAsInt64(out long value)
+        public bool TryGetInt64Value(out long value)
         {
             if (TokenType != JsonTokenType.Number)
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedNumber(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
             }
 
             return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed) && ValueSpan.Length == bytesConsumed;
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="float"/>.
+        /// Reads the next JSON token value from the source and parses it to a <see cref="float"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="float"/> value.
         /// Returns false otherwise.
         /// </summary>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a JsonTokenType.Number.
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetValueAsSingle(out float value)
+        public bool TryGetSingleValue(out float value)
         {
             if (TokenType != JsonTokenType.Number)
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedNumber(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
             }
 
             char standardFormat = ValueSpan.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
@@ -130,19 +122,20 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="double"/>.
+        /// Reads the next JSON token value from the source and parses it to a <see cref="double"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="double"/> value.
         /// Returns false otherwise.
         /// </summary>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a JsonTokenType.Number.
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetValueAsDouble(out double value)
+        public bool TryGetDoubleValue(out double value)
         {
             if (TokenType != JsonTokenType.Number)
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedNumber(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
             }
 
             char standardFormat = ValueSpan.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
@@ -150,19 +143,20 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="decimal"/>.
+        /// Reads the next JSON token value from the source and parses it to a <see cref="decimal"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="decimal"/> value.
         /// Returns false otherwise.
         /// </summary>
-        /// <exception cref="InvalidCastException">
-        /// Thrown if trying to get the value of JSON token that is not a JsonTokenType.Number.
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetValueAsDecimal(out decimal value)
+        public bool TryGetDecimalValue(out decimal value)
         {
             if (TokenType != JsonTokenType.Number)
             {
-                throw ThrowHelper.GetInvalidCastException_ExpectedNumber(TokenType);
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
             }
 
             char standardFormat = ValueSpan.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;

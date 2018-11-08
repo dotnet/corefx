@@ -451,7 +451,7 @@ namespace System.Text.Json
                 // Create local copy to avoid bounds checks.
                 ReadOnlySpan<byte> localBuffer = _buffer;
 
-                if ((uint)(first - '0') <= '9' - '0' || first == '-')
+                if (JsonReaderHelper.IsDigit(first) || first == '-')
                 {
                     if (!TryGetNumber(localBuffer.Slice(_consumed), out int numberOfBytes))
                     {
@@ -549,83 +549,86 @@ namespace System.Text.Json
         /// </summary>
         private bool ConsumeValue(byte marker)
         {
-        // Using goto to avoid recursive calls.
-        Begin:
-            if (marker == JsonConstants.Quote)
+            while (true)
             {
-                return ConsumeString();
-            }
-            else if (marker == JsonConstants.OpenBrace)
-            {
-                StartObject();
-            }
-            else if (marker == JsonConstants.OpenBracket)
-            {
-                StartArray();
-            }
-            else if ((uint)(marker - '0') <= '9' - '0' || marker == '-')
-            {
-                return ConsumeNumber();
-            }
-            else if (marker == 'f')
-            {
-                return ConsumeLiteral(JsonConstants.FalseValue, JsonTokenType.False);
-            }
-            else if (marker == 't')
-            {
-                return ConsumeLiteral(JsonConstants.TrueValue, JsonTokenType.True);
-            }
-            else if (marker == 'n')
-            {
-                return ConsumeLiteral(JsonConstants.NullValue, JsonTokenType.Null);
-            }
-            else
-            {
-                switch (_readerOptions.CommentHandling)
+                if (marker == JsonConstants.Quote)
                 {
-                    case JsonCommentHandling.Default:
-                        break;
-                    case JsonCommentHandling.AllowComments:
-                        if (marker == JsonConstants.Slash)
-                        {
-                            return ConsumeComment();
-                        }
-                        break;
-                    case JsonCommentHandling.SkipComments:
-                        if (marker == JsonConstants.Slash)
-                        {
-                            if (SkipComment())
+                    return ConsumeString();
+                }
+                else if (marker == JsonConstants.OpenBrace)
+                {
+                    StartObject();
+                }
+                else if (marker == JsonConstants.OpenBracket)
+                {
+                    StartArray();
+                }
+                else if (JsonReaderHelper.IsDigit(marker) || marker == '-')
+                {
+                    return ConsumeNumber();
+                }
+                else if (marker == 'f')
+                {
+                    return ConsumeLiteral(JsonConstants.FalseValue, JsonTokenType.False);
+                }
+                else if (marker == 't')
+                {
+                    return ConsumeLiteral(JsonConstants.TrueValue, JsonTokenType.True);
+                }
+                else if (marker == 'n')
+                {
+                    return ConsumeLiteral(JsonConstants.NullValue, JsonTokenType.Null);
+                }
+                else
+                {
+                    switch (_readerOptions.CommentHandling)
+                    {
+                        case JsonCommentHandling.Default:
+                            break;
+                        case JsonCommentHandling.AllowComments:
+                            if (marker == JsonConstants.Slash)
                             {
-                                if (_consumed >= (uint)_buffer.Length)
+                                return ConsumeComment();
+                            }
+                            break;
+                        default:
+                            Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.SkipComments);
+                            if (marker == JsonConstants.Slash)
+                            {
+                                if (SkipComment())
                                 {
-                                    if (_isNotPrimitive && IsLastSpan && _tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
+                                    if (_consumed >= (uint)_buffer.Length)
                                     {
-                                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
-                                    }
-                                    return false;
-                                }
-
-                                marker = _buffer[_consumed];
-
-                                // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
-                                if (marker <= JsonConstants.Space)
-                                {
-                                    SkipWhiteSpace();
-                                    if (!HasMoreData())
-                                    {
+                                        if (_isNotPrimitive && IsLastSpan && _tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
+                                        {
+                                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
+                                        }
                                         return false;
                                     }
-                                    marker = _buffer[_consumed];
-                                }
 
-                                // Skip comments and consume the actual JSON value.
-                                goto Begin;
+                                    marker = _buffer[_consumed];
+
+                                    // This check is done as an optimization to avoid calling SkipWhiteSpace when not necessary.
+                                    if (marker <= JsonConstants.Space)
+                                    {
+                                        SkipWhiteSpace();
+                                        if (!HasMoreData())
+                                        {
+                                            return false;
+                                        }
+                                        marker = _buffer[_consumed];
+                                    }
+
+                                    // Skip comments and consume the actual JSON value.
+                                    continue;
+                                }
+                                return false;
                             }
-                            return false;
-                        }
-                        break;
+                            break;
+                    }
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
                 }
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                break;
             }
             return true;
         }

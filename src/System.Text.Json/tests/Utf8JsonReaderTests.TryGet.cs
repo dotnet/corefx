@@ -147,13 +147,13 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.PropertyName)
                 {
-                    Assert.True(json.TryGetValueAsString(out key));
+                    key = json.GetStringValue();
                 }
                 if (json.TokenType == JsonTokenType.Number)
                 {
                     if (key.StartsWith("int"))
                     {
-                        Assert.True(json.TryGetValueAsInt32(out int numberInt));
+                        Assert.True(json.TryGetInt32Value(out int numberInt));
                         if (count >= ints.Count)
                             count = 0;
                         Assert.Equal(ints[count], numberInt);
@@ -161,7 +161,7 @@ namespace System.Text.Json.Tests
                     }
                     else if (key.StartsWith("long"))
                     {
-                        Assert.True(json.TryGetValueAsInt64(out long numberLong));
+                        Assert.True(json.TryGetInt64Value(out long numberLong));
                         if (count >= longs.Count)
                             count = 0;
                         Assert.Equal(longs[count], numberLong);
@@ -169,7 +169,7 @@ namespace System.Text.Json.Tests
                     }
                     else if (key.StartsWith("float"))
                     {
-                        Assert.True(json.TryGetValueAsSingle(out float numberFloat));
+                        Assert.True(json.TryGetSingleValue(out float numberFloat));
                         if (count >= floats.Count)
                             count = 0;
 
@@ -181,7 +181,7 @@ namespace System.Text.Json.Tests
                     }
                     else if (key.StartsWith("double"))
                     {
-                        Assert.True(json.TryGetValueAsDouble(out double numberDouble));
+                        Assert.True(json.TryGetDoubleValue(out double numberDouble));
                         if (count >= doubles.Count)
                             count = 0;
 
@@ -193,7 +193,7 @@ namespace System.Text.Json.Tests
                     }
                     else if (key.StartsWith("decimal"))
                     {
-                        Assert.True(json.TryGetValueAsDecimal(out decimal numberDecimal));
+                        Assert.True(json.TryGetDecimalValue(out decimal numberDecimal));
                         if (count >= decimals.Count)
                             count = 0;
 
@@ -216,7 +216,7 @@ namespace System.Text.Json.Tests
         [InlineData("12345.1", 12345.1)]
         [InlineData("12345678901", 12345678901)]
         [InlineData("123456789012345678901", 123456789012345678901d)]
-        public static void TestingNumbersInvalidCastToInt32(string jsonString, double expected)
+        public static void TestingNumbersInvalidConversionToInt32(string jsonString, double expected)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -225,8 +225,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.False(json.TryGetValueAsInt32(out int value));
-                    Assert.True(json.TryGetValueAsDouble(out double doubleValue));
+                    Assert.False(json.TryGetInt32Value(out int value));
+                    Assert.True(json.TryGetDoubleValue(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
                 }
             }
@@ -241,7 +241,7 @@ namespace System.Text.Json.Tests
         [InlineData("1.1e2", 110)]
         [InlineData("12345.1", 12345.1)]
         [InlineData("123456789012345678901", 123456789012345678901d)]
-        public static void TestingNumbersInvalidCastToInt64(string jsonString, double expected)
+        public static void TestingNumbersInvalidConversionToInt64(string jsonString, double expected)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -250,8 +250,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.False(json.TryGetValueAsInt64(out long value));
-                    Assert.True(json.TryGetValueAsDouble(out double doubleValue));
+                    Assert.False(json.TryGetInt64Value(out long value));
+                    Assert.True(json.TryGetDoubleValue(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
                 }
             }
@@ -261,7 +261,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TryGetInvalidCast()
+        public static void TryGetInvalidConversion()
         {
             string jsonString = "[\"stringValue\", true, 1234]";
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -273,10 +273,10 @@ namespace System.Text.Json.Tests
                 {
                     try
                     {
-                        json.TryGetValueAsString(out string value);
-                        Assert.True(false, "Expected TryGetValueAsString to throw InvalidCastException due to mismatch token type.");
+                        string value = json.GetStringValue();
+                        Assert.True(false, "Expected TryGetValueAsString to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
                 }
 
@@ -284,10 +284,10 @@ namespace System.Text.Json.Tests
                 {
                     try
                     {
-                        json.TryGetValueAsBoolean(out bool value);
-                        Assert.True(false, "Expected TryGetValueAsBoolean to throw InvalidCastException due to mismatch token type.");
+                        bool value = json.GetBooleanValue();
+                        Assert.True(false, "Expected TryGetValueAsBoolean to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
                 }
 
@@ -295,42 +295,42 @@ namespace System.Text.Json.Tests
                 {
                     try
                     {
-                        json.TryGetValueAsInt32(out int value);
-                        Assert.True(false, "Expected TryGetValueAsInt32 to throw InvalidCastException due to mismatch token type.");
+                        json.TryGetInt32Value(out int value);
+                        Assert.True(false, "Expected TryGetValueAsInt32 to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
 
                     try
                     {
-                        json.TryGetValueAsInt64(out long value);
-                        Assert.True(false, "Expected TryGetValueAsInt64 to throw InvalidCastException due to mismatch token type.");
+                        json.TryGetInt64Value(out long value);
+                        Assert.True(false, "Expected TryGetValueAsInt64 to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
 
                     try
                     {
-                        json.TryGetValueAsSingle(out float value);
-                        Assert.True(false, "Expected TryGetValueAsSingle to throw InvalidCastException due to mismatch token type.");
+                        json.TryGetSingleValue(out float value);
+                        Assert.True(false, "Expected TryGetValueAsSingle to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
 
                     try
                     {
-                        json.TryGetValueAsDouble(out double value);
-                        Assert.True(false, "Expected TryGetValueAsDouble to throw InvalidCastException due to mismatch token type.");
+                        json.TryGetDoubleValue(out double value);
+                        Assert.True(false, "Expected TryGetValueAsDouble to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
 
                     try
                     {
-                        json.TryGetValueAsDecimal(out decimal value);
-                        Assert.True(false, "Expected TryGetValueAsDecimal to throw InvalidCastException due to mismatch token type.");
+                        json.TryGetDecimalValue(out decimal value);
+                        Assert.True(false, "Expected TryGetValueAsDecimal to throw InvalidOperationException due to mismatch token type.");
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidOperationException)
                     { }
                 }
             }

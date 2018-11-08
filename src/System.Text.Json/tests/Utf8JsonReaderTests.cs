@@ -880,7 +880,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        Assert.True(json.TryGetValueAsString(out string actualComment));
+                        string actualComment = json.GetStringValue();
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -946,7 +946,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        Assert.True(json.TryGetValueAsString(out string actualComment));
+                        string actualComment = json.GetStringValue();
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -972,7 +972,7 @@ namespace System.Text.Json.Tests
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
                             Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                            Assert.True(jsonSlice.TryGetValueAsString(out string actualComment));
+                            string actualComment = jsonSlice.GetStringValue();
                             Assert.Equal(expectedComment, actualComment);
                             break;
                     }
@@ -995,7 +995,7 @@ namespace System.Text.Json.Tests
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
                                 Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                                Assert.True(jsonSlice.TryGetValueAsString(out string actualComment));
+                                string actualComment = jsonSlice.GetStringValue();
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
                         }
@@ -1519,23 +1519,23 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Number:
                         if (json.ValueSpan.Contains((byte)'.'))
                         {
-                            Assert.True(json.TryGetValueAsDouble(out double numberValue));
+                            Assert.True(json.TryGetDoubleValue(out double numberValue));
                             // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
-                            Assert.True(json.TryGetValueAsInt32(out int numberValue));
+                            Assert.True(json.TryGetInt32Value(out int numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         break;
                     case JsonTokenType.String:
-                        Assert.True(json.TryGetValueAsString(out string stringValue));
+                        string stringValue = json.GetStringValue();
                         Assert.Equal(expectedString, stringValue);
                         break;
                     case JsonTokenType.False:
                     case JsonTokenType.True:
-                        Assert.True(json.TryGetValueAsBoolean(out bool boolValue));
+                        bool boolValue = json.GetBooleanValue();
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         break;
                 }
@@ -1598,24 +1598,24 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Number:
                         if (json.ValueSpan.Contains((byte)'.'))
                         {
-                            Assert.True(json.TryGetValueAsDouble(out double numberValue));
+                            Assert.True(json.TryGetDoubleValue(out double numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
-                            Assert.True(json.TryGetValueAsInt32(out int numberValue));
+                            Assert.True(json.TryGetInt32Value(out int numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.String:
-                        Assert.True(json.TryGetValueAsString(out string stringValue));
+                        string stringValue = json.GetStringValue();
                         Assert.Equal(expectedString, stringValue);
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.False:
                     case JsonTokenType.True:
-                        Assert.True(json.TryGetValueAsBoolean(out bool boolValue));
+                        bool boolValue = json.GetBooleanValue();
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         foundPrimitiveValue = true;
                         break;
