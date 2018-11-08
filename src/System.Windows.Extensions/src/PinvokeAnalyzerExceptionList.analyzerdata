@@ -6,4 +6,4 @@ winmm.dll!mmioDescend
 winmm.dll!mmioClose
 winmm.dll!mmioOpen
 winmm.dll!mmioRead
-winmm.dll!PlaySound
+winmm.dll!PlaySoundW

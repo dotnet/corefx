@@ -83,6 +83,9 @@
     <PackageReference Include="System.Text.RegularExpressions.TestData">
       <Version>1.0.2</Version>
     </PackageReference>
+    <PackageReference Include="System.Windows.Extensions.TestData">
+      <Version>1.0.0</Version>
+    </PackageReference>
   </ItemGroup>
 
     <!-- Perf testing -->

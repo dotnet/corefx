@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Media.Test
 {
-    //[OuterLoop]
+    [OuterLoop]
     public class SystemSoundTests
     {
         public static IEnumerable<object[]> Play_TestData()

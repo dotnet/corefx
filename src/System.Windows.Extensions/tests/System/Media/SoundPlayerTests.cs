@@ -70,19 +70,19 @@ namespace System.Media.Test
 
         public static IEnumerable<object[]> Play_String_TestData()
         {
-            yield return new object[] { "C:/Users/hughb/Downloads/adpcm.wav" };
-            yield return new object[] { "C:/Users/hughb/Downloads/pcm.wav" };
+            yield return new object[] { "adpcm.wav" };
+            yield return new object[] { "pcm.wav" };
         }
 
         public static IEnumerable<object[]> Play_InvalidString_TestData()
         {
-            yield return new object[] { "C:/Users/hughb/Downloads/ccitt.wav" };
-            yield return new object[] { "C:/Users/hughb/Downloads/ima.wav" };
+            yield return new object[] { "ccitt.wav" };
+            yield return new object[] { "ima.wav" };
         }
 
         [Theory]
         [MemberData(nameof(Play_String_TestData))]
-        //[OuterLoop]
+        [OuterLoop]
         public void Load_SourceLocation_Success(string sourceLocation)
         {
             var soundPlayer = new SoundPlayer(sourceLocation);
@@ -97,7 +97,7 @@ namespace System.Media.Test
 
         [Theory]
         [MemberData(nameof(Play_String_TestData))]
-        //[OuterLoop]
+        [OuterLoop]
         public void Load_Stream_Success(string sourceLocation)
         {
             using (FileStream stream = File.OpenRead(sourceLocation.Replace("file://", "")))
@@ -151,7 +151,7 @@ namespace System.Media.Test
 
         [Theory]
         [MemberData(nameof(Play_String_TestData))]
-        //[OuterLoop]
+        [OuterLoop]
         public void Play_SourceLocation_Success(string sourceLocation)
         {
             var soundPlayer = new SoundPlayer(sourceLocation);
@@ -173,7 +173,7 @@ namespace System.Media.Test
 
         [Theory]
         [MemberData(nameof(Play_String_TestData))]
-        //[OuterLoop]
+        [OuterLoop]
         public void Play_Stream_Success(string sourceLocation)
         {
             using (FileStream stream = File.OpenRead(sourceLocation.Replace("file://", "")))
@@ -190,7 +190,7 @@ namespace System.Media.Test
         }
 
         [Fact]
-        //[OuterLoop]
+        [OuterLoop]
         public void Play_NullStream_Success()
         {
             var player = new SoundPlayer();
@@ -221,7 +221,7 @@ namespace System.Media.Test
         }
 
         [Fact]
-        //[OuterLoop]
+        [OuterLoop]
         public void PlayLooping_NullStream_Success()
         {
             var player = new SoundPlayer();
@@ -232,7 +232,7 @@ namespace System.Media.Test
         }
 
         [Fact]
-        //[OuterLoop]
+        [OuterLoop]
         public void PlaySync_NullStream_Success()
         {
             var player = new SoundPlayer();
@@ -392,29 +392,6 @@ namespace System.Media.Test
             {
                 player.Stream = stream;
                 Assert.False(calledHandler);
-            }
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData(10)]
-        public void SerializeSourceLocation_Deserialize_Success(object tag)
-        {
-            var formatter = new BinaryFormatter();
-            using (var serializationStream = new MemoryStream())
-            {
-                var player = new SoundPlayer("sourceLocation") { Tag = tag };
-                formatter.Serialize(serializationStream, player);
-
-                serializationStream.Seek(0, SeekOrigin.Begin);
-                SoundPlayer result = Assert.IsType<SoundPlayer>(formatter.Deserialize(serializationStream));
-                Assert.Null(player.Container);
-                Assert.False(player.IsLoadCompleted);
-                Assert.Equal(10000, player.LoadTimeout);
-                Assert.Null(player.Site);
-                Assert.Equal("sourceLocation", player.SoundLocation);
-                Assert.Null(player.Stream);
-                Assert.Equal(tag, player.Tag);
             }
         }
     }

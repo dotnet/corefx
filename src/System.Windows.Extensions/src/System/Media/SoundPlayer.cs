@@ -12,8 +12,6 @@ using System.Threading;
 
 namespace System.Media
 {
-    [Serializable]
-    [ToolboxItem(false)]
     public class SoundPlayer : Component, ISerializable
     {
         private const int BlockSize = 1024;
@@ -62,27 +60,7 @@ namespace System.Media
 
         protected SoundPlayer(SerializationInfo serializationInfo, StreamingContext context)
         {
-            foreach (SerializationEntry entry in serializationInfo)
-            {
-                switch (entry.Name)
-                {
-                    case "SoundLocation":
-                        SetupSoundLocation((string)entry.Value);
-                        break;
-                    case "Stream":
-                        _stream = (Stream)entry.Value;
-                        // when we deserialize a stream we have to reset its seek position
-                        // vsWhidbey 180361
-                        if (_stream.CanSeek)
-                        {
-                            _stream.Seek(0, SeekOrigin.Begin);
-                        }
-                        break;
-                    case "LoadTimeout":
-                        LoadTimeout = (int)entry.Value;
-                        break;
-                }
-            }
+            throw new PlatformNotSupportedException();
         }
         
         public int LoadTimeout
@@ -242,13 +220,13 @@ namespace System.Media
                 IsLoadCompleted = true;
 
                 ValidateSoundFile(localPath);
-                Interop.WinMM.PlaySound(localPath, IntPtr.Zero, Interop.WinMM.SND_NODEFAULT | flags);
+                Interop.WinMM.PlaySoundW(localPath, IntPtr.Zero, Interop.WinMM.SND_NODEFAULT | flags);
             }
             else
             {
                 LoadSync();
                 ValidateSoundData(_streamData);
-                Interop.WinMM.PlaySound(_streamData, IntPtr.Zero, Interop.WinMM.SND_MEMORY | Interop.WinMM.SND_NODEFAULT | flags);
+                Interop.WinMM.PlaySoundW(_streamData, IntPtr.Zero, Interop.WinMM.SND_MEMORY | Interop.WinMM.SND_NODEFAULT | flags);
             }
         }
 
@@ -431,7 +409,7 @@ namespace System.Media
 
         public void Stop()
         {
-            Interop.WinMM.PlaySound((byte[])null, IntPtr.Zero, Interop.WinMM.SND_PURGE);
+            Interop.WinMM.PlaySoundW((byte[])null, IntPtr.Zero, Interop.WinMM.SND_PURGE);
         }
 
         public event AsyncCompletedEventHandler LoadCompleted
@@ -722,17 +700,7 @@ namespace System.Media
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (!string.IsNullOrEmpty(_soundLocation))
-            {
-                info.AddValue("SoundLocation", _soundLocation);
-            }
-
-            if (_stream != null)
-            {
-                info.AddValue("Stream", _stream);
-            }
-
-            info.AddValue("LoadTimeout", _loadTimeout);
+            throw new PlatformNotSupportedException();
         }
     }
 }
