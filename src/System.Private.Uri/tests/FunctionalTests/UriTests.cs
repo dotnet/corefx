@@ -913,6 +913,8 @@ namespace System.PrivateUri.Tests
         [InlineData("90")]
         [InlineData("0")]
         [InlineData("000")]
+        [InlineData("65535")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Uri_PortTrailingSpaces_SpacesTrimmed(string portString)
         {
             Uri u = new Uri($"http://www.contoso.com:{portString}     ");
@@ -923,7 +925,8 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        public static void Uri_EmptyPortTrailingSpaces_SpacesTrimmed()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void Uri_EmptyPortTrailingSpaces_UsesDefaultPortSpacesTrimmed()
         {
             Uri u = new Uri($"http://www.contoso.com:     ");
 
@@ -949,6 +952,30 @@ namespace System.PrivateUri.Tests
 
             Assert.Equal($"http://www.contoso.com/{query}", u.AbsoluteUri);
             Assert.Equal(query, u.Query);
+        }
+
+        [Theory]
+        [InlineData(" 80")]
+        [InlineData("8 0")]
+        [InlineData("80a")]
+        [InlineData("65536")]
+        [InlineData("100000")]
+        [InlineData("10000000000")]
+        public static void Uri_InvalidPort_ThrowsUriFormatException(string portString)
+        {
+            Assert.Throws<UriFormatException>( () =>
+            {
+                Uri u = new Uri($"http://www.contoso.com:{portString}");
+            });
+        }
+
+        [Fact]
+        public static void Uri_EmptyPort_UsesDefaultPort()
+        {
+            Uri u = new Uri($"http://www.contoso.com:");
+
+            Assert.Equal($"http://www.contoso.com/", u.AbsoluteUri);
+            Assert.Equal(80, u.Port);
         }
     }
 }
