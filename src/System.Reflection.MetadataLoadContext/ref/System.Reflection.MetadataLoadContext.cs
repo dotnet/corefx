@@ -14,12 +14,6 @@ namespace System.Reflection
         public abstract Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName = null);
     }
 
-    public class PathAssemblyResolver : MetadataAssemblyResolver
-    {
-        public PathAssemblyResolver(IEnumerable<string> assemblyPaths) { }
-        public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName) { throw null; }
-    }
-
     public sealed partial class MetadataLoadContext : System.IDisposable
     {
         public MetadataLoadContext(MetadataAssemblyResolver resolver, string coreAssemblyName = null) { }

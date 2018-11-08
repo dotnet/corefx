@@ -14,7 +14,6 @@
     <Compile Include="System\Reflection\DefaultBinder.cs" />
     <Compile Include="System\Reflection\DefaultBinder.CanConvert.cs" />
     <Compile Include="System\Reflection\MetadataAssemblyResolver.cs" />
-    <Compile Include="System\Reflection\PathAssemblyResolver.cs" />
     <Compile Include="System\Reflection\MetadataLoadContext.Apis.cs" />
     <Compile Include="System\Reflection\MetadataLoadContext.CoreAssembly.cs" />
     <Compile Include="System\Reflection\MetadataLoadContext.Disposing.cs" />
@@ -79,8 +78,8 @@
     <Compile Include="System\Reflection\TypeLoading\General\Ecma\MetadataTable.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\HashHelpers.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\Helpers.cs" />
-    <Compile Include="System\Reflection\TypeLoading\General\Interop.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
-    <Compile Include="System\Reflection\TypeLoading\General\Interop.netstandard.cs" Condition="'$(TargetGroup)' == 'netstandard'" />
+    <Compile Include="System\Reflection\TypeLoading\General\TypeExtensions.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
+    <Compile Include="System\Reflection\TypeLoading\General\TypeExtensions.netstandard.cs" Condition="'$(TargetsNetStandard)' == 'true'" />
     <Compile Include="System\Reflection\TypeLoading\General\MethodSig.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\RoAssemblyName.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\Sentinels.cs" />
@@ -143,7 +142,7 @@
     <Compile Include="System\Reflection\TypeLoading\Types\RoType.TypeClassification.cs" />
     <Compile Include="System\Reflection\TypeLoading\Types\RoWrappedType.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+  <ItemGroup>
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Runtime.Extensions" />
