@@ -35,6 +35,7 @@ namespace System.Text.Json
         internal bool _inObject;
         internal bool _isNotPrimitive;
         internal JsonTokenType _tokenType;
+        internal JsonTokenType _previousTokenType;
         internal JsonReaderOptions _readerOptions;
         internal Stack<JsonTokenType> _stack;
 
@@ -75,18 +76,12 @@ namespace System.Text.Json
             _inObject = default;
             _isNotPrimitive = default;
             _tokenType = default;
+            _previousTokenType = default;
             _readerOptions = options;
 
-            // Only allocate the stack if the user explicitly sets the JsonReaderOptions
-            // by providing a custom JsonCommentHandling. This way we avoid allocations in the common, default cases.
-            if (_readerOptions.CommentHandling == JsonCommentHandling.Allow)
-            {
-                _stack = new Stack<JsonTokenType>();
-            }
-            else
-            {
-                _stack = null;
-            }
+            // Only allocate the stack if the user reads a JSON payload beyond the depth that the _stackFreeContainer can handle.
+            // This way we avoid allocations in the common, default cases, and allocate lazily.
+            _stack = null;
         }
 
         /// <summary>
