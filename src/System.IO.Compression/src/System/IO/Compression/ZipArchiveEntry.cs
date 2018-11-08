@@ -105,7 +105,14 @@ namespace System.IO.Compression
             _versionMadeBySpecification = ZipVersionNeededValues.Default;
             _versionToExtract = ZipVersionNeededValues.Default; // this must happen before following two assignment
             _generalPurposeBitFlag = 0;
-            CompressionMethod = CompressionMethodValues.Deflate;
+            if (_compressionLevel == CompressionLevel.NoCompression)
+            {
+                CompressionMethod = CompressionMethodValues.Stored;
+            }
+            else
+            {
+                CompressionMethod = CompressionMethodValues.Deflate;
+            }
             _lastModified = DateTimeOffset.Now;
 
             _compressedSize = 0; // we don't know these yet
@@ -594,15 +601,21 @@ namespace System.IO.Compression
         {
             // stream stack: backingStream -> DeflateStream -> CheckSumWriteStream
 
-            // we should always be compressing with deflate. Stored is used for empty files, but we don't actually
-            // call through this function for that - we just write the stored value in the header
-            Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate);
-
-            Stream compressorStream = _compressionLevel.HasValue ?
-                new DeflateStream(backingStream, _compressionLevel.Value, leaveBackingStreamOpen) :
-                new DeflateStream(backingStream, CompressionMode.Compress, leaveBackingStreamOpen);
-
             bool isIntermediateStream = true;
+            Stream compressorStream;
+            if (!_compressionLevel.HasValue)
+            {
+                compressorStream = new DeflateStream(backingStream, CompressionMode.Compress, leaveBackingStreamOpen);
+            }
+            else if (_compressionLevel == CompressionLevel.NoCompression)
+            {
+                compressorStream = backingStream;
+                isIntermediateStream = false;
+            }
+            else
+            {
+                compressorStream = new DeflateStream(backingStream, _compressionLevel.Value, leaveBackingStreamOpen);
+            }
 
             bool leaveCompressorStreamOpenOnClose = leaveBackingStreamOpen && !isIntermediateStream;
             var checkSumStream = new CheckSumAndSizeWriteStream(
