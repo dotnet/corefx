@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -1519,12 +1520,13 @@ namespace System.Text.Json.Tests
                         if (json.ValueSpan.Contains((byte)'.'))
                         {
                             Assert.True(json.TryGetValueAsDouble(out double numberValue));
-                            Assert.Equal(expectedString, numberValue.ToString());
+                            // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
+                            Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
                             Assert.True(json.TryGetValueAsInt32(out int numberValue));
-                            Assert.Equal(expectedString, numberValue.ToString());
+                            Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         break;
                     case JsonTokenType.String:
@@ -1534,7 +1536,7 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.False:
                     case JsonTokenType.True:
                         Assert.True(json.TryGetValueAsBoolean(out bool boolValue));
-                        Assert.Equal(expectedString, boolValue.ToString());
+                        Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         break;
                 }
             }
@@ -1597,12 +1599,12 @@ namespace System.Text.Json.Tests
                         if (json.ValueSpan.Contains((byte)'.'))
                         {
                             Assert.True(json.TryGetValueAsDouble(out double numberValue));
-                            Assert.Equal(expectedString, numberValue.ToString());
+                            Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
                             Assert.True(json.TryGetValueAsInt32(out int numberValue));
-                            Assert.Equal(expectedString, numberValue.ToString());
+                            Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         foundPrimitiveValue = true;
                         break;
@@ -1614,7 +1616,7 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.False:
                     case JsonTokenType.True:
                         Assert.True(json.TryGetValueAsBoolean(out bool boolValue));
-                        Assert.Equal(expectedString, boolValue.ToString());
+                        Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         foundPrimitiveValue = true;
                         break;
                 }

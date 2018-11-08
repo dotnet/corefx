@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -116,18 +117,22 @@ namespace System.Text.Json.Tests
             }
             for (int i = 0; i < doubles.Count; i++)
             {
+                // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"double").Append(i).Append("\": ");
-                builder.Append(doubles[i]).Append(", ");
+                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", doubles[i]);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < floats.Count; i++)
             {
                 builder.Append("\"float").Append(i).Append("\": ");
-                builder.Append(floats[i]).Append(", ");
+                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", floats[i]);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < decimals.Count; i++)
             {
                 builder.Append("\"decimal").Append(i).Append("\": ");
-                builder.Append(decimals[i]).Append(", ");
+                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", decimals[i]);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
 
             builder.Append("\"intEnd\": 0}");
@@ -168,7 +173,8 @@ namespace System.Text.Json.Tests
                         if (count >= floats.Count)
                             count = 0;
 
-                        float expected = float.Parse(floats[count].ToString());
+                        var str = string.Format(CultureInfo.InvariantCulture, "{0}", floats[count]);
+                        float expected = float.Parse(str, CultureInfo.InvariantCulture);
 
                         Assert.Equal(expected, numberFloat);
                         count++;
@@ -179,7 +185,8 @@ namespace System.Text.Json.Tests
                         if (count >= doubles.Count)
                             count = 0;
 
-                        double expected = double.Parse(doubles[count].ToString());
+                        var str = string.Format(CultureInfo.InvariantCulture, "{0}", doubles[count]);
+                        double expected = double.Parse(str, CultureInfo.InvariantCulture);
 
                         Assert.Equal(expected, numberDouble);
                         count++;
@@ -189,7 +196,10 @@ namespace System.Text.Json.Tests
                         Assert.True(json.TryGetValueAsDecimal(out decimal numberDecimal));
                         if (count >= decimals.Count)
                             count = 0;
-                        Assert.Equal(decimals[count], numberDecimal);
+
+                        var str = string.Format(CultureInfo.InvariantCulture, "{0}", decimals[count]);
+                        decimal expected = decimal.Parse(str, CultureInfo.InvariantCulture);
+                        Assert.Equal(expected, numberDecimal);
                         count++;
                     }
                 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -18,7 +19,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.Value != null)
                 {
-                    sb.Append(json.Value).Append(", ");
+                    // Use InvariantCulture to make sure numbers retain the decimal point '.'
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "{0}, ", json.Value);
                 }
             }
             return sb.ToString();
@@ -139,11 +141,11 @@ namespace System.Text.Json.Tests
             foreach (KeyValuePair<string, object> entry in dictionary)
             {
                 if (entry.Value is Dictionary<string, object> nestedDictionary)
-                    builder.Append(entry.Key).Append(", ").Append(DictionaryToString(nestedDictionary));
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0}, ", entry.Key).Append(DictionaryToString(nestedDictionary));
                 else if (entry.Value is List<object> nestedList)
-                    builder.Append(entry.Key).Append(", ").Append(ListToString(nestedList));
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0}, ", entry.Key).Append(ListToString(nestedList));
                 else
-                    builder.Append(entry.Key).Append(", ").Append(entry.Value).Append(", ");
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0}, {1}, ", entry.Key, entry.Value);
             }
             return builder.ToString();
         }
@@ -158,7 +160,7 @@ namespace System.Text.Json.Tests
                 else if (entry is List<object> nestedList)
                     builder.Append(ListToString(nestedList));
                 else
-                    builder.Append(entry).Append(", ");
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0}, ", entry);
             }
             return builder.ToString();
         }
