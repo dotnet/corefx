@@ -185,6 +185,48 @@ namespace System.Diagnostics.Tests
             }, filename, options).Dispose();
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)] // test relies on xdg-open
+        public void ProcessStart_UseShellExecute_OnUnix_DocumentFile_IgnoresArguments()
+        {
+            Assert.Equal(s_allowedProgramsToRun[0], "xdg-open");
+
+            if (!IsProgramInstalled("xdg-open"))
+            {
+                return;
+            }
+
+            // Open a file that doesn't exist with an argument that xdg-open considers invalid.
+            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = "/nosuchfile", Arguments = "invalid_arg" }))
+            {
+                Assert.NotNull(px);
+                px.WaitForExit();
+                // xdg-open returns different failure exit codes, 1 indicates an error in command line syntax.
+                Assert.NotEqual(0, px.ExitCode); // the command failed
+                Assert.NotEqual(1, px.ExitCode); // the failure is not due to the invalid argument
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        public void ProcessStart_UseShellExecute_OnUnix_Executable_PassesArguments()
+        {
+            string testFilePath = GetTestFilePath();
+            Assert.False(File.Exists(testFilePath));
+
+            // Start a process that will create a file pass the filename as Arguments.
+            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true,
+                                                                 FileName = "touch",
+                                                                 Arguments = testFilePath }))
+            {
+                Assert.NotNull(px);
+                px.WaitForExit();
+                Assert.Equal(0, px.ExitCode);
+            }
+
+            Assert.True(File.Exists(testFilePath));
+        }
+
         [Theory]
         [InlineData((string)null, true)]
         [InlineData("", true)]

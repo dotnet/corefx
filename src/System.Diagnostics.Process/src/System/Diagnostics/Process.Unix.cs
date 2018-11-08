@@ -334,7 +334,7 @@ namespace System.Diagnostics
                 if (!isExecuting)
                 {
                     filename = GetPathToOpenFile();
-                    argv = ParseArgv(startInfo, filename);
+                    argv = ParseArgv(startInfo, filename, ignoreArguments: true);
 
                     ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
@@ -456,34 +456,40 @@ namespace System.Diagnostics
 
         /// <summary>Converts the filename and arguments information from a ProcessStartInfo into an argv array.</summary>
         /// <param name="psi">The ProcessStartInfo.</param>
-        /// <param name="alternativePath">alternative resolved path to use as first argument</param>
+        /// <param name="resolvedExe">Resolved executable to open ProcessStartInfo.FileName</param>
+        /// <param name="ignoreArguments">Don't pass ProcessStartInfo.Arguments</param>
         /// <returns>The argv array.</returns>
-        private static string[] ParseArgv(ProcessStartInfo psi, string alternativePath = null)
+        private static string[] ParseArgv(ProcessStartInfo psi, string resolvedExe = null, bool ignoreArguments = false)
         {
-            string argv0 = psi.FileName; // when no alternative path exists, pass filename (instead of resolved path) as argv[0], to match what caller supplied
-            if (string.IsNullOrEmpty(psi.Arguments) && string.IsNullOrEmpty(alternativePath) && psi.ArgumentList.Count == 0)
+            // Avoid building List<string>.
+            if (string.IsNullOrEmpty(resolvedExe) &&
+                (ignoreArguments || (string.IsNullOrEmpty(psi.Arguments) && psi.ArgumentList.Count == 0)))
             {
-                return new string[] { argv0 };
+                return new string[] { psi.FileName };
             }
 
             var argvList = new List<string>();
-            if (!string.IsNullOrEmpty(alternativePath))
+            if (!string.IsNullOrEmpty(resolvedExe))
             {
-                argvList.Add(alternativePath);
-                if (alternativePath.Contains("kfmclient"))
+                argvList.Add(resolvedExe);
+                if (resolvedExe.Contains("kfmclient"))
                 {
                     argvList.Add("openURL"); // kfmclient needs OpenURL
                 }
             }
 
-            argvList.Add(argv0);
-            if (!string.IsNullOrEmpty(psi.Arguments))
+            argvList.Add(psi.FileName);
+
+            if (!ignoreArguments)
             {
-                ParseArgumentsIntoList(psi.Arguments, argvList);
-            }
-            else
-            {
-                argvList.AddRange(psi.ArgumentList);
+                if (!string.IsNullOrEmpty(psi.Arguments))
+                {
+                    ParseArgumentsIntoList(psi.Arguments, argvList);
+                }
+                else
+                {
+                    argvList.AddRange(psi.ArgumentList);
+                }
             }
             return argvList.ToArray();
         }
