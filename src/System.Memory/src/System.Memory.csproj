@@ -19,10 +19,10 @@
     <Compile Include="System\Buffers\ReadOnlySequence.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceDebugView.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceSegment.cs" />
-    <Compile Include="System\Buffers\ReadOnlySequence_helpers.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequence.helpers.cs" />
     <Compile Include="System\Buffers\SequenceReader.cs" />
-    <Compile Include="System\Buffers\SequenceReader_search.cs" />
-    <Compile Include="System\Buffers\SequenceReaderExtensions_binary.cs" />
+    <Compile Include="System\Buffers\SequenceReader.search.cs" />
+    <Compile Include="System\Buffers\SequenceReaderExtensions.binary.cs" />
     <Compile Include="System\Buffers\Text\Base64Decoder.cs" />
     <Compile Include="System\Buffers\Text\Base64Encoder.cs" />
     <Compile Include="System\Runtime\InteropServices\SequenceMarshal.cs" />
