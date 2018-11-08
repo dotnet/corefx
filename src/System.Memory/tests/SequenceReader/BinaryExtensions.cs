@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Memory.Tests.SequenceReader
@@ -47,7 +48,7 @@ namespace System.Memory.Tests.SequenceReader
             Assert.Equal(6, span[0]);
             Assert.Equal(7, span[1]);
 
-            Assert.True(reader.TryRead(out int intValue));
+            Assert.True(SequenceMarshal.TryRead(ref reader, out int intValue));
             Assert.Equal(BitConverter.ToInt32(new byte[] { 0, 1, 0, 2 }), intValue);
 
             Assert.True(reader.TryReadBigEndian(out intValue));

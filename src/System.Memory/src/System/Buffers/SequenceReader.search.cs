@@ -407,7 +407,7 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Try to read data until the given <paramref name="delimiter"/>.
+        /// Try to read data until the entire given <paramref name="delimiter"/> matches.
         /// </summary>
         /// <param name="sequence">The read data, if any.</param>
         /// <param name="delimiter">The multi (T) delimiter.</param>

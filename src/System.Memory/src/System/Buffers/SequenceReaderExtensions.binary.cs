@@ -4,6 +4,7 @@
 
 using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 
@@ -23,7 +24,8 @@ namespace System.Buffers
         /// <returns>
         /// True if successful. <paramref name="value"/> will be default if failed (due to lack of space).
         /// </returns>
-        public static unsafe bool TryRead<T>(ref this SequenceReader<byte> reader, out T value) where T : unmanaged
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe bool TryRead<T>(ref this SequenceReader<byte> reader, out T value) where T : unmanaged
         {
             ReadOnlySpan<byte> span = reader.UnreadSpan;
             if (span.Length < sizeof(T))
