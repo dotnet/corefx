@@ -892,5 +892,45 @@ namespace System.PrivateUri.Tests
             string largeString = new string('a', 1_000_000) + ":"; // 2MB is large enough to cause a stack overflow if we stackalloc the scheme buffer.
             Assert.Throws<UriFormatException>(() => new Uri(largeString));
         }
+
+        [Fact]
+        public static void Uri_HostTrailingSpaces_SpacesTrimmed()
+        {
+            string host = "www.contoso.com";
+            Uri u = new Uri($"http://{host}     ");
+
+            Assert.Equal($"http://{host}/", u.AbsoluteUri);
+            Assert.Equal(host, u.Host);
+        }
+
+        [Fact]
+        public static void Uri_PortTrailingSpaces_SpacesTrimmed()
+        {
+            int port = 1234;
+            Uri u = new Uri($"http://www.contoso.com:{port}     ");
+
+            Assert.Equal($"http://www.contoso.com:{port}/", u.AbsoluteUri);
+            Assert.Equal(port, u.Port);
+        }
+
+        [Fact]
+        public static void Uri_PathTrailingSpaces_SpacesTrimmed()
+        {
+            string path = "/path/";
+            Uri u = new Uri($"http://www.contoso.com{path}     ");
+
+            Assert.Equal($"http://www.contoso.com{path}", u.AbsoluteUri);
+            Assert.Equal(path, u.AbsolutePath);
+        }
+
+        [Fact]
+        public static void Uri_QueryTrailingSpaces_SpacesTrimmed()
+        {
+            string query = "?query";
+            Uri u = new Uri($"http://www.contoso.com/{query}     ");
+
+            Assert.Equal($"http://www.contoso.com/{query}", u.AbsoluteUri);
+            Assert.Equal(query, u.Query);
+        }
     }
 }

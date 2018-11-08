@@ -2422,8 +2422,7 @@ namespace System
                                 for (++idx; idx < info.Offset.End; ++idx)
                                 {
                                     ushort val = unchecked((ushort)((ushort)userString[idx] - (ushort)'0'));
-                                    if (val == unchecked((ushort)('/' - '0')) || val == (ushort)('?' - '0') ||
-                                        val == unchecked((ushort)('#' - '0')))
+                                    if (val > unchecked((ushort)('9' - '0')))
                                     {
                                         break;
                                     }
