@@ -49,7 +49,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="maxDepth">Sets the maximum depth allowed when reading JSON, with the default set as 64.
         /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.</param>
-        /// <param name="options">Defines the customized behaviour of the <see cref="Utf8JsonReader"/>
+        /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
         /// that is different from the JSON RFC (for example how to handle comments).
         /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid).</param>
         /// <exception cref="ArgumentException">
@@ -90,9 +90,9 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Gets the custom behaviour when reading JSON using
+        /// Gets the custom behavior when reading JSON using
         /// the <see cref="Utf8JsonReader"/> that may deviate from strict adherence
-        /// to the JSON specification, which is the default behaviour.
+        /// to the JSON specification, which is the default behavior.
         /// </summary>
         public JsonReaderOptions Options => _readerOptions;
 

@@ -5,10 +5,10 @@
 namespace System.Text.Json
 {
     /// <summary>
-    /// Provides the ability for the user to define custom behaviour when reading JSON
+    /// Provides the ability for the user to define custom behavior when reading JSON
     /// using the <see cref="Utf8JsonReader"/> that may deviate from strict adherence
     /// to the JSON specification (as per the JSON RFC - https://tools.ietf.org/html/rfc8259),
-    /// which is the default behaviour.
+    /// which is the default behavior.
     /// </summary>
     public struct JsonReaderOptions
     {

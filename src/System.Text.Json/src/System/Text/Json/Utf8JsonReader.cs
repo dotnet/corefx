@@ -1315,7 +1315,7 @@ namespace System.Text.Json
         private ConsumeTokenResult ConsumeNextTokenFromLastNonCommentToken()
         {
             JsonTokenType prevTokenType = _stack.Pop();
-            if (prevTokenType >= JsonTokenType.String && prevTokenType <= JsonTokenType.Null)
+            if (JsonReaderHelper.IsTokenTypePrimitive(prevTokenType))
             {
                 _tokenType = _inObject ? JsonTokenType.StartObject : JsonTokenType.StartArray;
             }
@@ -1532,7 +1532,7 @@ namespace System.Text.Json
                 if (SkipComment())
                 {
                     // The next character must be a start of a property name or value.
-                    if (!HasMoreData(resource/*ExceptionResource.ExpectedStartOfPropertyOrValueNotFound*/))
+                    if (!HasMoreData(resource))
                     {
                         goto IncompleteRollback;
                     }

@@ -13,6 +13,8 @@ namespace System.Text.Json
     /// </summary>
     public enum JsonTokenType : byte
     {
+        // Do not re-order.
+        // We rely on the ordering to quickly check things like IsTokenTypePrimitive
         None,
         StartObject,
         EndObject,

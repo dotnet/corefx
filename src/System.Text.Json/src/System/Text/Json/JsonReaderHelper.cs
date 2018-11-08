@@ -32,6 +32,11 @@ namespace System.Text.Json
         // Otherwise, return false.
         public static bool IsDigit(byte nextByte) => (uint)(nextByte - '0') <= '9' - '0';
 
+        // Returns true if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
+        // Otherwise, return false.
+        public static bool IsTokenTypePrimitive(JsonTokenType tokenType) =>
+            (tokenType - JsonTokenType.String) <= (JsonTokenType.Null - JsonTokenType.String);
+
         // A hex digit is valid if it is in the range: [0..9] | [A..F] | [a..f]
         // Otherwise, return false.
         public static bool IsHexDigit(byte nextByte) =>
