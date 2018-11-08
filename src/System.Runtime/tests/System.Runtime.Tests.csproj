@@ -31,12 +31,6 @@
     <Compile Include="$(CommonTestPath)\System\Collections\TestBase.NonGeneric.cs">
       <Link>Common\System\Collections\TestBase.NonGeneric.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
-      <Link>Common\System\IO\TempFile.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
-      <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
       <Link>System\StringTests.cs</Link>
     </Compile>
@@ -69,6 +63,7 @@
     <Compile Include="System\ApplicationExceptionTests.cs" />
     <Compile Include="System\AttributeTests.cs" />
     <Compile Include="System\Attributes.cs" />
+    <Compile Include="System\AttributeUsageAttributeTests.cs" />
     <Compile Include="System\BadImageFormatExceptionTests.cs" />
     <Compile Include="System\BooleanTests.cs" />
     <Compile Include="System\BufferTests.cs" />
@@ -88,7 +83,9 @@
     <Compile Include="System\Exceptions.Utility.cs" />
     <Compile Include="System\ExecutionEngineExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
+    <Compile Include="System\EventArgsTests.cs" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
+    <Compile Include="System\FlagsAttributeTests.cs" />
     <Compile Include="System\FormattableStringTests.cs" />
     <Compile Include="System\FormatExceptionTests.cs" />
     <Compile Include="System\GCTests.cs" />
@@ -118,11 +115,13 @@
     <Compile Include="System\NullReferenceExceptionTests.cs" />
     <Compile Include="System\ObjectTests.cs" />
     <Compile Include="System\ObjectDisposedExceptionTests.cs" />
+    <Compile Include="System\ObsoleteAttributeTests.cs" />
     <Compile Include="System\OutOfMemoryExceptionTests.cs" />
     <Compile Include="System\OverflowExceptionTests.cs" />
-    <Compile Include="System\RankExceptionTests.cs" />
+    <Compile Include="System\ParamArrayAttributeTests.cs" />
     <Compile Include="System\PlatformNotSupportedExceptionTests.cs" />
     <Compile Include="System\PseudoCustomAttributeTests.cs" />
+    <Compile Include="System\RankExceptionTests.cs" />
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StackOverflowExceptionTests.cs" />
@@ -135,6 +134,7 @@
     <Compile Include="System\TimeZoneInfoTests.cs" />
     <Compile Include="System\TimeZoneTests.cs" />
     <Compile Include="System\TimeZoneNotFoundExceptionTests.cs" />
+    <Compile Include="System\TypeLoadExceptionTests.cs" />
     <Compile Include="System\TypeUnloadedExceptionTests.cs" />
     <Compile Include="System\TupleTests.cs" />
     <Compile Include="System\UInt16Tests.cs" />
@@ -157,6 +157,7 @@
     <Compile Include="System\Collections\ObjectModel\ReadOnlyCollectionTests.cs" />
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.cs" />
     <Compile Include="System\ComponentModel\EditorBrowsableAttributeTests.cs" />
+    <Compile Include="System\Diagnostics\ConditionalAttributeTests.cs" />
     <Compile Include="System\IO\DirectoryNotFoundExceptionTests.cs" />
     <Compile Include="System\IO\DirectoryNotFoundException.InteropTests.cs" />
     <Compile Include="System\IO\EndOfStreamExceptionTests.cs" />
@@ -165,29 +166,21 @@
     <Compile Include="System\IO\FileLoadException.InteropTests.cs" />
     <Compile Include="System\IO\FileNotFoundExceptionTests.cs" />
     <Compile Include="System\IO\FileNotFoundException.InteropTests.cs" />
+    <Compile Include="System\IO\IOExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
-    <Compile Include="System\Reflection\AssemblyTests.cs" />
-    <Compile Include="System\Reflection\AssemblyNameTests.cs" />
-    <Compile Include="System\Reflection\ConstructorInfoTests.cs" />
+    <Compile Include="System\Reflection\AssemblyAttributesTests.cs" />
     <Compile Include="System\Reflection\CustomAttributeDataTests.cs" />
     <Compile Include="System\Reflection\CustomAttributesTestData.cs" />
     <Compile Include="System\Reflection\CustomAttribute_Named_Typed_ArgumentTests.cs" />
-    <Compile Include="System\Reflection\EventInfoTests.cs" />
-    <Compile Include="System\Reflection\FieldInfoTests.cs" />
-    <Compile Include="System\Reflection\MemberInfoTests.cs" />
+    <Compile Include="System\Reflection\DefaultMemberAttributeTests.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.cs" />
     <Compile Include="System\Reflection\MethodBodyTests.cs" />
-    <Compile Include="System\Reflection\MethodInfoTests.cs" />
     <Compile Include="System\Reflection\ModuleTests.cs" />
-    <Compile Include="System\Reflection\ParameterInfoTests.cs" />
     <Compile Include="System\Reflection\PointerTests.cs" />
-    <Compile Include="System\Reflection\PropertyInfoTests.cs" />
     <Compile Include="System\Reflection\ReflectionTypeLoadExceptionTests.cs" />
-    <Compile Include="System\Reflection\RuntimeReflectionExtensionsTests.cs" />
     <Compile Include="System\Reflection\StrongNameKeyPairTests.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.cs" />
-    <Compile Include="System\Reflection\TypeInfoTests.cs" />
     <Compile Include="System\Reflection\TypeTests.Get.CornerCases.cs" />
     <Compile Include="System\Reflection\TypeTests.GetInterface.cs" />
     <Compile Include="System\Reflection\TypeTests.GetMember.cs" />
@@ -204,6 +197,7 @@
     <Compile Include="System\Runtime\Serialization\SerializationExceptionTests.cs" />
     <Compile Include="System\Runtime\Serialization\StreamingContextTests.cs" />
     <Compile Include="System\Security\SecurityAttributeTests.cs" />
+    <Compile Include="System\Security\SecurityExceptionTests.cs" />
     <Compile Include="System\Text\StringBuilderTests.cs" />
     <Compile Include="System\Threading\WaitHandleTests.cs" />
     <Compile Include="System\Type\TypePropertyTests.cs" />
@@ -245,16 +239,15 @@
     <Compile Include="System\UInt64Tests.netcoreapp.cs" />
     <Compile Include="System\VersionTests.netcoreapp.cs" />
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\AssemblyTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\BindingFlagsDoNotWrap.netcoreapp.cs" />
     <Compile Include="System\Reflection\InvokeRefReturn.netcoreapp.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\MemberInfoTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\SignatureTypes.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\TypeInfoTests.netcoreapp.cs" />
+    <Compile Include="System\Runtime\CompilerServices\AttributesTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttributeTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.netcoreapp.cs" />
+    <Compile Include="System\Runtime\CompilerServices\MethodImplAttributeTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeFeatureTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
@@ -292,21 +285,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="TestAssembly\TestAssembly.csproj">
-      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
-      <Name>TestAssembly</Name>
-    </ProjectReference>
     <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj">
       <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
       <Name>TestLoadAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="ForwardedTypesAssembly\ForwardedTypesAssembly.csproj">
-      <Project>{3A3DE9F8-6295-4B68-BAAB-406F1CA0CD9C}</Project>
-      <Name>ForwardedTypesAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="UnloadableAssembly\UnloadableAssembly.csproj">
-      <Project>{CA43AAD6-59A6-4BEB-AC9E-52DC9FD04B8B}</Project>
-      <Name>UnloadableAssembly</Name>
     </ProjectReference>
     <Reference Include="TestModule\System.Reflection.TestModule.dll">
     </Reference>

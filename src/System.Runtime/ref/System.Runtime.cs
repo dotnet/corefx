@@ -5896,6 +5896,7 @@ namespace System.Reflection
     public enum MethodImplAttributes
     {
         AggressiveInlining = 256,
+        AggressiveOptimization = 512,
         CodeTypeMask = 3,
         ForwardRef = 16,
         IL = 0,
@@ -6661,6 +6662,7 @@ namespace System.Runtime.CompilerServices
     public enum MethodImplOptions
     {
         AggressiveInlining = 256,
+        AggressiveOptimization = 512,
         ForwardRef = 16,
         InternalCall = 4096,
         NoInlining = 8,
@@ -7681,6 +7683,7 @@ namespace System.Threading
         public System.Threading.CancellationTokenRegistration Register(System.Action callback, bool useSynchronizationContext) { throw null; }
         public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state) { throw null; }
         public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state, bool useSynchronizationContext) { throw null; }
+        public System.Threading.CancellationTokenRegistration UnsafeRegister(System.Action<object> callback, object state) { throw null; }
         public void ThrowIfCancellationRequested() { }
     }
     public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>

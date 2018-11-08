@@ -310,6 +310,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void RemoveReadOnlyNonExistingDoesNotThrow()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                store.Remove(cert);
+            }
+        }
+
+        [Fact]
         public static void RemoveDisposedIsIgnored()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -522,7 +533,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(0, store.Certificates.Count);
             }
         }
-
+#if Unix
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux)] // Windows/OSX doesn't use SSL_CERT_{DIR,FILE}.
         private void X509Store_MachineStoreLoadSkipsInvalidFiles()
@@ -565,5 +576,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
+#endif
     }
 }

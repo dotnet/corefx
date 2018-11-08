@@ -8,7 +8,6 @@ Building CoreFX on FreeBSD, Linux and OS X
 4. Run the build script `./build.sh`
 
 Calling the script `build.sh` builds both the native and managed code.
-Only use it when the parameters that you are passing to the script apply for both components. Otherwise, use the scripts `build-native.sh` and `build-managed.sh` respectively.
 
 For more information about the different options when building, run `build.sh -?` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
 

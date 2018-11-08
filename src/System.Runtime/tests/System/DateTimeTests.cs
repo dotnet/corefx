@@ -764,7 +764,7 @@ namespace System.Tests
             Assert.Equal(dt.ToString("r"), DateTime.ParseExact(Whitespace + input, "r", null, DateTimeStyles.AllowLeadingWhite).ToString("r"));
             Assert.Equal(dt.ToString("r"), DateTime.ParseExact(input + Whitespace, "r", null, DateTimeStyles.AllowTrailingWhite).ToString("r"));
             Assert.Equal(dt.ToString("r"), DateTime.ParseExact(
-                Whitespace + 
+                Whitespace +
                 input +
                 Whitespace, "r", null, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite).ToString("r"));
             Assert.Equal(dt.ToString("r"), DateTime.ParseExact(
@@ -1122,7 +1122,7 @@ namespace System.Tests
             }
             else
             {
-                // When the date separator and time separator are the same, DateTime.TryParse cannot 
+                // When the date separator and time separator are the same, DateTime.TryParse cannot
                 // tell the difference between a short date like dd.MM.yy and a short time
                 // like HH.mm.ss. So it assumes that if it gets 03.04.11, that must be a time
                 // and uses the current date to construct the date time.
@@ -1229,7 +1229,25 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("style", () => DateTime.ParseExact(strDateTime, formats, provider, style));
         }
 
-        public static IEnumerable<object[]> Parse_ValidInput_Suceeds_MemberData()
+        [Fact]
+        public static void TestTryParseAtBoundaries()
+        {
+            Assert.True(DateTime.TryParse("9999-12-31T23:59:59.9999999", out var maxDateTime),
+                        "DateTime parsing expected to succeed at the boundary DateTime.MaxValue");
+            Assert.Equal(DateTime.MaxValue, maxDateTime);
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime)); // exceeded DateTime.MaxValue
+            }
+            else
+            {
+                Assert.False(DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime),
+                         "DateTime parsing expected to throw with any dates greater than DateTime.MaxValue");
+            }
+        }
+
+        public static IEnumerable<object[]> Parse_ValidInput_Succeeds_MemberData()
         {
             yield return new object[] { "1234 12", CultureInfo.InvariantCulture, new DateTime(1234, 12, 1, 0, 0, 0) };
             yield return new object[] { "12 1234", CultureInfo.InvariantCulture, new DateTime(1234, 12, 1, 0, 0, 0) };
@@ -1250,45 +1268,47 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Parse_ValidInput_Suceeds_MemberData))]
-        public static void Parse_ValidInput_Suceeds(string input, CultureInfo culture, DateTime? expected)
+        [MemberData(nameof(Parse_ValidInput_Succeeds_MemberData))]
+        public static void Parse_ValidInput_Succeeds(string input, CultureInfo culture, DateTime? expected)
         {
             Assert.Equal(expected, DateTime.Parse(input, culture));
         }
 
         public static IEnumerable<object[]> ParseExact_ValidInput_Succeeds_MemberData()
         {
-            yield return new object[] { "9", "%d", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
-            yield return new object[] { "15", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
+            foreach (DateTimeStyles style in new[] { DateTimeStyles.None, DateTimeStyles.AllowWhiteSpaces })
+            {
+                yield return new object[] { "9", "%d", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
+                yield return new object[] { "15", "dd", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
 
-            yield return new object[] { "9", "%M", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "09", "MM", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "Sep", "MMM", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "September", "MMMM", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "9", "%M", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "09", "MM", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "Sep", "MMM", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "September", "MMMM", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
 
-            yield return new object[] { "1", "%y", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "01", "yy", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "2001", "yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2001, 1, 1, 0, 0, 0) };
+                yield return new object[] { "1", "%y", CultureInfo.InvariantCulture, style, new DateTime(2001, 1, 1, 0, 0, 0) };
+                yield return new object[] { "01", "yy", CultureInfo.InvariantCulture, style, new DateTime(2001, 1, 1, 0, 0, 0) };
+                yield return new object[] { "2001", "yyyy", CultureInfo.InvariantCulture, style, new DateTime(2001, 1, 1, 0, 0, 0) };
 
-            yield return new object[] { "3", "%H", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "03", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "3", "%H", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "03", "HH", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
 
-            yield return new object[] { "3A", "ht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "03A", "hht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "3P", "ht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(12 + 3) };
-            yield return new object[] { "03P", "hht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(12 + 3) };
+                yield return new object[] { "3A", "ht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "03A", "hht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "3P", "ht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(12 + 3) };
+                yield return new object[] { "03P", "hht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(12 + 3) };
 
-            yield return new object[] { "2017-10-11 01:23:45Z", "u", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 10, 11, 1, 23, 45) };
-            yield return new object[] { "9/8/2017 10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 9, 8, 10, 11, 12) };
-            yield return new object[] { "9/8/2017 20:11:12 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 9, 8, 20, 11, 12) };
-            yield return new object[] { "Fri, 08 Sep 2017 11:18:19 -0000", "ddd, d MMM yyyy H:m:s zzz", new CultureInfo("en-US"), DateTimeStyles.AllowInnerWhite, new DateTime(2017, 9, 8, 11, 18, 19, DateTimeKind.Utc) };
-            yield return new object[] { "1234-05-06T07:00:00.8Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 800) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
-            yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
-
+                yield return new object[] { "2017-10-11 01:23:45Z", "u", CultureInfo.InvariantCulture, style, new DateTime(2017, 10, 11, 1, 23, 45) };
+                yield return new object[] { "9/8/2017 10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, style, new DateTime(2017, 9, 8, 10, 11, 12) };
+                yield return new object[] { "9/8/2017 20:11:12 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, style, new DateTime(2017, 9, 8, 20, 11, 12) };
+                yield return new object[] { "Fri, 08 Sep 2017 11:18:19 -0000", "ddd, d MMM yyyy H:m:s zzz", new CultureInfo("en-US"), DateTimeStyles.AllowInnerWhite, new DateTime(2017, 9, 8, 11, 18, 19, DateTimeKind.Utc) };
+                yield return new object[] { "1234-05-06T07:00:00.8Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 800) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, style, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
+                yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, style, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
+            }
 
             yield return new object[] { "9", "\"  \"%d", CultureInfo.InvariantCulture, DateTimeStyles.AllowLeadingWhite, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
             yield return new object[] { "15", "\' \'dd", CultureInfo.InvariantCulture, DateTimeStyles.AllowLeadingWhite, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
@@ -1351,6 +1371,13 @@ namespace System.Tests
             yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ\" \"", CultureInfo.InvariantCulture, DateTimeStyles.AllowTrailingWhite, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
             yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ\"  \"", CultureInfo.InvariantCulture, DateTimeStyles.AllowTrailingWhite, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
 
+            yield return new object[] { "9/8/2017 10:11:12 AM                                          ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "9/8/2017 10:11:12 AM       ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "9/ 8    /2017    10:11:12 AM       ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "   9   /8/2017       10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "9/8/2017 10 : 11 : 12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { " 9 / 8 / 2017    10 : 11 : 12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "   9   /   8   /   2017    10  :   11  :   12  AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
 
             var hebrewCulture = new CultureInfo("he-IL");
             hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
@@ -1469,7 +1496,7 @@ namespace System.Tests
             //                     case 2: format = "r"; break;
             //                     default: format = "R"; break;
             //                 }
-            //     
+            //
             //                 try
             //                 {
             //                     rand.NextBytes(bytes);

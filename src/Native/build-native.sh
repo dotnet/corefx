@@ -109,14 +109,10 @@ prepare_native_build()
     fi
 
     # Generate version.c if specified, else have an empty one.
-    __versionSourceFile=$__rootRepo/bin/obj/version.c
+    __versionSourceFile=$__artifactsDir/obj/_version.c
     if [ ! -e "${__versionSourceFile}" ]; then
-        if [ $__generateversionsource == true ]; then
-            $__rootRepo/run.sh build-managed -project:"$__rootRepo/build.proj" -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /v:minimal
-        else
-            __versionSourceLine="static char sccsid[] __attribute__((used)) = \"@(#)No version information produced\";"
-            echo $__versionSourceLine > $__versionSourceFile
-        fi
+        __versionSourceLine="static char sccsid[] __attribute__((used)) = \"@(#)No version information produced\";"
+        echo "${__versionSourceLine}" > ${__versionSourceFile}
     fi
 }
 
@@ -152,17 +148,15 @@ build_native()
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __nativeroot=$__scriptpath/Unix
 __rootRepo="$__scriptpath/../.."
-__rootbinpath="$__scriptpath/../../bin"
+__artifactsDir="$__rootRepo/artifacts"
 
 # Set the various build properties here so that CMake and MSBuild can pick them up
 __CMakeExtraArgs=""
 __MakeExtraArgs=""
-__generateversionsource=true
 __BuildArch=x64
 __BuildType=Debug
 __CMakeArgs=DEBUG
 __BuildOS=Linux
-__TargetGroup=netcoreapp
 __NumProc=1
 __UnprocessedBuildArgs=
 __CrossBuild=0
@@ -251,6 +245,10 @@ while :; do
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
+        outconfig|-outconfig)
+            __outConfig=$2
+            shift
+            ;;
         freebsd|FreeBSD|-freebsd|-FreeBSD)
             __BuildOS=FreeBSD
             ;;
@@ -265,10 +263,6 @@ while :; do
             ;;
         stripsymbols|-stripsymbols)
             __CMakeExtraArgs="$__CMakeExtraArgs -DSTRIP_SYMBOLS=true"
-            ;;
-        --targetgroup)
-            shift
-            __TargetGroup=$1
             ;;
         --numproc|-numproc|numproc)
             shift
@@ -285,9 +279,6 @@ while :; do
             if [ "$__HostOS" == "Linux" ]; then
                 __PortableBuild=1
             fi
-            ;;
-        skipgenerateversion|-skipgenerateversion)
-            __generateversionsource=false
             ;;
         --clang*)
                 # clangx.y or clang-x.y
@@ -376,8 +367,9 @@ if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then
 fi
 
 # Set the remaining variables based upon the determined build configuration
-__IntermediatesDir="$__rootbinpath/obj/$__BuildOS.$__BuildArch.$__BuildType/native"
-__BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/native"
+__outConfig=${__outConfig:-"$__BuildOS-$__BuildArch-$__BuildType"}
+__IntermediatesDir="$__artifactsDir/obj/native/$__outConfig"
+__BinDir="$__artifactsDir/bin/native/$__outConfig"
 
 # Make the directories necessary for build if they don't exist
 setup_dirs

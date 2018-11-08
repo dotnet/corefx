@@ -4,7 +4,7 @@ Building CoreFX on Windows
 ## Required Software
 
 1. **[Visual Studio 2017](https://www.visualstudio.com/downloads/)** (Community, Professional, Enterprise) with the latest update must be installed. The Community version is completely free.
-2. **[.NET Core SDK](https://www.microsoft.com/net/download/windows)** >= v2.1.401 must be installed which will add the `dotnet` to your path.
+2. **[.NET Core SDK](https://www.microsoft.com/net/download/windows)** >= v2.1.401 must be installed which will add the `dotnet` toolchain to your path.
 3. **[CMake](https://cmake.org/)** must be installed from [the CMake download page](https://cmake.org/download/#latest) and added to your path.
 
 ### Visual Studio 2017
@@ -14,7 +14,7 @@ Building CoreFX on Windows
 The following are the minimum requirements:
   * .NET desktop development
     * All Required Components
-    * .NET Framework 4-4.6 Development Tools
+    * .NET Framework 4.7.2 Development Tools
   * Desktop development with C++
     * All Required Components
     * VC++ 2017 v141 Toolset (x86, x64)
@@ -35,10 +35,10 @@ The following are the minimum requirements:
   * Visual Studio C++ Core Features
   * VC++ 2017 v141 Toolset (x86, x64)
   * MSBuild
-  * .NET Framework 4.6 Targeting Pack
+  * .NET Framework 4.7.2 Targeting Pack
   * Windows Universal CRT SDK
   * VC++ 2015.3 v140 Toolset (x86, x64)
-  
+
 #### Visual Studio 2017 - Command line install
 
 If you've installed Visual Studio 2017 already, go to `C:\Program Files (x86)\Microsoft Visual Studio\Installer` and run
@@ -56,7 +56,6 @@ For the best possible experience make sure to have the latest version of Visual 
 From a (non-admin) Command Prompt window:
 
 - `build.cmd` - Will cause basic tool initialization and build the default configuration for refs, libs, and packages.
-- `build-tests.cmd` - Will build and run tests for the default configuration.
 
 For information on different configurations see [project-guidelines](../coding-guidelines/project-guidelines.md).
 
@@ -65,13 +64,12 @@ For information on different configurations see [project-guidelines](../coding-g
 Visual Studio Solution (.sln) files exist for related groups of libraries. These can be loaded to build, debug and test inside the Visual Studio IDE.
 
 Note that when calling the script `build.cmd` attempts to build both the native and managed code.
-Only use it when the parameters that you are passing to the script apply for both components. Otherwise, use the scripts `build-native.cmd` and `build-managed.cmd` respectively.
 
 For more information about the different options when building, run `build.cmd -?` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
 
 ### Running tests from the command line
 
-From the root, use `build-tests.cmd`.
+From the root, use `build.cmd -test`.
 For more details, or to test an individual project, see the [developer guide topic](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md).
 
 ### Running tests from Visual Studio
