@@ -10,33 +10,13 @@ namespace System.Buffers
     public ref partial struct SequenceReader<T> where T : unmanaged, IEquatable<T>
     {
         /// <summary>
-        /// Try to read everything up to the given <paramref name="delimiter"/>. The reader will be positioned
-        /// after the first occurrence of <paramref name="delimiter"/> when successful.
+        /// Try to read everything up to the given <paramref name="delimiter"/>.
         /// </summary>
         /// <param name="span">The read data, if any.</param>
         /// <param name="delimiter">The delimiter to look for.</param>
+        /// <param name="advancePastDelimiter">True to move past the <paramref name="delimiter"/> if found.</param>
         /// <returns>True if the <paramref name="delimiter"/> was found.</returns>
-        public bool TryReadTo(out ReadOnlySpan<T> span, T delimiter)
-        {
-            ReadOnlySpan<T> remaining = UnreadSpan;
-            int index = remaining.IndexOf(delimiter);
-
-            if (index != -1)
-            {
-                span = remaining.Slice(0, index);
-                AdvanceCurrentSpan(index + 1);
-                return true;
-            }
-
-            return TryReadToMultisegment(out span, delimiter);
-        }
-
-        private bool TryReadToMultisegment(out ReadOnlySpan<T> span, T delimiter)
-        {
-            return TryReadToSlow(out span, delimiter, advancePastDelimiter: true);
-        }
-
-        public bool TryReadTo(out ReadOnlySpan<T> span, T delimiter, bool advancePastDelimiter)
+        public bool TryReadTo(out ReadOnlySpan<T> span, T delimiter, bool advancePastDelimiter = true)
         {
             ReadOnlySpan<T> remaining = UnreadSpan;
             int index = remaining.IndexOf(delimiter);

@@ -301,6 +301,8 @@ namespace System.Buffers
                     break;
                 }
 
+                // As there may not be any further segments we need to
+                // push the current index to the end of the span.
                 CurrentSpanIndex += remaining;
                 count -= remaining;
                 Debug.Assert(count >= 0);
