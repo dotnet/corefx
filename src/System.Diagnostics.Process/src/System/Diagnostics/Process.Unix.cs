@@ -318,7 +318,7 @@ namespace System.Diagnostics
                 // when a Windows filesystem is mounted on Linux. To handle that, treat it as a regular file
                 // when exec returns ENOEXEC (file format cannot be executed).
                 bool isExecuting = false;
-                filename = ResolveExecutableForShellExecute(startInfo.FileName);
+                filename = ResolveExecutableForShellExecute(startInfo.FileName, cwd);
                 if (filename != null)
                 {
                     argv = ParseArgv(startInfo);
@@ -502,7 +502,7 @@ namespace System.Diagnostics
             return envp;
         }
 
-        private static string ResolveExecutableForShellExecute(string filename)
+        private static string ResolveExecutableForShellExecute(string filename, string workingDirectory)
         {
             // Determine if filename points to an executable file.
             // filename may be an absolute path, a relative path or a uri.
@@ -524,13 +524,18 @@ namespace System.Diagnostics
                     resolvedFilename = uri.LocalPath;
                 }
             }
+            // filename is relative
             else
             {
-                string relativeFile = Path.Combine(Directory.GetCurrentDirectory(), filename);
+                // The WorkingDirectory property specifies the location of the executable.
+                // If WorkingDirectory is an empty string, the current directory is understood to contain the executable.
+                workingDirectory = workingDirectory != null ? Path.GetFullPath(workingDirectory) :
+                                                              Directory.GetCurrentDirectory();
+                string filenameInWorkingDirectory = Path.Combine(workingDirectory, filename);
                 // filename is a relative path in the working directory
-                if (File.Exists(relativeFile))
+                if (File.Exists(filenameInWorkingDirectory))
                 {
-                    resolvedFilename = relativeFile;
+                    resolvedFilename = filenameInWorkingDirectory;
                 }
                 // find filename on PATH
                 else
