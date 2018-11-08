@@ -9,9 +9,9 @@ namespace System.Text.Json
 {
     public enum JsonCommentHandling : byte
     {
-        AllowComments = (byte)1,
-        Default = (byte)0,
-        SkipComments = (byte)2,
+        Allow = (byte)1,
+        Disallow = (byte)0,
+        Skip = (byte)2,
     }
     public sealed partial class JsonReaderException : System.Exception
     {

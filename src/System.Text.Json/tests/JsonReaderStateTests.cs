@@ -17,7 +17,7 @@ namespace System.Text.Json.Tests
 
             var expectedOption = new JsonReaderOptions
             {
-                CommentHandling = JsonCommentHandling.Default
+                CommentHandling = JsonCommentHandling.Disallow
             };
             Assert.Equal(expectedOption, state.Options);
         }
@@ -31,7 +31,7 @@ namespace System.Text.Json.Tests
 
             var expectedOption = new JsonReaderOptions
             {
-                CommentHandling = JsonCommentHandling.Default
+                CommentHandling = JsonCommentHandling.Disallow
             };
             Assert.Equal(expectedOption, state.Options);
         }
@@ -45,7 +45,7 @@ namespace System.Text.Json.Tests
 
             var expectedOption = new JsonReaderOptions
             {
-                CommentHandling = JsonCommentHandling.Default
+                CommentHandling = JsonCommentHandling.Disallow
             };
             Assert.Equal(expectedOption, state.Options);
 

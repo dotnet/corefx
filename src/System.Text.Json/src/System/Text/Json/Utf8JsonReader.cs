@@ -146,7 +146,7 @@ namespace System.Text.Json
             _consumed++;
             _bytePositionInLine++;
 
-            if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments &&
+            if (_readerOptions.CommentHandling != JsonCommentHandling.Allow &&
                 _currentDepth <= JsonReaderState.StackFreeMaxDepth)
             {
                 _stackFreeContainer = (_stackFreeContainer << 1) | 1;
@@ -179,7 +179,7 @@ namespace System.Text.Json
             _consumed++;
             _bytePositionInLine++;
 
-            if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments)
+            if (_readerOptions.CommentHandling != JsonCommentHandling.Allow)
             {
                 if (_currentDepth <= JsonReaderState.StackFreeMaxDepth)
                 {
@@ -220,7 +220,7 @@ namespace System.Text.Json
             _consumed++;
             _bytePositionInLine++;
 
-            if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments &&
+            if (_readerOptions.CommentHandling != JsonCommentHandling.Allow &&
                 _currentDepth <= JsonReaderState.StackFreeMaxDepth)
             {
                 _stackFreeContainer = _stackFreeContainer << 1;
@@ -242,7 +242,7 @@ namespace System.Text.Json
             _consumed++;
             _bytePositionInLine++;
 
-            if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments)
+            if (_readerOptions.CommentHandling != JsonCommentHandling.Allow)
             {
                 if (_currentDepth <= JsonReaderState.StackFreeMaxDepth)
                 {
@@ -383,7 +383,7 @@ namespace System.Text.Json
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
                     }
 
-                    if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments && _tokenType == JsonTokenType.Comment)
+                    if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && _tokenType == JsonTokenType.Comment)
                     {
                         return false;
                     }
@@ -420,7 +420,7 @@ namespace System.Text.Json
             if (first == JsonConstants.OpenBrace)
             {
                 _currentDepth++;
-                if (_readerOptions.CommentHandling != JsonCommentHandling.AllowComments)
+                if (_readerOptions.CommentHandling != JsonCommentHandling.Allow)
                 {
                     _stackFreeContainer = 1;
                 }
@@ -437,7 +437,7 @@ namespace System.Text.Json
             else if (first == JsonConstants.OpenBracket)
             {
                 _currentDepth++;
-                if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
+                if (_readerOptions.CommentHandling == JsonCommentHandling.Allow)
                 {
                     EnsureAndPushStack(JsonTokenType.StartArray);
                 }
@@ -486,9 +486,9 @@ namespace System.Text.Json
                     }
                 }
 
-                if (_readerOptions.CommentHandling != JsonCommentHandling.Default)
+                if (_readerOptions.CommentHandling != JsonCommentHandling.Disallow)
                 {
-                    if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
+                    if (_readerOptions.CommentHandling == JsonCommentHandling.Allow)
                     {
                         // This is necessary to avoid throwing when the user has 1 or more comments as the first token
                         // OR if there is a comment after a single, non-primitive value.
@@ -501,7 +501,7 @@ namespace System.Text.Json
                     }
                     else
                     {
-                        Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.SkipComments);
+                        Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.Skip);
                         if (_tokenType == JsonTokenType.StartObject || _tokenType == JsonTokenType.StartArray)
                         {
                             _isNotPrimitive = true;
@@ -583,16 +583,16 @@ namespace System.Text.Json
                 {
                     switch (_readerOptions.CommentHandling)
                     {
-                        case JsonCommentHandling.Default:
+                        case JsonCommentHandling.Disallow:
                             break;
-                        case JsonCommentHandling.AllowComments:
+                        case JsonCommentHandling.Allow:
                             if (marker == JsonConstants.Slash)
                             {
                                 return ConsumeComment();
                             }
                             break;
                         default:
-                            Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.SkipComments);
+                            Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.Skip);
                             if (marker == JsonConstants.Slash)
                             {
                                 if (SkipComment())
@@ -1228,9 +1228,9 @@ namespace System.Text.Json
         /// </summary>
         private ConsumeTokenResult ConsumeNextToken(byte marker)
         {
-            if (_readerOptions.CommentHandling != JsonCommentHandling.Default)
+            if (_readerOptions.CommentHandling != JsonCommentHandling.Disallow)
             {
-                if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments)
+                if (_readerOptions.CommentHandling == JsonCommentHandling.Allow)
                 {
                     if (marker == JsonConstants.Slash)
                     {
@@ -1243,7 +1243,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.SkipComments);
+                    Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.Skip);
                     return ConsumeNextTokenUntilAfterAllCommentsAreSkipped(marker);
                 }
             }
@@ -1282,7 +1282,7 @@ namespace System.Text.Json
                     first = _buffer[_consumed];
                 }
 
-                if (_readerOptions.CommentHandling == JsonCommentHandling.AllowComments && first == JsonConstants.Slash)
+                if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && first == JsonConstants.Slash)
                 {
                     return ConsumeComment() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }

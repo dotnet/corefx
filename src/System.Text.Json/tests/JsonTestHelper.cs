@@ -111,14 +111,14 @@ namespace System.Text.Json.Tests
             return textWriter.ToString();
         }
 
-        public static byte[] ReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
+        public static byte[] ReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow)
         {
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
             var reader = new Utf8JsonReader(data, true, state);
             return ReaderLoop(data.Length, out length, ref reader);
         }
 
-        public static object ReturnObjectHelper(byte[] data, JsonCommentHandling commentHandling = JsonCommentHandling.Default)
+        public static object ReturnObjectHelper(byte[] data, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow)
         {
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
             var reader = new Utf8JsonReader(data, true, state);
