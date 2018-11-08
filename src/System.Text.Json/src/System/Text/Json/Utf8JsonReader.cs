@@ -190,7 +190,7 @@ namespace System.Text.Json
                 {
                     Debug.Assert(_stack.Count > 0);
                     _stack.Pop();
-                    if (_stack.Count < JsonReaderState.StackFreeMaxDepth)
+                    if (_stack.Count == 0)
                     {
                         _inObject = (_stackFreeContainer & 1) != 0;
                     }
@@ -253,7 +253,7 @@ namespace System.Text.Json
                 {
                     Debug.Assert(_stack.Count > 0);
                     _stack.Pop();
-                    if (_stack.Count < JsonReaderState.StackFreeMaxDepth)
+                    if (_stack.Count == 0)
                     {
                         _inObject = (_stackFreeContainer & 1) != 0;
                     }
