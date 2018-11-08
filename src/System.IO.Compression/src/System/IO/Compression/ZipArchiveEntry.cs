@@ -91,6 +91,14 @@ namespace System.IO.Compression
             : this(archive, entryName)
         {
             _compressionLevel = compressionLevel;
+            if (_compressionLevel == CompressionLevel.NoCompression)
+            {
+                CompressionMethod = CompressionMethodValues.Stored;
+            }
+            else
+            {
+                CompressionMethod = CompressionMethodValues.Deflate;
+            }
         }
 
         // Initializes new entry
@@ -105,14 +113,7 @@ namespace System.IO.Compression
             _versionMadeBySpecification = ZipVersionNeededValues.Default;
             _versionToExtract = ZipVersionNeededValues.Default; // this must happen before following two assignment
             _generalPurposeBitFlag = 0;
-            if (_compressionLevel == CompressionLevel.NoCompression)
-            {
-                CompressionMethod = CompressionMethodValues.Stored;
-            }
-            else
-            {
-                CompressionMethod = CompressionMethodValues.Deflate;
-            }
+            CompressionMethod = CompressionMethodValues.Deflate;
             _lastModified = DateTimeOffset.Now;
 
             _compressedSize = 0; // we don't know these yet
