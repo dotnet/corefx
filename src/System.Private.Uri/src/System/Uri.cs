@@ -2411,8 +2411,7 @@ namespace System
                         if (++idx < info.Offset.End)
                         {
                             port = unchecked((ushort)(userString[idx] - '0'));
-                            if (!(port == unchecked((ushort)('/' - '0')) || port == (ushort)('?' - '0') ||
-                                port == unchecked((ushort)('#' - '0'))))
+                            if (port <= unchecked((ushort)('9' - '0')))
                             {
                                 notEmpty = true;
                                 if (port == 0)

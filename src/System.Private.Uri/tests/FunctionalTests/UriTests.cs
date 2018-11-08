@@ -903,14 +903,32 @@ namespace System.PrivateUri.Tests
             Assert.Equal(host, u.Host);
         }
 
-        [Fact]
-        public static void Uri_PortTrailingSpaces_SpacesTrimmed()
+        [Theory]
+        [InlineData("1234")]
+        [InlineData("01234")]
+        [InlineData("12340")]
+        [InlineData("012340")]
+        [InlineData("99")]
+        [InlineData("09")]
+        [InlineData("90")]
+        [InlineData("0")]
+        [InlineData("000")]
+        public static void Uri_PortTrailingSpaces_SpacesTrimmed(string portString)
         {
-            int port = 1234;
-            Uri u = new Uri($"http://www.contoso.com:{port}     ");
+            Uri u = new Uri($"http://www.contoso.com:{portString}     ");
 
+            int port = Int32.Parse(portString);
             Assert.Equal($"http://www.contoso.com:{port}/", u.AbsoluteUri);
             Assert.Equal(port, u.Port);
+        }
+
+        [Fact]
+        public static void Uri_EmptyPortTrailingSpaces_SpacesTrimmed()
+        {
+            Uri u = new Uri($"http://www.contoso.com:     ");
+
+            Assert.Equal($"http://www.contoso.com/", u.AbsoluteUri);
+            Assert.Equal(80, u.Port);
         }
 
         [Fact]
