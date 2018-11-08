@@ -14,7 +14,7 @@ internal partial class Interop
         internal const int MB_ICONEXCLAMATION = 0x30;
         internal const int MB_ICONASTERISK = 0x40;
 
-        [DllImport(Libraries.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [DllImport(Libraries.User32, ExactSpelling = true)]
         internal static extern bool MessageBeep(int type);
     }
 }

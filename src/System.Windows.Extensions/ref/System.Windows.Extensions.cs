@@ -80,7 +80,6 @@ namespace System.Drawing.Printing
 }
 namespace System.Media
 {
-    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class SoundPlayer : System.ComponentModel.Component, System.Runtime.Serialization.ISerializable
     {
         public SoundPlayer() { }

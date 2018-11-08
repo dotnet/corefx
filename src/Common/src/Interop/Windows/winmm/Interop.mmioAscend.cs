@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class WinMM
     {
-        [DllImport(Libraries.WinMM, CharSet = CharSet.Auto)]
+        [DllImport(Libraries.WinMM)]
         internal static extern int mmioAscend(IntPtr hMIO, MMCKINFO lpck, int flags);
     }
 }

@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class WinMM
     {
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        [StructLayout(LayoutKind.Sequential)]
         internal class WAVEFORMATEX
         {
             internal short wFormatTag;
@@ -25,7 +25,7 @@ internal static partial class Interop
         internal const int WAVE_FORMAT_ADPCM = 0x0002;
         internal const int WAVE_FORMAT_IEEE_FLOAT = 0x0003;
 
-        [DllImport(Libraries.WinMM, CharSet = CharSet.Auto)]
+        [DllImport(Libraries.WinMM)]
         internal static extern int mmioRead(IntPtr hMIO, [MarshalAs(UnmanagedType.LPArray)] byte[] wf, int cch);
     }
 }
