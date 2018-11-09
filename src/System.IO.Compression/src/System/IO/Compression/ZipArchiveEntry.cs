@@ -602,7 +602,6 @@ namespace System.IO.Compression
             // Stored is also used for empty files, but we don't actually call through this function for that - we just write the stored value in the header
             // Deflate64 is not supported on all platforms
             Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate
-                || CompressionMethod == CompressionMethodValues.Deflate64
                 || CompressionMethod == CompressionMethodValues.Stored);
 
             bool isIntermediateStream = true;

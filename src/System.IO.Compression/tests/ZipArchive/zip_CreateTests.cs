@@ -151,7 +151,7 @@ namespace System.IO.Compression.Tests
 
         private static string ReadStringFromSpan(Span<byte> input)
         {
-            return Text.Encoding.UTF8.GetString(input);
+            return Text.Encoding.UTF8.GetString(input.ToArray());
         }
     }
 }
