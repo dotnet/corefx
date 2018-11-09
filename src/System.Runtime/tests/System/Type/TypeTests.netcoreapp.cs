@@ -220,6 +220,7 @@ namespace System.Tests
 
                 yield return new object[] { typeof(TypedReference), true };
                 yield return new object[] { typeof(RuntimeArgumentHandle), true };
+                yield return new object[] { typeof(ArgIterator), true };
                 yield return new object[] { typeof(Span<>), true };
                 yield return new object[] { typeof(Span<int>), true };
                 yield return new object[] { typeof(Span<>).MakeGenericType(theT), true };
