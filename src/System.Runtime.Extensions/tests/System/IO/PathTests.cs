@@ -269,33 +269,22 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.GetFullPath(path));
         }
 
-        [Theory,
-        InlineData(@"C:\folder\", @"C:\folder"),
-        InlineData(@"C:/folder/", @"C:/folder"),
-        InlineData(@"/folder/", @"/folder"),
-        InlineData(@"\folder\", @"\folder"),
-        InlineData(@"C:\", @"C:\"),
-        InlineData(@"C:/", @"C:/"),
-        InlineData(@"", @""),
-        InlineData(@"/", @"/"),
-        InlineData(@"\", @"\"),
-        InlineData(@"\\server\share\", @"\\server\share"),
-        InlineData(@"\\server\share\folder\", @"\\server\share\folder"),
-        InlineData(@"\\?\C:\", @"\\?\C:\"),
-        InlineData(@"\\?\C:\folder\", @"\\?\C:\folder"),
-        InlineData(@"\\?\UNC\", @"\\?\UNC\"),
-        InlineData(@"\\?\UNC\a\", @"\\?\UNC\a\"),
-        InlineData(@"\\?\UNC\a\folder\", @"\\?\UNC\a\folder"),
-        InlineData(null, null)]
-        unsafe public void TrimEndingDirectorySeparator_CoreTests(string path, string expected)
+        [Theory]
+        [MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
+        public void TrimEndingDirectorySeparator_String_CoreTests(string path, string expected)
         {
             string trimmed = Path.TrimEndingDirectorySeparator(path);
             Assert.Equal(expected, trimmed);
             Assert.Same(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
+        }
 
-            ReadOnlySpan<char> trimmedROS = Path.TrimEndingDirectorySeparator(path.AsSpan());
-            PathAssert.Equal(expected, trimmedROS);
-            PathAssert.Equal(trimmedROS, Path.TrimEndingDirectorySeparator(trimmedROS));
+        [Theory]
+        [MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
+        public void TrimEndingDirectorySeparator_ReadOnlySpan_CoreTests(string path, string expected)
+        {
+            ReadOnlySpan<char> trimmed = Path.TrimEndingDirectorySeparator(path.AsSpan());
+            PathAssert.Equal(expected, trimmed);
+            PathAssert.Equal(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
         }
     }
 }
