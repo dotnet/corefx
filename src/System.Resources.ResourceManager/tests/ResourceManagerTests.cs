@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Drawing.Imaging;
+using System.Linq;
 
 namespace System.Resources.Tests
 {
@@ -82,24 +84,61 @@ namespace System.Resources.Tests
             Assert.Equal(expectedValue, manager.GetString(key.ToLower(), culture));
         }
 
+
         public static IEnumerable<object[]> EnglishNonStringResourceData()
         {
             yield return new object[] { "Int", 42 };
             yield return new object[] { "Float", 3.14159 };
             yield return new object[] { "Bytes", new byte[] { 41, 42, 43, 44, 192, 168, 1, 1 } };
             yield return new object[] { "InvalidKeyName", null };
-            yield return new object[] { "Point", new Point(50, 60) };
-            yield return new object[] { "Size", new Size(20, 30) };
+            yield return new object[] { "Point", new Point(50, 60), true };
+            yield return new object[] { "Size", new Size(20, 30), true };
         }
 
         [Theory]
         [MemberData(nameof(EnglishNonStringResourceData))]
-        [ActiveIssue(12565, TestPlatforms.AnyUnix)]
-        public static void GetObject(string key, object expectedValue)
+        public static void GetObject(string key, object expectedValue, bool requiresBinaryFormatter = false)
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
             Assert.Equal(expectedValue, manager.GetObject(key));
             Assert.Equal(expectedValue, manager.GetObject(key, new CultureInfo("en-US")));
+        }
+
+
+        private static byte[] GetImageData(object obj)
+        {
+            using (var stream = new MemoryStream())
+            {
+                switch (obj)
+                {
+                    case Image image:
+                        image.Save(stream, ImageFormat.Bmp);
+                        break;
+                    case Icon icon:
+                        icon.Save(stream);
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+
+        public static IEnumerable<object[]> EnglishImageResourceData()
+        {
+            yield return new object[] { "Bitmap", new Bitmap("bitmap.bmp") };
+            yield return new object[] { "Icon", new Icon("icon.ico") };
+        }
+
+        [Theory]
+        [MemberData(nameof(EnglishImageResourceData))]
+        public static void GetObject_Images(string key, object expectedValue)
+        {
+            var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
+            Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key)));
+            Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key, new CultureInfo("en-US"))));
         }
 
         [Theory]
@@ -114,12 +153,56 @@ namespace System.Resources.Tests
 
         [Theory]
         [MemberData(nameof(EnglishNonStringResourceData))]
-        public static void GetResourceSet_NonStrings(string key, object expectedValue)
+        public static void GetResourceSet_NonStrings(string key, object expectedValue, bool requiresBinaryFormatter = false)
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
             var culture = new CultureInfo("en-US");
             ResourceSet set = manager.GetResourceSet(culture, true, true);
             Assert.Equal(expectedValue, set.GetObject(key));
+        }
+
+        [Theory]
+        [MemberData(nameof(EnglishImageResourceData))]
+        public static void GetResourceSet_Images(string key, object expectedValue)
+        {
+            var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
+            var culture = new CultureInfo("en-US");
+            ResourceSet set = manager.GetResourceSet(culture, true, true);
+            Assert.Equal(GetImageData(expectedValue), GetImageData(set.GetObject(key)));
+        }
+
+        [Theory]
+        [MemberData(nameof(EnglishNonStringResourceData))]
+        public static void File_GetObject(string key, object expectedValue, bool requiresBinaryFormatter = false)
+        {
+            var manager = ResourceManager.CreateFileBasedResourceManager("TestResx.netstandard17", Directory.GetCurrentDirectory(), null);
+            if (requiresBinaryFormatter)
+            {
+                Assert.Throws<NotSupportedException>(() => manager.GetObject(key));
+                Assert.Throws<NotSupportedException>(() => manager.GetObject(key, new CultureInfo("en-US")));
+            }
+            else
+            {
+                Assert.Equal(expectedValue, manager.GetObject(key));
+                Assert.Equal(expectedValue, manager.GetObject(key, new CultureInfo("en-US")));
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnglishNonStringResourceData))]
+        public static void File_GetResourceSet_NonStrings(string key, object expectedValue, bool requiresBinaryFormatter = false)
+        {
+            var manager = ResourceManager.CreateFileBasedResourceManager("TestResx.netstandard17", Directory.GetCurrentDirectory(), null);
+            var culture = new CultureInfo("en-US");
+            ResourceSet set = manager.GetResourceSet(culture, true, true);
+            if (requiresBinaryFormatter)
+            {
+                Assert.Throws<NotSupportedException>(() => set.GetObject(key));
+            }
+            else
+            {
+                Assert.Equal(expectedValue, set.GetObject(key));
+            }
         }
 
         [Fact]
