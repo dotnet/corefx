@@ -9,7 +9,7 @@ namespace System.Collections
     // A vector of bits.  Use this to store bits efficiently, without having to do bit 
     // shifting yourself.
     [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    [Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class BitArray : ICollection, ICloneable
     {
         private int[] m_array; // Do not rename (binary serialization)
@@ -44,13 +44,16 @@ namespace System.Collections
                 throw new ArgumentOutOfRangeException(nameof(length), length, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            m_array = new int[GetArrayLength(length, BitsPerInt32)];
+            m_array = new int[GetIntegerArrayLengthFromBitLength(length)];
             m_length = length;
 
-            int fillValue = defaultValue ? unchecked(((int)0xffffffff)) : 0;
-            for (int i = 0; i < m_array.Length; i++)
+            if (defaultValue)
             {
-                m_array[i] = fillValue;
+                int fillValue = unchecked((int)0xffffffff);
+                for (int i = 0; i < m_array.Length; i++)
+                {
+                    m_array[i] = fillValue;
+                }
             }
 
             _version = 0;
@@ -74,40 +77,40 @@ namespace System.Collections
             // this value is chosen to prevent overflow when computing m_length.
             // m_length is of type int32 and is exposed as a property, so 
             // type of m_length can't be changed to accommodate.
-            if (bytes.Length > int.MaxValue / BitsPerByte)
+            if (bytes.Length > int.MaxValue >> BitShiftPerByte) // Divide by 8.
             {
                 throw new ArgumentException(SR.Format(SR.Argument_ArrayTooLarge, BitsPerByte), nameof(bytes));
             }
 
-            m_array = new int[GetArrayLength(bytes.Length, BytesPerInt32)];
+            m_array = new int[GetIntegerArrayLengthFromByteLength(bytes.Length)];
             m_length = bytes.Length * BitsPerByte;
 
             int i = 0;
             int j = 0;
-            while (bytes.Length - j >= 4)
+            int totalCount = bytes.Length >> 2;     // Divide by 4.
+
+            for (; i < totalCount; i++)
             {
-                m_array[i++] = (bytes[j] & 0xff) |
-                              ((bytes[j + 1] & 0xff) << 8) |
-                              ((bytes[j + 2] & 0xff) << 16) |
-                              ((bytes[j + 3] & 0xff) << 24);
+                m_array[i] = (bytes[j + 3] << 24) | (bytes[j + 2] << 16) | (bytes[j + 1] << 8) | bytes[j];
                 j += 4;
             }
 
             Debug.Assert(bytes.Length - j >= 0, "BitArray byteLength problem");
             Debug.Assert(bytes.Length - j < 4, "BitArray byteLength problem #2");
+            Debug.Assert(i == totalCount);
 
             switch (bytes.Length - j)
             {
                 case 3:
-                    m_array[i] = ((bytes[j + 2] & 0xff) << 16);
+                    m_array[i] = bytes[j + 2] << 16;
                     goto case 2;
                 // fall through
                 case 2:
-                    m_array[i] |= ((bytes[j + 1] & 0xff) << 8);
+                    m_array[i] |= bytes[j + 1] << 8;
                     goto case 1;
                 // fall through
                 case 1:
-                    m_array[i] |= (bytes[j] & 0xff);
+                    m_array[i] |= bytes[j];
                     break;
             }
 
@@ -121,13 +124,16 @@ namespace System.Collections
                 throw new ArgumentNullException(nameof(values));
             }
 
-            m_array = new int[GetArrayLength(values.Length, BitsPerInt32)];
+            m_array = new int[GetIntegerArrayLengthFromBitLength(values.Length)];
             m_length = values.Length;
 
             for (int i = 0; i < values.Length; i++)
             {
                 if (values[i])
-                    m_array[i / 32] |= (1 << (i % 32));
+                {
+                    int quotient = Div32Rem(i, out int remainder);
+                    m_array[quotient] |= 1 << remainder;
+                }
             }
 
             _version = 0;
@@ -149,13 +155,13 @@ namespace System.Collections
             }
 
             // this value is chosen to prevent overflow when computing m_length
-            if (values.Length > int.MaxValue / BitsPerInt32)
+            if (values.Length > int.MaxValue >> BitShiftPerInt32)   // Divide by 32.
             {
                 throw new ArgumentException(SR.Format(SR.Argument_ArrayTooLarge, BitsPerInt32), nameof(values));
             }
 
             m_array = new int[values.Length];
-            Array.Copy(values, 0, m_array, 0, values.Length);
+            values.AsSpan().CopyTo(m_array);
             m_length = values.Length * BitsPerInt32;
 
             _version = 0;
@@ -173,10 +179,13 @@ namespace System.Collections
                 throw new ArgumentNullException(nameof(bits));
             }
 
-            int arrayLength = GetArrayLength(bits.m_length, BitsPerInt32);
+            int arrayLength = GetIntegerArrayLengthFromBitLength(bits.m_length);
 
             m_array = new int[arrayLength];
-            Array.Copy(bits.m_array, 0, m_array, 0, arrayLength);
+
+            Debug.Assert(bits.m_array.Length <= arrayLength);
+
+            bits.m_array.AsSpan().CopyTo(m_array);
             m_length = bits.m_length;
 
             _version = bits._version;
@@ -202,12 +211,15 @@ namespace System.Collections
         =========================================================================*/
         public bool Get(int index)
         {
-            if (index < 0 || index >= Length)
+            if ((uint)index >= (uint)Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
             }
 
-            return (m_array[index / 32] & (1 << (index % 32))) != 0;
+            int quotient = index >> BitShiftPerInt32;   // Divide by 32.
+            int remainder = index - (quotient << BitShiftPerInt32);   // Multiply by 32.
+
+            return (m_array[quotient] & (1 << remainder)) != 0;
         }
 
         /*=========================================================================
@@ -218,18 +230,21 @@ namespace System.Collections
         =========================================================================*/
         public void Set(int index, bool value)
         {
-            if (index < 0 || index >= Length)
+            if ((uint)index >= (uint)Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
             }
 
+            int quotient = index >> BitShiftPerInt32;   // Divide by 32.
+            int remainder = index - (quotient << BitShiftPerInt32);   // Multiply by 32.
+
             if (value)
             {
-                m_array[index / 32] |= (1 << (index % 32));
+                m_array[quotient] |= 1 << remainder;
             }
             else
             {
-                m_array[index / 32] &= ~(1 << (index % 32));
+                m_array[quotient] &= ~(1 << remainder);
             }
 
             _version++;
@@ -240,11 +255,19 @@ namespace System.Collections
         =========================================================================*/
         public void SetAll(bool value)
         {
-            int fillValue = value ? unchecked(((int)0xffffffff)) : 0;
-            int ints = GetArrayLength(m_length, BitsPerInt32);
-            for (int i = 0; i < ints; i++)
+            int ints = GetIntegerArrayLengthFromBitLength(m_length);
+            if (value)
             {
-                m_array[i] = fillValue;
+                int fillValue = unchecked((int)0xffffffff);
+
+                for (int i = 0; i < ints; i++)
+                {
+                    m_array[i] = fillValue;
+                }
+            }
+            else
+            {
+                m_array.AsSpan(0, ints).Clear();
             }
 
             _version++;
@@ -263,7 +286,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int ints = GetArrayLength(m_length, BitsPerInt32);
+            int ints = GetIntegerArrayLengthFromBitLength(m_length);
             for (int i = 0; i < ints; i++)
             {
                 m_array[i] &= value.m_array[i];
@@ -286,7 +309,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int ints = GetArrayLength(m_length, BitsPerInt32);
+            int ints = GetIntegerArrayLengthFromBitLength(m_length);
             for (int i = 0; i < ints; i++)
             {
                 m_array[i] |= value.m_array[i];
@@ -309,7 +332,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int ints = GetArrayLength(m_length, BitsPerInt32);
+            int ints = GetIntegerArrayLengthFromBitLength(m_length);
             for (int i = 0; i < ints; i++)
             {
                 m_array[i] ^= value.m_array[i];
@@ -326,7 +349,7 @@ namespace System.Collections
         =========================================================================*/
         public BitArray Not()
         {
-            int ints = GetArrayLength(m_length, BitsPerInt32);
+            int ints = GetIntegerArrayLengthFromBitLength(m_length);
             for (int i = 0; i < ints; i++)
             {
                 m_array[i] = ~m_array[i];
@@ -356,22 +379,20 @@ namespace System.Collections
             }
 
             int toIndex = 0;
-            int ints = GetArrayLength(m_length, BitsPerInt32);
+            int ints = GetIntegerArrayLengthFromBitLength(m_length);
             if (count < m_length)
             {
-                int shiftCount;
                 // We can not use Math.DivRem without taking a dependency on System.Runtime.Extensions
-                int fromIndex = count / BitsPerInt32;
-                shiftCount = count - fromIndex * BitsPerInt32; // Optimized Rem
-
+                int fromIndex = Div32Rem(count, out int shiftCount);
+                Div32Rem(m_length, out int remainder);
                 if (shiftCount == 0)
                 {
                     unchecked
                     {
-                        uint mask = uint.MaxValue >> (BitsPerInt32 - m_length % BitsPerInt32);
+                        uint mask = uint.MaxValue >> (BitsPerInt32 - remainder);
                         m_array[ints - 1] &= (int)mask;
                     }
-                    Array.Copy(m_array, fromIndex, m_array, 0, ints - fromIndex);
+                    m_array.AsSpan(fromIndex, ints - fromIndex).CopyTo(m_array);
                     toIndex = ints - fromIndex;
                 }
                 else
@@ -385,14 +406,14 @@ namespace System.Collections
                             int left = m_array[++fromIndex] << (BitsPerInt32 - shiftCount);
                             m_array[toIndex++] = left | (int)right;
                         }
-                        uint mask = uint.MaxValue >> (BitsPerInt32 - m_length % BitsPerInt32);
+                        uint mask = uint.MaxValue >> (BitsPerInt32 - remainder);
                         mask &= (uint)m_array[fromIndex];
                         m_array[toIndex++] = (int)(mask >> shiftCount);
                     }
                 }
             }
 
-            Array.Clear(m_array, toIndex, ints - toIndex);
+            m_array.AsSpan(toIndex, ints - toIndex).Clear();
             _version++;
             return this;
         }
@@ -419,16 +440,14 @@ namespace System.Collections
             int lengthToClear;
             if (count < m_length)
             {
-                int lastIndex = (m_length - 1) / BitsPerInt32;
+                int lastIndex = (m_length - 1) >> BitShiftPerInt32;  // Divide by 32.
 
-                int shiftCount;
                 // We can not use Math.DivRem without taking a dependency on System.Runtime.Extensions
-                lengthToClear = count / BitsPerInt32;
-                shiftCount = count - lengthToClear * BitsPerInt32; // Optimized Rem
+                lengthToClear = Div32Rem(count, out int shiftCount);
 
                 if (shiftCount == 0)
                 {
-                    Array.Copy(m_array, 0, m_array, lengthToClear, lastIndex + 1 - lengthToClear);
+                    m_array.AsSpan(0, lastIndex + 1 - lengthToClear).CopyTo(m_array.AsSpan(lengthToClear));
                 }
                 else
                 {
@@ -448,10 +467,10 @@ namespace System.Collections
             }
             else
             {
-                lengthToClear = GetArrayLength(m_length, BitsPerInt32); // Clear all
+                lengthToClear = GetIntegerArrayLengthFromBitLength(m_length); // Clear all
             }
 
-            Array.Clear(m_array, 0, lengthToClear);
+            m_array.AsSpan(0, lengthToClear).Clear();
             _version++;
             return this;
         }
@@ -469,25 +488,34 @@ namespace System.Collections
                     throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
 
-                int newints = GetArrayLength(value, BitsPerInt32);
-                if (newints > m_array.Length || newints + _ShrinkThreshold < m_array.Length)
+                int newints = GetIntegerArrayLengthFromBitLength(value);
+
+                // grow or shrink (if wasting more than _ShrinkThreshold ints)
+                if (newints > m_array.Length)
                 {
-                    // grow or shrink (if wasting more than _ShrinkThreshold ints)
-                    Array.Resize(ref m_array, newints);
+                    var newArray = new int[newints];
+                    m_array.AsSpan().CopyTo(newArray);
+                    m_array = newArray;
+                }
+                else if (newints + _ShrinkThreshold < m_array.Length)
+                {
+                    var newArray = new int[newints];
+                    m_array.AsSpan(0, newints).CopyTo(newArray);
+                    m_array = newArray;
                 }
 
                 if (value > m_length)
                 {
                     // clear high bit values in the last int
-                    int last = GetArrayLength(m_length, BitsPerInt32) - 1;
-                    int bits = m_length % 32;
+                    int last = (m_length - 1) >> BitShiftPerInt32;
+                    Div32Rem(m_length, out int bits);
                     if (bits > 0)
                     {
                         m_array[last] &= (1 << bits) - 1;
                     }
 
                     // clear remaining int values
-                    Array.Clear(m_array, last + 1, newints - last - 1);
+                    m_array.AsSpan(last + 1, newints - last - 1).Clear();
                 }
 
                 m_length = value;
@@ -506,73 +534,94 @@ namespace System.Collections
             if (array.Rank != 1)
                 throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
 
-            int[] intArray = array as int[];
-            if (intArray != null)
+            if (array is int[] intArray)
             {
-                int last = GetArrayLength(m_length, BitsPerInt32) - 1;
-                int extraBits = m_length % BitsPerInt32;
+                int ints = GetIntegerArrayLengthFromBitLength(m_length);
+                Div32Rem(m_length, out int extraBits);
 
                 if (extraBits == 0)
                 {
                     // we have perfect bit alignment, no need to sanitize, just copy
-                    Array.Copy(m_array, 0, intArray, index, GetArrayLength(m_length, BitsPerInt32));
+                    m_array.AsSpan(0, ints).CopyTo(intArray.AsSpan(index));
                 }
                 else
                 {
+                    int last = ints - 1;
                     // do not copy the last int, as it is not completely used
-                    Array.Copy(m_array, 0, intArray, index, GetArrayLength(m_length, BitsPerInt32) - 1);
+                    m_array.AsSpan(0, last).CopyTo(intArray.AsSpan(index));
 
                     // the last int needs to be masked
                     intArray[index + last] = m_array[last] & unchecked((1 << extraBits) - 1);
                 }
             }
-            else if (array is byte[])
+            else if (array is byte[] byteArray)
             {
-                int extraBits = m_length % BitsPerByte;
-
-                int arrayLength = GetArrayLength(m_length, BitsPerByte);
+                int arrayLength = GetByteArrayLengthFromBitLength(m_length);
                 if ((array.Length - index) < arrayLength)
+                {
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
+                }
 
+                Div8Rem(m_length, out int extraBits);
                 if (extraBits > 0)
                 {
                     // last byte is not aligned, we will directly copy one less byte
                     arrayLength -= 1;
                 }
 
-                byte[] b = (byte[])array;
+                int quotient = Div4Rem(arrayLength, out int remainder);
+                int indexCopy = index;
+                for (int i = 0; i < quotient; i++)
+                {
+                    // Shift to bring the required byte to LSB, then mask
+                    int value = m_array[i];
+                    byteArray[indexCopy++] = (byte)(value & 0x000000FF);
+                    byteArray[indexCopy++] = (byte)((value >> 8) & 0x000000FF);
+                    byteArray[indexCopy++] = (byte)((value >> 16) & 0x000000FF);
+                    byteArray[indexCopy++] = (byte)((value >> 24) & 0x000000FF);
+                }
 
-                // copy all the perfectly-aligned bytes
-                for (int i = 0; i < arrayLength; i++)
-                    b[index + i] = (byte)((m_array[i / 4] >> ((i % 4) * 8)) & 0x000000FF); // Shift to bring the required byte to LSB, then mask
+                switch (remainder)
+                {
+                    case 3:
+                        byteArray[indexCopy++] = (byte)((m_array[quotient] >> 16) & 0x000000FF);
+                        goto case 2;
+                    // fall through
+                    case 2:
+                        byteArray[indexCopy++] = (byte)((m_array[quotient] >> 8) & 0x000000FF);
+                        goto case 1;
+                    // fall through
+                    case 1:
+                        byteArray[indexCopy++] = (byte)(m_array[quotient] & 0x000000FF);
+                        break;
+                }
 
                 if (extraBits > 0)
                 {
                     // mask the final byte
-                    int i = arrayLength;
-                    b[index + i] = (byte)((m_array[i / 4] >> ((i % 4) * 8)) & ((1 << extraBits) - 1));
+                    byteArray[index + arrayLength] = (byte)((m_array[quotient] >> (remainder * 8)) & ((1 << extraBits) - 1));
                 }
             }
-            else if (array is bool[])
+            else if (array is bool[] boolArray)
             {
                 if (array.Length - index < m_length)
+                {
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
+                }
 
-                bool[] b = (bool[])array;
                 for (int i = 0; i < m_length; i++)
-                    b[index + i] = ((m_array[i / 32] >> (i % 32)) & 0x00000001) != 0;
+                {
+                    int quotient = Div32Rem(i, out int remainder);
+                    boolArray[index + i] = ((m_array[quotient] >> (remainder)) & 0x00000001) != 0;
+                }
             }
             else
-                throw new ArgumentException(SR.Arg_BitArrayTypeUnsupported, nameof(array));
-        }
-
-        public int Count
-        {
-            get
             {
-                return m_length;
+                throw new ArgumentException(SR.Arg_BitArrayTypeUnsupported, nameof(array));
             }
         }
+
+        public int Count => m_length;
 
         public object SyncRoot
         {
@@ -580,95 +629,120 @@ namespace System.Collections
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
+                    Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
                 }
                 return _syncRoot;
             }
         }
 
-        public bool IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsSynchronized => false;
 
-        public bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsReadOnly => false;
 
-        public object Clone()
-        {
-            return new BitArray(this);
-        }
+        public object Clone() => new BitArray(this);
 
-        public IEnumerator GetEnumerator()
-        {
-            return new BitArrayEnumeratorSimple(this);
-        }
+        public IEnumerator GetEnumerator() => new BitArrayEnumeratorSimple(this);
 
         // XPerY=n means that n Xs can be stored in 1 Y. 
         private const int BitsPerInt32 = 32;
         private const int BytesPerInt32 = 4;
         private const int BitsPerByte = 8;
 
+        private const int BitShiftPerInt32 = 5;
+        private const int BitShiftPerByte = 3;
+        private const int BitShiftForBytesPerInt32 = 2;
+
         /// <summary>
         /// Used for conversion between different representations of bit array. 
-        /// Returns (n+(div-1))/div, rearranged to avoid arithmetic overflow. 
+        /// Returns (n + (32 - 1)) / 32, rearranged to avoid arithmetic overflow. 
         /// For example, in the bit to int case, the straightforward calc would 
-        /// be (n+31)/32, but that would cause overflow. So instead it's 
-        /// rearranged to ((n-1)/32) + 1, with special casing for 0.
+        /// be (n + 31) / 32, but that would cause overflow. So instead it's 
+        /// rearranged to ((n - 1) / 32) + 1.
+        /// Due to sign extension, we don't need to special case for n == 0, if we use
+        /// bitwise operations (since ((n - 1) >> 5) + 1 = 0).
+        /// This doesn't hold true for ((n - 1) / 32) + 1, which equals 1.
         /// 
         /// Usage:
-        /// GetArrayLength(77, BitsPerInt32): returns how many ints must be 
+        /// GetArrayLength(77): returns how many ints must be 
         /// allocated to store 77 bits.
         /// </summary>
         /// <param name="n"></param>
-        /// <param name="div">use a conversion constant, e.g. BytesPerInt32 to get
-        /// how many ints are required to store n bytes</param>
-        /// <returns></returns>
-        private static int GetArrayLength(int n, int div)
+        /// <returns>how many ints are required to store n bytes</returns>
+        private static int GetIntegerArrayLengthFromBitLength(int n)
         {
-            Debug.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
-            return n > 0 ? (((n - 1) / div) + 1) : 0;
+            Debug.Assert(n >= 0);
+            return ((n - 1) >> BitShiftPerInt32) + 1;
+        }
+
+        private static int GetIntegerArrayLengthFromByteLength(int n)
+        {
+            Debug.Assert(n >= 0);
+            // Due to sign extension, we don't need to special case for n == 0, since ((n - 1) >> 2) + 1 = 0
+            // This doesn't hold true for ((n - 1) / 4) + 1, which equals 1.
+            return ((n - 1) >> BitShiftForBytesPerInt32) + 1;
+        }
+
+        private static int GetByteArrayLengthFromBitLength(int n)
+        {
+            Debug.Assert(n >= 0);
+            // Due to sign extension, we don't need to special case for n == 0, since ((n - 1) >> 3) + 1 = 0
+            // This doesn't hold true for ((n - 1) / 8) + 1, which equals 1.
+            return ((n - 1) >> BitShiftPerByte) + 1;
+        }
+
+        private static int Div32Rem(int number, out int remainder)
+        {
+            int quotient = number >> BitShiftPerInt32;   // Divide by 32.
+            remainder = number - (quotient << BitShiftPerInt32);   // Multiply by 32.
+            return quotient;
+        }
+
+        private static int Div8Rem(int number, out int remainder)
+        {
+            int quotient = number >> BitShiftPerByte;   // Divide by 8.
+            remainder = number - (quotient << BitShiftPerByte);   // Multiply by 8.
+            return quotient;
+        }
+
+        private static int Div4Rem(int number, out int remainder)
+        {
+            int quotient = number >> BitShiftForBytesPerInt32;   // Divide by 4.
+            remainder = number - (quotient << BitShiftForBytesPerInt32);   // Multiply by 4.
+            return quotient;
         }
 
         private class BitArrayEnumeratorSimple : IEnumerator, ICloneable
         {
-            private BitArray bitarray;
-            private int index;
-            private int version;
-            private bool currentElement;
+            private BitArray _bitarray;
+            private int _index;
+            private readonly int _version;
+            private bool _currentElement;
 
             internal BitArrayEnumeratorSimple(BitArray bitarray)
             {
-                this.bitarray = bitarray;
-                this.index = -1;
-                version = bitarray._version;
+                _bitarray = bitarray;
+                _index = -1;
+                _version = bitarray._version;
             }
 
-            public object Clone()
-            {
-                return MemberwiseClone();
-            }
+            public object Clone() => MemberwiseClone();
 
             public virtual bool MoveNext()
             {
-                ICollection bitarrayAsICollection = bitarray;
-                if (version != bitarray._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
-                if (index < (bitarrayAsICollection.Count - 1))
+                ICollection bitarrayAsICollection = _bitarray;
+                if (_version != _bitarray._version)
+                    throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+
+                if (_index < (bitarrayAsICollection.Count - 1))
                 {
-                    index++;
-                    currentElement = bitarray.Get(index);
+                    _index++;
+                    _currentElement = _bitarray.Get(_index);
                     return true;
                 }
                 else
-                    index = bitarrayAsICollection.Count;
+                {
+                    _index = bitarrayAsICollection.Count;
+                }
 
                 return false;
             }
@@ -677,18 +751,30 @@ namespace System.Collections
             {
                 get
                 {
-                    if (index == -1)
-                        throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
-                    if (index >= ((ICollection)bitarray).Count)
-                        throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
-                    return currentElement;
+                    if ((uint)_index >= (uint)_bitarray.Count)
+                        throw GetInvalidOperationException(_index);
+                    return _currentElement;
                 }
             }
 
             public void Reset()
             {
-                if (version != bitarray._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
-                index = -1;
+                if (_version != _bitarray._version)
+                    throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                _index = -1;
+            }
+
+            private InvalidOperationException GetInvalidOperationException(int index)
+            {
+                if (index == -1)
+                {
+                    return new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
+                }
+                else
+                {
+                    Debug.Assert(index >= _bitarray.Count);
+                    return new InvalidOperationException(SR.InvalidOperation_EnumEnded);
+                }
             }
         }
     }
