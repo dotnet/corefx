@@ -162,6 +162,136 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        // Pad depth by nested objects, but minimize the text
+        [InlineData(1, true, true)]
+        [InlineData(2, true, true)]
+        [InlineData(3, true, true)]
+        [InlineData(16, true, true)]
+        [InlineData(32, true, true)]
+        [InlineData(60, true, true)]
+        [InlineData(61, true, true)]
+        [InlineData(62, true, true)]
+        [InlineData(63, true, true)]
+        [InlineData(64, true, true)]
+        [InlineData(65, true, true)]
+        [InlineData(66, true, true)]
+        [InlineData(67, true, true)]
+        [InlineData(68, true, true)]
+        [InlineData(123, true, true)]
+        [InlineData(124, true, true)]
+        [InlineData(125, true, true)]
+
+        // Pad depth by nested arrays, but minimize the text
+        [InlineData(1, false, true)]
+        [InlineData(2, false, true)]
+        [InlineData(3, false, true)]
+        [InlineData(16, false, true)]
+        [InlineData(32, false, true)]
+        [InlineData(60, false, true)]
+        [InlineData(61, false, true)]
+        [InlineData(62, false, true)]
+        [InlineData(63, false, true)]
+        [InlineData(64, false, true)]
+        [InlineData(65, false, true)]
+        [InlineData(66, false, true)]
+        [InlineData(67, false, true)]
+        [InlineData(68, false, true)]
+        [InlineData(123, false, true)]
+        [InlineData(124, false, true)]
+        [InlineData(125, false, true)]
+
+        // Pad depth by nested arrays, but keep the text formatted
+        [InlineData(1, false, false)]
+        [InlineData(2, false, false)]
+        [InlineData(3, false, false)]
+        [InlineData(16, false, false)]
+        [InlineData(32, false, false)]
+        [InlineData(60, false, false)]
+        [InlineData(61, false, false)]
+        [InlineData(62, false, false)]
+        [InlineData(63, false, false)]
+        [InlineData(64, false, false)]
+        [InlineData(65, false, false)]
+        [InlineData(66, false, false)]
+        [InlineData(67, false, false)]
+        [InlineData(68, false, false)]
+        [InlineData(123, false, false)]
+        [InlineData(124, false, false)]
+        [InlineData(125, false, false)]
+
+        // Pad depth by nested objects, but keep the text formatted
+        [InlineData(1, true, false)]
+        [InlineData(2, true, false)]
+        [InlineData(3, true, false)]
+        [InlineData(16, true, false)]
+        [InlineData(32, true, false)]
+        [InlineData(60, true, false)]
+        [InlineData(61, true, false)]
+        [InlineData(62, true, false)]
+        [InlineData(63, true, false)]
+        [InlineData(64, true, false)]
+        [InlineData(65, true, false)]
+        [InlineData(66, true, false)]
+        [InlineData(67, true, false)]
+        [InlineData(68, true, false)]
+        [InlineData(123, true, false)]
+        [InlineData(124, true, false)]
+        [InlineData(125, true, false)]
+        public static void TestPartialJsonReader(int depthPadding, bool padByObject, bool compactData)
+        {
+            var builderPrefix = new StringBuilder();
+            var builderSuffix = new StringBuilder();
+
+            if (padByObject)
+            {
+                for (int i = 0; i < depthPadding; i++)
+                {
+                    builderPrefix.Append($"{{\n \"property{i}\": ");
+                    builderSuffix.Append("\n}");
+                }
+            }
+            else
+            {
+                for (int i = 0; i < depthPadding; i++)
+                {
+                    builderPrefix.Append("[\n");
+                    builderSuffix.Append("\n]");
+                }
+            }
+
+            string jsonString = builderPrefix.ToString() + SR.FullJsonSchema1 + builderSuffix.ToString();
+
+            // Remove all formatting/indendation
+            if (compactData)
+            {
+                using (JsonTextReader jsonReader = new JsonTextReader(new StringReader(jsonString)))
+                {
+                    jsonReader.FloatParseHandling = FloatParseHandling.Decimal;
+                    JToken jtoken = JToken.ReadFrom(jsonReader);
+                    var stringWriter = new StringWriter();
+                    using (JsonTextWriter jsonWriter = new JsonTextWriter(stringWriter))
+                    {
+                        jtoken.WriteTo(jsonWriter);
+                        jsonString = stringWriter.ToString();
+                    }
+                }
+            }
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            // Set the max depth sufficiently large to account for the depth padding.
+            byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int outputLength, maxDepth: 256);
+            Span<byte> outputSpan = new byte[outputLength];
+            string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, outputLength));
+
+            Stream stream = new MemoryStream(dataUtf8);
+            TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
+            string expectedStr = JsonTestHelper.NewtonsoftReturnStringHelper(reader);
+
+            Assert.Equal(expectedStr, actualStr);
+        }
+
+        [Theory]
         [MemberData(nameof(SpecialNumTestCases))]
         public static void TestPartialJsonReaderSpecialNumbers(TestCaseType type, string jsonString)
         {

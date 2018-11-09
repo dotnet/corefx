@@ -114,7 +114,7 @@ namespace System.Text.Json
             _lineNumber = state._lineNumber;
             _bytePositionInLine = state._bytePositionInLine;
             _currentDepth = state._currentDepth;
-            _maxDepth = state._maxDepth == 0 ? JsonReaderState.StackFreeMaxDepth : state._maxDepth;
+            _maxDepth = state._maxDepth == 0 ? JsonReaderState.StackFreeMaxDepth : state._maxDepth; // If max depth is not set, revert to the default depth.
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
             _tokenType = state._tokenType;
@@ -161,7 +161,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
             _inObject = true;
         }
-        
+
         private void EndObject()
         {
             if (!_inObject || _currentDepth <= 0)

@@ -111,9 +111,9 @@ namespace System.Text.Json.Tests
             return textWriter.ToString();
         }
 
-        public static byte[] ReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow)
+        public static byte[] ReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow, int maxDepth = 64)
         {
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+            var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
             var reader = new Utf8JsonReader(data, true, state);
             return ReaderLoop(data.Length, out length, ref reader);
         }
