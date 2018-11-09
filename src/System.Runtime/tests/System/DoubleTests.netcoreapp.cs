@@ -305,8 +305,7 @@ namespace System.Tests
             for (int pow = -323; pow <= 308; pow++)
             {
                 var s = $"1.0e{pow}";
-                double value;
-                double.TryParse(s, out value);
+                double.TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out double value);
                 var tenToThePow = (ulong)BitConverter.DoubleToInt64Bits(value);
                 CheckOneDouble(s, value);
                 TestRoundTripDouble(tenToThePow + 1);
@@ -513,8 +512,7 @@ namespace System.Tests
 
         private static void CheckOneDouble(string s, double expected)
         {
-            double actual;
-            if (!double.TryParse(s, out actual)) actual = 1.0 / 0.0;
+            if (!double.TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out double actual)) actual = 1.0 / 0.0;
             if (!actual.Equals(expected))
             {
                 throw new Exception($@"
@@ -526,7 +524,7 @@ Error for double input ""{s}""
 
         private static string InvariantToString(object o)
         {
-            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:G17}", o);
+            return string.Format(CultureInfo.InvariantCulture, "{0:G17}", o);
         }
 
         private static void TestRoundTripDouble(double d)

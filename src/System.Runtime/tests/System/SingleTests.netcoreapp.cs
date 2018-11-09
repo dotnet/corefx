@@ -291,8 +291,7 @@ namespace System.Tests
 
         private static void CheckOneSingle(string s, float expected)
         {
-            float actual;
-            if (!float.TryParse(s, out actual)) actual = 1.0f / 0.0f;
+            if (!float.TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out float actual)) actual = 1.0f / 0.0f;
             if (!actual.Equals(expected))
             {
                 throw new Exception($@"
@@ -304,7 +303,7 @@ Error for float input ""{s}""
 
         private static string InvariantToString(object o)
         {
-            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:G9}", o);
+            return string.Format(CultureInfo.InvariantCulture, "{0:G9}", o);
         }
 
         private static void TestRoundTripSingle(float d)
