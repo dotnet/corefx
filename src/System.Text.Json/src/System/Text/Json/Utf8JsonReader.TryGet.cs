@@ -17,7 +17,7 @@ namespace System.Text.Json
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a string
-        /// (i.e. other than <see cref="JsonTokenType.String"/>, <see cref="JsonTokenType.PropertyName"/>, or <see cref="JsonTokenType.Comment"/>).
+        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="ArgumentException">
@@ -25,7 +25,7 @@ namespace System.Text.Json
         /// </exception>
         public string GetStringValue()
         {
-            if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.Comment)
+            if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName)
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }

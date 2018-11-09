@@ -166,7 +166,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnsureAndPushStack(JsonTokenType tokenType)
         {
-            Debug.Assert(tokenType != JsonTokenType.Comment);
+            Debug.Assert(tokenType == JsonTokenType.StartArray || tokenType == JsonTokenType.StartObject);
             if (_stack == null)
             {
                 _stack = new Stack<JsonTokenType>();
@@ -1461,7 +1461,6 @@ namespace System.Text.Json
             return ConsumeTokenResult.Success;
 
         RollBack:
-            EnsureAndPushStack(_tokenType);
             return ConsumeTokenResult.NotEnoughDataRollBackState;
         }
 
@@ -1712,7 +1711,7 @@ namespace System.Text.Json
                 return false;
             }
 
-            _consumed++;
+            idx++;
             _bytePositionInLine = 0;
             _lineNumber++;
         Done:
@@ -1772,11 +1771,11 @@ namespace System.Text.Json
                 byte marker = localBuffer[0];
                 if (marker == JsonConstants.Slash)
                 {
-                    return ConsumeSingleLineComment(localBuffer.Slice(1));
+                    return ConsumeSingleLineComment(localBuffer.Slice(1), _consumed);
                 }
                 else if (marker == JsonConstants.Asterisk)
                 {
-                    return ConsumeMultiLineComment(localBuffer.Slice(1));
+                    return ConsumeMultiLineComment(localBuffer.Slice(1), _consumed);
                 }
                 else
                 {
@@ -1791,14 +1790,14 @@ namespace System.Text.Json
             return false;
         }
 
-        private bool ConsumeSingleLineComment(ReadOnlySpan<byte> localBuffer)
+        private bool ConsumeSingleLineComment(ReadOnlySpan<byte> localBuffer, int previousConsumed)
         {
             if (!SkipSingleLineComment(localBuffer, out int idx))
             {
                 return false;
             }
 
-            ValueSpan = localBuffer.Slice(0, idx);
+            ValueSpan = _buffer.Slice(previousConsumed, idx + 2);   // Include the double slash and potential line feed at the end of the comment as part of it.
             if (_tokenType != JsonTokenType.Comment)
             {
                 _previousTokenType = _tokenType;
@@ -1807,14 +1806,14 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ConsumeMultiLineComment(ReadOnlySpan<byte> localBuffer)
+        private bool ConsumeMultiLineComment(ReadOnlySpan<byte> localBuffer, int previousConsumed)
         {
             if (!SkipMultiLineComment(localBuffer, out int idx))
             {
                 return false;
             }
 
-            ValueSpan = localBuffer.Slice(0, idx - 1);
+            ValueSpan = _buffer.Slice(previousConsumed, idx + 3); // Include the slash/asterisk and final slash at the end of the comment as part of it.
             if (_tokenType != JsonTokenType.Comment)
             {
                 _previousTokenType = _tokenType;
