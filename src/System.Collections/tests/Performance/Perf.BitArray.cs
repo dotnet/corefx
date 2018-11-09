@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.InteropServices;
 using Microsoft.Xunit.Performance;
 using Xunit;
 
@@ -325,7 +324,6 @@ namespace System.Collections.Tests
         {
             var bytes = new byte[size];
             s_random.NextBytes(bytes);
-            var original = new BitArray(bytes);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -333,6 +331,7 @@ namespace System.Collections.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
+                        var original = new BitArray(bytes);
                         original.Length = original.Length * 2;
                     }
                 }
@@ -354,7 +353,6 @@ namespace System.Collections.Tests
         {
             var bytes = new byte[size];
             s_random.NextBytes(bytes);
-            var original = new BitArray(bytes);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -362,6 +360,7 @@ namespace System.Collections.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
+                        var original = new BitArray(bytes);
                         original.Length = original.Length / 2;
                     }
                 }
