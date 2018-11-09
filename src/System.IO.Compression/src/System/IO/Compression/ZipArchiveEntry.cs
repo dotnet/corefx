@@ -95,10 +95,6 @@ namespace System.IO.Compression
             {
                 CompressionMethod = CompressionMethodValues.Stored;
             }
-            else
-            {
-                CompressionMethod = CompressionMethodValues.Deflate;
-            }
         }
 
         // Initializes new entry
@@ -601,14 +597,15 @@ namespace System.IO.Compression
         private CheckSumAndSizeWriteStream GetDataCompressor(Stream backingStream, bool leaveBackingStreamOpen, EventHandler onClose)
         {
             // stream stack: backingStream -> DeflateStream -> CheckSumWriteStream
+            Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate || CompressionMethod == CompressionMethodValues.Stored);
 
             bool isIntermediateStream = true;
             Stream compressorStream;
             if (!_compressionLevel.HasValue)
             {
-                compressorStream = new DeflateStream(backingStream, CompressionMode.Compress, leaveBackingStreamOpen);
+                _compressionLevel = CompressionMode.Compress;
             }
-            else if (_compressionLevel == CompressionLevel.NoCompression)
+            if (_compressionLevel == CompressionLevel.NoCompression)
             {
                 compressorStream = backingStream;
                 isIntermediateStream = false;
