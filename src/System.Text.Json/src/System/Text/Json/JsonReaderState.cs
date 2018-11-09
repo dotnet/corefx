@@ -17,16 +17,16 @@ namespace System.Text.Json
     public struct JsonReaderState
     {
         // We are using a ulong to represent our nested state, so we can only
-        // go 64 levels deep without having to allocate a stack.
-        internal const int StackFreeMaxDepth = sizeof(ulong) * 8;
+        // go 64 levels deep without having to allocate.
+        internal const int AllocationFreeMaxDepth = sizeof(ulong) * 8;
 
         // This ulong container represents a tiny stack to track the state during nested transitions.
         // The first bit represents the state of the current depth (1 == object, 0 == array).
         // Each subsequent bit is the parent / containing type (object or array). Since this
         // reader does a linear scan, we only need to keep a single path as we go through the data.
-        // This is primarily used as an optimization to avoid having to allocate a stack object for
+        // This is primarily used as an optimization to avoid having to allocate an object for
         // depths up to 64 (which is the default max depth).
-        internal ulong _stackFreeContainer;
+        internal ulong _allocationFreeContainer;
         internal long _lineNumber;
         internal long _bytePositionInLine;
         internal long _bytesConsumed;
@@ -37,7 +37,7 @@ namespace System.Text.Json
         internal JsonTokenType _tokenType;
         internal JsonTokenType _previousTokenType;
         internal JsonReaderOptions _readerOptions;
-        internal Stack<JsonTokenType> _stack;
+        internal CustomUncheckedBitArray _bitArray;
 
         /// <summary>
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
@@ -62,12 +62,12 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
         /// </remarks>
-        public JsonReaderState(int maxDepth = StackFreeMaxDepth, JsonReaderOptions options = default)
+        public JsonReaderState(int maxDepth = AllocationFreeMaxDepth, JsonReaderOptions options = default)
         {
             if (maxDepth <= 0)
                 throw ThrowHelper.GetArgumentException_MaxDepthMustBePositive();
 
-            _stackFreeContainer = default;
+            _allocationFreeContainer = default;
             _lineNumber = default;
             _bytePositionInLine = default;
             _bytesConsumed = default;
@@ -79,9 +79,9 @@ namespace System.Text.Json
             _previousTokenType = default;
             _readerOptions = options;
 
-            // Only allocate the stack if the user reads a JSON payload beyond the depth that the _stackFreeContainer can handle.
+            // Only allocate if the user reads a JSON payload beyond the depth that the _allocationFreeContainer can handle.
             // This way we avoid allocations in the common, default cases, and allocate lazily.
-            _stack = null;
+            _bitArray = default;
         }
 
         /// <summary>
