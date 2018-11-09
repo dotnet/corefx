@@ -6,7 +6,7 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Compile Include="System\ApplicationIdentity.cs" />
     <Compile Include="System\Data\Common\DBDataPermission.cs" />
     <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
@@ -57,7 +57,6 @@
     <Compile Include="System\Security\HostSecurityManagerOptions.cs" />
     <Compile Include="System\Security\IEvidenceFactory.cs" />
     <Compile Include="System\Security\ISecurityPolicyEncodable.cs" />
-    <Compile Include="System\Security\IStackWalk.cs" />
     <Compile Include="System\Security\NamedPermissionSet.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermission.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermissionAccess.cs" />
@@ -86,7 +85,6 @@
     <Compile Include="System\Security\Permissions\KeyContainerPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\KeyContainerPermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\PermissionSetAttribute.cs" />
-    <Compile Include="System\Security\Permissions\PermissionState.cs" />
     <Compile Include="System\Security\Permissions\PrincipalPermission.cs" />
     <Compile Include="System\Security\Permissions\PrincipalPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\PublisherIdentityPermission.cs" />
@@ -119,7 +117,6 @@
     <Compile Include="System\Security\Permissions\UrlIdentityPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\ZoneIdentityPermission.cs" />
     <Compile Include="System\Security\Permissions\ZoneIdentityPermissionAttribute.cs" />
-    <Compile Include="System\Security\PermissionSet.cs" />
     <Compile Include="System\Security\Policy\AllMembershipCondition.cs" />
     <Compile Include="System\Security\Policy\ApplicationDirectory.cs" />
     <Compile Include="System\Security\Policy\ApplicationDirectoryMembershipCondition.cs" />
@@ -172,6 +169,11 @@
     <Compile Include="System\Transactions\DistributedTransactionPermission.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermissionAttribute.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Compile Include="System\Security\IStackWalk.cs" />
+    <Compile Include="System\Security\Permissions\PermissionState.cs" />
+    <Compile Include="System\Security\PermissionSet.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -184,5 +186,22 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.Data.Common" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Security.Principal" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Csp" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
   </ItemGroup>
 </Project>

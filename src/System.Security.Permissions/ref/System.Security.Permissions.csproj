@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Security.Permissions.cs" />
+    <Compile Include="System.Security.Permissions.$(TargetGroup).cs" />
+    <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
@@ -19,5 +21,18 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <ProjectReference Include="..\..\System.Security.AccessControl\ref\System.Security.AccessControl.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />
+    <ProjectReference Include="..\..\System.ComponentModel.Primitives\ref\System.ComponentModel.Primitives.csproj" />
+    <ProjectReference Include="..\..\System.Data.Common\ref\System.Data.Common.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\ref\System.Runtime.Extensions.csproj" />
+    <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\ref\System.Security.Cryptography.Algorithms.csproj" />
+    <ProjectReference Include="..\..\System.Security.Cryptography.Csp\ref\System.Security.Cryptography.Csp.csproj" />
+    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\ref\System.Security.Cryptography.Primitives.csproj" />
+    <ProjectReference Include="..\..\System.Security.Cryptography.X509Certificates\ref\System.Security.Cryptography.X509Certificates.csproj" />
+    <ProjectReference Include="..\..\System.Text.RegularExpressions\ref\System.Text.RegularExpressions.csproj" />
+    <ProjectReference Include="..\..\System.Threading\ref\System.Threading.csproj" />
   </ItemGroup>
 </Project>
