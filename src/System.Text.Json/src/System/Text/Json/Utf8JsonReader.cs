@@ -161,48 +161,15 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
             _inObject = true;
         }
-
-        // Allocate the stack lazily only when it is absolutely necessary
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void EnsureAndPushStack(JsonTokenType tokenType)
-        {
-            Debug.Assert(tokenType == JsonTokenType.StartArray || tokenType == JsonTokenType.StartObject);
-            if (_stack == null)
-            {
-                _stack = new Stack<JsonTokenType>();
-            }
-            _stack.Push(tokenType);
-        }
-
+        
         private void EndObject()
         {
             if (!_inObject || _currentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace);
 
-            _consumed++;
-            _bytePositionInLine++;
-
-            if (_currentDepth <= JsonReaderState.StackFreeMaxDepth)
-            {
-                _stackFreeContainer >>= 1;
-                _inObject = (_stackFreeContainer & 1) != 0;
-            }
-            else
-            {
-                Debug.Assert(_stack.Count > 0);
-                _stack.Pop();
-                if (_stack.Count == 0)
-                {
-                    _inObject = (_stackFreeContainer & 1) != 0;
-                }
-                else
-                {
-                    _inObject = _stack.Peek() != JsonTokenType.StartArray;
-                }
-            }
-
-            _currentDepth--;
             _tokenType = JsonTokenType.EndObject;
+
+            UpdateStackOnEndToken();
         }
 
         private void StartArray()
@@ -232,6 +199,26 @@ namespace System.Text.Json
             if (_inObject || _currentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBracket);
 
+            _tokenType = JsonTokenType.EndArray;
+
+            UpdateStackOnEndToken();
+        }
+
+        // Allocate the stack lazily only when it is absolutely necessary
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnsureAndPushStack(JsonTokenType tokenType)
+        {
+            Debug.Assert(tokenType == JsonTokenType.StartArray || tokenType == JsonTokenType.StartObject);
+            if (_stack == null)
+            {
+                _stack = new Stack<JsonTokenType>();
+            }
+            _stack.Push(tokenType);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void UpdateStackOnEndToken()
+        {
             _consumed++;
             _bytePositionInLine++;
 
@@ -255,7 +242,6 @@ namespace System.Text.Json
             }
 
             _currentDepth--;
-            _tokenType = JsonTokenType.EndArray;
         }
 
         private bool ReadSingleSegment()
