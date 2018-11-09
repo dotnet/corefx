@@ -17,8 +17,19 @@
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <PropertyGroup>
-    <!-- PackageOutputPath gets unconditionally in arcade sdk targets we need to reset it here until we reconcile the paths -->
-    <PackageOutputPath>$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
+    <!--
+      Reset PackageOutputPath property from arcade as we need to use ConfigurationGroup instead of Configuration which arcade uses.
+      See issue https://github.com/dotnet/corefx/issues/33275
+    -->
+    <PackageOutputPath>$(ArtifactsDir)packages/$(ConfigurationGroup)/</PackageOutputPath>
+    <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
+
+    <!--
+      PublishPattern needs to be the root of the packages folder to ensure we maintain the relative structure
+      in the blob container which would have a Debug or Release subfolder otherwise we end trying to publish both
+      Debug and Release assets during our publish legs.
+    -->
+    <PublishPattern Condition="'$(PublishPattern)' == ''">$(ArtifactsDir)packages\**\*.nupkg</PublishPattern>
   </PropertyGroup>
 
   <Import Project="$(RepositoryEngineeringDir)versioning.targets" />
@@ -127,6 +138,8 @@
                            Include="@(_TargetGroupsWithIsAot->WithMetadataValue('IsAot', 'false'))">
       <RefPath>$(RefRootPath)%(Identity)/</RefPath>
     </BinPlaceConfiguration>
+
+    <BinPlaceConfiguration Include="@(AdditionalBinPlaceConfiguration)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)eng/depProj.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'" />

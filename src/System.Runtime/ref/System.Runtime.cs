@@ -1375,6 +1375,10 @@ namespace System
     {
         public HttpStyleUriParser() { }
     }
+    public partial interface IAsyncDisposable
+    {
+        System.Threading.Tasks.ValueTask DisposeAsync();
+    }
     public partial interface IAsyncResult
     {
         object AsyncState { get; }
@@ -3841,6 +3845,15 @@ namespace System.Collections
 }
 namespace System.Collections.Generic
 {
+    public partial interface IAsyncEnumerable<out T>
+    {
+        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator();
+    }
+    public partial interface IAsyncEnumerator<out T> : System.IAsyncDisposable
+    {
+        System.Threading.Tasks.ValueTask<bool> MoveNextAsync();
+        T Current { get; }
+    }
     public partial interface ICollection<T> : System.Collections.Generic.IEnumerable<T>, System.Collections.IEnumerable
     {
         int Count { get; }
@@ -7692,6 +7705,7 @@ namespace System.Threading
         private readonly int _dummyPrimitive;
         public System.Threading.CancellationToken Token { get { throw null; } }
         public void Dispose() { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Threading.CancellationTokenRegistration other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -8129,6 +8143,20 @@ namespace System.Threading.Tasks.Sources
         TResult GetResult(short token);
         System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
         void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
+    }
+    public partial struct ManualResetValueTaskSourceCore<TResult>
+    {
+        private TResult _result;
+        private object _dummy;
+        private int _dummyPrimitive;
+        public TResult GetResult(short token) { throw null; }
+        public ValueTaskSourceStatus GetStatus(short token) { throw null; }
+        public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) { throw null; }
+        public void Reset() { throw null; }
+        public bool RunContinuationsAsynchronously { get { throw null; } set { throw null; } }
+        public void SetException(System.Exception error) { throw null; }
+        public void SetResult(TResult result) { throw null; }
+        public short Version { get { throw null; } }
     }
     [System.FlagsAttribute]
     public enum ValueTaskSourceOnCompletedFlags

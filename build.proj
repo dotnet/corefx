@@ -5,12 +5,13 @@
   <PropertyGroup>
     <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
     <BuildNative Condition="'$(BuildNative)'==''">true</BuildNative>
+    <BuildManaged Condition="'$(BuildManaged)'==''">true</BuildManaged>
     <BuildTests Condition="'$(BuildTests)'==''">false</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)'==''">true</BuildPackages>
 
     <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildNative)'=='true'">$(BuildDependsOn);BuildNative</BuildDependsOn>
-    <BuildDependsOn>$(BuildDependsOn);BuildManaged</BuildDependsOn>
+    <BuildDependsOn Condition="'$(BuildManaged)'=='true'">$(BuildDependsOn);BuildManaged</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildTests)'=='true'">$(BuildDependsOn);Test</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildPackages)'=='true'">$(BuildDependsOn);Pack</BuildDependsOn>
 
@@ -24,7 +25,7 @@
 
   <UsingTask TaskName="GenerateConfigurationProps" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
-  <Target Name="Restore" DependsOnTargets="RestoreOptionalToolingPackages">
+  <Target Name="Restore" DependsOnTargets="RestoreOptionalToolingPackages;RestoreOptimizationDataPackage">
     <ItemGroup>
       <_RestoreProjects Include="external\dir.proj" />
     </ItemGroup>
@@ -72,9 +73,9 @@
   <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
 
   <Target Name="Clean">
-    <RemoveDir Directories="$(BinDir)" />
-    <!-- Temporarily outside BinDir -->
-    <RemoveDir Directories="$(PackageInstallPath)" />
+    <RemoveDir Directories="$(ArtifactsObjDir)" />
+    <RemoveDir Directories="$(ArtifactsBinDir)" />
+    <RemoveDir Directories="$(ArtifactsPackagesDir)" />
   </Target>
 
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
