@@ -4,6 +4,7 @@
 
 using Xunit;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -87,6 +88,8 @@ namespace System.Resources.Tests
             yield return new object[] { "Float", 3.14159 };
             yield return new object[] { "Bytes", new byte[] { 41, 42, 43, 44, 192, 168, 1, 1 } };
             yield return new object[] { "InvalidKeyName", null };
+            yield return new object[] { "Point", new Point(50, 60) };
+            yield return new object[] { "Size", new Size(20, 30) };
         }
 
         [Theory]
@@ -111,7 +114,6 @@ namespace System.Resources.Tests
 
         [Theory]
         [MemberData(nameof(EnglishNonStringResourceData))]
-        [ActiveIssue(12565, TestPlatforms.AnyUnix)]
         public static void GetResourceSet_NonStrings(string key, object expectedValue)
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
@@ -121,7 +123,6 @@ namespace System.Resources.Tests
         }
 
         [Fact]
-        [ActiveIssue(12565, TestPlatforms.AnyUnix)]
         public static void GetStream()
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
