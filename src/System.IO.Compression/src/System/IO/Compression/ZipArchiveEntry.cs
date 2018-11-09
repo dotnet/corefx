@@ -597,24 +597,29 @@ namespace System.IO.Compression
         private CheckSumAndSizeWriteStream GetDataCompressor(Stream backingStream, bool leaveBackingStreamOpen, EventHandler onClose)
         {
             // stream stack: backingStream -> DeflateStream -> CheckSumWriteStream
-            Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate || CompressionMethod == CompressionMethodValues.Stored);
+
+            // By default we compress with deflate, except if compression level is set to NoCompression then stored is used.
+            // Stored is also used for empty files, but we don't actually call through this function for that - we just write the stored value in the header
+            // Deflate64 is not supported on all platforms
+            Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate
+                || CompressionMethod == CompressionMethodValues.Deflate64
+                || CompressionMethod == CompressionMethodValues.Stored);
 
             bool isIntermediateStream = true;
             Stream compressorStream;
-            if (!_compressionLevel.HasValue)
+            switch (CompressionMethod)
             {
-                _compressionLevel = CompressionMode.Compress;
+                case CompressionMethodValues.Stored:
+                    compressorStream = backingStream;
+                    isIntermediateStream = false;
+                    break;
+                case CompressionMethodValues.Deflate:
+                case CompressionMethodValues.Deflate64:
+                default:
+                    compressorStream = new DeflateStream(backingStream, _compressionLevel ?? CompressionLevel.Optimal, leaveBackingStreamOpen);
+                    break;
+                
             }
-            if (_compressionLevel == CompressionLevel.NoCompression)
-            {
-                compressorStream = backingStream;
-                isIntermediateStream = false;
-            }
-            else
-            {
-                compressorStream = new DeflateStream(backingStream, _compressionLevel.Value, leaveBackingStreamOpen);
-            }
-
             bool leaveCompressorStreamOpenOnClose = leaveBackingStreamOpen && !isIntermediateStream;
             var checkSumStream = new CheckSumAndSizeWriteStream(
                 compressorStream,
