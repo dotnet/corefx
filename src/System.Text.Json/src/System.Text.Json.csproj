@@ -9,7 +9,6 @@
   <ItemGroup>
     <Compile Include="System\Text\Json\ConsumeNumberResult.cs" />
     <Compile Include="System\Text\Json\ConsumeTokenResult.cs" />
-    <Compile Include="System\Text\Json\CustomUncheckedBitArray.cs" />
     <Compile Include="System\Text\Json\JsonCommentHandling.cs" />
     <Compile Include="System\Text\Json\JsonConstants.cs" />
     <Compile Include="System\Text\Json\JsonReaderException.cs" />
