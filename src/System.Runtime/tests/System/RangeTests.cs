@@ -36,5 +36,43 @@ namespace System.Tests
             Assert.Equal(0, range.End.Value);
             Assert.True(range.End.FromEnd);
         }
+
+        [Fact]
+        public static void EqualityTest()
+        {
+            Range range1 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
+            Range range2 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
+            Assert.True(range1.Equals(range2));
+
+            range2 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: true));
+            Assert.False(range1.Equals(range2));
+
+            range2 = Range.Create(new Index(10, fromEnd: false), new Index(21, fromEnd: false));
+            Assert.False(range1.Equals(range2));
+        }
+
+        [Fact]
+        public static void HashCodeTest()
+        {
+            Range range1 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
+            Range range2 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
+            Assert.Equal(range1.GetHashCode(), range2.GetHashCode());
+
+            range2 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: true));
+            Assert.NotEqual(range1.GetHashCode(), range2.GetHashCode());
+
+            range2 = Range.Create(new Index(10, fromEnd: false), new Index(21, fromEnd: false));
+            Assert.NotEqual(range1.GetHashCode(), range2.GetHashCode());
+        }
+
+        [Fact]
+        public static void ToStringTest()
+        {
+            Range range1 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
+            Assert.Equal(10.ToString() + ".." + 20.ToString(), range1.ToString());
+
+            range1 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: true));
+            Assert.Equal(10.ToString() + "..^" + 20.ToString(), range1.ToString());
+        }
     }
 }

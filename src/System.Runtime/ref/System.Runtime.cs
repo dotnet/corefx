@@ -988,9 +988,12 @@ namespace System
     public readonly partial struct Index
     {
         private readonly int _dummyPrimitive;
+        public Index(int value, bool fromEnd) { throw null; }
         public int Value { get { throw null; } }
         public bool FromEnd { get { throw null; } }
-        public Index(int value, bool fromEnd) { throw null; }
+        public override bool Equals(object value) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
         public static implicit operator Index(int value) { throw null; }
     }
     public readonly partial struct Range
@@ -998,6 +1001,9 @@ namespace System
         private readonly int _dummyPrimitive;
         public Index Start { get { throw null; } }
         public Index End { get { throw null; } }
+        public override bool Equals(object value) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
         public static Range Create(Index start, Index end) { throw null; }
         public static Range FromStart(Index start) { throw null; }
         public static Range ToEnd(Index end) { throw null; }
@@ -2002,7 +2008,7 @@ namespace System
         public static System.ReadOnlySpan<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public ref readonly T this[int index] { get { throw null; } }
-        public T this[Index index] { get { throw null; } }
+        public ref readonly T this[Index index] { get { throw null; } }
         public ReadOnlySpan<T> this[Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(System.Span<T> destination) { }
@@ -2206,7 +2212,7 @@ namespace System
         public static System.Span<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public ref T this[int index] { get { throw null; } }
-        public T this[Index index] { get { throw null; } }
+        public ref readonly T this[Index index] { get { throw null; } }
         public Span<T> this[Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void Clear() { }
