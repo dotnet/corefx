@@ -17,13 +17,7 @@ namespace System.SpanTests
             Assert.Equal('o', span[new Index(1, fromEnd: true)]);
             Assert.Equal(span[new Index(2, fromEnd: false)], span[new Index(span.Length - 2, fromEnd: true)]);
 
-            Assert.Throws<IndexOutOfRangeException>(() =>
-            {
-                char c;
-                ReadOnlySpan<char> s = "Hello".AsSpan();
-                c = s[new Index(0, fromEnd: true)];
-                return;
-            });
+            Assert.Throws<IndexOutOfRangeException>(() => "Hello".AsSpan()[new Index(0, fromEnd: true)]);
 
             Span<char> span1 = new Span<char>(new char [] { 'H', 'e', 'l', 'l', 'o'});
             Assert.Equal('e', span1[new Index(1, fromEnd: false)]);
@@ -31,12 +25,7 @@ namespace System.SpanTests
             Assert.Equal(span1[new Index(2, fromEnd: false)], span1[new Index(span.Length - 2, fromEnd: true)]);
 
             Assert.Throws<IndexOutOfRangeException>(() =>
-            {
-                char c;
-                Span<char> s = new Span<char>(new char [] { 'H', 'e', 'l', 'l', 'o'});
-                c = s[new Index(0, fromEnd: true)];
-                return;
-            });
+                new Span<char>(new char [] { 'H', 'e', 'l', 'l', 'o'})[new Index(0, fromEnd: true)]);
         }
 
         [Fact]
@@ -47,24 +36,14 @@ namespace System.SpanTests
             Assert.True(span.Slice(1, 3) == sliced);
 
             Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                ReadOnlySpan<char> s = "Hello".AsSpan();
-                // Passing wrong start and end to the Range
-                ReadOnlySpan<char> s1 = s[Range.Create(new Index(1, fromEnd: true), new Index(1, fromEnd: false))];
-                return;
-            });
+                { ReadOnlySpan<char> s = "Hello".AsSpan()[Range.Create(new Index(1, fromEnd: true), new Index(1, fromEnd: false))]; });
 
             Span<char> span1 = new Span<char>(new char [] { 'H', 'e', 'l', 'l', 'o'});
             Span<char> sliced1 = span1[Range.Create(new Index(2, fromEnd: false), new Index(1, fromEnd: true))];
             Assert.True(span1.Slice(2, 2) == sliced1);
 
             Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                Span<char> s = new Span<char>(new char [] { 'H', 'e', 'l', 'l', 'o'});
-                // Passing wrong start and end to the Range
-                Span<char> s1 = s[Range.Create(new Index(0, fromEnd: true), new Index(1, fromEnd: false))];
-                return;
-            });
+                { Span<char> s = new Span<char>(new char [] { 'H', 'i' })[Range.Create(new Index(0, fromEnd: true), new Index(1, fromEnd: false))]; });
         }
     }
 }
