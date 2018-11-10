@@ -10,7 +10,7 @@ namespace System.Tests
 {
     public static class ArgIteratorTests
     {
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArgIteratorSupported))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsArgIteratorNotSupported))]
         public unsafe static void ArgIterator_Throws_PlatformNotSupportedException()
         {
             Assert.Throws<PlatformNotSupportedException>(() => new ArgIterator(new RuntimeArgumentHandle()));
