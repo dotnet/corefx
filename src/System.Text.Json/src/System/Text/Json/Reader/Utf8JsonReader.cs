@@ -1712,8 +1712,7 @@ namespace System.Text.Json
 
         private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
-            // TODO: https://github.com/dotnet/corefx/issues/33293
-            idx = localBuffer.IndexOf(JsonConstants.LineFeed);
+            idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
             if (idx == -1)
             {
                 if (IsLastSpan)
@@ -1725,6 +1724,15 @@ namespace System.Text.Json
                 }
                 return false;
             }
+
+            // If we have encountered \r, check and advance index if next character is \n
+            if (localBuffer[idx] == JsonConstants.CarriageReturn 
+                && idx < localBuffer.Length - 1
+                && localBuffer[idx + 1] == JsonConstants.LineFeed)
+            {
+                idx++;
+            }
+
 
             idx++;
             _bytePositionInLine = 0;
