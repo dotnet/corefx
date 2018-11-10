@@ -22,12 +22,12 @@
     see issue https://github.com/dotnet/arcade/issues/1114
   -->
   <PropertyGroup>
-    <MicrosoftDotNetApiCompatVersion>1.0.0-beta.18556.6</MicrosoftDotNetApiCompatVersion>
-    <MicrosoftDotNetCodeAnalysisVersion>1.0.0-beta.18556.6</MicrosoftDotNetCodeAnalysisVersion>
-    <MicrosoftDotNetGenAPIVersion>1.0.0-beta.18556.6</MicrosoftDotNetGenAPIVersion>
-    <MicrosoftDotNetGenFacadesVersion>1.0.0-beta.18556.6</MicrosoftDotNetGenFacadesVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18556.6</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>1.0.0-beta.18556.6</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetApiCompatVersion>1.0.0-beta.18559.22</MicrosoftDotNetApiCompatVersion>
+    <MicrosoftDotNetCodeAnalysisVersion>1.0.0-beta.18559.22</MicrosoftDotNetCodeAnalysisVersion>
+    <MicrosoftDotNetGenAPIVersion>1.0.0-beta.18559.22</MicrosoftDotNetGenAPIVersion>
+    <MicrosoftDotNetGenFacadesVersion>1.0.0-beta.18559.22</MicrosoftDotNetGenFacadesVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18559.22</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>1.0.0-beta.18559.22</MicrosoftDotNetBuildTasksPackagingVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftDotNetApiCompatPackageVersion>$(MicrosoftDotNetApiCompatVersion)</MicrosoftDotNetApiCompatPackageVersion>
