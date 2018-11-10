@@ -37,12 +37,15 @@ namespace System.Tests
             Index index1 = 10;
             Index index2 = 10;
             Assert.True(index1.Equals(index2));
+            Assert.True(index1.Equals((object)index2));
 
             index2 = new Index(10, fromEnd: true);
             Assert.False(index1.Equals(index2));
+            Assert.False(index1.Equals((object)index2));
 
             index2 = new Index(9, fromEnd: false);
             Assert.False(index1.Equals(index2));
+            Assert.False(index1.Equals((object)index2));
         }
 
         [Fact]

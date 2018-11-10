@@ -43,12 +43,15 @@ namespace System.Tests
             Range range1 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
             Range range2 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: false));
             Assert.True(range1.Equals(range2));
+            Assert.True(range1.Equals((object)range2));
 
             range2 = Range.Create(new Index(10, fromEnd: false), new Index(20, fromEnd: true));
             Assert.False(range1.Equals(range2));
+            Assert.False(range1.Equals((object)range2));
 
             range2 = Range.Create(new Index(10, fromEnd: false), new Index(21, fromEnd: false));
             Assert.False(range1.Equals(range2));
+            Assert.False(range1.Equals((object)range2));
         }
 
         [Fact]
