@@ -31,6 +31,8 @@ static SSLProtocol PalSslProtocolToSslProtocol(PAL_SslProtocol palProtocolId)
 {
     switch (palProtocolId)
     {
+        case PAL_SslProtocol_Tls13:
+            return kTLSProtocol13;
         case PAL_SslProtocol_Tls12:
             return kTLSProtocol12;
         case PAL_SslProtocol_Tls11:
@@ -419,7 +421,9 @@ int32_t AppleCryptoNative_SslGetProtocolVersion(SSLContextRef sslContext, PAL_Ss
     {
         PAL_SslProtocol matchedProtocol = PAL_SslProtocol_None;
 
-        if (protocol == kTLSProtocol12)
+        if (protocol == kTLSProtocol13)
+            matchedProtocol = PAL_SslProtocol_Tls13;
+        else if (protocol == kTLSProtocol12)
             matchedProtocol = PAL_SslProtocol_Tls12;
         else if (protocol == kTLSProtocol11)
             matchedProtocol = PAL_SslProtocol_Tls11;
