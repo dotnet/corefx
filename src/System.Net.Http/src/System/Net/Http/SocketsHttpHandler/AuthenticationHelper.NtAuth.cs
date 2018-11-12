@@ -79,16 +79,21 @@ namespace System.Net.Http
                         string challengeData = challenge.ChallengeData;
 
                         // Need to use FQDN normalized host so that CNAME's are traversed.
+                        // Use DNS to do the forward lookup to an A (host) record.
+                        // But skip DNS lookup on IP literals. Otherwise, we would end up
+                        // doing an unintended reverse DNS lookup.
                         string spn;
-                        if (authUri.HostNameType == UriHostNameType.IPv6 || authUri.HostNameType == UriHostNameType.IPv4)
+                        UriHostNameType hnt = authUri.HostNameType;
+                        if (hnt == UriHostNameType.IPv6 || hnt == UriHostNameType.IPv4)
                         {
-                            spn = "HTTP/" + authUri.IdnHost;
+                            spn = authUri.IdnHost;
                         }
                         else
                         {
-                            IPHostEntry result = await Dns.GetHostEntryAsync(authUri.IdnHost);
-                            spn = "HTTP/" + result.HostName;
+                            IPHostEntry result = await Dns.GetHostEntryAsync(authUri.IdnHost).ConfigureAwait(false);
+                            spn = result.HostName;
                         }
+                        spn = "HTTP/" + spn;
 
                         if (NetEventSource.IsEnabled)
                         {
