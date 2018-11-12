@@ -1062,14 +1062,15 @@ namespace System.Tests
             Assert.Equal(decimal.MaxValue, Math.Max(decimal.MinValue, decimal.MaxValue));
         }
 
-        [Fact]
-        public static void Max_Double()
+        [Theory]
+        [InlineData(double.NegativeInfinity, double.PositiveInfinity, double.PositiveInfinity)]
+        [InlineData(double.MinValue, double.MaxValue, double.MaxValue)]
+        [InlineData(double.NaN, double.NaN, double.NaN)]
+        [InlineData(3.0, -2.0, 3.0)]
+        [InlineData(double.PositiveInfinity, double.NaN, double.PositiveInfinity)]
+        public static void Max_Double(double x, double y, double expectedResult)
         {
-            Assert.Equal(3.0, Math.Max(3.0, -2.0));
-            Assert.Equal(double.MaxValue, Math.Max(double.MinValue, double.MaxValue));
-            Assert.Equal(double.PositiveInfinity, Math.Max(double.NegativeInfinity, double.PositiveInfinity));
-            Assert.Equal(double.NaN, Math.Max(double.PositiveInfinity, double.NaN));
-            Assert.Equal(double.NaN, Math.Max(double.NaN, double.NaN));
+            AssertEqual(expectedResult, Math.Max(x, y), 0.0);
         }
 
         [Fact]
@@ -1100,14 +1101,15 @@ namespace System.Tests
             Assert.Equal(sbyte.MaxValue, Math.Max(sbyte.MinValue, sbyte.MaxValue));
         }
 
-        [Fact]
-        public static void Max_Single()
+        [Theory]
+        [InlineData(float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity)]
+        [InlineData(float.MinValue, float.MaxValue, float.MaxValue)]
+        [InlineData(float.NaN, float.NaN, float.NaN)]
+        [InlineData(3.0f, -2.0f, 3.0f)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.PositiveInfinity)]
+        public static void Max_Single(float x, float y, float expectedResult)
         {
-            Assert.Equal(3.0f, Math.Max(3.0f, -2.0f));
-            Assert.Equal(float.MaxValue, Math.Max(float.MinValue, float.MaxValue));
-            Assert.Equal(float.PositiveInfinity, Math.Max(float.NegativeInfinity, float.PositiveInfinity));
-            Assert.Equal(float.NaN, Math.Max(float.PositiveInfinity, float.NaN));
-            Assert.Equal(float.NaN, Math.Max(float.NaN, float.NaN));
+            AssertEqual(expectedResult, Math.Max(x, y), 0.0f);
         }
 
         [Fact]
@@ -1145,14 +1147,15 @@ namespace System.Tests
             Assert.Equal(decimal.MinValue, Math.Min(decimal.MinValue, decimal.MaxValue));
         }
 
-        [Fact]
-        public static void Min_Double()
+        [Theory]
+        [InlineData(double.NegativeInfinity, double.PositiveInfinity, double.NegativeInfinity)]
+        [InlineData(double.MinValue, double.MaxValue, double.MinValue)]
+        [InlineData(double.NaN, double.NaN, double.NaN)]
+        [InlineData(3.0, -2.0, -2.0)]
+        [InlineData(double.PositiveInfinity, double.NaN, double.PositiveInfinity)]
+        public static void Min_Double(double x, double y, double expectedResult)
         {
-            Assert.Equal(-2.0, Math.Min(3.0, -2.0));
-            Assert.Equal(double.MinValue, Math.Min(double.MinValue, double.MaxValue));
-            Assert.Equal(double.NegativeInfinity, Math.Min(double.NegativeInfinity, double.PositiveInfinity));
-            Assert.Equal(double.NaN, Math.Min(double.NegativeInfinity, double.NaN));
-            Assert.Equal(double.NaN, Math.Min(double.NaN, double.NaN));
+            AssertEqual(expectedResult, Math.Min(x, y), 0.0);
         }
 
         [Fact]
@@ -1183,14 +1186,15 @@ namespace System.Tests
             Assert.Equal(sbyte.MinValue, Math.Min(sbyte.MinValue, sbyte.MaxValue));
         }
 
-        [Fact]
-        public static void Min_Single()
+        [Theory]
+        [InlineData(float.NegativeInfinity, float.PositiveInfinity, float.NegativeInfinity)]
+        [InlineData(float.MinValue, float.MaxValue, float.MinValue)]
+        [InlineData(float.NaN, float.NaN, float.NaN)]
+        [InlineData(3.0, -2.0, -2.0)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.PositiveInfinity)]
+        public static void Min_Single(float x, float y, float expectedResult)
         {
-            Assert.Equal(-2.0f, Math.Min(3.0f, -2.0f));
-            Assert.Equal(float.MinValue, Math.Min(float.MinValue, float.MaxValue));
-            Assert.Equal(float.NegativeInfinity, Math.Min(float.NegativeInfinity, float.PositiveInfinity));
-            Assert.Equal(float.NaN, Math.Min(float.NegativeInfinity, float.NaN));
-            Assert.Equal(float.NaN, Math.Min(float.NaN, float.NaN));
+            AssertEqual(expectedResult, Math.Min(x, y), 0.0f);
         }
 
         [Fact]
