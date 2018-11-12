@@ -132,7 +132,8 @@ namespace System.Resources.Tests
             yield return new object[] { "Icon", new Icon("icon.ico") };
         }
 
-        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(EnglishImageResourceData))]
         public static void GetObject_Images(string key, object expectedValue)
         {
@@ -161,7 +162,8 @@ namespace System.Resources.Tests
             Assert.Equal(expectedValue, set.GetObject(key));
         }
 
-        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(EnglishImageResourceData))]
         public static void GetResourceSet_Images(string key, object expectedValue)
         {
@@ -176,7 +178,7 @@ namespace System.Resources.Tests
         public static void File_GetObject(string key, object expectedValue, bool requiresBinaryFormatter = false)
         {
             var manager = ResourceManager.CreateFileBasedResourceManager("TestResx.netstandard17", Directory.GetCurrentDirectory(), null);
-            if (requiresBinaryFormatter)
+            if (requiresBinaryFormatter && !PlatformDetection.IsFullFramework)
             {
                 Assert.Throws<NotSupportedException>(() => manager.GetObject(key));
                 Assert.Throws<NotSupportedException>(() => manager.GetObject(key, new CultureInfo("en-US")));
@@ -195,7 +197,7 @@ namespace System.Resources.Tests
             var manager = ResourceManager.CreateFileBasedResourceManager("TestResx.netstandard17", Directory.GetCurrentDirectory(), null);
             var culture = new CultureInfo("en-US");
             ResourceSet set = manager.GetResourceSet(culture, true, true);
-            if (requiresBinaryFormatter)
+            if (requiresBinaryFormatter && !PlatformDetection.IsFullFramework)
             {
                 Assert.Throws<NotSupportedException>(() => set.GetObject(key));
             }
