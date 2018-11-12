@@ -60,6 +60,10 @@
     <!-- CoreFx sepcific paths -->
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
 
+    <TestArchiveRoot>$(ProjectDir)artifacts/helix/</TestArchiveRoot>
+    <TestArchiveTestsDir>$(TestArchiveRoot)tests/</TestArchiveTestsDir>
+    <TestArchiveRuntimeDir>$(TestArchiveRoot)runtime/</TestArchiveRuntimeDir>
+
     <!-- Input Directories -->
     <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
     <PackagesDir Condition="'$(PackagesDir)'=='' AND '$(NuGetPackageRoot)' != ''">$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))</PackagesDir>
@@ -91,6 +95,7 @@
     <ExcludeDepProjImport>true</ExcludeDepProjImport>
     <ExcludeResolveContractImport>true</ExcludeResolveContractImport>
     <ExcludePackageResolveImport>true</ExcludePackageResolveImport>
+    <ExcludeTestsImport>true</ExcludeTestsImport>
   </PropertyGroup>
 
   <!-- workaround https://github.com/dotnet/sdk/issues/2288
@@ -116,7 +121,7 @@
   <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
     <!-- Disable F5 and test explorer support for CI builds. -->
     <GenerateLaunchSettings>false</GenerateLaunchSettings>
-    <IncludeVSTestReferences>false</IncludeVSTestReferences>
+    <EnableVSTestReferences>false</EnableVSTestReferences>
   </PropertyGroup>
 
   <!-- list of nuget package sources passed to nuget restore -->
@@ -255,18 +260,22 @@
   -->
   <PropertyGroup>
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+    <DisableArcadeTestFramework>true</DisableArcadeTestFramework>
   </PropertyGroup>
 
+  <!-- TODO: Remove with Arcade update. -->
   <PropertyGroup>
     <_IsTestProjectBefore>$(IsTestProject)</_IsTestProjectBefore>
-    <IsPerformanceTestProject Condition="'$(IsPerformanceTestProject)' == '' AND '$(IsTestProject)' == 'true' AND $(MSBuildProjectName.EndsWith('Performance.Tests'))">true</IsPerformanceTestProject>
+    <_IsPerformanceTestProjectBefore>$(IsPerformanceTestProject)</_IsPerformanceTestProjectBefore>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
-    <!-- Need to reset our definition of IsTestProject after arcade sdk import -->
+  <!-- Need to reset our definition of IsTestProject after arcade sdk import -->
+  <!-- TODO: Remove with Arcade update. -->
   <PropertyGroup>
     <IsTestProject>$(_IsTestProjectBefore)</IsTestProject>
+    <IsPerformanceTestProject>$(_IsPerformanceTestProjectBefore)</IsPerformanceTestProject>
   </PropertyGroup>
 
   <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
@@ -387,6 +396,7 @@
     <NETCoreAppTestHostFxrPath>$(TestHostRootPath)host/fxr/$(NETCoreAppTestSharedFxVersion)/</NETCoreAppTestHostFxrPath>
     <NETCoreAppTestSharedFrameworkPath>$(TestHostRootPath)shared/Microsoft.NETCore.App/$(NETCoreAppTestSharedFxVersion)/</NETCoreAppTestSharedFrameworkPath>
     <ILCFXInputFolder>$(TestHostRootPath)ILCInputFolder</ILCFXInputFolder>
+    <InternalTestILCFolder>$(TestHostRootPath)TestILC</InternalTestILCFolder>
 
     <!-- For UAP, we'll produce the layout and hard-link this into each test's directory -->
     <UAPTestSharedFrameworkPath>$(TestHostRootPath)UAPLayout</UAPTestSharedFrameworkPath>
@@ -435,11 +445,15 @@
     <UseCoverageDedicatedRuntime Condition="'$(UseCoverageDedicatedRuntime)' == '' AND '$(CodeCoverageEnabled)' == 'true'">true</UseCoverageDedicatedRuntime>
 
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
-    <GenerateLaunchSettings Condition="'$(GenerateLaunchSettings)' == ''">true</GenerateLaunchSettings>
+    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''">true</EnableLaunchSettings>
 
     <!-- Disable VS Test SDK references if the .NET Native toolchain is used. -->
-    <IncludeVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</IncludeVSTestReferences>
+    <EnableVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</EnableVSTestReferences>
+    <EnableVSTestReferences Condition="'$(EnableVSTestReferences)' == ''">true</EnableVSTestReferences>
   </PropertyGroup>
+
+  <!-- TODO: Fix VB test project reference to Test SDK. -->
+  <Import Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true' AND '$(EnableVSTestReferences)' == 'true' AND '$(Language)' != 'VB'" Project="$(RuntimePath)Microsoft.Net.Test.Sdk.props" />
 
   <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
   <Import Project="$(MSBuildThisFileDirectory)eng\ReferenceAssemblies.props" />

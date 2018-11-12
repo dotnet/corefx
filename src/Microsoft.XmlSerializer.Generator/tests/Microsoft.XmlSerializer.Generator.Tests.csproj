@@ -11,7 +11,7 @@
   <PropertyGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <!-- We're building netcoreap, run on the test CLI
          Reuse the same runtimeconfig that the tests use. -->
-    <GeneratorRuntimeConfig>$(ToolsDir)netcoreapp.runtimeconfig.json</GeneratorRuntimeConfig>
+    <GeneratorRuntimeConfig>$(TestAssetsDir)netcoreapp.runtimeconfig.json</GeneratorRuntimeConfig>
     <GeneratorCliPath>$(TestHostRootPath)</GeneratorCliPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' != 'netcoreapp'">

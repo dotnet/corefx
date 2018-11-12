@@ -8,6 +8,7 @@
     We only want to build tests against current TargetGroup -->
     <AdditionalBuildConfigurations Condition="'$(TargetGroup)' == 'netfx'"></AdditionalBuildConfigurations>
     <GenerateCodeCoverageReportForAll>true</GenerateCodeCoverageReportForAll>
+    <EnableBenchviewTarget>true</EnableBenchviewTarget>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(RunningSharedFrameworkValidation)'=='true'">
@@ -22,7 +23,6 @@
     <SerializeProjects>true</SerializeProjects>
   </PropertyGroup>
 
-  <Import Project="$(ToolsDir)tests.targets" Condition="Exists('$(ToolsDir)tests.targets')" />
   <Import Project="$(ToolsDir)VersionTools.targets" Condition="Exists('$(ToolsDir)VersionTools.targets')" />
 
   <Target Name="BinPlaceXUnitRuntimeForNetstandardSuite" Condition="'$(TargetGroup)' == 'netstandard'" BeforeTargets="BuildAllProjects">
@@ -34,8 +34,8 @@
   </Target>
 
   <PropertyGroup>
-    <_ProjectPattern Condition="'$(Performance)' != 'true'">.Tests</_ProjectPattern>
-    <_ProjectPattern Condition="'$(Performance)' == 'true'">.Performance.Tests</_ProjectPattern>
+    <_ProjectPattern Condition="'$(Performance)' != 'true'">Tests</_ProjectPattern>
+    <_ProjectPattern Condition="'$(Performance)' == 'true'">PerformanceTests</_ProjectPattern>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BuildAllConfigurations)' != 'true'">
@@ -54,7 +54,7 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(BuildingUAPVertical)' == 'true'">
     <TraversalBuildDependsOn>
       MakeCommonResourcesPriFile;
       $(TraversalBuildDependsOn)
