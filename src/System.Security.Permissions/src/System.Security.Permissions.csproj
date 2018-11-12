@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="System\ApplicationIdentity.cs" />
+    <Compile Include="System\Configuration\ConfigurationPermission.cs" />
+    <Compile Include="System\Configuration\ConfigurationPermissionAttribute.cs" />
     <Compile Include="System\Data\Common\DBDataPermission.cs" />
     <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
     <Compile Include="System\Data\Odbc\OdbcPermission.cs" />
@@ -28,6 +30,11 @@
     <Compile Include="System\Diagnostics\PerformanceCounterPermissionAttribute.cs" />
     <Compile Include="System\Diagnostics\PerformanceCounterPermissionEntry.cs" />
     <Compile Include="System\Diagnostics\PerformanceCounterPermissionEntryCollection.cs" />
+    <Compile Include="System\DirectoryServices\DirectoryServicesPermission.cs" />
+    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionAccess.cs" />
+    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionAttribute.cs" />
+    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionEntry.cs" />
+    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionEntryCollection.cs" />
     <Compile Include="System\Drawing\Printing\PrintingPermission.cs" />
     <Compile Include="System\Drawing\Printing\PrintingPermissionAttribute.cs" />
     <Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
@@ -59,6 +66,9 @@
     <Compile Include="System\Security\ISecurityPolicyEncodable.cs" />
     <Compile Include="System\Security\IStackWalk.cs" />
     <Compile Include="System\Security\NamedPermissionSet.cs" />
+    <Compile Include="System\Security\Permissions\DataProtectionPermission.cs" />
+    <Compile Include="System\Security\Permissions\DataProtectionPermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\DataProtectionPermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermission.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermissionAccess.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermissionAttribute.cs" />
@@ -171,6 +181,9 @@
     <Compile Include="System\ServiceProcess\ServiceControllerPermissionEntryCollection.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermission.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermissionAttribute.cs" />
+    <Compile Include="System\Web\AspNetHostingPermission.cs" />
+    <Compile Include="System\Web\AspNetHostingPermissionAttribute.cs" />
+    <Compile Include="System\Web\AspNetHostingPermissionLevel.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />

@@ -7,7 +7,6 @@ using System.Security.Permissions;
 
 namespace System.Configuration
 {
-
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     sealed public class ConfigurationPermissionAttribute : CodeAccessSecurityAttribute
     {

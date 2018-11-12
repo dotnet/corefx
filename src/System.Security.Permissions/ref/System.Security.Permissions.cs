@@ -26,6 +26,27 @@ namespace System
     }
 }
 
+namespace System.Configuration
+{
+    public sealed partial class ConfigurationPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public ConfigurationPermission(System.Security.Permissions.PermissionState state) { }
+        public override System.Security.IPermission Copy() { throw null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { throw null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) { throw null; }
+        public bool IsUnrestricted() { throw null; }
+        public override System.Security.SecurityElement ToXml() { throw null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { throw null; }
+    }    
+    [System.AttributeUsageAttribute((System.AttributeTargets)(32767), AllowMultiple = true, Inherited = false)]
+    public sealed partial class ConfigurationPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public ConfigurationPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        public override System.Security.IPermission CreatePermission() { throw null; }
+    }
+}
+
 namespace System.Data.Common
 {
     public abstract partial class DBDataPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
@@ -136,6 +157,55 @@ namespace System.Data.OracleClient
     }
 }
 
+namespace System.DirectoryServices
+{
+    public sealed partial class DirectoryServicesPermission : System.Security.Permissions.ResourcePermissionBase
+    {
+        public DirectoryServicesPermission() { }
+        public DirectoryServicesPermission(System.DirectoryServices.DirectoryServicesPermissionAccess permissionAccess, string path) { }
+        public DirectoryServicesPermission(System.DirectoryServices.DirectoryServicesPermissionEntry[] permissionAccessEntries) { }
+        public DirectoryServicesPermission(System.Security.Permissions.PermissionState state) { }
+        public System.DirectoryServices.DirectoryServicesPermissionEntryCollection PermissionEntries { get { throw null; } }
+    }
+    [System.FlagsAttribute]
+    public enum DirectoryServicesPermissionAccess
+    {
+        Browse = 2,
+        None = 0,
+        Write = 6,
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)621, AllowMultiple = true, Inherited = false)]
+    public partial class DirectoryServicesPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public DirectoryServicesPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        public string Path { get { throw null; } set { } }
+        public System.DirectoryServices.DirectoryServicesPermissionAccess PermissionAccess { get { throw null; } set { } }
+        public override System.Security.IPermission CreatePermission() { throw null; }
+    }
+    public partial class DirectoryServicesPermissionEntry
+    {
+        public DirectoryServicesPermissionEntry(System.DirectoryServices.DirectoryServicesPermissionAccess permissionAccess, string path) { }
+        public string Path { get { throw null; } }
+        public System.DirectoryServices.DirectoryServicesPermissionAccess PermissionAccess { get { throw null; } }
+    }
+    public partial class DirectoryServicesPermissionEntryCollection : System.Collections.CollectionBase
+    {
+        public DirectoryServicesPermissionEntryCollection() { }
+        public System.DirectoryServices.DirectoryServicesPermissionEntry this[int index] { get { throw null; } set { } }
+        public int Add(System.DirectoryServices.DirectoryServicesPermissionEntry value) { throw null; }
+        public void AddRange(System.DirectoryServices.DirectoryServicesPermissionEntryCollection value) { }
+        public void AddRange(System.DirectoryServices.DirectoryServicesPermissionEntry[] value) { }
+        public bool Contains(System.DirectoryServices.DirectoryServicesPermissionEntry value) { throw null; }
+        public void CopyTo(System.DirectoryServices.DirectoryServicesPermissionEntry[] array, int index) { }
+        public int IndexOf(System.DirectoryServices.DirectoryServicesPermissionEntry value) { throw null; }
+        public void Insert(int index, System.DirectoryServices.DirectoryServicesPermissionEntry value) { }
+        protected override void OnClear() { }
+        protected override void OnInsert(int index, object value) { }
+        protected override void OnRemove(int index, object value) { }
+        protected override void OnSet(int index, object oldValue, object newValue) { }
+        public void Remove(System.DirectoryServices.DirectoryServicesPermissionEntry value) { }
+    }
+}
 namespace System.Drawing.Printing
 {
     public sealed partial class PrintingPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
@@ -720,6 +790,41 @@ namespace System.Security
 
 namespace System.Security.Permissions
 {
+    public sealed partial class DataProtectionPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public DataProtectionPermission(System.Security.Permissions.DataProtectionPermissionFlags flag) { }
+        public DataProtectionPermission(System.Security.Permissions.PermissionState state) { }
+        public System.Security.Permissions.DataProtectionPermissionFlags Flags { get { throw null; } set { } }
+        public override System.Security.IPermission Copy() { throw null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { throw null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) { throw null; }
+        public bool IsUnrestricted() { throw null; }
+        public override System.Security.SecurityElement ToXml() { throw null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { throw null; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)109, AllowMultiple = true, Inherited = false)]
+    [System.Security.Permissions.HostProtectionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, MayLeakOnAbort=true)]
+    public sealed partial class DataProtectionPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public DataProtectionPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        public System.Security.Permissions.DataProtectionPermissionFlags Flags { get { throw null; } set { } }
+        public bool ProtectData { get { throw null; } set { } }
+        public bool ProtectMemory { get { throw null; } set { } }
+        public bool UnprotectData { get { throw null; } set { } }
+        public bool UnprotectMemory { get { throw null; } set { } }
+        public override System.Security.IPermission CreatePermission() { throw null; }
+    }
+    [System.FlagsAttribute]
+    public enum DataProtectionPermissionFlags
+    {
+        AllFlags = 15,
+        NoFlags = 0,
+        ProtectData = 1,
+        ProtectMemory = 4,
+        UnprotectData = 2,
+        UnprotectMemory = 8,
+    }
     public sealed partial class EnvironmentPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
     {
         public EnvironmentPermission(System.Security.Permissions.EnvironmentPermissionAccess flag, string pathList) { }
@@ -1959,5 +2064,37 @@ namespace System.Transactions
         public DistributedTransactionPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
         public new bool Unrestricted { get; set; }
         public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
+namespace System.Web
+{
+    public sealed partial class AspNetHostingPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public AspNetHostingPermission(System.Security.Permissions.PermissionState state) { }
+        public AspNetHostingPermission(System.Web.AspNetHostingPermissionLevel level) { }
+        public System.Web.AspNetHostingPermissionLevel Level { get { throw null; } set { } }
+        public override System.Security.IPermission Copy() { throw null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { throw null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) { throw null; }
+        public bool IsUnrestricted() { throw null; }
+        public override System.Security.SecurityElement ToXml() { throw null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { throw null; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)32767, AllowMultiple = true, Inherited = false)]
+    public sealed partial class AspNetHostingPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public AspNetHostingPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        public System.Web.AspNetHostingPermissionLevel Level { get { throw null; } set { } }
+        public override System.Security.IPermission CreatePermission() { throw null; }
+    }
+    public enum AspNetHostingPermissionLevel
+    {
+        High = 500,
+        Low = 300,
+        Medium = 400,
+        Minimal = 200,
+        None = 100,
+        Unrestricted = 600,
     }
 }
