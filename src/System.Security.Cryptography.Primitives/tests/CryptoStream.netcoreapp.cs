@@ -11,8 +11,10 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
 {
     public static partial class CryptoStreamTests
     {
-        [Fact]
-        public static async Task DisposeAsync_DataFlushedCorrectly()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static async Task DisposeAsync_DataFlushedCorrectly(bool explicitFlushFinalBeforeDispose)
         {
             const string Text = "hello";
 
@@ -25,6 +27,11 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 encryptStream.Write(toWrite, 0, toWrite.Length);
                 Assert.False(encryptStream.HasFlushedFinalBlock);
                 Assert.Equal(0, stream.Position);
+
+                if (explicitFlushFinalBeforeDispose)
+                {
+                    encryptStream.FlushFinalBlock();
+                }
 
                 await encryptStream.DisposeAsync();
                 Assert.True(encryptStream.HasFlushedFinalBlock);
