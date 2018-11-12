@@ -216,8 +216,8 @@ namespace System
                     (actualVersionId.Major > major ||
                         (actualVersionId.Major == major && (actualVersionId.Minor > minor ||
                             (actualVersionId.Minor == minor && (actualVersionId.Build > build ||
-                                (actualVersionId.Build == build && actualVersionId.Revision > revision ||
-                                    (actualVersionId.Revision == revision)))))));
+                                (actualVersionId.Build == build && (actualVersionId.Revision > revision ||
+                                    (actualVersionId.Revision == revision))))))));
         }
 
         private static Version GetOSXProductVersion()
