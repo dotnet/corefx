@@ -67,7 +67,7 @@
     <PackageReference Include="xunit.performance.core" Version="$(XUnitPerformancePackageVersion)" />
     <PackageReference Include="xunit.performance.execution" Version="$(XUnitPerformancePackageVersion)" />
     <PackageReference Include="xunit.performance.metrics" Version="$(XUnitPerformancePackageVersion)" />
-    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="$(TraceEventPackageVersion)" />
+    <PackageReference Include="$(MicrosoftDiagnosticsTracingTraceEventPackageName)" Version="$(TraceEventPackageVersion)" />
     <PackageReference Include="MarkdownLog.NS20" Version="0.10.1" />
     <PackageReference Include="CommandLineParser.NS20" Version="2.3.1" />
 
@@ -75,7 +75,7 @@
     <PackageToInclude Include="xunit.performance.api"/>
     <PackageToInclude Include="xunit.performance.execution"/>
     <PackageToInclude Include="xunit.performance.metrics"/>
-    <PackageToInclude Include="Microsoft.Diagnostics.Tracing.TraceEvent"/>
+    <PackageToInclude Include="$(MicrosoftDiagnosticsTracingTraceEventPackageName)"/>
     <PackageToInclude Include="MarkdownLog.NS20"/>
     <PackageToInclude Include="CommandLineParser.NS20" />
   </ItemGroup>
@@ -99,17 +99,13 @@
   <!-- Ensure that the native components of TraceEvent are restored into the runtime directory so that TraceEvent can pinvoke into them. -->
   <Target Name="CopyTraceEventNativeFiles" AfterTargets="AfterResolveReferences">
 
-    <PropertyGroup>
-      <TraceEventPackageName>Microsoft.Diagnostics.Tracing.TraceEvent</TraceEventPackageName>
-    </PropertyGroup>
-
     <ItemGroup>
-      <TraceEventNativeFiles Include="$(PackagesDir)\$(TraceEventPackageName)\$(TraceEventPackageVersion)\lib\native\**\*.*" />
+      <TraceEventNativeFiles Include="$(PackagesDir)\$(MicrosoftDiagnosticsTracingTraceEventPackageName)\$(TraceEventPackageVersion)\lib\native\**\*.*" />
     </ItemGroup>
 
     <Copy
       SourceFiles="@(TraceEventNativeFiles)"
-      DestinationFiles="@(TraceEventNativeFiles->'$(RuntimePath)$(TraceEventPackageName)\%(RecursiveDir)%(FileName)%(Extension)')"
+      DestinationFiles="@(TraceEventNativeFiles->'$(RuntimePath)$(MicrosoftDiagnosticsTracingTraceEventPackageName)\%(RecursiveDir)%(FileName)%(Extension)')"
       UseHardlinksIfPossible="true"
       SkipUnchangedFiles="true" />
 
