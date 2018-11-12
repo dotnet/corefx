@@ -214,10 +214,10 @@ namespace System
             return
                 VersionEquivalentTo(major, minor, build, revision, actualVersionId) ||
                     (actualVersionId.Major > major ||
-                        (actualVersionId.Major == major && actualVersionId.Minor > minor ||
-                            (actualVersionId.Minor == minor && actualVersionId.Build > build ||
+                        (actualVersionId.Major == major && (actualVersionId.Minor > minor ||
+                            (actualVersionId.Minor == minor && (actualVersionId.Build > build ||
                                 (actualVersionId.Build == build && actualVersionId.Revision > revision ||
-                                    (actualVersionId.Revision == revision)))));
+                                    (actualVersionId.Revision == revision)))))));
         }
 
         private static Version GetOSXProductVersion()
