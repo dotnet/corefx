@@ -173,7 +173,7 @@ namespace Internal.Cryptography.Pal.Native
         // CERT_DELETE_KEYSET_PROP_ID is not defined by Windows. It's a custom property set by the framework
         // as a backchannel message from the portion of X509Certificate2Collection.Import() that loads up the PFX
         // to the X509Certificate2..ctor(IntPtr) call that creates the managed wrapper.
-        CERT_DELETE_KEYSET_PROP_ID = 101,
+        CERT_DELETE_KEYSET_PROP_ID = 125,
     }
 
     [Flags]
