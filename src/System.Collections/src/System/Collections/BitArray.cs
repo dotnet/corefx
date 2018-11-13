@@ -561,6 +561,7 @@ namespace System.Collections
                 if (extraBits > 0)
                 {
                     Debug.Assert(span.Length > 0);
+                    Debug.Assert(m_array.Length > quotient);
                     // mask the final byte
                     span[span.Length - 1] = (byte)((m_array[quotient] >> (remainder * 8)) & ((1 << (int)extraBits) - 1));
                 }
@@ -568,15 +569,15 @@ namespace System.Collections
                 switch (remainder)
                 {
                     case 3:
-                        span[2] = (byte)((m_array[quotient] >> 16) & 0x000000FF);
+                        span[2] = (byte)(m_array[quotient] >> 16);
                         goto case 2;
                     // fall through
                     case 2:
-                        span[1] = (byte)((m_array[quotient] >> 8) & 0x000000FF);
+                        span[1] = (byte)(m_array[quotient] >> 8);
                         goto case 1;
                     // fall through
                     case 1:
-                        span[0] = (byte)(m_array[quotient] & 0x000000FF);
+                        span[0] = (byte)m_array[quotient];
                         break;
                 }
             }
