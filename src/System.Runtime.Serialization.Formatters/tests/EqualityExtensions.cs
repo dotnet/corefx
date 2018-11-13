@@ -247,6 +247,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(@this.MinimumCapacity, other.MinimumCapacity);
         }
 
+        public static void IsEqual(this DateTime @this, DateTime other, bool isSamePlatform)
+        {
+            // DateTime's Equals ignores Kind
+            Assert.Equal(@this.Kind, other.Kind);
+            Assert.Equal(@this.Ticks, other.Ticks);
+        }
+
         public static void IsEqual(this Comparer @this, Comparer other, bool isSamePlatform)
         {
             if (@this == null && other == null)
