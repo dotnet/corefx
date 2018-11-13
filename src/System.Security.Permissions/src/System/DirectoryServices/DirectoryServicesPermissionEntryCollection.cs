@@ -8,6 +8,7 @@ namespace System.DirectoryServices
 {
     public class DirectoryServicesPermissionEntryCollection : CollectionBase
     {
+        internal DirectoryServicesPermissionEntryCollection() { }
         public DirectoryServicesPermissionEntry this[int index] { get { return null; } set { } }
         public int Add(DirectoryServicesPermissionEntry value) { return 0; }
         public void AddRange(DirectoryServicesPermissionEntryCollection value) { }

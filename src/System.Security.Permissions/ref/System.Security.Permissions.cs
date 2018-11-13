@@ -190,7 +190,7 @@ namespace System.DirectoryServices
     }
     public partial class DirectoryServicesPermissionEntryCollection : System.Collections.CollectionBase
     {
-        public DirectoryServicesPermissionEntryCollection() { }
+        internal DirectoryServicesPermissionEntryCollection() { }
         public System.DirectoryServices.DirectoryServicesPermissionEntry this[int index] { get { throw null; } set { } }
         public int Add(System.DirectoryServices.DirectoryServicesPermissionEntry value) { throw null; }
         public void AddRange(System.DirectoryServices.DirectoryServicesPermissionEntryCollection value) { }
