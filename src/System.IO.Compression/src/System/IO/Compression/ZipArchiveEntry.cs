@@ -374,7 +374,10 @@ namespace System.IO.Compression
                     }
 
                     // if they start modifying it and the compression method is not "store", we should make sure it will get deflated
-                    if (CompressionMethod != CompressionMethodValues.Stored) CompressionMethod = CompressionMethodValues.Deflate;
+                    if (CompressionMethod != CompressionMethodValues.Stored)
+                    {
+                        CompressionMethod = CompressionMethodValues.Deflate;
+                    }
                 }
 
                 return _storedUncompressedData;
