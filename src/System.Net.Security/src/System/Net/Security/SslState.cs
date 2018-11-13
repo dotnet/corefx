@@ -17,6 +17,8 @@ namespace System.Net.Security
 {
     internal class SslState
     {
+        internal const SslProtocols Tls13Protocol = (SslProtocols)12288;
+
         private static int s_uniqueNameInteger = 123;
         private static AsyncProtocolCallback s_partialFrameCallback = new AsyncProtocolCallback(PartialFrameCallback);
         private static AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
@@ -374,6 +376,11 @@ namespace System.Net.Security
                 if ((proto & SslProtocols.Tls12) != 0)
                 {
                     ret |= SslProtocols.Tls12;
+                }
+
+                if ((proto & Tls13Protocol) != 0)
+                {
+                    ret |= Tls13Protocol;
                 }
 
                 return ret;

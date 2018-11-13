@@ -14,6 +14,8 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
+            private const SslProtocols Tls13Protocol = (SslProtocols)12288;
+
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
             {
                 Debug.Assert(
@@ -125,8 +127,12 @@ namespace System.Net.Http
                     case SslProtocols.Tls12:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_2;
                         break;
+                    case Tls13Protocol:
+                        curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_3;
+                        break;
 
                     case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12:
+                    case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | Tls13Protocol:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1;
                         break;
 

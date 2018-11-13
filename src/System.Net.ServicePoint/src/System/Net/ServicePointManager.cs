@@ -12,6 +12,8 @@ namespace System.Net
 {
     public class ServicePointManager
     {
+        private const SecurityProtocolType Tls13 = (SecurityProtocolType)12288;
+
         public const int DefaultNonPersistentConnectionLimit = 4;
         public const int DefaultPersistentConnectionLimit = 2;
 
@@ -36,7 +38,7 @@ namespace System.Net
 
         private static void ValidateSecurityProtocol(SecurityProtocolType value)
         {
-            SecurityProtocolType allowed = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            SecurityProtocolType allowed = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | Tls13;
             if ((value & ~allowed) != 0)
             {
                 throw new NotSupportedException(SR.net_securityprotocolnotsupported);

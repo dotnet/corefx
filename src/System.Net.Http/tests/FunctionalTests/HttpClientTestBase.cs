@@ -4,11 +4,14 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Security.Authentication;
 
 namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientTestBase : RemoteExecutorTestBase
     {
+        protected const SslProtocols Tls13Protocol = (SslProtocols)12288;
+
         protected virtual bool UseSocketsHttpHandler => true;
 
         protected bool IsWinHttpHandler => !UseSocketsHttpHandler && PlatformDetection.IsWindows && !PlatformDetection.IsUap && !PlatformDetection.IsFullFramework;
