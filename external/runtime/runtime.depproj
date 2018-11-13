@@ -72,7 +72,7 @@
       <HostFxrFileName Condition="'$(OSGroup)'=='Windows_NT'">hostfxr</HostFxrFileName>
       <HostFxrFileName Condition="'$(OSGroup)'!='Windows_NT'">libhostfxr</HostFxrFileName>
       <UseHardlink>true</UseHardlink>
-      <!-- workaround core-setup problem for hardlinking dotnet executable to testhost -->
+      <!-- workaround core-setup problem for hardlinking dotnet executable to testhost: core-setup #4742 -->
       <UseHardlink Condition="'$(_runtimeOSFamily)' == 'FreeBSD'">false</UseHardlink>
     </PropertyGroup>
 
