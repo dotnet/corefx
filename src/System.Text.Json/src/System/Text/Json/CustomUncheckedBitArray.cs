@@ -33,11 +33,11 @@ namespace System.Text.Json
             {
                 Debug.Assert(index >= 0 && index < Length, $"index: {index}, Length: {Length}");
 
-                int quotient = Div32Rem(index, out int remainder);
+                int elementIndex = Div32Rem(index, out int extraBits);
 
-                Debug.Assert(quotient < _array.Length, $"index: {index}, Length: {Length}, quotient: {quotient}, arrayLength: {_array.Length}, remainder: {remainder}");
+                Debug.Assert(elementIndex < _array.Length, $"index: {index}, Length: {Length}, elementIndex: {elementIndex}, arrayLength: {_array.Length}, extraBits: {extraBits}");
 
-                return (_array[quotient] & (1 << remainder)) != 0;
+                return (_array[elementIndex] & (1 << extraBits)) != 0;
             }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
@@ -51,18 +51,20 @@ namespace System.Text.Json
                     Grow(index);
                 }
 
-                int quotient = Div32Rem(index, out int remainder);
+                int elementIndex = Div32Rem(index, out int extraBits);
 
-                Debug.Assert(quotient < _array.Length, $"index: {index}, Length: {Length}, quotient: {quotient}, arrayLength: {_array.Length}, remainder: {remainder}");
+                Debug.Assert(elementIndex < _array.Length, $"index: {index}, Length: {Length}, elementIndex: {elementIndex}, arrayLength: {_array.Length}, extraBits: {extraBits}");
 
+                int newValue = _array[elementIndex];
                 if (value)
                 {
-                    _array[quotient] |= 1 << remainder;
+                    newValue |= 1 << extraBits;
                 }
                 else
                 {
-                    _array[quotient] &= ~(1 << remainder);
+                    newValue &= ~(1 << extraBits);
                 }
+                _array[elementIndex] = newValue;
             }
         }
 
@@ -70,15 +72,20 @@ namespace System.Text.Json
         private void Grow(int index)
         {
             Debug.Assert(index >= Length, $"index: {index}, Length: {Length}");
-            int newints = ((index - 1) >> 5) + 1;   // (value + 31) / 32 without overflow
 
-            // If index is a multiple of 32
-            if ((index & 31) == 0)
+            // If index is a multiple of 32, add 1.
+            int newints = (index & 31) == 0 ? 1 : 0;
+
+            if ((uint)index / 2 < int.MaxValue)
             {
-                newints++;
+                index *= 2; // Grow by doubling, if possible.
+            }
+            else
+            {
+                index++;
             }
 
-            index++;
+            newints += ((index - 1) >> 5) + 1;   // (value + 31) / 32 without overflow
 
             if (newints > _array.Length)
             {
@@ -107,9 +114,9 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Div32Rem(int number, out int remainder)
         {
-            int quotient = number >> 5;   // Divide by 32.
-            remainder = number - (quotient << 5);   // Multiply by 32.
-            return quotient;
+            uint quotient = (uint)number / 32;
+            remainder = number & 31;    // number & 31 == number % 32
+            return (int)quotient;
         }
     }
 }

@@ -90,10 +90,16 @@ namespace System.Text.JsonTests
                 Assert.True(bitArray.Length >= i);
             }
 
-            Assert.Equal(bitLength + growBy, bitArray.Length);
-            for (int i = 0; i < bitArray.Length; i++)
+            Assert.True(bitLength + growBy <= bitArray.Length && bitArray.Length <= (bitLength + growBy) * 2);
+            for (int i = 0; i < values.Length; i++)
             {
                 Assert.True(values[i] == bitArray[i], $"expected: {values[i]}, actual: {bitArray[i]}, index: {i}, Length: {bitArray.Length}");
+            }
+
+            // Extra bits start off as false.
+            for (int i = values.Length; i < bitArray.Length; i++)
+            {
+                Assert.False(bitArray[i], $"index: {i}, Length: {bitArray.Length}, ValuesLength: {values.Length}");
             }
         }
     }
