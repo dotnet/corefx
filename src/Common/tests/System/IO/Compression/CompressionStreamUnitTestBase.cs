@@ -1331,7 +1331,6 @@ namespace System.IO.Compression
 
             await base.WriteAsync(array, offset, count, cancellationToken);
         }
-        #if STREAM_MEMORY_OVERLOADS_AVAILABLE
 
         public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
@@ -1363,6 +1362,5 @@ namespace System.IO.Compression
 
             await base.WriteAsync(buffer, cancellationToken);
         }
-        #endif
     }
 }
