@@ -1222,8 +1222,6 @@ namespace System.IO
         public static string Combine(string path1, string path2, string path3) { throw null; }
         public static string Combine(string path1, string path2, string path3, string path4) { throw null; }
         public static string Combine(params string[] paths) { throw null; }
-        public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) { throw null; }
-        public static string TrimEndingDirectorySeparator(string path) { throw null; }
         public static string GetDirectoryName(string path) { throw null; }
         public static ReadOnlySpan<char> GetDirectoryName(ReadOnlySpan<char> path) { throw null; }
         public static string GetExtension(string path) { throw null; }
@@ -1254,6 +1252,8 @@ namespace System.IO
         public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3, Span<char> destination, out int charsWritten) { throw null; }
         public static string Join(string path1, string path2) { throw null; }
         public static string Join(string path1, string path2, string path3) { throw null; }
+        public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) { throw null; }
+        public static string TrimEndingDirectorySeparator(string path) { throw null; }
     }
 
     public partial class BinaryReader : System.IDisposable
