@@ -118,7 +118,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             try
             {
                 eA = (@this as IEnumerable).GetEnumerator();
-                eB = (@this as IEnumerable).GetEnumerator();
+                eB = (other as IEnumerable).GetEnumerator();
                 while (true)
                 {
                     bool moved = eA.MoveNext();
