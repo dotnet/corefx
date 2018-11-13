@@ -114,6 +114,23 @@ namespace System
         public ApplicationException(string message) { }
         public ApplicationException(string message, System.Exception innerException) { }
     }
+    public ref partial struct ArgIterator
+    {
+        private int _dummyPrimitive;
+        public ArgIterator(System.RuntimeArgumentHandle arglist) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public unsafe ArgIterator(System.RuntimeArgumentHandle arglist, void* ptr) { throw null; }
+        public void End() { }
+        public override bool Equals(object o) { throw null; }
+        public override int GetHashCode() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public System.TypedReference GetNextArg() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public System.TypedReference GetNextArg(System.RuntimeTypeHandle rth) { throw null; }
+        public System.RuntimeTypeHandle GetNextArgType() { throw null; }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        public int GetRemainingCount() { throw null; }
+    }
     public partial class ArgumentException : System.SystemException
     {
         public ArgumentException() { }
@@ -985,6 +1002,33 @@ namespace System
         public static bool TryParse(string s, out System.Decimal result) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out System.Decimal result) { throw null; }
     }
+    public readonly partial struct Index : System.IEquatable<System.Index>
+    {
+        private readonly int _dummyPrimitive;
+        public Index(int value, bool fromEnd) { throw null; }
+        public int Value { get { throw null; } }
+        public bool FromEnd { get { throw null; } }
+        public override bool Equals(object value) { throw null; }
+        public bool Equals(Index other) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+        public static implicit operator Index(int value) { throw null; }
+    }
+    public readonly partial struct Range : System.IEquatable<System.Range>
+    {
+        private readonly int _dummyPrimitive;
+        public Index Start { get { throw null; } }
+        public Index End { get { throw null; } }
+        public override bool Equals(object value) { throw null; }
+        public bool Equals(Range other) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+        public static Range Create(Index start, Index end) { throw null; }
+        public static Range FromStart(Index start) { throw null; }
+        public static Range ToEnd(Index end) { throw null; }
+        public static Range All() { throw null; }
+    }
+
     public abstract partial class Delegate : System.ICloneable, System.Runtime.Serialization.ISerializable
     {
         protected Delegate(object target, string method) { }
@@ -1374,6 +1418,10 @@ namespace System
     public partial class HttpStyleUriParser : System.UriParser
     {
         public HttpStyleUriParser() { }
+    }
+    public partial interface IAsyncDisposable
+    {
+        System.Threading.Tasks.ValueTask DisposeAsync();
     }
     public partial interface IAsyncResult
     {
@@ -1979,6 +2027,8 @@ namespace System
         public static System.ReadOnlySpan<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public ref readonly T this[int index] { get { throw null; } }
+        public ref readonly T this[Index index] { get { throw null; } }
+        public ReadOnlySpan<T> this[Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(System.Span<T> destination) { }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -2181,6 +2231,8 @@ namespace System
         public static System.Span<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public ref T this[int index] { get { throw null; } }
+        public ref T this[Index index] { get { throw null; } }
+        public Span<T> this[Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void Clear() { }
         public void CopyTo(System.Span<T> destination) { }
@@ -3841,6 +3893,15 @@ namespace System.Collections
 }
 namespace System.Collections.Generic
 {
+    public partial interface IAsyncEnumerable<out T>
+    {
+        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator();
+    }
+    public partial interface IAsyncEnumerator<out T> : System.IAsyncDisposable
+    {
+        System.Threading.Tasks.ValueTask<bool> MoveNextAsync();
+        T Current { get; }
+    }
     public partial interface ICollection<T> : System.Collections.Generic.IEnumerable<T>, System.Collections.IEnumerable
     {
         int Count { get; }
@@ -5084,6 +5145,7 @@ namespace System.IO
         public override System.IAsyncResult BeginRead(byte[] array, int offset, int numBytes, System.AsyncCallback callback, object state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] array, int offset, int numBytes, System.AsyncCallback callback, object state) { throw null; }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { }
         ~FileStream() { }
@@ -5156,6 +5218,7 @@ namespace System.IO
         protected virtual System.Threading.WaitHandle CreateWaitHandle() { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public virtual System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public virtual int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public virtual void EndWrite(System.IAsyncResult asyncResult) { }
         public abstract void Flush();
@@ -6990,7 +7053,7 @@ namespace System.Runtime.InteropServices
 namespace System.Runtime.Remoting
 {
     public class ObjectHandle : MarshalByRefObject
-    {        
+    {
         private ObjectHandle() { }
         public ObjectHandle(Object o) { }
         public Object Unwrap() { throw null; }
@@ -7692,6 +7755,7 @@ namespace System.Threading
         private readonly int _dummyPrimitive;
         public System.Threading.CancellationToken Token { get { throw null; } }
         public void Dispose() { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Threading.CancellationTokenRegistration other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -8129,6 +8193,20 @@ namespace System.Threading.Tasks.Sources
         TResult GetResult(short token);
         System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
         void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
+    }
+    public partial struct ManualResetValueTaskSourceCore<TResult>
+    {
+        private TResult _result;
+        private object _dummy;
+        private int _dummyPrimitive;
+        public TResult GetResult(short token) { throw null; }
+        public ValueTaskSourceStatus GetStatus(short token) { throw null; }
+        public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) { throw null; }
+        public void Reset() { throw null; }
+        public bool RunContinuationsAsynchronously { get { throw null; } set { throw null; } }
+        public void SetException(System.Exception error) { throw null; }
+        public void SetResult(TResult result) { throw null; }
+        public short Version { get { throw null; } }
     }
     [System.FlagsAttribute]
     public enum ValueTaskSourceOnCompletedFlags

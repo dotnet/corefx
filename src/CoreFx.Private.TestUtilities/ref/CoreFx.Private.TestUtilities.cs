@@ -46,7 +46,9 @@ namespace System
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
+        public static bool IsArm64Process { get { throw null; } }
         public static bool IsAlpine { get { throw null; } }
+        public static bool IsArgIteratorSupported { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
         public static bool IsDebian8 { get { throw null; } }
@@ -65,7 +67,9 @@ namespace System
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
         public static bool IsNotIntMaxValueArrayIndexSupported { get { throw null; } }
+        public static bool IsArgIteratorNotSupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
+        public static bool IsNotArm64Process { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
         public static bool IsNotNetNative { get { throw null; } }
