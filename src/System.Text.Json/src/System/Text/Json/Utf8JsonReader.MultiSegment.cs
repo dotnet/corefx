@@ -9,127 +9,8 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Provides a high-performance API for forward-only, read-only access to the UTF-8 encoded JSON text.
-    /// It processes the text sequentially with no caching and adheres strictly to the JSON RFC
-    /// by default (https://tools.ietf.org/html/rfc8259). When it encounters invalid JSON, it throws
-    /// a JsonReaderException with basic error information like line number and byte position on the line.
-    /// Since this type is a ref struct, it does not directly support async. However, it does provide
-    /// support for reentrancy to read incomplete data, and continue reading once more data is presented.
-    /// To be able to set max depth while reading OR allow skipping comments, create an instance of 
-    /// <see cref="JsonReaderState"/> and pass that in to the reader.
-    /// </summary>
     public ref partial struct Utf8JsonReader
     {
-        private ReadOnlySpan<byte> _buffer;
-
-        private bool _isFinalBlock;
-
-        private ulong _allocationFreeContainer;
-        private long _lineNumber;
-        private long _bytePositionInLine;
-        private int _consumed;
-        private int _currentDepth;
-        private int _maxDepth;
-        private bool _inObject;
-        private bool _isNotPrimitive;
-        private JsonTokenType _tokenType;
-        private JsonTokenType _previousTokenType;
-        private JsonReaderOptions _readerOptions;
-        private CustomUncheckedBitArray _bitArray;
-
-        private long _totalConsumed;
-        private bool _isLastSegment;
-        private readonly bool _isSingleSegment;
-
-        private SequencePosition _nextPosition;
-        private SequencePosition _currentPosition;
-        private ReadOnlySequence<byte> _sequence;
-
-        private bool IsLastSpan => _isFinalBlock && (_isSingleSegment || _isLastSegment);
-
-        /// <summary>
-        /// Gets the value of the last processed token as a ReadOnlySpan&lt;byte&gt; slice
-        /// of the input payload. If the JSON is provided within a ReadOnlySequence&lt;byte&gt;
-        /// and the slice that represents the token value fits in a single segment, then
-        /// ValueSpan will contain the sliced value since it can be represented as a span.
-        /// </summary>
-        public ReadOnlySpan<byte> ValueSpan { get; private set; }
-
-        /// <summary>
-        /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
-        /// for the current instance of the <see cref="Utf8JsonReader"/> with the given UTF-8 encoded input text.
-        /// </summary>
-        public long BytesConsumed => _totalConsumed + _consumed;
-
-        /// <summary>
-        /// Tracks the recursive depth of the nested objects / arrays within the JSON text
-        /// processed so far. This provides the depth of the current token.
-        /// </summary>
-        public int CurrentDepth => _currentDepth;
-
-        /// <summary>
-        /// Gets the type of the last processed JSON token in the UTF-8 encoded JSON text.
-        /// </summary>
-        public JsonTokenType TokenType => _tokenType;
-
-        /// <summary>
-        /// Lets the caller know which of the two 'Value' properties to read to get the 
-        /// token value. For input data within a ReadOnlySpan&lt;byte&gt; this will
-        /// always return false. For input data within a ReadOnlySequence&lt;byte&gt;, this
-        /// will only return true if the token straddles more than a single segment and
-        /// hence couldn't be represented as a span.
-        /// </summary>
-        public bool HasValueSequence { get; private set; }
-
-        /// <summary>
-        /// Gets the value of the last processed token as a ReadOnlySpan&lt;byte&gt; slice
-        /// of the input payload. If the JSON is provided within a ReadOnlySequence&lt;byte&gt;
-        /// and the slice that represents the token value fits in a single segment, then
-        /// ValueSpan will contain the sliced value since it can be represented as a span.
-        /// </summary>
-        public ReadOnlySequence<byte> ValueSequence { get; private set; }
-
-        /// <summary>
-        /// Returns the current <see cref="SequencePosition"/> within the provided UTF-8 encoded
-        /// input ReadOnlySequence&lt;byte&gt;. If the <see cref="Utf8JsonReader"/> was constructed
-        /// with a ReadOnlySpan&lt;byte&gt; instead, this will always return a default <see cref="SequencePosition"/>.
-        /// </summary>
-        public SequencePosition Position
-        {
-            get
-            {
-                // TODO: Cannot use Slice even though it would be faster: https://github.com/dotnet/corefx/issues/33291
-                return _currentPosition.GetObject() == null
-                    ? default
-                    : _sequence.GetPosition(BytesConsumed);
-            }
-        }
-
-        /// <summary>
-        /// Returns the current snapshot of the <see cref="Utf8JsonReader"/> state which must
-        /// be captured by the caller and passed back in to the <see cref="Utf8JsonReader"/> ctor with more data.
-        /// Unlike the <see cref="Utf8JsonReader"/>, which is a ref struct, the state can survive
-        /// across async/await boundaries and hence this type is required to provide support for reading
-        /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
-        /// </summary>
-        public JsonReaderState CurrentState => new JsonReaderState
-        {
-            _allocationFreeContainer = _allocationFreeContainer,
-            _lineNumber = _lineNumber,
-            _bytePositionInLine = _bytePositionInLine,
-            _bytesConsumed = BytesConsumed,
-            _currentDepth = _currentDepth,
-            _maxDepth = _maxDepth,
-            _inObject = _inObject,
-            _isNotPrimitive = _isNotPrimitive,
-            _tokenType = _tokenType,
-            _previousTokenType = _previousTokenType,
-            _readerOptions = _readerOptions,
-            _bitArray = _bitArray,
-            _sequencePosition = Position,
-        };
-
         /// <summary>
         /// Constructs a new <see cref="Utf8JsonReader"/> instance.
         /// </summary>
@@ -142,9 +23,9 @@ namespace System.Text.Json
         /// Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
         /// This is the reason why the ctor accepts a <see cref="JsonReaderState"/>.
         /// </remarks>
-        public Utf8JsonReader(ReadOnlySpan<byte> jsonData, bool isFinalBlock, JsonReaderState state)
+        public Utf8JsonReader(in ReadOnlySequence<byte> jsonData, bool isFinalBlock, JsonReaderState state)
         {
-            _buffer = jsonData;
+            _buffer = jsonData.First.Span;
 
             _isFinalBlock = isFinalBlock;
 
@@ -163,133 +44,42 @@ namespace System.Text.Json
 
             _consumed = 0;
             _totalConsumed = 0;
-            _isLastSegment = _isFinalBlock;
-            _isSingleSegment = true;
 
             ValueSpan = ReadOnlySpan<byte>.Empty;
 
-            _currentPosition = default;
-            _nextPosition = default;
-            _sequence = default;
+            _sequence = jsonData;
             HasValueSequence = false;
             ValueSequence = ReadOnlySequence<byte>.Empty;
-        }
 
-        /// <summary>
-        /// Read the next JSON token from input source.
-        /// </summary>
-        /// <returns>True if the token was read successfully, else false.</returns>
-        /// <exception cref="JsonReaderException">
-        /// Thrown when an invalid JSON token is encountered according to the JSON RFC
-        /// or if the current depth exceeds the recursive limit set by the max depth.
-        /// </exception>
-        public bool Read()
-        {
-            return _isSingleSegment ? ReadSingleSegment() : ReadMultiSegment();
-        }
-
-        private void StartObject()
-        {
-            if (_currentDepth >= _maxDepth)
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ObjectDepthTooLarge);
-
-            if (_currentDepth < JsonReaderState.AllocationFreeMaxDepth)
+            if (jsonData.IsSingleSegment)
             {
-                _allocationFreeContainer = (_allocationFreeContainer << 1) | 1;
+                _nextPosition = default;
+                _currentPosition = default;
+                _isLastSegment = isFinalBlock;
+                _isSingleSegment = true;
             }
             else
             {
-                EnsureAndPushToBitArray(inObject: true);
-            }
+                _nextPosition = jsonData.Start;
+                if (_buffer.Length == 0)
+                {
+                    while (jsonData.TryGet(ref _nextPosition, out ReadOnlyMemory<byte> memory, advance: true))
+                    {
+                        if (memory.Length != 0)
+                        {
+                            _buffer = memory.Span;
+                            break;
+                        }
+                    }
+                }
 
-            _currentDepth++;
-            _consumed++;
-            _bytePositionInLine++;
-            _tokenType = JsonTokenType.StartObject;
-            _inObject = true;
-        }
-
-        private void EndObject()
-        {
-            if (!_inObject || _currentDepth <= 0)
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace);
-
-            _tokenType = JsonTokenType.EndObject;
-
-            UpdateBitArrayOnEndToken();
-        }
-
-        private void StartArray()
-        {
-            if (_currentDepth >= _maxDepth)
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge);
-
-            if (_currentDepth < JsonReaderState.AllocationFreeMaxDepth)
-            {
-                _allocationFreeContainer = _allocationFreeContainer << 1;
-            }
-            else
-            {
-                EnsureAndPushToBitArray(inObject: false);
-            }
-
-            _currentDepth++;
-            _consumed++;
-            _bytePositionInLine++;
-            _tokenType = JsonTokenType.StartArray;
-            _inObject = false;
-        }
-
-        private void EndArray()
-        {
-            if (_inObject || _currentDepth <= 0)
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBracket);
-
-            _tokenType = JsonTokenType.EndArray;
-
-            UpdateBitArrayOnEndToken();
-        }
-
-        // Allocate the bit array lazily only when it is absolutely necessary
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void EnsureAndPushToBitArray(bool inObject)
-        {
-            if (_bitArray.Length == 0)
-            {
-                _bitArray = new CustomUncheckedBitArray(bitLength: 64, integerLength: 2);
-            }
-            _bitArray[_currentDepth - JsonReaderState.AllocationFreeMaxDepth] = inObject;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void UpdateBitArrayOnEndToken()
-        {
-            _consumed++;
-            _bytePositionInLine++;
-            _currentDepth--;
-
-            if (_currentDepth < JsonReaderState.AllocationFreeMaxDepth)
-            {
-                _allocationFreeContainer >>= 1;
-                _inObject = (_allocationFreeContainer & 1) != 0;
-            }
-            else if (_currentDepth == JsonReaderState.AllocationFreeMaxDepth)
-            {
-                _inObject = (_allocationFreeContainer & 1) != 0;
-            }
-            else
-            {
-                UpdateInObjectFromBitArray();
+                _currentPosition = _nextPosition;
+                _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: true) && isFinalBlock; // Don't re-order to avoid short-circuiting
+                _isSingleSegment = false;
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void UpdateInObjectFromBitArray()
-        {
-            _inObject = _bitArray[_currentDepth - JsonReaderState.AllocationFreeMaxDepth - 1];
-        }
-
-        private bool ReadSingleSegment()
+        private bool ReadMultiSegment()
         {
             bool retVal = false;
 
@@ -387,7 +177,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool HasMoreData()
+        private bool HasMoreDataMultiSegment()
         {
             if (_consumed >= (uint)_buffer.Length)
             {
@@ -417,7 +207,7 @@ namespace System.Text.Json
         // This is because, this method is only called after a ',' (i.e. we expect a value/property name) or after 
         // a property name, which means it must be followed by a value.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool HasMoreData(ExceptionResource resource)
+        private bool HasMoreDataMultiSegment(ExceptionResource resource)
         {
             if (_consumed >= (uint)_buffer.Length)
             {
@@ -430,7 +220,38 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ReadFirstToken(byte first)
+        private bool GetNextSpan()
+        {
+            ReadOnlyMemory<byte> memory = default;
+            while (true)
+            {
+                SequencePosition copy = _currentPosition;
+                _currentPosition = _nextPosition;
+                bool noMoreData = !_sequence.TryGet(ref _nextPosition, out memory, advance: true);
+                if (noMoreData)
+                {
+                    _currentPosition = copy;
+                    return false;
+                }
+                if (memory.Length != 0)
+                {
+                    break;
+                }
+            }
+
+            if (_isFinalBlock)
+            {
+                _isLastSegment = !_sequence.TryGet(ref _nextPosition, out _, advance: false);
+            }
+
+            _buffer = memory.Span;
+            _totalConsumed += _consumed;
+            _consumed = 0;
+
+            return true;
+        }
+
+        private bool ReadFirstTokenMultiSegment(byte first)
         {
             if (first == JsonConstants.OpenBrace)
             {
@@ -518,7 +339,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private void SkipWhiteSpace()
+        private void SkipWhiteSpaceMultiSegment()
         {
             // Create local copy to avoid bounds checks.
             ReadOnlySpan<byte> localBuffer = _buffer;
@@ -551,7 +372,7 @@ namespace System.Text.Json
         /// This method contains the logic for processing the next value token and determining
         /// what type of data it is.
         /// </summary>
-        private bool ConsumeValue(byte marker)
+        private bool ConsumeValueMultiSegment(byte marker)
         {
             while (true)
             {
@@ -638,7 +459,7 @@ namespace System.Text.Json
         }
 
         // Consumes 'null', or 'true', or 'false'
-        private bool ConsumeLiteral(ReadOnlySpan<byte> literal, JsonTokenType tokenType)
+        private bool ConsumeLiteralMultiSegment(ReadOnlySpan<byte> literal, JsonTokenType tokenType)
         {
             ReadOnlySpan<byte> span = _buffer.Slice(_consumed);
             Debug.Assert(span.Length > 0);
@@ -656,7 +477,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool CheckLiteral(ReadOnlySpan<byte> span, ReadOnlySpan<byte> literal)
+        private bool CheckLiteralMultiSegment(ReadOnlySpan<byte> span, ReadOnlySpan<byte> literal)
         {
             Debug.Assert(span.Length > 0 && span[0] == literal[0]);
 
@@ -689,7 +510,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private void ThrowInvalidLiteral(ReadOnlySpan<byte> span)
+        private void ThrowInvalidLiteralMultiSegment(ReadOnlySpan<byte> span)
         {
             byte firstByte = span[0];
 
@@ -710,7 +531,7 @@ namespace System.Text.Json
             ThrowHelper.ThrowJsonReaderException(ref this, resource, bytes: span);
         }
 
-        private bool ConsumeNumber()
+        private bool ConsumeNumberMultiSegment()
         {
             if (!TryGetNumber(_buffer.Slice(_consumed), out int consumed))
             {
@@ -742,7 +563,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ConsumePropertyName()
+        private bool ConsumePropertyNameMultiSegment()
         {
             if (!ConsumeString())
             {
@@ -781,7 +602,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ConsumeString()
+        private bool ConsumeStringMultiSegment()
         {
             Debug.Assert(_buffer.Length >= _consumed + 1);
             Debug.Assert(_buffer[_consumed] == JsonConstants.Quote);
@@ -824,7 +645,7 @@ namespace System.Text.Json
         // Found a backslash or control characters which are considered invalid within a string.
         // Search through the rest of the string one byte at a time.
         // https://tools.ietf.org/html/rfc8259#section-7
-        private bool ConsumeStringAndValidate(ReadOnlySpan<byte> data, int idx)
+        private bool ConsumeStringAndValidateMultiSegment(ReadOnlySpan<byte> data, int idx)
         {
             Debug.Assert(idx >= 0 && idx < data.Length);
             Debug.Assert(data[idx] != JsonConstants.Quote);
@@ -916,7 +737,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ValidateHexDigits(ReadOnlySpan<byte> data, int idx)
+        private bool ValidateHexDigitsMultiSegment(ReadOnlySpan<byte> data, int idx)
         {
             for (int j = idx; j < data.Length; j++)
             {
@@ -936,7 +757,7 @@ namespace System.Text.Json
         }
 
         // https://tools.ietf.org/html/rfc7159#section-6
-        private bool TryGetNumber(ReadOnlySpan<byte> data, out int consumed)
+        private bool TryGetNumberMultiSegment(ReadOnlySpan<byte> data, out int consumed)
         {
             // TODO: https://github.com/dotnet/corefx/issues/33294
             Debug.Assert(data.Length > 0);
@@ -1049,7 +870,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private ConsumeNumberResult ConsumeNegativeSign(ref ReadOnlySpan<byte> data, ref int i)
+        private ConsumeNumberResult ConsumeNegativeSignMultiSegment(ref ReadOnlySpan<byte> data, ref int i)
         {
             byte nextByte = data[i];
 
@@ -1076,7 +897,7 @@ namespace System.Text.Json
             return ConsumeNumberResult.OperationIncomplete;
         }
 
-        private ConsumeNumberResult ConsumeZero(ref ReadOnlySpan<byte> data, ref int i)
+        private ConsumeNumberResult ConsumeZeroMultiSegment(ref ReadOnlySpan<byte> data, ref int i)
         {
             Debug.Assert(data[i] == (byte)'0');
             i++;
@@ -1113,7 +934,7 @@ namespace System.Text.Json
             return ConsumeNumberResult.OperationIncomplete;
         }
 
-        private ConsumeNumberResult ConsumeIntegerDigits(ref ReadOnlySpan<byte> data, ref int i)
+        private ConsumeNumberResult ConsumeIntegerDigitsMultiSegment(ref ReadOnlySpan<byte> data, ref int i)
         {
             byte nextByte = default;
             for (; i < data.Length; i++)
@@ -1146,7 +967,7 @@ namespace System.Text.Json
             return ConsumeNumberResult.OperationIncomplete;
         }
 
-        private ConsumeNumberResult ConsumeDecimalDigits(ref ReadOnlySpan<byte> data, ref int i)
+        private ConsumeNumberResult ConsumeDecimalDigitsMultiSegment(ref ReadOnlySpan<byte> data, ref int i)
         {
             if (i >= data.Length)
             {
@@ -1168,7 +989,7 @@ namespace System.Text.Json
             return ConsumeIntegerDigits(ref data, ref i);
         }
 
-        private ConsumeNumberResult ConsumeSign(ref ReadOnlySpan<byte> data, ref int i)
+        private ConsumeNumberResult ConsumeSignMultiSegment(ref ReadOnlySpan<byte> data, ref int i)
         {
             if (i >= data.Length)
             {
@@ -1205,7 +1026,7 @@ namespace System.Text.Json
             return ConsumeNumberResult.OperationIncomplete;
         }
 
-        private bool ConsumeNextTokenOrRollback(byte marker)
+        private bool ConsumeNextTokenOrRollbackMultiSegment(byte marker)
         {
             int prevConsumed = _consumed;
             long prevPosition = _bytePositionInLine;
@@ -1230,7 +1051,7 @@ namespace System.Text.Json
         /// This method consumes the next token regardless of whether we are inside an object or an array.
         /// For an object, it reads the next property name token. For an array, it just reads the next value.
         /// </summary>
-        private ConsumeTokenResult ConsumeNextToken(byte marker)
+        private ConsumeTokenResult ConsumeNextTokenMultiSegment(byte marker)
         {
             if (_readerOptions.CommentHandling != JsonCommentHandling.Disallow)
             {
@@ -1319,7 +1140,7 @@ namespace System.Text.Json
             return ConsumeTokenResult.Success;
         }
 
-        private ConsumeTokenResult ConsumeNextTokenFromLastNonCommentToken()
+        private ConsumeTokenResult ConsumeNextTokenFromLastNonCommentTokenMultiSegment()
         {
             if (JsonReaderHelper.IsTokenTypePrimitive(_previousTokenType))
             {
@@ -1495,7 +1316,7 @@ namespace System.Text.Json
             return ConsumeTokenResult.NotEnoughDataRollBackState;
         }
 
-        private bool SkipAllComments(ref byte marker)
+        private bool SkipAllCommentsMultiSegment(ref byte marker)
         {
             while (marker == JsonConstants.Slash)
             {
@@ -1530,7 +1351,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private bool SkipAllComments(ref byte marker, ExceptionResource resource)
+        private bool SkipAllCommentsMultiSegment(ref byte marker, ExceptionResource resource)
         {
             while (marker == JsonConstants.Slash)
             {
@@ -1567,7 +1388,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private ConsumeTokenResult ConsumeNextTokenUntilAfterAllCommentsAreSkipped(byte marker)
+        private ConsumeTokenResult ConsumeNextTokenUntilAfterAllCommentsAreSkippedMultiSegment(byte marker)
         {
             if (!SkipAllComments(ref marker))
             {
@@ -1697,7 +1518,7 @@ namespace System.Text.Json
             return ConsumeTokenResult.NotEnoughDataRollBackState;
         }
 
-        private bool SkipComment()
+        private bool SkipCommentMultiSegment()
         {
             // Create local copy to avoid bounds checks.
             ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
@@ -1726,7 +1547,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
+        private bool SkipSingleLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
             // TODO: https://github.com/dotnet/corefx/issues/33293
             idx = localBuffer.IndexOf(JsonConstants.LineFeed);
@@ -1750,7 +1571,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool SkipMultiLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
+        private bool SkipMultiLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
             idx = 0;
             while (true)
@@ -1792,7 +1613,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ConsumeComment()
+        private bool ConsumeCommentMultiSegment()
         {
             // Create local copy to avoid bounds checks.
             ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
@@ -1821,7 +1642,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private bool ConsumeSingleLineComment(ReadOnlySpan<byte> localBuffer, int previousConsumed)
+        private bool ConsumeSingleLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int previousConsumed)
         {
             if (!SkipSingleLineComment(localBuffer, out int idx))
             {
@@ -1837,7 +1658,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ConsumeMultiLineComment(ReadOnlySpan<byte> localBuffer, int previousConsumed)
+        private bool ConsumeMultiLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int previousConsumed)
         {
             if (!SkipMultiLineComment(localBuffer, out int idx))
             {

@@ -31,6 +31,7 @@ namespace System.Text.Json
         public JsonReaderState(int maxDepth = 64, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int MaxDepth { get { throw null; } }
+        public SequencePosition Position { get { throw null; } }
         public System.Text.Json.JsonReaderOptions Options { get { throw null; } }
     }
     public enum JsonTokenType : byte
@@ -52,11 +53,15 @@ namespace System.Text.Json
     {
         private object _dummy;
         public Utf8JsonReader(System.ReadOnlySpan<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
+        public Utf8JsonReader(in System.Buffers.ReadOnlySequence<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
+        public bool HasValueSequence { get { throw null; } }
         public System.Text.Json.JsonReaderState CurrentState { get { throw null; } }
+        public SequencePosition Position { get { throw null; } }
         public System.Text.Json.JsonTokenType TokenType { get { throw null; } }
         public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
+        public System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
         public bool GetBooleanValue() { throw null; }
         public string GetStringValue() { throw null; }
         public bool Read() { throw null; }
