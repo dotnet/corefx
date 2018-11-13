@@ -558,18 +558,18 @@ namespace System.Collections
                     span = span.Slice(4);
                 }
 
-                int leftOver = 0;
+                int leftOver = m_array.Length > quotient ? m_array[quotient] : 0;
                 if (extraBits > 0)
                 {
-                    leftOver = m_array[quotient];
+                    Debug.Assert(span.Length > 0);
                     // mask the final byte
-                    span[3] = (byte)((leftOver >> (remainder * 8)) & ((1 << (int)extraBits) - 1));
+                    span[span.Length - 1] = (byte)((leftOver >> (remainder * 8)) & ((1 << (int)extraBits) - 1));
                 }
 
                 switch (remainder)
                 {
                     case 3:
-                        span[0] = (byte)((leftOver >> 16) & 0x000000FF);
+                        span[2] = (byte)((leftOver >> 16) & 0x000000FF);
                         goto case 2;
                     // fall through
                     case 2:
@@ -577,7 +577,7 @@ namespace System.Collections
                         goto case 1;
                     // fall through
                     case 1:
-                        span[2] = (byte)(leftOver & 0x000000FF);
+                        span[0] = (byte)(leftOver & 0x000000FF);
                         break;
                 }
             }
