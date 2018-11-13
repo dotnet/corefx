@@ -721,6 +721,22 @@ Namespace Microsoft.VisualBasic.Tests.VB
             End Using
         End Sub
 
+        <Fact>
+        Public Sub LongDirectoryPathTest()
+            Using TestBase As New FileIOTests
+                Assert.True(TestBase.TestDirectory().Length < 260)
+                Dim DirectoryBaseName As String = New String("A"c, 250)
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryBaseName)
+                FileSystem.CreateDirectory(FullPathToTargetDirectory)
+                Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
+                Dim VeryLongDirectoryName As String = New String("A"c, 250)
+                Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
+                FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
+                Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
+            End Using
+
+        End Sub
+
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub MoveDirectory_Source_DirectoryName_DestinationDirectoryName_UIOptionOverwriteFalse()
