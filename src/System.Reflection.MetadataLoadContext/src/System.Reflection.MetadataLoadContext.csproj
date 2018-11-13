@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Compile Include="System\CoreRtBridge.cs" />
+    <Compile Include="System\Reflection\PathAssemblyResolver.cs" />
     <Compile Include="System\Reflection\DefaultBinder.cs" />
     <Compile Include="System\Reflection\DefaultBinder.CanConvert.cs" />
     <Compile Include="System\Reflection\MetadataAssemblyResolver.cs" />
