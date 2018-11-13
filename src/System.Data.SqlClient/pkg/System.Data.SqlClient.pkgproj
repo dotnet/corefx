@@ -6,14 +6,8 @@
       <SupportedFramework>net461;netcoreapp2.0;uap10.0.16299;$(UAPvNextTFM);$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Data.SqlClient.csproj" />
-    <HarvestIncludePaths Include="ref/net451;lib/net451;runtimes/win/lib/net451" />
-    <HarvestIncludePaths Include="ref/net46;lib/net46;runtimes/win/lib/net46" />
-    <HarvestIncludePaths Include="ref/netstandard1.2">
-      <SupportedFramework>net451;win81;wpa81</SupportedFramework>
-    </HarvestIncludePaths>
-    <HarvestIncludePaths Include="ref/netstandard1.3">
-      <SupportedFramework>net46;netcoreapp1.0</SupportedFramework>
-    </HarvestIncludePaths>
+    <HarvestIncludePaths Include="lib/net451;runtimes/win/lib/net451" />
+    <HarvestIncludePaths Include="lib/net46;runtimes/win/lib/net46" />
     <HarvestIncludePaths Include="runtimes/unix/lib/netstandard1.3;runtimes/win/lib/netstandard1.3" />
 
     <!-- Since UAP and .NETCoreApp are package based we still want to enable
@@ -28,5 +22,10 @@
   <ItemGroup>
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
   </ItemGroup>
+  <PropertyGroup>
+    <!-- Excluding the reference assets on the package so that RAR will see the run-time conflicts at build time in order to
+    generate the right binding redirects when targeting Desktop. https://github.com/dotnet/corefx/issues/32457 -->
+    <ExcludeReferenceAssets>true</ExcludeReferenceAssets>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
