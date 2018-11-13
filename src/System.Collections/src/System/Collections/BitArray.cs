@@ -470,19 +470,10 @@ namespace System.Collections
                 }
 
                 int newints = GetInt32ArrayLengthFromBitLength(value);
-
-                // grow or shrink (if wasting more than _ShrinkThreshold ints)
-                if (newints > m_array.Length)
+                if (newints > m_array.Length || newints + _ShrinkThreshold < m_array.Length)
                 {
-                    var newArray = new int[newints];
-                    m_array.AsSpan().CopyTo(newArray);
-                    m_array = newArray;
-                }
-                else if (newints + _ShrinkThreshold < m_array.Length)
-                {
-                    var newArray = new int[newints];
-                    m_array.AsSpan(0, newints).CopyTo(newArray);
-                    m_array = newArray;
+                    // grow or shrink (if wasting more than _ShrinkThreshold ints)
+                    Array.Resize(ref m_array, newints);
                 }
 
                 if (value > m_length)
