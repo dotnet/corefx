@@ -38,11 +38,15 @@ namespace System.Text.Json.Tests
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length);
             string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
+            byte[] resultSequence = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length);
+            string actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+
             Stream stream = new MemoryStream(dataUtf8);
             TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
             string expectedStr = JsonTestHelper.NewtonsoftReturnStringHelper(reader);
 
             Assert.Equal(expectedStr, actualStr);
+            Assert.Equal(expectedStr, actualStrSequence);
 
             // Json payload contains numbers that are too large for .NET (need BigInteger+)
             if (type != TestCaseType.FullSchema1 && type != TestCaseType.BasicLargeNum)
@@ -56,13 +60,19 @@ namespace System.Text.Json.Tests
 
             result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Skip);
             actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            resultSequence = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Skip);
+            actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
 
             Assert.Equal(expectedStr, actualStr);
+            Assert.Equal(expectedStr, actualStrSequence);
 
             result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Allow);
             actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            resultSequence = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Allow);
+            actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
 
             Assert.Equal(expectedStr, actualStr);
+            Assert.Equal(expectedStr, actualStrSequence);
         }
 
         [Theory]
@@ -237,7 +247,7 @@ namespace System.Text.Json.Tests
         [InlineData(123, true, false)]
         [InlineData(124, true, false)]
         [InlineData(125, true, false)]
-        public static void TestPartialJsonReader(int depthPadding, bool padByObject, bool compactData)
+        public static void TestPartialJsonReaderWithDepthPadding(int depthPadding, bool padByObject, bool compactData)
         {
             var builderPrefix = new StringBuilder();
             var builderSuffix = new StringBuilder();
@@ -556,6 +566,11 @@ namespace System.Text.Json.Tests
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
             string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+
+            Assert.Equal(expectedStr, actualStr);
+
+            result = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, commentHandling);
+            actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
             Assert.Equal(expectedStr, actualStr);
 
