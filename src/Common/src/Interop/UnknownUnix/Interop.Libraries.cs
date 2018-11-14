@@ -6,6 +6,6 @@ internal static partial class Interop
 {
     internal static partial class Libraries
     {
-        internal const string Odbc32 = "libodbc.so";
+        internal const string Odbc32 = "libodbc.so.2";
     }
 }
