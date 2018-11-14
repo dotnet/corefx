@@ -2221,8 +2221,11 @@ namespace System.Tests
                 {
                     Assert.False(string.IsNullOrWhiteSpace(tzi.StandardName));
                     Assert.Matches(@"^\(UTC(\+|-)[0-9]{2}:[0-9]{2}\) \S.*", tzi.DisplayName);
-                    string offset = Regex.Match(tzi.DisplayName, @"(-|)[0-9]{2}:[0-9]{2}").Value;
-                    Assert.True(tzi.BaseUtcOffset == TimeSpan.Parse(offset), $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.DisplayName}");
+                    if (PlatformDetection.IsNotWindowsNanoServer) // see https://github.com/dotnet/corefx/pull/33204#issuecomment-438782500
+                    {
+                        string offset = Regex.Match(tzi.DisplayName, @"(-|)[0-9]{2}:[0-9]{2}").Value;
+                        Assert.True(tzi.BaseUtcOffset == TimeSpan.Parse(offset), $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.DisplayName}");
+                    }
                 }
             }
         }
