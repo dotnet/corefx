@@ -201,10 +201,10 @@ namespace System.Net.WebSockets.Tests
                     Assert.Equal(WebSocketState.Open, socket.State);
 
                     // Ask server to send us a close
-                    await socket.SendAsync(Encoding.UTF8.GetBytes(".close"), WebSocketMessageType.Text, true, default);
+                    await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(".close")), WebSocketMessageType.Text, true, default);
 
                     // Verify received server-initiated close message.
-                    WebSocketReceiveResult recvResult = await socket.ReceiveAsync(new byte[256], default);
+                    WebSocketReceiveResult recvResult = await socket.ReceiveAsync(new ArraySegment<byte>(new byte[256]), default);
                     Assert.Equal(WebSocketCloseStatus.NormalClosure, recvResult.CloseStatus);
                     Assert.Equal(WebSocketCloseStatus.NormalClosure, socket.CloseStatus);
                     Assert.Equal(WebSocketState.CloseReceived, socket.State);
@@ -228,7 +228,7 @@ namespace System.Net.WebSockets.Tests
 
             if (secure)
             {
-                SslStream ssl = new SslStream(stream, leaveInnerStreamOpen: true, delegate { return true; });
+                var ssl = new SslStream(stream, leaveInnerStreamOpen: true, delegate { return true; });
                 await ssl.AuthenticateAsClientAsync(echoUri.Host);
                 stream = ssl;
             }
