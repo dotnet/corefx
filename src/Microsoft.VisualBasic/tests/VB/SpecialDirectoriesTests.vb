@@ -14,6 +14,15 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
+        Private Shared Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
+            If Environment.GetFolderPath(folder) = "" Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() getSpecialDirectory)
+            Else
+                Assert.Equal(Environment.GetFolderPath(folder).TrimEnd(Separators), getSpecialDirectory().TrimEnd(Separators))
+            End If
+
+        End Sub
+
         <Fact>
         Public Shared Sub AllUsersApplicationDataFolderTest()
             Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
@@ -26,13 +35,15 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub DesktopFolderTest()
-            Dim Env_Desktop As String = Environment.GetFolderPath(SpecialFolder.Desktop).Trim.TrimEnd(Separators).TrimEnd
-            If Env_Desktop.Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
-            Else
-                Dim FileIO_Desktop As String = SpecialDirectories.Desktop.TrimEnd(Separators)
-                Assert.True(Env_Desktop = FileIO_Desktop, $"{Env_Desktop} <> {FileIO_Desktop}")
-            End If
+            CheckSpecialFolder(SpecialFolder.Desktop, Function() (SpecialDirectories.Desktop))
+
+            'Dim Env_Desktop As String = Environment.GetFolderPath(SpecialFolder.Desktop).Trim.TrimEnd(Separators).TrimEnd
+            'If Env_Desktop.Length = 0 Then
+            '    Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Desktop)
+            'Else
+            '    Dim FileIO_Desktop As String = SpecialDirectories.Desktop.TrimEnd(Separators)
+            '    Assert.True(Env_Desktop = FileIO_Desktop, $"{Env_Desktop} <> {FileIO_Desktop}")
+            'End If
         End Sub
 
         <Fact>
@@ -41,11 +52,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Exit Sub
             End If
 
-            If Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments).Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
-            Else
-                Assert.Equal(Environment.GetFolderPath(SpecialFolder.Personal).TrimEnd(Separators), SpecialDirectories.MyDocuments.TrimEnd(Separators))
-            End If
+            CheckSpecialFolder(SpecialFolder.MyDocuments, Function() (SpecialDirectories.MyDocuments))
         End Sub
 
         <PlatformSpecific(TestPlatforms.Windows), ConditionalFact(GetType(PlatformDetection), NameOf(PlatformDetection.IsWindowsNanoServer))>
@@ -56,38 +63,22 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub MyMusicFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.MyMusic).Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyMusic)
-            Else
-                Assert.Equal(Environment.GetFolderPath(SpecialFolder.MyMusic).TrimEnd(Separators), SpecialDirectories.MyMusic.TrimEnd(Separators))
-            End If
+            CheckSpecialFolder(SpecialFolder.MyMusic, Function() (SpecialDirectories.MyMusic))
         End Sub
 
         <Fact>
         Public Shared Sub MyPicturesFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.MyPictures).Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyPictures)
-            Else
-                Assert.Equal(Environment.GetFolderPath(SpecialFolder.MyPictures).TrimEnd(Separators), SpecialDirectories.MyPictures.TrimEnd(Separators))
-            End If
+            CheckSpecialFolder(SpecialFolder.MyPictures, Function() (SpecialDirectories.MyPictures))
         End Sub
 
         <Fact>
         Public Shared Sub ProgramFilesFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.ProgramFiles)
-            Else
-                Assert.Equal(Environment.GetFolderPath(SpecialFolder.ProgramFiles).TrimEnd(Separators), SpecialDirectories.ProgramFiles.TrimEnd(Separators))
-            End If
+            CheckSpecialFolder(SpecialFolder.ProgramFiles, Function() (SpecialDirectories.ProgramFiles))
         End Sub
 
         <Fact>
         Public Shared Sub ProgramsFolderTest()
-            If Environment.GetFolderPath(Environment.SpecialFolder.Programs).Length = 0 Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.Programs)
-            Else
-                Assert.Equal(Environment.GetFolderPath(SpecialFolder.Programs).TrimEnd(Separators), SpecialDirectories.Programs.TrimEnd(Separators))
-            End If
+            CheckSpecialFolder(SpecialFolder.Programs, Function() (SpecialDirectories.Programs))
         End Sub
 
         <Fact>

@@ -175,7 +175,7 @@ Namespace Microsoft.VisualBasic.FileIO
         Private Shared Function GetShellOperationInfo(
                             ByVal OperationType As SHFileOperationType, ByVal OperationFlags As ShFileOperationFlags,
                             ByVal SourcePath As String, Optional ByVal TargetPath As String = Nothing) As SHFILEOPSTRUCT
-            Debug.Assert(SourcePath = "" And IO.Path.IsPathRooted(SourcePath), "Invalid SourcePath!!!")
+            Debug.Assert(SourcePath <> "" And IO.Path.IsPathRooted(SourcePath), "Invalid SourcePath!!!")
 
             Return GetShellOperationInfo(OperationType, OperationFlags, New String() {SourcePath}, TargetPath)
         End Function
@@ -328,15 +328,6 @@ Namespace Microsoft.VisualBasic.FileIO
             End Try
         End Sub
 
-        ' When calling MoveFileEx, set the following flags:
-        ' - Simulate CopyFile and DeleteFile if copied to a different volume.
-        ' - Replace contents of existing target with the contents of source file.
-        ' - Do not return until the file has actually been moved on the disk.
-        Private Const m_MOVEFILEEX_FLAGS As Integer = CInt(
-            MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
-            MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
-            MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
-
         ' Base operation flags used in shell IO operation.
         ' - DON'T move connected files as a group.
         ' - DON'T confirm directory creation - our silent copy / move do not.
@@ -350,5 +341,14 @@ Namespace Microsoft.VisualBasic.FileIO
         Private Const m_SHELL_OPERATION_FLAGS_HIDE_UI As ShFileOperationFlags =
             ShFileOperationFlags.FOF_SILENT Or
             ShFileOperationFlags.FOF_NOCONFIRMATION
+
+        ' When calling MoveFileEx, set the following flags:
+        ' - Simulate CopyFile and DeleteFile if copied to a different volume.
+        ' - Replace contents of existing target with the contents of source file.
+        ' - Do not return until the file has actually been moved on the disk.
+        Private Const m_MOVEFILEEX_FLAGS As Integer = CInt(
+            MoveFileExFlags.MOVEFILE_COPY_ALLOWED Or
+            MoveFileExFlags.MOVEFILE_REPLACE_EXISTING Or
+            MoveFileExFlags.MOVEFILE_WRITE_THROUGH)
     End Class
 End Namespace
