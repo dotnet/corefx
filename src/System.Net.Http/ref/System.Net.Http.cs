@@ -388,6 +388,7 @@ namespace System.Net.Http.Headers
         public System.Net.Http.Headers.MediaTypeHeaderValue ContentType { get { throw null; } set { } }
         public System.Nullable<System.DateTimeOffset> Expires { get { throw null; } set { } }
         public System.Nullable<System.DateTimeOffset> LastModified { get { throw null; } set { } }
+        public override string ToString() { throw null; }
     }
     public abstract partial class HttpHeaders : System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Collections.Generic.IEnumerable<string>>>, System.Collections.IEnumerable
     {
