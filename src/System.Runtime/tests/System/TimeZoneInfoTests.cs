@@ -2222,7 +2222,7 @@ namespace System.Tests
                     Assert.False(string.IsNullOrWhiteSpace(tzi.StandardName));
                     Assert.Matches(@"^\(UTC(\+|-)[0-9]{2}:[0-9]{2}\) \S.*", tzi.DisplayName);
                     string offset = Regex.Match(tzi.DisplayName, @"(-|)[0-9]{2}:[0-9]{2}").Value;
-                    Assert.Equal(tzi.BaseUtcOffset, TimeSpan.Parse(offset));
+                    Assert.True(tzi.BaseUtcOffset == TimeSpan.Parse(offset), $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.DisplayName}");
                 }
             }
         }
