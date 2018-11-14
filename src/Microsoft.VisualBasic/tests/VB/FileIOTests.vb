@@ -729,10 +729,16 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryBaseName)
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
-                Dim VeryLongDirectoryName As String = New String("A"c, 250)
-                Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
-                FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
-                Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
+                If AreAllLongPathsAvailable() Then
+                    Dim VeryLongDirectoryName As String = New String("A"c, 250)
+                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
+                    FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
+                    Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
+                Else
+                    Dim VeryLongDirectoryName As String = New String("A"c, 250)
+                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
+                    Assert.Throws(Of IO.PathTooLongException)(Sub() FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory))
+                End If
             End Using
 
         End Sub

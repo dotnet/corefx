@@ -3,7 +3,14 @@
     <ProjectGuid>{da95454e-5f0e-4f8a-871a-25d1ab62867a}</ProjectGuid>
     <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="PathFeatures.Windows.vb" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' != 'true'">
+    <Compile Include="PathFeatures.Unix.vb" />
+  </ItemGroup>
   <ItemGroup>
+    <Compile Include="PathFeatures.vb" />
     <Compile Include="SpecialDirectoriesTests.vb" />
     <Compile Include="Dummy.vb" />
     <Compile Include="FileIOTests.vb" />
