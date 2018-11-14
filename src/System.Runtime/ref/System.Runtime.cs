@@ -2330,6 +2330,7 @@ namespace System
         public bool EndsWith(System.String value) { throw null; }
         public bool EndsWith(System.String value, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
         public bool EndsWith(System.String value, System.StringComparison comparisonType) { throw null; }
+        public RuneEnumerator EnumerateRunes() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.String value) { throw null; }
         public static bool Equals(System.String a, System.String b) { throw null; }
@@ -2457,6 +2458,19 @@ namespace System
         public System.String TrimStart() { throw null; }
         public System.String TrimStart(char trimChar) { throw null; }
         public System.String TrimStart(params char[] trimChars) { throw null; }
+        public partial struct RuneEnumerator : System.Collections.Generic.IEnumerable<System.Text.Rune>, System.Collections.Generic.IEnumerator<System.Text.Rune>
+        {
+            private readonly object _dummyReference;
+            private readonly int _dummyPrimitive;
+            public System.Text.Rune Current { get { throw null; } }
+            public RuneEnumerator GetEnumerator() { throw null; }
+            public bool MoveNext() { throw null; }
+            object System.Collections.IEnumerator.Current { get { throw null; } }
+            void IDisposable.Dispose() { }
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+            System.Collections.Generic.IEnumerator<System.Text.Rune> System.Collections.Generic.IEnumerable<System.Text.Rune>.GetEnumerator() { throw null; }
+            void System.Collections.IEnumerator.Reset() { }
+        }
     }
     public enum StringComparison
     {
