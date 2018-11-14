@@ -50,7 +50,6 @@ function Apply-IBCData
         {
             if(!$UsePartialNgen)
             {
-                $count = $count + 1
                 Write-Host "$IBCMerge -q -f -mo $fileToOptimize -incremental $file"
                 & $IBCMerge -q -f -mo $fileToOptimize -incremental $file
             }
