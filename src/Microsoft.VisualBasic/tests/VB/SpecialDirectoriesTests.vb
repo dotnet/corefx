@@ -16,8 +16,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         Private Shared Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
             If Environment.GetFolderPath(folder) = "" Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(getSpecialDirectory)
-                Assert.Equal(getSpecialDirectory.Invoke, "")
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() getSpecialDirectory.Invoke)
             Else
                 Assert.Equal(Environment.GetFolderPath(folder).TrimEnd(Separators), getSpecialDirectory().TrimEnd(Separators))
             End If
@@ -42,17 +41,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Shared Sub MyDocumentsFolderTest()
             If PlatformDetection.IsWindowsNanoServer Then
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
                 Exit Sub
             End If
 
             CheckSpecialFolder(SpecialFolder.MyDocuments, Function() SpecialDirectories.MyDocuments)
         End Sub
-
-        <PlatformSpecific(TestPlatforms.Windows), ConditionalFact(GetType(PlatformDetection), NameOf(PlatformDetection.IsWindowsNanoServer))>
-        Public Shared Sub MyDocumentsFolderTestForNano()
-            Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
-        End Sub
-
 
         <Fact>
         Public Shared Sub MyMusicFolderTest()
