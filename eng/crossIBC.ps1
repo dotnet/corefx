@@ -5,6 +5,7 @@ param(
     [Parameter(Mandatory=$true)][string]$ToolSource,
     [Parameter(Mandatory=$true)][string]$ToolUser,
     [Parameter(Mandatory=$true)][string]$ToolPAT,
+    [Parameter(Mandatory=$true)][string]$RepoRoot,
     [bool]$UsePartialNgen
 )
 
@@ -64,9 +65,10 @@ function Apply-IBCData
     }
 }
 
-cd ..
+pushd $RepoRoot
 .\build.cmd -restore /p:OptionalToolSource=$ToolSource /p:OptionalToolSourceUser=$ToolUser /p:OptionalToolSourcePassword=$ToolPAT /p:EnableProfileGuidedOptimization=true /p:IBCTarget=Linux -release -ci
 mkdir Optimized
 $IBCMerge = Find-IBCMerge
 Preprocess-IBCMerge
 Apply-IBCData
+popd
