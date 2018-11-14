@@ -83,24 +83,6 @@ namespace System.Security.Permissions.Tests
         }
 
         [Fact]
-        public static void DirectoryServicesPermissionCallMethods()
-        {
-            DirectoryServicesPermission dsp = new DirectoryServicesPermission(new PermissionState());
-            DirectoryServicesPermission other = new DirectoryServicesPermission();
-            other = new DirectoryServicesPermission(default(DirectoryServicesPermissionAccess), default(string));
-            DirectoryServicesPermissionEntryCollection pe = other.PermissionEntries;
-        }
-
-        [Fact]
-        public static void DirectoryServicesPermissionAttributeCallMethods()
-        {
-            var dpa = new DirectoryServicesPermissionAttribute(new SecurityAction());
-            DirectoryServicesPermissionAccess pa = dpa.PermissionAccess;
-            string path = dpa.Path;
-            IPermission ip = dpa.CreatePermission();
-        }
-
-        [Fact]
         public static void EnvironmentPermissionCallMethods()
         {
             EnvironmentPermission ep = new EnvironmentPermission(new Permissions.EnvironmentPermissionAccess(), "testpath");
