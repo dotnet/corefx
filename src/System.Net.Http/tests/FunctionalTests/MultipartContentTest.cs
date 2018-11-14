@@ -180,7 +180,6 @@ namespace System.Net.Http.Functional.Tests
                 "This is a ByteArrayContent\r\n" +
                 "--theBoundary\r\n" +
                 "Content-Type: text/plain; charset=utf-8\r\n" +
-                "Content-Length: 26\r\n" +
                 "\r\n" +
                 "This is a StringContent\r\n" +
                 "--theBoundary--\r\n",
