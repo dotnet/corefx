@@ -10,7 +10,7 @@ namespace System.Collections
     // A vector of bits.  Use this to store bits efficiently, without having to do bit 
     // shifting yourself.
     [Serializable]
-    [Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class BitArray : ICollection, ICloneable
     {
         private int[] m_array; // Do not rename (binary serialization)
@@ -533,7 +533,8 @@ namespace System.Collections
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
                 }
 
-                uint extraBits = (uint)m_length & (BitsPerByte - 1); // number & 7 == number % 8
+                // equivalent to m_length % BitsPerByte, sine BitsPerByte is a power of 2
+                uint extraBits = (uint)m_length & (BitsPerByte - 1);
                 if (extraBits > 0)
                 {
                     // last byte is not aligned, we will directly copy one less byte
@@ -641,7 +642,7 @@ namespace System.Collections
         private static int GetInt32ArrayLengthFromBitLength(int n)
         {
             Debug.Assert(n >= 0);
-            return ((n - 1) >> BitShiftPerInt32) + 1;
+            return (int)((uint)(n - 1 + (1 << BitShiftPerInt32)) >> BitShiftPerInt32);
         }
 
         private static int GetInt32ArrayLengthFromByteLength(int n)
@@ -649,7 +650,7 @@ namespace System.Collections
             Debug.Assert(n >= 0);
             // Due to sign extension, we don't need to special case for n == 0, since ((n - 1) >> 2) + 1 = 0
             // This doesn't hold true for ((n - 1) / 4) + 1, which equals 1.
-            return ((n - 1) >> BitShiftForBytesPerInt32) + 1;
+            return (int)((uint)(n - 1 + (1 << BitShiftForBytesPerInt32)) >> BitShiftForBytesPerInt32);
         }
 
         private static int GetByteArrayLengthFromBitLength(int n)
@@ -657,20 +658,20 @@ namespace System.Collections
             Debug.Assert(n >= 0);
             // Due to sign extension, we don't need to special case for n == 0, since ((n - 1) >> 3) + 1 = 0
             // This doesn't hold true for ((n - 1) / 8) + 1, which equals 1.
-            return ((n - 1) >> BitShiftPerByte) + 1;
+            return (int)((uint)(n - 1 + (1 << BitShiftPerByte)) >> BitShiftPerByte);
         }
 
         private static int Div32Rem(int number, out int remainder)
         {
             uint quotient = (uint)number / BitsPerInt32;
-            remainder = number & (BitsPerInt32 - 1);    // number & 31 == number % 32
+            remainder = number & (BitsPerInt32 - 1);    // equivalent to number % BitsPerInt32, sine BitsPerInt32 is a power of 2
             return (int)quotient;
         }
 
         private static int Div4Rem(int number, out int remainder)
         {
             uint quotient = (uint)number / BytesPerInt32;
-            remainder = number & (BytesPerInt32 - 1);   // number & 4 == number % 4
+            remainder = number & (BytesPerInt32 - 1);   // equivalent to number % BytesPerInt32, sine BytesPerInt32 is a power of 2
             return (int)quotient;
         }
 
