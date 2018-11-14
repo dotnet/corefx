@@ -311,6 +311,15 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(ip1, ip2);
             Assert.Equal(ip1.GetHashCode(), ip2.GetHashCode());
         }
+
+        [Fact]
+        public static void Foo()
+        {
+            Assert.Throws<InvalidOperationException>(() => IPAddress.Any.Address = MaxAddress - 1);
+            Assert.Throws<InvalidOperationException>(() => IPAddress.Broadcast.Address = MaxAddress - 1);
+            Assert.Throws<InvalidOperationException>(() => IPAddress.Loopback.Address = MaxAddress - 1);
+
+        }
 #pragma warning restore 618
     }
 }
