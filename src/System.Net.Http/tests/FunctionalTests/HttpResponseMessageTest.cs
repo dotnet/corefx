@@ -266,6 +266,7 @@ namespace System.Net.Http.Functional.Tests
                     "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                     "{\r\n" +
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
+                    "  Content-Length: 7\r\n" +
                     "}", rm.ToString());
 
                 rm.Headers.AcceptRanges.Add("bytes");
@@ -280,6 +281,7 @@ namespace System.Net.Http.Functional.Tests
                     "  Accept-Ranges: pages\r\n" +
                     "  Custom-Response-Header: value1\r\n" +
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
+                    "  Content-Length: 7\r\n" +
                     "  Custom-Content-Header: value2\r\n" +
                     "}", rm.ToString());
             }
@@ -308,6 +310,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        #endregion   
+        #endregion
     }
 }

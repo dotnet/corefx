@@ -119,7 +119,7 @@ namespace System.Net.Http.Functional.Tests
 
             rm.Dispose();
             rm.Dispose(); // Multiple calls don't throw.
-            
+
             Assert.True(content.IsDisposed);
             Assert.Throws<ObjectDisposedException>(() => { rm.Method = HttpMethod.Put; });
             Assert.Throws<ObjectDisposedException>(() => { rm.RequestUri = null; });
@@ -182,9 +182,9 @@ namespace System.Net.Http.Functional.Tests
         public void ToString_DefaultAndNonDefaultInstance_DumpAllFields()
         {
             var rm = new HttpRequestMessage();
-            string expected = 
-                    "Method: GET, RequestUri: '<null>', Version: " + 
-                    _expectedRequestMessageVersion.ToString(2) + 
+            string expected =
+                    "Method: GET, RequestUri: '<null>', Version: " +
+                    _expectedRequestMessageVersion.ToString(2) +
                     ", Content: <null>, Headers:\r\n{\r\n}";
             Assert.Equal(expected, rm.ToString());
 
@@ -199,11 +199,12 @@ namespace System.Net.Http.Functional.Tests
                 "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                 "{\r\n" +
                 "  Content-Type: text/plain; charset=utf-8\r\n" +
+                "  Content-Length: 7\r\n" +
                 "}", rm.ToString());
 
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain", 0.2));
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml", 0.1));
-            rm.Headers.Add("Custom-Request-Header", "value1");            
+            rm.Headers.Add("Custom-Request-Header", "value1");
             rm.Content.Headers.Add("Custom-Content-Header", "value2");
 
             Assert.Equal(
@@ -213,6 +214,7 @@ namespace System.Net.Http.Functional.Tests
                 "  Accept: text/xml; q=0.1\r\n" +
                 "  Custom-Request-Header: value1\r\n" +
                 "  Content-Type: text/plain; charset=utf-8\r\n" +
+                "  Content-Length: 7\r\n" +
                 "  Custom-Content-Header: value2\r\n" +
                 "}", rm.ToString());
         }

@@ -38,7 +38,7 @@ namespace System.Net.Http.Headers
             set { SetOrRemoveParsedValue(KnownHeaders.ContentDisposition.Descriptor, value); }
         }
 
-        // Must be a collection (and not provide properties like "GZip", "Deflate", etc.) since the 
+        // Must be a collection (and not provide properties like "GZip", "Deflate", etc.) since the
         // order matters!
         public ICollection<string> ContentEncoding
         {
@@ -152,7 +152,7 @@ namespace System.Net.Http.Headers
         internal override void EnsureHeaders()
         {
             base.EnsureHeaders();
-            if (_parent != null)
+            if ((_parent != null) && !_parent.IsDisposed)
             {
                 // Content-Length is not among headers unless its property is accessed.
                 long? contentLengthValue = ContentLength;

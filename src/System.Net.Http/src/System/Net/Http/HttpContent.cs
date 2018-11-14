@@ -543,6 +543,8 @@ namespace System.Net.Http
 
         #region Helpers
 
+        internal bool IsDisposed => _disposed;
+
         private void CheckDisposed()
         {
             if (_disposed)

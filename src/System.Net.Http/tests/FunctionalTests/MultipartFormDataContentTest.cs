@@ -94,7 +94,9 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
-                + "Content-Disposition: form-data\r\n\r\nHello World\r\n--test_boundary--\r\n",
+                + "Content-Disposition: form-data\r\n"
+                + "Content-Length: 11\r\n\r\n"
+                + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
 
@@ -112,7 +114,9 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
-                + "Content-Disposition: form-data; name=test_name\r\n\r\nHello World\r\n--test_boundary--\r\n",
+                + "Content-Disposition: form-data; name=test_name\r\n"
+                + "Content-Length: 11\r\n\r\n"
+                + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
 
@@ -130,8 +134,9 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
-                + "Content-Disposition: form-data; name=test_name; " 
-                + "filename=test_file_name; filename*=utf-8\'\'test_file_name\r\n\r\n"
+                + "Content-Disposition: form-data; name=test_name; "
+                + "filename=test_file_name; filename*=utf-8\'\'test_file_name\r\n"
+                + "Content-Length: 11\r\n\r\n"
                 + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
@@ -150,7 +155,9 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
-                + "Content-Disposition: form-data; name=\"test name\"\r\n\r\nHello World\r\n--test_boundary--\r\n",
+                + "Content-Disposition: form-data; name=\"test name\"\r\n"
+                + "Content-Length: 11\r\n\r\n"
+                + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
 
@@ -168,8 +175,9 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
-                + "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\""
-                + "\r\n\r\nHello World\r\n--test_boundary--\r\n",
+                + "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\"\r\n"
+                + "Content-Length: 11\r\n\r\n"
+                + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
 
@@ -187,8 +195,9 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
-                + "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\""
-                + "\r\n\r\nHello World\r\n--test_boundary--\r\n",
+                + "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\"\r\n"
+                + "Content-Length: 11\r\n\r\n"
+                + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
 
@@ -207,8 +216,9 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(
                 "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n"
                 + "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\";"
-                + " filename=\"=?utf-8?B?ZmlsZeOCrw0KIG5hbcOp?=\"; filename*=utf-8\'\'file%E3%82%AF%0D%0A%20nam%C3%A9" 
-                + "\r\n\r\nHello World\r\n--test_boundary--\r\n",
+                + " filename=\"=?utf-8?B?ZmlsZeOCrw0KIG5hbcOp?=\"; filename*=utf-8\'\'file%E3%82%AF%0D%0A%20nam%C3%A9\r\n"
+                + "Content-Length: 11\r\n\r\n"
+                + "Hello World\r\n--test_boundary--\r\n",
                 result);
         }
     }
