@@ -51,8 +51,14 @@ namespace System.Text.Json
         /// Gets the value of the last processed token as a ReadOnlySpan&lt;byte&gt; slice
         /// of the input payload. If the JSON is provided within a ReadOnlySequence&lt;byte&gt;
         /// and the slice that represents the token value fits in a single segment, then
-        /// ValueSpan will contain the sliced value since it can be represented as a span.
+        /// <see cref="ValueSpan"/> will contain the sliced value since it can be represented as a span.
+        /// Otherwise, the <see cref="ValueSequence"/> will contain the token value.
         /// </summary>
+        /// <remarks>
+        /// If <see cref="HasValueSequence"/> is true, <see cref="ValueSpan"/> contains useless data, likely for
+        /// a previous single-segment token. Therefore, only access <see cref="ValueSpan"/> if <see cref="HasValueSequence"/> is false.
+        /// Otherwise, the token value must be accessed from <see cref="ValueSequence"/>.
+        /// </remarks>
         public ReadOnlySpan<byte> ValueSpan { get; private set; }
 
         /// <summary>
@@ -76,7 +82,7 @@ namespace System.Text.Json
         /// Lets the caller know which of the two 'Value' properties to read to get the 
         /// token value. For input data within a ReadOnlySpan&lt;byte&gt; this will
         /// always return false. For input data within a ReadOnlySequence&lt;byte&gt;, this
-        /// will only return true if the token straddles more than a single segment and
+        /// will only return true if the token value straddles more than a single segment and
         /// hence couldn't be represented as a span.
         /// </summary>
         public bool HasValueSequence { get; private set; }
@@ -85,8 +91,14 @@ namespace System.Text.Json
         /// Gets the value of the last processed token as a ReadOnlySpan&lt;byte&gt; slice
         /// of the input payload. If the JSON is provided within a ReadOnlySequence&lt;byte&gt;
         /// and the slice that represents the token value fits in a single segment, then
-        /// ValueSpan will contain the sliced value since it can be represented as a span.
+        /// <see cref="ValueSpan"/> will contain the sliced value since it can be represented as a span.
+        /// Otherwise, the <see cref="ValueSequence"/> will contain the token value.
         /// </summary>
+        /// <remarks>
+        /// If <see cref="HasValueSequence"/> is false, <see cref="ValueSequence"/> contains useless data, likely for
+        /// a previous multi-segment token. Therefore, only access <see cref="ValueSpan"/> if <see cref="HasValueSequence"/> is true.
+        /// Otherwise, the token value must be accessed from <see cref="ValueSpan"/>.
+        /// </remarks>
         public ReadOnlySequence<byte> ValueSequence { get; private set; }
 
         /// <summary>
