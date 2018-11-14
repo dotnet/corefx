@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Globalization.Tests
 {
-    public class CompareInfoTests
+    public partial class CompareInfoTests
     {
         [Theory]
         [InlineData("")]
@@ -49,31 +49,26 @@ namespace System.Globalization.Tests
             }
         }
 
+        public object[] GetHashCodeTestData => new[]
+        {
+            new object[] { "abc", CompareOptions.OrdinalIgnoreCase, "ABC", CompareOptions.OrdinalIgnoreCase, true },
+            new object[] { "abc", CompareOptions.Ordinal, "ABC", CompareOptions.Ordinal, false },
+            new object[] { "abc", CompareOptions.Ordinal, "abc", CompareOptions.Ordinal, true },
+            new object[] { "abc", CompareOptions.None, "abc", CompareOptions.None, true },
+        };
+
         [Theory]
-        [InlineData("abc", CompareOptions.OrdinalIgnoreCase, "ABC", CompareOptions.OrdinalIgnoreCase, true)]
-        [InlineData("abc", CompareOptions.Ordinal, "ABC", CompareOptions.Ordinal, false)]
-        [InlineData("abc", CompareOptions.Ordinal, "abc", CompareOptions.Ordinal, true)]
-        [InlineData("abc", CompareOptions.None, "abc", CompareOptions.None, true)]
-        public void GetHashCode(string source1, CompareOptions options1, string source2, CompareOptions options2, bool expectSameHashCode)
+        [MemberData(nameof(GetHashCodeTestData))]
+        public void GetHashCode(string source1, CompareOptions options1, string source2, CompareOptions options2, bool expected)
         {
             CompareInfo invariantCompare = CultureInfo.InvariantCulture.CompareInfo;
-
-            int hashOfSource1AsString = invariantCompare.GetHashCode(source1, options1);
-            int hashOfSource1AsSpan = invariantCompare.GetHashCode(source1.AsSpan(), options1);
-            Assert.Equal(hashOfSource1AsString, hashOfSource1AsSpan);
-
-            int hashOfSource2AsString = invariantCompare.GetHashCode(source2, options2);
-            int hashOfSource2AsSpan = invariantCompare.GetHashCode(source2.AsSpan(), options2);
-            Assert.Equal(hashOfSource2AsString, hashOfSource2AsSpan);
-
-            Assert.Equal(expectSameHashCode, hashOfSource1AsString == hashOfSource2AsString);
+            Assert.Equal(expected, invariantCompare.GetHashCode(source1, options1).Equals(invariantCompare.GetHashCode(source2, options2)));
         }
 
         [Fact]
         public void GetHashCode_EmptyString()
         {
             Assert.Equal(0, CultureInfo.InvariantCulture.CompareInfo.GetHashCode("", CompareOptions.None));
-            Assert.Equal(0, CultureInfo.InvariantCulture.CompareInfo.GetHashCode(ReadOnlySpan<char>.Empty, CompareOptions.None));
         }
 
         [Fact]
@@ -84,10 +79,6 @@ namespace System.Globalization.Tests
             AssertExtensions.Throws<ArgumentException>("options", () => CultureInfo.InvariantCulture.CompareInfo.GetHashCode("Test", CompareOptions.StringSort));
             AssertExtensions.Throws<ArgumentException>("options", () => CultureInfo.InvariantCulture.CompareInfo.GetHashCode("Test", CompareOptions.Ordinal | CompareOptions.IgnoreSymbols));
             AssertExtensions.Throws<ArgumentException>("options", () => CultureInfo.InvariantCulture.CompareInfo.GetHashCode("Test", (CompareOptions)(-1)));
-
-            AssertExtensions.Throws<ArgumentException>("options", () => CultureInfo.InvariantCulture.CompareInfo.GetHashCode("Test".AsSpan(), CompareOptions.StringSort));
-            AssertExtensions.Throws<ArgumentException>("options", () => CultureInfo.InvariantCulture.CompareInfo.GetHashCode("Test".AsSpan(), CompareOptions.Ordinal | CompareOptions.IgnoreSymbols));
-            AssertExtensions.Throws<ArgumentException>("options", () => CultureInfo.InvariantCulture.CompareInfo.GetHashCode("Test".AsSpan(), (CompareOptions)(-1)));
         }
 
         [Theory]
