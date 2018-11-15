@@ -726,9 +726,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Using TestBase As New FileIOTests
                 Dim PathLength As Integer = TestBase.TestDirectory().Length
                 Assert.True(PathLength < 257) ' Need room for slash and new directory name
-                Dim MaxDirNameLength As Integer = 247 - (PathLength + 1) ' +1 for trailing /
-                MaxDirNameLength = If(MaxDirNameLength >= 248, 247, MaxDirNameLength)
-                Dim DirectoryName As String = New String("A"c, MaxDirNameLength)
+                Dim DirectoryName As String = New String("A"c, 30)
 
                 Assert.True(DirectoryName.Length < 248, $"DirectoryBaseName.Length at {DirectoryName.Length} is not < 248")
                 Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryName)
