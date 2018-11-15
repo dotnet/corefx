@@ -11,6 +11,14 @@ namespace System.Text.JsonTests
     {
         private static Random s_random = new Random(42);
 
+        [Fact]
+        public static void DefaultBitArray()
+        {
+            CustomUncheckedBitArray bitArray = default;
+            Assert.True(bitArray.IsDefault);
+            Assert.Equal(-1, bitArray.MaxIndexableLength);
+        }
+
         [Theory]
         [InlineData(32)]
         [InlineData(64)]
@@ -23,42 +31,73 @@ namespace System.Text.JsonTests
         private static void BigArrayGetSetHelper(int bitLength)
         {
             var bitArray = new CustomUncheckedBitArray(bitLength);
-            Assert.Equal(bitLength, bitArray.Length);
+            Assert.False(bitArray.IsDefault);
+            Assert.Equal(bitLength - 1, bitArray.MaxIndexableLength);
 
-            var values = new bool[bitArray.Length];
+            var values = new bool[bitArray.MaxIndexableLength + 1];
             for (int i = 0; i < values.Length; i++)
             {
                 values[i] = s_random.NextDouble() >= 0.5;
             }
 
-            for (int i = 0; i < bitArray.Length; i++)
+            for (int i = 0; i <= bitArray.MaxIndexableLength; i++)
             {
                 bitArray[i] = values[i];
             }
 
-            for (int i = 0; i < bitArray.Length; i++)
+            for (int i = 0; i <= bitArray.MaxIndexableLength; i++)
             {
                 Assert.Equal(values[i], bitArray[i]);
             }
         }
 
         [Theory]
-        [OuterLoop]
         [InlineData(3_200_000)]
-        [InlineData(int.MaxValue / 32 + 167_108_864)]    // 67_108_864
+        [InlineData(int.MaxValue / 32 + 1)]    // 67_108_864
         public static void BitArrayGetSetLarge(int bitLength)
         {
-            BigArrayGetSetHelper(bitLength);
+            var bitArray = new CustomUncheckedBitArray(bitLength);
+            Assert.False(bitArray.IsDefault);
+            Assert.Equal(bitLength - 1, bitArray.MaxIndexableLength);
+
+            var values = new bool[bitArray.MaxIndexableLength + 1];
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = s_random.NextDouble() >= 0.5;
+            }
+
+            const int IterationCapacity = 1_600_000;
+
+            // Only set and compare the first and last few (otherwise, the test takes too long)
+            for (int i = 0; i <= IterationCapacity; i++)
+            {
+                bitArray[i] = values[i];
+            }
+            for (int i = bitLength - IterationCapacity; i <= bitArray.MaxIndexableLength; i++)
+            {
+                bitArray[i] = values[i];
+            }
+
+            for (int i = 0; i <= IterationCapacity; i++)
+            {
+                Assert.Equal(values[i], bitArray[i]);
+            }
+            for (int i = bitLength - IterationCapacity; i <= bitArray.MaxIndexableLength; i++)
+            {
+                Assert.Equal(values[i], bitArray[i]);
+            }
         }
 
         [Theory]
         [InlineData(32)]
         [InlineData(64)]
+        [InlineData(128)]
         [InlineData(256)]
         public static void BitArrayGrow(int bitLength)
         {
             var bitArray = new CustomUncheckedBitArray(bitLength);
-            Assert.Equal(bitLength, bitArray.Length);
+            Assert.Equal(bitLength - 1, bitArray.MaxIndexableLength);
+            Assert.False(bitArray.IsDefault);
 
             const int growBy = 128;
 
@@ -71,20 +110,41 @@ namespace System.Text.JsonTests
             for (int i = 0; i < bitLength + growBy; i++)
             {
                 bitArray[i] = values[i];
-                Assert.True(bitArray.Length >= i);
+                Assert.True(bitArray.MaxIndexableLength >= i);
             }
 
-            Assert.True(bitLength + growBy <= bitArray.Length && bitArray.Length <= (bitLength + growBy) * 2);
+            Assert.True(bitLength - 1 + growBy <= bitArray.MaxIndexableLength);
+
+            int expectedLength = NextClosestPowerOf2(bitLength + growBy) - 1;
+
+            Assert.True(expectedLength == bitArray.MaxIndexableLength, $"expected: {expectedLength}, actual: {bitArray.MaxIndexableLength}, bitLength: {bitLength}, growBy: {growBy}");
             for (int i = 0; i < values.Length; i++)
             {
-                Assert.True(values[i] == bitArray[i], $"expected: {values[i]}, actual: {bitArray[i]}, index: {i}, Length: {bitArray.Length}");
+                Assert.True(values[i] == bitArray[i], $"expected: {values[i]}, actual: {bitArray[i]}, index: {i}, Length: {bitArray.MaxIndexableLength}");
             }
 
             // Extra bits start off as false.
-            for (int i = values.Length; i < bitArray.Length; i++)
+            for (int i = values.Length; i < bitArray.MaxIndexableLength; i++)
             {
-                Assert.False(bitArray[i], $"index: {i}, Length: {bitArray.Length}, ValuesLength: {values.Length}");
+                Assert.False(bitArray[i], $"index: {i}, Length: {bitArray.MaxIndexableLength}, ValuesLength: {values.Length}");
             }
+        }
+
+        private static int NextClosestPowerOf2(int n)
+        {
+            // Required to handle powers of 2.
+            n--;
+
+            // Set all the bits to the right of the leftmost set bit to 1.
+            n |= n >> 1;
+            n |= n >> 2;
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+
+            n++;
+
+            return n;
         }
     }
 }

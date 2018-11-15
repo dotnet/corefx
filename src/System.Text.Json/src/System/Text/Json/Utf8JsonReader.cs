@@ -206,7 +206,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnsureAndPushToBitArray(bool inObject)
         {
-            if (_bitArray == default)
+            if (_bitArray.IsDefault)
             {
                 _bitArray = new CustomUncheckedBitArray(bitLength: 64);
             }
