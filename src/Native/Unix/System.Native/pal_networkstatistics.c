@@ -171,28 +171,31 @@ int32_t SystemNative_GetIcmpv4GlobalStatistics(Icmpv4GlobalStatistics* retStats)
         return -1;
     }
 
-    retStats->AddressMaskRepliesReceived = systemStats.icps_inhist[ICMP_MASKREPLY];
-    retStats->AddressMaskRepliesSent = systemStats.icps_outhist[ICMP_MASKREPLY];
-    retStats->AddressMaskRequestsReceived = systemStats.icps_inhist[ICMP_MASKREQ];
-    retStats->AddressMaskRequestsSent = systemStats.icps_outhist[ICMP_MASKREQ];
-    retStats->DestinationUnreachableMessagesReceived = systemStats.icps_inhist[ICMP_UNREACH];
-    retStats->DestinationUnreachableMessagesSent = systemStats.icps_outhist[ICMP_UNREACH];
-    retStats->EchoRepliesReceived = systemStats.icps_inhist[ICMP_ECHOREPLY];
-    retStats->EchoRepliesSent = systemStats.icps_outhist[ICMP_ECHOREPLY];
-    retStats->EchoRequestsReceived = systemStats.icps_inhist[ICMP_ECHO];
-    retStats->EchoRequestsSent = systemStats.icps_outhist[ICMP_ECHO];
-    retStats->ParameterProblemsReceived = systemStats.icps_inhist[ICMP_PARAMPROB];
-    retStats->ParameterProblemsSent = systemStats.icps_outhist[ICMP_PARAMPROB];
-    retStats->RedirectsReceived = systemStats.icps_inhist[ICMP_REDIRECT];
-    retStats->RedirectsSent = systemStats.icps_outhist[ICMP_REDIRECT];
-    retStats->SourceQuenchesReceived = systemStats.icps_inhist[ICMP_SOURCEQUENCH];
-    retStats->SourceQuenchesSent = systemStats.icps_outhist[ICMP_SOURCEQUENCH];
-    retStats->TimeExceededMessagesReceived = systemStats.icps_inhist[ICMP_TIMXCEED];
-    retStats->TimeExceededMessagesSent = systemStats.icps_outhist[ICMP_TIMXCEED];
-    retStats->TimestampRepliesReceived = systemStats.icps_inhist[ICMP_TSTAMPREPLY];
-    retStats->TimestampRepliesSent = systemStats.icps_outhist[ICMP_TSTAMPREPLY];
-    retStats->TimestampRequestsReceived = systemStats.icps_inhist[ICMP_TSTAMP];
-    retStats->TimestampRequestsSent = systemStats.icps_outhist[ICMP_TSTAMP];
+    __typeof(systemStats.icps_inhist[0])* inHist = systemStats.icps_inhist;
+    __typeof(systemStats.icps_outhist[0])* outHist = systemStats.icps_outhist;
+
+    retStats->AddressMaskRepliesReceived = inHist[ICMP_MASKREPLY];
+    retStats->AddressMaskRepliesSent = outHist[ICMP_MASKREPLY];
+    retStats->AddressMaskRequestsReceived = inHist[ICMP_MASKREQ];
+    retStats->AddressMaskRequestsSent = outHist[ICMP_MASKREQ];
+    retStats->DestinationUnreachableMessagesReceived = inHist[ICMP_UNREACH];
+    retStats->DestinationUnreachableMessagesSent = outHist[ICMP_UNREACH];
+    retStats->EchoRepliesReceived = inHist[ICMP_ECHOREPLY];
+    retStats->EchoRepliesSent = outHist[ICMP_ECHOREPLY];
+    retStats->EchoRequestsReceived = inHist[ICMP_ECHO];
+    retStats->EchoRequestsSent = outHist[ICMP_ECHO];
+    retStats->ParameterProblemsReceived = inHist[ICMP_PARAMPROB];
+    retStats->ParameterProblemsSent = outHist[ICMP_PARAMPROB];
+    retStats->RedirectsReceived = inHist[ICMP_REDIRECT];
+    retStats->RedirectsSent = outHist[ICMP_REDIRECT];
+    retStats->SourceQuenchesReceived = inHist[ICMP_SOURCEQUENCH];
+    retStats->SourceQuenchesSent = outHist[ICMP_SOURCEQUENCH];
+    retStats->TimeExceededMessagesReceived = inHist[ICMP_TIMXCEED];
+    retStats->TimeExceededMessagesSent = outHist[ICMP_TIMXCEED];
+    retStats->TimestampRepliesReceived = inHist[ICMP_TSTAMPREPLY];
+    retStats->TimestampRepliesSent = outHist[ICMP_TSTAMPREPLY];
+    retStats->TimestampRequestsReceived = inHist[ICMP_TSTAMP];
+    retStats->TimestampRequestsSent = outHist[ICMP_TSTAMP];
 
     return 0;
 }
