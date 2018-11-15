@@ -202,11 +202,6 @@ namespace Microsoft.VisualBasic
         public static float Rnd() { throw null; }
         public static float Rnd(float Number) { throw null; }
     }
-    //[Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
-    //internal sealed partial class Interaction
-    //{
-    //    internal Interaction() { }
-    //}
 }
 namespace Microsoft.VisualBasic.ApplicationServices
 {

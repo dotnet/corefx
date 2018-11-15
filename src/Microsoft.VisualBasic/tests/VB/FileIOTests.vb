@@ -726,7 +726,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Using TestBase As New FileIOTests
                 Dim PathLength As Integer = TestBase.TestDirectory().Length
                 Assert.True(PathLength < 260)
-                Dim DirectoryBaseName As String = New String("A"c, 260 - PathLength)
+                Dim DirectoryBaseName As String = New String("A"c, 250 - PathLength)
                 Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryBaseName)
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))

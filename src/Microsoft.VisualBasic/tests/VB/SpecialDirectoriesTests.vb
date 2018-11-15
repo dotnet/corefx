@@ -14,12 +14,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
-        Private Shared Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of Object))
+        Private Shared Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
             Dim LocalFolderPath As String = Environment.GetFolderPath(folder)
             If LocalFolderPath = "" Then
-                Assert.Throws(Of IO.DirectoryNotFoundException)(getSpecialDirectory)
+                Assert.Throws(Of IO.DirectoryNotFoundException)(Function() getSpecialDirectory.Invoke)
             Else
-                Assert.Equal(LocalFolderPath.TrimEnd(Separators), getSpecialDirectory().ToString.TrimEnd(Separators))
+                Assert.Equal(LocalFolderPath.TrimEnd(Separators), getSpecialDirectory().TrimEnd(Separators))
             End If
 
         End Sub
