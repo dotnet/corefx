@@ -725,11 +725,14 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Sub LongDirectoryPathTest()
             Using TestBase As New FileIOTests
                 Dim PathLength As Integer = TestBase.TestDirectory().Length
-                Assert.True(PathLength < 257)
+                Assert.True(PathLength < 257) ' Need room for slash and new directory name
                 Dim MaxDirNameLength As Integer = 257 - PathLength
-                MaxDirNameLength = If(MaxDirNameLength > 248, 248, MaxDirNameLength)
+                MaxDirNameLength = If(MaxDirNameLength >= 248, 247, MaxDirNameLength)
                 Dim DirectoryBaseName As String = New String("A"c, MaxDirNameLength)
                 Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryBaseName)
+                Assert.True(DirectoryBaseName.Length < 248, $"DirectoryBaseName.Length at {DirectoryBaseName.Length} is not < 248")
+                Assert.True(FullPathToTargetDirectory.Length < 260, $"FullPathToTargetDirectory.Length at {FullPathToTargetDirectory.Length} is not < 260")
+
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
                 If AreAllLongPathsAvailable() Then
