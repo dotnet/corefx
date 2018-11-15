@@ -343,7 +343,7 @@ namespace System.Collections.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => bitArray.CopyTo(array, -1));
             if (def is int)
             {
-                AssertExtensions.Throws<ArgumentException>(null, string.Empty, () => bitArray.CopyTo(array, index));
+                AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => bitArray.CopyTo(array, index));
             }
             else
             {

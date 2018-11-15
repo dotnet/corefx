@@ -156,7 +156,7 @@ namespace System.Collections
             }
 
             m_array = new int[values.Length];
-            values.AsSpan().CopyTo(m_array);
+            Array.Copy(values, 0, m_array, 0, values.Length);
             m_length = values.Length * BitsPerInt32;
 
             _version = 0;
@@ -180,7 +180,7 @@ namespace System.Collections
 
             Debug.Assert(bits.m_array.Length <= arrayLength);
 
-            bits.m_array.AsSpan().CopyTo(m_array);
+            Array.Copy(bits.m_array, 0, m_array, 0, arrayLength);
             m_length = bits.m_length;
 
             _version = bits._version;
@@ -381,7 +381,7 @@ namespace System.Collections
                         uint mask = uint.MaxValue >> (BitsPerInt32 - extraBits);
                         m_array[ints - 1] &= (int)mask;
                     }
-                    m_array.AsSpan(fromIndex, ints - fromIndex).CopyTo(m_array);
+                    Array.Copy(m_array, fromIndex, m_array, 0, ints - fromIndex);
                     toIndex = ints - fromIndex;
                 }
                 else
@@ -436,7 +436,7 @@ namespace System.Collections
 
                 if (shiftCount == 0)
                 {
-                    m_array.AsSpan(0, lastIndex + 1 - lengthToClear).CopyTo(m_array.AsSpan(lengthToClear));
+                    Array.Copy(m_array, 0, m_array, lengthToClear, lastIndex + 1 - lengthToClear);
                 }
                 else
                 {
@@ -521,13 +521,13 @@ namespace System.Collections
                 if (extraBits == 0)
                 {
                     // we have perfect bit alignment, no need to sanitize, just copy
-                    m_array.CopyTo(intArray.AsSpan(index));
+                    Array.Copy(m_array, 0, intArray, index, m_array.Length);
                 }
                 else
                 {
                     int last = (m_length - 1) >> BitShiftPerInt32;
                     // do not copy the last int, as it is not completely used
-                    m_array.AsSpan(0, last).CopyTo(intArray.AsSpan(index));
+                    Array.Copy(m_array, 0, intArray, index, last);
 
                     // the last int needs to be masked
                     intArray[index + last] = m_array[last] & unchecked((1 << extraBits) - 1);
