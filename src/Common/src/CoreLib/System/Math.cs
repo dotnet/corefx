@@ -96,7 +96,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static decimal Abs(decimal value)
         {
-            return decimal.Abs(ref value);
+            return decimal.Abs(value);
         }
 
         [StackTraceHidden]
@@ -108,6 +108,76 @@ namespace System
         public static long BigMul(int a, int b)
         {
             return ((long)a) * b;
+        }
+
+        public static double BitDecrement(double x)
+        {
+            var bits = BitConverter.DoubleToInt64Bits(x);
+
+            if (((bits >> 32) & 0x7FF00000) >= 0x7FF00000)
+            {
+                // NaN returns NaN
+                // -Infinity returns -Infinity
+                // +Infinity returns double.MaxValue
+                return (bits == 0x7FF00000_00000000) ? double.MaxValue : x;
+            }
+
+            if (bits == 0x00000000_00000000)
+            {
+                // +0.0 returns -double.Epsilon
+                return -double.Epsilon;
+            }
+
+            // Negative values need to be incremented
+            // Positive values need to be decremented
+
+            bits += ((bits < 0) ? +1 : -1);
+            return BitConverter.Int64BitsToDouble(bits);
+        }
+
+        public static double BitIncrement(double x)
+        {
+            var bits = BitConverter.DoubleToInt64Bits(x);
+
+            if (((bits >> 32) & 0x7FF00000) >= 0x7FF00000)
+            {
+                // NaN returns NaN
+                // -Infinity returns double.MinValue
+                // +Infinity returns +Infinity
+                return (bits == unchecked((long)(0xFFF00000_00000000))) ? double.MinValue : x;
+            }
+
+            if (bits == unchecked((long)(0x80000000_00000000)))
+            {
+                // -0.0 returns double.Epsilon
+                return double.Epsilon;
+            }
+
+            // Negative values need to be decremented
+            // Positive values need to be incremented
+
+            bits += ((bits < 0) ? -1 : +1);
+            return BitConverter.Int64BitsToDouble(bits);
+        }
+
+        public static unsafe double CopySign(double x, double y)
+        {
+            // This method is required to work for all inputs,
+            // including NaN, so we operate on the raw bits.
+
+            var xbits = BitConverter.DoubleToInt64Bits(x);
+            var ybits = BitConverter.DoubleToInt64Bits(y);
+
+            // If the sign bits of x and y are not the same,
+            // flip the sign bit of x and return the new value;
+            // otherwise, just return x
+
+            if ((xbits ^ ybits) < 0)
+            {
+                return BitConverter.Int64BitsToDouble(xbits ^ long.MinValue);
+            }
+
+            return x;
         }
 
         public static int DivRem(int a, int b, out int result)
@@ -463,22 +533,36 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static decimal Max(decimal val1, decimal val2)
         {
-            return decimal.Max(ref val1, ref val2);
+            return decimal.Max(val1, val2);
         }
 
         public static double Max(double val1, double val2)
         {
-            if (val1 > val2)
-            {
-                return val1;
-            }
+            // When val1 and val2 are both finite or infinite, return the larger
+            //  * We count +0.0 as larger than -0.0 to match MSVC
+            // When val1 or val2, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
 
             if (double.IsNaN(val1))
             {
+                return val2;
+            }
+
+            if (double.IsNaN(val2))
+            {
                 return val1;
             }
 
-            return val2;
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (val1 < val2) first could get transformed into (val2 >= val1) by the JIT
+            //   which would then return an incorrect value
+
+            if (val1 == val2)
+            {
+                return double.IsNegative(val1) ? val2 : val1;
+            }
+
+            return (val1 < val2) ? val2 : val1;
         }
 
         [NonVersionable]
@@ -508,17 +592,31 @@ namespace System
         
         public static float Max(float val1, float val2)
         {
-            if (val1 > val2)
-            {
-                return val1;
-            }
+            // When val1 and val2 are both finite or infinite, return the larger
+            //  * We count +0.0 as larger than -0.0 to match MSVC
+            // When val1 or val2, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
 
             if (float.IsNaN(val1))
             {
+                return val2;
+            }
+
+            if (float.IsNaN(val2))
+            {
                 return val1;
             }
 
-            return val2;
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (val1 < val2) first could get transformed into (val2 >= val1) by the JIT
+            //   which would then return an incorrect value
+
+            if (val1 == val2)
+            {
+                return float.IsNegative(val1) ? val2 : val1;
+            }
+
+            return (val1 < val2) ? val2 : val1;
         }
 
         [CLSCompliant(false)]
@@ -542,6 +640,38 @@ namespace System
             return (val1 >= val2) ? val1 : val2;
         }
 
+        public static double MaxMagnitude(double x, double y)
+        {
+            // When x and y are both finite or infinite, return the larger magnitude
+            //  * We count +0.0 as larger than -0.0 to match MSVC
+            // When x or y, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
+
+            if (double.IsNaN(x))
+            {
+                return y;
+            }
+
+            if (double.IsNaN(y))
+            {
+                return x;
+            }
+
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (ax < ay) first could get transformed into (ay >= ax) by the JIT which would
+            //   then return an incorrect value
+
+            double ax = Abs(x);
+            double ay = Abs(y);
+
+            if (ax == ay)
+            {
+                return double.IsNegative(x) ? y : x;
+            }
+
+            return (ax < ay) ? y : x;
+        }
+
         [NonVersionable]
         public static byte Min(byte val1, byte val2)
         {
@@ -551,22 +681,36 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static decimal Min(decimal val1, decimal val2)
         {
-            return decimal.Min(ref val1, ref val2);
+            return decimal.Min(val1, val2);
         }
 
         public static double Min(double val1, double val2)
         {
-            if (val1 < val2)
-            {
-                return val1;
-            }
+            // When val1 and val2 are both finite or infinite, return the smaller
+            //  * We count -0.0 as smaller than -0.0 to match MSVC
+            // When val1 or val2, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
 
             if (double.IsNaN(val1))
             {
+                return val2;
+            }
+
+            if (double.IsNaN(val2))
+            {
                 return val1;
             }
 
-            return val2;
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (val1 < val2) first could get transformed into (val2 >= val1) by the JIT
+            //   which would then return an incorrect value
+
+            if (val1 == val2)
+            {
+                return double.IsNegative(val1) ? val1 : val2;
+            }
+
+            return (val1 < val2) ? val1 : val2;
         }
 
         [NonVersionable]
@@ -596,17 +740,31 @@ namespace System
 
         public static float Min(float val1, float val2)
         {
-            if (val1 < val2)
-            {
-                return val1;
-            }
+            // When val1 and val2 are both finite or infinite, return the smaller
+            //  * We count -0.0 as smaller than -0.0 to match MSVC
+            // When val1 or val2, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
 
             if (float.IsNaN(val1))
             {
+                return val2;
+            }
+
+            if (float.IsNaN(val2))
+            {
                 return val1;
             }
 
-            return val2;
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (val1 < val2) first could get transformed into (val2 >= val1) by the JIT
+            //   which would then return an incorrect value
+
+            if (val1 == val2)
+            {
+                return float.IsNegative(val1) ? val1 : val2;
+            }
+
+            return (val1 < val2) ? val1 : val2;
         }
 
         [CLSCompliant(false)]
@@ -628,6 +786,38 @@ namespace System
         public static ulong Min(ulong val1, ulong val2)
         {
             return (val1 <= val2) ? val1 : val2;
+        }
+
+        public static double MinMagnitude(double x, double y)
+        {
+            // When x and y are both finite or infinite, return the smaller magnitude
+            //  * We count -0.0 as smaller than -0.0 to match MSVC
+            // When x or y, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
+
+            if (double.IsNaN(x))
+            {
+                return y;
+            }
+
+            if (double.IsNaN(y))
+            {
+                return x;
+            }
+
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (ax < ay) first could get transformed into (ay >= ax) by the JIT which would
+            //   then return an incorrect value
+
+            double ax = Abs(x);
+            double ay = Abs(y);
+
+            if (ax == ay)
+            {
+                return double.IsNegative(x) ? x : y;
+            }
+
+            return (ax < ay) ? x : y;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -680,7 +870,7 @@ namespace System
                 flrTempVal -= 1.0;
             }
 
-            return copysign(flrTempVal, a);
+            return CopySign(flrTempVal, a);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -736,7 +926,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Sign(decimal value)
         {
-            return decimal.Sign(ref value);
+            return decimal.Sign(value);
         }
 
         public static int Sign(double value)
@@ -808,23 +998,6 @@ namespace System
         {
             ModF(d, &d);
             return d;
-        }
-
-        private static unsafe double copysign(double x, double y)
-        {
-            var xbits = BitConverter.DoubleToInt64Bits(x);
-            var ybits = BitConverter.DoubleToInt64Bits(y);
-
-            // If the sign bits of x and y are not the same,
-            // flip the sign bit of x and return the new value;
-            // otherwise, just return x
-
-            if (((xbits ^ ybits) >> 63) != 0)
-            {
-                return BitConverter.Int64BitsToDouble(xbits ^ long.MinValue);
-            }
-
-            return x;
         }
 
         private static void ThrowMinMaxException<T>(T min, T max)

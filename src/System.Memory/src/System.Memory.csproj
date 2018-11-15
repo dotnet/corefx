@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4BBC8F69-D03E-4432-AA8A-D458FA5B235A}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -6,6 +6,9 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreappaot-Windows_NT-Debug;netcoreappaot-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetGroup)' == 'netcoreappaot' OR '$(TargetGroup)' == 'uapaot'">
+    <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\SequencePosition.cs" />
@@ -19,71 +22,13 @@
     <Compile Include="System\Buffers\ReadOnlySequence.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceDebugView.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceSegment.cs" />
-    <Compile Include="System\Buffers\ReadOnlySequence_helpers.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequence.Helpers.cs" />
+    <Compile Include="System\Buffers\SequenceReader.cs" />
+    <Compile Include="System\Buffers\SequenceReader.Search.cs" />
+    <Compile Include="System\Buffers\SequenceReaderExtensions.Binary.cs" />
     <Compile Include="System\Buffers\Text\Base64Decoder.cs" />
     <Compile Include="System\Buffers\Text\Base64Encoder.cs" />
     <Compile Include="System\Runtime\InteropServices\SequenceMarshal.cs" />
-  </ItemGroup>
-  <!-- Utf8 Formatter/Parser -->
-  <ItemGroup>
-    <Compile Include="System\Buffers\StandardFormat.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Constants.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\FormattingHelpers.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Boolean.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Date.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Date.G.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Date.O.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Date.R.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Date.L.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Decimal.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Decimal.E.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Decimal.F.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Decimal.G.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Float.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Guid.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Signed.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Signed.D.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Signed.Default.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Signed.N.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Unsigned.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Unsigned.D.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Unsigned.Default.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Unsigned.N.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Integer.Unsigned.X.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.TimeSpan.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\ParserHelpers.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Boolean.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Date.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Date.Default.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Date.G.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Date.Helpers.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Date.O.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Date.R.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Decimal.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Float.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Guid.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Signed.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Signed.D.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Signed.N.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Unsigned.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Unsigned.D.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Unsigned.N.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Unsigned.X.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.Number.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpan.BigG.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpan.C.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpan.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpan.LittleG.cs" />
-    <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpanSplitter.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Buffers\Text\FormattingHelpers.CountDigits.cs" />
-  </ItemGroup>
-  <!-- Double/Decimal format/parser logic copied (almost verbatim) over from CoreRT -->
-  <ItemGroup>
-    <Compile Include="System\Number\Decimal.DecCalc.cs" />
-    <Compile Include="System\Number\Number.cs" />
-    <Compile Include="System\Number\Number.FormatAndParse.cs" />
-    <Compile Include="System\Number\Number.NumberBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Common or Common-branched source files -->
