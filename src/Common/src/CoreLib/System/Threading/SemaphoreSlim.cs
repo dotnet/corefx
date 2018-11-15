@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+
+using Thread = Internal.Runtime.Augments.RuntimeThread;
 
 namespace System.Threading
 {
@@ -80,7 +78,7 @@ namespace System.Threading
             internal TaskNode Prev, Next;
             internal TaskNode() : base() { }
 
-            internal override void ExecuteFromThreadPool()
+            internal override void ExecuteFromThreadPool(Thread threadPoolThread)
             {
                 bool setSuccessfully = TrySetResult(true);
                 Debug.Assert(setSuccessfully, "Should have been able to complete task");

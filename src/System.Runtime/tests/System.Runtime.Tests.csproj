@@ -31,9 +31,6 @@
     <Compile Include="$(CommonTestPath)\System\Collections\TestBase.NonGeneric.cs">
       <Link>Common\System\Collections\TestBase.NonGeneric.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
-      <Link>Common\System\IO\TempFile.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
       <Link>System\StringTests.cs</Link>
     </Compile>
@@ -173,15 +170,12 @@
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
     <Compile Include="System\Reflection\AssemblyAttributesTests.cs" />
-    <Compile Include="System\Reflection\AssemblyTests.cs" />
-    <Compile Include="System\Reflection\AssemblyNameTests.cs" />
-    <Compile Include="System\Reflection\DefaultMemberAttributeTests.cs" />
     <Compile Include="System\Reflection\CustomAttributeDataTests.cs" />
     <Compile Include="System\Reflection\CustomAttributesTestData.cs" />
     <Compile Include="System\Reflection\CustomAttribute_Named_Typed_ArgumentTests.cs" />
+    <Compile Include="System\Reflection\DefaultMemberAttributeTests.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.cs" />
     <Compile Include="System\Reflection\MethodBodyTests.cs" />
-    <Compile Include="System\Reflection\MethodInfoTests.cs" />
     <Compile Include="System\Reflection\ModuleTests.cs" />
     <Compile Include="System\Reflection\PointerTests.cs" />
     <Compile Include="System\Reflection\ReflectionTypeLoadExceptionTests.cs" />
@@ -227,12 +221,14 @@
     <Compile Include="System\FormattableStringTests.netcoreapp.cs" />
     <Compile Include="System\GCTests.netcoreapp.cs" />
     <Compile Include="System\GuidTests.netcoreapp.cs" />
+    <Compile Include="System\IndexTests.cs" />
     <Compile Include="System\Int16Tests.netcoreapp.cs" />
     <Compile Include="System\Int32Tests.netcoreapp.cs" />
     <Compile Include="System\Int64Tests.netcoreapp.cs" />
     <Compile Include="System\IntPtrTests.netcoreapp.cs" />
     <Compile Include="System\Collections\Generic\KeyValuePairTests.netcoreapp.cs" />
     <Compile Include="System\LazyTests.netcoreapp.cs" />
+    <Compile Include="System\RangeTests.cs" />
     <Compile Include="System\SByteTests.netcoreapp.cs" />
     <Compile Include="System\StringComparerTests.netcoreapp.cs" />
     <Compile Include="System\StringGetHashCodeTests.netcoreapp.cs" />
@@ -245,7 +241,6 @@
     <Compile Include="System\UInt64Tests.netcoreapp.cs" />
     <Compile Include="System\VersionTests.netcoreapp.cs" />
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netcoreapp.cs" />
-    <Compile Include="System\Reflection\AssemblyTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\BindingFlagsDoNotWrap.netcoreapp.cs" />
     <Compile Include="System\Reflection\InvokeRefReturn.netcoreapp.cs" />
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
@@ -262,8 +257,11 @@
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
     <Compile Include="System\Type\TypePropertyTests.netcoreapp.cs" />
     <Compile Include="System\Type\TypeTests.netcoreapp.cs" />
+    <Compile Include="System\ArgIteratorTests.netcoreapp.cs" />
     <Compile Include="System\DoubleTests.netcoreapp.cs" />
     <Compile Include="System\SingleTests.netcoreapp.cs" />
+    <Compile Include="$(CommonPath)\..\tests\System\RealParserTestsBase.netcoreapp.cs" Link="System\RealParserTestsBase.netcoreapp.cs" />
+    <Compile Include="System\RealParserTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="System\StringSplitExtensions.cs" />
@@ -292,21 +290,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="TestAssembly\TestAssembly.csproj">
-      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
-      <Name>TestAssembly</Name>
-    </ProjectReference>
     <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj">
       <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
       <Name>TestLoadAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="ForwardedTypesAssembly\ForwardedTypesAssembly.csproj">
-      <Project>{3A3DE9F8-6295-4B68-BAAB-406F1CA0CD9C}</Project>
-      <Name>ForwardedTypesAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="UnloadableAssembly\UnloadableAssembly.csproj">
-      <Project>{CA43AAD6-59A6-4BEB-AC9E-52DC9FD04B8B}</Project>
-      <Name>UnloadableAssembly</Name>
     </ProjectReference>
     <Reference Include="TestModule\System.Reflection.TestModule.dll">
     </Reference>
