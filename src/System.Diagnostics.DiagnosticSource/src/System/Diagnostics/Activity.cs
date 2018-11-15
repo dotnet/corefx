@@ -223,7 +223,7 @@ namespace System.Diagnostics
             else
             {
                 ParentId = parentId;
-                IsW3CFormat = IsW3CId(ParentId);
+                IdFormat = Parent.IdFormat;
             }
             return this;
         }
@@ -314,13 +314,16 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                if (IsW3CId || (ParentId == null && DefaultIdFormat == ActivityIDFormat.W3C))
+                if (IdFormat == ActivityIdFormat.W3C || (ParentId == null && DefaultIdFormat == ActivityIdFormat.W3C))
                 {
-                    IsW3CFormat = true;
                     Id = GenerateW3CId();
+                    IdFormat = ActivityIdFormat.W3C;
                 }
                 else
+                {
                     Id = GenerateId();
+                    IdFormat = ActivityIdFormat.Hierarchical;
+                }
                 SetCurrent(this);
             }
             return this;
@@ -388,31 +391,111 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// Returns true if the ID happens to be in W3C format XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX
-        /// this is a convenience method.  Note that it is intended to be used to determine
-        /// what HTTP headers that carry this ID (that is do you use the tracestate HTTP header)
-        /// Thus if new IDs come along that also use the tracestate HTTP header, then this should return
-        /// true for them as well.  
+        /// Returns the format for the ID.   
         /// </summary>
-        public bool IsW3CFormat { get; private set; }
+        public ActivityIdFormat IdFormat { get; private set; }
 
         /* static state (configuration) */
         /// <summary>
-        /// Activity tries to use the same format for IDs as its parent it has a parent.  
+        /// Activity tries to use the same format for IDs as its parent.
         /// However if the activity has no parent, it has to do something.   
         /// This determines the default format we use.  
         /// </summary>
-        public static ActivityIDFormat DefaultIdFormat
+        public static ActivityIdFormat DefaultIdFormat
         {
             get { return s_DefaultIdFormat; }
             set
             {
-                if (!(ActivityIDFormat.Hierarchical <= value && value <= ActivityIDFormat.W3C))
+                if (!(ActivityIdFormat.Hierarchical <= value && value <= ActivityIdFormat.W3C))
                     throw new ArgumentException($"value must be a valid ActivityIDFormat value");
                 s_DefaultIdFormat = value;
             }
         }
-      #region private 
+
+        /* Activity Sampling Support */
+        /// <summary>
+        /// If true (set by StartWithSampling) 
+        /// </summary>
+        public bool Recording { get; private set; }
+
+        /// <summary>
+        /// CreateActivityIfRecording is intended to be used to support activity sampling.  It is to 
+        /// be used when the activity has no parent (it might have an external Parent ID), and the 
+        /// activity is not too big (otherwise when logging is on, too much recording happens.  
+        /// 
+        /// You pass the operation name, and this method will return an Activity (if this activity 
+        /// is to be recorded), or null if it is not.   It is expected that you set Activity.Current with this.  
+        /// 
+        /// This overload is meant to be used when the activity has no logical parent (e.g. it did not
+        /// come from outside the process, it is a new top-level piece of work).  
+        /// </summary>
+        static Activity CreateActivityIfRecording(string operationName)
+        {
+            return CreateActivityIfRecording(operationName, false, Sampling.NextHash());
+        }
+
+        /// <summary>
+        /// CreateActivityIfRecording is intended to be used to support activity sampling.  It is to 
+        /// be used when the activity has no parent (it might have an external Parent ID), and the 
+        /// activity is not too big (otherwise when logging is on, too much recording happens.  
+        /// 
+        /// You pass the operation name, and this method will return an Activity (if this activity 
+        /// is to be recorded), or null if it is not.   It is expected that you set Activity.Current with this.  
+        /// 
+        /// This overload is intended to be used when the activity comes from outside the process and
+        /// you have a activity ID for your parent.  If 'parentID' is in W3C format, we try to respect
+        /// the 'recording' bit of the ID, otherwise we use the last 2 bytes (4 chars) as a hash 
+        /// to determine if it will be selected as a 'wildcard' sample.   
+        /// </summary>
+        static Activity CreateActivityIfRecording(string operationName, string parentID)
+        {
+            if (IsW3CId(parentID))
+            {
+                bool recordingBit = ((parentID[54] - '0') & 1) != 0;   // Convert the last character to an byte and take the LSB which is the Recording bit.  
+
+                // Convert the LCB of the SpanID to a 64bit  binary number.  
+                int hash = ((((parentID[48] - '0') & 0xF) << 4 + ((parentID[49] - '0') & 0xF)) << 4 + ((parentID[50] - '0') & 0xF)) << ((parentID[51] - '0') & 0xF);
+                return CreateActivityIfRecording(operationName, recordingBit, (ushort)hash);
+            }
+            return CreateActivityIfRecording(operationName, false, (ushort)parentID.GetHashCode());
+        }
+
+        /// <summary>
+        ///  TODO make public?
+        /// </summary>
+        private static Activity CreateActivityIfRecording(string operationName, bool recordingDesired, ushort parentIDHash)
+        {
+            if (!Sampling.ShouldSample(recordingDesired, parentIDHash))
+                return null;
+            Activity ret = new Activity(operationName);
+            ret.Recording = true;
+            return ret;
+        }
+
+        /// <summary>
+        /// Returns true if ActivitySampling is currently on.   You turn on ActivitySampling by 
+        /// using RegisterActivityConfig.  
+        /// </summary>
+        static bool IsActivitySamplingEnabled { get { return s_sampling.IsActivitySampledEnabled; } }
+
+        /// <summary>
+        /// Activities support sampling.   Logging systems are strongly encouraged to support sampling 
+        /// by adding the following check before they actually log (the logging system gets to decide 
+        /// what verbosity level does this (we recommend info or more verbose).
+        /// 
+        /// To turn on logging you create a ActivityConfig class (which specifies the degree of filtering)
+        /// and call RegisterActivityConfig.  Once registered this config is active until the config object
+        /// is Disposed (Or dies and is finalized).    This way multiple logging systems can ask for 
+        /// varying levels of sampling and you get the union (Most verbose) of what is currently active. 
+        /// 
+        /// Finally it should be noted that all logging systems have to be prepared to receive more events
+        /// than they asked for (thus sampling is a perf optimization).   If the logging system wishes 
+        /// to insure some limit, it should do that filtering after receiving the event (when it has complete 
+        /// control).   The goal of activity sampling is to simply make logging CHEAP.   
+        /// </summary>
+        static void RegisterActivityConfig(ActivityConfig config) { return s_sampling.RegisterSamplingConfig(config); }
+
+        #region private 
         /// <summary>
         /// Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context
         /// </summary>
@@ -426,14 +509,19 @@ namespace System.Diagnostics
             //  * 3 chars - separators.  
             //  = 55 chars (see https://w3c.github.io/trace-context)
             // We require that all non-WC3IDs NOT start with a digit.  
-            return id.Length == 55 && char.IdDigit(id[0]);
+            return id.Length == 55 && char.IsDigit(id[0]);
         }
+        private static bool IsW3CId(Span<byte> id)
+        {
+            return id.Length == 55 && char.IsDigit((char) id[0]);
+        }
+
         private string GenerateW3CId()
         {
             string newSpanId = Guid.NewGuid().ToString("n").Substring(16, 16);
             if (ParentId != null)
             {
-                return ParentId.SubString(0, 36) + newSpanId + ParentId.SubString(52, 3);
+                return ParentId.Substring(0, 36) + newSpanId + ParentId.Substring(52, 3);
             }
             else
             {
@@ -494,8 +582,8 @@ namespace System.Diagnostics
         {
             // If this is a W3C ID it has the format Version2-TraceId32-SpanId16-Flags2
             // and the root ID is the TraceId.   
-            if (IsW3CId)
-                return id.SubString(3, 32);
+            if (IdFormat == ActivityIdFormat.W3C)
+                return id.Substring(3, 32);
 
             //id MAY start with '|' and contain '.'. We return substring between them
             //ParentId MAY NOT have hierarchical structure and we don't know if initially rootId was started with '|',
@@ -583,8 +671,9 @@ namespace System.Diagnostics
             public KeyValueListNode Next;
         }
 
-        private static ActivityIDFormat s_DefaultIdFormat;
-    
+        private static ActivityIdFormat s_DefaultIdFormat;
+        private static Sampling s_sampling = new Sampling();
+
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
         private string _traceState;
@@ -595,10 +684,121 @@ namespace System.Diagnostics
     /// <summary>
     /// The possibilities for the format of the ID
     /// </summary>
-    public enum ActivityIDFormat : byte
+    public enum ActivityIdFormat : byte
     {
         Unknown,      // ID format is not known.     
         Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
         W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
     };
+
+
+    class Sampling
+    {
+        public Sampling()
+        {
+            _sampleIfLessEq = 0xFFFF;   // Set to 100% sampling by default.  
+        }
+
+        public bool IsActivitySampledEnabled { get; set; }
+
+        /// <summary>
+        /// Activities without an in-process parent (either because they are a root activity or 
+        /// their parent is off machine (they only have an ID), are sampled at this Percentage.
+        /// Thus if this is 5, then it means 5 out of every 100 non-parented activity will have its
+        /// 'Recording' property turned on.    The smallest this can be is  .0015 which means 
+        /// only 1 out of every 64K non-parented activities will be sampled.   
+        /// </summary>
+        public double SamplingPercent
+        {
+            get { return _sampleIfLessEq / (double)0XFFFF; }
+        }
+
+        public void RegisterSamplingConfig(ActivityConfig config)
+        {
+            if (config._next != null)
+                throw new InvalidOperationException("Can only register sampling configuration once");
+            config._next = _configs;
+            _configs = config;
+
+            if (config.SamplingPercent < SamplingPercent)
+                SetSamplingPercent(config.SamplingPercent);
+        }
+
+        #region private 
+        private void SetSamplingPercent(double value)
+        {
+            if (100 <= value)
+                _sampleIfLessEq = 0xFFFF;
+            else if (value < 0)
+                _sampleIfLessEq = 0;
+            else
+                _sampleIfLessEq = (ushort)((value * 0xFFFF) / 100.0);
+        }
+
+        internal ushort NextHash()
+        {
+            int oldValue = _defaultHash;
+            return (ushort)Interlocked.CompareExchange(ref _defaultHash, oldValue, oldValue * 214013 + 2531011);
+        }
+
+        internal bool ShouldSample(bool recordingDesired, ushort activityIdHash)
+        {
+            if (activityIdHash <= _sampleIfLessEq)
+            {
+                if (_samplesForExplicitRecording <= 0)
+                {
+                    if (recordingDesired)
+                        return true;
+                    else
+                        Interlocked.Increment(ref _samplesForExplicitRecording);
+                }
+                else
+                    return true;
+            }
+
+            if (recordingDesired && 0 < _samplesForExplicitRecording)
+            {
+                Interlocked.Decrement(ref _samplesForExplicitRecording);
+                return true;
+            }
+            return false;
+        }
+
+        internal void Remove(ActivityConfig config)
+        {
+            // TODO NOT DONE.  
+            // Search for entry, and compute the new sampling rate.  
+        }
+
+        ushort _sampleIfLessEq;
+        int _samplesForExplicitRecording;
+        int _defaultHash;
+        ActivityConfig _configs;    // This is a linked list of registrations.  
+        #endregion
+    }
+
+
+    public sealed class ActivityConfig : IDisposable
+    {
+        public ActivityConfig(double samplingPercent)
+        {
+            SamplingPercent = samplingPercent;
+        }
+
+        public double SamplingPercent { get; set; }
+
+        ~ActivityConfig()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (_owner != null)
+                _owner.Remove(this);
+        }
+
+        Sampling _owner;
+        internal ActivityConfig _next;   // next config in the list;
+    }
 }
