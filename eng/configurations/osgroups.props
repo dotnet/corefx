@@ -9,28 +9,24 @@
     <OSGroups Include="Unix">
       <Imports>AnyOS</Imports>
       <TargetsUnix>true</TargetsUnix>
-      <TargetsUnknownUnix>true</TargetsUnknownUnix>
       <PackageTargetRuntime>unix</PackageTargetRuntime>
     </OSGroups>
     <OSGroups Include="Linux">
       <Imports>Unix</Imports>
       <TargetsUnix>true</TargetsUnix>
       <TargetsLinux>true</TargetsLinux>
-      <TargetsUnknownUnix>false</TargetsUnknownUnix>
       <PackageTargetRuntime>linux</PackageTargetRuntime>
     </OSGroups>
     <OSGroups Include="OSX">
       <Imports>Unix</Imports>
       <TargetsUnix>true</TargetsUnix>
       <TargetsOSX>true</TargetsOSX>
-      <TargetsUnknownUnix>false</TargetsUnknownUnix>
       <PackageTargetRuntime>osx</PackageTargetRuntime>
     </OSGroups>
     <OSGroups Include="FreeBSD">
       <Imports>Unix</Imports>
       <TargetsUnix>true</TargetsUnix>
       <TargetsFreeBSD>true</TargetsFreeBSD>
-      <TargetsUnknownUnix>false</TargetsUnknownUnix>
       <PackageTargetRuntime>freebsd</PackageTargetRuntime>
     </OSGroups>
     <OSGroups Include="NetBSD">
