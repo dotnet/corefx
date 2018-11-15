@@ -370,6 +370,14 @@ namespace System.Collections
                 {
                     unchecked
                     {
+                        // Cannot use `(1u << extraBits) - 1u` as the mask
+                        // because for extraBits == 0, we need the mask to be 111...111, not 0.
+                        // In that case, we are shifting a uint by 32, which could be considered undefined.
+                        // The result of a shift operation is undefined ... if the right operand
+                        // is greater than or equal to the width in bits of the promoted left operand,
+                        // https://docs.microsoft.com/en-us/cpp/c-language/bitwise-shift-operators?view=vs-2017
+                        // However, the compiler protects us from undefined behaviour by constraining the
+                        // right operand to between 0 and width - 1 (inclusive), i.e. righ_operand = (right_operand % width).
                         uint mask = uint.MaxValue >> (BitsPerInt32 - extraBits);
                         m_array[ints - 1] &= (int)mask;
                     }
@@ -533,7 +541,7 @@ namespace System.Collections
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
                 }
 
-                // equivalent to m_length % BitsPerByte, sine BitsPerByte is a power of 2
+                // equivalent to m_length % BitsPerByte, since BitsPerByte is a power of 2
                 uint extraBits = (uint)m_length & (BitsPerByte - 1);
                 if (extraBits > 0)
                 {
@@ -663,15 +671,15 @@ namespace System.Collections
 
         private static int Div32Rem(int number, out int remainder)
         {
-            uint quotient = (uint)number / BitsPerInt32;
-            remainder = number & (BitsPerInt32 - 1);    // equivalent to number % BitsPerInt32, sine BitsPerInt32 is a power of 2
+            uint quotient = (uint)number / 32;
+            remainder = number & (32 - 1);    // equivalent to number % 32, since 32 is a power of 2
             return (int)quotient;
         }
 
         private static int Div4Rem(int number, out int remainder)
         {
-            uint quotient = (uint)number / BytesPerInt32;
-            remainder = number & (BytesPerInt32 - 1);   // equivalent to number % BytesPerInt32, sine BytesPerInt32 is a power of 2
+            uint quotient = (uint)number / 4;
+            remainder = number & (4 - 1);   // equivalent to number % 4, since 4 is a power of 2
             return (int)quotient;
         }
 
