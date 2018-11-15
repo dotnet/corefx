@@ -206,9 +206,9 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnsureAndPushToBitArray(bool inObject)
         {
-            if (_bitArray.Length == 0)
+            if (_bitArray == default)
             {
-                _bitArray = new CustomUncheckedBitArray(bitLength: 64, integerLength: 2);
+                _bitArray = new CustomUncheckedBitArray(bitLength: 64);
             }
             _bitArray[_currentDepth - JsonReaderState.AllocationFreeMaxDepth] = inObject;
         }

@@ -12,25 +12,17 @@ namespace System.Text.JsonTests
         private static Random s_random = new Random(42);
 
         [Theory]
-        [InlineData(1, 1)]
-        [InlineData(2, 1)]
-        [InlineData(31, 1)]
-        [InlineData(32, 1)]
-        [InlineData(33, 2)]
-        [InlineData(63, 2)]
-        [InlineData(64, 2)]
-        [InlineData(65, 3)]
-        [InlineData(255, 8)]
-        [InlineData(256, 8)]
-        [InlineData(257, 9)]
-        public static void BitArrayGetSet(int bitLength, int intLength)
+        [InlineData(32)]
+        [InlineData(64)]
+        [InlineData(256)]
+        public static void BitArrayGetSet(int bitLength)
         {
-            BigArrayGetSetHelper(bitLength, intLength);
+            BigArrayGetSetHelper(bitLength);
         }
 
-        private static void BigArrayGetSetHelper(int bitLength, int intLength)
+        private static void BigArrayGetSetHelper(int bitLength)
         {
-            var bitArray = new CustomUncheckedBitArray(bitLength, intLength);
+            var bitArray = new CustomUncheckedBitArray(bitLength);
             Assert.Equal(bitLength, bitArray.Length);
 
             var values = new bool[bitArray.Length];
@@ -52,28 +44,20 @@ namespace System.Text.JsonTests
 
         [Theory]
         [OuterLoop]
-        [InlineData(3_200_000, 100_000)]
-        [InlineData(int.MaxValue / 32 + 1, (int.MaxValue / 32 + 1) / 32)]    // 67_108_864, 2_097_152
-        public static void BitArrayGetSetLarge(int bitLength, int intLength)
+        [InlineData(3_200_000)]
+        [InlineData(int.MaxValue / 32 + 167_108_864)]    // 67_108_864
+        public static void BitArrayGetSetLarge(int bitLength)
         {
-            BigArrayGetSetHelper(bitLength, intLength);
+            BigArrayGetSetHelper(bitLength);
         }
 
         [Theory]
-        [InlineData(1, 1)]
-        [InlineData(2, 1)]
-        [InlineData(31, 1)]
-        [InlineData(32, 1)]
-        [InlineData(33, 2)]
-        [InlineData(63, 2)]
-        [InlineData(64, 2)]
-        [InlineData(65, 3)]
-        [InlineData(255, 8)]
-        [InlineData(256, 8)]
-        [InlineData(257, 9)]
-        public static void BitArrayGrow(int bitLength, int intLength)
+        [InlineData(32)]
+        [InlineData(64)]
+        [InlineData(256)]
+        public static void BitArrayGrow(int bitLength)
         {
-            var bitArray = new CustomUncheckedBitArray(bitLength, intLength);
+            var bitArray = new CustomUncheckedBitArray(bitLength);
             Assert.Equal(bitLength, bitArray.Length);
 
             const int growBy = 128;

@@ -9,20 +9,18 @@ namespace System.Text.Json
 {
     // Inspired by BitArray
     // https://github.com/dotnet/corefx/blob/master/src/System.Collections/src/System/Collections/BitArray.cs
-    internal struct CustomUncheckedBitArray
+    internal sealed class CustomUncheckedBitArray
     {
         private int[] _array;
 
         public int Length { get; private set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CustomUncheckedBitArray(int bitLength, int integerLength)
+        public CustomUncheckedBitArray(int bitLength)
         {
-            Debug.Assert(bitLength > 0, $"bitLength: {bitLength}, integerLength: {integerLength}");
-            Debug.Assert(integerLength > 0 && integerLength <= int.MaxValue / 32 + 1, $"bitLength: {bitLength}, integerLength: {integerLength}");
-            Debug.Assert(bitLength <= (long)integerLength * 32, $"bitLength: {bitLength}, integerLength: {integerLength}");
+            Debug.Assert(bitLength > 0 && bitLength % 32 == 0, $"bitLength: {bitLength}");
 
-            _array = new int[integerLength];
+            _array = new int[bitLength / 32];
             Length = bitLength;
         }
 
@@ -68,7 +66,6 @@ namespace System.Text.Json
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void Grow(int index)
         {
             Debug.Assert(index >= Length, $"index: {index}, Length: {Length}");
@@ -89,23 +86,7 @@ namespace System.Text.Json
 
             if (newints > _array.Length)
             {
-                var newArray = new int[newints];
-                _array.AsSpan().CopyTo(newArray);
-                _array = newArray;
-            }
-
-            if (index > Length)
-            {
-                // clear high bit values in the last int
-                int last = (Length - 1) >> 5;
-                Div32Rem(Length, out int bits);
-                if (bits > 0)
-                {
-                    _array[last] &= (1 << bits) - 1;
-                }
-
-                // clear remaining int values
-                _array.AsSpan(last + 1, newints - last - 1).Clear();
+                Array.Resize(ref _array, newints);
             }
 
             Length = index;
