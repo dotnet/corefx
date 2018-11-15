@@ -86,7 +86,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX|TestPlatforms.FreeBSD)]  // Some APIs are not supported on OSX
+        [PlatformSpecific(TestPlatforms.OSX|TestPlatforms.FreeBSD)]
         public void BasicTest_AccessInstanceProperties_NoExceptions_Bsd()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -227,7 +227,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX|TestPlatforms.FreeBSD)]  // Some APIs are not supported on OSX
+        [PlatformSpecific(TestPlatforms.OSX|TestPlatforms.FreeBSD)]
         public void BasicTest_GetIPInterfaceStatistics_Success_Bsd()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
