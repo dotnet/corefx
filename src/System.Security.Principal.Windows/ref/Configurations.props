@@ -5,6 +5,7 @@
       netstandard;
       netfx;
       netcoreapp;
+      uap;
       net461;
     </BuildConfigurations>
   </PropertyGroup>

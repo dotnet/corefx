@@ -4,7 +4,7 @@
     <RootNamespace>System.Security.Permissions</RootNamespace>
     <AssemblyName>System.Security.Permissions</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Compile Include="System\ApplicationIdentity.cs" />
@@ -170,9 +170,9 @@
     <Compile Include="System\Transactions\DistributedTransactionPermissionAttribute.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
-    <Compile Include="System\Security\IStackWalk.cs" />
-    <Compile Include="System\Security\Permissions\PermissionState.cs" />
-    <Compile Include="System\Security\PermissionSet.cs" />
+    <Compile Include="..\..\System.Runtime.Extensions\src\System\Security\IStackWalk.cs" />
+    <Compile Include="..\..\System.Runtime.Extensions\src\System\Security\PermissionSet.cs" />
+    <Compile Include="..\..\System.Runtime.Extensions\src\System\Security\Permissions\PermissionState.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
@@ -187,7 +187,7 @@
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.ComponentModel.Primitives" />
