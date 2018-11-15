@@ -1742,12 +1742,6 @@
         "net45": "4.0.0.0"
       }
     },
-    "System.Drawing.Design.Primitives": {
-      "InboxOn": {},
-      "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
-      }
-    },
     "System.Drawing.Primitives": {
       "StableVersions": [
         "4.0.0",
@@ -3098,9 +3092,13 @@
       }
     },
     "System.Numerics.Tensors": {
+      "StableVersions": [
+        "0.1.0"
+      ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "0.1.0.0": "0.1.0"
+        "0.1.0.0": "0.1.0",
+        "0.2.0.0": "0.2.0"
       }
     },
     "System.Numerics.Vectors": {
@@ -3473,10 +3471,10 @@
       }
     },
     "System.Reflection.MetadataLoadContext": {
-        "InboxOn": {},
-        "AssemblyVersionInPackageVersion": {
-            "4.0.0.0": "4.6.0"
-        }
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
     },
     "System.Reflection.Primitives": {
       "StableVersions": [
