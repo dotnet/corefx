@@ -419,6 +419,16 @@ namespace System.Diagnostics
         public bool Recording { get; private set; }
 
         /// <summary>
+        /// Indicates the desire that the current activity should be Recorded (sampled).  
+        /// It may not be honored because there are already too many samples based on 
+        /// the desired SamplingPercent.   
+        /// </summary>
+        public void SetRecordingDesired()
+        {
+            // TODO NOT DONE.  
+        }
+
+        /// <summary>
         /// CreateActivityIfRecording is intended to be used to support activity sampling.  It is to 
         /// be used when the activity has no parent (it might have an external Parent ID), and the 
         /// activity is not too big (otherwise when logging is on, too much recording happens.  
