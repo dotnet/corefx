@@ -75,7 +75,7 @@ namespace System.Text.Json
                 {
                     // This multiplication can overflow, so cast to uint first.
                     Debug.Assert(index >= 0 && index > (int)((uint)_array.Length * 32 - 1), $"Only grow when necessary - index: {index}, arrayLength: {_array.Length}");
-                    DoubleArray();
+                    DoubleArray(elementIndex);
                 }
 
                 Debug.Assert(elementIndex < _array.Length, $"Set - index: {index}, elementIndex: {elementIndex}, arrayLength: {_array.Length}, extraBits: {extraBits}");
@@ -94,13 +94,15 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void DoubleArray()
+        private void DoubleArray(int minSize)
         {
             Debug.Assert(_array.Length < int.MaxValue / 2, $"Array too large - arrayLength: {_array.Length}");
+            Debug.Assert(minSize >= 0 && minSize >= _array.Length);
 
-            // This is gauranteed to never overflow since the maximum integer array length
-            // for int.MaxValue bits is 67_108_864.
-            Array.Resize(ref _array, _array.Length * 2);
+            int nextDouble = NextClosestPowerOf2(minSize + 1);
+            Debug.Assert(nextDouble > minSize);
+
+            Array.Resize(ref _array, nextDouble);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,6 +111,25 @@ namespace System.Text.Json
             uint quotient = (uint)number / 32;
             remainder = number & (32 - 1);   // equivalent to number % 32, since 32 is a power of 2
             return (int)quotient;
+        }
+
+        private static int NextClosestPowerOf2(int n)
+        {
+            Debug.Assert(n > 0);
+
+            // Required to handle powers of 2.
+            n--;
+
+            // Set all the bits to the right of the leftmost set bit to 1.
+            n |= n >> 1;
+            n |= n >> 2;
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+
+            n++;
+
+            return n;
         }
     }
 }

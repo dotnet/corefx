@@ -130,6 +130,36 @@ namespace System.Text.JsonTests
             }
         }
 
+        [Fact]
+        public static void BitArrayGrowByN()
+        {
+            const int bitLength = 32;
+            
+            for (int growBy = 0; growBy < 100; growBy++)
+            {
+                var bitArray = new CustomUncheckedBitArray(bitLength);
+                Assert.Equal(bitLength - 1, bitArray.MaxIndexableLength);
+                Assert.False(bitArray.IsDefault);
+
+                bool value = s_random.NextDouble() >= 0.5;
+
+                int index = bitLength + growBy - 1;
+                bitArray[index] = value;
+                Assert.True(bitArray.MaxIndexableLength >= index);
+
+                int expectedLength = NextClosestPowerOf2(bitLength + growBy) - 1;
+
+                Assert.True(expectedLength == bitArray.MaxIndexableLength, $"expected: {expectedLength}, actual: {bitArray.MaxIndexableLength}, bitLength: {bitLength}, growBy: {growBy}");
+                Assert.True(value == bitArray[index], $"expected: {value}, actual: {bitArray[index]}, index: {index}, Length: {bitArray.MaxIndexableLength}");
+
+                // Extra bits start off as false.
+                for (int i = index + 1; i < bitArray.MaxIndexableLength; i++)
+                {
+                    Assert.False(bitArray[i], $"index: {i}, Length: {bitArray.MaxIndexableLength}");
+                }
+            }
+        }
+
         private static int NextClosestPowerOf2(int n)
         {
             // Required to handle powers of 2.
