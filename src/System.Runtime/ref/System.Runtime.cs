@@ -6679,6 +6679,7 @@ namespace System.Runtime.CompilerServices
     {
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.All, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class IsReadOnlyAttribute : System.Attribute
     {
         public IsReadOnlyAttribute() { }
