@@ -67,15 +67,15 @@ namespace System
     public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9);
     public static partial class Activator
     {
+        public static System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName) { throw null; }
+        public static System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
+        public static System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
         public static object CreateInstance(System.Type type) { throw null; }
         public static object CreateInstance(System.Type type, bool nonPublic) { throw null; }
         public static object CreateInstance(System.Type type, params object[] args) { throw null; }
         public static object CreateInstance(System.Type type, object[] args, object[] activationAttributes) { throw null; }
         public static object CreateInstance(System.Type type, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture) { throw null; }
         public static object CreateInstance(System.Type type, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
-        public static System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName) { throw null; }
-        public static System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
-        public static System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes) { throw null; }
         public static System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName) { throw null; }
         public static System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes) { throw null; }
         public static System.Runtime.Remoting.ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes) { throw null; }
@@ -1002,33 +1002,6 @@ namespace System
         public static bool TryParse(string s, out System.Decimal result) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out System.Decimal result) { throw null; }
     }
-    public readonly partial struct Index : System.IEquatable<System.Index>
-    {
-        private readonly int _dummyPrimitive;
-        public Index(int value, bool fromEnd) { throw null; }
-        public int Value { get { throw null; } }
-        public bool FromEnd { get { throw null; } }
-        public override bool Equals(object value) { throw null; }
-        public bool Equals(Index other) { throw null; }
-        public override int GetHashCode() { throw null; }
-        public override string ToString() { throw null; }
-        public static implicit operator Index(int value) { throw null; }
-    }
-    public readonly partial struct Range : System.IEquatable<System.Range>
-    {
-        private readonly int _dummyPrimitive;
-        public Index Start { get { throw null; } }
-        public Index End { get { throw null; } }
-        public override bool Equals(object value) { throw null; }
-        public bool Equals(Range other) { throw null; }
-        public override int GetHashCode() { throw null; }
-        public override string ToString() { throw null; }
-        public static Range Create(Index start, Index end) { throw null; }
-        public static Range FromStart(Index start) { throw null; }
-        public static Range ToEnd(Index end) { throw null; }
-        public static Range All() { throw null; }
-    }
-
     public abstract partial class Delegate : System.ICloneable, System.Runtime.Serialization.ISerializable
     {
         protected Delegate(object target, string method) { }
@@ -1261,8 +1234,8 @@ namespace System
     {
         protected FormattableString() { }
         public abstract int ArgumentCount { get; }
-        public static string CurrentCulture(System.FormattableString formattable) { throw null; }
         public abstract string Format { get; }
+        public static string CurrentCulture(System.FormattableString formattable) { throw null; }
         public abstract object GetArgument(int index);
         public abstract object[] GetArguments();
         public static string Invariant(System.FormattableString formattable) { throw null; }
@@ -1482,6 +1455,18 @@ namespace System
     public partial interface IFormattable
     {
         string ToString(string format, System.IFormatProvider formatProvider);
+    }
+    public readonly partial struct Index : System.IEquatable<System.Index>
+    {
+        private readonly int _dummyPrimitive;
+        public Index(int value, bool fromEnd) { throw null; }
+        public bool FromEnd { get { throw null; } }
+        public int Value { get { throw null; } }
+        public bool Equals(System.Index other) { throw null; }
+        public override bool Equals(object value) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static implicit operator System.Index (int value) { throw null; }
+        public override string ToString() { throw null; }
     }
     public sealed partial class IndexOutOfRangeException : System.SystemException
     {
@@ -1984,6 +1969,20 @@ namespace System
         public PlatformNotSupportedException(string message, System.Exception inner) { }
     }
     public delegate bool Predicate<in T>(T obj);
+    public readonly partial struct Range : System.IEquatable<System.Range>
+    {
+        private readonly int _dummyPrimitive;
+        public System.Index End { get { throw null; } }
+        public System.Index Start { get { throw null; } }
+        public static System.Range All() { throw null; }
+        public static System.Range Create(System.Index start, System.Index end) { throw null; }
+        public override bool Equals(object value) { throw null; }
+        public bool Equals(System.Range other) { throw null; }
+        public static System.Range FromStart(System.Index start) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static System.Range ToEnd(System.Index end) { throw null; }
+        public override string ToString() { throw null; }
+    }
     public partial class RankException : System.SystemException
     {
         public RankException() { }
@@ -2026,9 +2025,9 @@ namespace System
         public ReadOnlySpan(T[] array, int start, int length) { throw null; }
         public static System.ReadOnlySpan<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
+         public ref readonly T this[System.Index index] { get { throw null; } }
         public ref readonly T this[int index] { get { throw null; } }
-        public ref readonly T this[Index index] { get { throw null; } }
-        public ReadOnlySpan<T> this[Range range] { get { throw null; } }
+        public System.ReadOnlySpan<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(System.Span<T> destination) { }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -2230,9 +2229,9 @@ namespace System
         public Span(T[] array, int start, int length) { throw null; }
         public static System.Span<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
+        public ref T this[System.Index index] { get { throw null; } }
         public ref T this[int index] { get { throw null; } }
-        public ref T this[Index index] { get { throw null; } }
-        public Span<T> this[Range range] { get { throw null; } }
+        public System.Span<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void Clear() { }
         public void CopyTo(System.Span<T> destination) { }
@@ -2346,9 +2345,9 @@ namespace System
         public static System.String Format(System.String format, params object[] args) { throw null; }
         public System.CharEnumerator GetEnumerator() { throw null; }
         public override int GetHashCode() { throw null; }
+        public static int GetHashCode(System.ReadOnlySpan<char> value) { throw null; }
+        public static int GetHashCode(System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public int GetHashCode(System.StringComparison comparisonType) { throw null; }
-        public static int GetHashCode(ReadOnlySpan<char> value) { throw null; }
-        public static int GetHashCode(ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public System.TypeCode GetTypeCode() { throw null; }
         public int IndexOf(char value) { throw null; }
         public int IndexOf(char value, int startIndex) { throw null; }
@@ -3102,9 +3101,9 @@ namespace System
         public virtual System.Type MakeArrayType(int rank) { throw null; }
         public virtual System.Type MakeByRefType() { throw null; }
         public static System.Type MakeGenericMethodParameter(int position) { throw null; }
+        public static System.Type MakeGenericSignatureType(System.Type genericTypeDefinition, params System.Type[] typeArguments) { throw null; }
         public virtual System.Type MakeGenericType(params System.Type[] typeArguments) { throw null; }
         public virtual System.Type MakePointerType() { throw null; }
-        public static System.Type MakeGenericSignatureType(System.Type genericTypeDefinition, params System.Type[] typeArguments) { throw null; }
         public static bool operator ==(System.Type left, System.Type right) { throw null; }
         public static bool operator !=(System.Type left, System.Type right) { throw null; }
         public static System.Type ReflectionOnlyGetType(string typeName, bool throwIfNotFound, bool ignoreCase) { throw null; }
@@ -3802,8 +3801,8 @@ namespace System.Buffers
     {
         protected MemoryManager() { }
         public virtual System.Memory<T> Memory { get { throw null; } }
-        protected Memory<T> CreateMemory(int length) { throw null; }
-        protected Memory<T> CreateMemory(int start, int length) { throw null; }
+        protected System.Memory<T> CreateMemory(int length) { throw null; }
+        protected System.Memory<T> CreateMemory(int start, int length) { throw null; }
         protected abstract void Dispose(bool disposing);
         public abstract System.Span<T> GetSpan();
         public abstract System.Buffers.MemoryHandle Pin(int elementIndex = 0);
@@ -3901,8 +3900,8 @@ namespace System.Collections.Generic
     }
     public partial interface IAsyncEnumerator<out T> : System.IAsyncDisposable
     {
-        System.Threading.Tasks.ValueTask<bool> MoveNextAsync();
         T Current { get; }
+        System.Threading.Tasks.ValueTask<bool> MoveNextAsync();
     }
     public partial interface ICollection<T> : System.Collections.Generic.IEnumerable<T>, System.Collections.IEnumerable
     {
@@ -4266,8 +4265,8 @@ namespace System.Globalization
         public static System.Globalization.CompareInfo GetCompareInfo(string name) { throw null; }
         public static System.Globalization.CompareInfo GetCompareInfo(string name, System.Reflection.Assembly assembly) { throw null; }
         public override int GetHashCode() { throw null; }
+        public int GetHashCode(System.ReadOnlySpan<char> source, System.Globalization.CompareOptions options) { throw null; }
         public virtual int GetHashCode(string source, System.Globalization.CompareOptions options) { throw null; }
-        public int GetHashCode(ReadOnlySpan<char> source, System.Globalization.CompareOptions options) { throw null; }
         public virtual System.Globalization.SortKey GetSortKey(string source) { throw null; }
         public virtual System.Globalization.SortKey GetSortKey(string source, System.Globalization.CompareOptions options) { throw null; }
         public virtual int IndexOf(string source, char value) { throw null; }
@@ -5159,15 +5158,15 @@ namespace System.IO
         public override int Read(byte[] array, int offset, int count) { throw null; }
         public override int Read(System.Span<byte> buffer) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override int ReadByte() { throw null; }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public virtual void Unlock(long position, long length) { }
         public override void Write(byte[] array, int offset, int count) { }
-        public override void Write(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public override void Write(System.ReadOnlySpan<byte> buffer) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
     }
     public enum HandleInheritability
@@ -6471,7 +6470,7 @@ namespace System.Runtime.CompilerServices
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine { }
     }
     [System.AttributeUsage((System.AttributeTargets)(2048), AllowMultiple = false, Inherited = false)]
-    public sealed class CallerArgumentExpressionAttribute : System.Attribute
+    public sealed partial class CallerArgumentExpressionAttribute : System.Attribute
     {
         public CallerArgumentExpressionAttribute(string parameterName) { }
         public string ParameterName { get { throw null; } }
@@ -7055,9 +7054,8 @@ namespace System.Runtime.InteropServices
 }
 namespace System.Runtime.Remoting
 {
-    public class ObjectHandle : MarshalByRefObject
+    public partial class ObjectHandle : MarshalByRefObject
     {
-        private ObjectHandle() { }
         public ObjectHandle(Object o) { }
         public Object Unwrap() { throw null; }
     }
@@ -7684,18 +7682,13 @@ namespace System.Text
         public System.Text.StringBuilder AppendJoin<T>(string separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public System.Text.StringBuilder AppendLine() { throw null; }
         public System.Text.StringBuilder AppendLine(string value) { throw null; }
-        public struct ChunkEnumerator
-        {
-            public ChunkEnumerator GetEnumerator() { throw null; }
-            public bool MoveNext() { throw null; }
-            public ReadOnlyMemory<char> Current { get { throw null; } }
-        }
         public System.Text.StringBuilder Clear() { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public void CopyTo(int sourceIndex, System.Span<char> destination, int count) { }
         public int EnsureCapacity(int capacity) { throw null; }
         public bool Equals(System.ReadOnlySpan<char> span) { throw null; }
         public bool Equals(System.Text.StringBuilder sb) { throw null; }
+        public System.Text.StringBuilder.ChunkEnumerator GetChunks() { throw null; }
         public System.Text.StringBuilder Insert(int index, bool value) { throw null; }
         public System.Text.StringBuilder Insert(int index, byte value) { throw null; }
         public System.Text.StringBuilder Insert(int index, char value) { throw null; }
@@ -7719,7 +7712,6 @@ namespace System.Text
         public System.Text.StringBuilder Insert(int index, uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public System.Text.StringBuilder Insert(int index, ulong value) { throw null; }
-        public ChunkEnumerator GetChunks() { throw null; }
         public System.Text.StringBuilder Remove(int startIndex, int length) { throw null; }
         public System.Text.StringBuilder Replace(char oldChar, char newChar) { throw null; }
         public System.Text.StringBuilder Replace(char oldChar, char newChar, int startIndex, int count) { throw null; }
@@ -7728,6 +7720,12 @@ namespace System.Text
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
         public string ToString(int startIndex, int length) { throw null; }
+        public partial struct ChunkEnumerator
+        {
+            public System.ReadOnlyMemory<char> Current { get { throw null; } }
+            public System.Text.StringBuilder.ChunkEnumerator GetEnumerator() { throw null; }
+            public bool MoveNext() { throw null; }
+        }
     }
 }
 namespace System.Threading
@@ -7749,8 +7747,8 @@ namespace System.Threading
         public System.Threading.CancellationTokenRegistration Register(System.Action callback, bool useSynchronizationContext) { throw null; }
         public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state) { throw null; }
         public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state, bool useSynchronizationContext) { throw null; }
-        public System.Threading.CancellationTokenRegistration UnsafeRegister(System.Action<object> callback, object state) { throw null; }
         public void ThrowIfCancellationRequested() { }
+        public System.Threading.CancellationTokenRegistration UnsafeRegister(System.Action<object> callback, object state) { throw null; }
     }
     public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>
     {
@@ -7762,9 +7760,9 @@ namespace System.Threading
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Threading.CancellationTokenRegistration other) { throw null; }
         public override int GetHashCode() { throw null; }
-        public bool Unregister() { throw null; }
         public static bool operator ==(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { throw null; }
         public static bool operator !=(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { throw null; }
+        public bool Unregister() { throw null; }
     }
     public enum LazyThreadSafetyMode
     {
@@ -8202,14 +8200,14 @@ namespace System.Threading.Tasks.Sources
         private TResult _result;
         private object _dummy;
         private int _dummyPrimitive;
-        public TResult GetResult(short token) { throw null; }
-        public ValueTaskSourceStatus GetStatus(short token) { throw null; }
-        public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) { throw null; }
-        public void Reset() { throw null; }
-        public bool RunContinuationsAsynchronously { get { throw null; } set { throw null; } }
-        public void SetException(System.Exception error) { throw null; }
-        public void SetResult(TResult result) { throw null; }
+        public bool RunContinuationsAsynchronously { get { throw null; } set { } }
         public short Version { get { throw null; } }
+        public TResult GetResult(short token) { throw null; }
+        public System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token) { throw null; }
+        public void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags) { }
+        public void Reset() { }
+        public void SetException(System.Exception error) { }
+        public void SetResult(TResult result) { }
     }
     [System.FlagsAttribute]
     public enum ValueTaskSourceOnCompletedFlags
