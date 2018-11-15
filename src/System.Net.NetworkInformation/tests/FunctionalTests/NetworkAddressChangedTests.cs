@@ -13,6 +13,7 @@ namespace System.Net.NetworkInformation.Tests
         private readonly NetworkAddressChangedEventHandler _addressHandler = delegate { };
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.FreeBSD)]
         public void NetworkAddressChanged_AddRemove_Success()
         {
             NetworkChange.NetworkAddressChanged += _addressHandler;
@@ -20,6 +21,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.FreeBSD)]
         public void NetworkAddressChanged_JustRemove_Success()
         {
             NetworkChange.NetworkAddressChanged -= _addressHandler;
