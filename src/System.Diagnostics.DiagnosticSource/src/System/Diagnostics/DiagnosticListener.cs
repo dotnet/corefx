@@ -234,7 +234,15 @@ namespace System.Diagnostics
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
                 if (curSubscription.IsEnabled1Arg == null || curSubscription.IsEnabled1Arg(name))
+                {
+                    if (Activity.Sampling.IsActivitySampledEnabled)
+                    {
+                        var cur = Activity.Current;
+                        if (cur == null || !cur.Recording)
+                            return false;
+                    }
                     return true;
+                }
             }
             return false;
         }
@@ -245,10 +253,19 @@ namespace System.Diagnostics
         /// </summary>
         public override bool IsEnabled(string name, object arg1, object arg2 = null)
         {
+
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
                 if (curSubscription.IsEnabled3Arg == null || curSubscription.IsEnabled3Arg(name, arg1, arg2))
+                {
+                    if (Activity.Sampling.IsActivitySampledEnabled)
+                    {
+                        var cur = Activity.Current;
+                        if (cur == null || !cur.Recording)
+                            return false;
+                    }
                     return true;
+                }
             }
             return false;
         }
