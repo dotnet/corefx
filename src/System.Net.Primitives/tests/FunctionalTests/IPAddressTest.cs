@@ -313,6 +313,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // IPAddress.Value can be set on full framework
         public static void Address_ReadOnlyStatics_Set_Failure()
         {
             Assert.Throws<SocketException>(() => IPAddress.Any.Address = MaxAddress - 1);
