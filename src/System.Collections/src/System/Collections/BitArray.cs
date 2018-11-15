@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers.Binary;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
@@ -87,7 +87,7 @@ namespace System.Collections
             ReadOnlySpan<byte> byteSpan = bytes;
             for (int i = 0; i < totalCount; i++)
             {
-                m_array[i] = MemoryMarshal.Read<int>(byteSpan);
+                m_array[i] = BinaryPrimitives.ReadInt32LittleEndian(byteSpan);
                 byteSpan = byteSpan.Slice(4);
             }
 
@@ -554,7 +554,7 @@ namespace System.Collections
                 int quotient = Div4Rem(arrayLength, out int remainder);
                 for (int i = 0; i < quotient; i++)
                 {
-                    MemoryMarshal.Write(span, ref m_array[i]);
+                    BinaryPrimitives.WriteInt32LittleEndian(span, m_array[i]);
                     span = span.Slice(4);
                 }
 
