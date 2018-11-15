@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/socket.h>
 #include <net/route.h>
 #include <net/if.h>
 
@@ -31,6 +32,8 @@
 #include <sys/ioctl.h>
 #endif
 #include <sys/socketvar.h>
+#include <netinet/in.h>
+#include <netinet/in_pcb.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
@@ -138,6 +141,10 @@ int32_t SystemNative_GetUdpGlobalStatistics(UdpGlobalStatistics* retStats)
     retStats->IncomingDiscarded = systemStats.udps_noport;
     retStats->IncomingErrors = systemStats.udps_hdrops + systemStats.udps_badsum + systemStats.udps_badlen;
 
+#if defined(__FreeBSD__)
+    // FreeBSD does not have net.inet.udp.pcbcount
+    retStats->UdpListeners = 0;
+#else
     // This may contain both UDP4 and UDP6 listeners.
     oldlenp = sizeof(retStats->UdpListeners);
     if (sysctlbyname("net.inet.udp.pcbcount", &retStats->UdpListeners, &oldlenp, NULL, 0))
@@ -145,6 +152,7 @@ int32_t SystemNative_GetUdpGlobalStatistics(UdpGlobalStatistics* retStats)
         retStats->UdpListeners = 0;
         return -1;
     }
+#endif
 
     return 0;
 }
@@ -163,31 +171,28 @@ int32_t SystemNative_GetIcmpv4GlobalStatistics(Icmpv4GlobalStatistics* retStats)
         return -1;
     }
 
-    u_int32_t* inHist = systemStats.icps_inhist;
-    u_int32_t* outHist = systemStats.icps_outhist;
-
-    retStats->AddressMaskRepliesReceived = inHist[ICMP_MASKREPLY];
-    retStats->AddressMaskRepliesSent = outHist[ICMP_MASKREPLY];
-    retStats->AddressMaskRequestsReceived = inHist[ICMP_MASKREQ];
-    retStats->AddressMaskRequestsSent = outHist[ICMP_MASKREQ];
-    retStats->DestinationUnreachableMessagesReceived = inHist[ICMP_UNREACH];
-    retStats->DestinationUnreachableMessagesSent = outHist[ICMP_UNREACH];
-    retStats->EchoRepliesReceived = inHist[ICMP_ECHOREPLY];
-    retStats->EchoRepliesSent = outHist[ICMP_ECHOREPLY];
-    retStats->EchoRequestsReceived = inHist[ICMP_ECHO];
-    retStats->EchoRequestsSent = outHist[ICMP_ECHO];
-    retStats->ParameterProblemsReceived = inHist[ICMP_PARAMPROB];
-    retStats->ParameterProblemsSent = outHist[ICMP_PARAMPROB];
-    retStats->RedirectsReceived = inHist[ICMP_REDIRECT];
-    retStats->RedirectsSent = outHist[ICMP_REDIRECT];
-    retStats->SourceQuenchesReceived = inHist[ICMP_SOURCEQUENCH];
-    retStats->SourceQuenchesSent = outHist[ICMP_SOURCEQUENCH];
-    retStats->TimeExceededMessagesReceived = inHist[ICMP_TIMXCEED];
-    retStats->TimeExceededMessagesSent = outHist[ICMP_TIMXCEED];
-    retStats->TimestampRepliesReceived = inHist[ICMP_TSTAMPREPLY];
-    retStats->TimestampRepliesSent = outHist[ICMP_TSTAMPREPLY];
-    retStats->TimestampRequestsReceived = inHist[ICMP_TSTAMP];
-    retStats->TimestampRequestsSent = outHist[ICMP_TSTAMP];
+    retStats->AddressMaskRepliesReceived = systemStats.icps_inhist[ICMP_MASKREPLY];
+    retStats->AddressMaskRepliesSent = systemStats.icps_outhist[ICMP_MASKREPLY];
+    retStats->AddressMaskRequestsReceived = systemStats.icps_inhist[ICMP_MASKREQ];
+    retStats->AddressMaskRequestsSent = systemStats.icps_outhist[ICMP_MASKREQ];
+    retStats->DestinationUnreachableMessagesReceived = systemStats.icps_inhist[ICMP_UNREACH];
+    retStats->DestinationUnreachableMessagesSent = systemStats.icps_outhist[ICMP_UNREACH];
+    retStats->EchoRepliesReceived = systemStats.icps_inhist[ICMP_ECHOREPLY];
+    retStats->EchoRepliesSent = systemStats.icps_outhist[ICMP_ECHOREPLY];
+    retStats->EchoRequestsReceived = systemStats.icps_inhist[ICMP_ECHO];
+    retStats->EchoRequestsSent = systemStats.icps_outhist[ICMP_ECHO];
+    retStats->ParameterProblemsReceived = systemStats.icps_inhist[ICMP_PARAMPROB];
+    retStats->ParameterProblemsSent = systemStats.icps_outhist[ICMP_PARAMPROB];
+    retStats->RedirectsReceived = systemStats.icps_inhist[ICMP_REDIRECT];
+    retStats->RedirectsSent = systemStats.icps_outhist[ICMP_REDIRECT];
+    retStats->SourceQuenchesReceived = systemStats.icps_inhist[ICMP_SOURCEQUENCH];
+    retStats->SourceQuenchesSent = systemStats.icps_outhist[ICMP_SOURCEQUENCH];
+    retStats->TimeExceededMessagesReceived = systemStats.icps_inhist[ICMP_TIMXCEED];
+    retStats->TimeExceededMessagesSent = systemStats.icps_outhist[ICMP_TIMXCEED];
+    retStats->TimestampRepliesReceived = systemStats.icps_inhist[ICMP_TSTAMPREPLY];
+    retStats->TimestampRepliesSent = systemStats.icps_outhist[ICMP_TSTAMPREPLY];
+    retStats->TimestampRequestsReceived = systemStats.icps_inhist[ICMP_TSTAMP];
+    retStats->TimestampRequestsSent = systemStats.icps_outhist[ICMP_TSTAMP];
 
     return 0;
 }
@@ -438,8 +443,11 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
         // An invalid interface name was given (doesn't exist).
         return -1;
     }
-
+#if HAVE_IF_MSGHDR2
     int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, (int)interfaceIndex};
+#else
+    int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, (int)interfaceIndex};
+#endif
 
     size_t len;
     // Get estimated data length
@@ -468,12 +476,21 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
          headPtr += ((struct if_msghdr*)headPtr)->ifm_msglen)
     {
         struct if_msghdr* ifHdr = (struct if_msghdr*)headPtr;
+#if HAVE_IF_MSGHDR2
         if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO2)
         {
             struct if_msghdr2* ifHdr2 = (struct if_msghdr2*)ifHdr;
             retStats->SendQueueLength = (uint64_t)ifHdr2->ifm_snd_maxlen;
 
             struct if_data64 systemStats = ifHdr2->ifm_data;
+#else
+        if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO)
+        {
+            struct if_msghdr* ifHdr2 = (struct if_msghdr*)ifHdr;
+            retStats->SendQueueLength = 0;
+
+            struct if_data systemStats = ifHdr2->ifm_data;
+#endif
             retStats->Mtu = systemStats.ifi_mtu;
             retStats->Speed = systemStats.ifi_baudrate; // bits per second.
             retStats->InPackets = systemStats.ifi_ipackets;
@@ -504,7 +521,7 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
 
                     if (ioctl(fd, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0)
                     {
-                        if (errno == EOPNOTSUPP)
+                        if (errno == EOPNOTSUPP || errno == EINVAL)
                         {
                             // Virtual interfaces like loopback do not have media.
                             // Assume they are up when administrative state is up.
@@ -548,9 +565,10 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeI
     memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
     return -1;
 }
-
 int32_t SystemNative_GetNumRoutes()
 {
+    int32_t count = 0;
+#if HAVE_RT_MSGHDR2
     int routeDumpMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_DUMP, 0};
 
     size_t len;
@@ -574,7 +592,6 @@ int32_t SystemNative_GetNumRoutes()
 
     uint8_t* headPtr = buffer;
     struct rt_msghdr2* rtmsg;
-    int32_t count = 0;
 
     for (size_t i = 0; i < len; i += rtmsg->rtm_msglen)
     {
@@ -588,7 +605,7 @@ int32_t SystemNative_GetNumRoutes()
     }
 
     free(buffer);
+#endif // HAVE_RT_MSGHDR2
     return count;
 }
-
 #endif // HAVE_TCP_VAR_H
