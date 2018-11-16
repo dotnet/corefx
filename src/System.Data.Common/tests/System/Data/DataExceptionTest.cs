@@ -9,67 +9,35 @@ namespace System.Data.Tests
     public class DataExceptionTest
     {
         [Fact]
-        public void DefaultArgumentsShowed()
+        public void Ctor_Parameterless_UsesDefaults()
         {
-            var defaultException = new CustomDataException();
-            Assert.Equal("Data Exception.", defaultException.Message);
-            Assert.Null(defaultException.InnerException);
-            Assert.Equal(-2146232032, defaultException.HResult);
+            var e = new CustomDataException();
+            Assert.False(string.IsNullOrWhiteSpace(e.Message));
+            Assert.Null(e.InnerException);
+            Assert.Equal(-2146232032, e.HResult);
         }
 
         [Fact]
-        public void ArgumentsStored()
+        public void Ctor_ArgumentsRoundtrip()
         {
-            var dataException = new CustomDataException("test", new Exception("inner exception"));
-            Assert.Equal("test", dataException.Message);
-            Assert.Equal("inner exception", dataException.InnerException.Message);
-            Assert.Equal(-2146233087, dataException.HResult);
+            var innerException = new Exception("inner exception");
+
+            var e = new CustomDataException("test");
+            Assert.Equal("test", e.Message);
+            Assert.Null(e.InnerException);
+            Assert.Equal(-2146232032, e.HResult);
+
+            e = new CustomDataException("test", innerException);
+            Assert.Equal("test", e.Message);
+            Assert.Same(innerException, e.InnerException);
+            Assert.Equal(-2146233087, e.HResult);
         }
 
-        [Fact]
-        public void ArgumentsFromSerializationInfo()
-        {
-            var si = new System.Runtime.Serialization.SerializationInfo(typeof(CustomDataException), new System.Runtime.Serialization.FormatterConverter());
-            si.AddValue("ClassName", string.Empty);
-            si.AddValue("Message", string.Empty);
-            si.AddValue("InnerException", new ArgumentException());
-            si.AddValue("HelpURL", string.Empty);
-            si.AddValue("StackTraceString", string.Empty);
-            si.AddValue("RemoteStackTraceString", string.Empty);
-            si.AddValue("RemoteStackIndex", 0);
-            si.AddValue("ExceptionMethod", string.Empty);
-            si.AddValue("HResult", 1);
-            si.AddValue("Source", string.Empty);
-
-            var sc = new System.Runtime.Serialization.StreamingContext();
-
-            var exFromSerializationInfo = new CustomDataException(si, sc);
-
-            Assert.Equal(string.Empty, exFromSerializationInfo.Message);
-            Assert.IsType<ArgumentException>(exFromSerializationInfo.InnerException);
-            Assert.Equal(1, exFromSerializationInfo.HResult);
-        }
-
-        [Serializable]
         private class CustomDataException : DataException
         {
-            public CustomDataException() : base()
-            {
-            }
-
-            public CustomDataException(string message) : base(message)
-            {
-            }
-
-            public CustomDataException(string message, Exception innerException) : base(message, innerException)
-            {
-            }
-
-            public CustomDataException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-                : base(info, context)
-            {
-                // For exposing the protected constructor
-            }
+            public CustomDataException() { }
+            public CustomDataException(string message) : base(message) { }
+            public CustomDataException(string message, Exception innerException) : base(message, innerException) { }
         }
     }
 }
