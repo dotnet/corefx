@@ -40,7 +40,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' Returns true if you can use long paths, including long DOS style paths (e.g. over 260 without \\?\).
         ''' </summary>
         Private Function AreAllLongPathsAvailable() As Boolean
-            Return Not AreLongPathsBlocked() AndAlso AreOsLongPathsEnabled()
+            Return (Not AreLongPathsBlocked()) And AreOsLongPathsEnabled()
         End Function
 
         ''' <summary>
@@ -124,14 +124,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 stream.Read(ReadData, 0, SourceData.Length)
                 Return ExpectedData = ReadData
             End Using
-        End Function
-
-        Private Function HasLegacyIoBehavior(propertyName As String) As Boolean
-            Dim t As Type = GetType(Object).Assembly.GetType("System.AppContextSwitches")
-            Dim p = t.GetProperty(propertyName, BindingFlags.Static Or BindingFlags.Public)
-
-            ' If the switch actually exists use it, otherwise we predate the switch and are effectively on
-            Return CBool(If(p?.GetValue(Nothing), True))
         End Function
 
         ''' RemoveEndingSeparator
