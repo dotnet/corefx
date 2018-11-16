@@ -689,7 +689,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
                 Try
-                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), New String("D"c, 260))
+                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), New String("D"c, 247))
                     FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
                     Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
                 Catch e As IO.PathTooLongException
