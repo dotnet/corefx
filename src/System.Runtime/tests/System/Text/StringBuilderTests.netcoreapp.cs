@@ -150,7 +150,7 @@ namespace System.Text.Tests
         public static void Append_CharMemory(string original, char[] value, string expected)
         {
             var builder = new StringBuilder(original);
-            builder.Append(new ReadOnlyMemory<char>(value));
+            builder.Append(value.AsMemory());
             Assert.Equal(expected, builder.ToString());
         }
 
