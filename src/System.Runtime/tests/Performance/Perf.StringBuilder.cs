@@ -161,7 +161,7 @@ namespace System.Tests
 
                 // Actual perf testing
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         empty.Append(memory); // Appends a string of length "length" to an increasingly large StringBuilder
             }
         }
@@ -177,13 +177,13 @@ namespace System.Tests
             {
                 // Setup - Create a string of the specified length
                 string builtString = utils.CreateString(length);
-                ReadOnlyMemory<char> memory = builtString.AsMemory();
+                object memoryObject = builtString.AsMemory(); // deliberately forces memory.ToString() to be called so this can be compared to AppendAsReadOnlyMemory
                 StringBuilder empty = new StringBuilder();
 
                 // Actual perf testing
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
-                        empty.Append((object)memory); // cast to object deliberately forces memory.ToString() to be called so this can be compared to AppendAsReadOnlyMemory
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                        empty.Append(memoryObject); 
             }
         }
     }
