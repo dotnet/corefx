@@ -27,9 +27,6 @@
     <Project Include="*\pkg\**\CoreFx.Private.TestUtilities.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="*\pkg\**\System.Data.SqlClient.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
     <Project Include="*\pkg\**\System.IO.Pipelines.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
@@ -37,9 +34,6 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="*\pkg\**\System.Net.Http.WinHttpHandler.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="*\pkg\**\System.Security.Cryptography.Cng.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="*\pkg\**\System.Text.Encoding.CodePages.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
