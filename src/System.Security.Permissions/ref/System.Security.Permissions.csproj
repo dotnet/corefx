@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{07CAF142-B259-418E-86EF-C4BD8B50253E}</ProjectGuid>
-    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true' or '$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
     <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Security.Permissions.cs" />
-    <Compile Include="System.Security.Permissions.netstandard.cs" Condition="'$(TargetsNetFx)' != 'true' and '$(TargetGroup)' == 'netstandard'" />
+    <Compile Include="System.Security.Permissions.netstandard.cs" Condition="'$(TargetsNetFx)' == 'true' OR '$(TargetGroup)' == 'netstandard'" />
     <Compile Include="System.Security.Permissions.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="System.Security.Permissions.netcoreapp.cs" Condition="'$(TargetGroup)' == 'uap'" />
     <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
@@ -23,11 +23,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <ProjectReference Include="..\..\System.Security.AccessControl\ref\System.Security.AccessControl.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
-    <Compile Include="..\..\System.Runtime.Extensions\src\System\Security\IStackWalk.cs" />
-    <Compile Include="..\..\System.Runtime.Extensions\src\System\Security\Permissions\PermissionState.cs" />
-    <Compile Include="..\..\System.Runtime.Extensions\src\System\Security\PermissionSet.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
     <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />

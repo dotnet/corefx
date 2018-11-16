@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Security.AccessControl.csproj">
-      <SupportedFramework>net461</SupportedFramework>
+      <SupportedFramework>net461;netcoreapp3.0</SupportedFramework>
     </ProjectReference>
     <File Include="$(PlaceHolderFile)">
       <TargetPath>runtimes/win/lib/uap10.0.16299</TargetPath>

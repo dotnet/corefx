@@ -6,7 +6,7 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Compile Include="System\ApplicationIdentity.cs" />
     <Compile Include="System\Data\Common\DBDataPermission.cs" />
     <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
