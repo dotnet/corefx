@@ -683,17 +683,22 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Dim DirectoryName As String = New String("B"c, 30)
 
                 Assert.True(DirectoryName.Length < 248, $"DirectoryBaseName.Length at {DirectoryName.Length} is not < 248")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryName)
+                Assert.True(IO.Directory.Exists(TestBase.TestDirectory))
+
+                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory, DirectoryName)
                 Assert.True(FullPathToTargetDirectory.Length < 260, $"FullPathToTargetDirectory.Length at {FullPathToTargetDirectory.Length} is not < 260")
 
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
+
                 Try
-                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), New String("D"c, 247))
+                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory, New String("E"c, 239))
                     FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
                     Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
                 Catch e As IO.PathTooLongException
                     Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Catch e As IO.DirectoryNotFoundException
+                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) And IntPtr.Size = 4)
                 End Try
             End Using
 
