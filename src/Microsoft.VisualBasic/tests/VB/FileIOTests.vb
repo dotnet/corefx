@@ -6,7 +6,6 @@ Option Strict On
 
 Imports Microsoft.VisualBasic.FileIO
 Imports System.Collections.ObjectModel
-Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports System.Text
@@ -19,51 +18,15 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ReadOnly DestData() As Char = {"x"c, "X"c, "y"c}
 
         ReadOnly SourceData() As Char = {"a"c, "A"c, "b"c}
-        Private s_osEnabled As State
 
         Sub New()
         End Sub
-
-        Private Enum State
-            Uninitialized
-            [True]
-            [False]
-        End Enum
 
         Public Shared ReadOnly Property ManualTestsEnabled() As Boolean
             Get
                 Return Not String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"))
             End Get
         End Property
-
-        ''' <summary>
-        ''' Returns true if you can use long paths, including long DOS style paths (e.g. over 260 without \\?\).
-        ''' </summary>
-        Private Function AreAllLongPathsAvailable() As Boolean
-            Return (Not AreLongPathsBlocked()) And AreOsLongPathsEnabled()
-        End Function
-
-        ''' <summary>
-        ''' Returns true if > MAX_PATH (260) character paths are blocked.
-        ''' Note that this doesn't reflect that you can actually use long paths without device syntax when on Windows.
-        ''' Use AreAllLongPathsAvailable() to see that you can use long DOS style paths if on Windows.
-        ''' </summary>
-        Private Function AreLongPathsBlocked() As Boolean
-            Return HasLegacyIoBehavior("BlockLongPaths")
-        End Function
-
-        Private Function AreOsLongPathsEnabled() As Boolean
-            If s_osEnabled = State.Uninitialized Then
-                ' No official way to check yet this is good enough for tests
-                Try
-                    s_osEnabled = If(RtlAreLongPathsEnabled(), State.True, State.False)
-                Catch
-                    s_osEnabled = State.False
-                End Try
-            End If
-
-            Return s_osEnabled = State.True
-        End Function
 
         ''' <summary>
         ''' All "Public" tests are Named for the FileIO function they test followed by _ParameterName for each Parameter and if there are options
@@ -735,32 +698,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Sub IOPathCombineTest()
             Assert.Throws(Of System.ArgumentNullException)(Function() FileSystem.CombinePath(Nothing, "User"))
-        End Sub
-        <Fact>
-        Public Sub LongDirectoryPathTest()
-            Using TestBase As New FileIOTests
-                Dim PathLength As Integer = TestBase.TestDirectory().Length
-                Assert.True(PathLength < 257) ' Need room for slash and new directory name
-                Dim DirectoryName As String = New String("A"c, 30)
-
-                Assert.True(DirectoryName.Length < 248, $"DirectoryBaseName.Length at {DirectoryName.Length} is not < 248")
-                Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryName)
-                Assert.True(FullPathToTargetDirectory.Length < 260, $"FullPathToTargetDirectory.Length at {FullPathToTargetDirectory.Length} is not < 260")
-
-                FileSystem.CreateDirectory(FullPathToTargetDirectory)
-                Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
-                If AreAllLongPathsAvailable() Then
-                    Dim VeryLongDirectoryName As String = New String("A"c, 250)
-                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
-                    FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
-                    Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
-                Else
-                    Dim VeryLongDirectoryName As String = New String("A"c, 250)
-                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
-                    Assert.Throws(Of IO.PathTooLongException)(Sub() FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory))
-                End If
-            End Using
-
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>
