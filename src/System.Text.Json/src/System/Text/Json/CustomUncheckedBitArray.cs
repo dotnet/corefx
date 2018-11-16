@@ -11,7 +11,19 @@ namespace System.Text.Json
     // https://github.com/dotnet/corefx/blob/master/src/System.Collections/src/System/Collections/BitArray.cs
     internal struct CustomUncheckedBitArray
     {
+        // We are using a ulong to represent our nested state, so we can only
+        // go 64 levels deep without having to allocate.
+        internal const int AllocationFreeMaxDepth = sizeof(ulong) * 8;
+
         private int[] _array;
+
+        // This ulong container represents a tiny stack to track the state during nested transitions.
+        // The first bit represents the state of the current depth (1 == object, 0 == array).
+        // Each subsequent bit is the parent / containing type (object or array). Since this
+        // reader does a linear scan, we only need to keep a single path as we go through the data.
+        // This is primarily used as an optimization to avoid having to allocate an object for
+        // depths up to 64 (which is the default max depth).
+        internal ulong _allocationFreeContainer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CustomUncheckedBitArray(int bitLength)
@@ -19,6 +31,7 @@ namespace System.Text.Json
             Debug.Assert(bitLength > 0 && bitLength % 32 == 0, $"bitLength: {bitLength}");
 
             _array = new int[bitLength / 32];
+            _allocationFreeContainer = default;
         }
 
         public bool IsDefault => _array == default;
@@ -42,6 +55,69 @@ namespace System.Text.Json
 
                 return indexableLength;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnsureAndPushTrue(int depth)
+        {
+            if (depth < AllocationFreeMaxDepth)
+            {
+                _allocationFreeContainer = (_allocationFreeContainer << 1) | 1;
+            }
+            else
+            {
+                EnsureAndPush(depth, true);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnsureAndPushFalse(int depth)
+        {
+            if (depth < AllocationFreeMaxDepth)
+            {
+                _allocationFreeContainer = _allocationFreeContainer << 1;
+            }
+            else
+            {
+                EnsureAndPush(depth, false);
+            }
+        }
+
+        // Allocate the bit array lazily only when it is absolutely necessary
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnsureAndPush(int depth, bool value)
+        {
+            if (IsDefault)
+            {
+                _array = new int[2];
+            }
+            this[depth - AllocationFreeMaxDepth] = value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool UpdateAndPop(int depth)
+        {
+            bool inObject = false;
+            if (depth < AllocationFreeMaxDepth)
+            {
+                _allocationFreeContainer >>= 1;
+                inObject = (_allocationFreeContainer & 1) != 0;
+            }
+            else if (depth == AllocationFreeMaxDepth)
+            {
+                inObject = (_allocationFreeContainer & 1) != 0;
+            }
+            else
+            {
+                inObject = GetInObjectFromArray(depth);
+            }
+            return inObject;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private bool GetInObjectFromArray(int depth)
+        {
+            return this[depth - AllocationFreeMaxDepth - 1];
         }
 
         public bool this[int index]
@@ -99,7 +175,7 @@ namespace System.Text.Json
             Debug.Assert(_array.Length < int.MaxValue / 2, $"Array too large - arrayLength: {_array.Length}");
             Debug.Assert(minSize >= 0 && minSize >= _array.Length);
 
-            int nextDouble = NextClosestPowerOf2(minSize + 1);
+            int nextDouble = Math.Max(minSize + 1, _array.Length * 2);
             Debug.Assert(nextDouble > minSize);
 
             Array.Resize(ref _array, nextDouble);
@@ -111,25 +187,6 @@ namespace System.Text.Json
             uint quotient = (uint)number / 32;
             remainder = number & (32 - 1);   // equivalent to number % 32, since 32 is a power of 2
             return (int)quotient;
-        }
-
-        private static int NextClosestPowerOf2(int n)
-        {
-            Debug.Assert(n > 0);
-
-            // Required to handle powers of 2.
-            n--;
-
-            // Set all the bits to the right of the leftmost set bit to 1.
-            n |= n >> 1;
-            n |= n >> 2;
-            n |= n >> 4;
-            n |= n >> 8;
-            n |= n >> 16;
-
-            n++;
-
-            return n;
         }
     }
 }

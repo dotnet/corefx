@@ -147,7 +147,8 @@ namespace System.Text.JsonTests
                 bitArray[index] = value;
                 Assert.True(bitArray.MaxIndexableLength >= index);
 
-                int expectedLength = NextClosestPowerOf2(bitLength + growBy) - 1;
+                // Round down to closest multiple of 32 and then add 31.
+                int expectedLength = ((index >> 5) << 5) + 31;
 
                 Assert.True(expectedLength == bitArray.MaxIndexableLength, $"expected: {expectedLength}, actual: {bitArray.MaxIndexableLength}, bitLength: {bitLength}, growBy: {growBy}");
                 Assert.True(value == bitArray[index], $"expected: {value}, actual: {bitArray[index]}, index: {index}, Length: {bitArray.MaxIndexableLength}");
