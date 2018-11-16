@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="System\DllNotFoundExceptionTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\IUnknownConstantAttributeTests.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IDispatchConstantAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\AllowReversePInvokeCallsAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ArrayWithOffsetTests.cs" />
     <Compile Include="System\Runtime\InteropServices\BestFitMappingAttributeTests.cs" />
