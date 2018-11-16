@@ -9,17 +9,12 @@ Imports Microsoft.VisualBasic.FileIO
 Imports Xunit
 Namespace Microsoft.VisualBasic.Tests.VB
     Public NotInheritable Class SpecialDirectoriesTests
-        Private Shared ReadOnly Separators() As Char = {
-            IO.Path.DirectorySeparatorChar,
-            IO.Path.AltDirectorySeparatorChar
-            }
-
         Private Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
             Dim LocalFolderPath As String = Environment.GetFolderPath(folder)
             If LocalFolderPath = "" Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() getSpecialDirectory.Invoke)
             Else
-                Assert.Equal(LocalFolderPath.TrimEnd(Separators), getSpecialDirectory().TrimEnd(Separators))
+                Assert.Equal(LocalFolderPath.TrimSeparators, getSpecialDirectory().TrimSeparators)
             End If
 
         End Sub
@@ -71,7 +66,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         <Fact>
         Public Shared Sub TempFolderTest()
-            Assert.Equal(IO.Path.GetTempPath.TrimEnd(Separators), SpecialDirectories.Temp.TrimEnd(Separators))
+            Assert.Equal(IO.Path.GetTempPath.TrimSeparators, SpecialDirectories.Temp.TrimSeparators)
         End Sub
 
     End Class
