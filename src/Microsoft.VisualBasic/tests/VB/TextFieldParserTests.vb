@@ -21,8 +21,8 @@ Fatigiug kojitfu taapi iz alujok me zimipa koz latkekij vem fo si cepzizhub li p
 Ewujajlu mivec tooju ad bu cowic irtafit ehaoca vojhehfo aztidun zo wezecmo abe muz wikhutwen idce.
 Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun urokir tawdac rahaw beiweed."""
 
-        Private FixedFieldWidths() As Integer = {5, 10, 6, -1}
-        Private ReadOnly FixedFormatData() As String = {
+        Private Shared ReadOnly FixedFieldWidths() As Integer = {5, 10, 6, -1}
+        Private Shared ReadOnly FixedFormatData() As String = {
             "Err  1001                  Cannot access resource.",
             "Err  2014                  Resource not found.",
             "Acc  10/03/2009 User1      Administrator.",
@@ -31,14 +31,15 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
             "Acc  10/04/2009 User2      Standard user."
         }
 
-        Private ErrorFormat As Integer() = {5, 5, -1}
-        Private StdFormat As Integer() = {5, 10, 11, -1}
+        Private Shared ReadOnly ErrorFormat As Integer() = {5, 5, -1}
+        Private Shared ReadOnly StdFormat As Integer() = {5, 10, 11, -1}
 
         Enum FormatType
             ErrorFormat = 0
             StdFormat = 1
         End Enum
-        Private ReadOnly MultipleFormatData() As String = {
+
+        Private Shared ReadOnly MultipleFormatData() As String = {
             "Err  1001 Cannot access resource.",
             "Err  2014 Resource not found.",
             "Acc  10/03/2009User1      Administrator.",
@@ -47,16 +48,15 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
             "Acc  10/04/2009User2      Standard user."
         }
 
-
         ''' <summary>
         ''' Create a new file with TestData
         ''' </summary>
-        ''' <param name="TestBase">Opbject to manage temporary Files</param>
+        ''' <param name="TestBase">Object to manage temporary Files</param>
         ''' <param name="TestData">Data to be written to file</param>
         ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
-        ''' <param name="TestFileName">Optional Filename, if none a randon one based on TestName will be created</param>
+        ''' <param name="TestFileName">Optional Filename, if none a random one based on TestName will be created</param>
         ''' <returns>Full Path to New File</returns>
-        Private Function CreateTestFile(TestBase As TextFieldParserTests, TestData As String, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+        Private Shared Function CreateTestFile(TestBase As TextFieldParserTests, TestData As String, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
             Dim TempFileNameWithPath As String
             If TestFileName.Length = 0 Then
                 TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
@@ -80,7 +80,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         End Function
 
         <Fact>
-        Public Sub BadPathTest()
+        Public Shared Sub BadPathTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
                 TestFile = CreateTestFile(TestBase, HeaderLine & vbCrLf & """" & vbCrLf, PathFromBase:="", TestFileName:="")
@@ -89,7 +89,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         End Sub
 
         <Fact>
-        Public Sub CSVBadDataTest()
+        Public Shared Sub CSVBadDataTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
                 TestFile = CreateTestFile(TestBase, HeaderLine & ",""", PathFromBase:="", TestFileName:="")
@@ -104,7 +104,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         End Sub
 
         <Fact>
-        Public Sub CSVDataTest()
+        Public Shared Sub CSVDataTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
                 TestFile = CreateTestFile(TestBase, CSVData, "", "")
@@ -142,7 +142,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         End Sub
 
         <Fact>
-        Public Sub FixedFormatTest()
+        Public Shared Sub FixedFormatTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
                 TestFile = CreateTestFile(TestBase, String.Join(vbCrLf, FixedFormatData), PathFromBase:="", TestFileName:="")
@@ -166,7 +166,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         End Sub
 
         <Fact>
-        Public Sub MultiFormatTest()
+        Public Shared Sub MultiFormatTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
                 TestFile = CreateTestFile(TestBase, String.Join(vbCrLf, FixedFormatData), "", "")
