@@ -680,7 +680,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Using TestBase As New FileIOTests
                 Dim PathLength As Integer = TestBase.TestDirectory().Length
                 Assert.True(PathLength < 257) ' Need room for slash and new directory name
-                Dim DirectoryName As String = New String("A"c, 30)
+                Dim DirectoryName As String = New String("B"c, 30)
 
                 Assert.True(DirectoryName.Length < 248, $"DirectoryBaseName.Length at {DirectoryName.Length} is not < 248")
                 Dim FullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), DirectoryName)
@@ -689,8 +689,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
                 Try
-                    Dim VeryLongDirectoryName As String = New String("A"c, 250)
-                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
+                    Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), New String("D"c, 260))
                     FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
                     Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
                 Catch e As IO.PathTooLongException
