@@ -6,6 +6,7 @@ Option Strict On
 
 Imports Microsoft.VisualBasic.FileIO
 Imports System.Collections.ObjectModel
+Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports System.Text
@@ -25,6 +26,22 @@ Namespace Microsoft.VisualBasic.Tests.VB
             [True]
             [False]
         End Enum
+
+        ''' <summary>
+        ''' Returns true if you can use long paths, including long DOS style paths (e.g. over 260 without \\?\).
+        ''' </summary>
+        Public Function AreAllLongPathsAvailable() As Boolean
+            Return Not AreLongPathsBlocked() AndAlso AreOsLongPathsEnabled()
+        End Function
+
+        ''' <summary>
+        ''' Returns true if > MAX_PATH (260) character paths are blocked.
+        ''' Note that this doesn't reflect that you can actually use long paths without device syntax when on Windows.
+        ''' Use AreAllLongPathsAvailable() to see that you can use long DOS style paths if on Windows.
+        ''' </summary>
+        Public Shared Function AreLongPathsBlocked() As Boolean
+            Return HasLegacyIoBehavior("BlockLongPaths")
+        End Function
 
         Private Function AreOsLongPathsEnabled() As Boolean
             If s_osEnabled = State.Uninitialized Then
@@ -535,7 +552,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                     Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
                         sourceStream.Write(SourceData, 0, SourceData.Length)
                         destStream.Write(DestData, 0, DestData.Length)
-            End Using
+                    End Using
                 End Using
                 FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
 
@@ -547,7 +564,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <ConditionalFact(NameOf(ManualTestsEnabled))>
         <PlatformSpecific(TestPlatforms.Windows)>
         Public Sub CopyFile_SourceFileName_DestinationFileName_UIOptionTestOverWriteTrue()
-                Using TestBase As New FileIOTests
+            Using TestBase As New FileIOTests
                 Dim testFileSource As String = CreateTestFile(TestBase:=TestBase, TestData:=SourceData, TestFileName:="Select_Replace_the_file")
                 Dim testFileDest As String = TestBase.GetTestFilePath()
 
@@ -556,7 +573,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                     Using destStream As New IO.StreamWriter(IO.File.Create(testFileDest))
                         sourceStream.Write(SourceData, 0, SourceData.Length)
                         destStream.Write(DestData, 0, DestData.Length)
-                End Using
+                    End Using
                 End Using
                 FileSystem.CopyFile(testFileSource, testFileDest, showUI:=UIOption.AllDialogs, onUserCancel:=UICancelOption.DoNothing)
 
@@ -740,7 +757,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Assert.True(FileList.Count = 4, $"4 files expected, {FileList.Count} returned from FileSystem.GetFiles")
             End Using
         End Sub
-
         <Fact>
         Public Sub LongDirectoryPathTest()
             Using TestBase As New FileIOTests
@@ -754,7 +770,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
-                If AreOsLongPathsEnabled() Then
+                If AreAllLongPathsAvailable() Then
                     Dim VeryLongDirectoryName As String = New String("A"c, 250)
                     Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
                     FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
@@ -766,6 +782,18 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 End If
             End Using
 
+        End Sub
+
+        <PlatformSpecific(TestPlatforms.AnyUnix)>
+        <Fact>
+        Public Sub LongDirectoryPathTestUnix()
+            Assert.True(AreAllLongPathsAvailable, "All non-Windows platforms support Long Directory Paths")
+        End Sub
+
+        <PlatformSpecific(TestPlatforms.Windows)>
+        <Fact>
+        Public Sub LongDirectoryPathTestWindows64()
+            Assert.True(AreAllLongPathsAvailable, "All Windows platforms support Long Directory Paths")
         End Sub
 
         <ConditionalFact(NameOf(ManualTestsEnabled))>

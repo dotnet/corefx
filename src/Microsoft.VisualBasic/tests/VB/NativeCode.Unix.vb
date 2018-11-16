@@ -9,5 +9,10 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Function RtlAreLongPathsEnabled() As Boolean
             Return True
         End Function
+
+        Public Function HasLegacyIoBehavior(propertyName As String) As Boolean
+            Return False
+        End Function
+
     End Module
 End Namespace
