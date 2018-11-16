@@ -16,6 +16,8 @@ namespace System.Text.Json
     /// </summary>
     public struct JsonReaderState
     {
+        internal const int DefaultMaxDepth = 64;
+
         internal long _lineNumber;
         internal long _bytePositionInLine;
         internal long _bytesConsumed;
@@ -26,7 +28,7 @@ namespace System.Text.Json
         internal JsonTokenType _tokenType;
         internal JsonTokenType _previousTokenType;
         internal JsonReaderOptions _readerOptions;
-        internal CustomUncheckedBitArray _bitArray;
+        internal BitStack _bitStack;
 
         /// <summary>
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
@@ -51,7 +53,7 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
         /// </remarks>
-        public JsonReaderState(int maxDepth = CustomUncheckedBitArray.AllocationFreeMaxDepth, JsonReaderOptions options = default)
+        public JsonReaderState(int maxDepth = DefaultMaxDepth, JsonReaderOptions options = default)
         {
             if (maxDepth <= 0)
                 throw ThrowHelper.GetArgumentException_MaxDepthMustBePositive();
@@ -69,7 +71,7 @@ namespace System.Text.Json
 
             // Only allocate if the user reads a JSON payload beyond the depth that the _allocationFreeContainer can handle.
             // This way we avoid allocations in the common, default cases, and allocate lazily.
-            _bitArray = default;
+            _bitStack = default;
         }
 
         /// <summary>

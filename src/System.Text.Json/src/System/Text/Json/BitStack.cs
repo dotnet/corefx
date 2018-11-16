@@ -7,13 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
-    // Inspired by BitArray
-    // https://github.com/dotnet/corefx/blob/master/src/System.Collections/src/System/Collections/BitArray.cs
-    internal struct CustomUncheckedBitArray
+    internal struct BitStack
     {
         // We are using a ulong to represent our nested state, so we can only
         // go 64 levels deep without having to allocate.
-        internal const int AllocationFreeMaxDepth = sizeof(ulong) * 8;
+        private const int AllocationFreeMaxDepth = sizeof(ulong) * 8;
+
+        private const int DefaultInitialArraySize = 2;
 
         private int[] _array;
 
@@ -26,39 +26,7 @@ namespace System.Text.Json
         internal ulong _allocationFreeContainer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CustomUncheckedBitArray(int bitLength)
-        {
-            Debug.Assert(bitLength > 0 && bitLength % 32 == 0, $"bitLength: {bitLength}");
-
-            _array = new int[bitLength / 32];
-            _allocationFreeContainer = default;
-        }
-
-        public bool IsDefault => _array == default;
-
-        public int MaxIndexableLength
-        {
-            get
-            {
-                if (IsDefault)
-                {
-                    return -1;
-                }
-
-                // Maximum possible array length if bitLength was int.MaxValue (i.e. 67_108_864)
-                Debug.Assert(_array.Length <= int.MaxValue / 32 + 1, $"arrayLength: {_array.Length}");
-
-                // This multiplication can overflow, so cast to uint first.
-                int indexableLength = (int)((uint)_array.Length * 32 - 1);
-
-                Debug.Assert(indexableLength >= -1, $"maximum indexable length: {indexableLength}");
-
-                return indexableLength;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void EnsureAndPushTrue(int depth)
+        public void PushTrueAt(int depth)
         {
             if (depth < AllocationFreeMaxDepth)
             {
@@ -71,7 +39,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void EnsureAndPushFalse(int depth)
+        public void PushFalseAt(int depth)
         {
             if (depth < AllocationFreeMaxDepth)
             {
@@ -87,15 +55,15 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnsureAndPush(int depth, bool value)
         {
-            if (IsDefault)
+            if (_array == null)
             {
-                _array = new int[2];
+                _array = new int[DefaultInitialArraySize];
             }
             this[depth - AllocationFreeMaxDepth] = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool UpdateAndPop(int depth)
+        public bool PopAt(int depth)
         {
             bool inObject = false;
             if (depth < AllocationFreeMaxDepth)
@@ -120,12 +88,12 @@ namespace System.Text.Json
             return this[depth - AllocationFreeMaxDepth - 1];
         }
 
-        public bool this[int index]
+        private bool this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Debug.Assert(!IsDefault);
+                Debug.Assert(_array != null);
                 Debug.Assert(index >= 0, $"Get - Negative - index: {index}, arrayLength: {_array.Length}");
 
                 int elementIndex = Div32Rem(index, out int extraBits);
@@ -137,7 +105,7 @@ namespace System.Text.Json
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                Debug.Assert(!IsDefault);
+                Debug.Assert(_array != null);
                 Debug.Assert(index >= 0, $"Set - Negative - index: {index}, arrayLength: {_array.Length}");
 
                 // Maximum possible array length if bitLength was int.MaxValue (i.e. 67_108_864)
