@@ -18,6 +18,26 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ReadOnly DestData() As Char = {"x"c, "X"c, "y"c}
 
         ReadOnly SourceData() As Char = {"a"c, "A"c, "b"c}
+        Private s_osEnabled As State
+
+        Private Enum State
+            Uninitialized
+            [True]
+            [False]
+        End Enum
+
+        Private Function AreOsLongPathsEnabled() As Boolean
+            If s_osEnabled = State.Uninitialized Then
+                ' No official way to check yet this is good enough for tests
+                Try
+                    s_osEnabled = If(RtlAreLongPathsEnabled(), State.True, State.False)
+                Catch
+                    s_osEnabled = State.False
+                End Try
+            End If
+
+            Return s_osEnabled = State.True
+        End Function
 
         Sub New()
         End Sub
@@ -34,11 +54,11 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' For example CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteFalse tests CopyDirectory with 3 arguments
         ''' SourceDirectoryName, DestinationDirectoryName and Overwrite and the value of Overwrite being tested is False
         ''' </summary>
-        Private Shared Function CreateTestFile(TestBase As FileIOTests, ByVal TestData() As Char, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+        Private Function CreateTestFile(TestBase As FileIOTests, ByVal TestData() As Char, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
             Return CreateTestFile(TestBase, TestData, "", "", memberName, lineNumber)
         End Function
 
-        Private Shared Function CreateTestFile(TestBase As FileIOTests, ByVal TestData() As Char, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+        Private Function CreateTestFile(TestBase As FileIOTests, ByVal TestData() As Char, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
             Return CreateTestFile(TestBase, TestData, "", TestFileName, memberName, lineNumber)
         End Function
 
@@ -50,7 +70,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
         ''' <param name="TestFileName">Optional Filename, if none a randon one based on TestName will be created</param>
         ''' <returns>Full Path to New File</returns>
-        Private Shared Function CreateTestFile(TestBase As FileIOTests, ByVal TestData() As Char, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
+        Private Function CreateTestFile(TestBase As FileIOTests, ByVal TestData() As Char, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
             Dim TempFileNameWithPath As String
             If TestFileName.Length = 0 Then
                 TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
@@ -73,7 +93,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             Return TempFileNameWithPath
         End Function
 
-        Private Shared Function DirectoryListToString(DirectoryList As ReadOnlyCollection(Of String)) As String
+        Private Function DirectoryListToString(DirectoryList As ReadOnlyCollection(Of String)) As String
             Dim S As New StringBuilder
             For Each d As String In DirectoryList
                 S.Append($"{d} ")
@@ -89,7 +109,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' <param name="Path">a full or relative path.</param>
         ''' <returns>If Path is a root path, the same value. Otherwise, removes any directory separators at the end.</returns>
         ''' <remarks>We decided not to return path with separators at the end.</remarks>
-        Private Shared Function RemoveEndingSeparator(ByVal Path As String) As String
+        Private Function RemoveEndingSeparator(ByVal Path As String) As String
             If IO.Path.IsPathRooted(Path) Then
                 ' If the path is rooted, attempt to check if it is a root path.
                 ' Note: IO.Path.GetPathRoot: C: -> C:, C:\ -> C:\, \\myshare\mydir -> \\myshare\mydir
@@ -113,13 +133,13 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Function
 
         <Fact>
-        Public Shared Sub CombinePathTest_BadBaseDirectory_RelativePath()
+        Public Sub CombinePathTest_BadBaseDirectory_RelativePath()
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath(Nothing, "Test2"))
             Assert.Throws(Of ArgumentNullException)(Function() FileSystem.CombinePath("", "Test2"))
         End Sub
 
         <Fact>
-        Public Shared Sub CombinePathTest_BaseDirectory_RelativePath()
+        Public Sub CombinePathTest_BaseDirectory_RelativePath()
             Using TestBase As New FileIOTests
                 Dim TestDirInfo As New IO.DirectoryInfo(TestBase.TestDirectory)
                 Dim Root As String = TestDirInfo.Root.Name
@@ -128,7 +148,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub CombinePathTest_RootDirectory_RelativePath()
+        Public Sub CombinePathTest_RootDirectory_RelativePath()
             Using TestBase As New FileIOTests
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, Nothing), TestBase.TestDirectory)
                 Assert.Equal(FileSystem.CombinePath(TestBase.TestDirectory, ""), TestBase.TestDirectory)
@@ -137,12 +157,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub IOPathCombineTest()
+        Public Sub IOPathCombineTest()
             Assert.Throws(Of System.ArgumentNullException)(Function() FileSystem.CombinePath(Nothing, "User"))
         End Sub
 
         <Fact>
-        Public Shared Sub CreateDirectory_Directory()
+        Public Sub CreateDirectory_Directory()
             Using TestBase As New FileIOTests
                 Dim FullPathToNewDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), "NewDirectory")
                 Assert.False(IO.Directory.Exists(FullPathToNewDirectory))
@@ -152,7 +172,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub CurrentDirectoryGet()
+        Public Sub CurrentDirectoryGet()
             If Not RuntimeInformation.IsOSPlatform(OSPlatform.OSX) Then
                 ' Can't get current Directory on Mac before setting it.
                 Dim CurrentDirectory As String = IO.Directory.GetCurrentDirectory()
@@ -161,7 +181,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub CurrentDirectorySet()
+        Public Sub CurrentDirectorySet()
             If Not RuntimeInformation.IsOSPlatform(OSPlatform.OSX) Then
                 Dim SavedCurrentDirectory As String = IO.Directory.GetCurrentDirectory()
                 Using TestBase As New FileIOTests
@@ -177,7 +197,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub DirectoryExists_directory()
+        Public Sub DirectoryExists_directory()
             Using TestBase As New FileIOTests
                 Dim TestDirectory As String = TestBase.TestDirectory()
                 Assert.True(FileSystem.DirectoryExists(TestDirectory))
@@ -186,7 +206,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub GetDirectories_Directory()
+        Public Sub GetDirectories_Directory()
             Using TestBase As New FileIOTests
                 Dim DirectoryList As ReadOnlyCollection(Of String) = FileSystem.GetDirectories(TestBase.TestDirectory)
                 Assert.True(DirectoryList.Count = 0)
@@ -205,7 +225,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub GetDirectories_Directory_SearchOption()
+        Public Sub GetDirectories_Directory_SearchOption()
             Using TestBase As New FileIOTests
                 Dim DirectoryList As ReadOnlyCollection(Of String) = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly)
                 Assert.True(DirectoryList.Count = 0)
@@ -226,7 +246,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub GetDirectories_Directory_SearchOption_Wildcards()
+        Public Sub GetDirectories_Directory_SearchOption_Wildcards()
             Using TestBase As New FileIOTests
                 Dim DirectoryList As ReadOnlyCollection(Of String) = FileSystem.GetDirectories(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly, "*")
                 Assert.True(DirectoryList.Count = 0)
@@ -249,7 +269,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub GetDirectoryInfo_Directory()
+        Public Sub GetDirectoryInfo_Directory()
             Using TestBase As New FileIOTests
                 For i As Integer = 0 To 5
                     IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, $"NewSubDirectory{i}"))
@@ -268,21 +288,21 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub GetDriveInfo_Drive()
+        Public Sub GetDriveInfo_Drive()
             Dim Drives() As IO.DriveInfo = IO.DriveInfo.GetDrives()
             Assert.True(Drives.Count > 0)
             Assert.Equal(FileSystem.GetDriveInfo(Drives(0).Name).Name, New System.IO.DriveInfo(Drives(0).Name).Name)
         End Sub
 
         <Fact>
-        Public Shared Sub GetName_Path()
+        Public Sub GetName_Path()
             Using TestBase As New FileIOTests
                 Assert.Equal(FileSystem.GetName(TestBase.TestDirectory), IO.Path.GetFileName(TestBase.TestDirectory))
             End Using
         End Sub
 
         <Fact>
-        Public Shared Sub GetParentPath_Path()
+        Public Sub GetParentPath_Path()
             Using TestBase As New FileIOTests
                 Dim TestDirectory As String = TestBase.TestDirectory
                 Assert.Equal(FileSystem.GetParentPath(TestDirectory), IO.Path.GetDirectoryName(TestDirectory.TrimEnd(IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar)))
@@ -290,7 +310,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub GetTempFileName()
+        Public Sub GetTempFileName()
             Dim TempFile As String = FileSystem.GetTempFileName
             Assert.True(IO.File.Exists(TempFile))
             Assert.True((New IO.FileInfo(TempFile)).Length = 0)
@@ -298,7 +318,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub RenameDirectory_Directory_NewName()
+        Public Sub RenameDirectory_Directory_NewName()
             Using TestBase As New FileIOTests
                 ''' <exception cref="IO.FileNotFoundException">If directory does not point to an existing directory.</exception>
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Sub() FileSystem.RenameDirectory(IO.Path.Combine(TestBase.TestDirectory, "DoesNotExistDirectory"), "NewDirectory"))
@@ -734,7 +754,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
                 FileSystem.CreateDirectory(FullPathToTargetDirectory)
                 Assert.True(IO.Directory.Exists(FullPathToTargetDirectory))
-                If AreAllLongPathsAvailable() Then
+                If AreOsLongPathsEnabled() Then
                     Dim VeryLongDirectoryName As String = New String("A"c, 250)
                     Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory(), VeryLongDirectoryName, VeryLongDirectoryName)
                     FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)

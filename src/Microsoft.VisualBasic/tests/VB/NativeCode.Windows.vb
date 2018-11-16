@@ -3,11 +3,12 @@
 ' See the LICENSE file in the project root for more information.
 Option Explicit On
 Option Strict On
+Imports System.Runtime.InteropServices
 
 Namespace Microsoft.VisualBasic.Tests.VB
-    Partial Public Module PathFeatures
-        Private Function RtlAreLongPathsEnabled() As Boolean
-            Return True
+    Public Module NativeCode
+        <DllImport("ntdll", ExactSpelling:=True)>
+        Public Function RtlAreLongPathsEnabled() As Boolean
         End Function
     End Module
 End Namespace

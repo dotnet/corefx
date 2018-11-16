@@ -14,7 +14,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
             IO.Path.AltDirectorySeparatorChar
             }
 
-        Private Shared Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
+        Private Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
             Dim LocalFolderPath As String = Environment.GetFolderPath(folder)
             If LocalFolderPath = "" Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() getSpecialDirectory.Invoke)
@@ -25,22 +25,22 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub AllUsersApplicationDataFolderTest()
+        Public Sub AllUsersApplicationDataFolderTest()
             Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.AllUsersApplicationData)
         End Sub
 
         <Fact>
-        Public Shared Sub CurrentUserApplicationDataFolderTest()
+        Public Sub CurrentUserApplicationDataFolderTest()
             Assert.Throws(Of PlatformNotSupportedException)(Function() SpecialDirectories.CurrentUserApplicationData)
         End Sub
 
         <Fact>
-        Public Shared Sub DesktopFolderTest()
+        Public Sub DesktopFolderTest()
             CheckSpecialFolder(SpecialFolder.Desktop, Function() SpecialDirectories.Desktop)
         End Sub
 
         <Fact>
-        Public Shared Sub MyDocumentsFolderTest()
+        Public Sub MyDocumentsFolderTest()
             If PlatformDetection.IsWindowsNanoServer Then
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Function() SpecialDirectories.MyDocuments)
                 Exit Sub
@@ -50,22 +50,22 @@ Namespace Microsoft.VisualBasic.Tests.VB
         End Sub
 
         <Fact>
-        Public Shared Sub MyMusicFolderTest()
+        Public Sub MyMusicFolderTest()
             CheckSpecialFolder(SpecialFolder.MyMusic, Function() SpecialDirectories.MyMusic)
         End Sub
 
         <Fact>
-        Public Shared Sub MyPicturesFolderTest()
+        Public Sub MyPicturesFolderTest()
             CheckSpecialFolder(SpecialFolder.MyPictures, Function() SpecialDirectories.MyPictures)
         End Sub
 
         <Fact>
-        Public Shared Sub ProgramFilesFolderTest()
+        Public Sub ProgramFilesFolderTest()
             CheckSpecialFolder(SpecialFolder.ProgramFiles, Function() SpecialDirectories.ProgramFiles)
         End Sub
 
         <Fact>
-        Public Shared Sub ProgramsFolderTest()
+        Public Sub ProgramsFolderTest()
             CheckSpecialFolder(SpecialFolder.Programs, Function() SpecialDirectories.Programs)
         End Sub
 

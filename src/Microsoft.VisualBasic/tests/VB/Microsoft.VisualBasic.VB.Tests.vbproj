@@ -4,13 +4,12 @@
     <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <Compile Include="PathFeatures.Windows.vb" />
+    <Compile Include="NativeCode.Windows.vb" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' != 'true'">
-    <Compile Include="PathFeatures.Unix.vb" />
+    <Compile Include="NativeCode.Unix.vb" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PathFeatures.vb" />
     <Compile Include="SpecialDirectoriesTests.vb" />
     <Compile Include="Dummy.vb" />
     <Compile Include="FileIOTests.vb" />
