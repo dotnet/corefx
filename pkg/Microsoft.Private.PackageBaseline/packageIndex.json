@@ -1742,12 +1742,6 @@
         "net45": "4.0.0.0"
       }
     },
-    "System.Drawing.Design.Primitives": {
-      "InboxOn": {},
-      "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
-      }
-    },
     "System.Drawing.Primitives": {
       "StableVersions": [
         "4.0.0",
@@ -2543,9 +2537,10 @@
       ],
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0",
+        "netcoreapp3.0": "4.2.0.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
-        "uap10.0.16300": "4.1.0.0",
+        "uap10.0.16300": "4.2.0.0",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",
         "xamarintvos10": "Any",
@@ -3097,9 +3092,13 @@
       }
     },
     "System.Numerics.Tensors": {
+      "StableVersions": [
+        "0.1.0"
+      ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "0.1.0.0": "0.1.0"
+        "0.1.0.0": "0.1.0",
+        "0.2.0.0": "0.2.0"
       }
     },
     "System.Numerics.Vectors": {
@@ -3472,10 +3471,10 @@
       }
     },
     "System.Reflection.MetadataLoadContext": {
-        "InboxOn": {},
-        "AssemblyVersionInPackageVersion": {
-            "4.0.0.0": "4.6.0"
-        }
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
     },
     "System.Reflection.Primitives": {
       "StableVersions": [

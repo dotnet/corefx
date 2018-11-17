@@ -48,6 +48,7 @@ namespace System
         public static bool IsArmProcess { get { throw null; } }
         public static bool IsArm64Process { get { throw null; } }
         public static bool IsAlpine { get { throw null; } }
+        public static bool IsArgIteratorSupported { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
         public static bool IsDebian8 { get { throw null; } }
@@ -66,6 +67,7 @@ namespace System
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
         public static bool IsNotIntMaxValueArrayIndexSupported { get { throw null; } }
+        public static bool IsArgIteratorNotSupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
         public static bool IsNotArm64Process { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
@@ -100,6 +102,7 @@ namespace System
         public static bool IsUbuntu1710 { get { throw null; } }
         public static bool IsUbuntu1710OrHigher { get { throw null; } }
         public static bool IsUbuntu1804 { get { throw null; } }
+        public static bool IsUbuntu1810OrHigher { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
         public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
@@ -107,6 +110,7 @@ namespace System
         public static bool IsWindows10Version1803OrGreater { get { throw null; } } // >= Windows 10 April 2018 Update
         public static bool IsWindows7 { get { throw null; } }
         public static bool IsWindows8x { get { throw null; } }
+        public static bool IsWindows8xOrLater { get { throw null; } }
         public static bool IsWindowsAndElevated { get { throw null; } }
         public static bool IsWindowsHomeEdition { get { throw null; } }
         public static bool IsWindowsIoTCore { get { throw null; } }
