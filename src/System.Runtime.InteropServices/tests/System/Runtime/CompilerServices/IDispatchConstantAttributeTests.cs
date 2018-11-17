@@ -10,6 +10,7 @@ namespace System.Runtime.CompilerServices.Tests
     public class IDispatchConstantAttributeTests
     {
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Ctor_Default()
         {
             var attribute = new IDispatchConstantAttribute();
