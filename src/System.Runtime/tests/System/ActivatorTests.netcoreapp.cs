@@ -35,6 +35,7 @@ namespace System.Tests
             Type type = typeBuilder.CreateType();
             FieldInfo field = type.GetField("_field");
 
+            // Activator holds a cache of constructors and the types to which they belong.
             // Test caching behaviour by activating multiple times.
             object v1 = Activator.CreateInstance(type, nonPublic: true);
             Assert.Equal(-1, field.GetValue(v1));
@@ -277,7 +278,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "AssemblyBuilderAccess.ReflectionOnly is not supported in .NET Core")]
         public void CreateInstance_ReflectionOnlyType_ThrowsInvalidOperationException()
         {
             AssemblyName assemblyName = new AssemblyName("Assembly");
@@ -289,7 +290,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "AssemblyBuilderAccess.Save is not supported in .NET Core")]
         public void CreateInstance_DynamicTypeWithoutRunAccess_ThrowsNotSupportedException()
         {
             AssemblyName assemblyName = new AssemblyName("Assembly");

@@ -68,6 +68,7 @@ namespace System.Tests
         [Fact]
         public void CreateInstance_ValueTypeWithPublicDefaultConstructor_Success()
         {
+            // Activator holds a cache of constructors and the types to which they belong.
             // Test caching behaviour by activating multiple times.
             Assert.IsType<ValueTypeWithDefaultConstructor>(Activator.CreateInstance(typeof(ValueTypeWithDefaultConstructor)));
             Assert.IsType<ValueTypeWithDefaultConstructor>(Activator.CreateInstance(typeof(ValueTypeWithDefaultConstructor), nonPublic: true));
@@ -77,6 +78,7 @@ namespace System.Tests
         [Fact]
         public void CreateInstance_NonPublicClassWithPrivateDefaultConstructor_Success()
         {
+            // Activator holds a cache of constructors and the types to which they belong.
             // Test caching behaviour by activating multiple times.
             ClassWithPrivateDefaultConstructor c1 = (ClassWithPrivateDefaultConstructor)Activator.CreateInstance(typeof(ClassWithPrivateDefaultConstructor), nonPublic: true);
             Assert.Equal(-1, c1.Property);
@@ -121,6 +123,7 @@ namespace System.Tests
         [Fact]
         public void CreateInstance_NotRuntimeType_ThrowsArgumentException()
         {
+            // This cannot be a [Theory] due to https://github.com/xunit/xunit/issues/1325.
             foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
             {
                 AssertExtensions.Throws<ArgumentException>("type", () => Activator.CreateInstance(nonRuntimeType));
@@ -148,8 +151,12 @@ namespace System.Tests
             yield return new object[] { typeof(void) };
             yield return new object[] { typeof(void).MakeArrayType() };
             yield return new object[] { Type.GetType("System.ArgIterator") };
-            // Fails with TypeLoadException in .NET Core
-            // yield return new object[] { Type.GetType("System.ArgIterator").MakeArrayType() };
+            // Fails with TypeLoadException in .NET Core.
+            // [ActiveIssue(33572, TargetFrameworkMonikers.Netcoreapp)]
+            if (!PlatformDetection.IsNetCore)
+            {
+                yield return new object[] { Type.GetType("System.ArgIterator").MakeArrayType() };
+            }
         }
 
         [Theory]
@@ -212,10 +219,24 @@ namespace System.Tests
         [Theory]
         [InlineData(typeof(TypedReference))]
         [InlineData(typeof(RuntimeArgumentHandle))]
-        [InlineData(typeof(Span<int>))]
         public void CreateInstance_BoxedByRefType_ThrowsNotSupportedException(Type type)
         {
             Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(type));
+        }
+
+        [Fact]
+        public void CreateInstance_Span_ThrowsNotSupportedException()
+        {
+            // Move to test data for CreateInstance_BoxedByRefType_ThrowsNotSupportedException
+            // if .NET Framework recognizes Span<T> as an intrinsic.
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotNull(Activator.CreateInstance(typeof(Span<int>)));
+            }
+            else
+            {
+                CreateInstance_BoxedByRefType_ThrowsNotSupportedException(typeof(Span<int>));
+            }
         }
 
         [Fact]
@@ -225,7 +246,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Activation Attributes are not supported in .NET Core.")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Activation Attributes are not supported in .NET Core.")]
         [InlineData(typeof(MarshalByRefObject))]
         [InlineData(typeof(SubMarshalByRefObject))]
         public void CreateInstance_MarshalByRefObjectNetFramework_ThrowsNotSupportedException(Type type)

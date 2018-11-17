@@ -983,6 +983,10 @@ namespace System.Tests.Types
             : TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit;
 
         public override bool IsMarshalByRef => !PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
     }
 
     public class ContextBoundObjectTests : TypePropertyTestBase
@@ -998,6 +1002,10 @@ namespace System.Tests.Types
         public override bool IsMarshalByRef => !PlatformDetection.IsNetCore;
 
         public override bool IsContextful => !PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityCritical => PlatformDetection.IsNetCore;
+
+        public override bool IsSecurityTransparent => !PlatformDetection.IsNetCore;
     }
 
     public enum ByteEnum : byte { }
