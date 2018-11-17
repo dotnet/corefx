@@ -35,6 +35,9 @@ namespace System.Text.Json.Tests
             }
 
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            SpanSequenceStatesAreEqual(dataUtf8);
+
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length);
             string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 

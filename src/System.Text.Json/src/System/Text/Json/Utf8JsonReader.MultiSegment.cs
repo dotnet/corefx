@@ -260,6 +260,7 @@ namespace System.Text.Json
                 if (noMoreData)
                 {
                     _currentPosition = copy;
+                    _isLastSegment = true;
                     return false;
                 }
                 if (memory.Length != 0)
@@ -445,6 +446,10 @@ namespace System.Text.Json
                                         }
                                         if (!GetNextSpan())
                                         {
+                                            if (_isNotPrimitive && IsLastSpan && _tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
+                                            {
+                                                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
+                                            }
                                             return false;
                                         }
                                     }
@@ -598,18 +603,15 @@ namespace System.Text.Json
 
             int minLength = Math.Min(span.Length, literal.Length);
 
-            for (int i = 0; i < minLength; i++)
+            int i = 0;
+            for (; i < minLength; i++)
             {
                 if (span[i] != literal[i])
                 {
-                    indexOfFirstMismatch = i;
                     break;
                 }
             }
-            if (span.Length < literal.Length)
-            {
-                indexOfFirstMismatch = span.Length;
-            }
+            indexOfFirstMismatch = i;
 
             Debug.Assert(indexOfFirstMismatch >= 0 && indexOfFirstMismatch < literal.Length);
 
@@ -758,7 +760,7 @@ namespace System.Text.Json
             long prevTotalConsumed = _totalConsumed;
             long prevPosition = _bytePositionInLine;
 
-            bool reachedNextSegment = false;
+            bool reachedNextSegment = true;
 
             while (true)
             {
@@ -796,6 +798,7 @@ namespace System.Text.Json
                         _bytePositionInLine += idx + 1; // Add 1 for the first quote
 
                         bool nextCharEscaped = false;
+                        bool sawNewLine = false;
                         while (true)
                         {
                         StartOfLoop:
@@ -833,6 +836,7 @@ namespace System.Text.Json
                                         // Escaped new line character
                                         _bytePositionInLine = -1; // Should be 0, but we increment _bytePositionInLine below already
                                         _lineNumber++;
+                                        sawNewLine = true;
                                     }
                                     else if (currentByte == 'u')
                                     {
@@ -925,7 +929,7 @@ namespace System.Text.Json
                         }
 
                     Done:
-                        _bytePositionInLine += leftOver + idx + 1;  // Add 1 for the end quote of the string.
+                        _bytePositionInLine += sawNewLine ? leftOver + idx : leftOver + idx + 1;  // Add 1 for the end quote of the string.
                         _consumed = idx + 1;    // Add 1 for the end quote of the string.
                         if (reachedNextSegment)
                         {
@@ -1279,6 +1283,10 @@ namespace System.Text.Json
                     }
                     if (!GetNextSpan())
                     {
+                        if (IsLastSpan)
+                        {
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                        }
                         return ConsumeNumberResult.NeedMoreData;
                     }
                     _totalConsumed++;
@@ -1322,6 +1330,10 @@ namespace System.Text.Json
 
                 if (!GetNextSpan())
                 {
+                    if (IsLastSpan)
+                    {
+                        return ConsumeNumberResult.Success;
+                    }
                     return ConsumeNumberResult.NeedMoreData;
                 }
 
@@ -1372,6 +1384,11 @@ namespace System.Text.Json
                 {
                     if (!GetNextSpan())
                     {
+                        if (IsLastSpan)
+                        {
+                            _bytePositionInLine += counter;
+                            return ConsumeNumberResult.Success;
+                        }
                         return ConsumeNumberResult.NeedMoreData;
                     }
 
@@ -1389,17 +1406,16 @@ namespace System.Text.Json
                             break;
                         }
                     }
+                    _bytePositionInLine += i;
                     if (i >= data.Length)
                     {
                         if (IsLastSpan)
                         {
-                            _bytePositionInLine += i;
                             return ConsumeNumberResult.Success;
                         }
                     }
                     else
                     {
-                        _bytePositionInLine += i;
                         break;
                     }
                 }
@@ -1428,6 +1444,10 @@ namespace System.Text.Json
                 }
                 if (!GetNextSpan())
                 {
+                    if (IsLastSpan)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                    }
                     return ConsumeNumberResult.NeedMoreData;
                 }
                 _totalConsumed += i;
@@ -1456,6 +1476,10 @@ namespace System.Text.Json
 
                 if (!GetNextSpan())
                 {
+                    if (IsLastSpan)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                    }
                     return ConsumeNumberResult.NeedMoreData;
                 }
                 HasValueSequence = true;
@@ -1477,6 +1501,10 @@ namespace System.Text.Json
 
                     if (!GetNextSpan())
                     {
+                        if (IsLastSpan)
+                        {
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                        }
                         return ConsumeNumberResult.NeedMoreData;
                     }
                     _totalConsumed++;
@@ -1564,6 +1592,12 @@ namespace System.Text.Json
                     }
                     if (!GetNextSpan())
                     {
+                        if (IsLastSpan)
+                        {
+                            _consumed--;
+                            _bytePositionInLine--;
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                        }
                         return ConsumeTokenResult.NotEnoughDataRollBackState;
                     }
                 }
@@ -1667,6 +1701,12 @@ namespace System.Text.Json
                     }
                     if (!GetNextSpan())
                     {
+                        if (IsLastSpan)
+                        {
+                            _consumed--;
+                            _bytePositionInLine--;
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                        }
                         goto RollBack;
                     }
                 }
@@ -1946,6 +1986,12 @@ namespace System.Text.Json
                     }
                     if (!GetNextSpan())
                     {
+                        if (IsLastSpan)
+                        {
+                            _consumed--;
+                            _bytePositionInLine--;
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                        }
                         return ConsumeTokenResult.NotEnoughDataRollBackState;
                     }
                 }
@@ -2017,6 +2063,10 @@ namespace System.Text.Json
 
                 if (!GetNextSpan())
                 {
+                    if (IsLastSpan)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                    }
                     return false;
                 }
 
@@ -2172,6 +2222,10 @@ namespace System.Text.Json
 
                 if (!GetNextSpan())
                 {
+                    if (IsLastSpan)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                    }
                     return false;
                 }
 

@@ -153,6 +153,8 @@ namespace System.Text.Json.Tests
             BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
             var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
 
+            SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth);
+
             var state = new JsonReaderState(maxDepth: maxDepth);
             var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
 
@@ -176,6 +178,8 @@ namespace System.Text.Json.Tests
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
 
+            SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth);
+
             var state = new JsonReaderState(maxDepth: maxDepth);
             var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
 
@@ -189,6 +193,56 @@ namespace System.Text.Json.Tests
             {
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
                 Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+            }
+        }
+
+        private static void SpanSequenceStatesAreEqualInvalidJson(byte[] dataUtf8, ReadOnlySequence<byte> sequence, int maxDepth)
+        {
+            var stateSpan = new JsonReaderState(maxDepth: maxDepth);
+            var jsonSpan = new Utf8JsonReader(dataUtf8, isFinalBlock: true, stateSpan);
+
+            var stateSequence = new JsonReaderState(maxDepth: maxDepth);
+            var jsonSequence = new Utf8JsonReader(sequence, isFinalBlock: true, stateSequence);
+
+            try
+            {
+                while (true)
+                {
+                    bool spanResult = jsonSpan.Read();
+                    bool sequenceResult = jsonSequence.Read();
+                    Assert.Equal(jsonSpan.CurrentDepth, jsonSequence.CurrentDepth);
+                    Assert.Equal(jsonSpan.BytesConsumed, jsonSequence.BytesConsumed);
+                    Assert.Equal(spanResult, sequenceResult);
+                    if (!spanResult)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (JsonReaderException)
+            {
+
+            }
+        }
+
+        private static void SpanSequenceStatesAreEqual(byte[] dataUtf8)
+        {
+            ReadOnlySequence<byte> sequence = JsonTestHelper.CreateSegments(dataUtf8);
+
+            var jsonSpan = new Utf8JsonReader(dataUtf8, isFinalBlock: true, default);
+            var jsonSequence = new Utf8JsonReader(sequence, isFinalBlock: true, default);
+
+            while (true)
+            {
+                bool spanResult = jsonSpan.Read();
+                bool sequenceResult = jsonSequence.Read();
+                Assert.Equal(jsonSpan.CurrentDepth, jsonSequence.CurrentDepth);
+                Assert.Equal(jsonSpan.BytesConsumed, jsonSequence.BytesConsumed);
+                Assert.Equal(spanResult, sequenceResult);
+                if (!spanResult)
+                {
+                    break;
+                }
             }
         }
     }
