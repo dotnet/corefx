@@ -36,6 +36,7 @@ namespace System.Runtime.InteropServices.Tests
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(GetTypedObjectForIUnknown_ComObject_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void GetTypedObjectForIUnknown_ComObject_ReturnsExpected(object o, Type type)
         {
             GetTypedObjectForIUnknown_ValidPointer_ReturnsExpected(o, type);
@@ -49,6 +50,7 @@ namespace System.Runtime.InteropServices.Tests
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(GetTypedObjectForIUnknownTypeUncastableComObject_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void GetTypedObjectForIUnknown_UncastableComObject_ThrowsInvalidCastException(object o, Type type)
         {
             GetTypedObjectForIUnknown_UncastableObject_ThrowsInvalidCastException(o, type);

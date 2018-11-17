@@ -115,6 +115,7 @@ namespace System.Runtime.InteropServices.Tests
             }
         }
 
+#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void CreateAggregatedObject_ObjectNotCollectible_ReturnsExpected()
@@ -137,5 +138,6 @@ namespace System.Runtime.InteropServices.Tests
                 Marshal.Release(ptr);
             }
         }
+#endif
     }
 }
