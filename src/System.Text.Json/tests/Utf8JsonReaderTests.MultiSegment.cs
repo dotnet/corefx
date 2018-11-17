@@ -140,5 +140,84 @@ namespace System.Text.Json.Tests
                 }
             }
         }
+
+        [Theory]
+        [InlineData("\"", 0, 0)]
+        [InlineData("{]", 0, 1)]
+        [InlineData("[}", 0, 1)]
+        [InlineData("nul", 0, 3)]
+        [InlineData("tru", 0, 3)]
+        [InlineData("fals", 0, 4)]
+        [InlineData("\"a\u6F22\u5B57ge\":", 0, 11)]
+        [InlineData("{\"a\u6F22\u5B57ge\":", 0, 13)]
+        [InlineData("{\"name\":\"A\u6F22\u5B57hso", 0, 8)]
+        [InlineData("12345.1.", 0, 7)]
+        [InlineData("-", 0, 1)]
+        [InlineData("-f", 0, 1)]
+        [InlineData("1.f", 0, 2)]
+        [InlineData("0.", 0, 2)]
+        [InlineData("0.1f", 0, 3)]
+        [InlineData("0.1e1f", 0, 5)]
+        [InlineData("123,", 0, 3)]
+        [InlineData("false,", 0, 5)]
+        [InlineData("true,", 0, 4)]
+        [InlineData("trUe,", 0, 4)]
+        [InlineData("null,", 0, 4)]
+        [InlineData("\"h\u6F22\u5B57ello\",", 0, 13)]
+        [InlineData("01", 0, 1)]
+        [InlineData("1a", 0, 1)]
+        [InlineData("-01", 0, 2)]
+        [InlineData("10.5e", 0, 5)]
+        [InlineData("10.5e-", 0, 6)]
+        [InlineData("10.5e-0.2", 0, 7)]
+        [InlineData("{\"age\":30, \"ints\":[1, 2, 3, 4, 5.1e7.3]}", 0, 36)]
+        [InlineData("{\"age\":30, \r\n \"num\":-0.e, \r\n \"ints\":[1, 2, 3, 4, 5]}", 1, 10)]
+        [InlineData("{{}}", 0, 1, 1)]
+        [InlineData("[[{{}}]]", 0, 3)]
+        [InlineData("[1, 2, 3, ]", 0, 10)]
+        [InlineData("{\"ints\":[1, 2, 3, 4, 5", 0, 22)]
+        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"", 0, 36)]
+        [InlineData("{\"age\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 32)]
+        [InlineData("{\"age\":30, \"name\":\"test}", 0, 18)]
+        [InlineData("{\r\n\"isActive\": false \"\r\n}", 1, 18)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19)]
+        [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32)]
+        [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35)]
+        [InlineData("\"hel\rlo\"", 0, 4)]
+        [InlineData("\"hel\nlo\"", 0, 4)]
+        [InlineData("\"hel\\uABCXlo\"", 0, 9)]
+        [InlineData("\"hel\\\tlo\"", 0, 5)]
+        [InlineData("\"hel\rlo\\\"\"", 0, 4)]
+        [InlineData("\"hel\nlo\\\"\"", 0, 4)]
+        [InlineData("\"hel\\uABCXlo\\\"\"", 0, 9)]
+        [InlineData("\"hel\\\tlo\\\"\"", 0, 5)]
+        [InlineData("\"he\\nl\rlo\\\"\"", 1, 1)]
+        [InlineData("\"he\\nl\nlo\\\"\"", 1, 1)]
+        [InlineData("\"he\\nl\\uABCXlo\\\"\"", 1, 6)]
+        [InlineData("\"he\\nl\\\tlo\\\"\"", 1, 2)]
+        [InlineData("\"he\\nl\rlo", 1, 1)]
+        [InlineData("\"he\\nl\nlo", 1, 1)]
+        [InlineData("\"he\\nl\\uABCXlo", 1, 6)]
+        [InlineData("\"he\\nl\\\tlo", 1, 2)]
+        public static void InvalidJsonMultiSegment(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: true, default);
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException for multi-segment data was not thrown.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(expectedlineNumber, ex.LineNumber);
+                Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+            }
+        }
     }
 }

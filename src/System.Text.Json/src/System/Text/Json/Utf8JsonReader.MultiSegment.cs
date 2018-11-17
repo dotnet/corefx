@@ -178,6 +178,28 @@ namespace System.Text.Json
             goto Done;
         }
 
+        private bool ValidateStateAtEndOfData()
+        {
+            Debug.Assert(_isNotPrimitive && IsLastSpan);
+
+            if (_currentDepth != 0)
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
+            }
+
+            if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && _tokenType == JsonTokenType.Comment)
+            {
+                return false;
+            }
+
+            if (_tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
+            }
+
+            return true;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool HasMoreDataMultiSegment()
         {
@@ -185,19 +207,9 @@ namespace System.Text.Json
             {
                 if (_isNotPrimitive && IsLastSpan)
                 {
-                    if (_currentDepth != 0)
-                    {
-                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
-                    }
-
-                    if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && _tokenType == JsonTokenType.Comment)
+                    if (!ValidateStateAtEndOfData())
                     {
                         return false;
-                    }
-
-                    if (_tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
-                    {
-                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
                     }
                 }
 
@@ -205,20 +217,7 @@ namespace System.Text.Json
                 {
                     if (_isNotPrimitive && IsLastSpan)
                     {
-                        if (_currentDepth != 0)
-                        {
-                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
-                        }
-
-                        if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && _tokenType == JsonTokenType.Comment)
-                        {
-                            return false;
-                        }
-
-                        if (_tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
-                        {
-                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
-                        }
+                        ValidateStateAtEndOfData();
                     }
                     return false;
                 }
@@ -370,37 +369,16 @@ namespace System.Text.Json
         {
             while (true)
             {
-                // Create local copy to avoid bounds checks.
-                ReadOnlySpan<byte> localBuffer = _buffer;
-                for (; _consumed < localBuffer.Length; _consumed++)
+                SkipWhiteSpace();
+
+                if (_consumed < _buffer.Length)
                 {
-                    byte val = localBuffer[_consumed];
-
-                    // JSON RFC 8259 section 2 says only these 4 characters count, not all of the Unicode defintions of whitespace.
-                    if (val != JsonConstants.Space &&
-                        val != JsonConstants.CarriageReturn &&
-                        val != JsonConstants.LineFeed &&
-                        val != JsonConstants.Tab)
-                    {
-                        return;
-                    }
-
-                    if (val == JsonConstants.LineFeed)
-                    {
-                        _lineNumber++;
-                        _bytePositionInLine = 0;
-                    }
-                    else
-                    {
-                        _bytePositionInLine++;
-                    }
+                    break;
                 }
-                if (_consumed >= localBuffer.Length)
+
+                if (!GetNextSpan())
                 {
-                    if (!GetNextSpan())
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
         }
@@ -530,10 +508,16 @@ namespace System.Text.Json
         {
             Debug.Assert(span.Length > 0 && span[0] == literal[0]);
 
+            Span<byte> readSoFar = stackalloc byte[literal.Length];
+            int written = 0;
+
             long prevTotalConsumed = _totalConsumed;
             if (span.Length >= literal.Length || IsLastSpan)
             {
                 _bytePositionInLine += FindMismatch(span, literal);
+
+                span.Slice(0, literal.Length).CopyTo(readSoFar);
+                written += literal.Length;
                 goto Throw;
             }
             else
@@ -541,6 +525,8 @@ namespace System.Text.Json
                 if (!literal.StartsWith(span))
                 {
                     _bytePositionInLine += FindMismatch(span, literal);
+                    span.CopyTo(readSoFar);
+                    written += span.Length;
                     goto Throw;
                 }
 
@@ -564,6 +550,10 @@ namespace System.Text.Json
                         return false;
                     }
 
+                    int amountToWrite = Math.Min(span.Length, readSoFar.Length - written);
+                    span.Slice(0, amountToWrite).CopyTo(readSoFar.Slice(written));
+                    written += amountToWrite;
+
                     span = _buffer;
 
                     if (span.StartsWith(leftToMatch))
@@ -579,6 +569,11 @@ namespace System.Text.Json
                     if (!leftToMatch.StartsWith(span))
                     {
                         _bytePositionInLine += FindMismatch(span, leftToMatch);
+
+                        amountToWrite = Math.Min(span.Length, readSoFar.Length - written);
+                        span.Slice(0, amountToWrite).CopyTo(readSoFar.Slice(written));
+                        written += amountToWrite;
+
                         goto Throw;
                     }
 
@@ -589,39 +584,36 @@ namespace System.Text.Json
         Throw:
             _totalConsumed = prevTotalConsumed;
             consumed = default;
-            ThrowInvalidLiteralMultiSegment(span);
-            return false;
+            throw GetInvalidLiteralMultiSegment(readSoFar.Slice(0, written).ToArray());
         }
 
         private int FindMismatch(ReadOnlySpan<byte> span, ReadOnlySpan<byte> literal)
         {
-            Debug.Assert(span.Length > 0 && span[0] == literal[0]);
+            Debug.Assert(span.Length > 0);
 
             int indexOfFirstMismatch = 0;
 
-            for (int i = 1; i < literal.Length; i++)
+            int minLength = Math.Min(span.Length, literal.Length);
+
+            for (int i = 0; i < minLength; i++)
             {
-                if (span.Length > i)
-                {
-                    if (span[i] != literal[i])
-                    {
-                        indexOfFirstMismatch = i;
-                        break;
-                    }
-                }
-                else
+                if (span[i] != literal[i])
                 {
                     indexOfFirstMismatch = i;
                     break;
                 }
             }
+            if (span.Length < literal.Length)
+            {
+                indexOfFirstMismatch = span.Length - 1;
+            }
 
-            Debug.Assert(indexOfFirstMismatch > 0 && indexOfFirstMismatch < literal.Length);
+            Debug.Assert(indexOfFirstMismatch >= 0 && indexOfFirstMismatch < literal.Length);
 
             return indexOfFirstMismatch;
         }
 
-        private void ThrowInvalidLiteralMultiSegment(ReadOnlySpan<byte> span)
+        private JsonReaderException GetInvalidLiteralMultiSegment(ReadOnlySpan<byte> span)
         {
             byte firstByte = span[0];
 
@@ -639,7 +631,7 @@ namespace System.Text.Json
                     resource = ExceptionResource.ExpectedNull;
                     break;
             }
-            ThrowHelper.ThrowJsonReaderException(ref this, resource, bytes: span);
+            return ThrowHelper.GetJsonReaderException(ref this, resource, nextByte: default, bytes: span);
         }
 
         private bool ConsumeNumberMultiSegment()
@@ -724,7 +716,7 @@ namespace System.Text.Json
             // If the first found byte is a quote, we have reached an end of string, and
             // can avoid validation.
             // Otherwise, in the uncommon case, iterate one character at a time and validate.
-            int idx = localBuffer.IndexOfQuoteOrAnyControlOrBaskSlash();
+            int idx = localBuffer.IndexOfQuoteOrAnyControlOrBackSlash();
 
             if (idx >= 0)
             {
@@ -782,7 +774,7 @@ namespace System.Text.Json
 
                 //Create local copy to avoid bounds checks.
                 ReadOnlySpan<byte> localBuffer = _buffer;
-                int idx = localBuffer.IndexOfQuoteOrAnyControlOrBaskSlash();
+                int idx = localBuffer.IndexOfQuoteOrAnyControlOrBackSlash();
 
                 if (idx >= 0)
                 {
@@ -1198,6 +1190,7 @@ namespace System.Text.Json
             if (nextByte == '.')
             {
                 i++;
+                _bytePositionInLine++;
                 ConsumeNumberResult result = ConsumeDecimalDigitsMultiSegment(ref data, ref i);
                 if (result == ConsumeNumberResult.NeedMoreData)
                 {
@@ -1222,6 +1215,7 @@ namespace System.Text.Json
 
             Debug.Assert(nextByte == 'E' || nextByte == 'e');
             i++;
+            _bytePositionInLine++;
 
             signResult = ConsumeSignMultiSegment(ref data, ref i);
             if (signResult == ConsumeNumberResult.NeedMoreData)
@@ -1235,6 +1229,7 @@ namespace System.Text.Json
             Debug.Assert(signResult == ConsumeNumberResult.OperationIncomplete);
 
             i++;
+            _bytePositionInLine++;
             ConsumeNumberResult resultExponent = ConsumeIntegerDigitsMultiSegment(ref data, ref i);
             if (resultExponent == ConsumeNumberResult.NeedMoreData)
             {

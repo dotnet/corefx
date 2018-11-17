@@ -804,7 +804,7 @@ namespace System.Text.Json
             // If the first found byte is a quote, we have reached an end of string, and
             // can avoid validation.
             // Otherwise, in the uncommon case, iterate one character at a time and validate.
-            int idx = localBuffer.IndexOfQuoteOrAnyControlOrBaskSlash();
+            int idx = localBuffer.IndexOfQuoteOrAnyControlOrBackSlash();
 
             if (idx >= 0)
             {
