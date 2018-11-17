@@ -38,7 +38,7 @@ namespace System.Text.Json
             }
             else
             {
-                EnsureAndPush(true);
+                PushToArray(true);
             }
             _currentDepth++;
         }
@@ -52,14 +52,14 @@ namespace System.Text.Json
             }
             else
             {
-                EnsureAndPush(false);
+                PushToArray(false);
             }
             _currentDepth++;
         }
 
         // Allocate the bit array lazily only when it is absolutely necessary
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void EnsureAndPush(bool value)
+        private void PushToArray(bool value)
         {
             if (_array == null)
             {
@@ -114,13 +114,13 @@ namespace System.Text.Json
             }
             else
             {
-                inObject = GetInObjectFromArray();
+                inObject = PopFromArray();
             }
             return inObject;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private bool GetInObjectFromArray()
+        private bool PopFromArray()
         {
             int index = _currentDepth - AllocationFreeMaxDepth - 1;
             Debug.Assert(_array != null);
