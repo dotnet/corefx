@@ -867,7 +867,7 @@ namespace System.Text.Json
                     int index = JsonConstants.EscapableChars.IndexOf(currentByte);
                     if (index == -1)
                     {
-                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterAfterEscapeWithinString, currentByte);
                     }
 
                     if (currentByte == JsonConstants.Quote)
@@ -934,7 +934,7 @@ namespace System.Text.Json
                 byte nextByte = data[j];
                 if (!JsonReaderHelper.IsHexDigit(nextByte))
                 {
-                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidHexCharacterWithinString, nextByte);
                 }
                 if (j - idx >= 3)
                 {

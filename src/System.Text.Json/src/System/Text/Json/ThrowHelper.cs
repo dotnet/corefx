@@ -132,6 +132,12 @@ namespace System.Text.Json
                 case ExceptionResource.InvalidCharacterWithinString:
                     message = SR.Format(SR.InvalidCharacterWithinString, character);
                     break;
+                case ExceptionResource.InvalidCharacterAfterEscapeWithinString:
+                    message = SR.Format(SR.InvalidCharacterAfterEscapeWithinString, character);
+                    break;
+                case ExceptionResource.InvalidHexCharacterWithinString:
+                    message = SR.Format(SR.InvalidHexCharacterWithinString, character);
+                    break;
                 case ExceptionResource.EndOfCommentNotFound:
                     message = SR.EndOfCommentNotFound;
                     break;
@@ -168,6 +174,8 @@ namespace System.Text.Json
         ExpectedValueAfterPropertyNameNotFound,
         FoundInvalidCharacter,
         InvalidCharacterWithinString,
+        InvalidCharacterAfterEscapeWithinString,
+        InvalidHexCharacterWithinString,
         InvalidEndOfJsonNonPrimitive,
         MismatchedObjectArray,
         ObjectDepthTooLarge,

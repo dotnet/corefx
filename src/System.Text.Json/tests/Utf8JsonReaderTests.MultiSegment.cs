@@ -141,7 +141,7 @@ namespace System.Text.Json.Tests
             }
         }
 
-        //[Theory]
+        [Theory]
         [MemberData(nameof(InvalidJsonStrings))]
         public static void InvalidJsonMultiSegmentWithEmptyFirst(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
         {
@@ -166,37 +166,10 @@ namespace System.Text.Json.Tests
             {
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
                 Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
-                throw ex;
             }
         }
 
-        [Fact]
-        public static void InvalidJsonMultiSegmentWithEmptyFirstTemp()
-        {
-            string jsonString = "tr\u0000eabc";
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            ReadOnlyMemory<byte> dataMemory = dataUtf8;
-            var firstSegment = new BufferSegment<byte>(dataMemory.Slice(0, 0));
-            ReadOnlyMemory<byte> secondMem = dataMemory;
-            BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
-            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
-
-            var json = new Utf8JsonReader(sequence, isFinalBlock: true, default);
-
-            try
-            {
-                while (json.Read())
-                    ;
-                Assert.True(false, "Expected JsonReaderException for multi-segment data was not thrown.");
-            }
-            catch (JsonReaderException ex)
-            {
-                throw ex;
-            }
-        }
-
-        //[Theory]
+        [Theory]
         [MemberData(nameof(InvalidJsonStrings))]
         public static void InvalidJsonMultiSegmentByOne(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
         {
