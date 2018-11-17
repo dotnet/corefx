@@ -13,7 +13,6 @@
     <Compile Include="EvidenceBaseTests.cs" />
     <Compile Include="PolicyTests.cs" />
     <Compile Include="TrustManagerContextTests.cs" />
-    <Compile Include="PermissionSetTests.cs" />
     <Compile Include="PermissionTests.cs" />
     <Compile Include="PrincipalPermissionTests.cs" />
     <Compile Include="SecurityElementTests.cs" />

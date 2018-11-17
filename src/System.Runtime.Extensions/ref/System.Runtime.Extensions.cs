@@ -59,6 +59,7 @@ namespace System
         public void SetPrincipalPolicy(System.Security.Principal.PrincipalPolicy policy) { }
         public void SetThreadPrincipal(System.Security.Principal.IPrincipal principal) { }
         public AppDomainSetup SetupInformation { get { throw null; } }
+        public System.Security.PermissionSet PermissionSet { get { throw null; } }
         public override string ToString() { throw null; }
         public static void Unload(System.AppDomain domain) { }
         public bool ShadowCopyFiles { get { throw null; } }
