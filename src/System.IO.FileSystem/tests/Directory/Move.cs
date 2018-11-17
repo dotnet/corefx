@@ -113,6 +113,16 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void MoveFileOntoFile()
+        {
+            string source = GetTestFilePath();
+            string destination = GetTestFilePath();
+            File.Create(source).Dispose();
+            File.Create(destination).Dispose();
+            Assert.Throws<IOException>(() => Move(source, destination));
+        }
+
+        [Fact]
         public void MoveOntoFile()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
