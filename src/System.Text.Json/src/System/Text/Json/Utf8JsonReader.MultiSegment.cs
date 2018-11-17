@@ -760,8 +760,6 @@ namespace System.Text.Json
             long prevTotalConsumed = _totalConsumed;
             long prevPosition = _bytePositionInLine;
 
-            bool reachedNextSegment = true;
-
             while (true)
             {
                 if (!GetNextSpan())
@@ -880,16 +878,11 @@ namespace System.Text.Json
                                                 return false;
                                             }
 
-                                            // Do not add the left over for the first segment to total consumed
-                                            if (reachedNextSegment)
-                                            {
-                                                _totalConsumed += localBuffer.Length;
-                                            }
+                                            _totalConsumed += localBuffer.Length;
 
                                             localBuffer = _buffer;
                                             idx = 0;
                                             j = 0;
-                                            reachedNextSegment = true;
                                             movedToNext = true;
                                             numberOfHexDigits -= j - idx;
                                         }
@@ -918,23 +911,15 @@ namespace System.Text.Json
                                 return false;
                             }
 
-                            // Do not add the left over for the first segment to total consumed
-                            if (reachedNextSegment)
-                            {
-                                _totalConsumed += localBuffer.Length;
-                            }
+                            _totalConsumed += localBuffer.Length;
                             localBuffer = _buffer;
                             idx = 0;
-                            reachedNextSegment = true;
                         }
 
                     Done:
                         _bytePositionInLine += sawNewLine ? leftOver + idx : leftOver + idx + 1;  // Add 1 for the end quote of the string.
                         _consumed = idx + 1;    // Add 1 for the end quote of the string.
-                        if (reachedNextSegment)
-                        {
-                            _totalConsumed += leftOver;
-                        }
+                        _totalConsumed += leftOver;
                         end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + idx);
                         break;
                     }

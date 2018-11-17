@@ -145,29 +145,32 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(InvalidJsonStrings))]
         public static void InvalidJsonMultiSegmentWithEmptyFirst(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
         {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            ReadOnlyMemory<byte> dataMemory = dataUtf8;
-            var firstSegment = new BufferSegment<byte>(dataMemory.Slice(0, 0));
-            ReadOnlyMemory<byte> secondMem = dataMemory;
-            BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
-            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
-
-            SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth);
-
-            var state = new JsonReaderState(maxDepth: maxDepth);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
-
-            try
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                while (json.Read())
-                    ;
-                Assert.True(false, "Expected JsonReaderException for multi-segment data was not thrown.");
-            }
-            catch (JsonReaderException ex)
-            {
-                Assert.Equal(expectedlineNumber, ex.LineNumber);
-                Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+                ReadOnlyMemory<byte> dataMemory = dataUtf8;
+                var firstSegment = new BufferSegment<byte>(dataMemory.Slice(0, 0));
+                ReadOnlyMemory<byte> secondMem = dataMemory;
+                BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
+                var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
+
+                SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth, commentHandling);
+
+                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonReaderException for multi-segment data was not thrown.");
+                }
+                catch (JsonReaderException ex)
+                {
+                    Assert.Equal(expectedlineNumber, ex.LineNumber);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                }
             }
         }
 
@@ -175,33 +178,36 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(InvalidJsonStrings))]
         public static void InvalidJsonMultiSegmentByOne(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
         {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-
-            SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth);
-
-            var state = new JsonReaderState(maxDepth: maxDepth);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
-
-            try
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                while (json.Read())
-                    ;
-                Assert.True(false, "Expected JsonReaderException for multi-segment data was not thrown.");
-            }
-            catch (JsonReaderException ex)
-            {
-                Assert.Equal(expectedlineNumber, ex.LineNumber);
-                Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+
+                SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth, commentHandling);
+
+                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonReaderException for multi-segment data was not thrown.");
+                }
+                catch (JsonReaderException ex)
+                {
+                    Assert.Equal(expectedlineNumber, ex.LineNumber);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                }
             }
         }
 
-        private static void SpanSequenceStatesAreEqualInvalidJson(byte[] dataUtf8, ReadOnlySequence<byte> sequence, int maxDepth)
+        private static void SpanSequenceStatesAreEqualInvalidJson(byte[] dataUtf8, ReadOnlySequence<byte> sequence, int maxDepth, JsonCommentHandling commentHandling)
         {
-            var stateSpan = new JsonReaderState(maxDepth: maxDepth);
+            var stateSpan = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
             var jsonSpan = new Utf8JsonReader(dataUtf8, isFinalBlock: true, stateSpan);
 
-            var stateSequence = new JsonReaderState(maxDepth: maxDepth);
+            var stateSequence = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
             var jsonSequence = new Utf8JsonReader(sequence, isFinalBlock: true, stateSequence);
 
             try
@@ -210,19 +216,21 @@ namespace System.Text.Json.Tests
                 {
                     bool spanResult = jsonSpan.Read();
                     bool sequenceResult = jsonSequence.Read();
+
+                    Assert.Equal(spanResult, sequenceResult);
                     Assert.Equal(jsonSpan.CurrentDepth, jsonSequence.CurrentDepth);
                     Assert.Equal(jsonSpan.BytesConsumed, jsonSequence.BytesConsumed);
-                    Assert.Equal(spanResult, sequenceResult);
+                    Assert.Equal(jsonSpan.TokenType, jsonSequence.TokenType);
+
                     if (!spanResult)
                     {
                         break;
                     }
                 }
+                Assert.True(false, "Expected JsonReaderException due to invalid JSON.");
             }
             catch (JsonReaderException)
-            {
-
-            }
+            { }
         }
 
         private static void SpanSequenceStatesAreEqual(byte[] dataUtf8)
@@ -236,9 +244,12 @@ namespace System.Text.Json.Tests
             {
                 bool spanResult = jsonSpan.Read();
                 bool sequenceResult = jsonSequence.Read();
+
+                Assert.Equal(spanResult, sequenceResult);
                 Assert.Equal(jsonSpan.CurrentDepth, jsonSequence.CurrentDepth);
                 Assert.Equal(jsonSpan.BytesConsumed, jsonSequence.BytesConsumed);
-                Assert.Equal(spanResult, sequenceResult);
+                Assert.Equal(jsonSpan.TokenType, jsonSequence.TokenType);
+
                 if (!spanResult)
                 {
                     break;
