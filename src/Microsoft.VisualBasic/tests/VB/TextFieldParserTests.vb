@@ -10,7 +10,7 @@ Imports Xunit
 
 Namespace Microsoft.VisualBasic.Tests.VB
     Public NotInheritable Class TextFieldParserTests
-        Inherits IO.FileCleanupTestBase
+        Inherits FileIOTestBase
 
         Private Const HeaderLine As String = "seq,oneword,age,street,city,state,zip,dollar,pick,date,paragraph"
 
@@ -48,42 +48,11 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
             "Acc  10/04/2009User2      Standard user."
         }
 
-        ''' <summary>
-        ''' Create a new file with TestData
-        ''' </summary>
-        ''' <param name="TestBase">Object to manage temporary Files</param>
-        ''' <param name="TestData">Data to be written to file</param>
-        ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
-        ''' <param name="TestFileName">Optional Filename, if none a random one based on TestName will be created</param>
-        ''' <returns>Full Path to New File</returns>
-        Private Shared Function CreateTestFile(TestBase As TextFieldParserTests, TestData As String, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
-            Dim TempFileNameWithPath As String
-            If TestFileName.Length = 0 Then
-                TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
-            Else
-                Assert.False(IO.Path.IsPathRooted(TestFileName))
-                If PathFromBase.Length = 0 Then
-                    TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, TestFileName)
-                Else
-                    ' If we have a Base we must have a filename
-                    Assert.False(String.IsNullOrWhiteSpace(TestFileName))
-                    TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, PathFromBase, TestFileName)
-                End If
-            End If
-            Assert.False(IO.File.Exists(TempFileNameWithPath), $"File {TempFileNameWithPath} should not exist!")
-            ' Write and copy file
-            Using sourceStream As New IO.StreamWriter(IO.File.Create(TempFileNameWithPath))
-                sourceStream.Write(TestData, 0, TestData.Length)
-            End Using
-
-            Return TempFileNameWithPath
-        End Function
-
         <Fact>
         Public Shared Sub BadPathTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, HeaderLine & vbCrLf & """" & vbCrLf, PathFromBase:="", TestFileName:="")
+                TestFile = CreateTestFile(TestBase:=TestBase, TestData:=(HeaderLine & vbCrLf & """" & vbCrLf).ToCharArray, PathFromBase:="", TestFileName:="")
                 Assert.Throws(Of IO.FileNotFoundException)(Function() New TextFieldParser(IO.Path.ChangeExtension(TestFile, ".txt")))
             End Using
         End Sub
@@ -92,7 +61,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         Public Shared Sub CSVBadDataTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, HeaderLine & ",""", PathFromBase:="", TestFileName:="")
+                TestFile = CreateTestFile(TestBase, TestData:=(HeaderLine & ",""").ToCharArray, PathFromBase:="", TestFileName:="")
                 Using MyReader As New TextFieldParser(TestFile)
                     MyReader.TextFieldType = FieldType.Delimited
                     MyReader.Delimiters = New String() {","}
@@ -107,7 +76,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         Public Shared Sub CSVDataTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, CSVData, "", "")
+                TestFile = CreateTestFile(TestBase, TestData:=CSVData.ToCharArray, PathFromBase:="", TestFileName:="")
                 Using MyReader As New TextFieldParser(TestFile)
                     MyReader.TextFieldType = FieldType.Delimited
                     MyReader.Delimiters = New String() {","}
@@ -145,7 +114,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         Public Shared Sub FixedFormatTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, String.Join(vbCrLf, FixedFormatData), PathFromBase:="", TestFileName:="")
+                TestFile = CreateTestFile(TestBase, TestData:=String.Join(vbCrLf, FixedFormatData).ToCharArray, PathFromBase:="", TestFileName:="")
                 Using MyReader As New TextFieldParser(TestFile)
                     MyReader.TextFieldType = FieldType.FixedWidth
                     MyReader.SetFieldWidths(FixedFieldWidths)
@@ -169,7 +138,7 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         Public Shared Sub MultiFormatTest()
             Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, String.Join(vbCrLf, FixedFormatData), "", "")
+                TestFile = CreateTestFile(TestBase, TestData:=String.Join(vbCrLf, FixedFormatData).ToCharArray, PathFromBase:="", TestFileName:="")
                 Using MyReader As New TextFieldParser(TestFile)
                     MyReader.TextFieldType = FieldType.FixedWidth
                     MyReader.FieldWidths = StdFormat

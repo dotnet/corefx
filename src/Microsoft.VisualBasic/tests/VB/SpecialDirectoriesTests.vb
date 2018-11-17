@@ -9,6 +9,7 @@ Imports Microsoft.VisualBasic.FileIO
 Imports Xunit
 Namespace Microsoft.VisualBasic.Tests.VB
     Public NotInheritable Class SpecialDirectoriesTests
+
         Private Shared Sub CheckSpecialFolder(folder As SpecialFolder, getSpecialDirectory As Func(Of String))
             Dim LocalFolderPath As String = Environment.GetFolderPath(folder)
             If LocalFolderPath = "" Then

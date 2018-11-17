@@ -13,7 +13,7 @@ Imports Xunit
 ' Do not Imports System.IO
 Namespace Microsoft.VisualBasic.Tests.VB
     Public NotInheritable Class FileIOTests
-        Inherits IO.FileCleanupTestBase
+        Inherits FileIOTestBase
 
         Sub New()
         End Sub
@@ -26,51 +26,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Return Not String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MANUAL_TESTS"))
             End Get
         End Property
-
-        ''' <summary>
-        ''' All "Public" tests are Named for the FileIO function they test followed by _ParameterName for each Parameter and if there are options
-        ''' they are separated into additional test and the Option Value is the last  part of the name.
-        ''' For example CopyDirectory_SourceDirectoryName_DestinationDirectoryName_OverwriteFalse tests CopyDirectory with 3 arguments
-        ''' SourceDirectoryName, DestinationDirectoryName and Overwrite and the value of Overwrite being tested is False
-        ''' </summary>
-        Private Shared Function CreateTestFile(TestBase As FileIOTests, TestData() As Char, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
-            Return CreateTestFile(TestBase, TestData, "", "", memberName, lineNumber)
-        End Function
-
-        Private Shared Function CreateTestFile(TestBase As FileIOTests, TestData() As Char, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
-            Return CreateTestFile(TestBase, TestData, "", TestFileName, memberName, lineNumber)
-        End Function
-
-        ''' <summary>
-        ''' Create a new file with TestData
-        ''' </summary>
-        ''' <param name="TestBase">Object to manage temporary Files</param>
-        ''' <param name="TestData">Data to be written to file</param>
-        ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
-        ''' <param name="TestFileName">Optional Filename, if none a random one based on TestName will be created</param>
-        ''' <returns>Full Path to New File</returns>
-        Private Shared Function CreateTestFile(TestBase As FileIOTests, TestData() As Char, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
-            Dim TempFileNameWithPath As String
-            If TestFileName.Length = 0 Then
-                TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
-            Else
-                Assert.False(IO.Path.IsPathRooted(TestFileName))
-                If PathFromBase.Length = 0 Then
-                    TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, TestFileName)
-                Else
-                    ' If we have a Base we must have a filename
-                    Assert.False(String.IsNullOrWhiteSpace(TestFileName))
-                    TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, PathFromBase, TestFileName)
-                End If
-            End If
-            Assert.False(IO.File.Exists(TempFileNameWithPath), $"File {TempFileNameWithPath} should not exist!")
-            ' Write and copy file
-            Using writer As New IO.StreamWriter(IO.File.Create(TempFileNameWithPath))
-                writer.Write(TestData, 0, TestData.Length)
-            End Using
-
-            Return TempFileNameWithPath
-        End Function
 
         Private Shared Function DirectoryListToString(DirectoryList As ReadOnlyCollection(Of String)) As String
             Dim S As New StringBuilder
@@ -694,11 +649,12 @@ Namespace Microsoft.VisualBasic.Tests.VB
                 Try
                     Dim VeryLongFullPathToTargetDirectory As String = IO.Path.Combine(TestBase.TestDirectory, New String("E"c, 239))
                     FileSystem.CreateDirectory(VeryLongFullPathToTargetDirectory)
-                    Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory))
+                    Assert.True(IO.Directory.Exists(VeryLongFullPathToTargetDirectory), $"Directory {VeryLongFullPathToTargetDirectory} does not exist")
                 Catch e As IO.PathTooLongException
-                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Unexpected Failure on non-Windows Platform")
                 Catch e As IO.DirectoryNotFoundException
-                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) And IntPtr.Size = 4)
+                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Unexpected Failure on non-Windows Platform")
+                    Assert.Equal(IntPtr.Size, 4)
                 End Try
             End Using
 
