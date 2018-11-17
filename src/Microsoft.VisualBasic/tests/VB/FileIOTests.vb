@@ -654,7 +654,7 @@ Namespace Microsoft.VisualBasic.Tests.VB
                     Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Unexpected Failure on non-Windows Platform")
                 Catch e As IO.DirectoryNotFoundException
                     Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Unexpected Failure on non-Windows Platform")
-                    Assert.Equal(IntPtr.Size, 4)
+                    Assert.Equal(8, IntPtr.Size)
                 End Try
             End Using
 
