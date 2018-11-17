@@ -348,9 +348,9 @@ namespace System.IO
                 // ... but it doesn't care if the destination has a trailing separator.
                 destFullPath = PathInternal.TrimEndingDirectorySeparator(destFullPath);
 
-                // ... and dest cannot be an existing file.
-                if(FileExists(destFullPath))
-                    throw new IOException(SR.IO_FileCreateAlreadyExists);
+                // Behavior from this point is the same as MoveFile w/no overwrite
+                MoveFile(sourceFullPath, destFullPath, overwrite: false);
+                return;
             }
 
             if (Interop.Sys.Rename(sourceFullPath, destFullPath) < 0)
