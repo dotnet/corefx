@@ -348,8 +348,58 @@ namespace System.IO
                 // ... but it doesn't care if the destination has a trailing separator.
                 destFullPath = PathInternal.TrimEndingDirectorySeparator(destFullPath);
 
-                // Behavior from this point is the same as MoveFile w/no overwrite
-                MoveFile(sourceFullPath, destFullPath, overwrite: false);
+                // Attempt to perform the move by linking
+                //      TODO: Other than the type of exception thrown, this code is largly the same as in MoveFile
+                //            and could probably be moved to a common method that both call.
+                if (Interop.Sys.Link(sourceFullPath, destFullPath) < 0)
+                {
+                    // If link fails, we can fall back to doing a full copy, but we'll only do so for
+                    // cases where we expect link could fail but such a copy could succeed.  We don't
+                    // want to do so for all errors, because the copy could incur a lot of cost
+                    // even if we know it'll eventually fail, e.g. EROFS means that the source file
+                    // system is read-only and couldn't support the link being added, but if it's
+                    // read-only, then the move should fail any way due to an inability to delete
+                    // the source file.
+                    Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                    if (errorInfo.Error == Interop.Error.EXDEV ||      // rename fails across devices / mount points
+                        errorInfo.Error == Interop.Error.EPERM ||      // permissions might not allow creating hard links even if a copy would work
+                        errorInfo.Error == Interop.Error.EOPNOTSUPP || // links aren't supported by the source file system
+                        errorInfo.Error == Interop.Error.EMLINK ||     // too many hard links to the source file
+                        errorInfo.Error == Interop.Error.ENOSYS)       // the file system doesn't support link
+                    {
+                        // There is a race condition here, where the file could be replaced by a directory 
+                        // after our initial check
+                        CopyFile(sourceFullPath, destFullPath, overwrite: false);
+                    }
+                    else
+                    {
+                        // The operation failed.  Within reason, try to determine which path caused the problem 
+                        // so we can throw a detailed exception.
+
+                        if (errorInfo.Error == Interop.Error.EEXIST)
+                        {
+                            // Match Windows behavior
+                            throw new IOException(SR.IO_FileCreateAlreadyExists);
+                        }
+                        else
+                        {
+                            string path = sourceFullPath;
+
+                            // If error is "no such entry" then try to figure out which path did not exist. There is a 
+                            // potential race condition here, where something could change between when the error occurs 
+                            // and our checks, but it's the the best we can do.
+                            if (errorInfo.Error == Interop.Error.ENOENT && FileExists(sourceFullPath))
+                            {
+                                // Source file still exists
+                                path = destFullPath;
+                            }
+
+                            throw Interop.GetExceptionForIoErrno(errorInfo, path, true);
+                        }
+                    }
+                }
+                DeleteFile(sourceFullPath);
+
                 return;
             }
 

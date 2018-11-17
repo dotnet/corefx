@@ -204,6 +204,9 @@
   <data name="IO_EOF_ReadBeyondEOF" xml:space="preserve">
     <value>Unable to read beyond the end of the stream.</value>
   </data>
+  <data name="IO_FileCreateAlreadyExists" xml:space="preserve">
+    <value>Cannot create a file when that file already exists.</value>
+  </data>
   <data name="IO_FileExists_Name" xml:space="preserve">
     <value>The file '{0}' already exists.</value>
   </data>
