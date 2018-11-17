@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -27,7 +26,6 @@ namespace System.Text.Json
         private long _lineNumber;
         private long _bytePositionInLine;
         private int _consumed;
-        private int _currentDepth;
         private int _maxDepth;
         private bool _inObject;
         private bool _isNotPrimitive;
@@ -60,7 +58,7 @@ namespace System.Text.Json
         /// Tracks the recursive depth of the nested objects / arrays within the JSON text
         /// processed so far. This provides the depth of the current token.
         /// </summary>
-        public int CurrentDepth => _currentDepth;
+        public int CurrentDepth => _bitStack.CurrentDepth;
 
         /// <summary>
         /// Gets the type of the last processed JSON token in the UTF-8 encoded JSON text.
@@ -79,7 +77,6 @@ namespace System.Text.Json
             _lineNumber = _lineNumber,
             _bytePositionInLine = _bytePositionInLine,
             _bytesConsumed = BytesConsumed,
-            _currentDepth = _currentDepth,
             _maxDepth = _maxDepth,
             _inObject = _inObject,
             _isNotPrimitive = _isNotPrimitive,
@@ -110,7 +107,6 @@ namespace System.Text.Json
             // Note: We do not retain _bytesConsumed or _sequencePosition as they reset with the new input data
             _lineNumber = state._lineNumber;
             _bytePositionInLine = state._bytePositionInLine;
-            _currentDepth = state._currentDepth;
             _maxDepth = state._maxDepth == 0 ? JsonReaderState.DefaultMaxDepth : state._maxDepth; // If max depth is not set, revert to the default depth.
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
@@ -139,12 +135,11 @@ namespace System.Text.Json
 
         private void StartObject()
         {
-            if (_currentDepth >= _maxDepth)
+            if (CurrentDepth >= _maxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ObjectDepthTooLarge);
 
-            _bitStack.PushTrueAt(_currentDepth);
+            _bitStack.PushTrue();
 
-            _currentDepth++;
             _consumed++;
             _bytePositionInLine++;
             _tokenType = JsonTokenType.StartObject;
@@ -153,7 +148,7 @@ namespace System.Text.Json
 
         private void EndObject()
         {
-            if (!_inObject || _currentDepth <= 0)
+            if (!_inObject || CurrentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace);
 
             _tokenType = JsonTokenType.EndObject;
@@ -163,12 +158,11 @@ namespace System.Text.Json
 
         private void StartArray()
         {
-            if (_currentDepth >= _maxDepth)
+            if (CurrentDepth >= _maxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge);
 
-            _bitStack.PushFalseAt(_currentDepth);
+            _bitStack.PushFalse();
 
-            _currentDepth++;
             _consumed++;
             _bytePositionInLine++;
             _tokenType = JsonTokenType.StartArray;
@@ -177,7 +171,7 @@ namespace System.Text.Json
 
         private void EndArray()
         {
-            if (_inObject || _currentDepth <= 0)
+            if (_inObject || CurrentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBracket);
 
             _tokenType = JsonTokenType.EndArray;
@@ -190,8 +184,7 @@ namespace System.Text.Json
         {
             _consumed++;
             _bytePositionInLine++;
-            _currentDepth--;
-            _inObject = _bitStack.PopAt(_currentDepth);
+            _inObject = _bitStack.Pop();
         }
 
         private bool ReadSingleSegment()
@@ -298,7 +291,7 @@ namespace System.Text.Json
             {
                 if (_isNotPrimitive && IsLastSpan)
                 {
-                    if (_currentDepth != 0)
+                    if (CurrentDepth != 0)
                     {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
                     }
@@ -339,8 +332,7 @@ namespace System.Text.Json
         {
             if (first == JsonConstants.OpenBrace)
             {
-                _currentDepth++;
-                _bitStack._allocationFreeContainer = 1;
+                _bitStack.SetFirstBit();
                 _tokenType = JsonTokenType.StartObject;
                 _consumed++;
                 _bytePositionInLine++;
@@ -349,7 +341,7 @@ namespace System.Text.Json
             }
             else if (first == JsonConstants.OpenBracket)
             {
-                _currentDepth++;
+                _bitStack.ResetFirstBit();
                 _tokenType = JsonTokenType.StartArray;
                 _consumed++;
                 _bytePositionInLine++;

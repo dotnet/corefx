@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-
 namespace System.Text.Json
 {
     /// <summary>
@@ -21,7 +19,6 @@ namespace System.Text.Json
         internal long _lineNumber;
         internal long _bytePositionInLine;
         internal long _bytesConsumed;
-        internal int _currentDepth;
         internal int _maxDepth;
         internal bool _inObject;
         internal bool _isNotPrimitive;
@@ -61,7 +58,6 @@ namespace System.Text.Json
             _lineNumber = default;
             _bytePositionInLine = default;
             _bytesConsumed = default;
-            _currentDepth = default;
             _maxDepth = maxDepth;
             _inObject = default;
             _isNotPrimitive = default;

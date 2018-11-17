@@ -15,7 +15,36 @@ namespace System.Text.JsonTests
         public static void DefaultBitStack()
         {
             BitStack bitStack = default;
-            Assert.Equal((ulong)0, bitStack._allocationFreeContainer);
+            Assert.Equal(0, bitStack.CurrentDepth);
+        }
+
+        [Fact]
+        public static void SetResetFirstBit()
+        {
+            BitStack bitStack = default;
+            Assert.Equal(0, bitStack.CurrentDepth);
+            bitStack.SetFirstBit();
+            Assert.Equal(1, bitStack.CurrentDepth);
+            Assert.False(bitStack.Pop());
+            Assert.Equal(0, bitStack.CurrentDepth);
+
+            bitStack = default;
+            Assert.Equal(0, bitStack.CurrentDepth);
+            bitStack.ResetFirstBit();
+            Assert.Equal(1, bitStack.CurrentDepth);
+            Assert.False(bitStack.Pop());
+            Assert.Equal(0, bitStack.CurrentDepth);
+
+            bitStack = default;
+            Assert.Equal(0, bitStack.CurrentDepth);
+            bitStack.SetFirstBit();
+            Assert.Equal(1, bitStack.CurrentDepth);
+            Assert.False(bitStack.Pop());
+            Assert.Equal(0, bitStack.CurrentDepth);
+            bitStack.ResetFirstBit();
+            Assert.Equal(1, bitStack.CurrentDepth);
+            Assert.False(bitStack.Pop());
+            Assert.Equal(0, bitStack.CurrentDepth);
         }
 
         [Theory]
@@ -25,7 +54,7 @@ namespace System.Text.JsonTests
         public static void BitStackPushPop(int bitLength)
         {
             BitStack bitStack = default;
-            Assert.Equal((ulong)0, bitStack._allocationFreeContainer);
+            Assert.Equal(0, bitStack.CurrentDepth);
 
             var values = new bool[bitLength];
             for (int i = 0; i < bitLength; i++)
@@ -37,18 +66,21 @@ namespace System.Text.JsonTests
             {
                 if (values[i])
                 {
-                    bitStack.PushTrueAt(i);
+                    bitStack.PushTrue();
                 }
                 else
                 {
-                    bitStack.PushFalseAt(i);
+                    bitStack.PushFalse();
                 }
+                Assert.Equal(i + 1, bitStack.CurrentDepth);
             }
 
+            // Loop backwards when popping.
             for (int i = bitLength - 1; i > 0; i--)
             {
                 // We need the value at the top *after* popping off the last one.
-                Assert.Equal(values[i - 1], bitStack.PopAt(i));
+                Assert.Equal(values[i - 1], bitStack.Pop());
+                Assert.Equal(i, bitStack.CurrentDepth);
             }
         }
 
@@ -58,7 +90,7 @@ namespace System.Text.JsonTests
         public static void BitStackPushPopLarge(int bitLength)
         {
             BitStack bitStack = default;
-            Assert.Equal((ulong)0, bitStack._allocationFreeContainer);
+            Assert.Equal(0, bitStack.CurrentDepth);
 
             var values = new bool[bitLength];
             for (int i = 0; i < bitLength; i++)
@@ -68,39 +100,54 @@ namespace System.Text.JsonTests
 
             const int IterationCapacity = 1_600_000;
 
+            int expectedDepth = 0;
             // Only set and compare the first and last few (otherwise, the test takes too long)
-            for (int i = 0; i <= IterationCapacity; i++)
+            for (int i = 0; i < IterationCapacity; i++)
             {
                 if (values[i])
                 {
-                    bitStack.PushTrueAt(i);
+                    bitStack.PushTrue();
                 }
                 else
                 {
-                    bitStack.PushFalseAt(i);
+                    bitStack.PushFalse();
                 }
+                expectedDepth++;
+                Assert.Equal(expectedDepth, bitStack.CurrentDepth);
             }
             for (int i = bitLength - IterationCapacity; i < bitLength; i++)
             {
                 if (values[i])
                 {
-                    bitStack.PushTrueAt(i);
+                    bitStack.PushTrue();
                 }
                 else
                 {
-                    bitStack.PushFalseAt(i);
+                    bitStack.PushFalse();
                 }
+                expectedDepth++;
+                Assert.Equal(expectedDepth, bitStack.CurrentDepth);
             }
 
-            for (int i = bitLength - 1; i > bitLength - IterationCapacity; i--)
+            Assert.Equal(expectedDepth, IterationCapacity * 2);
+
+            // Loop backwards when popping.
+            for (int i = bitLength - 1; i >= bitLength - IterationCapacity; i--)
             {
-                Assert.Equal(values[i - 1], bitStack.PopAt(i));
+                // We need the value at the top *after* popping off the last one.
+                Assert.Equal(values[i - 1], bitStack.Pop());
+
+                expectedDepth--;
+                Assert.Equal(expectedDepth, bitStack.CurrentDepth);
             }
             for (int i = IterationCapacity - 1; i > 0; i--)
             {
-                Assert.Equal(values[i - 1], bitStack.PopAt(i));
+                // We need the value at the top *after* popping off the last one.
+                Assert.Equal(values[i - 1], bitStack.Pop());
+
+                expectedDepth--;
+                Assert.Equal(expectedDepth, bitStack.CurrentDepth);
             }
-            
         }
     }
 }
