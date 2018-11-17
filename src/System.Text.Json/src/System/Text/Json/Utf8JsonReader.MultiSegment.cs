@@ -501,6 +501,7 @@ namespace System.Text.Json
         Done:
             _tokenType = tokenType;
             _consumed += consumed;
+            _bytePositionInLine += consumed;
             return true;
         }
 
@@ -516,8 +517,9 @@ namespace System.Text.Json
             {
                 _bytePositionInLine += FindMismatch(span, literal);
 
-                span.Slice(0, literal.Length).CopyTo(readSoFar);
-                written += literal.Length;
+                int amountToWrite = Math.Min(span.Length, literal.Length);
+                span.Slice(0, amountToWrite).CopyTo(readSoFar);
+                written += amountToWrite;
                 goto Throw;
             }
             else
@@ -605,7 +607,7 @@ namespace System.Text.Json
             }
             if (span.Length < literal.Length)
             {
-                indexOfFirstMismatch = span.Length - 1;
+                indexOfFirstMismatch = span.Length;
             }
 
             Debug.Assert(indexOfFirstMismatch >= 0 && indexOfFirstMismatch < literal.Length);
@@ -643,7 +645,6 @@ namespace System.Text.Json
 
             _tokenType = JsonTokenType.Number;
             _consumed += consumed;
-            _bytePositionInLine += consumed;
 
             if (_consumed >= (uint)_buffer.Length)
             {
@@ -849,7 +850,7 @@ namespace System.Text.Json
                                                 {
                                                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
                                                 }
-                                                if (j - idx >= numberOfHexDigits)
+                                                if (j - idx > numberOfHexDigits)
                                                 {
                                                     if (movedToNext)
                                                     {
@@ -1022,7 +1023,7 @@ namespace System.Text.Json
                                     {
                                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, nextByte);
                                     }
-                                    if (j - idx >= numberOfHexDigits)
+                                    if (j - idx > numberOfHexDigits)
                                     {
                                         if (movedToNext)
                                         {
@@ -1180,7 +1181,6 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
                 {
-                    _bytePositionInLine += i;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
                 }
             }
@@ -1208,7 +1208,6 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (nextByte != 'E' && nextByte != 'e')
                 {
-                    _bytePositionInLine += i;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedNextDigitEValueNotFound, nextByte);
                 }
             }
@@ -1245,7 +1244,6 @@ namespace System.Text.Json
 
             Debug.Assert(resultExponent == ConsumeNumberResult.OperationIncomplete);
 
-            _bytePositionInLine += i;
             ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
 
         Done:
@@ -1276,7 +1274,6 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        _bytePositionInLine += i;
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     if (!GetNextSpan())
@@ -1292,7 +1289,6 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (!JsonReaderHelper.IsDigit(nextByte))
                 {
-                    _bytePositionInLine += i;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
                 }
             }
@@ -1341,7 +1337,6 @@ namespace System.Text.Json
             nextByte = data[i];
             if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
             {
-                _bytePositionInLine += i;
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
             }
 
@@ -1368,6 +1363,7 @@ namespace System.Text.Json
                     // A payload containing a single value of integers (e.g. "12") is valid
                     // If we are dealing with multi-value JSON,
                     // ConsumeNumber will validate that we have a delimiter following the integer.
+                    _bytePositionInLine += counter;
                     return ConsumeNumberResult.Success;
                 }
 
@@ -1427,7 +1423,6 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    _bytePositionInLine += i;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                 }
                 if (!GetNextSpan())
@@ -1442,7 +1437,6 @@ namespace System.Text.Json
             byte nextByte = data[i];
             if (!JsonReaderHelper.IsDigit(nextByte))
             {
-                _bytePositionInLine += i;
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterDecimal, nextByte);
             }
             i++;
@@ -1456,7 +1450,6 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    _bytePositionInLine += i;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                 }
 
@@ -1478,7 +1471,6 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        _bytePositionInLine += i;
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
 
@@ -1496,7 +1488,6 @@ namespace System.Text.Json
 
             if (!JsonReaderHelper.IsDigit(nextByte))
             {
-                _bytePositionInLine += i;
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
             }
 
