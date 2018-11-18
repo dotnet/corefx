@@ -798,21 +798,21 @@ nameof(binaryForm));
                 //
                 // length of buffer calculation
                 // prefix = "S-1-".Length: 4;
-                // authority: long.MaxValue.ToString("D") + '-'.Length : 18+1: 20;
+                // authority: long.MaxValue.ToString("D") : 19;
                 // subauth = MaxSubAuthorities * ( uint.MaxValue.ToString("D").Length + '-'.Length ): 15 * (10+1): 165;
-                // max possible length = 4 + 20 + 165: 189;
-                Span<char> result = stackalloc char[189];
-                int written = 0;
-                int length = 4;
-                ReadOnlySpan<char> prefix = stackalloc char[] { 'S', '-', '1', '-' };
-                int count = _subAuthorities.Length;
+                // max possible length = 4 + 19 + 165: 188
+                Span<char> result = stackalloc char[188];
+                int written;
                 int[] values = _subAuthorities;
-
-                prefix.CopyTo(result);
+                result[0] = 'S';
+                result[1] = '-';
+                result[0] = '1';
+                result[1] = '-';
+                int length = 4;
                 ((long)_identifierAuthority).TryFormat(result.Slice(4), out written);
                 length += written;
 
-                for (int index = 0; index < count; index++)
+                for (int index = 0; index < _subAuthorities.Length; index++)
                 {
                     uint value = (uint)values[index];
                     result[length] = '-';
