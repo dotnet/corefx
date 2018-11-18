@@ -792,21 +792,36 @@ nameof(binaryForm));
         {
             if (_sddlForm == null)
             {
-                StringBuilder result = new StringBuilder();
-
                 //
                 // Typecasting of _IdentifierAuthority to a long below is important, since
                 // otherwise you would see this: "S-1-NTAuthority-32-544"
                 //
+                // length of buffer calculation
+                // prefix = "S-1-".Length: 4;
+                // authority: long.MaxValue.ToString("D") + '-'.Length : 18+1: 20;
+                // subauth = MaxSubAuthorities * ( uint.MaxValue.ToString("D").Length + '-'.Length ): 15 * (10+1): 165;
+                // max possible length = 4 + 20 + 165: 189;
+                Span<char> result = stackalloc char[189];
+                int written = 0;
+                int length = 4;
+                ReadOnlySpan<char> prefix = stackalloc char[] { 'S', '-', '1', '-' };
+                int count = _subAuthorities.Length;
+                int[] values = _subAuthorities;
 
-                result.Append("S-1-").Append((long)_identifierAuthority);
+                prefix.CopyTo(result);
+                ((long)_identifierAuthority).TryFormat(result.Slice(4), out written);
+                length += written;
 
-                for (int i = 0; i < SubAuthorityCount; i++)
+                for (int index = 0; index < count; index++)
                 {
-                    result.Append('-').Append((uint)(_subAuthorities[i]));
+                    uint value = (uint)values[index];
+                    result[length] = '-';
+                    length += 1;
+                    value.TryFormat(result.Slice(length), out written);
+                    length += written;
                 }
+                _sddlForm = result.Slice(0, length).ToString();
 
-                _sddlForm = result.ToString();
             }
 
             return _sddlForm;
