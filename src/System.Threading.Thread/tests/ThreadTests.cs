@@ -333,10 +333,24 @@ namespace System.Threading.Threads.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void CurrentCultureTest_SkipOnDesktopFramework()
         {
-            // Cannot access culture properties on a thread object from a different thread
-            var t = new Thread(() => { });
+            CultureInfo culture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            CultureInfo uiCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            var t = new Thread(() => {
+                Assert.Same(culture, Thread.CurrentThread.CurrentCulture);
+                Assert.Same(uiCulture, Thread.CurrentThread.CurrentUICulture);
+            });
+            t.CurrentCulture = culture;
+            t.CurrentUICulture = uiCulture;
             Assert.Throws<InvalidOperationException>(() => t.CurrentCulture);
             Assert.Throws<InvalidOperationException>(() => t.CurrentUICulture);
+
+            t.Start();
+            // Cannot access culture properties on a thread object from a different thread once the thread is started
+            Assert.Throws<InvalidOperationException>(() => { t.CurrentCulture = culture; });
+            Assert.Throws<InvalidOperationException>(() => { t.CurrentUICulture = uiCulture; });
+            Assert.Throws<InvalidOperationException>(() => t.CurrentCulture);
+            Assert.Throws<InvalidOperationException>(() => t.CurrentUICulture);
+            t.Join();
         }
 
         [Fact]
