@@ -802,17 +802,16 @@ nameof(binaryForm));
                 // subauth = MaxSubAuthorities * ( uint.MaxValue.ToString("D").Length + '-'.Length ): 15 * (10+1): 165;
                 // max possible length = 4 + 19 + 165: 188
                 Span<char> result = stackalloc char[188];
-                int written;
-                int[] values = _subAuthorities;
                 result[0] = 'S';
                 result[1] = '-';
-                result[0] = '1';
-                result[1] = '-';
+                result[2] = '1';
+                result[3] = '-';
+                int written;
                 int length = 4;
-                ((long)_identifierAuthority).TryFormat(result.Slice(4), out written);
+                ((ulong)_identifierAuthority).TryFormat(result.Slice(4), out written);
                 length += written;
-
-                for (int index = 0; index < _subAuthorities.Length; index++)
+                int[] values = _subAuthorities;
+                for (int index = 0; index < values.Length; index++)
                 {
                     uint value = (uint)values[index];
                     result[length] = '-';
