@@ -40,7 +40,7 @@ namespace System.Net.NetworkInformation.Tests
             Assert.NotNull(gp.GetIPv4GlobalStatistics());
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && !RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
             {
-                // OSX dnd FreeBSD do not provide IPv6  stats.
+                // OSX and FreeBSD do not provide IPv6  stats.
                 Assert.NotNull(gp.GetIPv6GlobalStatistics());
             }
 
