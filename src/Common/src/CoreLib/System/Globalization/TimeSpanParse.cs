@@ -116,7 +116,7 @@ namespace System.Globalization
                     return false;
 
                 // num > 0 && zeroes > 0 && num <= maxValue && zeroes <= maxPrecision
-                return _num >= MaxFraction / Pow10(_zeroes - 1);
+                return _num >= MaxFraction / Pow10(_zeroes);
             }
         }
 
