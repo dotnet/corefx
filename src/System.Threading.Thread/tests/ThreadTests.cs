@@ -331,7 +331,8 @@ namespace System.Threading.Threads.Tests
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
-        public static void CurrentCultureTest_SkipOnDesktopFramework()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public static void CurrentCultureTest_DifferentThread()
         {
             CultureInfo culture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             CultureInfo uiCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
