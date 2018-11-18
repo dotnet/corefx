@@ -340,13 +340,19 @@ namespace System.Threading.Threads.Tests
                 Assert.Same(culture, Thread.CurrentThread.CurrentCulture);
                 Assert.Same(uiCulture, Thread.CurrentThread.CurrentUICulture);
             });
+
+            // We allow setting thread culture of unstarted threads to ease .NET Framework migration. It is pattern used
+            // in real world .NET Framework apps.
             t.CurrentCulture = culture;
             t.CurrentUICulture = uiCulture;
+
+            // Cannot access culture properties on a thread object from a different thread
             Assert.Throws<InvalidOperationException>(() => t.CurrentCulture);
             Assert.Throws<InvalidOperationException>(() => t.CurrentUICulture);
 
             t.Start();
             // Cannot access culture properties on a thread object from a different thread once the thread is started
+            // .NET Framework allowed this, but it did not work reliably. .NET Core throws instead.
             Assert.Throws<InvalidOperationException>(() => { t.CurrentCulture = culture; });
             Assert.Throws<InvalidOperationException>(() => { t.CurrentUICulture = uiCulture; });
             Assert.Throws<InvalidOperationException>(() => t.CurrentCulture);

@@ -137,6 +137,19 @@ namespace System.Threading
             }
         }
 
+        private void SetCultureOnUnstartedThread(CultureInfo value, ref CultureInfo culture)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            if ((_runtimeThread.ThreadState & ThreadState.Unstarted) == 0)
+            {
+                throw new InvalidOperationException(SR.Thread_Operation_RequiresCurrentThread);
+            }
+            culture = value;
+        }
+
         public CultureInfo CurrentCulture
         {
             get
@@ -148,15 +161,8 @@ namespace System.Threading
             {
                 if (this != CurrentThread)
                 {
-                    if (value == null)
-                    {
-                        throw new ArgumentNullException(nameof(value));
-                    }
-                    if ((_runtimeThread.ThreadState & ThreadState.Unstarted) == 0)
-                    {
-                        throw new InvalidOperationException(SR.Thread_Operation_RequiresCurrentThread);
-                    }
-                    _startCulture = value;
+                    SetCultureOnUnstartedThread(value, ref _startCulture);
+                    return;
                 }
                 CultureInfo.CurrentCulture = value;
             }
@@ -173,15 +179,8 @@ namespace System.Threading
             {
                 if (this != CurrentThread)
                 {
-                    if (value == null)
-                    {
-                        throw new ArgumentNullException(nameof(value));
-                    }
-                    if ((_runtimeThread.ThreadState & ThreadState.Unstarted) == 0)
-                    {
-                        throw new InvalidOperationException(SR.Thread_Operation_RequiresCurrentThread);
-                    }
-                    _startUICulture = value;
+                    SetCultureOnUnstartedThread(value, ref _startUICulture);
+                    return;
                 }
                 CultureInfo.CurrentUICulture = value;
             }
