@@ -793,34 +793,43 @@ nameof(binaryForm));
             if (_sddlForm == null)
             {
                 //
-                // Typecasting of _IdentifierAuthority to a long below is important, since
+                // Typecasting of _IdentifierAuthority to a ulong below is important, since
                 // otherwise you would see this: "S-1-NTAuthority-32-544"
                 //
+
+#if netcoreapp20 || netstandard
+                StringBuilder result = new StringBuilder();
+                result.Append("S-1-").Append((ulong)_identifierAuthority);
+                for (int i = 0; i < SubAuthorityCount; i++)
+                {
+                    result.Append('-').Append((uint)(_subAuthorities[i]));
+                }
+                _sddlForm = result.ToString();
+#else
                 // length of buffer calculation
                 // prefix = "S-1-".Length: 4;
-                // authority: long.MaxValue.ToString("D") : 19;
+                // authority: ulong.MaxValue.ToString("D") : 20;
                 // subauth = MaxSubAuthorities * ( uint.MaxValue.ToString("D").Length + '-'.Length ): 15 * (10+1): 165;
-                // max possible length = 4 + 19 + 165: 188
-                Span<char> result = stackalloc char[188];
+                // max possible length = 4 + 20 + 165: 189
+                Span<char> result = stackalloc char[189];
                 result[0] = 'S';
                 result[1] = '-';
                 result[2] = '1';
                 result[3] = '-';
                 int written;
                 int length = 4;
-                ((ulong)_identifierAuthority).TryFormat(result.Slice(4), out written);
+                ((ulong)_identifierAuthority).TryFormat(result.Slice(length), out written);
                 length += written;
                 int[] values = _subAuthorities;
                 for (int index = 0; index < values.Length; index++)
                 {
-                    uint value = (uint)values[index];
                     result[length] = '-';
                     length += 1;
-                    value.TryFormat(result.Slice(length), out written);
+                    ((uint)values[index]).TryFormat(result.Slice(length), out written);
                     length += written;
                 }
                 _sddlForm = result.Slice(0, length).ToString();
-
+#endif
             }
 
             return _sddlForm;
@@ -924,9 +933,9 @@ nameof(binaryForm));
             }
         }
 
-        #endregion
+#endregion
 
-        #region Operators
+#region Operators
 
         public static bool operator ==(SecurityIdentifier left, SecurityIdentifier right)
         {
@@ -952,9 +961,9 @@ nameof(binaryForm));
             return !(left == right);
         }
 
-        #endregion
+#endregion
 
-        #region IComparable implementation
+#region IComparable implementation
 
         public int CompareTo(SecurityIdentifier sid)
         {
@@ -996,9 +1005,9 @@ nameof(binaryForm));
             return 0;
         }
 
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
 
         internal int GetSubAuthority(int index)
         {
@@ -1234,6 +1243,6 @@ nameof(binaryForm));
 
             throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, nameof(targetType));
         }
-        #endregion
+#endregion
     }
 }
