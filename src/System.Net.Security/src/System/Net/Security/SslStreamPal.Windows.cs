@@ -154,7 +154,7 @@ namespace System.Net.Security
 
                 // CoreFX: always opt-in SCH_USE_STRONG_CRYPTO except for SSL3.
                 if (((protocolFlags == 0) ||
-                        (protocolFlags & (Interop.SChannel.SP_PROT_TLS1_0 | Interop.SChannel.SP_PROT_TLS1_1 | Interop.SChannel.SP_PROT_TLS1_2)) != 0)
+                        (protocolFlags & (Interop.SChannel.SP_PROT_TLS1_0 | Interop.SChannel.SP_PROT_TLS1_1 | Interop.SChannel.SP_PROT_TLS1_2 | Interop.SChannel.SP_PROT_TLS1_3)) != 0)
                      && (policy != EncryptionPolicy.AllowNoEncryption) && (policy != EncryptionPolicy.NoEncryption))
                 {
                     flags |= Interop.SspiCli.SCHANNEL_CRED.Flags.SCH_USE_STRONG_CRYPTO;
