@@ -608,29 +608,4 @@ namespace System.Diagnostics
         Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
         W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
     };
-
-
-    public sealed class ActivityConfig : IDisposable
-    {
-        public ActivityConfig(double samplingPercent)
-        {
-            SamplingPercent = samplingPercent;
-        }
-
-        public double SamplingPercent { get; set; }
-
-        ~ActivityConfig()
-        {
-            Dispose();
-        }
-
-        public void Dispose()
-        {
-            if (_owner != null)
-                _owner.Remove(this);
-        }
-
-        Sampling _owner;
-        internal ActivityConfig _next;   // next config in the list;
-    }
 }
