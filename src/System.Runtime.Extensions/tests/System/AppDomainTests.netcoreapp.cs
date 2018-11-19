@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Security;
+using System.Security.Permissions;
 using Xunit;
 
 namespace System.Tests
@@ -28,9 +29,7 @@ namespace System.Tests
         public static void GetPermissionSet()
         {
             RemoteInvoke(() => {
-                PermissionSet permissionSet = AppDomain.CurrentDomain.PermissionSet;
-                Assert.NotNull(permissionSet);
-                Assert.Equal(permissionSet, AppDomain.CurrentDomain.PermissionSet);
+                Assert.Equal(new PermissionSet(PermissionState.Unrestricted), AppDomain.CurrentDomain.PermissionSet);
                 return SuccessExitCode;
             }).Dispose();
         }    

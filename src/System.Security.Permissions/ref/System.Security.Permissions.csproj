@@ -6,8 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Security.Permissions.cs" />
-    <Compile Include="System.Security.Permissions.netstandard.netfx.cs" Condition="'$(TargetsNetFx)' == 'true' OR '$(TargetGroup)' == 'netstandard'" />
-    <Compile Include="System.Security.Permissions.netcoreapp.uap.cs" Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'" />
     <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
