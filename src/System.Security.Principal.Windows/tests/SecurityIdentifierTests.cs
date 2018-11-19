@@ -12,9 +12,10 @@ public class SecurityIdentifierTests
     [Fact]
     public void ValidateGetCurrentUser()
     {
-        WindowsIdentity identity = WindowsIdentity.GetCurrent(false);
-        Assert.NotNull(identity.User);
-        identity?.Dispose();
+        using (WindowsIdentity identity = WindowsIdentity.GetCurrent(false))
+        {
+            Assert.NotNull(identity.User);
+        }
     }
 
     [Fact]
