@@ -662,6 +662,15 @@ namespace System.Net.Http
             // Serialize entity-body (content) headers.
             if (requestMessage.Content != null)
             {
+                // TODO (#5523): Content-Length header isn't getting correctly placed using ToString()
+                // This is a bug in HttpContentHeaders that needs to be fixed.
+                if (requestMessage.Content.Headers.ContentLength.HasValue)
+                {
+                    long contentLength = requestMessage.Content.Headers.ContentLength.Value;
+                    requestMessage.Content.Headers.ContentLength = null;
+                    requestMessage.Content.Headers.ContentLength = contentLength;
+                }
+
                 requestHeadersBuffer.AppendLine(requestMessage.Content.Headers.ToString());
             }
 
@@ -942,7 +951,7 @@ namespace System.Net.Http
             uint optionData = 0;
             SslProtocols sslProtocols =
                 (_sslProtocols == SslProtocols.None) ? SecurityProtocol.DefaultSecurityProtocols : _sslProtocols;
-            
+
 #pragma warning disable 0618 // SSL2/SSL3 are deprecated
             if ((sslProtocols & SslProtocols.Ssl2) != 0)
             {
