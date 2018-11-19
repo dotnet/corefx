@@ -16,6 +16,7 @@ namespace System.Xml
     /// Represents an entire document. An XmlDataDocument can contain XML
     /// data or relational data (DataSet).
     /// </summary>
+    [Obsolete("XmlDataDocument class will be removed in a future release.")]
     public class XmlDataDocument : XmlDocument
     {
         private DataSet _dataSet;

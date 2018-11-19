@@ -3316,6 +3316,7 @@ namespace System.Data.SqlTypes
 }
 namespace System.Xml
 {
+    [Obsolete("XmlDataDocument class will be removed in a future release.")]
     public partial class XmlDataDocument : System.Xml.XmlDocument
     {
         public XmlDataDocument() { }
