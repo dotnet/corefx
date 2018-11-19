@@ -29,17 +29,15 @@ namespace System.Text.Json
             _isFinalBlock = isFinalBlock;
 
             // Note: We do not retain _bytesConsumed or _sequencePosition as they reset with the new input data
-            _allocationFreeContainer = state._allocationFreeContainer;
             _lineNumber = state._lineNumber;
             _bytePositionInLine = state._bytePositionInLine;
-            _currentDepth = state._currentDepth;
-            _maxDepth = state._maxDepth == 0 ? JsonReaderState.AllocationFreeMaxDepth : state._maxDepth; // If max depth is not set, revert to the default depth.
+            _maxDepth = state._maxDepth == 0 ? JsonReaderState.DefaultMaxDepth : state._maxDepth; // If max depth is not set, revert to the default depth.
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
             _tokenType = state._tokenType;
             _previousTokenType = state._previousTokenType;
             _readerOptions = state._readerOptions;
-            _bitArray = state._bitArray;
+            _bitStack = state._bitStack;
 
             _consumed = 0;
             _totalConsumed = 0;
@@ -182,7 +180,7 @@ namespace System.Text.Json
         {
             Debug.Assert(_isNotPrimitive && IsLastSpan);
 
-            if (_currentDepth != 0)
+            if (_bitStack.CurrentDepth != 0)
             {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
             }
@@ -285,8 +283,7 @@ namespace System.Text.Json
         {
             if (first == JsonConstants.OpenBrace)
             {
-                _currentDepth++;
-                _allocationFreeContainer = 1;
+                _bitStack.SetFirstBit();
                 _tokenType = JsonTokenType.StartObject;
                 _consumed++;
                 _bytePositionInLine++;
@@ -295,7 +292,7 @@ namespace System.Text.Json
             }
             else if (first == JsonConstants.OpenBracket)
             {
-                _currentDepth++;
+                _bitStack.ResetFirstBit();
                 _tokenType = JsonTokenType.StartArray;
                 _consumed++;
                 _bytePositionInLine++;

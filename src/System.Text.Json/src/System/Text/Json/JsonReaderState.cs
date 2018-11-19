@@ -26,6 +26,7 @@ namespace System.Text.Json
         internal JsonTokenType _previousTokenType;
         internal JsonReaderOptions _readerOptions;
         internal BitStack _bitStack;
+        internal SequencePosition _sequencePosition;
 
         /// <summary>
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
@@ -75,6 +76,8 @@ namespace System.Text.Json
             // Only allocate if the user reads a JSON payload beyond the depth that the _allocationFreeContainer can handle.
             // This way we avoid allocations in the common, default cases, and allocate lazily.
             _bitStack = default;
+
+            _sequencePosition = default;
         }
 
         /// <summary>
