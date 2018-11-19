@@ -81,7 +81,7 @@ namespace System.Net.Http
             if (currentActivity != null && !request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
             {
                 // Output the ID.  Based on what kind of ID we put it in different headers (either traceparent or Request-Id)
-                if (currentActivity.IsWC3Id)
+                if (currentActivity.IdFormat == ActivityIdFormat.W3C)
                     request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
                 else
                     request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
