@@ -68,16 +68,12 @@ public class SecurityIdentifierTests
             int endSid = 0;
             if (startSid >= 0)
             {
-                int index = startSid + 6;
-                while (index < output.Length)
+                int length = Math.Min(output.Length - startSid, librarySid.Length);
+                windowsSid = output.Substring(startSid, length);
+
+                if (output.Length > startSid + length)
                 {
-                    char value = output[index];
-                    if (value != '-' && !char.IsNumber(value))
-                    {
-                        endSid = index;
-                        break;
-                    }
-                    index++;
+                    Assert.True(char.IsWhiteSpace(output[startSid + length]));
                 }
             }
             if (endSid > startSid)
