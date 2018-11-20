@@ -16,7 +16,7 @@ namespace System.Net.Http.Functional.Tests
 {
     public class HttpRequestMessageTest : HttpClientTestBase
     {
-        Version _expectedRequestMessageVersion = !PlatformDetection.IsFullFramework ? new Version(2,0) : new Version(1, 1);
+        Version _expectedRequestMessageVersion = !PlatformDetection.IsFullFramework ? new Version(2, 0) : new Version(1, 1);
 
         [Fact]
         public void Ctor_Default_CorrectDefaults()
@@ -195,28 +195,32 @@ namespace System.Net.Http.Functional.Tests
 
             // Note that there is no Content-Length header: The reason is that the value for Content-Length header
             // doesn't get set by StringContent..ctor, but only if someone actually accesses the ContentLength property.
-            Assert.Equal(
-                "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
+            expected = "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                 "{\r\n" +
                 "  Content-Type: text/plain; charset=utf-8\r\n" +
+#if netcoreapp
                 "  Content-Length: 7\r\n" +
-                "}", rm.ToString());
+#endif
+                "}";
+            Assert.Equal(expected, rm.ToString());
 
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain", 0.2));
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml", 0.1));
             rm.Headers.Add("Custom-Request-Header", "value1");
             rm.Content.Headers.Add("Custom-Content-Header", "value2");
 
-            Assert.Equal(
-                "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
+            expected = "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                 "{\r\n" +
                 "  Accept: text/plain; q=0.2\r\n" +
                 "  Accept: text/xml; q=0.1\r\n" +
                 "  Custom-Request-Header: value1\r\n" +
                 "  Content-Type: text/plain; charset=utf-8\r\n" +
+#if netcoreapp
                 "  Content-Length: 7\r\n" +
+#endif
                 "  Custom-Content-Header: value2\r\n" +
-                "}", rm.ToString());
+                "}";
+            Assert.Equal(expected, rm.ToString());
         }
 
         [Theory]

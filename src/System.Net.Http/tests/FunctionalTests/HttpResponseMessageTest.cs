@@ -262,28 +262,32 @@ namespace System.Net.Http.Functional.Tests
 
                 // Note that there is no Content-Length header: The reason is that the value for Content-Length header
                 // doesn't get set by StringContent..ctor, but only if someone actually accesses the ContentLength property.
-                Assert.Equal(
-                    "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
+                var expected = "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                     "{\r\n" +
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
+#if netcoreapp
                     "  Content-Length: 7\r\n" +
-                    "}", rm.ToString());
+#endif
+                    "}";
+                Assert.Equal(expected, rm.ToString());
 
                 rm.Headers.AcceptRanges.Add("bytes");
                 rm.Headers.AcceptRanges.Add("pages");
                 rm.Headers.Add("Custom-Response-Header", "value1");
                 rm.Content.Headers.Add("Custom-Content-Header", "value2");
 
-                Assert.Equal(
-                    "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
+                expected = "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                     "{\r\n" +
                     "  Accept-Ranges: bytes\r\n" +
                     "  Accept-Ranges: pages\r\n" +
                     "  Custom-Response-Header: value1\r\n" +
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
+#if netcoreapp
                     "  Content-Length: 7\r\n" +
+#endif
                     "  Custom-Content-Header: value2\r\n" +
-                    "}", rm.ToString());
+                    "}";
+                Assert.Equal(expected, rm.ToString());
             }
         }
 

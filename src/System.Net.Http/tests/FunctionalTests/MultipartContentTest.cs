@@ -153,16 +153,17 @@ namespace System.Net.Http.Functional.Tests
             var mc = new MultipartContent("someSubtype", "theBoundary");
             mc.Add(subContent);
 
-            Assert.Equal(
-                "--theBoundary\r\n" +
+            var expected = "--theBoundary\r\n" +
                 "someHeaderName: andSomeHeaderValue\r\n" +
                 "someOtherHeaderName: withNotOne, ButTwoValues\r\n" +
                 "oneMoreHeader: withNotOne, AndNotTwo, butThreeValues\r\n" +
+#if netcoreapp
                 "Content-Length: 26\r\n" +
+#endif
                 "\r\n" +
                 "This is a ByteArrayContent\r\n" +
-                "--theBoundary--\r\n",
-                await MultipartContentToStringAsync(mc, mode));
+                "--theBoundary--\r\n";
+            Assert.Equal(expected, await MultipartContentToStringAsync(mc, mode));
         }
 
         [Theory]
@@ -174,18 +175,21 @@ namespace System.Net.Http.Functional.Tests
             mc.Add(new ByteArrayContent(Encoding.UTF8.GetBytes("This is a ByteArrayContent")));
             mc.Add(new StringContent("This is a StringContent"));
 
-            Assert.Equal(
-                "--theBoundary\r\n" +
+            var expected = "--theBoundary\r\n" +
+#if netcoreapp
                 "Content-Length: 26\r\n" +
+#endif
                 "\r\n" +
                 "This is a ByteArrayContent\r\n" +
                 "--theBoundary\r\n" +
                 "Content-Type: text/plain; charset=utf-8\r\n" +
+#if netcoreapp
                 "Content-Length: 23\r\n" +
+#endif
                 "\r\n" +
                 "This is a StringContent\r\n" +
-                "--theBoundary--\r\n",
-                await MultipartContentToStringAsync(mc, mode));
+                "--theBoundary--\r\n";
+            Assert.Equal(expected, await MultipartContentToStringAsync(mc, mode));
         }
 
         [Fact]
