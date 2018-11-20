@@ -647,7 +647,7 @@ namespace System.IO.Pipelines
                 {
                     ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
                 }
-                result = new ReadResult();
+                result = default;
                 return false;
             }
         }
@@ -802,7 +802,7 @@ namespace System.IO.Pipelines
             }
             else
             {
-                result = new ReadResult(new ReadOnlySequence<byte>(), isCanceled, isCompleted);
+                result = new ReadResult(default, isCanceled, isCompleted);
             }
 
             if (isCanceled)
