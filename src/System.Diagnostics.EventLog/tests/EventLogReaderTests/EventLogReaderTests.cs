@@ -14,7 +14,7 @@ namespace System.Diagnostics.Tests
         [InlineData("Application", true)]
         [InlineData("Microsoft-Windows-PowerShell/Operational", false)]
         [InlineData("Microsoft-Windows-PowerShell/Operational", true)]
-        public void EventLog_Record(string logName, bool useQuery)
+        public void ReadEvent(string logName, bool useQuery)
         {
             var eventLog =
                 useQuery
@@ -27,6 +27,38 @@ namespace System.Diagnostics.Tests
                 var record = eventLog.ReadEvent();
                 Assert.NotNull(record);
                 Assert.Equal(logName, record.LogName);
+            }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void Seek()
+        {
+            using (var eventLog = new EventLogReader("Application"))
+            {
+                var record = eventLog.ReadEvent();
+                eventLog.Seek(record.Bookmark);
+                eventLog.Seek(IO.SeekOrigin.Begin, 0);
+                eventLog.Seek(IO.SeekOrigin.Current, 0);
+                eventLog.Seek(IO.SeekOrigin.End, 0);
+            }
+        }
+
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void CancelReading()
+        {
+            using (var eventLog = new EventLogReader("Application"))
+            {
+                eventLog.CancelReading();
+            }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void LogStatus()
+        {
+            using (var eventLog = new EventLogReader("Application"))
+            {
+                Assert.NotEmpty(eventLog.LogStatus);
             }
         }
     }
