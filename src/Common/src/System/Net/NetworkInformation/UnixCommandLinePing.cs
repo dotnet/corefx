@@ -18,7 +18,7 @@ namespace System.Net.NetworkInformation
 
         private static readonly string s_discoveredPing4UtilityPath = GetPingUtilityPath(ipv4: true);
         private static readonly string s_discoveredPing6UtilityPath = GetPingUtilityPath(ipv4: false);
-        private static readonly bool s_isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        private static readonly bool s_isBSD = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"));
 
         // We don't want to pick up an arbitrary or malicious ping
         // command, so that's why we do the path probing ourselves.
@@ -67,9 +67,9 @@ namespace System.Net.NetworkInformation
 
             if (ttl > 0)
             {
-                if (!ipv4 && s_isOSX)
+                if (!ipv4 && s_isBSD)
                 {
-                    // OSX uses -h to set hop limit for IPv6
+                    // OSX nad FreeBSD uses -h to set hop limit for IPv6
                     sb.Append(" -h ");
                 }
                 else
