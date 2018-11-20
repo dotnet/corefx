@@ -9,49 +9,24 @@ namespace System.Diagnostics.Tests
 {
     public class EventLogReaderTests
     {
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void ApplicationEventLog_Record()
+        [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [InlineData("Application", false)]
+        [InlineData("Application", true)]
+        [InlineData("Microsoft-Windows-PowerShell/Operational", false)]
+        [InlineData("Microsoft-Windows-PowerShell/Operational", true)]
+        public void EventLog_Record(string logName, bool useQuery)
         {
-            using (var eventLog = new EventLogReader("Application"))
-            {
-                var record = eventLog.ReadEvent();
-                Assert.NotNull(record);
-                Assert.Equal("Application", record.LogName);
-            }
-        }
+            var eventLog =
+                useQuery
+                ? new EventLogReader(
+                     new EventLogQuery(logName, PathType.LogName) { ReverseDirection = true })
+                : new EventLogReader(logName);
 
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void ApplicationEventLogQuery_Record()
-        {
-            var query = new EventLogQuery("Application", PathType.LogName) { ReverseDirection = true };
-            using (var eventLog = new EventLogReader(query))
+            using (eventLog)
             {
                 var record = eventLog.ReadEvent();
                 Assert.NotNull(record);
-                Assert.Equal("Application", record.LogName);
-            }
-        }
-
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void NestedEventLog_Record()
-        {
-            using (var eventLog = new EventLogReader("Microsoft-Windows-PowerShell/Operational"))
-            {
-                var record = eventLog.ReadEvent();
-                Assert.NotNull(record);
-                Assert.Equal("Microsoft-Windows-PowerShell/Operational", record.LogName);
-            }
-        }
-
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void NestedEventLogQuery_Record()
-        {
-            var query = new EventLogQuery("Microsoft-Windows-PowerShell/Operational", PathType.LogName) { ReverseDirection = true };
-            using (var eventLog = new EventLogReader(query))
-            {
-                var record = eventLog.ReadEvent();
-                Assert.NotNull(record);
-                Assert.Equal("Microsoft-Windows-PowerShell/Operational", record.LogName);
+                Assert.Equal(logName, record.LogName);
             }
         }
     }
