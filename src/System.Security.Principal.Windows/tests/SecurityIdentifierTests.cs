@@ -40,7 +40,7 @@ public class SecurityIdentifierTests
         Assert.All(parts, part => uint.TryParse(part, out uint _));
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsServerCore))]
     public void ValidateToStringUsingWhoami()
     {
         string librarySid = null;
