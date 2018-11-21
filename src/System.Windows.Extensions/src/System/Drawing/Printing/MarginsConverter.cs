@@ -13,8 +13,6 @@ namespace System.Drawing.Printing
 {
     public class MarginsConverter : ExpandableObjectConverter
     {
-        private readonly ConstructorInfo _constructorInfo = typeof(Margins).GetTypeInfo().GetConstructor(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int) });
-
         public MarginsConverter() { }
 
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -86,7 +84,8 @@ namespace System.Drawing.Printing
             }
             if (destinationType == typeof(InstanceDescriptor) && value is Margins c)
             {
-                return new InstanceDescriptor(_constructorInfo, new object[] { c.Left, c.Right, c.Top, c.Bottom });
+                ConstructorInfo ctor = typeof(Margins).GetTypeInfo ().GetConstructor (new Type[] {typeof(int), typeof(int), typeof(int), typeof(int)} );
+                return new InstanceDescriptor(ctor, new object[] { c.Left, c.Right, c.Top, c.Bottom });
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
