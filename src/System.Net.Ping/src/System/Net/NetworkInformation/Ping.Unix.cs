@@ -23,11 +23,18 @@ namespace System.Net.NetworkInformation
 
         private PingReply SendPingCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            PingReply reply = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
-                SendIcmpEchoRequestOverRawSocket(address, buffer, timeout, options) :
-                SendWithPingUtility(address, buffer, timeout, options);
+            try
+            {
+                PingReply reply = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
+                    SendIcmpEchoRequestOverRawSocket(address, buffer, timeout, options) :
+                    SendWithPingUtility(address, buffer, timeout, options);
 
-            return reply;
+                return reply;
+            }
+            finally
+            {
+                Finish();
+            }
         }
 
         private async Task<PingReply> SendPingAsyncCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
@@ -122,7 +129,7 @@ namespace System.Net.NetworkInformation
             {
                 return false;
             }
-            
+
             sw.Stop();
             long roundTripTime = sw.ElapsedMilliseconds;
             int dataOffset = ipHeaderLength + IcmpHeaderLengthInBytes;

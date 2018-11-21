@@ -69,7 +69,7 @@ namespace System.Net.NetworkInformation
             {
                 if (!ipv4 && s_isBSD)
                 {
-                    // OSX nad FreeBSD uses -h to set hop limit for IPv6
+                    // OSX and FreeBSD uses -h to set hop limit for IPv6
                     sb.Append(" -h ");
                 }
                 else

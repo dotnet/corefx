@@ -31,15 +31,33 @@ namespace System.Net.NetworkInformation
 
         private PingReply SendPingCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            // Since isAsync == false, DoSendPingCore will execute synchronously and return a completed 
+            // Since isAsync == false, DoSendPingCore will execute synchronously and return a completed
             // Task - so no blocking here
-            return DoSendPingCore(address, buffer, timeout, options, isAsync: false).Result;
+            try
+            {
+                return DoSendPingCore(address, buffer, timeout, options, isAsync: false).Result;
+            }
+            catch
+            {
+                // Call finish on errors. If everything is OK, it would be handled inside DoSendPingCore().
+                Finish();
+                throw;
+            }
         }
 
         private Task<PingReply> SendPingAsyncCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            // Since isAsync == true, DoSendPingCore will execute asynchronously and return an active Task 
-            return DoSendPingCore(address, buffer, timeout, options, isAsync: true);
+            // Since isAsync == true, DoSendPingCore will execute asynchronously and return an active Task
+            try
+            {
+                return DoSendPingCore(address, buffer, timeout, options, isAsync: true);
+            }
+            catch
+            {
+                // Call finish on errors. If everything is OK, it would be handled inside DoSendPingCore().
+                Finish();
+                throw;
+            }
         }
 
         // Any exceptions that escape synchronously will be caught by the caller and wrapped in a PingException.
