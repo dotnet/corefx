@@ -13,16 +13,16 @@ namespace System.Drawing.Printing
 {
     public class MarginsConverter : ExpandableObjectConverter
     {
-		private readonly ConstructorInfo _constructorInfo = typeof(Margins).GetTypeInfo().GetConstructor(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int) });
+        private readonly ConstructorInfo _constructorInfo = typeof(Margins).GetTypeInfo().GetConstructor(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int) });
 
         public MarginsConverter() { }
 
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             if (sourceType == typeof(string))
-			{
-				return true;
-			}
+            {
+                return true;
+            }
 
             return base.CanConvertFrom(context, sourceType);
         }
@@ -30,9 +30,9 @@ namespace System.Drawing.Printing
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (destinationType == typeof(string) || destinationType == typeof(InstanceDescriptor))
-			{
-				return true;
-			}
+            {
+                return true;
+            }
 
             return base.CanConvertTo(context, destinationType);
         }
@@ -42,19 +42,19 @@ namespace System.Drawing.Printing
             if (value is string valueString)
             {
                 if (value == null)
-				{
-					return new Margins();
-				}
+                {
+                    return new Margins();
+                }
 
                 // format [left];[right];[top];[bottom]
-				const string Separator = @"( |\t)*;( |\t)*";
+                const string Separator = @"( |\t)*;( |\t)*";
                 const string Pattern = @"(?<left>\d+)" + Separator + @"(?<right>\d+)" + Separator + @"(?<top>\d+)" + Separator + @"(?<bottom>\d+)";
 
                 Match match = new Regex(Pattern).Match(valueString);
                 if (!match.Success)
-				{
-					throw new ArgumentException(nameof(value));
-				}
+                {
+                    throw new ArgumentException(nameof(value));
+                }
 
                 int left, right, top, bottom;
                 try
@@ -86,7 +86,7 @@ namespace System.Drawing.Printing
             }
             if (destinationType == typeof(InstanceDescriptor) && value is Margins c)
             {
-                
+
                 return new InstanceDescriptor(_constructorInfo, new object[] { c.Left, c.Right, c.Top, c.Bottom });
             }
 
