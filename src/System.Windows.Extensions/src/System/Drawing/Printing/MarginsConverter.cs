@@ -86,7 +86,6 @@ namespace System.Drawing.Printing
             }
             if (destinationType == typeof(InstanceDescriptor) && value is Margins c)
             {
-
                 return new InstanceDescriptor(_constructorInfo, new object[] { c.Left, c.Right, c.Top, c.Bottom });
             }
 
