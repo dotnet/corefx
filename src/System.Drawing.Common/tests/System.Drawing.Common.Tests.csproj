@@ -101,7 +101,6 @@
       <LogicalName>System.Drawing.Tests.invalid.ico</LogicalName>
     </EmbeddedResource>
     <Compile Include="Printing\MarginsTests.cs" />
-    <Compile Include="Printing\MarginsConverterTests.cs" />
     <Compile Include="Printing\PrinterResolutionTests.cs" />
     <Compile Include="Printing\PageSettingsTests.cs" />
     <Compile Include="Printing\PaperSizeTests.cs" />

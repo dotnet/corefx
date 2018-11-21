@@ -131,7 +131,6 @@
     <Compile Include="System\Drawing\Printing\InvalidPrinterException.cs" />
     <Compile Include="System\Drawing\Printing\InvalidPrinterException.Core.cs" />
     <Compile Include="System\Drawing\Printing\Margins.cs" />
-    <Compile Include="System\Drawing\Printing\MarginsConverter.cs" />
     <Compile Include="System\Drawing\Printing\PaperKinds.cs" />
     <Compile Include="System\Drawing\Printing\PaperSize.cs" />
     <Compile Include="System\Drawing\Printing\PaperSource.cs" />
@@ -372,11 +371,9 @@
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />
-    <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Text.Encoding.Extensions" />
-    <Reference Include="System.Text.RegularExpressions" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
