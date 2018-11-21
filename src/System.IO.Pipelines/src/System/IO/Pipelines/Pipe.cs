@@ -789,8 +789,8 @@ namespace System.IO.Pipelines
 
         private void GetReadResult(out ReadResult result)
         {
-            var isCompleted = _writerCompletion.IsCompletedOrThrow();
-            var isCanceled = _readerAwaitable.ObserveCancelation();
+            bool isCompleted = _writerCompletion.IsCompletedOrThrow();
+            bool isCanceled = _readerAwaitable.ObserveCancelation();
            
             // No need to read end if there is no head
             BufferSegment head = _readHead;

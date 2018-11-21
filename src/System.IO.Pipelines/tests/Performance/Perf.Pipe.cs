@@ -12,17 +12,17 @@ namespace System.IO.Pipelines.Tests
         public async void ReadAsync()
         {
             // Setup
-            var pipe = new Pipe(new PipeOptions(new TestMemoryPool(), readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
+            var pipe = new Pipe(new PipeOptions(pool: null, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
             var writer = pipe.Writer;
             var reader = pipe.Reader;
 
-            writer.WriteEmpty(4);
+            await writer.WriteAsync(new ReadOnlyMemory<byte>(new byte[] { 0, 0, 0, 0 }));
             await writer.FlushAsync();
 
             // Actual perf testing
             foreach (var iteration in Benchmark.Iterations)
-            {   
+            {
                 using (iteration.StartMeasurement())
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
