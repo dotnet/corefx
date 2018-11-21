@@ -141,6 +141,82 @@ namespace System.Collections.Immutable
 
         #endregion
 
+        #region ImmutableHashSet<TKey, TValue> members
+
+        /// <summary>
+        /// Obtains an equal value from the set, otherwise adds it.
+        /// </summary>
+        /// <typeparam name="T">The type of the values contained in the collection.</typeparam>
+        /// <param name="location">The variable or field to atomically update if the specified <paramref name="value"/> is not in the set.</param>
+        /// <param name="value">The value to search for, or to add if an equal one is not already present.</param>
+        /// <returns>The equal value within the set, or <paramref name="value"/> if it was not present.</returns>
+        public static T GetOrAdd<T>(ref ImmutableHashSet<T> location, T value)
+        {
+            var priorCollection = Volatile.Read(ref location);
+
+            Requires.NotNull(priorCollection, nameof(location));
+
+            bool successful;
+            do
+            {
+                if (priorCollection.TryGetValue(value, out T existingValue))
+                {
+                    // The value already exists in the set. Return it.
+                    return existingValue;
+                }
+
+                var updatedCollection = priorCollection.Add(value);
+                var interlockedResult = Interlocked.CompareExchange(ref location, updatedCollection, priorCollection);
+                successful = object.ReferenceEquals(priorCollection, interlockedResult);
+                priorCollection = interlockedResult; // we already have a volatile read that we can reuse for the next loop
+            }
+            while (!successful);
+
+            // We won the race-condition and have updated the collection.
+            // Return the value that is in the collection (as of the Interlocked operation).
+            return value;
+        }
+
+        #endregion
+
+        #region ImmutableSortedSet<TKey, TValue> members
+
+        /// <summary>
+        /// Obtains an equal value from the set, otherwise adds it.
+        /// </summary>
+        /// <typeparam name="T">The type of the values contained in the collection.</typeparam>
+        /// <param name="location">The variable or field to atomically update if the specified <paramref name="value"/> is not in the set.</param>
+        /// <param name="value">The value to search for, or to add if an equal one is not already present.</param>
+        /// <returns>The equal value within the set, or <paramref name="value"/> if it was not present.</returns>
+        public static T GetOrAdd<T>(ref ImmutableSortedSet<T> location, T value)
+        {
+            var priorCollection = Volatile.Read(ref location);
+
+            Requires.NotNull(priorCollection, nameof(location));
+
+            bool successful;
+            do
+            {
+                if (priorCollection.TryGetValue(value, out T existingValue))
+                {
+                    // The value already exists in the set. Return it.
+                    return existingValue;
+                }
+
+                var updatedCollection = priorCollection.Add(value);
+                var interlockedResult = Interlocked.CompareExchange(ref location, updatedCollection, priorCollection);
+                successful = object.ReferenceEquals(priorCollection, interlockedResult);
+                priorCollection = interlockedResult; // we already have a volatile read that we can reuse for the next loop
+            }
+            while (!successful);
+
+            // We won the race-condition and have updated the collection.
+            // Return the value that is in the collection (as of the Interlocked operation).
+            return value;
+        }
+
+        #endregion
+
         #region ImmutableDictionary<TKey, TValue> members
 
         /// <summary>

@@ -494,6 +494,8 @@ namespace System.Collections.Immutable
         public static TValue GetOrAdd<TKey, TValue>(ref System.Collections.Immutable.ImmutableDictionary<TKey, TValue> location, TKey key, System.Func<TKey, TValue> valueFactory) { throw null; }
         public static TValue GetOrAdd<TKey, TValue>(ref System.Collections.Immutable.ImmutableDictionary<TKey, TValue> location, TKey key, TValue value) { throw null; }
         public static TValue GetOrAdd<TKey, TValue, TArg>(ref System.Collections.Immutable.ImmutableDictionary<TKey, TValue> location, TKey key, System.Func<TKey, TArg, TValue> valueFactory, TArg factoryArgument) { throw null; }
+        public static T GetOrAdd<T>(ref System.Collections.Immutable.ImmutableHashSet<T> location, T value) { throw null; }
+        public static T GetOrAdd<T>(ref System.Collections.Immutable.ImmutableSortedSet<T> location, T value) { throw null; }
         public static System.Collections.Immutable.ImmutableArray<T> InterlockedCompareExchange<T>(ref System.Collections.Immutable.ImmutableArray<T> location, System.Collections.Immutable.ImmutableArray<T> value, System.Collections.Immutable.ImmutableArray<T> comparand) { throw null; }
         public static System.Collections.Immutable.ImmutableArray<T> InterlockedExchange<T>(ref System.Collections.Immutable.ImmutableArray<T> location, System.Collections.Immutable.ImmutableArray<T> value) { throw null; }
         public static bool InterlockedInitialize<T>(ref System.Collections.Immutable.ImmutableArray<T> location, System.Collections.Immutable.ImmutableArray<T> value) { throw null; }

@@ -287,6 +287,26 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void GetOrAddHashSet()
+        {
+            var set = ImmutableHashSet.Create<string>();
+            string value = "a";
+            string valueClone = new string(value.ToCharArray());
+            Assert.Same(value, ImmutableInterlocked.GetOrAdd(ref set, value));
+            Assert.Same(value, ImmutableInterlocked.GetOrAdd(ref set, valueClone));
+        }
+
+        [Fact]
+        public void GetOrAddSortedSet()
+        {
+            var set = ImmutableSortedSet.Create<string>();
+            string value = "a";
+            string valueClone = new string(value.ToCharArray());
+            Assert.Same(value, ImmutableInterlocked.GetOrAdd(ref set, value));
+            Assert.Same(value, ImmutableInterlocked.GetOrAdd(ref set, valueClone));
+        }
+
+        [Fact]
         public void AddOrUpdateDictionaryAddValue()
         {
             var dictionary = ImmutableDictionary.Create<int, string>();
