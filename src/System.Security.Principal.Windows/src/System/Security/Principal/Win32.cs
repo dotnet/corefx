@@ -27,7 +27,7 @@ namespace System.Security.Principal
         POLICY_NOTIFICATION = 0x00001000,
     }
 
-    internal static class Win32
+    internal static partial class Win32
     {
         internal const int FALSE = 0;
 

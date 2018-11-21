@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>System.Security.AccessControl</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -6,6 +6,7 @@
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_AccessControl</GeneratePlatformNotSupportedAssemblyMessage>
     <ProjectGuid>{D27FFA1F-B446-4D24-B60A-1F88385CDB6D}</ProjectGuid>
     <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <DefineConstants>$(DefineConstants);ACCESSCONTROL_ASSEMBLY</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetFx)'=='true'">
     <Reference Include="mscorlib" />
@@ -18,13 +19,21 @@
     <Compile Include="System\Security\AccessControl\NativeObjectSecurity.cs" />
     <Compile Include="System\Security\AccessControl\ObjectSecurity.cs" />
     <Compile Include="System\Security\AccessControl\ObjectSecurityT.cs" />
-    <Compile Include="System\Security\AccessControl\Privilege.cs" />
-    <Compile Include="System\Security\AccessControl\PrivilegeNotHeldException.cs" />
+    <Compile Include="$(CommonPath)\System\Security\AccessControl\Privilege.cs" >
+      <Link>Common\System\Security\AccessControl\Privilege.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\AccessControl\PrivilegeNotHeldException.cs" >
+      <Link>Common\System\Security\AccessControl\PrivilegeNotHeldException.cs</Link>
+    </Compile>
     <Compile Include="System\Security\AccessControl\SecurityDescriptor.cs" />
     <Compile Include="System\Security\AccessControl\Rules.cs" />
     <Compile Include="System\Security\AccessControl\Win32.cs" />
-    <Compile Include="System\Security\Principal\Win32.cs" />
-    <Compile Include="System\Security\SafeSecurityHandles.cs" />
+    <Compile Include="$(CommonPath)\System\Security\Principal\Win32.cs" >
+      <Link>Common\System\Security\Principal\Win32.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\SafeSecurityHandles.cs" >
+      <Link>Common\System\Security\SafeSecurityHandles.cs</Link>
+    </Compile>
     <!-- PInvoke sources -->
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>

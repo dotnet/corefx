@@ -14,7 +14,7 @@ using System.Runtime.Versioning;
 
 namespace System.Security.Principal
 {
-    internal static class Win32
+    internal static partial class Win32
     {
         internal static int OpenThreadToken(TokenAccessLevels dwDesiredAccess, WinSecurityContext dwOpenAs, out SafeTokenHandle phThreadToken)
         {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F9E9894E-2513-4085-9046-311AD49D8AE6}</ProjectGuid>
     <AssemblyName>System.Security.Principal.Windows</AssemblyName>
@@ -19,6 +19,7 @@
     <Compile Include="System\Security\Principal\TokenAccessLevels.cs" />
     <Compile Include="System\Security\Principal\Win32.cs" />
     <Compile Include="System\Security\Principal\WindowsIdentity.cs" />
+    <Compile Include="System\Security\Principal\WindowsImpersonationContext.cs" />
     <Compile Include="System\Security\Principal\WindowsPrincipal.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Interop.Libraries.cs</Link>
@@ -44,6 +45,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Interop.UNICODE_STRING.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.LsaRegisterLogonProcess.cs" >
+      <Link>Common\Interop\Windows\sspicli\Interop.LsaRegisterLogonProcess.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcess_IntPtr.cs">
       <Link>Common\Interop\Interop.GetCurrentProcess.cs</Link>
     </Compile>
@@ -53,6 +57,12 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ClaimSecurityAttributes.cs">
       <Link>Common\Interop\Interop.ClaimSecurityAttributes.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenProcessToken_IntPtr.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.OpenProcessToken_IntPtr.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenThreadToken_SafeTokenHandle.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.OpenThreadToken_SafeTokenHandle.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenProcessToken_SafeAccessTokenHandle.cs">
       <Link>Common\Interop\Interop.OpenProcessToken.cs</Link>
     </Compile>
@@ -61,6 +71,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.DuplicateTokenEx.cs">
       <Link>Common\Interop\Interop.DuplicateTokenEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.DuplicateTokenEx_SafeTokenHandle.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.DuplicateTokenEx_SafeTokenHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DuplicateHandle.cs">
       <Link>Common\Interop\Interop.DuplicateHandle.cs</Link>
@@ -86,6 +99,15 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LsaFreeMemory.cs">
       <Link>Common\Interop\Interop.LsaFreeMemory.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LookupPrivilegeValue.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.LookupPrivilegeValue.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LUID.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.LUID.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LUID_AND_ATTRIBUTES.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.LUID_AND_ATTRIBUTES.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LsaOpenPolicy.cs">
       <Link>Common\Interop\Interop.LsaOpenPolicy.cs</Link>
     </Compile>
@@ -107,8 +129,20 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenThreadToken.cs">
       <Link>Common\Interop\Interop.OpenThreadToken.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ProcessOptions.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.ProcessOptions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.RevertToSelf.cs">
       <Link>Common\Interop\Interop.RevertToSelf.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.SecurityImpersonationLevel.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.SecurityImpersonationLevel.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.SetThreadToken.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.SetThreadToken.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.TOKEN_PRIVILEGE.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.TOKEN_PRIVILEGE.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ImpersonateLoggedOnUser.cs">
       <Link>Common\Interop\Interop.ImpersonateLoggedOnUser.cs</Link>
@@ -161,6 +195,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.TokenSource.cs">
       <Link>Common\Interop\Windows\sspicli\Interop.TokenSource.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.AdjustTokenPrivileges.cs" >
+      <Link>Common\Interop\Windows\advapi32\Interop.AdjustTokenPrivileges.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.AllocateLocallyUniqueId.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.AllocateLocallyUniqueId.cs</Link>
     </Compile>
@@ -169,6 +206,18 @@
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLsaHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLsaHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\SafeSecurityHandles.cs" >
+      <Link>Common\System\Security\SafeSecurityHandles.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\AccessControl\Privilege.cs" >
+      <Link>Common\System\Security\AccessControl\Privilege.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\AccessControl\PrivilegeNotHeldException.cs" >
+      <Link>Common\System\Security\AccessControl\PrivilegeNotHeldException.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Principal\Win32.cs" >
+      <Link>Common\System\Security\Principal\Win32.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp')) AND '$(TargetsWindows)' == 'true'">
@@ -196,5 +245,6 @@
     <Reference Include="System.Security.Claims" />
     <Reference Include="System.Security.Principal" />
     <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
   </ItemGroup>
 </Project>

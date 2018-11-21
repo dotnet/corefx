@@ -21,6 +21,7 @@ using QUOTA_LIMITS = Interop.SspiCli.QUOTA_LIMITS;
 using SECURITY_LOGON_TYPE = Interop.SspiCli.SECURITY_LOGON_TYPE;
 using TOKEN_SOURCE = Interop.SspiCli.TOKEN_SOURCE;
 using System.Runtime.Serialization;
+using System.Security.AccessControl;
 
 namespace System.Security.Principal
 {
@@ -54,6 +55,7 @@ namespace System.Security.Principal
         private List<Claim> _userClaims;
 
         private static bool s_ignoreWindows8Properties;
+        private static readonly SafeAccessTokenHandle s_invalidTokenHandle = SafeAccessTokenHandle.InvalidHandle;
 
         public WindowsIdentity(IntPtr userToken) : this(userToken, null, -1) { }
 
@@ -105,23 +107,31 @@ namespace System.Security.Principal
         /// <summary>
         /// Initializes a new instance of the WindowsIdentity class for the user represented by the specified User Principal Name (UPN).
         /// </summary>
-        /// <remarks>
-        /// Unlike the desktop version, we connect to Lsa only as an untrusted caller. We do not attempt to exploit Tcb privilege or adjust the current
-        /// thread privilege to include Tcb.
-        /// </remarks>
-        public WindowsIdentity(string sUserPrincipalName)
+        public WindowsIdentity(string sUserPrincipalName, string type)
             : base(null, null, null, ClaimTypes.Name, ClaimTypes.GroupSid)
+        {
+            KerbS4ULogon(sUserPrincipalName, ref _safeTokenHandle);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the WindowsIdentity class for the user represented by the specified User Principal Name (UPN).
+        /// </summary>
+        public WindowsIdentity(string sUserPrincipalName)
+            : this(sUserPrincipalName, null)
+        { }
+
+        private static void KerbS4ULogon(string sUserPrincipalName, ref SafeAccessTokenHandle accessTokenHandle)
         {
             // Desktop compat: See comments below for why we don't validate sUserPrincipalName.
 
-            using (SafeLsaHandle lsaHandle = ConnectToLsa())
+            // 8 byte or less name that indicates the source of the access token. This choice of name is visible to callers through the native GetTokenInformation() api
+            // so we'll use the same name the CLR used even though we're not actually the "CLR."
+            byte[] sourceName = { (byte)'C', (byte)'L', (byte)'R', (byte)0 };
+
+            using (SafeLsaHandle lsaHandle = GetLsaHandle(sourceName))
             {
                 int packageId = LookupAuthenticationPackage(lsaHandle, Interop.SspiCli.AuthenticationPackageNames.MICROSOFT_KERBEROS_NAME_A);
-
-                // 8 byte or less name that indicates the source of the access token. This choice of name is visible to callers through the native GetTokenInformation() api
-                // so we'll use the same name the CLR used even though we're not actually the "CLR."
-                byte[] sourceName = { (byte)'C', (byte)'L', (byte)'R', (byte)0 };
-
+                
                 TOKEN_SOURCE sourceContext;
                 if (!Interop.Advapi32.AllocateLocallyUniqueId(out sourceContext.SourceIdentifier))
                     throw new SecurityException(new Win32Exception().Message);
@@ -179,8 +189,7 @@ namespace System.Security.Principal
 
                             SafeLsaReturnBufferHandle profileBuffer;
                             int profileBufferLength;
-                            LUID logonId;
-                            SafeAccessTokenHandle accessTokenHandle;
+                            LUID logonId; 
                             QUOTA_LIMITS quota;
                             int subStatus;
                             int ntStatus = Interop.SspiCli.LsaLogonUser(
@@ -208,20 +217,70 @@ namespace System.Security.Principal
 
                             if (profileBuffer != null)
                                 profileBuffer.Dispose();
-
-                            _safeTokenHandle = accessTokenHandle;
                         }
                     }
                 }
             }
         }
 
-        private static SafeLsaHandle ConnectToLsa()
+        /// <summary>
+        /// To obtain SafeLsaHandle we try before for an Impersonation token that require SeTcbPrivilege, if fails we fallback
+        /// to an Identification token
+        /// </summary>
+        /// <param name="logonProcessNameBuffer"></param>
+        /// <returns></returns>
+        private static SafeLsaHandle GetLsaHandle(byte[] logonProcessNameBuffer)
         {
             SafeLsaHandle lsaHandle;
-            int ntStatus = Interop.SspiCli.LsaConnectUntrusted(out lsaHandle);
-            if (ntStatus < 0) // non-negative numbers indicate success
-                throw GetExceptionFromNtStatus(ntStatus);
+
+            // Try to get an impersonation token
+            Privilege privilege = null;
+            try
+            { 
+                // Try to enable the TCB privilege if possible
+                try
+                {
+                    privilege = new Privilege("SeTcbPrivilege");
+                    privilege.Enable();
+                }
+                catch (PrivilegeNotHeldException) { }
+
+                ushort sourceNameLength = checked((ushort)(logonProcessNameBuffer.Length));
+                using (SafeLocalAllocHandle sourceNameBuffer = Interop.Kernel32.LocalAlloc(0, new UIntPtr(sourceNameLength)))
+                {
+                    if (sourceNameBuffer.IsInvalid)
+                        throw new OutOfMemoryException();
+
+                    Marshal.Copy(logonProcessNameBuffer, 0, sourceNameBuffer.DangerousGetHandle(), logonProcessNameBuffer.Length);
+                    LSA_STRING logonProcessName = new LSA_STRING(sourceNameBuffer.DangerousGetHandle(), sourceNameLength);
+                    IntPtr dummy = IntPtr.Zero;
+                    int ntStatus = Interop.SspiCli.LsaRegisterLogonProcess(ref logonProcessName, out lsaHandle, out dummy);
+                    if (Interop.Errors.ERROR_ACCESS_DENIED == Marshal.GetLastWin32Error())
+                    {
+                        // We don't have the Tcb privilege. The best we can hope for is to get an Identification token.
+                        ntStatus = Interop.SspiCli.LsaConnectUntrusted(out lsaHandle);
+
+                        // non-negative numbers indicate success
+                        if (ntStatus < 0)
+                        { 
+                            throw GetExceptionFromNtStatus(ntStatus);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // protect against exception filter-based luring attacks
+                if (privilege != null)
+                    privilege.Revert();
+                throw;
+            }
+            finally
+            {
+                if (privilege != null)
+                    privilege.Revert();
+            }
+
             return lsaHandle;
         }
 
@@ -280,7 +339,7 @@ namespace System.Security.Principal
             return duplicateAccessToken;
         }
 
-        private static SafeAccessTokenHandle DuplicateAccessToken(SafeAccessTokenHandle accessToken)
+        internal static SafeAccessTokenHandle DuplicateAccessToken(SafeAccessTokenHandle accessToken)
         {
             if (accessToken.IsInvalid)
             {
@@ -1277,19 +1336,72 @@ namespace System.Security.Principal
                 safeAllocHandle.Close();
             }
         }
-    }
 
-    internal enum WinSecurityContext
-    {
-        Thread = 1, // OpenAsSelf = false
-        Process = 2, // OpenAsSelf = true
-        Both = 3 // OpenAsSelf = true, then OpenAsSelf = false
-    }
+        public virtual WindowsImpersonationContext Impersonate()
+        {
+            if (_safeTokenHandle.IsInvalid)
+                throw new InvalidOperationException(SR.InvalidOperation_AnonymousCannotImpersonate);
 
-    internal enum TokenType : int
-    {
-        TokenPrimary = 1,
-        TokenImpersonation
+            return SafeImpersonate(_safeTokenHandle);
+        }
+
+        public static WindowsImpersonationContext Impersonate(IntPtr userToken) 
+        {
+            // impersonating a zero token means clear the token on the thread
+            if (userToken == IntPtr.Zero)
+            {
+                return SafeImpersonate(s_invalidTokenHandle);
+            }
+
+            WindowsIdentity wi = new WindowsIdentity(userToken, null, -1);
+            return wi.Impersonate();
+        }
+
+        /// <summary>
+        /// Impersonation workflow:
+        /// 1) We get current usertoken.
+        /// 2) We create WindowsImpersonationContext class with current usertoken and a flag to specify if we'are already in a impersonated context.
+        /// 3) If we'are in a impersonated context WindowsImpersonationContext duplicates current usertoken to allow to revert to correct identity once 
+        ///    impersonation context ends.
+        /// 4) We revert current impersonated context if existent and call ImpersonateLoggedOnUser with new token identity.
+        /// 5) On WindowsImpersonationContext.Undo()/.Dispose() if we were in a impersonated context we revert to correct identity or simply clear the token
+        ///    on the thread.
+        /// </summary>
+        /// <param name="userToken"></param>
+        /// <returns></returns>
+        private static WindowsImpersonationContext SafeImpersonate(SafeAccessTokenHandle userTokenToImpersonate)
+        {
+            SafeAccessTokenHandle currentUserToken = GetCurrentToken(TokenAccessLevels.MaximumAllowed, false, out bool isImpersonating, out int hr);
+
+            if (currentUserToken == null || currentUserToken.IsInvalid)
+            {
+                throw new SecurityException(new Win32Exception().Message);
+            }
+
+            WindowsImpersonationContext context = new WindowsImpersonationContext(currentUserToken, isImpersonating);
+
+            // impersonating a zero token means clear the token on the thread
+            if (userTokenToImpersonate.IsInvalid)
+            { 
+                if (!Interop.Advapi32.RevertToSelf())
+                    Environment.FailFast(new Win32Exception().Message);
+            }
+            // revert existent impersonating token if existent and impersonate with new token identity
+            else
+            {
+                if (!Interop.Advapi32.RevertToSelf())
+                    Environment.FailFast(new Win32Exception().Message);
+
+                if (!Interop.Advapi32.ImpersonateLoggedOnUser(userTokenToImpersonate))
+                {
+                    // if impersonation fails we cleanup WindowsImpersonationContext and throw SecurityException
+                    context.Undo();
+                    throw new SecurityException(SR.Argument_ImpersonateUser);
+                }
+            }
+            
+            return context;
+        }
     }
 
     internal enum TokenInformationClass : int

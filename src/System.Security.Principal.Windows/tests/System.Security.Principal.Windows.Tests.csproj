@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="NTAccount.cs" />
     <Compile Include="WindowsIdentityTests.cs" />
+    <Compile Include="WindowsIdentityTests.Impersonate.cs" />
     <Compile Include="WindowsPrincipalTests.cs" />
     <Compile Include="WellKnownSidTypeTests.cs" />
   </ItemGroup>

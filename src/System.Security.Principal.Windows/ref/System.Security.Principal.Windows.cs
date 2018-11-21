@@ -318,7 +318,6 @@ namespace System.Security.Principal
         SystemOperator = 549,
         User = 545,
     }
-    [System.Runtime.InteropServices.ComVisible(true)]
     public enum WindowsAccountType
     {
         Normal = 0,
@@ -334,6 +333,7 @@ namespace System.Security.Principal
         public WindowsIdentity(System.IntPtr userToken, string type, WindowsAccountType acctType){ }
         public WindowsIdentity(System.IntPtr userToken, string type, WindowsAccountType acctType, bool isAuthenticated) { }
         public WindowsIdentity(string sUserPrincipalName) { }
+        public WindowsIdentity(string sUserPrincipalName, string type) { }
         public WindowsIdentity(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         protected WindowsIdentity(System.Security.Principal.WindowsIdentity identity) { }
         public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle AccessToken { get { throw null; } }
@@ -341,6 +341,8 @@ namespace System.Security.Principal
         public override System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> Claims { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> DeviceClaims { get { throw null; } }
         public System.Security.Principal.IdentityReferenceCollection Groups { get { throw null; } }
+        public virtual WindowsImpersonationContext Impersonate() { throw null; }
+        public static WindowsImpersonationContext Impersonate(IntPtr userToken) { throw null; }
         public System.Security.Principal.TokenImpersonationLevel ImpersonationLevel { get { throw null; } }
         public virtual bool IsAnonymous { get { throw null; } }
         public override bool IsAuthenticated { get { throw null; } }
@@ -374,4 +376,13 @@ namespace System.Security.Principal
         public override bool IsInRole(string role) { throw null; }
         public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> UserClaims { get { throw null; } }
     }
+
+    public partial class WindowsImpersonationContext : IDisposable
+    {
+        internal WindowsImpersonationContext(Microsoft.Win32.SafeHandles.SafeAccessTokenHandle safeTokenHandle, WindowsIdentity wi, bool isImpersonating) { throw null; }
+        protected virtual void Dispose(bool disposing) { throw null; }
+        public void Dispose() { throw null; }
+        public void Undo() { throw null; }
+    }
+
 }

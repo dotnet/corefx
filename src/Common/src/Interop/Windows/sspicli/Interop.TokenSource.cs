@@ -14,7 +14,7 @@ internal partial class Interop
         {
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = TOKEN_SOURCE_LENGTH)]
             internal byte[] SourceName;
-            internal LUID SourceIdentifier;
+            internal Interop.Advapi32.LUID SourceIdentifier;
 
             internal const int TOKEN_SOURCE_LENGTH = 8;
         }

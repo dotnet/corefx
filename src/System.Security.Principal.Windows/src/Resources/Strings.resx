@@ -76,6 +76,9 @@
   <data name="Argument_InvalidValue" xml:space="preserve">
     <value>Value was invalid.</value>
   </data>
+  <data name="Argument_InvalidPrivilegeName" xml:space="preserve">
+    <value>Privilege '{0}' is not valid on this system.</value>
+  </data>
   <data name="Argument_TokenZero" xml:space="preserve">
     <value>Token cannot be zero.</value>
   </data>
@@ -118,7 +121,22 @@
   <data name="IdentityReference_NotAWindowsDomain" xml:space="preserve">
     <value>The domainSid parameter is not a valid Windows domain SID.</value>
   </data>
+  <data name="InvalidOperation_MustBeSameThread" xml:space="preserve">
+    <value>This operation must take place on the same thread on which the object was created.</value>
+  </data>
+  <data name="InvalidOperation_MustRevertPrivilege" xml:space="preserve">
+    <value>Must revert the privilege prior to attempting this operation.</value>
+  </data>
   <data name="PlatformNotSupported_Principal" xml:space="preserve">
     <value>Windows Principal functionality is not supported on this platform.</value>
+  </data>
+  <data name="PrivilegeNotHeld_Default" xml:space="preserve">
+    <value>The process does not possess some privilege required for this operation.</value>
+  </data>
+  <data name="PrivilegeNotHeld_Named" xml:space="preserve">
+    <value>The process does not possess the '{0}' privilege which is required for this operation.</value>
+  </data>
+  <data name="InvalidOperation_AnonymousCannotImpersonate" xml:space="preserve">
+    <value>An anonymous identity cannot perform an impersonation.</value>
   </data>
 </root>
