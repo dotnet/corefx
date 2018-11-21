@@ -49,7 +49,8 @@ namespace System.IO.Tests
             DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromMilliseconds(1));
             fileInfo.CreationTimeUtc = newCreationTimeUTC;
 
-            Assert.True(fileInfo.CreationTimeUtc == newCreationTimeUTC);
+            Assert.Equal(newCreationTimeUTC, fileInfo.LastWriteTimeUtc);
+            Assert.Equal(newCreationTimeUTC, fileInfo.CreationTimeUtc);
         }
 
         public override IEnumerable<TimeFunction> TimeFunctions(bool requiresRoundtripping = false)
