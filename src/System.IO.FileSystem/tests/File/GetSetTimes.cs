@@ -46,10 +46,11 @@ namespace System.IO.Tests
             File.WriteAllText(fileName, "");
 
             FileInfo fileInfo = new System.IO.FileInfo(fileName);
-            DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromMilliseconds(1));
+            DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromDays(1));
             fileInfo.CreationTimeUtc = newCreationTimeUTC;
 
             Assert.Equal(newCreationTimeUTC, fileInfo.LastWriteTimeUtc);
+
             Assert.Equal(newCreationTimeUTC, fileInfo.CreationTimeUtc);
         }
 
