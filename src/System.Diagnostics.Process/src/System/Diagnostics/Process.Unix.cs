@@ -306,8 +306,8 @@ namespace System.Diagnostics
             if (startInfo.UseShellExecute)
             {
                 string verb = startInfo.Verb;
-                if (!string.IsNullOrEmpty(verb) &&
-                    !string.Equals(verb, "open", StringComparison.InvariantCultureIgnoreCase))
+                if (verb != null &&
+                    !string.Equals(verb, "open", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new Win32Exception(Interop.Errors.ERROR_NO_ASSOCIATION);
                 }

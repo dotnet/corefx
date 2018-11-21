@@ -188,7 +188,6 @@ namespace System.IO
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         ~FileCleanupTestBase() { }
-        protected string CreateTestDirectory(System.Nullable<int> index = default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName = null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber = 0) { throw null; }
         protected string GetTestFileName(System.Nullable<int> index = default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName = null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber = 0) { throw null; }
         protected string GetTestFilePath(System.Nullable<int> index = default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName = null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber = 0) { throw null; }
     }

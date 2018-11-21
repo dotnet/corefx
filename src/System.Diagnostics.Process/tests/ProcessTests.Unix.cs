@@ -125,7 +125,6 @@ namespace System.Diagnostics.Tests
 
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
-        [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
         {
             string programToOpen = s_allowedProgramsToRun.FirstOrDefault(program => IsProgramInstalled(program));
@@ -162,7 +161,8 @@ namespace System.Diagnostics.Tests
         {
             // Create a script that we'll use to 'open' the file by putting it on PATH
             // with the appropriate name.
-            string path = CreateTestDirectory();
+            string path = Path.Combine(TestDirectory, "Path");
+            Directory.CreateDirectory(path);
             WriteScriptFile(path, s_allowedProgramsToRun[0], returnValue: 42);
 
             // Create a file that has the x-bit set, but which isn't a valid script.
@@ -238,7 +238,8 @@ namespace System.Diagnostics.Tests
         {
             // Create a script that we'll use to 'open' the file by putting it on PATH
             // with the appropriate name.
-            string path = CreateTestDirectory();
+            string path = Path.Combine(TestDirectory, "Path");
+            Directory.CreateDirectory(path);
             WriteScriptFile(path, s_allowedProgramsToRun[0], returnValue: 42);
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();

@@ -76,14 +76,6 @@ namespace System.IO
         /// </summary>
         protected string TestDirectory { get; }
 
-        /// <summary>Creates a test directory that is associated with the call site.</summary>
-        protected string CreateTestDirectory(int? index = null, [CallerMemberName] string memberName = null, [CallerLineNumber] int lineNumber = 0)
-        {
-            string path = GetTestFilePath(index, memberName, lineNumber);
-            Directory.CreateDirectory(path);
-            return path;
-        }
-
         /// <summary>Gets a test file full path that is associated with the call site.</summary>
         /// <param name="index">An optional index value to use as a suffix on the file name.  Typically a loop index.</param>
         /// <param name="memberName">The member name of the function calling this method.</param>

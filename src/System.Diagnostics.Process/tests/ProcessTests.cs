@@ -244,9 +244,11 @@ namespace System.Diagnostics.Tests
         public void ProcessStart_UseShellExecute_ExecuteOrder()
         {
             // Create a directory that we will use as PATH
-            string path = CreateTestDirectory();
+            string path = Path.Combine(TestDirectory, "Path");
+            Directory.CreateDirectory(path);
             // Create a directory that will be our working directory
-            string wd = CreateTestDirectory();
+            string wd = Path.Combine(TestDirectory, "WorkingDirectory");
+            Directory.CreateDirectory(wd);
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
@@ -287,7 +289,8 @@ namespace System.Diagnostics.Tests
         {
             // Create a directory that will ProcessStartInfo.WorkingDirectory
             // and add a script.
-            string wd = CreateTestDirectory();
+            string wd = Path.Combine(TestDirectory, "WorkingDirectory");
+            Directory.CreateDirectory(wd);
             string filename = Path.GetFileName(WriteScriptFile(wd, GetTestFileName(), returnValue: 42));
 
             // Verify UseShellExecute finds the script in the WorkingDirectory.
