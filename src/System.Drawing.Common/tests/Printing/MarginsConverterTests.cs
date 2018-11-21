@@ -17,38 +17,30 @@ namespace System.Drawing.Printing.Tests
         public void CanConvertFrom()
         {
             MarginsConverter mc = new MarginsConverter();
-            MyTypeDescriptorContext context = new MyTypeDescriptorContext();
 
-            // without context
-            Assert.True(mc.CanConvertFrom(null, typeof(string)));
-            Assert.False(mc.CanConvertFrom(null, typeof(Guid)));
-            Assert.False(mc.CanConvertFrom(null, typeof(object)));
-            Assert.False(mc.CanConvertFrom(null, typeof(int)));
-
-            // with context
-            Assert.True(mc.CanConvertFrom(context, typeof(string)));
-            Assert.False(mc.CanConvertFrom(context, typeof(Guid)));
-            Assert.False(mc.CanConvertFrom(context, typeof(object)));
-            Assert.False(mc.CanConvertFrom(context, typeof(int)));
+            // try once with then once without context
+            for (var context = new MyTypeDescriptorContext(); context != null; context = null)
+            {
+                Assert.True(mc.CanConvertFrom(context, typeof(string)));
+                Assert.False(mc.CanConvertFrom(context, typeof(Guid)));
+                Assert.False(mc.CanConvertFrom(context, typeof(object)));
+                Assert.False(mc.CanConvertFrom(context, typeof(int)));
+            }
         }
 
         [Fact]
         public void CanConvertTo()
         {
             MarginsConverter mc = new MarginsConverter();
-            MyTypeDescriptorContext context = new MyTypeDescriptorContext();
 
-            // without context
-            Assert.True(mc.CanConvertTo(null, typeof(string)));
-            Assert.False(mc.CanConvertTo(null, typeof(Guid)));
-            Assert.False(mc.CanConvertTo(null, typeof(object)));
-            Assert.False(mc.CanConvertTo(null, typeof(int)));
-
-            // with context
-            Assert.True(mc.CanConvertTo(context, typeof(string)));
-            Assert.False(mc.CanConvertTo(context, typeof(Guid)));
-            Assert.False(mc.CanConvertTo(context, typeof(object)));
-            Assert.False(mc.CanConvertTo(context, typeof(int)));
+            // try once with then once without context
+            for (var context = new MyTypeDescriptorContext(); context != null; context = null)
+            {
+                Assert.True(mc.CanConvertTo(context, typeof(string)));
+                Assert.False(mc.CanConvertTo(context, typeof(Guid)));
+                Assert.False(mc.CanConvertTo(context, typeof(object)));
+                Assert.False(mc.CanConvertTo(context, typeof(int)));
+            }
         }
 
         [Fact]
@@ -62,9 +54,9 @@ namespace System.Drawing.Printing.Tests
             values.Add("Right", "2");
             values.Add("Top", "3");
             Assert.Null(mc.CreateInstance(context, values));
-            
+
             values.Add("Bottom", "4");
-            object result = mc.CreateInstance(context, values);            
+            object result = mc.CreateInstance(context, values);
             Assert.NotNull(result);
 
             Assert.IsType<Margins>(result);
@@ -89,7 +81,7 @@ namespace System.Drawing.Printing.Tests
             MarginsConverter mc = new MarginsConverter();
             CultureInfo culture = CultureInfo.InvariantCulture;
 
-            // try once with and once without context
+            // try once with then once without context
             for (var context = new MyTypeDescriptorContext(); context != null; context = null)
             {
                 object result = mc.ConvertFrom(context, culture, "1;2;3;4");
@@ -115,9 +107,9 @@ namespace System.Drawing.Printing.Tests
             MarginsConverter mc = new MarginsConverter();
             Guid guid = Guid.NewGuid();
             CultureInfo culture = CultureInfo.InvariantCulture;
-            Margins margins = new Margins() { Left = 1, Right = 2, Top = 3, Bottom = 4};
+            Margins margins = new Margins() { Left = 1, Right = 2, Top = 3, Bottom = 4 };
 
-            // try once with and once without context
+            // try once with then once without context
             for (var context = new MyTypeDescriptorContext(); context != null; context = null)
             {
                 Assert.Equal("1;2;3;4", mc.ConvertTo(context, culture, "1;2;3;4", typeof(string)));
@@ -128,7 +120,7 @@ namespace System.Drawing.Printing.Tests
 
                 converted = mc.ConvertTo(context, culture, margins, typeof(InstanceDescriptor));
                 Assert.IsType<InstanceDescriptor>(converted);
-                Assert.Equal(new object[] {1, 2, 3, 4}, ((InstanceDescriptor)converted).Arguments);
+                Assert.Equal(new object[] { 1, 2, 3, 4 }, ((InstanceDescriptor)converted).Arguments);
 
                 Assert.Throws<NotSupportedException>(() => mc.ConvertTo(context, culture, new object(), typeof(object)));
                 Assert.Throws<NotSupportedException>(() => mc.ConvertTo(context, culture, 12, typeof(int)));
