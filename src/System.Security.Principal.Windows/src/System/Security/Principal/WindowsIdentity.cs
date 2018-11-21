@@ -272,13 +272,17 @@ namespace System.Security.Principal
             {
                 // protect against exception filter-based luring attacks
                 if (privilege != null)
+                { 
                     privilege.Revert();
+                }
                 throw;
             }
             finally
             {
                 if (privilege != null)
+                { 
                     privilege.Revert();
+                }
             }
 
             return lsaHandle;
