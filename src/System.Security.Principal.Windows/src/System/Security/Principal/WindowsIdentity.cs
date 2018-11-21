@@ -1344,7 +1344,9 @@ namespace System.Security.Principal
         public virtual WindowsImpersonationContext Impersonate()
         {
             if (_safeTokenHandle.IsInvalid)
+            { 
                 throw new InvalidOperationException(SR.InvalidOperation_AnonymousCannotImpersonate);
+            }
 
             return SafeImpersonate(_safeTokenHandle);
         }
@@ -1388,13 +1390,17 @@ namespace System.Security.Principal
             if (userTokenToImpersonate.IsInvalid)
             { 
                 if (!Interop.Advapi32.RevertToSelf())
+                { 
                     Environment.FailFast(new Win32Exception().Message);
+                }
             }
             // revert existent impersonating token if existent and impersonate with new token identity
             else
             {
                 if (!Interop.Advapi32.RevertToSelf())
+                { 
                     Environment.FailFast(new Win32Exception().Message);
+                }
 
                 if (!Interop.Advapi32.ImpersonateLoggedOnUser(userTokenToImpersonate))
                 {
